@@ -1,6 +1,6 @@
 // オフライン対応（キャッシュファースト、更新はバックグラウンドで取得）
 
-const CACHE = 'aetheria-v6';
+const CACHE = 'aetheria-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -32,6 +32,7 @@ const ASSETS = [
   './src/game/enemies.js',
   './src/game/npc.js',
   './src/game/quests.js',
+  './src/game/dialogue.js',
   './src/game/mount.js',
   './src/ui/ui.js',
 ];

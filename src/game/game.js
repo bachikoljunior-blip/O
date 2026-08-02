@@ -1371,6 +1371,20 @@ export class Game {
       if (Math.hypot(n.x - px, n.z - pz) > 90) continue;
       if (!frustum.sphere(n.x, n.y + n.height * 0.5, n.z, n.height)) continue;
       n.emit(renderer, time, this);
+      // 用件のある相手の頭上に印を出す（受注は金、報告は白）
+      const mark = n.questMark(this);
+      if (!mark) continue;
+      const b = renderer.batchFor('spike');
+      if (!b) continue;
+      const bob = Math.sin(time * 2.2 + n.id) * 0.07;
+      const gold = mark === 'new';
+      const c = gold ? [1.0, 0.82, 0.32] : [0.85, 0.95, 1.0];
+      const o = b.alloc();
+      writeInstance(b.data, o, n.x, n.y + n.height * 1.24 + bob, n.z, time * 1.2,
+        0.20, 0.34, 0.20, c[0], c[1], c[2], 1, 0, 1.7, 0, 0);
+      const o2 = b.alloc();
+      writeInstance(b.data, o2, n.x, n.y + n.height * 1.24 + bob + 0.30, n.z, time * 1.2,
+        0.20, -0.22, 0.20, c[0], c[1], c[2], 1, 0, 1.7, 0, 0);
     }
 
     // 発射物

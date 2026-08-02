@@ -3,6 +3,7 @@
 import { Actor, TEAM } from './actor.js';
 import { makeRng } from '../core/noise.js';
 import { TAU } from '../core/math.js';
+import { makeContext, pickLine } from './dialogue.js';
 
 const FIRST = ['エルダ', 'ミラ', 'ヨナス', 'カイ', 'セシル', 'ロウ', 'ハンナ', 'ギルド', 'テオ', 'ノラ',
   'ヴィム', 'サラ', 'オズ', 'リーヴ', 'マレン', 'ドラン'];
@@ -105,20 +106,64 @@ export class NPC extends Actor {
         if (q.isActive('main')) {
           opts.push({ label: '現状を確認する', next: { text: q.stageText('main', game), options: [{ label: '分かった', end: true }] } });
         }
+        // 亡妻の指輪（選択のある依頼）
+        if (!q.state.relic && q.flags.talkedElder) {
+          opts.push({
+            label: '頼みたいことは無いか',
+            action: () => q.start('relic'),
+            next: {
+              text: '……ひとつだけ。妻を地下墓所に葬った。指輪を嵌めたままだ。\n主が居座って以来、誰も近づけぬ。取り戻してくれるなら、礼はする。',
+              options: [{ label: '探してみよう', end: true }],
+            },
+          });
+        } else if (q.isActive('relic') && q.stageOf('relic') === 1) {
+          opts.push({
+            label: '指輪を差し出す',
+            next: {
+              text: 'これは……ああ、間違いない。\n……いや、待て。お前が持っていくこともできる。魔よけとして、悪くない品だ。どうする。',
+              options: [
+                {
+                  label: '返す（当然だ）',
+                  action: () => { q.flags.relicAnswer = 'return'; },
+                  next: { text: '……ありがとう。この鎖帷子は、妻が私に遺したものだ。持っていけ。もう寒くはないそうだ。', options: [{ label: '受け取る', end: true }] },
+                },
+                {
+                  label: '貰っておく',
+                  action: () => { q.flags.relicAnswer = 'keep'; },
+                  next: { text: '……そうか。いや、責めはせん。生きている者が使う方がいい。\n約束の礼だ。少ないがな。', options: [{ label: '……', end: true }] },
+                },
+              ],
+            },
+          });
+        }
         opts.push({ label: 'この地について', next: { text: this.lore(game), options: [{ label: 'なるほど', end: true }] } });
         opts.push({ label: '去る', end: true });
-        return { text: '灰の落人よ。まだ火は消えておらぬな。', options: opts };
+        return { text: this.greeting(game), options: opts };
       }
 
-      case 'merchant':
-        return {
-          text: '旅の御方、掘り出し物があるよ。残響さえあれば何でも揃う。',
-          options: [
-            { label: '商品を見る', action: () => game.ui.openShop(this) },
-            { label: '噂を聞く', next: { text: this.rumor(game), options: [{ label: '礼を言う', end: true }] } },
-            { label: '去る', end: true },
-          ],
-        };
+      case 'merchant': {
+        const opts = [{ label: '商品を見る', action: () => game.ui.openShop(this) }];
+        const here = this.poi?.id;
+        if (!q.state.courier) {
+          opts.push({
+            label: '運ぶものはあるか',
+            action: () => { q.start('courier'); q.flags.courierFrom = here; },
+            next: {
+              text: 'この手紙を、別の集落まで。誰でもいい、そこの商人か宿の主に渡してくれ。\n街道は物騒でね、私はもう歩きたくない。',
+              options: [{ label: '預かった', end: true }],
+            },
+          });
+        } else if (q.isActive('courier') && q.flags.courierFrom && q.flags.courierFrom !== here) {
+          opts.push({
+            label: '手紙を渡す',
+            action: () => { q.flags.letterDelivered = true; },
+            next: { text: 'これは……あいつの字だ。まだ生きていたのか。\n礼だ、受け取ってくれ。街道を歩ける人間は貴重だからな。', options: [{ label: '受け取る', end: true }] },
+          });
+        }
+        opts.push({ label: '噂を聞く', next: { text: this.rumor(game), options: [{ label: '礼を言う', end: true }] } });
+        opts.push({ label: '去る', end: true });
+        return { text: this.greeting(game), options: opts };
+      }
 
       case 'smith': {
         const opts = [{ label: '武器を強化する', action: () => game.ui.openSmith(this) }];
@@ -138,8 +183,24 @@ export class NPC extends Actor {
             next: { text: 'よくやった。これが俺の打った長剣だ。手入れは怠るなよ。', options: [{ label: '感謝する', end: true }] },
           });
         }
+        if (q.isDone('smith') && !q.state.smith2) {
+          opts.push({
+            label: 'もっと良い鉄はあるか',
+            action: () => q.start('smith2'),
+            next: {
+              text: '……ある。だが銀じゃ届かん。「古き欠片」だ。\nひとつでいい。持ってこられたら、俺が生涯で一本しか打てん大剣をやる。',
+              options: [{ label: '探してくる', end: true }],
+            },
+          });
+        } else if (q.isActive('smith2') && q.stageOf('smith2') === 1) {
+          opts.push({
+            label: '古き欠片を渡す',
+            action: () => { p.inventory.shard_ancient -= 1; q.flags.smith2TurnedIn = true; },
+            next: { text: '……本当に持ってきやがった。\n三日かかる。いや、今のあんたなら待てんだろう。持っていけ、灰鉄の大剣だ。', options: [{ label: '受け取る', end: true }] },
+          });
+        }
         opts.push({ label: '去る', end: true });
-        return { text: '火は正直だ。鉄も、人もな。', options: opts };
+        return { text: this.greeting(game), options: opts };
       }
 
       case 'herbalist': {
@@ -157,9 +218,25 @@ export class NPC extends Actor {
             next: { text: 'ありがとう！ これで村のみんなを助けられる。お礼を受け取って。', options: [{ label: 'どういたしまして', end: true }] },
           });
         }
+        if (q.isDone('herbs') && !q.state.herbs2) {
+          opts.push({
+            label: 'まだ何か要るか',
+            action: () => q.start('herbs2'),
+            next: {
+              text: '……ひとつ試したい薬があるの。魔力の結晶が五つ要る。\n死なない体をつくる薬じゃない。痛みを忘れない薬。あなたには要るでしょう。',
+              options: [{ label: '集めてくる', end: true }],
+            },
+          });
+        } else if (q.isActive('herbs2') && q.stageOf('herbs2') === 1) {
+          opts.push({
+            label: '結晶を渡す',
+            action: () => { p.inventory.crystal -= 5; q.flags.herbs2TurnedIn = true; },
+            next: { text: 'できた。……これを飲めば、器が少しだけ広がる。\n生きて帰る理由が増えるってことよ。', options: [{ label: '受け取る', end: true }] },
+          });
+        }
         opts.push({ label: '調合を頼む', action: () => game.ui.openCraft(this) });
         opts.push({ label: '去る', end: true });
-        return { text: '薬草の匂いは嫌い？ 私は好きよ。生きている匂いだもの。', options: opts };
+        return { text: this.greeting(game), options: opts };
       }
 
       case 'hunter': {
@@ -177,9 +254,31 @@ export class NPC extends Actor {
             next: { text: '見事だ。この指輪を持っていけ、狩人の証だ。', options: [{ label: '受け取る', end: true }] },
           });
         }
-        opts.push({ label: '狩りの助言', next: { text: '獣は正面から来る。焦らず、引きつけて転がれ。背後を取れれば一撃で終わる。', options: [{ label: '覚えておく', end: true }] } });
+        if (q.isDone('wolves') && !q.state.packlord) {
+          opts.push({
+            label: '群れはまだ散らないのか',
+            action: () => q.start('packlord'),
+            next: {
+              text: '散らん。頭がいるからだ。黒いのが二匹。\nあれが吠えると群れが変わる。速くなる、怖がらなくなる。先に頭を潰せ。',
+              options: [{ label: '狩ってくる', end: true }],
+            },
+          });
+        } else if (q.isActive('packlord') && q.stageOf('packlord') === 1) {
+          opts.push({
+            label: '黒い二匹を仕留めた',
+            action: () => { q.flags.packlordTurnedIn = true; },
+            next: { text: 'ようやく森が静かになる。……この弓は親父のだ。俺より当たる。持っていけ。', options: [{ label: '受け取る', end: true }] },
+          });
+        }
+        opts.push({
+          label: '狩りの助言',
+          next: {
+            text: this.huntTip(game),
+            options: [{ label: '覚えておく', end: true }],
+          },
+        });
         opts.push({ label: '去る', end: true });
-        return { text: '足音を殺せ。獣はお前より耳がいい。', options: opts };
+        return { text: this.greeting(game), options: opts };
       }
 
       case 'priest': {
@@ -197,66 +296,169 @@ export class NPC extends Actor {
             next: { text: '安らかに……。約束の奇跡だ。己の傷を癒すがよい。', options: [{ label: '感謝する', end: true }] },
           });
         }
-        opts.push({ label: '教義を聞く', next: { text: '死は終わりではない。残響が続く限り、我らは何度でも立ち上がる。それを呪いと呼ぶ者もいるがな。', options: [{ label: '……', end: true }] } });
+        if (q.isDone('wraiths') && !q.state.fenwatch) {
+          opts.push({
+            label: '亡霊はなぜ湧く',
+            action: () => q.start('fenwatch'),
+            next: {
+              text: '湧いているのではない。呼ばれているのだ。\n霧の奥に、かつて癒し手だった女がいる。あれを鎮めぬ限り、嘆きは尽きぬ。',
+              options: [{ label: '霧へ向かう', end: true }],
+            },
+          });
+        } else if (q.isActive('fenwatch') && q.stageOf('fenwatch') === 1) {
+          opts.push({
+            label: '魔女を鎮めた',
+            action: () => { q.flags.fenwatchTurnedIn = true; },
+            next: { text: '……霧が薄い。何年ぶりだろうな。\nこの守りの奇跡を授ける。お前の背を守るものが、もう誰もいないのだから。', options: [{ label: '感謝する', end: true }] },
+          });
+        }
+        opts.push({ label: '教義を聞く', next: { text: this.lore(game), options: [{ label: '……', end: true }] } });
         opts.push({ label: '去る', end: true });
-        return { text: '灰の落人よ。祈りは届いているか。', options: opts };
+        return { text: this.greeting(game), options: opts };
       }
 
-      case 'innkeeper':
-        return {
-          text: '休んでいくかい。屋根があるだけでも贅沢さ。',
-          options: [
-            {
-              label: '休む（HP・雫を回復）',
-              action: () => {
-                p.hp = p.maxHp; p.stamina = p.maxStamina; p.fp = p.maxFP;
-                p.flask.hp = p.flask.hpMax; p.flask.fp = p.flask.fpMax;
-                game.sky.skipToMorning();
-                game.ui.toast('よく眠った');
-              },
+      case 'innkeeper': {
+        const opts = [{
+          label: '休む（HP・雫を回復）',
+          action: () => {
+            p.hp = p.maxHp; p.stamina = p.maxStamina; p.fp = p.maxFP;
+            p.flask.hp = p.flask.hpMax; p.flask.fp = p.flask.fpMax;
+            game.sky.skipToMorning();
+            game.ui.toast('よく眠った');
+          },
+        }];
+        if (!q.state.missing) {
+          opts.push({
+            label: '浮かない顔だな',
+            action: () => q.start('missing'),
+            next: {
+              text: '弟が地下へ潜ったきり戻らん。宝を探すと言って、もう半年だ。\n……生きているとは思っていない。ただ、どこで終わったのかだけ知りたい。',
+              options: [{ label: '探してみよう', end: true }],
             },
+          });
+        } else if (q.isActive('missing') && q.stageOf('missing') === 1) {
+          opts.push({
+            label: '弟のことだが',
+            next: {
+              text: '……見つけたのか。',
+              options: [
+                {
+                  label: '骨と、開けられぬままの宝箱があった',
+                  action: () => { q.flags.missingAnswer = 'truth'; },
+                  next: {
+                    text: '……そうか。最後まで欲張りな奴だ。\nありがとう。嘘をつかれなかったことに、礼を言う。これを持っていけ。',
+                    options: [{ label: '受け取る', end: true }],
+                  },
+                },
+                {
+                  label: '別の街道で生きているらしい',
+                  action: () => { q.flags.missingAnswer = 'lie'; },
+                  next: {
+                    text: 'そうか……そうか！ あいつらしい。\n礼だ、多めに包んだ。……いつか帰ってくるかもしれんからな。',
+                    options: [{ label: '……受け取る', end: true }],
+                  },
+                },
+              ],
+            },
+          });
+        }
+        if (q.isActive('courier') && q.flags.courierFrom && q.flags.courierFrom !== this.poi?.id) {
+          opts.push({
+            label: '手紙を預かっている',
+            action: () => { q.flags.letterDelivered = true; },
+            next: { text: 'おお、あの男からか。生きているならそう言え、まったく。\n少ないが、駄賃だ。', options: [{ label: '受け取る', end: true }] },
+          });
+        }
+        opts.push({ label: '噂を聞く', next: { text: this.rumor(game), options: [{ label: '礼を言う', end: true }] } });
+        opts.push({ label: '去る', end: true });
+        return { text: this.greeting(game), options: opts };
+      }
+
+      default: {
+        // 一般村人：世間話に加え、噂も持っている
+        return {
+          text: this.smalltalk(game),
+          options: [
             { label: '噂を聞く', next: { text: this.rumor(game), options: [{ label: '礼を言う', end: true }] } },
             { label: '去る', end: true },
           ],
         };
-
-      default:
-        return {
-          text: this.smalltalk(game),
-          options: [{ label: '去る', end: true }],
-        };
+      }
     }
   }
 
-  lore(game) {
-    const lines = [
-      'かつてこの地には王がいた。名を捨て、簒奪王と呼ばれた男だ。彼が深淵に触れた日、世界は記憶を失い始めた。',
-      '八つの地方には、それぞれ守り手がいた。今はもう、化物になり果てているがな。',
-      '篝火は王の剣の欠片だ。あれに触れれば、死んでも戻ってこられる。',
-    ];
-    return lines[(game.player.kills + this.id) % lines.length];
+  /**
+   * この NPC が今どんな用件を持っているか。
+   * 'new'    : 受けられる依頼がある
+   * 'turnin' : 報告できる依頼がある
+   * null     : 特に用は無い
+   */
+  questMark(game) {
+    const q = game.quests;
+    const ready = (id) => q.isActive(id) && q.stageOf(id) === 1;
+    const fresh = (id, cond = true) => !q.state[id] && cond;
+    switch (this.role) {
+      case 'elder':
+        if (!q.flags.talkedElder) return 'new';
+        if (ready('relic')) return 'turnin';
+        if (fresh('relic')) return 'new';
+        return null;
+      case 'merchant':
+        if (q.isActive('courier') && q.flags.courierFrom
+          && q.flags.courierFrom !== this.poi?.id) return 'turnin';
+        if (fresh('courier')) return 'new';
+        return null;
+      case 'smith':
+        if (ready('smith') || ready('smith2')) return 'turnin';
+        if (fresh('smith') || fresh('smith2', q.isDone('smith'))) return 'new';
+        return null;
+      case 'herbalist':
+        if (ready('herbs') || ready('herbs2')) return 'turnin';
+        if (fresh('herbs') || fresh('herbs2', q.isDone('herbs'))) return 'new';
+        return null;
+      case 'hunter':
+        if (ready('wolves') || ready('packlord')) return 'turnin';
+        if (fresh('wolves') || fresh('packlord', q.isDone('wolves'))) return 'new';
+        return null;
+      case 'priest':
+        if (ready('wraiths') || ready('fenwatch')) return 'turnin';
+        if (fresh('wraiths') || fresh('fenwatch', q.isDone('wraiths'))) return 'new';
+        return null;
+      case 'innkeeper':
+        if (ready('missing')) return 'turnin';
+        if (q.isActive('courier') && q.flags.courierFrom
+          && q.flags.courierFrom !== this.poi?.id) return 'turnin';
+        if (fresh('missing')) return 'new';
+        return null;
+      default:
+        return null;
+    }
   }
-  rumor(game) {
-    const lines = [
-      '灰燼の荒野には、燃え尽きぬ騎士がいるという。近づく者は皆、灰になる。',
-      '常闇の森の奥、木々が避ける場所に「森の主」がいる。あれは狼ではない。',
-      '蒼天嶺の頂には竜が眠る。竜の鍵がなければ、王の門は開かぬそうだ。',
-      '湿原の魔女は、かつて人を癒す者だった。霧に呑まれてから、誰も戻らない。',
-      '見張り塔に登れば、その地方の地図が手に入る。登る価値はあるさ。',
-      '宝箱は罠かもしれん。だが開けずに死ぬのも間抜けだろう？',
-    ];
-    return lines[(Math.floor(game.time.now * 0.2) + this.id) % lines.length];
+
+  /** 状況（時刻・天候・進行・こちらの様子）に反応した台詞を引く */
+  say(pool, game, drift = 0) {
+    const ctx = makeContext(this, game);
+    const salt = (this.id | 0) + Math.floor(game.time.now * 0.08) + drift;
+    return pickLine(pool, ctx, salt) || '……。';
   }
-  smalltalk(game) {
-    const lines = [
-      'あんた、生きてるのか？ ……いや、聞くだけ野暮か。',
-      '外は危ない。だが、ここも安全とは言えないな。',
-      '村の外れの篝火は使えるはずだ。あそこで休むといい。',
-      '子供が森に近づかないよう見ていてくれ。あそこは変わってしまった。',
-      '残響が集まると、頭の中で誰かの声がする。慣れるさ。',
-    ];
-    return lines[(this.id + Math.floor(game.time.now * 0.1)) % lines.length];
+  greeting(game) {
+    return this.say(`greet_${this.role}`, game) || this.say('smalltalk', game);
   }
+  huntTip(game) {
+    const tips = [
+      '獣は正面から来る。焦らず、引きつけて転がれ。背後を取れれば一撃で終わる。',
+      '囲まれたら、殴りかかってくるのは二匹か三匹までだ。残りは回っている。そいつらの背中を狙え。',
+      '振りかぶって止める奴がいる。あれは誘いだ。転がるのは刃が来てからでいい。',
+      '同じ技でも溜めが毎回違う。数えるな、見ろ。',
+      '大盾は正面を通さん。回り込むか、体当たりで態勢を崩せ。',
+      '術者を先に黙らせろ。死人を起こす奴は、放っておくと切りがない。',
+      '長柄は間合いの外から刺す。踏み込むか、下がりきるかだ。中途半端が一番死ぬ。',
+    ];
+    return tips[(this.id + Math.floor(game.player.kills / 7)) % tips.length];
+  }
+  lore(game) { return this.say('lore', game, 3); }
+  rumor(game) { return this.say('rumor', game, 7); }
+  smalltalk(game) { return this.say('smalltalk', game, 11); }
 }
 
 /** 村 POI に NPC を配置 */

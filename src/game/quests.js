@@ -134,6 +134,103 @@ export const QUESTS = {
     ],
     reward: { echo: 1500, items: [['bone', 3]] },
   },
+
+  /* ===================================================== 連鎖する依頼 */
+  smith2: {
+    id: 'smith2', name: '鍛冶の火・熾き', giver: 'smith', after: 'smith',
+    stages: [
+      {
+        text: '古き欠片をひとつ鍛冶屋に持ち込む',
+        progress: (q, game) => `${Math.min(1, game.player.inventory.shard_ancient || 0)}/1`,
+        check: (q, game) => (game.player.inventory.shard_ancient || 0) >= 1,
+      },
+      { text: '鍛冶屋に渡す', check: (q) => q.flags.smith2TurnedIn },
+    ],
+    reward: { echo: 3200, weapon: 'greatsword', items: [['ore_silver', 2]] },
+  },
+
+  herbs2: {
+    id: 'herbs2', name: '薬師の秘薬', giver: 'herbalist', after: 'herbs',
+    stages: [
+      {
+        text: '魔力の結晶を 5 つ薬師に届ける',
+        progress: (q, game) => `${Math.min(5, game.player.inventory.crystal || 0)}/5`,
+        check: (q, game) => (game.player.inventory.crystal || 0) >= 5,
+      },
+      { text: '薬師に渡す', check: (q) => q.flags.herbs2TurnedIn },
+    ],
+    reward: { echo: 2400, talisman: 'ring_vigor', items: [['herb', 8], ['antidote', 4]] },
+  },
+
+  fenwatch: {
+    id: 'fenwatch', name: '霧の見張り', giver: 'priest', after: 'wraiths',
+    stages: [
+      {
+        text: '湿原の魔女セラフィナを鎮める',
+        check: (q) => q.flags.bossDefeated_witch,
+      },
+      { text: '司祭に報告する', check: (q) => q.flags.fenwatchTurnedIn },
+    ],
+    reward: { echo: 4000, spell: 'barrier', items: [['blood_flower', 4]] },
+  },
+
+  /* ===================================================== 選択のある依頼 */
+  missing: {
+    id: 'missing', name: '帰らぬ弟', giver: 'innkeeper',
+    stages: [
+      {
+        text: '地下に潜り、弟の消息を探す（遺跡・墓所の宝箱を 2 つ）',
+        progress: (q) => `${Math.min(2, q.count.dungeonChests || 0)}/2`,
+        check: (q) => (q.count.dungeonChests || 0) >= 2,
+      },
+      { text: '宿の主に伝える', check: (q) => !!q.flags.missingAnswer },
+    ],
+    /** 真実を告げるか、優しい嘘をつくかで報いが変わる */
+    reward: (q) => (q.flags.missingAnswer === 'truth'
+      ? { echo: 2600, talisman: 'ring_echo', items: [['herb', 6]] }
+      : { echo: 4200, items: [['echo_shard', 3]] }),
+  },
+
+  relic: {
+    id: 'relic', name: '亡妻の指輪', giver: 'elder',
+    stages: [
+      {
+        text: '遺跡の主を討ち、副葬された指輪を取り戻す',
+        progress: (q) => `${Math.min(1, q.count.dungeonBosses || 0)}/1`,
+        check: (q) => (q.count.dungeonBosses || 0) >= 1,
+      },
+      { text: '長老に指輪を届ける', check: (q) => !!q.flags.relicAnswer },
+    ],
+    /** 返せば信、持ち去れば力 */
+    reward: (q) => (q.flags.relicAnswer === 'return'
+      ? { echo: 3000, armor: 'chain', items: [['ore_silver', 2]] }
+      : { echo: 1200, talisman: 'ring_moon' }),
+  },
+
+  /* ===================================================== その他 */
+  courier: {
+    id: 'courier', name: '遠い便り', giver: 'merchant',
+    stages: [
+      {
+        text: 'ほかの集落まで手紙を届ける',
+        check: (q) => !!q.flags.letterDelivered,
+      },
+    ],
+    reward: { echo: 1800, items: [['bone', 2], ['ore_iron', 3]] },
+  },
+
+  packlord: {
+    id: 'packlord', name: '黒い一匹', giver: 'hunter', after: 'wolves',
+    stages: [
+      {
+        text: '群れの長を 2 体討つ',
+        progress: (q) => `${Math.min(2, q.count.kill_direwolf || 0)}/2`,
+        check: (q) => (q.count.kill_direwolf || 0) >= 2,
+      },
+      { text: '狩人に報告する', check: (q) => q.flags.packlordTurnedIn },
+    ],
+    reward: { echo: 3400, weapon: 'bow', items: [['arrow', 40], ['beast_bone', 6]] },
+  },
 };
 
 export class QuestLog {
@@ -207,7 +304,8 @@ export class QuestLog {
 
   grant(q, game) {
     const p = game.player;
-    const r = q.reward || {};
+    // 報いは選択で変わることがあるので、関数なら今の状態から求める
+    const r = (typeof q.reward === 'function' ? q.reward(this, game) : q.reward) || {};
     if (r.echo) { p.echo += r.echo; game.ui.toast(`残響 +${r.echo}`); }
     for (const [item, n] of r.items || []) { p.addItem(item, n); game.ui.itemGain(item, n); }
     if (r.weapon) game.unlockWeapon(r.weapon);
