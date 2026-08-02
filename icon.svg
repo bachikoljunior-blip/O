@@ -1,20 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#12203a"/><stop offset="0.55" stop-color="#3b3350"/><stop offset="1" stop-color="#1a1220"/>
+    <radialGradient id="bg" cx="50%" cy="38%" r="72%">
+      <stop offset="0%" stop-color="#2a2418"/>
+      <stop offset="55%" stop-color="#0e0e13"/>
+      <stop offset="100%" stop-color="#050507"/>
+    </radialGradient>
+    <linearGradient id="blade" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#7a6428"/>
+      <stop offset="45%" stop-color="#d8b862"/>
+      <stop offset="100%" stop-color="#fff3cf"/>
     </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff3d0"/><stop offset="0.5" stop-color="#e8c874"/><stop offset="1" stop-color="#a97f34"/>
-    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#sky)"/>
-  <circle cx="256" cy="300" r="120" fill="#ff9a5a" opacity="0.35"/>
-  <path d="M0 372 L90 292 L150 336 L232 250 L318 340 L392 286 L512 380 L512 512 L0 512 Z" fill="#191428"/>
-  <path d="M0 420 L110 356 L206 408 L300 344 L400 412 L512 356 L512 512 L0 512 Z" fill="#0e0b16"/>
-  <g transform="translate(256 236)">
-    <path d="M0 -132 L20 -96 L14 44 L0 68 L-14 44 L-20 -96 Z" fill="url(#gold)"/>
-    <rect x="-62" y="44" width="124" height="22" rx="10" fill="url(#gold)"/>
-    <rect x="-13" y="66" width="26" height="60" rx="10" fill="#6b4a2a"/>
-    <circle cy="132" r="16" fill="url(#gold)"/>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- 遠景の稜線 -->
+  <path d="M0 372 L92 300 L150 340 L214 268 L292 336 L352 292 L432 350 L512 312 L512 512 L0 512 Z"
+        fill="#0b0d12" opacity="0.95"/>
+  <path d="M0 412 L120 360 L206 400 L300 356 L392 404 L512 366 L512 512 L0 512 Z"
+        fill="#07080b"/>
+
+  <!-- 篝火の剣 -->
+  <g filter="url(#glow)">
+    <rect x="248" y="112" width="16" height="232" fill="url(#blade)"/>
+    <path d="M256 96 L268 122 L244 122 Z" fill="#fff3cf"/>
+    <rect x="212" y="330" width="88" height="14" rx="5" fill="#d8b862"/>
+    <rect x="249" y="344" width="14" height="52" rx="6" fill="#6d5a2c"/>
+    <circle cx="256" cy="404" r="12" fill="#d8b862"/>
   </g>
+
+  <!-- 火の粉 -->
+  <g fill="#ffcf7a" opacity="0.9">
+    <circle cx="196" cy="286" r="5"/>
+    <circle cx="318" cy="250" r="4"/>
+    <circle cx="172" cy="212" r="3"/>
+    <circle cx="344" cy="322" r="3.5"/>
+    <circle cx="228" cy="176" r="2.6"/>
+    <circle cx="300" cy="150" r="2.2"/>
+  </g>
+
+  <ellipse cx="256" cy="424" rx="118" ry="22" fill="#d8b862" opacity="0.10"/>
 </svg>

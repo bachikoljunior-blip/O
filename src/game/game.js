@@ -1,1295 +1,917 @@
-// game.js — the game hub: state, systems, interactions, save/load.
+// ゲーム本体：ループ・エンティティ管理・スポーン・インタラクション・セーブ
 
-import {
-  clamp, lerp, dist, dist2, angleTo, angleDiff, makeRNG, TAU, makeCanvas, hash2, smoothstep,
-} from '../core/util.js';
+import { initGL } from '../core/gl.js';
 import { Input } from '../core/input.js';
-import { audio } from '../core/audio.js';
-import { generateWorld, TILE, B, WATER, BIOME_NAME, SEA } from '../world/worldgen.js';
-import { WorldRuntime, regionLevel, pickSpawnKind } from '../world/runtime.js';
-import { Dungeon } from '../world/dungeon.js';
-import { Renderer, skyAt } from '../render/renderer.js';
-import { Particles, FX } from '../render/particles.js';
-import { mapColor } from '../render/tiles.js';
-import { drawHumanoid } from '../render/actors.js';
-import { Player, Enemy, NPC, Projectile, Drop, ENEMY_TYPES, SPELLS } from './entities.js';
-import {
-  ITEMS, RECIPES, rollEquip, rollLoot, shopStock, upgradeCost, effStats, displayName, setUid, nextUid,
-} from './items.js';
-import { QuestLog, MAIN_CHAPTERS } from './quests.js';
-import { greeting, options as dlgOptions, rumor } from '../game/dialogue.js';
-import { UI } from '../ui/ui.js';
-import { HUD } from '../ui/hud.js';
-import { Menus } from '../ui/menus.js';
+import { AudioEngine } from '../core/audio.js';
+import { hash2, makeRng } from '../core/noise.js';
+import { clamp, clamp01, lerp, v3, TAU } from '../core/math.js';
 
-const SAVE_KEY = 'aetheria_save_v1';
-const DAY_LENGTH = 780;          // seconds per in-game day
+import { WorldGen, WORLD_RADIUS } from '../world/worldgen.js';
+import { Terrain, CHUNK } from '../world/terrain.js';
+import { generatePOIs } from '../world/pois.js';
+import { Sky } from '../world/sky.js';
+
+import { Renderer } from '../render/renderer.js';
+import { Camera } from '../render/camera.js';
+import { FX } from '../render/fx.js';
+import { writeInstance } from '../render/instance.js';
+
+import { Player } from './player.js';
+import { Enemy, spawnEnemy, spawnBoss } from './enemies.js';
+import { NPC, populateVillage } from './npc.js';
+import { QuestLog } from './quests.js';
+import { TEAM } from './actor.js';
+import {
+  SPAWN_TABLE, CHEST_TABLE, WEAPONS, ARMORS, SHIELDS, TALISMANS, SPELLS, ITEMS,
+} from './data.js';
+
+export const QUALITY_PRESETS = {
+  low: {
+    name: '軽量', renderScale: 0.62, viewChunks: 6, lodScale: 0.7, shadows: true, shadowSize: 1024,
+    shadowRange: 42, grassDensity: 0.55, grassDist: 60, grassShadow: false, treeDensity: 0.6,
+    bloom: false, bloomPasses: 1, bloomStrength: 0.5, water: true, skyQuality: 0, maxEnemies: 12,
+  },
+  medium: {
+    name: '標準', renderScale: 0.82, viewChunks: 8, lodScale: 1.0, shadows: true, shadowSize: 1536,
+    shadowRange: 58, grassDensity: 0.85, grassDist: 84, grassShadow: false, treeDensity: 0.85,
+    bloom: true, bloomPasses: 2, bloomStrength: 0.55, water: true, skyQuality: 1, maxEnemies: 18,
+  },
+  high: {
+    name: '高品質', renderScale: 1.0, viewChunks: 11, lodScale: 1.3, shadows: true, shadowSize: 2048,
+    shadowRange: 78, grassDensity: 1.15, grassDist: 108, grassShadow: true, treeDensity: 1.0,
+    bloom: true, bloomPasses: 3, bloomStrength: 0.6, water: true, skyQuality: 1, maxEnemies: 26,
+  },
+};
+
+class Time {
+  constructor() {
+    this.now = 0; this.dt = 0; this.raw = 0;
+    this.stop = 0; this.scale = 1;
+    this.frames = 0; this.fps = 60; this._acc = 0; this._n = 0;
+  }
+  hitstop(s) { this.stop = Math.max(this.stop, s); }
+  step(rawDt) {
+    this.raw = rawDt;
+    this._acc += rawDt; this._n++;
+    if (this._acc > 0.4) { this.fps = this._n / this._acc; this._acc = 0; this._n = 0; }
+    let dt = rawDt * this.scale;
+    if (this.stop > 0) {
+      const use = Math.min(this.stop, rawDt);
+      this.stop -= use;
+      dt *= 0.06;
+    }
+    this.dt = Math.min(dt, 0.05);
+    this.now += this.dt;
+    this.frames++;
+    return this.dt;
+  }
+}
+
+const _proj = [0, 0, 0];
 
 export class Game {
-  constructor(canvas) {
+  constructor(canvas, ui) {
     this.canvas = canvas;
-    this.renderer = new Renderer(canvas);
+    this.ui = ui;
+    this.gl = initGL(canvas);
+    if (!this.gl) throw new Error('WebGL2 not supported');
+    this.quality = { ...QUALITY_PRESETS.medium };
+    this.time = new Time();
     this.input = new Input(canvas);
-    this.audio = audio;
-    this.pt = new Particles();
-    this.ui = new UI();
-    this.hud = new HUD(this.ui);
-    this.menus = new Menus(this.ui);
-    this.state = 'loading';
-    this.seed = (Math.random() * 1e9) | 0;
-    this.time = 8 * (DAY_LENGTH / 24);
-    this.day = 1;
-    this.frame = 0;
+    this.audio = new AudioEngine();
+    this.paused = false;
+    this.running = false;
+    this.worldRadius = WORLD_RADIUS - 20;
+    this.exposureMul = 1;
+  }
+
+  async init(opts = {}) {
+    const seed = opts.seed || 20260802;
+    this.seed = seed;
+    this.world = new WorldGen(seed);
+    this.ui.progress('大地を編んでいます…', 0.1);
+    await frame();
+
+    this.pois = generatePOIs(this.world);
+    this.ui.progress('拠点と街道を敷いています…', 0.35);
+    await frame();
+
+    this.terrain = new Terrain(this.gl, this.world, this.quality);
+    this.sky = new Sky(seed + 3);
+    this.fx = new FX(this.gl);
+    this.camera = new Camera();
+    this.renderer = new Renderer(this.gl, this.quality);
+    this.ui.progress('世界を描き出しています…', 0.6);
+    await frame();
+
+    this.player = new Player({ x: 40, z: 300 });
+    this.player.y = this.world.height(40, 300);
+    this.quests = new QuestLog();
+
     this.enemies = [];
     this.npcs = [];
-    this.drops = [];
     this.projectiles = [];
-    this.objects = [];
-    this.groundMarkers = [];
-    this.weather = { rain: 0, snow: 0, fog: 0, wind: 0.4, target: { rain: 0, snow: 0, fog: 0 }, timer: 40 };
-    this.ashFall = 0;
-    this.hitStopT = 0;
-    this.flashT = 0;
-    this.fadeT = 0;
-    this.interior = null;
+    this.gatherables = new Map();
+    this.harvested = new Set();
+    this.openedChests = new Set();
+    this.clearedPOIs = new Set();
     this.activeBoss = null;
-    this.settings = { music: 0.5, sfx: 0.75, vibrate: true, hq: true, showFps: false };
-    this.fps = 60;
+    this.bossPOI = null;
+    this.unlocked = { weapons: new Set(['broken_sword']), armors: new Set(['rags', 'hood']), shields: new Set(['wooden_shield']), talismans: new Set(), spells: new Set() };
+
+    // 村に NPC を配置
+    for (const p of this.pois) {
+      if (p.type === 'village') this.npcs.push(...populateVillage(p, this.world));
+    }
+    // 開始地点の篝火
+    const start = this.pois.find((p) => p.tag === 'start');
+    if (start) { this.player.lastShrine = start; start.discovered = true; this.player.discovered.add(start.id); }
+
+    this.ui.progress('残響が満ちるのを待っています…', 0.85);
+    await frame();
+
+    this.mapBake = { canvas: null, row: 0, size: 176, done: false };
+    this.visited = new Set();
+
+    this.resize();
+    addEventListener('resize', () => this.resize());
+    this.ui.bind(this);
+    this.ui.progress('', 1);
+
     this.spawnTimer = 0;
-    this.autosaveT = 0;
-    this.campState = new Map();
-    this.poiObjects = new Map();
-    this.lastShrine = null;
-    this.locationBanner = null;
-    this.lastBiome = -1;
-    this.loadSettings();
+    this.lastSave = 0;
+    return this;
   }
 
-  // ————————————————————————————————————————————————— setup
-
-  *generate(seed) {
-    this.seed = seed >>> 0;
-    let world = null;
-    for (const p of generateWorld(this.seed)) {
-      if (p.world) world = p.world;
-      yield p;
-    }
-    this.world = world;
-    this.runtime = new WorldRuntime(world);
-    yield { phase: '地図を描く', t: 0.98 };
-    this.buildMapCanvas();
-    this.player = new Player(world.start.x, world.start.y);
-    this.quests = new QuestLog(this);
-    this.spawnSettlementNPCs();
-    this.startingKit();
-    this.renderer.cam.x = this.player.x;
-    this.renderer.cam.y = this.player.y;
-    yield { phase: '完了', t: 1 };
+  resize() {
+    const dpr = Math.min(devicePixelRatio || 1, 2.4);
+    const w = Math.round(innerWidth * dpr);
+    const h = Math.round(innerHeight * dpr);
+    this.canvas.width = w;
+    this.canvas.height = h;
+    this.canvas.style.width = innerWidth + 'px';
+    this.canvas.style.height = innerHeight + 'px';
+    this.camera.resize(w, h);
+    this.renderer.resize(w, h);
   }
 
-  buildMapCanvas() {
-    const w = this.world.w, h = this.world.h;
-    const { canvas, ctx } = makeCanvas(w, h);
-    const img = ctx.createImageData(w, h);
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        const c = mapColor(this.world, x, y);
-        const o = (y * w + x) * 4;
-        img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
-      }
-    }
-    ctx.putImageData(img, 0, 0);
-    this.mapCanvas = canvas;
-    const fog = makeCanvas(w, h);
-    fog.ctx.fillStyle = 'rgba(8,9,12,1)';
-    fog.ctx.fillRect(0, 0, w, h);
-    this.fogCanvas = fog.canvas;
-    this.fogCtx = fog.ctx;
-    this.fogCtx.globalCompositeOperation = 'destination-out';
+  setQuality(preset) {
+    Object.assign(this.quality, QUALITY_PRESETS[preset]);
+    this.quality.preset = preset;
+    this.renderer.applyQuality();
+    // チャンクを作り直す
+    for (const [, c] of this.terrain.chunks) c.dispose();
+    this.terrain.chunks.clear();
   }
 
-  revealFog(tx, ty, r = 22) {
-    if (!this.fogCtx) return;
-    const g = this.fogCtx.createRadialGradient(tx, ty, r * 0.35, tx, ty, r);
-    g.addColorStop(0, 'rgba(0,0,0,1)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    this.fogCtx.fillStyle = g;
-    this.fogCtx.beginPath();
-    this.fogCtx.arc(tx, ty, r, 0, TAU);
-    this.fogCtx.fill();
-  }
-
-  startingKit() {
-    const rng = makeRNG(this.seed ^ 0x1234);
-    const sword = rollEquip(rng, 1, 0, 'weapon');
-    sword.name = '駆け出しの剣';
-    sword.weaponKind = 'sword'; sword.icon = 'sword'; sword.reach = 34; sword.atkSpeed = 1; sword.weaponLen = 18;
-    const body = rollEquip(rng, 1, 0, 'body');
-    this.giveEquip(sword, true);
-    this.giveEquip(body, true);
-    this.equipItem(sword);
-    this.equipItem(body);
-    this.giveItem('potion_s', 3, true);
-    this.giveItem('bread', 2, true);
-  }
-
-  spawnSettlementNPCs() {
-    for (const s of this.world.settlements) {
-      const rng = makeRNG((s.x * 7919 + s.y * 104729) >>> 0);
-      const roleFor = { inn: 'innkeeper', shop: 'merchant', smith: 'smith', alchemist: 'alchemist', guild: 'guildmaster', temple: 'priest', castle: 'elder' };
-      for (const b of s.buildings) {
-        const role = roleFor[b.type];
-        const bx = (b.tx + b.tw / 2) * TILE;
-        const by = (b.ty + b.th + 0.8) * TILE;
-        if (role) {
-          const n = new NPC(bx, by, role, s, rng, { x: bx, y: by });
-          n.shopSeed = (rng() * 1e9) | 0;
-          n.building = b;
-          this.npcs.push(n);
-        }
-      }
-      const villagers = s.type === 'capital' ? 12 : s.type === 'town' ? 8 : s.type === 'village' ? 5 : 3;
-      for (let i = 0; i < villagers; i++) {
-        const a = rng() * TAU, rad = rng.range(2, s.size - 2) * TILE;
-        const x = (s.x + 0.5) * TILE + Math.cos(a) * rad;
-        const y = (s.y + 0.5) * TILE + Math.sin(a) * rad;
-        const home = s.buildings.length ? rng.pick(s.buildings) : null;
-        const role = rng.chance(0.16) ? 'child' : 'villager';
-        this.npcs.push(new NPC(x, y, role, s, rng, home ? { x: (home.tx + home.tw / 2) * TILE, y: (home.ty + home.th + 0.6) * TILE } : null));
-      }
-      const guards = s.type === 'capital' ? 6 : s.type === 'town' ? 4 : 2;
-      for (let i = 0; i < guards; i++) {
-        const a = (i / guards) * TAU;
-        const x = (s.x + 0.5) * TILE + Math.cos(a) * (s.size - 1.5) * TILE;
-        const y = (s.y + 0.5) * TILE + Math.sin(a) * (s.size - 1.5) * TILE;
-        const n = new NPC(x, y, 'guard', s, rng, null);
-        n.post = { x, y };
-        this.npcs.push(n);
-      }
-      // quest board seed
-      s.boardSeed = (rng() * 1e9) | 0;
-    }
-  }
-
-  newGame() {
-    // full reset — the world stays, everything the hero touched does not
-    this.player = new Player(this.world.start.x, this.world.start.y);
-    this.quests = new QuestLog(this);
-    this.enemies.length = 0;
-    this.drops.length = 0;
-    this.projectiles.length = 0;
-    this.objects.length = 0;
-    this.pt.clear();
-    this.campState.clear();
-    this.poiObjects.clear();
-    this.interior = null;
-    this.activeBoss = null;
-    this.lastShrine = null;
-    this.locationBanner = null;
-    this.lastBiome = -1;
-    for (const poi of this.world.pois) { poi.discovered = false; poi.activated = false; poi.cleared = false; poi.looted = false; }
-    for (const st of this.world.settlements) { st.discovered = false; st.board = null; st.boardDay = -1; }
-    this.buildMapCanvas();
-    this.startingKit();
-    this.renderer.cam.x = this.player.x;
-    this.renderer.cam.y = this.player.y;
-    this.state = 'play';
-    this.time = 8 * (DAY_LENGTH / 24);
-    this.day = 1;
-    localStorage.removeItem(SAVE_KEY);
-    this.audio.init();
-    this.showBanner(MAIN_CHAPTERS[0].title, MAIN_CHAPTERS[0].desc);
-    // gentle onboarding for the first minute
-    this.tips = [
-      [6, '画面左側をドラッグして移動', '#cfd6dd'],
-      [11, '剣ボタンで攻撃・連打で連続攻撃', '#ffd0a0'],
-      [16, '▲ボタンで人と話す・調べる', '#8fd0ff'],
-      [22, '祠に祈ると回復し、地図から転移できる', '#8fe0ff'],
-    ];
-    const cap = this.world.settlements[0];
-    if (cap) { cap.discovered = true; this.locationBanner = { name: cap.name + cap.label, sub: '旅の始まり', t: 0 }; }
-  }
-
-  // ————————————————————————————————————————————————— time & weather
-
-  hour() { return ((this.time % DAY_LENGTH) / DAY_LENGTH) * 24; }
-  isNight() { const h = this.hour(); return h < 5.6 || h > 19.4; }
-  biomeName() {
-    if (this.interior) return this.interior.name;
-    const tx = Math.floor(this.player.x / TILE), ty = Math.floor(this.player.y / TILE);
-    for (const s of this.world.settlements) {
-      if (dist(tx, ty, s.x, s.y) < s.size + 3) return s.name + s.label;
-    }
-    return BIOME_NAME[this.world.biomeAt(tx, ty)] || '荒野';
-  }
-
-  updateWeather(dt) {
-    const W = this.weather;
-    W.timer -= dt;
-    if (W.timer <= 0) {
-      W.timer = 60 + Math.random() * 180;
-      const tx = Math.floor(this.player.x / TILE), ty = Math.floor(this.player.y / TILE);
-      const b = this.world.biomeAt(tx, ty);
-      const cold = b === B.SNOW || b === B.TAIGA || b === B.TUNDRA || b === B.PEAK;
-      const dry = b === B.DESERT || b === B.ASH || b === B.SAVANNA;
-      const wet = b === B.SWAMP || b === B.DARKWOOD || b === B.FOREST;
-      const r = Math.random();
-      W.target.rain = 0; W.target.snow = 0; W.target.fog = 0;
-      if (cold && r < 0.42) W.target.snow = 0.4 + Math.random() * 0.6;
-      else if (!dry && r < (wet ? 0.5 : 0.28)) W.target.rain = 0.35 + Math.random() * 0.65;
-      else if (r < 0.55) W.target.fog = Math.random() * 0.5;
-      W.windTarget = 0.2 + Math.random() * 1.2;
-    }
-    const k = 1 - Math.pow(0.35, dt);
-    W.rain = lerp(W.rain, W.target.rain, k);
-    W.snow = lerp(W.snow, W.target.snow, k);
-    W.fog = lerp(W.fog, W.target.fog, k);
-    W.wind = lerp(W.wind, W.windTarget ?? 0.4, k * 0.5);
-    const tx = Math.floor(this.player.x / TILE), ty = Math.floor(this.player.y / TILE);
-    this.ashFall = lerp(this.ashFall, this.world.biomeAt(tx, ty) === B.ASH ? 1 : 0, 1 - Math.pow(0.2, dt));
-  }
-
-  // ————————————————————————————————————————————————— collision helpers
-
-  blocked(x, y, r, self) {
-    if (this.interior) {
-      if (this.interior.blocked(x, y, r)) return true;
-    } else {
-      const w = this.world;
-      const t = TILE;
-      for (const [ox, oy] of [[-r, 0], [r, 0], [0, -r * 0.5], [0, r * 0.4]]) {
-        const tx = Math.floor((x + ox) / t), ty = Math.floor((y + oy) / t);
-        if (w.isSolidTile(tx, ty)) return true;
-      }
-      // buildings
-      for (const s of w.settlements) {
-        if (Math.abs((s.x + 0.5) * t - x) > (s.size + 14) * t) continue;
-        if (Math.abs((s.y + 0.5) * t - y) > (s.size + 14) * t) continue;
-        for (const b of s.buildings) {
-          const bx = b.tx * t, by = b.ty * t, bw = b.tw * t, bh = b.th * t;
-          if (x + r > bx && x - r < bx + bw && y + r * 0.6 > by && y - r * 0.4 < by + bh) return true;
-        }
-      }
-    }
-    // props
-    let hit = false;
-    const list = this.interior ? this.interior.props : null;
-    if (list) {
-      for (const p of list) {
-        if (!p.r) continue;
-        if (dist2(x, y, p.x, p.y) < (p.r + r) * (p.r + r)) { hit = true; break; }
-      }
-    } else {
-      this.runtime.forEachPropNear(x, y, r + 24, (p) => {
-        if (hit || !p.r) return;
-        if (p.harvest && this.runtime.isHarvested(p, this.time)) return;
-        if (dist2(x, y, p.x, p.y) < (p.r + r) * (p.r + r)) hit = true;
-      });
-    }
-    if (hit) return true;
-    for (const o of this.objects) {
-      if (!o.solid) continue;
-      if (dist2(x, y, o.x, o.y) < (o.r + r) * (o.r + r)) return true;
-    }
-    return false;
-  }
-
-  blockedPoint(x, y) {
-    if (this.interior) return this.interior.blocked(x, y, 3);
-    const tx = Math.floor(x / TILE), ty = Math.floor(y / TILE);
-    return this.world.isSolidTile(tx, ty);
-  }
-
-  isWater(x, y) {
-    if (this.interior) return false;
-    return this.world.isWaterTile(Math.floor(x / TILE), Math.floor(y / TILE));
-  }
-  isRoad(x, y) {
-    if (this.interior) return false;
-    const o = this.world.overlayAt(Math.floor(x / TILE), Math.floor(y / TILE));
-    return o === 1 || o === 5 || o === 6 || o === 4;
-  }
-
-  // ————————————————————————————————————————————————— combat helpers
-
-  spawnProjectile(o) { this.projectiles.push(new Projectile(o)); }
-
-  areaDamage(x, y, r, dmg, opt = {}) {
-    if (opt.src === 'player' || !opt.src) {
-      for (const e of this.enemies) {
-        if (!e.alive) continue;
-        const d = dist(x, y, e.x, e.y);
-        if (d > r + e.r) continue;
-        const falloff = clamp(1 - (d / (r + e.r)) * 0.5, 0.4, 1);
-        e.damage(this, dmg * falloff, x, y, { ...opt, knock: 180 });
-      }
-    }
-    if (opt.src === 'enemy') {
-      const p = this.player;
-      if (p.alive && dist(x, y, p.x, p.y) < r + p.r) p.damage(this, dmg, x, y, {});
-    }
-  }
-
-  coneEffect(x, y, ang, range, halfAngle, fn) {
-    for (const e of this.enemies) {
-      if (!e.alive) continue;
-      const d = dist(x, y, e.x, e.y);
-      if (d > range) continue;
-      if (Math.abs(angleDiff(ang, angleTo(x, y, e.x, e.y))) > halfAngle) continue;
-      fn(e);
-    }
-  }
-
-  nearestEnemy(x, y, maxD = 400) {
-    let best = null, bd = maxD * maxD;
-    for (const e of this.enemies) {
-      if (!e.alive) continue;
-      const d = dist2(x, y, e.x, e.y);
-      if (d < bd) { bd = d; best = e; }
-    }
-    return best;
-  }
-
-  hitProps(x, y, ang, reach, arc) {
-    const strike = (p) => {
-      if (!p.harvest) return;
-      if (this.runtime.isHarvested(p, this.time)) return;
-      const d = dist(x, y, p.x, p.y);
-      if (d > reach + 6) return;
-      if (Math.abs(angleDiff(ang, angleTo(x, y, p.x, p.y))) > arc) return;
-      this.harvestProp(p);
+  start() {
+    this.running = true;
+    let last = performance.now();
+    const loop = (now) => {
+      if (!this.running) return;
+      requestAnimationFrame(loop);
+      const raw = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      this.frame(raw);
     };
-    if (this.interior) this.interior.props.forEach(strike);
-    else this.runtime.forEachPropNear(x, y, reach + 20, strike);
+    requestAnimationFrame(loop);
   }
 
-  harvestProp(p) {
-    const rng = makeRNG((p.x * 31 + p.y * 17 + this.frame) | 0);
-    const table = {
-      herb: [['herb', 1, 2]], berry: [['herb', 0, 1]], shroom: [['herb', 0, 1], ['bloom', 0, 1]],
-      ore: [['ore_iron', 1, 2], ['ore_silver', 0, 1]], crystal: [['core', 1, 1], ['ore_myth', 0, 1]],
-    };
-    const t = table[p.harvest] || [];
-    let got = false;
-    for (const [id, lo, hi] of t) {
-      const n = rng.irange(lo, hi);
-      if (n > 0) { this.giveItem(id, n); got = true; }
+  frame(raw) {
+    const dt = this.time.step(raw);
+    this.input.update();
+
+    if (this.ui.modalOpen) {
+      this.ui.update(dt, this);
+      this.input.endFrame();
+      this.renderFrame();
+      return;
     }
-    if (p.harvest === 'shroom' && this.isNight()) this.giveItem('bloom', 1);
-    this.runtime.harvest(p, this.time);
-    FX.dust(this.pt, p.x, p.y, 8);
-    this.pt.burst(p.x, p.y - 10, 10, { speed: 70, life: 0.5, r: 2.6, col: '#a8e05a', g: 180 });
-    audio.sfx(p.harvest === 'ore' || p.harvest === 'crystal' ? 'craft' : 'pickup');
-    if (!got) this.toast('何も採れなかった', '#999');
+    if (!this.paused) this.update(dt);
+    this.ui.update(dt, this);
+    this.input.endFrame();
+    this.renderFrame();
   }
 
-  enemyAlert(e) {
-    this.pt.text(e.x, e.y - e.r * 2.6, '！', { col: '#ff6a4a', size: 18 });
+  renderFrame() {
+    this.renderer.damage = lerp(this.renderer.damage, this.damageFlash || 0, 0.2);
+    this.damageFlash = Math.max(0, (this.damageFlash || 0) - this.time.raw * 2.4);
+    this.renderer.aberration = this.activeBoss ? 0.022 : 0;
+    this.renderer.render(this);
   }
 
-  onEnemyKilled(e, opt) {
+  /* ============================================================ 更新 */
+  update(dt) {
     const p = this.player;
-    p.kills++;
-    p.addXp(Math.round(e.T.xp * (1 + (e.level - 1) * 0.22)), this);
-    const rng = makeRNG((e.x * 7919 + e.y * 104729 + this.frame) | 0);
-    const gold = rng.irange(e.T.gold[0], e.T.gold[1]) * (1 + Math.floor(e.level / 4));
-    if (gold > 0) this.drops.push(new Drop(e.x, e.y, { gold }));
-    for (const l of rollLoot(rng, e.kind, e.level)) this.drops.push(new Drop(e.x, e.y, l));
-    this.quests.onKill(e.kind, e.x, e.y);
-    if (e.boss) {
-      this.activeBoss = null;
-      this.shake(12, 0.8);
-      this.flashT = 0.7;
-      if (e.kind === 'dragon') {
-        this.quests.onBossKill('dragon');
-        this.showBanner('灰燼竜、堕つ', '大陸に朝が還った。');
-      } else {
-        this.quests.onDungeonBoss();
-        this.drops.push(new Drop(e.x, e.y, { id: 'relic', n: 1 }));
-      }
-      audio.setMood(this.interior ? 'dungeon' : 'explore');
+
+    this.sky.update(dt, this);
+    this.sky.applyRegion(this.world.params(p.x, p.z));
+
+    this.camera.update(dt, this);
+    p.update(dt, this);
+    if (p.state === 'cast') p.processSpell(dt, this);
+
+    // 地形ストリーミング
+    this.terrain.update(p.x, p.z, this.time.now, this.quality.viewChunks > 8 ? 7 : 5);
+
+    // エンティティ
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      const e = this.enemies[i];
+      const d = Math.hypot(e.x - p.x, e.z - p.z);
+      if (e.dead && e.removeAt > 6) { this.enemies.splice(i, 1); continue; }
+      if (!e.boss && d > 190) { this.enemies.splice(i, 1); continue; }
+      if (d < 150) e.update(dt, this);
     }
-    if (e.campId) {
-      const st = this.campState.get(e.campId);
-      if (st) {
-        st.alive--;
-        if (st.alive <= 0 && !st.cleared) {
-          st.cleared = true;
-          const poi = this.world.pois.find((q) => q.id === e.campId);
-          if (poi) poi.cleared = true;
-          this.quests.onCampCleared();
-          this.toast('野営地を制圧した！', '#ffd76a');
-          this.spawnChest(st.x, st.y, regionLevel(this.world, st.x, st.y) + 2);
+    for (const n of this.npcs) {
+      if (Math.hypot(n.x - p.x, n.z - p.z) < 70) n.update(dt, this);
+    }
+    this.updateProjectiles(dt);
+    this.updateSpawning(dt);
+    this.updateGatherables();
+    this.updateBoss(dt);
+    this.updateAmbient(dt);
+    this.fx.update(dt, this);
+    this.quests.update(this);
+    this.updateInteract();
+    this.updateDiscovery();
+    this.updateMusic();
+    this.audio.update(dt, this);
+
+    // バフ
+    if (p.spellBuff) {
+      p.spellBuff.t -= dt;
+      p.defBuff = p.mods.defMul * p.spellBuff.def;
+      if (p.spellBuff.t <= 0) { p.spellBuff = null; p.defBuff = p.mods.defMul; }
+    }
+
+    // オートセーブ
+    this.lastSave += dt;
+    if (this.lastSave > 30) { this.lastSave = 0; this.save(); }
+  }
+
+  /* -------------------------------------------------------- スポーン */
+  updateSpawning(dt) {
+    const p = this.player;
+    this.spawnTimer -= dt;
+
+    // POI 常駐の敵
+    for (const poi of this.pois) {
+      if (!poi.spawns.length || this.clearedPOIs.has(poi.id)) continue;
+      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
+      if (d > 130 || poi.spawned) continue;
+      poi.spawned = true;
+      for (const s of poi.spawns) {
+        for (let i = 0; i < s.count; i++) {
+          const a = Math.random() * TAU, r = Math.random() * s.radius;
+          const x = poi.x + Math.cos(a) * r, z = poi.z + Math.sin(a) * r;
+          const e = spawnEnemy(s.kind, {
+            x, y: this.world.height(x, z), z, yaw: Math.random() * TAU,
+            poi, leash: s.radius + 22,
+            hpMul: 1 + poi.danger * 0.12, echoMul: 1 + poi.danger * 0.2,
+          });
+          if (e) this.enemies.push(e);
         }
       }
     }
+    // POI から離れたらリセット
+    for (const poi of this.pois) {
+      if (poi.spawned && Math.hypot(poi.x - p.x, poi.z - p.z) > 210) poi.spawned = false;
+    }
+
+    // 徘徊する敵
+    if (this.spawnTimer > 0) return;
+    this.spawnTimer = 1.6;
+    const roamers = this.enemies.filter((e) => !e.poi && !e.boss && !e.dead).length;
+    const params = this.world.params(p.x, p.z);
+    const want = Math.min(this.quality.maxEnemies, Math.round(3 + params.danger * 0.9));
+    if (roamers >= want) return;
+
+    const table = SPAWN_TABLE[params.region.id] || SPAWN_TABLE.downs;
+    let total = 0;
+    for (const [, w] of table) total += w;
+    let r = Math.random() * total;
+    let kind = table[0][0];
+    for (const [k, w] of table) { r -= w; if (r <= 0) { kind = k; break; } }
+
+    for (let tries = 0; tries < 12; tries++) {
+      const a = Math.random() * TAU;
+      const dist = 62 + Math.random() * 48;
+      const x = p.x + Math.cos(a) * dist, z = p.z + Math.sin(a) * dist;
+      if (Math.hypot(x, z) > this.worldRadius - 30) continue;
+      const s = this.world.sample(x, z);
+      if (s.h < 1.5 || s.slope > 0.7) continue;
+      // 集落の近くには湧かない
+      let near = false;
+      for (const poi of this.pois) {
+        if (poi.type !== 'village' && poi.type !== 'shrine') continue;
+        if (Math.hypot(poi.x - x, poi.z - z) < 60) { near = true; break; }
+      }
+      if (near) continue;
+
+      const def = SPAWN_TABLE[params.region.id] ? kind : 'wolf';
+      const group = Math.random() < 0.5 ? 1 : 1 + (Math.random() * 2 | 0);
+      for (let i = 0; i < group; i++) {
+        const ox = x + (Math.random() - 0.5) * 8, oz = z + (Math.random() - 0.5) * 8;
+        const e = spawnEnemy(def, {
+          x: ox, y: this.world.height(ox, oz), z: oz, yaw: Math.random() * TAU,
+          leash: 46, hpMul: 1 + params.danger * 0.14, echoMul: 1 + params.danger * 0.22,
+        });
+        if (e) this.enemies.push(e);
+      }
+      break;
+    }
+  }
+
+  respawnWorld() {
+    // 篝火で休むと敵が復活する
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      const e = this.enemies[i];
+      if (e.boss && !e.dead) continue;
+      this.enemies.splice(i, 1);
+    }
+    for (const poi of this.pois) poi.spawned = false;
+    this.harvested.clear();
+    if (this.activeBoss && this.activeBoss.dead) this.endBoss();
+  }
+
+  /* ------------------------------------------------------ 発射物 */
+  spawnProjectile(o) {
+    const cp = Math.cos(o.pitch || 0);
+    this.projectiles.push({
+      x: o.x, y: o.y, z: o.z,
+      vx: Math.sin(o.yaw) * cp * o.speed,
+      vy: Math.sin(o.pitch || 0) * o.speed,
+      vz: Math.cos(o.yaw) * cp * o.speed,
+      kind: o.kind, damage: o.damage, team: o.team, owner: o.owner,
+      life: 5, gravity: o.gravity ?? (o.kind === 'arrow' || o.kind === 'arrow_heavy' ? 5.5 : 0),
+      splash: o.splash || 0, frost: o.frost, fire: o.fire, poise: 14,
+    });
+  }
+
+  updateProjectiles(dt) {
+    const P = this.projectiles;
+    for (let i = P.length - 1; i >= 0; i--) {
+      const b = P[i];
+      b.life -= dt;
+      b.vy -= b.gravity * dt;
+      const nx = b.x + b.vx * dt, ny = b.y + b.vy * dt, nz = b.z + b.vz * dt;
+
+      // 軌跡
+      const col = PROJ_COLOR[b.kind] || [1, 1, 1];
+      this.fx.spawn({
+        x: b.x, y: b.y, z: b.z, life: 0.22, size: b.kind === 'firebomb' ? 0.2 : 0.11, sizeEnd: 0.02,
+        r: col[0], g: col[1], b: col[2], a: 0.9, kind: 0, glow: 1.4, drag: 2,
+      });
+
+      let hit = null;
+      const targets = b.team === TEAM.PLAYER ? this.enemies : [this.player];
+      for (const t of targets) {
+        if (t.dead) continue;
+        const dx = t.x - nx, dz = t.z - nz;
+        const dy = (t.y + t.height * 0.55) - ny;
+        if (dx * dx + dz * dz < (t.radius + 0.35) ** 2 && Math.abs(dy) < t.height * 0.6) {
+          hit = t; break;
+        }
+      }
+      const gh = this.world.height(nx, nz);
+      if (!hit && ny <= gh) hit = 'ground';
+
+      if (hit || b.life <= 0) {
+        if (b.splash > 0) {
+          this.explode(nx, Math.max(ny, gh + 0.2), nz, b.splash, b.damage, b.team, b);
+        } else if (hit && hit !== 'ground') {
+          hit.takeDamage(b.damage, {
+            source: b.owner, poise: b.poise, frost: b.frost, fire: b.fire, type: 'projectile',
+          }, this);
+        } else {
+          this.fx.sparks(nx, ny, nz, 5, col);
+        }
+        P.splice(i, 1);
+        continue;
+      }
+      b.x = nx; b.y = ny; b.z = nz;
+    }
+  }
+
+  explode(x, y, z, radius, damage, team, b) {
+    this.fx.emberBurst(x, y, z, 34);
+    this.fx.shockwave(x, y, z, radius * 0.7);
+    this.audio.play('slam');
+    this.camera.shake(0.4);
+    const targets = team === TEAM.PLAYER ? this.enemies : [this.player];
+    for (const t of targets) {
+      if (t.dead) continue;
+      const d = Math.hypot(t.x - x, t.z - z);
+      if (d > radius) continue;
+      const k = 1 - d / radius;
+      t.takeDamage(damage * (0.5 + k * 0.5), {
+        source: b?.owner, poise: 30 * k, fire: b?.fire, type: 'fire',
+      }, this);
+    }
+  }
+
+  /** 攻撃で樽などを壊す（簡易） */
+  hitProps() { /* 予約：破壊可能オブジェクト */ }
+
+  /* -------------------------------------------------------- ボス */
+  updateBoss(dt) {
+    const p = this.player;
+    if (!this.activeBoss) {
+      for (const poi of this.pois) {
+        if (poi.type !== 'boss' || poi.cleared) continue;
+        const d = Math.hypot(poi.x - p.x, poi.z - p.z);
+        if (d < (poi.arenaR || 26) - 3) {
+          this.startBoss(poi);
+          break;
+        }
+      }
+      return;
+    }
+    const b = this.activeBoss;
+    const d = Math.hypot(b.x - p.x, b.z - p.z);
+    if (b.dead) {
+      this.bossDeathT = (this.bossDeathT || 0) + dt;
+      if (this.bossDeathT > 3.2) this.endBoss();
+    } else if (d > (this.bossPOI.arenaR || 26) + 26 || p.dead) {
+      this.endBoss(true);
+    }
+  }
+
+  startBoss(poi) {
+    const def = poi.boss;
+    const b = spawnBoss(def, {
+      x: poi.x, y: this.world.height(poi.x, poi.z), z: poi.z,
+      yaw: Math.atan2(this.player.x - poi.x, this.player.z - poi.z),
+      arenaR: poi.arenaR,
+    });
+    if (!b) return;
+    b.aggro = true;
+    b.aiState = 'chase';
+    this.activeBoss = b;
+    this.bossPOI = poi;
+    this.bossDeathT = 0;
+    this.enemies.push(b);
+    this.ui.showBoss(b);
+    this.audio.setMode(b.bossDef.music === 'final' ? 'final' : 'boss');
+    this.audio.play('boss_phase');
+    poi.discovered = true;
+    this.player.discovered.add(poi.id);
+  }
+
+  endBoss(reset = false) {
+    if (reset && this.activeBoss && !this.activeBoss.dead) {
+      const i = this.enemies.indexOf(this.activeBoss);
+      if (i >= 0) this.enemies.splice(i, 1);
+    }
+    this.activeBoss = null;
+    this.bossPOI = null;
+    this.ui.hideBoss();
+  }
+
+  onBossDefeated(boss) {
+    const poi = this.bossPOI;
+    if (poi) { poi.cleared = true; this.clearedPOIs.add(poi.id); }
+    this.quests.onBossDefeated(boss.bossDef.id);
+    this.ui.bossDefeated(boss.name);
+    this.audio.setMode('explore');
+    const r = boss.bossDef.reward || {};
+    if (r.weapon) this.unlockWeapon(r.weapon);
+    if (r.armor) this.unlockArmor(r.armor);
+    if (r.talisman) this.unlockTalisman(r.talisman);
+    if (r.spell) this.unlockSpell(r.spell);
+    if (r.item) { this.player.addItem(r.item, r.count || 1); this.ui.itemGain(r.item, r.count || 1); }
+    if (boss.bossDef.final) this.ui.showEnding(this);
+    this.save();
+  }
+
+  unlockWeapon(id) {
+    if (!WEAPONS[id] || this.unlocked.weapons.has(id)) return;
+    this.unlocked.weapons.add(id);
+    this.player.upgrades[id] = this.player.upgrades[id] || 0;
+    this.ui.toast(`武器を手に入れた：${WEAPONS[id].name}`);
+    this.audio.play('discover');
+  }
+  unlockArmor(id) {
+    if (!ARMORS[id] || this.unlocked.armors.has(id)) return;
+    this.unlocked.armors.add(id);
+    this.ui.toast(`防具を手に入れた：${ARMORS[id].name}`);
+  }
+  unlockShield(id) {
+    if (!SHIELDS[id] || this.unlocked.shields.has(id)) return;
+    this.unlocked.shields.add(id);
+    this.ui.toast(`盾を手に入れた：${SHIELDS[id].name}`);
+  }
+  unlockTalisman(id) {
+    if (!TALISMANS[id] || this.unlocked.talismans.has(id)) return;
+    this.unlocked.talismans.add(id);
+    this.ui.toast(`護符を手に入れた：${TALISMANS[id].name}`);
+  }
+  unlockSpell(id) {
+    if (!SPELLS[id] || this.unlocked.spells.has(id)) return;
+    this.unlocked.spells.add(id);
+    if (!this.player.equip.spell) this.player.equip.spell = id;
+    this.ui.toast(`魔法を覚えた：${SPELLS[id].name}`);
+  }
+
+  /* ---------------------------------------------------- 採取ポイント */
+  updateGatherables() {
+    const p = this.player;
+    const CELL = 34;
+    const R = 3;
+    const cx = Math.floor(p.x / CELL), cz = Math.floor(p.z / CELL);
+    const seen = new Set();
+    for (let j = -R; j <= R; j++) {
+      for (let i = -R; i <= R; i++) {
+        const gx = cx + i, gz = cz + j;
+        const key = gx * 100003 + gz;
+        seen.add(key);
+        if (this.gatherables.has(key)) continue;
+        const h = hash2(gx, gz, this.seed + 55);
+        if (h > 0.30) { this.gatherables.set(key, null); continue; }
+        const x = (gx + 0.2 + hash2(gx, gz, 3) * 0.6) * CELL;
+        const z = (gz + 0.2 + hash2(gx, gz, 9) * 0.6) * CELL;
+        const s = this.world.sample(x, z);
+        if (s.h < 1.4 || s.slope > 0.75) { this.gatherables.set(key, null); continue; }
+        const params = this.world.params(x, z);
+        let type = 'herb';
+        if (params.moist > 0.85) type = 'blood_flower';
+        else if (s.surface === 'rock' || params.region.id === 'skyspire') type = 'ore_iron';
+        else if (params.region.id === 'cinder' || params.region.id === 'riftvale') type = 'crystal';
+        else if (hash2(gx, gz, 17) < 0.18) type = 'ore_iron';
+        this.gatherables.set(key, { key, x, y: s.h, z, type });
+      }
+    }
+    for (const k of [...this.gatherables.keys()]) {
+      if (!seen.has(k)) this.gatherables.delete(k);
+    }
+  }
+
+  /* ------------------------------------------------- インタラクション */
+  updateInteract() {
+    const p = this.player;
+    let best = null, bestD = 3.4;
+
+    for (const n of this.npcs) {
+      const d = Math.hypot(n.x - p.x, n.z - p.z);
+      if (d < bestD) { bestD = d; best = { type: 'npc', obj: n, label: `${n.npcName}（${n.title}）と話す` }; }
+    }
+    for (const poi of this.pois) {
+      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
+      if (poi.type === 'shrine' && d < 3.2) {
+        if (d < bestD) { bestD = d; best = { type: 'shrine', obj: poi, label: `${poi.name}で休息する` }; }
+      }
+      if (poi.type === 'tower' && d < 4.5 && !poi.climbed) {
+        if (d < bestD) { bestD = d; best = { type: 'tower', obj: poi, label: '望楼に登る' }; }
+      }
+      if (poi.chest && !this.openedChests.has(poi.id)) {
+        const cd = Math.hypot(poi.chest.x - p.x, poi.chest.z - p.z);
+        if (cd < bestD) { bestD = cd; best = { type: 'chest', obj: poi, label: '宝箱を開ける' }; }
+      }
+    }
+    for (const g of this.gatherables.values()) {
+      if (!g || this.harvested.has(g.key)) continue;
+      const d = Math.hypot(g.x - p.x, g.z - p.z);
+      if (d < bestD) { bestD = d; best = { type: 'gather', obj: g, label: `${ITEMS[g.type].name}を採る` }; }
+    }
+    if (p.lostEcho) {
+      const d = Math.hypot(p.lostEcho.x - p.x, p.lostEcho.z - p.z);
+      if (d < 2.6) { bestD = d; best = { type: 'echo', obj: p.lostEcho, label: `残響を回収する（${p.lostEcho.echo}）` }; }
+    }
+
+    this.interact = best;
+    this.ui.setPrompt(best ? best.label : null);
+    if (best && this.input.pressed('interact')) this.doInteract(best);
+  }
+
+  doInteract(t) {
+    const p = this.player;
+    switch (t.type) {
+      case 'npc':
+        this.ui.openDialogue(t.obj);
+        break;
+      case 'shrine': {
+        const poi = t.obj;
+        if (!poi.discovered) {
+          poi.discovered = true;
+          p.discovered.add(poi.id);
+        }
+        this.audio.play('shrine');
+        this.ui.openShrine(poi);
+        break;
+      }
+      case 'tower': {
+        t.obj.climbed = true;
+        this.quests.onTower();
+        this.revealAround(t.obj.x, t.obj.z, 380);
+        this.audio.play('discover');
+        this.ui.toast(`${t.obj.name}：周辺の地図を得た`);
+        for (const poi of this.pois) {
+          if (Math.hypot(poi.x - t.obj.x, poi.z - t.obj.z) < 380) {
+            poi.discovered = true;
+            p.discovered.add(poi.id);
+          }
+        }
+        break;
+      }
+      case 'chest': {
+        const poi = t.obj;
+        this.openedChests.add(poi.id);
+        const tier = clamp(poi.chest.tier, 1, CHEST_TABLE.length - 1);
+        const loot = CHEST_TABLE[tier];
+        p.echo += loot.echo;
+        for (const [item, n] of loot.items) { p.addItem(item, n); this.ui.itemGain(item, n); }
+        this.ui.toast(`宝箱：残響 +${loot.echo}`);
+        this.audio.play('chest');
+        this.fx.heal(poi.chest.x, this.world.height(poi.chest.x, poi.chest.z) + 0.6, poi.chest.z);
+        break;
+      }
+      case 'gather': {
+        const g = t.obj;
+        this.harvested.add(g.key);
+        const n = 1 + (Math.random() < 0.35 ? 1 : 0);
+        p.addItem(g.type, n);
+        this.ui.itemGain(g.type, n);
+        this.audio.play('ui_confirm');
+        this.fx.dust(g.x, g.y + 0.3, g.z, 6);
+        break;
+      }
+      case 'echo': {
+        p.echo += p.lostEcho.echo;
+        this.ui.toast(`残響を取り戻した（+${p.lostEcho.echo}）`);
+        this.audio.play('levelup');
+        this.fx.heal(p.x, p.y + 1, p.z);
+        p.lostEcho = null;
+        break;
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------- 発見 */
+  updateDiscovery() {
+    const p = this.player;
+    const key = `${Math.floor(p.x / 48)},${Math.floor(p.z / 48)}`;
+    this.visited.add(key);
+    for (const poi of this.pois) {
+      if (poi.discovered) continue;
+      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
+      const r = poi.type === 'village' || poi.type === 'boss' ? 70 : 42;
+      if (d < r) {
+        poi.discovered = true;
+        p.discovered.add(poi.id);
+        this.ui.discover(poi);
+        this.audio.play('discover');
+      }
+    }
+    // 地方の踏破
+    const region = this.world.regionAt(p.x, p.z);
+    if (this.currentRegion !== region.id) {
+      this.currentRegion = region.id;
+      this.ui.showRegion(region);
+    }
+  }
+
+  revealAround(x, z, radius) {
+    const step = 48;
+    for (let dz = -radius; dz <= radius; dz += step) {
+      for (let dx = -radius; dx <= radius; dx += step) {
+        if (dx * dx + dz * dz > radius * radius) continue;
+        this.visited.add(`${Math.floor((x + dx) / 48)},${Math.floor((z + dz) / 48)}`);
+      }
+    }
+  }
+
+  /* ----------------------------------------------------- 環境演出 */
+  updateAmbient(dt) {
+    const cam = this.camera;
+    const p = this.player;
+    const params = this.world.params(p.x, p.z);
+    if (this.sky.rainAmount > 0.02) {
+      this.fx.rain(cam.pos[0], cam.pos[1], cam.pos[2], dt, this.sky.rainAmount, this.world);
+    }
+    if (this.sky.snowAmount > 0.02 || (params.temp < 0.22 && p.y > 60)) {
+      this.fx.snow(cam.pos[0], cam.pos[1], cam.pos[2], dt, Math.max(this.sky.snowAmount, 0.35));
+    }
+    const rid = params.region.id;
+    if (rid === 'cinder') this.fx.ambient(p.x, p.y + 1.5, p.z, dt, 'ash', 0.5);
+    else if (rid === 'mistfen') this.fx.ambient(p.x, p.y + 1.5, p.z, dt, 'spore', 0.4);
+    else if (this.sky.isNight && (rid === 'downs' || rid === 'gloomwood')) {
+      this.fx.ambient(p.x, p.y + 1.2, p.z, dt, 'firefly', 0.35);
+    } else if (this.sky.wind > 0.8) {
+      this.fx.ambient(p.x, p.y + 1.5, p.z, dt, 'leaf', 0.22);
+    }
+    // 篝火・焚き火の火の粉
+    for (const poi of this.pois) {
+      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
+      if (d > 40) continue;
+      if (poi.type === 'shrine') this.fx.shrineGlow(poi.x, poi.y + 1.2, poi.z, dt);
+      else if (poi.type === 'village' || poi.type === 'camp') {
+        this.fx.campfireEmbers(poi.x, poi.y + 0.4, poi.z, dt);
+      }
+    }
+  }
+
+  updateMusic() {
+    if (this.activeBoss && !this.activeBoss.dead) return;
+    let combat = false;
+    for (const e of this.enemies) {
+      if (e.dead || !e.aggro) continue;
+      if (Math.hypot(e.x - this.player.x, e.z - this.player.z) < 26) { combat = true; break; }
+    }
+    this.audio.setMode(this.player.dead ? 'none' : combat ? 'combat' : 'explore');
+  }
+
+  /* ------------------------------------------------------ コールバック */
+  onDamage(target, dmg, opts, blocked) {
+    this.ui.damageNumber(target, dmg, blocked, opts);
+    if (target === this.player) {
+      this.damageFlash = Math.min(1, (this.damageFlash || 0) + dmg / this.player.maxHp * 2.4);
+      this.camera.shake(0.3 + Math.min(0.5, dmg / 120));
+      this.audio.play('hit', { pitch: 0.8 });
+    }
+  }
+
+  onActorDeath(actor) {
+    if (actor instanceof Enemy && !actor.boss) this.quests.onKill(actor.archetype);
   }
 
   onPlayerDeath() {
-    const lost = Math.floor(this.player.gold * 0.15);
-    this.player.gold -= lost;
-    this.lostGold = lost;
-    audio.setMood('night');
-    setTimeout(() => { if (!this.player.alive) this.menus.open('death'); }, 1500);
+    this.audio.setMode('none');
+    this.audio.play('death');
+    this.ui.showDeath();
   }
 
-  respawn() {
+  /* -------------------------------------------------- インスタンス出力 */
+  emitInstances(renderer) {
     const p = this.player;
-    p.alive = true;
-    p.hp = p.maxHp * 0.6;
-    p.mp = p.maxMp * 0.5;
-    p.sta = p.maxSta;
-    p.state = 'idle';
-    p.deathT = 0;
-    this.enemies.length = 0;
-    this.activeBoss = null;
-    this.interior = null;
-    const t = this.lastShrine || this.world.start;
-    p.x = t.x; p.y = t.y;
-    this.renderer.cam.x = p.x; this.renderer.cam.y = p.y;
-    this.fadeT = 1;
-    audio.setMood('explore');
-  }
+    const time = this.time.now;
+    const px = p.x, pz = p.z;
+    const frustum = renderer.frustum;
 
-  // ————————————————————————————————————————————————— inventory
+    // 地形の散布物
+    for (const c of this.terrain.visible) {
+      if (!c.props) continue;
+      if (!frustum.sphere(c.center[0], c.center[1], c.center[2], c.radius + 8)) continue;
+      for (const [model, data] of c.props) {
+        const b = renderer.batchFor(model);
+        if (b) b.append(data);
+      }
+    }
 
-  itemDef(id) { return ITEMS[id]; }
-  countItem(id) {
-    const e = this.player.inv.find((x) => x.id === id);
-    return e ? e.n : 0;
-  }
-  giveItem(id, n = 1, silent = false) {
-    const def = ITEMS[id];
-    if (!def) return;
-    const e = this.player.inv.find((x) => x.id === id);
-    if (e) e.n += n;
-    else this.player.inv.push({ id, n });
-    if (!silent) this.toast(`${def.name} ×${n}`, def.color || '#cfd6dd');
-    this.quests.onCollect(id, n);
-  }
-  giveEquip(item, silent) {
-    this.player.inv.push({ item, n: 1 });
-    if (!silent) this.toast(`${displayName(item)} を手に入れた`, '#8fd0ff');
-  }
-  removeItem(id, n = 1) {
-    const i = this.player.inv.findIndex((x) => x.id === id);
-    if (i < 0) return false;
-    this.player.inv[i].n -= n;
-    if (this.player.inv[i].n <= 0) this.player.inv.splice(i, 1);
-    return true;
-  }
-  dropItem(entry) {
-    const i = this.player.inv.indexOf(entry);
-    if (i >= 0) this.player.inv.splice(i, 1);
-  }
-  equipItem(item) {
-    const p = this.player;
-    const slot = item.slot;
-    p.equip[slot] = item;
-    p.recompute();
-    audio.sfx('uiBig');
-  }
-  unequip(slot) {
-    this.player.equip[slot] = null;
-    this.player.recompute();
-  }
-  useItem(id) {
-    const def = ITEMS[id];
-    if (!def || !def.use) return;
-    const p = this.player;
-    const u = def.use;
-    if (u.hp) p.heal(this, u.hp);
-    if (u.mp) { p.mp = Math.min(p.maxMp, p.mp + u.mp); this.pt.text(p.x, p.y - 40, '+MP', { col: '#8fd0ff', size: 15 }); }
-    if (u.sta) p.sta = Math.min(p.maxSta, p.sta + u.sta);
-    if (u.cure) { p.poison = 0; p.slow = 0; }
-    if (u.buffAtk) { p.buff.atk = u.buffAtk; p.buff.t = u.buffTime; p.recompute(); }
-    if (u.buffDef) { p.buff.def = u.buffDef; p.buff.t = u.buffTime; p.recompute(); }
-    if (u.warp) {
-      if (this.lastShrine) this.fastTravel(this.lastShrine.x, this.lastShrine.y, '祠');
-      else { this.toast('祈った祠がない', '#aaa'); return; }
+    // POI の建造物
+    for (const poi of this.pois) {
+      const d = Math.hypot(poi.x - px, poi.z - pz);
+      if (d > 300) continue;
+      for (const s of poi.structures) {
+        if (!frustum.sphere(s.x, s.y + 3, s.z, 12)) continue;
+        const b = renderer.batchFor(s.model);
+        if (!b) continue;
+        const o = b.alloc();
+        writeInstance(b.data, o, s.x, s.y, s.z, s.rotY, s.sx, s.sy, s.sz,
+          s.r, s.g, s.b, 1, s.wind, s.emissive, 0);
+      }
+      // 宝箱
+      if (poi.chest && !this.openedChests.has(poi.id) && d < 200) {
+        const b = renderer.batchFor('chest');
+        if (b) {
+          const o = b.alloc();
+          const cy = this.world.height(poi.chest.x, poi.chest.z);
+          writeInstance(b.data, o, poi.chest.x, cy, poi.chest.z, 0, 1, 1, 1,
+            1, 0.95, 0.7, 1, 0, 0.12 + Math.sin(time * 2) * 0.05, 0);
+        }
+      }
     }
-    this.removeItem(id, 1);
-    audio.sfx(u.warp ? 'warp' : 'drink');
-  }
-  quickItem() {
-    const order = ['potion_s', 'potion_m', 'potion_l', 'elixir', 'meat', 'bread'];
-    for (const id of order) {
-      const n = this.countItem(id);
-      if (n > 0) return { id, n };
-    }
-    return null;
-  }
-  collect(payload) {
-    if (payload.gold) {
-      this.player.gold += payload.gold;
-      this.pt.text(this.player.x, this.player.y - 34, `+${payload.gold}G`, { col: '#ffd76a', size: 15 });
-      audio.sfx('gold', { vol: 0.6 });
-    } else if (payload.equip) {
-      this.giveEquip(payload.equip);
-      audio.sfx('pickup');
-    } else {
-      this.giveItem(payload.id, payload.n || 1);
-      audio.sfx('pickup', { vol: 0.7 });
-    }
-  }
-  buyPrice(item) { return Math.max(1, Math.round((item.value || 10) * 1.25)); }
-  sellPrice(item) { return Math.max(1, Math.floor((item.value || 10) * 0.4)); }
-  buyItem(stockEntry) {
-    if (!stockEntry) return;
-    const item = stockEntry.equip || ITEMS[stockEntry.id];
-    const price = this.buyPrice(item);
-    if (this.player.gold < price) { this.toast('お金が足りない', '#e0524a'); audio.sfx('error'); return; }
-    this.player.gold -= price;
-    if (stockEntry.equip) {
-      this.giveEquip(stockEntry.equip);
-      const list = this.menus.data.stock;
-      const i = list.indexOf(stockEntry);
-      if (i >= 0) list.splice(i, 1);
-      this.menus.sel = null;
-    } else {
-      this.giveItem(stockEntry.id, 1);
-    }
-    audio.sfx('gold');
-  }
-  sellItem(entry) {
-    if (!entry) return;
-    const it = entry.item || ITEMS[entry.id];
-    const price = this.sellPrice(it);
-    this.player.gold += price;
-    if (entry.item) this.dropItem(entry);
-    else this.removeItem(entry.id, 1);
-    audio.sfx('gold');
-    this.toast(`+${price}G`, '#ffd76a');
-  }
-  craft(recipe) {
-    for (const k in recipe.in) if (this.countItem(k) < recipe.in[k]) return;
-    for (const k in recipe.in) this.removeItem(k, recipe.in[k]);
-    this.giveItem(recipe.out, recipe.n);
-    audio.sfx('craft');
-  }
-  upgrade(item) {
-    const cost = upgradeCost(item);
-    if (this.player.gold < cost.gold) { this.toast('お金が足りない', '#e0524a'); return; }
-    for (const k in cost.mats) if (this.countItem(k) < cost.mats[k]) { this.toast('素材が足りない', '#e0524a'); return; }
-    this.player.gold -= cost.gold;
-    for (const k in cost.mats) this.removeItem(k, cost.mats[k]);
-    item.plus = (item.plus || 0) + 1;
-    this.player.recompute();
-    audio.sfx('craft');
-    this.toast(`${displayName(item)} に強化した！`, '#ffd76a');
-    FX.levelUp(this.pt, this.player.x, this.player.y);
-  }
-  innCost() { return 10 + this.player.level * 6; }
 
-  // ————————————————————————————————————————————————— interaction
+    // 採取物
+    for (const g of this.gatherables.values()) {
+      if (!g || this.harvested.has(g.key)) continue;
+      const model = g.type === 'ore_iron' || g.type === 'crystal' ? 'crystal' : 'bush_1';
+      const b = renderer.batchFor(model);
+      if (!b) continue;
+      const o = b.alloc();
+      const c = GATHER_COLOR[g.type];
+      writeInstance(b.data, o, g.x, g.y, g.z, g.key % 6, 0.6, 0.7, 0.6,
+        c[0], c[1], c[2], 1, g.type === 'herb' || g.type === 'blood_flower' ? 0.6 : 0,
+        0.35 + Math.sin(time * 1.7 + g.key) * 0.12, 0.55);
+    }
 
-  findInteractable() {
-    const p = this.player;
-    let best = null, bd = 46;
+    // アクター
+    p.emit(renderer, time);
+    for (const e of this.enemies) {
+      if (Math.hypot(e.x - px, e.z - pz) > 140) continue;
+      if (!frustum.sphere(e.x, e.y + e.height * 0.5, e.z, e.height)) continue;
+      e.emit(renderer, time);
+    }
     for (const n of this.npcs) {
-      const d = dist(p.x, p.y, n.x, n.y);
-      if (d < bd) { bd = d; best = { kind: 'npc', npc: n, label: `${n.name}（${n.roleLabel}）と話す` }; }
+      if (Math.hypot(n.x - px, n.z - pz) > 90) continue;
+      if (!frustum.sphere(n.x, n.y + n.height * 0.5, n.z, n.height)) continue;
+      n.emit(renderer, time);
     }
-    for (const o of this.objects) {
-      const d = dist(p.x, p.y, o.x, o.y);
-      if (d < bd + 8) {
-        if (o.kind === 'chest' && !o.opened) { bd = d; best = { kind: 'chest', obj: o, label: '宝箱を開ける' }; }
-        else if (o.kind === 'campfire') { bd = d; best = { kind: 'fire', obj: o, label: '焚き火で調理する' }; }
-      }
-    }
-    // POIs (shrine / cave)
-    if (!this.interior) {
-      for (const poi of this.world.pois) {
-        const d = dist(p.x, p.y, poi.x, poi.y);
-        if (d > 70 || d > bd + 24) continue;
-        if (poi.kind === 'shrine') { bd = d; best = { kind: 'shrine', poi, label: poi.activated ? '祠に祈る' : '祠を目覚めさせる' }; }
-        else if (poi.kind === 'dungeon' || poi.kind === 'lair') { bd = d; best = { kind: 'cave', poi, label: `${poi.name} に入る` }; }
-      }
-    } else {
-      // exit stairs
-      const tx = Math.floor(p.x / TILE), ty = Math.floor(p.y / TILE);
-      if (this.interior.at(tx, ty) === 3) best = { kind: 'stairs', label: '次の階へ進む' };
-      const ex = this.interior.entry;
-      if (dist(p.x, p.y, ex.x, ex.y) < 42) best = { kind: 'exitDungeon', label: '外へ出る' };
-    }
-    // harvestables
-    const strike = (pr) => {
-      if (!pr.harvest) return;
-      if (this.runtime.isHarvested(pr, this.time)) return;
-      const d = dist(p.x, p.y, pr.x, pr.y);
-      if (d < bd) { bd = d; best = { kind: 'harvest', prop: pr, label: pr.harvest === 'ore' || pr.harvest === 'crystal' ? '採掘する' : '採取する' }; }
-    };
-    if (this.interior) this.interior.props.forEach(strike);
-    else this.runtime.forEachPropNear(p.x, p.y, 60, strike);
-    return best;
-  }
 
-  interact() {
-    const t = this.interactTarget;
-    if (!t) return;
-    switch (t.kind) {
-      case 'npc': this.talkTo(t.npc); break;
-      case 'harvest': this.harvestProp(t.prop); break;
-      case 'chest': this.openChest(t.obj); break;
-      case 'fire': this.menus.open('craft', { station: 'fire' }); break;
-      case 'shrine': this.useShrine(t.poi); break;
-      case 'cave': this.enterDungeon(t.poi); break;
-      case 'stairs': this.nextFloor(); break;
-      case 'exitDungeon': this.exitDungeon(); break;
+    // 発射物
+    for (const b of this.projectiles) {
+      const model = b.kind === 'arrow' || b.kind === 'arrow_heavy' ? 'w_dagger' : 'ball';
+      const batch = renderer.batchFor(model);
+      if (!batch) continue;
+      const o = batch.alloc();
+      const c = PROJ_COLOR[b.kind] || [1, 1, 1];
+      const yaw = Math.atan2(b.vx, b.vz);
+      const s = b.kind === 'firebomb' ? 0.5 : 0.32;
+      writeInstance(batch.data, o, b.x, b.y, b.z, yaw, s, s, s, c[0], c[1], c[2], 1, 0, 1.2, 0.6);
     }
-  }
 
-  talkTo(npc) {
-    npc.talkT = 3;
-    this.quests.onTalk(npc);
-    this.menus.open('dialogue', { npc, text: greeting(npc, this), options: dlgOptions(npc, this) });
-  }
-
-  dialogueAction(npc, o) {
-    const m = this.menus;
-    switch (o.act) {
-      case 'close': m.close(); break;
-      case 'rumor': m.data.text = rumor(this); m.data.options = dlgOptions(npc, this); break;
-      case 'shop': {
-        const rng = makeRNG(npc.shopSeed + Math.floor(this.day / 2));
-        const lvl = Math.max(1, Math.round(regionLevel(this.world, npc.x, npc.y) * 0.6 + this.player.level * 0.6));
-        m.open('shop', { stock: shopStock(rng, o.shop, lvl), shopName: `${npc.name}の${npc.roleLabel}` });
-        break;
-      }
-      case 'craft': m.open('craft', { station: o.station }); break;
-      case 'upgrade': m.open('upgrade'); break;
-      case 'board': {
-        const s = npc.settlement;
-        const lvl = Math.max(1, Math.round(regionLevel(this.world, npc.x, npc.y) * 0.7 + this.player.level * 0.5));
-        if (!s.board || s.boardDay !== this.day) {
-          s.board = this.quests.generateBoard(s, lvl, s.boardSeed + this.day * 31);
-          s.boardDay = this.day;
-        }
-        m.open('board', { board: s.board });
-        break;
-      }
-      case 'rest': {
-        const cost = this.innCost();
-        if (this.player.gold < cost) { this.toast('お金が足りない', '#e0524a'); audio.sfx('error'); break; }
-        this.player.gold -= cost;
-        this.rest();
-        m.closeAll();
-        break;
-      }
-      case 'pray': {
-        this.player.hp = this.player.maxHp;
-        this.player.mp = this.player.maxMp;
-        this.player.poison = 0;
-        FX.heal(this.pt, this.player.x, this.player.y);
-        audio.sfx('heal');
-        this.toast('女神の加護を受けた', '#8fe8a8');
-        m.closeAll();
-        break;
-      }
-      case 'turnin': {
-        this.quests.turnIn(o.quest);
-        m.data.text = 'よくやってくれた。これは礼だ。';
-        m.data.options = dlgOptions(npc, this);
-        break;
+    // ロックオンマーカー
+    if (p.lockTarget && !p.lockTarget.dead) {
+      const t = p.lockTarget;
+      const b = renderer.batchFor('ball');
+      if (b) {
+        const o = b.alloc();
+        const s = 0.16 + Math.sin(time * 5) * 0.02;
+        writeInstance(b.data, o, t.x, t.y + t.height * 1.16, t.z, time, s, s, s,
+          1, 0.85, 0.5, 1, 0, 1.5, 0.8);
       }
     }
   }
 
-  rest() {
-    const p = this.player;
-    p.hp = p.maxHp; p.mp = p.maxMp; p.sta = p.maxSta; p.poison = 0;
-    // advance to morning
-    const h = this.hour();
-    const toMorning = ((30 - h) % 24) * (DAY_LENGTH / 24);
-    this.time += Math.max(DAY_LENGTH * 0.2, toMorning);
-    this.fadeT = 1.2;
-    this.toast('ぐっすり眠った', '#8fe8a8');
-    audio.sfx('heal');
-    this.enemies.length = 0;
-    this.save(true);
-  }
-
-  openChest(o) {
-    o.opened = true;
-    audio.sfx('chest');
-    const rng = makeRNG((o.x * 31 + o.y * 17) | 0);
-    const lvl = o.level || regionLevel(this.world, o.x, o.y);
-    const gold = rng.irange(20, 60) * (1 + Math.floor(lvl / 3));
-    this.drops.push(new Drop(o.x, o.y - 10, { gold }));
-    const n = o.big ? 3 : 1 + rng.int(2);
-    for (let i = 0; i < n; i++) {
-      if (rng.chance(0.55)) this.drops.push(new Drop(o.x, o.y - 10, { equip: rollEquip(rng, lvl, o.big ? 2 + rng.int(2) : null) }));
-      else this.drops.push(new Drop(o.x, o.y - 10, { id: rng.pick(['potion_m', 'ether_m', 'ore_iron', 'ore_silver', 'herb', 'bloom', 'core']), n: rng.irange(1, 3) }));
-    }
-    this.pt.burst(o.x, o.y - 10, 26, { speed: 90, life: 0.8, r: 3, col: '#ffd76a', glow: 1, g: 120, vz: 80, z: 8 });
-  }
-
-  spawnChest(x, y, level, big) {
-    this.objects.push({ kind: 'chest', sprite: 'chest', x, y, opened: false, level, big, r: 12, solid: false, id: 'c' + (x | 0) + '_' + (y | 0) });
-  }
-
-  useShrine(poi) {
-    if (!poi.activated) {
-      poi.activated = true;
-      poi.discovered = true;
-      this.quests.onShrine();
-      this.showBanner(poi.name, '祠が目覚めた。ここへ転移できる。');
-      this.pt.ring(poi.x, poi.y, { r0: 10, r1: 200, life: 1.2, col: 'rgba(140,230,255,0.8)', w: 6 });
-      audio.sfx('warp');
-      this.player.addXp(60, this);
-    }
-    this.lastShrine = { x: poi.x, y: poi.y + 30 };
-    const p = this.player;
-    p.hp = p.maxHp; p.mp = p.maxMp; p.sta = p.maxSta; p.poison = 0;
-    FX.heal(this.pt, p.x, p.y);
-    this.toast('祠の加護で回復した', '#8fe8a8');
-    this.save(true);
-  }
-
-  fastTravel(x, y, name) {
-    this.fadeT = 1.4;
-    this.interior = null;
-    this.enemies.length = 0;
-    this.player.x = x; this.player.y = y;
-    this.renderer.cam.x = x; this.renderer.cam.y = y;
-    audio.sfx('warp');
-    this.locationBanner = { name, sub: '転移した', t: 0 };
-  }
-
-  enterDungeon(poi) {
-    this.outsidePos = { x: this.player.x, y: this.player.y + 40 };
-    this.dungeonPoi = poi;
-    this.dungeonFloor = 0;
-    this.loadFloor();
-    this.showBanner(poi.name, `推奨レベル ${poi.level}`);
-  }
-
-  loadFloor() {
-    const poi = this.dungeonPoi;
-    const d = new Dungeon(poi, this.dungeonFloor, poi.seed);
-    this.interior = d;
-    this.enemies.length = 0;
-    this.drops.length = 0;
-    this.projectiles.length = 0;
-    this.objects = d.chests.map((c) => ({ ...c, r: 12, solid: false }));
-    this.player.x = d.entry.x;
-    this.player.y = d.entry.y;
-    this.renderer.cam.x = this.player.x;
-    this.renderer.cam.y = this.player.y;
-    this.fadeT = 1.2;
-    audio.setMood(d.boss ? 'boss' : 'dungeon');
-    // spawn enemies
-    const rng = makeRNG((poi.seed ^ (this.dungeonFloor * 977)) >>> 0);
-    for (const s of d.spawns) {
-      if (s.boss && d.boss) {
-        const kind = poi.boss ? 'dragon' : 'troll';
-        const e = new Enemy(kind, s.x, s.y, d.level + 2);
-        e.boss = true;
-        this.enemies.push(e);
-        this.activeBoss = e;
-      } else {
-        const pool = d.themeKey === 'crypt' ? ['skeleton', 'ghost', 'wraith']
-          : d.themeKey === 'ice' ? ['wolf', 'golem', 'wraith']
-          : d.themeKey === 'lair' ? ['imp', 'drake', 'golem']
-          : d.themeKey === 'ruin' ? ['skeleton', 'spider', 'bandit']
-          : ['bat', 'spider', 'slime', 'golem'];
-        const kind = rng.pick(pool);
-        this.enemies.push(new Enemy(kind, s.x, s.y, clamp(d.level + rng.irange(-1, 1), 1, 30)));
-      }
-    }
-  }
-
-  nextFloor() {
-    if (this.dungeonFloor + 1 < this.dungeonPoi.floors) {
-      this.dungeonFloor++;
-      this.loadFloor();
-      this.toast(`${this.dungeonFloor + 1}層へ降りた`, '#c58cff');
-    } else this.exitDungeon();
-  }
-
-  exitDungeon() {
-    this.interior = null;
-    this.enemies.length = 0;
-    this.objects.length = 0;
-    this.activeBoss = null;
-    this.player.x = this.outsidePos.x;
-    this.player.y = this.outsidePos.y;
-    this.renderer.cam.x = this.player.x;
-    this.renderer.cam.y = this.player.y;
-    this.fadeT = 1.2;
-    audio.setMood('explore');
-  }
-
-  // ————————————————————————————————————————————————— spawn director
-
-  updateSpawns(dt) {
-    if (this.interior) return;
-    const p = this.player;
-    // despawn far enemies
-    for (let i = this.enemies.length - 1; i >= 0; i--) {
-      const e = this.enemies[i];
-      if (!e.alive) { this.enemies.splice(i, 1); continue; }
-      if (!e.boss && dist2(e.x, e.y, p.x, p.y) > 1500 * 1500) this.enemies.splice(i, 1);
-    }
-    // POI content streaming
-    for (const poi of this.world.pois) {
-      const d = dist(p.x, p.y, poi.x, poi.y);
-      if (d < 260 && !poi.discovered) {
-        poi.discovered = true;
-        this.quests.onDiscover(poi);
-        const names = { shrine: poi.name || '祠', dungeon: poi.name, camp: '野盗の野営地', ruin: '古代の遺跡', lair: poi.name };
-        this.locationBanner = { name: names[poi.kind] || '未知の場所', sub: '発見した', t: 0 };
-        this.player.addXp(25, this);
-        audio.sfx('quest', { vol: 0.5 });
-      }
-      if (d < 900 && !this.poiObjects.has(poi.id)) this.buildPOI(poi);
-      else if (d > 1600 && this.poiObjects.has(poi.id)) {
-        const objs = this.poiObjects.get(poi.id);
-        this.objects = this.objects.filter((o) => !objs.includes(o));
-        this.poiObjects.delete(poi.id);
-      }
-    }
-
-    // ambient spawns
-    this.spawnTimer -= dt;
-    const cap = this.isNight() ? 26 : 20;
-    if (this.spawnTimer <= 0 && this.enemies.length < cap) {
-      this.spawnTimer = 0.6;
-      const rng = makeRNG((this.frame * 2654435761) | 0);
-      for (let attempt = 0; attempt < 6; attempt++) {
-        const a = rng() * TAU;
-        const r = rng.range(460, 820);
-        const x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r;
-        const tx = Math.floor(x / TILE), ty = Math.floor(y / TILE);
-        if (!this.world.inBounds(tx, ty)) continue;
-        if (this.world.isWaterTile(tx, ty) || this.world.isSolidTile(tx, ty)) continue;
-        const ov = this.world.overlayAt(tx, ty);
-        if (ov === 4 || ov === 6 || ov === 3) continue;
-        let inTown = false;
-        for (const s of this.world.settlements) if (dist(tx, ty, s.x, s.y) < s.size + 12) { inTown = true; break; }
-        if (inTown) continue;
-        const lvl = regionLevel(this.world, x, y);
-        const kind = pickSpawnKind(this.world, tx, ty, this.isNight(), rng, lvl);
-        if (!kind) continue;
-        const packSize = kind === 'wolf' ? rng.irange(2, 4) : rng.chance(0.3) ? 2 : 1;
-        for (let k = 0; k < packSize && this.enemies.length < cap; k++) {
-          const ex = x + (rng() - 0.5) * 60, ey = y + (rng() - 0.5) * 60;
-          if (this.blocked(ex, ey, 10)) continue;
-          this.enemies.push(new Enemy(kind, ex, ey, clamp(lvl + rng.irange(-1, 1), 1, 30)));
-        }
-        break;
-      }
-    }
-  }
-
-  buildPOI(poi) {
-    const objs = [];
-    const rng = makeRNG(poi.seed || ((poi.tx * 7919 + poi.ty) | 0));
-    if (poi.kind === 'camp') {
-      const st = this.campState.get(poi.id) || { alive: 0, cleared: poi.cleared, x: poi.x, y: poi.y };
-      objs.push({ kind: 'prop', sprite: 'campfire', x: poi.x, y: poi.y, r: 10, solid: false, light: true, fire: true });
-      for (let i = 0; i < 3; i++) {
-        const a = (i / 3) * TAU + rng();
-        objs.push({ kind: 'prop', sprite: 'tent', x: poi.x + Math.cos(a) * 70, y: poi.y + Math.sin(a) * 70, r: 24, solid: true });
-      }
-      for (let i = 0; i < 2; i++) {
-        const a = rng() * TAU;
-        objs.push({ kind: 'prop', sprite: 'barrel', x: poi.x + Math.cos(a) * 46, y: poi.y + Math.sin(a) * 46, r: 11, solid: true });
-      }
-      if (!st.cleared) {
-        const lvl = regionLevel(this.world, poi.x, poi.y);
-        const n = 4 + rng.int(3);
-        st.alive = n;
-        for (let i = 0; i < n; i++) {
-          const a = rng() * TAU, r = rng.range(30, 110);
-          const e = new Enemy(rng.chance(0.3) ? 'archer' : 'bandit', poi.x + Math.cos(a) * r, poi.y + Math.sin(a) * r, clamp(lvl, 1, 30));
-          e.campId = poi.id;
-          this.enemies.push(e);
-        }
-      } else if (!st.chest) {
-        st.chest = true;
-      }
-      this.campState.set(poi.id, st);
-    } else if (poi.kind === 'ruin') {
-      const n = 4 + rng.int(5);
-      for (let i = 0; i < n; i++) {
-        const a = rng() * TAU, r = rng.range(30, 120);
-        objs.push({
-          kind: 'prop', sprite: rng.chance(0.6) ? 'ruinPillar' : 'ruinWall',
-          x: poi.x + Math.cos(a) * r, y: poi.y + Math.sin(a) * r, r: 14, solid: true, variant: rng.int(6),
-        });
-      }
-      if (!poi.looted) {
-        objs.push({
-          kind: 'chest', sprite: 'chest', x: poi.x, y: poi.y, opened: false,
-          level: regionLevel(this.world, poi.x, poi.y), r: 12, solid: false, id: poi.id + '_chest',
-        });
-      }
-      const lvl = regionLevel(this.world, poi.x, poi.y);
-      if (dist(this.player.x, this.player.y, poi.x, poi.y) > 300) {
-        for (let i = 0; i < 2 + rng.int(2); i++) {
-          const a = rng() * TAU, r = rng.range(40, 140);
-          this.enemies.push(new Enemy(rng.pick(['skeleton', 'ghost', 'spider']), poi.x + Math.cos(a) * r, poi.y + Math.sin(a) * r, clamp(lvl, 1, 30)));
-        }
-      }
-    }
-    for (const o of objs) this.objects.push(o);
-    this.poiObjects.set(poi.id, objs);
-  }
-
-  // ————————————————————————————————————————————————— feedback helpers
-
-  toast(text, col) { this.hud.toast(text, col); }
-  showBanner(title, sub) { this.hud.showBanner(title, sub); }
-  shake(power, time) { this.renderer.cam.shake(power, time); }
-  hitStop(t) { this.hitStopT = Math.max(this.hitStopT, t); }
-  vibrate(ms) { if (this.settings.vibrate && navigator.vibrate) navigator.vibrate(ms); }
-
-  collectLights(add, view) {
-    if (this.interior) { this.interior.collectLights(add, view, this); return; }
-    const night = this.isNight();
-    // town lamps & windows
-    for (const s of this.world.settlements) {
-      const sx = (s.x + 0.5) * TILE, sy = (s.y + 0.5) * TILE;
-      if (Math.abs(sx - this.player.x) > 1800 || Math.abs(sy - this.player.y) > 1800) continue;
-      if (night) {
-        for (const p of s.props) {
-          if (p.kind !== 'lamp') continue;
-          const fl = 0.9 + Math.sin(this.time * 6 + p.x) * 0.06;
-          add(p.x, p.y - 60, 165 * fl, [255, 200, 120], 1.0);
-        }
-        for (const b of s.buildings) {
-          add((b.tx + b.tw / 2) * TILE, (b.ty + b.th - 0.4) * TILE, 90, [255, 190, 110], 0.55);
-        }
-      }
-    }
-    for (const o of this.objects) {
-      if (!o.light) continue;
-      const fl = 0.86 + Math.sin(this.time * 9 + o.x) * 0.09;
-      add(o.x, o.y - 8, 150 * fl, [255, 160, 70], 0.95);
-    }
-    // shrines
-    for (const poi of this.world.pois) {
-      if (poi.kind !== 'shrine' || !poi.activated) continue;
-      if (Math.abs(poi.x - this.player.x) > 1200 || Math.abs(poi.y - this.player.y) > 1200) continue;
-      add(poi.x, poi.y - 50, 150, [120, 220, 255], 0.8);
-    }
-    // spells & projectiles
-    for (const pr of this.projectiles) {
-      if (pr.kind === 'fireball' || pr.kind === 'fire') add(pr.x, pr.y, 110, [255, 150, 60], 0.9);
-      else if (pr.kind === 'ice') add(pr.x, pr.y, 70, [140, 220, 255], 0.7);
-    }
-    // volcanic glow
-    const tx = Math.floor(this.player.x / TILE), ty = Math.floor(this.player.y / TILE);
-    if (this.world.biomeAt(tx, ty) === B.ASH) {
-      const fl = 0.8 + Math.sin(this.time * 2) * 0.2;
-      add(this.player.x, this.player.y, 500 * fl, [255, 90, 40], 0.25);
-    }
-  }
-
-  // ————————————————————————————————————————————————— portraits (for menus)
-
-  drawHeroPortrait(ctx, x, y, scale) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
-    drawHumanoid(ctx, {
-      dir: 0, animT: performance.now() / 1000, moving: false,
-      pal: this.player.pal, equip: this.player.appearance, scale: 1,
-    });
-    ctx.restore();
-  }
-  drawNPCPortrait(ctx, npc, x, y, scale) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
-    drawHumanoid(ctx, {
-      dir: 0, animT: performance.now() / 1000, moving: false,
-      pal: npc.pal, equip: npc.equipVis, scale: npc.scale || 1,
-    });
-    ctx.restore();
-  }
-
-  // ————————————————————————————————————————————————— update
-
-  update(dt) {
-    this.frame++;
-    if (this.state !== 'play') return;
-    const menusOpen = this.menus.isOpen;
-    this.input.setUIMode(menusOpen);
-
-    if (this.hitStopT > 0) { this.hitStopT -= dt; dt *= 0.12; }
-    this.fadeT = Math.max(0, this.fadeT - dt * 1.4);
-    this.flashT = Math.max(0, this.flashT - dt * 2.4);
-
-    if (!menusOpen) {
-      const prevDay = Math.floor(this.time / DAY_LENGTH);
-      this.time += dt;
-      if (Math.floor(this.time / DAY_LENGTH) !== prevDay) {
-        this.day++;
-        this.toast(`${this.day}日目の朝`, '#ffd76a');
-      }
-      this.updateWeather(dt);
-      this.handleInput(dt);
-      this.player.update(dt, this);
-      for (const e of this.enemies) e.update(dt, this);
-      for (const n of this.npcs) {
-        if (dist2(n.x, n.y, this.player.x, this.player.y) < 1400 * 1400) n.update(dt, this);
-      }
-      for (let i = this.projectiles.length - 1; i >= 0; i--) {
-        const pr = this.projectiles[i];
-        pr.update(dt, this);
-        if (pr.dead) this.projectiles.splice(i, 1);
-      }
-      for (let i = this.drops.length - 1; i >= 0; i--) {
-        const d = this.drops[i];
-        d.update(dt, this);
-        if (d.dead) this.drops.splice(i, 1);
-      }
-      this.pt.update(dt);
-      this.updateSpawns(dt);
-
-      // interaction target
-      this.interactTarget = this.findInteractable();
-      this.interactPrompt = this.interactTarget ? this.interactTarget.label : null;
-      this.nearNPC = this.interactTarget && this.interactTarget.kind === 'npc' ? this.interactTarget.npc : null;
-
-      // boss music / tracking
-      if (this.activeBoss && !this.activeBoss.alive) this.activeBoss = null;
-      const inCombat = this.enemies.some((e) => e.alive && e.aggroT > 0 && dist2(e.x, e.y, this.player.x, this.player.y) < 400 * 400);
-      if (this.activeBoss) audio.setMood('boss');
-      else if (inCombat) audio.setMood('combat');
-      else if (this.interior) audio.setMood('dungeon');
-      else if (this.inSettlement()) audio.setMood('town');
-      else if (this.isNight()) audio.setMood('night');
-      else audio.setMood('explore');
-
-      // fog of war + location banners
-      if (this.frame % 6 === 0 && !this.interior) {
-        this.revealFog(this.player.x / TILE, this.player.y / TILE, 26);
-        for (const s of this.world.settlements) {
-          if (!s.discovered && dist(this.player.x / TILE, this.player.y / TILE, s.x, s.y) < s.size + 16) {
-            s.discovered = true;
-            this.locationBanner = { name: s.name + s.label, sub: '発見した', t: 0 };
-            this.player.addXp(40, this);
-            audio.sfx('quest', { vol: 0.6 });
-          }
-        }
-        const b = this.world.biomeAt(Math.floor(this.player.x / TILE), Math.floor(this.player.y / TILE));
-        if (b !== this.lastBiome && !this.inSettlement()) {
-          this.lastBiome = b;
-          if (this.frame > 120) this.locationBanner = { name: BIOME_NAME[b] || '', sub: '', t: 0 };
-        }
-      }
-
-      // ground quest markers
-      this.groundMarkers.length = 0;
-      for (const m of this.quests.markers()) {
-        if (dist2(m.x, m.y, this.player.x, this.player.y) < 420 * 420) this.groundMarkers.push(m);
-      }
-
-      // onboarding tips
-      if (this.tips && this.tips.length) {
-        const el = this.tips[0];
-        if (this.player.playtime > el[0]) { this.toast(el[1], el[2]); this.tips.shift(); }
-      }
-
-      this.autosaveT += dt;
-      if (this.autosaveT > 60) { this.autosaveT = 0; this.save(true); }
-    }
-
-    // camera
-    const cam = this.renderer.cam;
-    const lead = 26;
-    cam.follow(this.player.x + Math.cos(this.player.face) * lead, this.player.y + Math.sin(this.player.face) * lead - 8, dt);
-    cam.update(dt);
-    audio.update();
-  }
-
-  inSettlement() {
-    if (this.interior) return false;
-    const tx = this.player.x / TILE, ty = this.player.y / TILE;
-    for (const s of this.world.settlements) if (dist(tx, ty, s.x, s.y) < s.size + 4) return true;
-    return false;
-  }
-
-  handleInput(dt) {
-    const inp = this.input;
-    const p = this.player;
-    if (!p.alive) return;
-
-    if (inp.pressed('attack') || inp.keyPressed('j') || inp.gamepadPressed(0)) p.tryAttack(this);
-    if (inp.released('attack') && p.state === 'bow') p.releaseBow(this);
-    if (!inp.down('attack') && !inp.key('j') && p.state === 'bow' && p.charge > 0.12) p.releaseBow(this);
-    if (inp.pressed('dodge') || inp.keyPressed('shift') || inp.gamepadPressed(1)) p.tryRoll(this);
-    if (inp.pressed('interact') || inp.keyPressed('e') || inp.gamepadPressed(2)) this.interact();
-    if (inp.pressed('item') || inp.keyPressed('q')) {
-      const q = this.quickItem();
-      if (q) this.useItem(q.id); else { audio.sfx('error'); this.toast('回復アイテムがない', '#aaa'); }
-    }
-    for (let i = 0; i < 4; i++) {
-      if (inp.pressed('spell' + i) || inp.keyPressed(String(i + 1))) p.castSpell(this, i);
-    }
-    // block (hold)
-    const blocking = (inp.down('block') || inp.key('k') || inp.gamepadDown(3)) && p.equip.off;
-    if (blocking && (p.state === 'idle' || p.state === 'block')) {
-      if (p.state !== 'block') { p.state = 'block'; p.blockT = 0; }
-    } else if (p.state === 'block') p.state = 'idle';
-
-    if (inp.pressed('menu') || inp.keyPressed('escape') || inp.keyPressed('tab')) this.menus.open('pause');
-    if (inp.pressed('map') || inp.keyPressed('m')) this.menus.open('map');
-    if (inp.keyPressed('i')) this.menus.open('inventory');
-  }
-
-  // ————————————————————————————————————————————————— render
-
-  render(dt) {
-    const r = this.renderer;
-    const ctx = r.ctx;
-    if (this.state === 'play') {
-      r.render(this, dt);
-    } else {
-      ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
-      ctx.fillStyle = '#0d1526';
-      ctx.fillRect(0, 0, r.w, r.h);
-    }
-    ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
-    this.ui.begin(ctx, this.input, r.w, r.h);
-    if (this.state === 'play' && !this.menus.isOpen) {
-      this.hud.draw(ctx, this, dt);
-      this.hud.registerButtons(this.input, this, this.hud.layout(r.w, r.h));
-    } else {
-      this.input.setButtons([]);
-    }
-    this.menus.draw(ctx, this, dt);
-    if (this.settings.showFps) {
-      this.ui.text(`${Math.round(this.fps)} fps  |  ${this.enemies.length}e ${this.pt.a.length}p`, 8, r.h - 12, { size: 11, col: 'rgba(255,255,255,0.5)' });
-    }
-  }
-
-  applyQuality() {
-    this.renderer.quality = this.settings.hq ? 1 : 0.6;
-    this.renderer.lightScale = this.settings.hq ? 0.5 : 0.34;
-    this.renderer.resize(this.renderer.w, this.renderer.h, this.renderer.dpr);
-    this.saveSettings();
-  }
-
-  // ————————————————————————————————————————————————— persistence
-
-  saveSettings() {
-    try { localStorage.setItem('aetheria_settings', JSON.stringify(this.settings)); } catch (e) {}
-  }
-  loadSettings() {
+  /* ---------------------------------------------------------- セーブ */
+  save() {
     try {
-      const s = JSON.parse(localStorage.getItem('aetheria_settings') || 'null');
-      if (s) Object.assign(this.settings, s);
-    } catch (e) {}
-    audio.setMusicVol(this.settings.music);
-    audio.setSfxVol(this.settings.sfx);
-  }
-
-  hasSave() {
-    try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) return false;
-      const d = JSON.parse(raw);
-      return d && (d.seed >>> 0) === (this.seed >>> 0);
-    } catch (e) { return false; }
-  }
-
-  save(silent = false) {
-    if (this.state !== 'play') return;
-    const p = this.player;
-    // if we're underground, remember the cave mouth rather than the dungeon coords
-    const pos = this.interior && this.outsidePos ? this.outsidePos : { x: p.x, y: p.y };
-    const data = {
-      v: 1, seed: this.seed, time: this.time, day: this.day,
-      player: {
-        x: pos.x, y: pos.y, level: p.level, xp: p.xp, gold: p.gold, hp: p.hp, mp: p.mp,
-        inv: p.inv, equip: Object.fromEntries(Object.entries(p.equip).map(([k, v]) => [k, v ? v.id : null])),
-        spellSlots: p.spellSlots, knownSpells: p.knownSpells, kills: p.kills, playtime: p.playtime,
-      },
-      quests: this.quests.save(),
-      pois: this.world.pois.map((q) => ({ id: q.id, d: q.discovered, a: !!q.activated, c: !!q.cleared, l: !!q.looted })),
-      settlements: this.world.settlements.map((s) => ({ id: s.id, d: s.discovered })),
-      lastShrine: this.lastShrine,
-      camps: [...this.campState.entries()].map(([k, v]) => [k, { cleared: v.cleared, x: v.x, y: v.y }]),
-      fog: this.fogCanvas ? this.fogCanvas.toDataURL('image/webp', 0.5) : null,
-    };
-    try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-      if (!silent) this.toast('セーブしました', '#8fd0ff');
-    } catch (e) {
-      console.warn('save failed', e);
-    }
-  }
-
-  applySave(data) {
-    const p = this.player;
-    this.time = data.time || 0;
-    this.day = data.day || 1;
-    const d = data.player;
-    p.x = d.x; p.y = d.y;
-    p.level = d.level; p.xp = d.xp; p.gold = d.gold;
-    p.kills = d.kills || 0; p.playtime = d.playtime || 0;
-    p.inv = (d.inv || []).map((e) => (e.item ? { item: e.item, n: 1 } : { id: e.id, n: e.n }));
-    let maxUid = 0;
-    for (const e of p.inv) {
-      if (!e.item || !e.item.id) continue;
-      const n = parseInt(String(e.item.id).replace(/^[a-z]+/, ''), 10);
-      if (n > maxUid) maxUid = n;
-    }
-    setUid(maxUid + 1);
-    p.knownSpells = d.knownSpells || ['fire'];
-    p.spellSlots = d.spellSlots || ['fire', 'heal', null, null];
-    for (const slot in p.equip) {
-      const id = d.equip[slot];
-      p.equip[slot] = id ? (p.inv.find((e) => e.item && e.item.id === id) || {}).item || null : null;
-    }
-    p.recompute();
-    p.hp = clamp(d.hp, 1, p.maxHp);
-    p.mp = clamp(d.mp, 0, p.maxMp);
-    this.quests.load(data.quests);
-    for (const s of data.pois || []) {
-      const poi = this.world.pois.find((q) => q.id === s.id);
-      if (poi) { poi.discovered = s.d; poi.activated = s.a; poi.cleared = s.c; poi.looted = s.l; }
-    }
-    for (const s of data.settlements || []) {
-      const st = this.world.settlements.find((q) => q.id === s.id);
-      if (st) st.discovered = s.d;
-    }
-    this.lastShrine = data.lastShrine || null;
-    this.campState = new Map((data.camps || []).map(([k, v]) => [k, { ...v, alive: 0 }]));
-    if (data.fog && this.fogCanvas) {
-      const img = new Image();
-      img.onload = () => {
-        this.fogCtx.globalCompositeOperation = 'source-over';
-        this.fogCtx.clearRect(0, 0, this.fogCanvas.width, this.fogCanvas.height);
-        this.fogCtx.drawImage(img, 0, 0);
-        this.fogCtx.globalCompositeOperation = 'destination-out';
+      const data = {
+        v: 3, seed: this.seed,
+        player: this.player.serialize(),
+        quests: this.quests.serialize(),
+        sky: this.sky.serialize(),
+        opened: [...this.openedChests],
+        cleared: [...this.clearedPOIs],
+        climbed: this.pois.filter((p) => p.climbed).map((p) => p.id),
+        unlocked: {
+          weapons: [...this.unlocked.weapons], armors: [...this.unlocked.armors],
+          shields: [...this.unlocked.shields], talismans: [...this.unlocked.talismans],
+          spells: [...this.unlocked.spells],
+        },
+        visited: [...this.visited].slice(-5000),
+        quality: this.quality.preset || 'medium',
       };
-      img.src = data.fog;
-    }
-    this.renderer.cam.x = p.x;
-    this.renderer.cam.y = p.y;
-  }
-
-  loadGame() {
-    try {
-      const data = JSON.parse(localStorage.getItem(SAVE_KEY));
-      if (!data) return false;
-      if (data.seed !== this.seed) {
-        // regenerate the world for the saved seed — handled by main.js
-        this.pendingLoad = data;
-        return 'reseed';
-      }
-      this.applySave(data);
-      this.state = 'play';
-      this.audio.init();
+      localStorage.setItem('aetheria_save', JSON.stringify(data));
       return true;
     } catch (e) {
-      console.warn(e);
+      console.warn('save failed', e);
       return false;
     }
   }
+
+  static hasSave() {
+    try { return !!localStorage.getItem('aetheria_save'); } catch { return false; }
+  }
+
+  load() {
+    try {
+      const raw = localStorage.getItem('aetheria_save');
+      if (!raw) return false;
+      const d = JSON.parse(raw);
+      if (d.seed !== this.seed) return false;
+      this.player.deserialize(d.player, this);
+      this.quests.deserialize(d.quests);
+      this.sky.deserialize(d.sky);
+      this.openedChests = new Set(d.opened || []);
+      this.clearedPOIs = new Set(d.cleared || []);
+      for (const id of d.climbed || []) {
+        const poi = this.pois.find((p) => p.id === id);
+        if (poi) poi.climbed = true;
+      }
+      for (const k of ['weapons', 'armors', 'shields', 'talismans', 'spells']) {
+        this.unlocked[k] = new Set(d.unlocked?.[k] || [...this.unlocked[k]]);
+      }
+      this.visited = new Set(d.visited || []);
+      for (const poi of this.pois) {
+        if (this.player.discovered.has(poi.id)) poi.discovered = true;
+        if (this.clearedPOIs.has(poi.id)) poi.cleared = true;
+      }
+      this.player.y = this.world.height(this.player.x, this.player.z);
+      return true;
+    } catch (e) {
+      console.warn('load failed', e);
+      return false;
+    }
+  }
+
+  static clearSave() {
+    try { localStorage.removeItem('aetheria_save'); } catch { /* noop */ }
+  }
 }
+
+const PROJ_COLOR = {
+  arrow: [0.85, 0.8, 0.7], arrow_heavy: [0.95, 0.9, 0.75],
+  fire: [1, 0.5, 0.15], soul: [0.5, 0.7, 1], ice: [0.6, 0.85, 1],
+  bolt: [1, 0.95, 0.5], void: [0.55, 0.25, 0.85], knife: [0.8, 0.82, 0.86],
+  firebomb: [1, 0.55, 0.2],
+};
+const GATHER_COLOR = {
+  herb: [0.45, 0.85, 0.4], blood_flower: [0.95, 0.25, 0.3],
+  ore_iron: [0.75, 0.7, 0.65], crystal: [0.55, 0.75, 1],
+};
+
+function frame() {
+  return new Promise((r) => requestAnimationFrame(() => r()));
+}
+
+export { clamp, clamp01, lerp, v3, CHUNK, makeRng, NPC };

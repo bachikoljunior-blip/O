@@ -1,347 +1,350 @@
-// audio.js — fully procedural WebAudio: adaptive score + synthesized SFX.
+// 手続き的オーディオ：WebAudio による効果音合成と適応型 BGM（音源ファイル不要）
 
-import { makeRNG, clamp, lerp } from './util.js';
+const A4 = 440;
+const note = (semi) => A4 * Math.pow(2, semi / 12);
 
-const NOTE = (n) => 440 * Math.pow(2, (n - 69) / 12);
-
-// scale degrees (semitones) for the modes we use
-const MODES = {
-  aeolian: [0, 2, 3, 5, 7, 8, 10],
-  dorian: [0, 2, 3, 5, 7, 9, 10],
-  ionian: [0, 2, 4, 5, 7, 9, 11],
-  lydian: [0, 2, 4, 6, 7, 9, 11],
-  phrygian: [0, 1, 3, 5, 7, 8, 10],
+/** 各モードの音階（半音オフセット） */
+const SCALES = {
+  explore: [-24, -17, -12, -10, -5, 0, 3, 7, 12],       // 静かな自然短音階
+  tension: [-24, -18, -12, -11, -6, -1, 2, 6],
+  combat: [-24, -19, -12, -8, -5, -1, 4, 7],
+  boss: [-27, -22, -15, -13, -8, -3, 1, 6],
+  final: [-29, -24, -17, -16, -10, -5, 2, 7],
 };
 
-const MOODS = {
-  explore: { root: 57, mode: 'dorian', bpm: 74, prog: [0, 5, 3, 4], pad: 0.16, mel: 0.5, perc: 0 },
-  town: { root: 60, mode: 'ionian', bpm: 96, prog: [0, 3, 4, 0], pad: 0.14, mel: 0.75, perc: 0.2 },
-  combat: { root: 52, mode: 'phrygian', bpm: 138, prog: [0, 0, 5, 6], pad: 0.13, mel: 0.55, perc: 0.9 },
-  night: { root: 55, mode: 'aeolian', bpm: 62, prog: [0, 6, 3, 5], pad: 0.2, mel: 0.32, perc: 0 },
-  dungeon: { root: 48, mode: 'phrygian', bpm: 68, prog: [0, 1, 0, 6], pad: 0.22, mel: 0.2, perc: 0.15 },
-  boss: { root: 50, mode: 'phrygian', bpm: 152, prog: [0, 6, 5, 6], pad: 0.16, mel: 0.7, perc: 1 },
-  peace: { root: 62, mode: 'lydian', bpm: 66, prog: [0, 4, 5, 3], pad: 0.18, mel: 0.6, perc: 0 },
-};
-
-export class Audio {
+export class AudioEngine {
   constructor() {
     this.ctx = null;
     this.ready = false;
-    this.musicVol = 0.55;
-    this.sfxVol = 0.8;
+    this.master = 0.8;
+    this.sfxVol = 0.9;
+    this.musicVol = 0.5;
+    this.mode = 'explore';
+    this.nextNote = 0;
+    this.beat = 0;
+    this.intensity = 0;
     this.muted = false;
-    this.mood = 'explore';
-    this.nextMood = 'explore';
-    this.rng = makeRNG(20260802);
-    this.step = 0;
-    this.nextTime = 0;
-    this._lastFoot = 0;
   }
 
   init() {
-    if (this.ctx) {
-      if (this.ctx.state === 'suspended') this.ctx.resume();
-      return;
-    }
+    if (this.ctx) return;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
-    const ctx = new AC();
-    this.ctx = ctx;
-    this.master = ctx.createGain();
-    this.master.gain.value = this.muted ? 0 : 0.9;
-    this.master.connect(ctx.destination);
+    this.ctx = new AC();
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.value = this.master;
+    this.masterGain.connect(this.ctx.destination);
 
-    // shared reverb
-    this.reverb = ctx.createConvolver();
-    const len = ctx.sampleRate * 2.4;
-    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
-    for (let ch = 0; ch < 2; ch++) {
-      const d = buf.getChannelData(ch);
-      for (let i = 0; i < len; i++) {
-        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6) * 0.55;
-      }
-    }
-    this.reverb.buffer = buf;
-    this.revGain = ctx.createGain();
-    this.revGain.gain.value = 0.32;
-    this.reverb.connect(this.revGain);
-    this.revGain.connect(this.master);
-
-    this.musicGain = ctx.createGain();
-    this.musicGain.gain.value = this.musicVol;
-    this.musicGain.connect(this.master);
-    this.musicSend = ctx.createGain();
-    this.musicSend.gain.value = 0.5;
-    this.musicSend.connect(this.reverb);
-
-    this.sfxGain = ctx.createGain();
+    this.sfxGain = this.ctx.createGain();
     this.sfxGain.gain.value = this.sfxVol;
-    this.sfxGain.connect(this.master);
-    this.sfxSend = ctx.createGain();
-    this.sfxSend.gain.value = 0.22;
-    this.sfxSend.connect(this.reverb);
+    this.sfxGain.connect(this.masterGain);
 
-    // noise buffer for percussive sfx
-    const nlen = ctx.sampleRate * 1.2;
-    this.noise = ctx.createBuffer(1, nlen, ctx.sampleRate);
-    const nd = this.noise.getChannelData(0);
-    for (let i = 0; i < nlen; i++) nd[i] = Math.random() * 2 - 1;
+    this.musicGain = this.ctx.createGain();
+    this.musicGain.gain.value = 0;
+    this.musicGain.connect(this.masterGain);
 
+    // 残響
+    this.reverb = this.ctx.createConvolver();
+    this.reverb.buffer = this._impulse(2.2, 2.4);
+    this.reverbGain = this.ctx.createGain();
+    this.reverbGain.gain.value = 0.24;
+    this.reverbGain.connect(this.masterGain);
+    this.reverb.connect(this.reverbGain);
+
+    this.noiseBuf = this._noise(2);
     this.ready = true;
-    this.nextTime = ctx.currentTime + 0.1;
   }
 
-  setMuted(m) {
-    this.muted = m;
-    if (this.master) this.master.gain.setTargetAtTime(m ? 0 : 0.9, this.ctx.currentTime, 0.05);
-  }
-  setMusicVol(v) {
-    this.musicVol = v;
-    if (this.musicGain) this.musicGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.1);
-  }
-  setSfxVol(v) {
-    this.sfxVol = v;
-    if (this.sfxGain) this.sfxGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.05);
+  resume() {
+    this.init();
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
   }
 
-  setMood(m) {
-    if (MOODS[m]) this.nextMood = m;
+  setVolumes({ master, sfx, music }) {
+    if (master !== undefined) this.master = master;
+    if (sfx !== undefined) this.sfxVol = sfx;
+    if (music !== undefined) this.musicVol = music;
+    if (!this.ready) return;
+    this.masterGain.gain.value = this.muted ? 0 : this.master;
+    this.sfxGain.gain.value = this.sfxVol;
   }
 
-  // ————————————————————————————————————————— music scheduler
-
-  update() {
-    if (!this.ready || this.muted) return;
+  _noise(sec) {
     const ctx = this.ctx;
-    if (ctx.state === 'suspended') return;
-    const mood = MOODS[this.mood] || MOODS.explore;
-    const spb = 60 / mood.bpm;
-    const stepDur = spb / 2;              // eighth notes
-    let guard = 0;
-    while (this.nextTime < ctx.currentTime + 0.25 && guard++ < 32) {
-      this._schedule(this.nextTime, mood);
-      this.nextTime += stepDur;
-      this.step++;
-      if (this.step % 32 === 0 && this.mood !== this.nextMood) this.mood = this.nextMood;
-    }
+    const len = ctx.sampleRate * sec;
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    return buf;
   }
 
-  _schedule(t, mood) {
-    const scale = MODES[mood.mode];
-    const bar = Math.floor(this.step / 8) % mood.prog.length;
-    const deg = mood.prog[bar];
-    const rootN = mood.root + scale[deg % 7] + (deg >= 7 ? 12 : 0);
-    const s = this.step % 8;
-
-    // ——— pad (once per bar)
-    if (s === 0) {
-      const chord = [0, 2, 4].map((i) => mood.root + scale[(deg + i) % 7] + (deg + i >= 7 ? 12 : 0));
-      for (const n of chord) {
-        this._tone({
-          freq: NOTE(n + 12), type: 'triangle', t, dur: (60 / mood.bpm) * 4.2,
-          a: 0.9, d: 1.4, gain: mood.pad, detune: this.rng() * 8 - 4, send: 0.7, filter: 1400,
-        });
-        this._tone({
-          freq: NOTE(n), type: 'sine', t, dur: (60 / mood.bpm) * 4.2,
-          a: 1.1, d: 1.4, gain: mood.pad * 0.7, send: 0.6, filter: 900,
-        });
+  _impulse(sec, decay) {
+    const ctx = this.ctx;
+    const len = Math.floor(ctx.sampleRate * sec);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
       }
     }
-    // ——— bass
-    if (s % 2 === 0) {
-      this._tone({
-        freq: NOTE(rootN - 12), type: 'sine', t, dur: 0.42,
-        a: 0.01, d: 0.34, gain: 0.24, filter: 420, send: 0.1,
-      });
-    }
-    // ——— melody
-    if (this.rng() < mood.mel && s % 2 === 1) {
-      const oct = this.rng() < 0.25 ? 24 : 12;
-      const n = mood.root + scale[(deg + Math.floor(this.rng() * 5)) % 7] + oct;
-      this._tone({
-        freq: NOTE(n), type: 'triangle', t: t + this.rng() * 0.01, dur: 0.5,
-        a: 0.012, d: 0.42, gain: 0.13, send: 0.6, filter: 3200,
-      });
-    }
-    // ——— percussion
-    if (mood.perc > 0) {
-      if (s % 4 === 0) this._noise({ t, dur: 0.14, gain: 0.22 * mood.perc, filter: 220, type: 'lowpass' });
-      if (s % 4 === 2) this._noise({ t, dur: 0.10, gain: 0.13 * mood.perc, filter: 2600, type: 'highpass' });
-      if (mood.perc > 0.7 && s % 8 === 7) this._noise({ t, dur: 0.18, gain: 0.16, filter: 1800, type: 'highpass' });
-    }
+    return buf;
   }
 
-  _tone({ freq, type = 'sine', t, dur = 0.3, a = 0.005, d = 0.2, gain = 0.2, detune = 0, send = 0.2, filter = 0, bend = 0, target = null }) {
+  /* -------------------------------------------------------- 合成部品 */
+  tone({ freq = 440, dur = 0.2, type = 'sine', gain = 0.2, attack = 0.005, decay = null,
+    sweep = 0, detune = 0, delay = 0, reverb = 0, dest = null } = {}) {
+    if (!this.ready) return;
     const ctx = this.ctx;
-    const o = ctx.createOscillator();
-    o.type = type;
-    o.frequency.setValueAtTime(freq, t);
-    if (bend) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq * bend), t + dur);
-    o.detune.value = detune;
-    let node = o;
-    if (filter) {
-      const f = ctx.createBiquadFilter();
-      f.type = 'lowpass';
-      f.frequency.value = filter;
-      f.Q.value = 0.7;
-      o.connect(f);
-      node = f;
-    }
+    const t0 = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + a);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
-    node.connect(g);
-    const dst = target || this.musicGain;
-    g.connect(dst);
-    const sendNode = target ? this.sfxSend : this.musicSend;
-    if (send > 0) {
-      const sg = ctx.createGain();
-      sg.gain.value = send;
-      g.connect(sg);
-      sg.connect(sendNode);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    if (sweep) osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq * sweep), t0 + dur);
+    if (detune) osc.detune.value = detune;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + (decay ?? dur));
+    osc.connect(g);
+    g.connect(dest || this.sfxGain);
+    if (reverb > 0) {
+      const rg = ctx.createGain();
+      rg.gain.value = reverb;
+      g.connect(rg);
+      rg.connect(this.reverb);
     }
-    o.start(t);
-    o.stop(t + a + d + 0.05);
+    osc.start(t0);
+    osc.stop(t0 + (decay ?? dur) + 0.05);
   }
 
-  _noise({ t, dur = 0.2, gain = 0.2, filter = 1000, type = 'lowpass', target = null, Q = 1, sweep = 0 }) {
+  noise({ dur = 0.2, gain = 0.2, freq = 1200, q = 1, type = 'bandpass', sweep = 0,
+    delay = 0, reverb = 0 } = {}) {
+    if (!this.ready) return;
     const ctx = this.ctx;
+    const t0 = ctx.currentTime + delay;
     const src = ctx.createBufferSource();
-    src.buffer = this.noise;
-    src.playbackRate.value = 0.8 + Math.random() * 0.5;
+    src.buffer = this.noiseBuf;
+    src.loop = true;
     const f = ctx.createBiquadFilter();
     f.type = type;
-    f.frequency.setValueAtTime(filter, t);
-    if (sweep) f.frequency.exponentialRampToValueAtTime(Math.max(60, filter * sweep), t + dur);
-    f.Q.value = Q;
+    f.frequency.setValueAtTime(freq, t0);
+    if (sweep) f.frequency.exponentialRampToValueAtTime(Math.max(60, freq * sweep), t0 + dur);
+    f.Q.value = q;
     const g = ctx.createGain();
-    g.gain.setValueAtTime(gain, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(f); f.connect(g);
-    g.connect(target || this.musicGain);
-    src.start(t);
-    src.stop(t + dur + 0.02);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(f); f.connect(g); g.connect(this.sfxGain);
+    if (reverb > 0) {
+      const rg = ctx.createGain();
+      rg.gain.value = reverb;
+      g.connect(rg); rg.connect(this.reverb);
+    }
+    src.start(t0);
+    src.stop(t0 + dur + 0.05);
   }
 
-  // ————————————————————————————————————————— SFX
-
-  sfx(name, opt = {}) {
+  /* ---------------------------------------------------------- 効果音 */
+  play(name, opts = {}) {
     if (!this.ready || this.muted) return;
-    const ctx = this.ctx;
-    const t = ctx.currentTime + 0.001;
-    const out = this.sfxGain;
-    const v = opt.vol ?? 1;
+    const p = opts.pitch || 1;
+    const d = opts.delay || 0;
     switch (name) {
       case 'swing':
-        this._noise({ t, dur: 0.16, gain: 0.18 * v, filter: 1800, type: 'bandpass', target: out, Q: 1.4, sweep: 2.6 });
+        this.noise({ dur: 0.16, gain: 0.16, freq: 900 * p, sweep: 0.35, q: 1.4, delay: d });
         break;
       case 'hit':
-        this._noise({ t, dur: 0.12, gain: 0.34 * v, filter: 900, type: 'lowpass', target: out, sweep: 0.3 });
-        this._tone({ freq: 180, type: 'square', t, dur: 0.1, a: 0.002, d: 0.09, gain: 0.16 * v, target: out, bend: 0.5, send: 0.1 });
-        break;
-      case 'crit':
-        this._noise({ t, dur: 0.18, gain: 0.4 * v, filter: 1400, type: 'bandpass', target: out, Q: 2, sweep: 0.4 });
-        this._tone({ freq: 660, type: 'square', t, dur: 0.16, a: 0.002, d: 0.14, gain: 0.16 * v, target: out, bend: 0.4, send: 0.3 });
-        break;
-      case 'hurt':
-        this._tone({ freq: 300, type: 'sawtooth', t, dur: 0.24, a: 0.004, d: 0.2, gain: 0.2 * v, target: out, bend: 0.35, send: 0.2, filter: 1200 });
-        break;
-      case 'enemyHurt':
-        this._tone({ freq: 220, type: 'square', t, dur: 0.14, a: 0.003, d: 0.12, gain: 0.12 * v, target: out, bend: 0.6, filter: 1600, send: 0.1 });
-        break;
-      case 'die':
-        this._tone({ freq: 420, type: 'sawtooth', t, dur: 0.6, a: 0.01, d: 0.55, gain: 0.2 * v, target: out, bend: 0.18, filter: 1400, send: 0.4 });
-        this._noise({ t: t + 0.02, dur: 0.4, gain: 0.16 * v, filter: 800, type: 'lowpass', target: out, sweep: 0.2 });
-        break;
-      case 'step': {
-        const now = performance.now();
-        if (now - this._lastFoot < 190) return;
-        this._lastFoot = now;
-        this._noise({ t, dur: 0.07, gain: 0.075 * v, filter: opt.water ? 900 : 420, type: 'lowpass', target: out, sweep: 0.5 });
-        break;
-      }
-      case 'pickup':
-        this._tone({ freq: 880, type: 'triangle', t, dur: 0.1, a: 0.004, d: 0.09, gain: 0.14 * v, target: out, send: 0.3 });
-        this._tone({ freq: 1320, type: 'triangle', t: t + 0.06, dur: 0.12, a: 0.004, d: 0.1, gain: 0.12 * v, target: out, send: 0.3 });
-        break;
-      case 'gold':
-        for (let i = 0; i < 3; i++)
-          this._tone({ freq: 1200 + i * 340, type: 'triangle', t: t + i * 0.035, dur: 0.1, a: 0.002, d: 0.09, gain: 0.09 * v, target: out, send: 0.4 });
-        break;
-      case 'levelup':
-        [0, 4, 7, 12, 16].forEach((n, i) =>
-          this._tone({ freq: NOTE(72 + n), type: 'triangle', t: t + i * 0.09, dur: 0.5, a: 0.01, d: 0.45, gain: 0.16 * v, target: out, send: 0.7 }));
-        break;
-      case 'quest':
-        [0, 5, 9].forEach((n, i) =>
-          this._tone({ freq: NOTE(69 + n), type: 'sine', t: t + i * 0.12, dur: 0.6, a: 0.02, d: 0.5, gain: 0.14 * v, target: out, send: 0.8 }));
-        break;
-      case 'ui':
-        this._tone({ freq: 640, type: 'sine', t, dur: 0.06, a: 0.002, d: 0.05, gain: 0.09 * v, target: out, send: 0.1 });
-        break;
-      case 'uiBig':
-        this._tone({ freq: 320, type: 'triangle', t, dur: 0.14, a: 0.003, d: 0.12, gain: 0.12 * v, target: out, send: 0.2 });
-        break;
-      case 'error':
-        this._tone({ freq: 180, type: 'square', t, dur: 0.16, a: 0.003, d: 0.14, gain: 0.11 * v, target: out, filter: 900 });
-        break;
-      case 'fire':
-        this._noise({ t, dur: 0.5, gain: 0.24 * v, filter: 700, type: 'lowpass', target: out, sweep: 0.35 });
-        this._tone({ freq: 140, type: 'sawtooth', t, dur: 0.4, a: 0.01, d: 0.36, gain: 0.14 * v, target: out, bend: 0.5, filter: 800, send: 0.4 });
-        break;
-      case 'ice':
-        this._tone({ freq: 1600, type: 'triangle', t, dur: 0.3, a: 0.004, d: 0.28, gain: 0.12 * v, target: out, bend: 0.55, send: 0.6 });
-        this._noise({ t, dur: 0.25, gain: 0.12 * v, filter: 4200, type: 'highpass', target: out });
-        break;
-      case 'bolt':
-        this._noise({ t, dur: 0.3, gain: 0.3 * v, filter: 3000, type: 'highpass', target: out, sweep: 0.2 });
-        this._tone({ freq: 90, type: 'square', t, dur: 0.24, a: 0.002, d: 0.22, gain: 0.16 * v, target: out, bend: 0.4, send: 0.5 });
-        break;
-      case 'heal':
-        [0, 7, 12].forEach((n, i) =>
-          this._tone({ freq: NOTE(76 + n), type: 'sine', t: t + i * 0.07, dur: 0.5, a: 0.02, d: 0.44, gain: 0.12 * v, target: out, send: 0.8 }));
-        break;
-      case 'bow':
-        this._noise({ t, dur: 0.12, gain: 0.2 * v, filter: 2400, type: 'bandpass', target: out, Q: 2, sweep: 1.8 });
-        break;
-      case 'arrow':
-        this._noise({ t, dur: 0.08, gain: 0.14 * v, filter: 3200, type: 'bandpass', target: out, Q: 3 });
+        this.noise({ dur: 0.12, gain: 0.34, freq: 420 * p, sweep: 0.3, q: 0.9, delay: d, reverb: 0.2 });
+        this.tone({ freq: 120 * p, dur: 0.10, type: 'square', gain: 0.16, sweep: 0.4, delay: d });
         break;
       case 'block':
-        this._noise({ t, dur: 0.1, gain: 0.3 * v, filter: 2600, type: 'bandpass', target: out, Q: 3, sweep: 0.5 });
-        this._tone({ freq: 520, type: 'square', t, dur: 0.12, a: 0.002, d: 0.1, gain: 0.1 * v, target: out, bend: 0.7, send: 0.4 });
+        this.noise({ dur: 0.16, gain: 0.3, freq: 2400, sweep: 0.4, q: 3, delay: d });
+        this.tone({ freq: 320, dur: 0.14, type: 'triangle', gain: 0.14, sweep: 0.6, delay: d });
+        break;
+      case 'guardbreak':
+        this.tone({ freq: 180, dur: 0.5, type: 'sawtooth', gain: 0.24, sweep: 0.35, delay: d, reverb: 0.4 });
+        this.noise({ dur: 0.35, gain: 0.24, freq: 900, sweep: 0.2, delay: d });
         break;
       case 'parry':
-        this._tone({ freq: 1400, type: 'triangle', t, dur: 0.3, a: 0.002, d: 0.28, gain: 0.16 * v, target: out, bend: 0.6, send: 0.8 });
+        this.tone({ freq: 1500, dur: 0.32, type: 'triangle', gain: 0.26, sweep: 1.6, delay: d, reverb: 0.5 });
+        this.tone({ freq: 2400, dur: 0.22, type: 'sine', gain: 0.18, sweep: 1.4, delay: d + 0.02 });
         break;
-      case 'dodge':
-        this._noise({ t, dur: 0.2, gain: 0.1 * v, filter: 1200, type: 'bandpass', target: out, Q: 1, sweep: 2.4 });
+      case 'parry_swing':
+        this.noise({ dur: 0.12, gain: 0.12, freq: 1800, sweep: 0.5, q: 2, delay: d });
+        break;
+      case 'critical':
+        this.tone({ freq: 90, dur: 0.6, type: 'sawtooth', gain: 0.3, sweep: 0.4, delay: d, reverb: 0.6 });
+        this.noise({ dur: 0.4, gain: 0.34, freq: 600, sweep: 0.25, delay: d + 0.24, reverb: 0.5 });
+        break;
+      case 'death':
+        this.tone({ freq: 220, dur: 0.9, type: 'sine', gain: 0.2, sweep: 0.3, delay: d, reverb: 0.7 });
+        this.noise({ dur: 0.6, gain: 0.16, freq: 500, sweep: 0.25, delay: d });
+        break;
+      case 'aggro':
+        this.tone({ freq: 300 * p, dur: 0.4, type: 'sawtooth', gain: 0.14, sweep: 0.55, delay: d, reverb: 0.4 });
+        break;
+      case 'roll':
+        this.noise({ dur: 0.28, gain: 0.16, freq: 380, sweep: 0.4, q: 0.7, delay: d });
+        break;
+      case 'jump':
+        this.noise({ dur: 0.14, gain: 0.12, freq: 600, sweep: 0.5, delay: d });
         break;
       case 'drink':
-        this._tone({ freq: 300, type: 'sine', t, dur: 0.3, a: 0.02, d: 0.26, gain: 0.12 * v, target: out, bend: 1.6, send: 0.3 });
+        this.tone({ freq: 420, dur: 0.3, type: 'sine', gain: 0.16, sweep: 1.5, delay: d });
+        break;
+      case 'heal':
+        for (let i = 0; i < 3; i++) {
+          this.tone({ freq: note(4 + i * 5), dur: 0.6, type: 'sine', gain: 0.1, delay: d + i * 0.07, reverb: 0.6 });
+        }
+        break;
+      case 'buff':
+        this.tone({ freq: note(-5), dur: 0.8, type: 'triangle', gain: 0.12, sweep: 1.5, delay: d, reverb: 0.6 });
+        break;
+      case 'cast_start':
+        this.tone({ freq: 300, dur: 0.4, type: 'sine', gain: 0.10, sweep: 2.0, delay: d });
+        break;
+      case 'cast':
+        this.tone({ freq: 900, dur: 0.35, type: 'triangle', gain: 0.16, sweep: 0.35, delay: d, reverb: 0.5 });
+        this.noise({ dur: 0.3, gain: 0.12, freq: 2600, sweep: 0.3, q: 2, delay: d });
+        break;
+      case 'bow':
+        this.noise({ dur: 0.12, gain: 0.2, freq: 1600, sweep: 0.25, q: 2.5, delay: d });
+        this.tone({ freq: 180, dur: 0.14, type: 'triangle', gain: 0.1, sweep: 0.6, delay: d });
+        break;
+      case 'throw':
+        this.noise({ dur: 0.14, gain: 0.14, freq: 1100, sweep: 0.4, delay: d });
+        break;
+      case 'slam':
+        this.tone({ freq: 70, dur: 0.7, type: 'sine', gain: 0.36, sweep: 0.4, delay: d, reverb: 0.7 });
+        this.noise({ dur: 0.5, gain: 0.24, freq: 300, sweep: 0.2, delay: d, reverb: 0.5 });
+        break;
+      case 'teleport':
+        this.tone({ freq: 1200, dur: 0.3, type: 'sine', gain: 0.14, sweep: 0.2, delay: d, reverb: 0.6 });
+        break;
+      case 'boss_phase':
+        this.tone({ freq: 55, dur: 1.6, type: 'sawtooth', gain: 0.3, sweep: 1.2, delay: d, reverb: 0.9 });
+        this.noise({ dur: 1.2, gain: 0.2, freq: 200, sweep: 3, delay: d, reverb: 0.8 });
+        break;
+      case 'thunder':
+        this.noise({ dur: 1.8, gain: 0.34, freq: 220, sweep: 0.25, q: 0.4, delay: d, reverb: 0.9 });
+        this.tone({ freq: 48, dur: 1.4, type: 'sine', gain: 0.22, sweep: 0.6, delay: d, reverb: 0.9 });
+        break;
+      case 'shrine':
+        for (let i = 0; i < 4; i++) {
+          this.tone({ freq: note([-12, -5, 0, 7][i]), dur: 1.6, type: 'sine', gain: 0.09, delay: d + i * 0.12, reverb: 0.9 });
+        }
+        break;
+      case 'discover':
+        for (let i = 0; i < 3; i++) {
+          this.tone({ freq: note([0, 4, 7][i]), dur: 0.9, type: 'triangle', gain: 0.09, delay: d + i * 0.1, reverb: 0.7 });
+        }
         break;
       case 'chest':
-        this._noise({ t, dur: 0.3, gain: 0.16 * v, filter: 1200, type: 'lowpass', target: out, sweep: 0.4 });
-        [0, 4, 7, 11].forEach((n, i) =>
-          this._tone({ freq: NOTE(72 + n), type: 'triangle', t: t + 0.12 + i * 0.06, dur: 0.4, a: 0.01, d: 0.34, gain: 0.11 * v, target: out, send: 0.7 }));
+        this.noise({ dur: 0.5, gain: 0.16, freq: 400, sweep: 0.5, q: 1, delay: d });
+        this.tone({ freq: note(7), dur: 0.7, type: 'sine', gain: 0.1, delay: d + 0.2, reverb: 0.6 });
         break;
-      case 'warp':
-        this._tone({ freq: 200, type: 'sine', t, dur: 1.0, a: 0.2, d: 0.8, gain: 0.18 * v, target: out, bend: 6, send: 0.9, filter: 3000 });
+      case 'upgrade':
+        this.noise({ dur: 0.18, gain: 0.22, freq: 3000, sweep: 0.2, q: 2, delay: d });
+        this.tone({ freq: note(12), dur: 0.5, type: 'triangle', gain: 0.12, delay: d + 0.05, reverb: 0.5 });
         break;
-      case 'roar':
-        this._tone({ freq: 70, type: 'sawtooth', t, dur: 1.2, a: 0.08, d: 1.1, gain: 0.3 * v, target: out, bend: 1.6, filter: 600, send: 0.7 });
-        this._noise({ t, dur: 1.0, gain: 0.22 * v, filter: 500, type: 'lowpass', target: out, sweep: 1.6 });
+      case 'levelup':
+        for (let i = 0; i < 5; i++) {
+          this.tone({ freq: note([0, 4, 7, 11, 14][i]), dur: 1.2, type: 'sine', gain: 0.1, delay: d + i * 0.09, reverb: 0.8 });
+        }
         break;
-      case 'craft':
-        this._noise({ t, dur: 0.2, gain: 0.18 * v, filter: 1600, type: 'bandpass', target: out, Q: 1.5, sweep: 0.6 });
-        this._tone({ freq: 900, type: 'triangle', t: t + 0.1, dur: 0.3, a: 0.01, d: 0.26, gain: 0.12 * v, target: out, send: 0.6 });
+      case 'echo':
+        this.tone({ freq: note(12 + (Math.random() * 4 | 0)), dur: 0.22, type: 'sine', gain: 0.07, delay: d });
         break;
-      case 'gate':
-        this._noise({ t, dur: 0.7, gain: 0.2 * v, filter: 500, type: 'lowpass', target: out, sweep: 0.5 });
+      case 'ui_on':
+        this.tone({ freq: 880, dur: 0.09, type: 'square', gain: 0.06, delay: d });
+        break;
+      case 'ui_off':
+        this.tone({ freq: 520, dur: 0.09, type: 'square', gain: 0.05, delay: d });
+        break;
+      case 'ui_move':
+        this.tone({ freq: 700, dur: 0.05, type: 'square', gain: 0.04, delay: d });
+        break;
+      case 'ui_confirm':
+        this.tone({ freq: 1046, dur: 0.12, type: 'triangle', gain: 0.07, delay: d });
+        break;
+      case 'fail':
+        this.tone({ freq: 180, dur: 0.16, type: 'square', gain: 0.07, sweep: 0.6, delay: d });
+        break;
+      default:
         break;
     }
   }
-}
 
-export const audio = new Audio();
+  footstep(surface, vol = 0.35) {
+    if (!this.ready || this.muted) return;
+    const cfg = {
+      grass: { f: 1500, q: 0.8, d: 0.10, g: 0.10 },
+      dirt: { f: 700, q: 0.7, d: 0.09, g: 0.13 },
+      sand: { f: 2400, q: 0.5, d: 0.13, g: 0.09 },
+      rock: { f: 1100, q: 2.2, d: 0.07, g: 0.16 },
+      snow: { f: 3000, q: 0.6, d: 0.12, g: 0.08 },
+      marsh: { f: 500, q: 0.6, d: 0.16, g: 0.14 },
+    }[surface] || { f: 1000, q: 1, d: 0.1, g: 0.12 };
+    this.noise({ dur: cfg.d, gain: cfg.g * vol * 2.4, freq: cfg.f * (0.85 + Math.random() * 0.3), q: cfg.q, sweep: 0.5 });
+  }
+
+  /* ------------------------------------------------------------ BGM */
+  setMode(mode) {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    this.nextNote = 0;
+  }
+
+  update(dt, game) {
+    if (!this.ready || this.muted) return;
+    const ctx = this.ctx;
+    const wantVol = this.mode === 'none' ? 0 : this.musicVol * (this.mode === 'explore' ? 0.5 : 0.85);
+    this.musicGain.gain.setTargetAtTime(wantVol, ctx.currentTime, 0.8);
+    if (this.mode === 'none') return;
+
+    const bpm = this.mode === 'boss' ? 112 : this.mode === 'final' ? 128 : this.mode === 'combat' ? 96 : 54;
+    const spb = 60 / bpm;
+    this.nextNote -= dt;
+    if (this.nextNote > 0) return;
+    this.nextNote = spb;
+    this.beat++;
+
+    const scale = SCALES[this.mode] || SCALES.explore;
+    const t = ctx.currentTime;
+    const isBoss = this.mode === 'boss' || this.mode === 'final';
+
+    // ベース／ドローン
+    if (this.beat % 4 === 1 || isBoss) {
+      const root = scale[0] + (isBoss && this.beat % 8 === 5 ? 3 : 0);
+      this.tone({
+        freq: note(root), dur: isBoss ? spb * 1.1 : spb * 4.2, type: isBoss ? 'sawtooth' : 'sine',
+        gain: isBoss ? 0.16 : 0.10, attack: isBoss ? 0.01 : 0.6, dest: this.musicGain, reverb: 0.5,
+      });
+    }
+    // 打楽器（戦闘時のみ）
+    if (isBoss) {
+      this.noise({ dur: 0.14, gain: 0.10, freq: 120, q: 0.6 });
+      if (this.beat % 2 === 0) this.noise({ dur: 0.09, gain: 0.06, freq: 5200, q: 1.2 });
+    } else if (this.mode === 'combat' && this.beat % 2 === 1) {
+      this.noise({ dur: 0.12, gain: 0.05, freq: 160, q: 0.7 });
+    }
+    // 旋律
+    const density = isBoss ? 0.85 : this.mode === 'combat' ? 0.5 : 0.34;
+    if (Math.random() < density) {
+      const n = scale[1 + ((Math.random() * (scale.length - 1)) | 0)];
+      this.tone({
+        freq: note(n + 12), dur: spb * (isBoss ? 1.2 : 3.0),
+        type: isBoss ? 'triangle' : 'sine',
+        gain: isBoss ? 0.07 : 0.05, attack: isBoss ? 0.02 : 0.35,
+        dest: this.musicGain, reverb: 0.8,
+      });
+    }
+    // 高音のきらめき（探索時）
+    if (!isBoss && this.beat % 8 === 3) {
+      const n = scale[(scale.length - 2 + (Math.random() * 2 | 0)) % scale.length];
+      this.tone({ freq: note(n + 24), dur: 2.4, type: 'sine', gain: 0.035, attack: 0.5, dest: this.musicGain, reverb: 0.9 });
+    }
+    void game;
+  }
+}

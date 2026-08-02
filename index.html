@@ -2,26 +2,116 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0b1220">
-<meta name="description" content="アエテリア戦記 — スマートフォンで遊べる、手続き生成のオープンワールドRPG。">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1">
+<meta name="theme-color" content="#0a0a0d">
+<meta name="description" content="アエテリア戦記 — スマートフォンで遊べる3Dオープンワールド・アクションRPG">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>アエテリア戦記 — オープンワールドRPG</title>
+<meta name="mobile-web-app-capable" content="yes">
+<title>アエテリア戦記 — Echoes of Aetheria</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-<canvas id="game" aria-label="ゲーム画面"></canvas>
-<div id="boot">
-  <div class="boot-title">アエテリア戦記</div>
-  <div class="boot-sub">読み込み中…</div>
+<canvas id="view"></canvas>
+
+<!-- ===================== HUD ===================== -->
+<div id="hud" class="hidden">
+  <div class="vitals">
+    <div class="bar hp"><i></i><b></b><span></span></div>
+    <div class="bar fp"><i></i><b></b></div>
+    <div class="bar st"><i></i><b></b></div>
+    <div class="statuses"></div>
+  </div>
+
+  <div class="topright">
+    <canvas id="minimap" width="150" height="150"></canvas>
+    <div class="worldinfo">
+      <div class="region">—</div>
+      <div class="clock"><span class="time">06:00</span> · <span class="weather">晴れ</span></div>
+    </div>
+  </div>
+
+  <div class="echo"><span class="ei">◈</span><span class="val">0</span></div>
+
+  <div class="questtrack hidden">
+    <div class="qname"></div>
+    <div class="qstage"></div>
+  </div>
+
+  <div id="bossbar" class="hidden">
+    <div class="bname"></div>
+    <div class="btitle"></div>
+    <div class="bbar"><i></i><b></b></div>
+  </div>
+
+  <div id="prompt" class="hidden"><span class="key">E</span><span class="txt"></span></div>
+  <div id="toasts"></div>
+  <div id="dmgnums"></div>
+  <div id="regionsplash" class="hidden"><div class="rs-name"></div><div class="rs-sub"></div></div>
+
+  <!-- ===================== タッチ操作 ===================== -->
+  <div id="touch">
+    <div id="stick" class="hidden"><i></i></div>
+    <div class="topbtns">
+      <button class="tb sm" data-btn="menu" aria-label="メニュー">☰</button>
+      <button class="tb sm" data-btn="map" aria-label="地図">▦</button>
+    </div>
+    <div class="cluster">
+      <div class="subrow">
+        <button class="tb sub" data-btn="lock" aria-label="対象固定">◎</button>
+        <button class="tb sub" data-btn="spell" aria-label="魔法">✦</button>
+        <button class="tb sub" data-btn="item" aria-label="道具">雫<span class="cnt">5</span></button>
+      </div>
+      <div class="diamond">
+        <button class="tb main up" data-btn="jump" aria-label="跳躍">跳</button>
+        <button class="tb main left" data-btn="block" aria-label="防御">防</button>
+        <button class="tb main right big" data-btn="attack" data-hold="heavy" aria-label="攻撃">攻</button>
+        <button class="tb main down" data-btn="dodge" aria-label="回避">避</button>
+      </div>
+    </div>
+    <button id="interactbtn" class="tb act hidden" data-btn="interact">調べる</button>
+  </div>
 </div>
-<noscript>
-  <div class="noscript">このゲームを遊ぶには JavaScript を有効にしてください。</div>
-</noscript>
+
+<!-- ===================== オーバーレイ ===================== -->
+<div id="overlay" class="hidden"></div>
+
+<div id="dialogue" class="hidden">
+  <div class="dbox">
+    <div class="dname"></div>
+    <div class="dtext"></div>
+    <div class="dopts"></div>
+  </div>
+</div>
+
+<div id="death" class="hidden"><div class="dtitle">力尽きた</div><div class="dsub">残響を失った</div></div>
+
+<div id="loading">
+  <div class="logo">
+    <div class="jp">アエテリア戦記</div>
+    <div class="en">ECHOES OF AETHERIA</div>
+  </div>
+  <div class="pbar"><i></i></div>
+  <div class="ptext">起動中…</div>
+</div>
+
+<div id="title" class="hidden">
+  <div class="logo">
+    <div class="jp">アエテリア戦記</div>
+    <div class="en">ECHOES OF AETHERIA</div>
+  </div>
+  <div class="tmenu">
+    <button data-act="continue" class="hidden">冒険を続ける</button>
+    <button data-act="new">新しい旅を始める</button>
+    <button data-act="settings">設定</button>
+    <button data-act="howto">操作方法</button>
+  </div>
+  <div class="tfoot">WebGL2 / 依存ライブラリなし・オフライン対応</div>
+</div>
+
 <script type="module" src="src/main.js"></script>
 </body>
 </html>

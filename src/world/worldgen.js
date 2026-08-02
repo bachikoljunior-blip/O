@@ -1,703 +1,425 @@
-// worldgen.js — procedural continent: elevation, climate, biomes, rivers,
-// settlements, roads and points of interest. Fully deterministic from a seed.
+// 手続き的ワールド生成：大陸・地方（リージョン）・河川・湖・街道・平坦化
 
-import { fbm, ridge, valueNoise2, hash2, clamp, lerp, smoothstep, invLerp, makeRNG, dist } from '../core/util.js';
+import { Noise, makeRng, hash2 } from '../core/noise.js';
+import { clamp, clamp01, lerp, smoothstep } from '../core/math.js';
 
-export const TILE = 32;
-export const WORLD_W = 768;
-export const WORLD_H = 768;
-export const SEA = 0.42;
-
-export const B = {
-  DEEP: 0, OCEAN: 1, SHALLOW: 2, BEACH: 3, GRASS: 4, MEADOW: 5, FOREST: 6,
-  DARKWOOD: 7, TAIGA: 8, SNOW: 9, TUNDRA: 10, DESERT: 11, SAVANNA: 12,
-  SWAMP: 13, ROCK: 14, PEAK: 15, ASH: 16, FARM: 17, ROAD: 18, RIVER: 19, FLOOR: 20,
-};
-
-export const BIOME_NAME = {
-  [B.DEEP]: '深海', [B.OCEAN]: '海', [B.SHALLOW]: '浅瀬', [B.BEACH]: '砂浜',
-  [B.GRASS]: '草原', [B.MEADOW]: '花畑', [B.FOREST]: '森', [B.DARKWOOD]: '暗い森',
-  [B.TAIGA]: '針葉樹林', [B.SNOW]: '雪原', [B.TUNDRA]: 'ツンドラ', [B.DESERT]: '砂漠',
-  [B.SAVANNA]: 'サバンナ', [B.SWAMP]: '湿地', [B.ROCK]: '岩山', [B.PEAK]: '霊峰',
-  [B.ASH]: '灰の荒野', [B.FARM]: '農地', [B.ROAD]: '街道', [B.RIVER]: '川', [B.FLOOR]: '街',
-};
-
-// Tiles that block movement outright.
-export const SOLID = new Set([B.DEEP, B.OCEAN, B.PEAK]);
-// Tiles that slow you down / count as water.
-export const WATER = new Set([B.DEEP, B.OCEAN, B.SHALLOW, B.RIVER]);
-
-const NAMES_A = ['アル', 'ヴェル', 'エル', 'ソル', 'ミル', 'カル', 'ノル', 'リン', 'ゼフ', 'グラン', 'テル', 'オル', 'ファル', 'ヘイム', 'イス'];
-const NAMES_B = ['ハイム', 'ガルド', 'ドール', 'ヴィア', 'モント', 'ブルク', 'テア', 'リア', 'ネス', 'ハーレ', 'フェン', 'スト', 'ダール'];
-
-export class WorldData {
-  constructor(seed) {
-    this.seed = seed >>> 0;
-    this.w = WORLD_W;
-    this.h = WORLD_H;
-    this.height = new Float32Array(this.w * this.h);
-    this.moist = new Float32Array(this.w * this.h);
-    this.biome = new Uint8Array(this.w * this.h);
-    /** overlay: 0 none, 1 road, 2 river, 3 farm, 4 town floor, 5 bridge, 6 plaza */
-    this.overlay = new Uint8Array(this.w * this.h);
-    this.settlements = [];
-    this.pois = [];
-    this.roadNodes = [];
-  }
-  idx(x, y) { return y * this.w + x; }
-  inBounds(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
-  heightAt(x, y) {
-    if (!this.inBounds(x, y)) return 0;
-    return this.height[y * this.w + x];
-  }
-  biomeAt(x, y) {
-    if (!this.inBounds(x, y)) return B.DEEP;
-    return this.biome[y * this.w + x];
-  }
-  overlayAt(x, y) {
-    if (!this.inBounds(x, y)) return 0;
-    return this.overlay[y * this.w + x];
-  }
-  isSolidTile(x, y) {
-    if (!this.inBounds(x, y)) return true;
-    const o = this.overlay[y * this.w + x];
-    if (o === 1 || o === 3 || o === 4 || o === 5 || o === 6) return false;
-    return SOLID.has(this.biome[y * this.w + x]);
-  }
-  isWaterTile(x, y) {
-    if (!this.inBounds(x, y)) return true;
-    const o = this.overlay[y * this.w + x];
-    if (o === 5) return false; // bridge
-    return WATER.has(this.biome[y * this.w + x]);
-  }
-}
-
-function pickBiome(e, m, t, world) {
-  if (e < SEA - 0.10) return B.DEEP;
-  if (e < SEA - 0.025) return B.OCEAN;
-  if (e < SEA) return B.SHALLOW;
-  if (e < SEA + 0.018) return B.BEACH;
-  if (e > 0.85) return B.PEAK;
-  if (e > 0.72) return B.ROCK;
-  if (t < 0.20) return e > 0.62 ? B.SNOW : m > 0.45 ? B.TAIGA : B.TUNDRA;
-  if (t < 0.34) return m > 0.55 ? B.TAIGA : m > 0.3 ? B.FOREST : B.TUNDRA;
-  if (t > 0.78) {
-    if (m < 0.28) return B.DESERT;
-    if (m < 0.52) return B.SAVANNA;
-    return B.SWAMP;
-  }
-  if (m < 0.24) return B.SAVANNA;
-  if (m > 0.78) return e < SEA + 0.06 ? B.SWAMP : B.DARKWOOD;
-  if (m > 0.58) return B.FOREST;
-  if (m > 0.42) return B.MEADOW;
-  return B.GRASS;
-}
+export const WORLD_RADIUS = 2100;   // 大陸の外縁（m）
+export const SEA_LEVEL = 0;
 
 /**
- * Generates the world in incremental steps so a loading screen can breathe.
- * Usage: `for (const p of generateWorld(seed)) { showProgress(p) }`
+ * 地方定義。中心からの距離で滑らかにブレンドされ、地形パラメータと
+ * 植生・色・危険度が決まる。ここを編集すれば世界の性格が変わる。
  */
-export function* generateWorld(seed) {
-  const world = new WorldData(seed);
-  const { w, h } = world;
-  const S = world.seed;
-  const rng = makeRNG(S ^ 0x9e3779b9);
-
-  // ————————————————————————————————————— 1. elevation + climate
-  const F1 = 1 / 170, F2 = 1 / 260, F3 = 1 / 90;
-  const rows = 24;
-  for (let y0 = 0; y0 < h; y0 += rows) {
-    for (let y = y0; y < Math.min(h, y0 + rows); y++) {
-      for (let x = 0; x < w; x++) {
-        const nx = x / w - 0.5, ny = y / h - 0.5;
-        const base = fbm(x * F1, y * F1, S, 6);
-        const rg = ridge(x * F2, y * F2, S + 4001, 5);
-        const mountainMask = smoothstep(clamp(invLerp(0.40, 0.70, fbm(x * F2 * 0.7, y * F2 * 0.7, S + 777, 3)), 0, 1));
-        // inland elevation sits comfortably above sea level, with ranges on top
-        let land = 0.52 + (base - 0.5) * 0.62
-          + rg * 0.54 * mountainMask
-          + (fbm(x * F3, y * F3, S + 22, 3) - 0.5) * 0.10;
-
-        // continental mask — an island continent with a wiggly coast
-        let d = Math.sqrt(nx * nx * 1.05 + ny * ny * 1.18) * 2;
-        d += (fbm(x * 0.0090, y * 0.0090, S + 91, 4) - 0.5) * 0.80;
-        d += (valueNoise2(x * 0.03, y * 0.03, S + 55) - 0.5) * 0.12;
-        const mask = 1 - smoothstep(clamp(invLerp(0.74, 1.26, d), 0, 1));
-        let e = lerp(0.06, land, mask);
-
-        e = clamp(e, 0, 1);
-        world.height[y * w + x] = e;
-
-        // moisture: stretched around the mean so wet/dry extremes actually occur
-        let m = fbm(x * F1 * 1.25 + 500, y * F1 * 1.25 - 320, S + 1337, 5);
-        m = (m - 0.5) * 2.35 + 0.5;
-        m += (fbm(x * 0.004 - 900, y * 0.004 + 210, S + 6151, 3) - 0.5) * 0.7;
-        m = clamp(m - Math.max(0, e - SEA) * 0.30, 0, 1);
-        world.moist[y * w + x] = m;
-      }
-    }
-    yield { phase: '大地を形づくる', t: (y0 / h) * 0.42 };
-  }
-
-  // ————————————————————————————————————— 2. biomes
-  for (let y0 = 0; y0 < h; y0 += 64) {
-    for (let y = y0; y < Math.min(h, y0 + 64); y++) {
-      for (let x = 0; x < w; x++) {
-        const i = y * w + x;
-        const e = world.height[i];
-        const m = world.moist[i];
-        // temperature: latitude band + altitude + regional noise
-        let t = 1 - Math.abs(y / h - 0.5) * 1.55;
-        t += ((fbm(x * 0.005, y * 0.005, S + 4242, 3) - 0.5) * 2) * 0.30;
-        t = clamp(t - Math.max(0, e - SEA) * 1.05, 0, 1);
-        world.biome[i] = pickBiome(e, m, t, world);
-      }
-    }
-    yield { phase: '気候を巡らせる', t: 0.42 + (y0 / h) * 0.14 };
-  }
-
-  // volcanic region: one hot ashen zone around the highest inland peak
+export const REGIONS = [
   {
-    let bx = 0, by = 0, best = -1;
-    for (let y = 60; y < h - 60; y += 3) {
-      for (let x = 60; x < w - 60; x += 3) {
-        const e = world.height[y * w + x];
-        if (e > best) { best = e; bx = x; by = y; }
+    id: 'downs', name: '白樺の草原', en: 'Verdant Downs',
+    cx: 0, cz: 320, r: 620, danger: 1,
+    base: 7, landAmp: 26, hillAmp: 7.5, ridgeAmp: 14, ridgeSharp: 2.6, rough: 1.0,
+    temp: 0.62, moist: 0.55,
+    grass: [0.30, 0.48, 0.22], grass2: [0.42, 0.55, 0.24], rock: [0.42, 0.41, 0.38],
+    tree: 'birch', treeDensity: 0.35, bushDensity: 0.5, grassDensity: 1.0,
+    fog: [0.62, 0.72, 0.82], fogDensity: 0.9,
+  },
+  {
+    id: 'gloomwood', name: '常闇の森', en: 'Gloomwood',
+    cx: -760, cz: -520, r: 660, danger: 3,
+    base: 10, landAmp: 30, hillAmp: 11, ridgeAmp: 26, ridgeSharp: 2.2, rough: 1.25,
+    temp: 0.48, moist: 0.85,
+    grass: [0.14, 0.26, 0.15], grass2: [0.19, 0.33, 0.16], rock: [0.30, 0.31, 0.30],
+    tree: 'pine', treeDensity: 1.0, bushDensity: 0.7, grassDensity: 0.6,
+    fog: [0.36, 0.44, 0.42], fogDensity: 1.9,
+  },
+  {
+    id: 'cinder', name: '灰燼の荒野', en: 'Cinderwaste',
+    cx: 980, cz: -980, r: 700, danger: 7,
+    base: 14, landAmp: 44, hillAmp: 14, ridgeAmp: 46, ridgeSharp: 1.9, rough: 1.6,
+    temp: 0.95, moist: 0.08,
+    grass: [0.36, 0.20, 0.14], grass2: [0.46, 0.26, 0.15], rock: [0.28, 0.20, 0.19],
+    tree: 'dead', treeDensity: 0.16, bushDensity: 0.15, grassDensity: 0.25,
+    fog: [0.62, 0.32, 0.22], fogDensity: 2.4,
+  },
+  {
+    id: 'mistfen', name: '霧の湿原', en: 'Mistfen',
+    cx: -980, cz: 860, r: 600, danger: 4,
+    base: 1.5, landAmp: 9, hillAmp: 3.2, ridgeAmp: 5, ridgeSharp: 3.0, rough: 0.8,
+    temp: 0.55, moist: 1.0,
+    grass: [0.24, 0.31, 0.20], grass2: [0.32, 0.36, 0.19], rock: [0.30, 0.32, 0.30],
+    tree: 'willow', treeDensity: 0.45, bushDensity: 0.9, grassDensity: 1.3,
+    fog: [0.58, 0.64, 0.60], fogDensity: 3.2,
+  },
+  {
+    id: 'skyspire', name: '蒼天嶺', en: 'Skyspire Range',
+    cx: 420, cz: -1560, r: 760, danger: 6,
+    base: 40, landAmp: 70, hillAmp: 16, ridgeAmp: 150, ridgeSharp: 1.55, rough: 1.5,
+    temp: 0.12, moist: 0.45,
+    grass: [0.34, 0.37, 0.32], grass2: [0.44, 0.46, 0.42], rock: [0.48, 0.49, 0.52],
+    tree: 'pine', treeDensity: 0.4, bushDensity: 0.2, grassDensity: 0.35,
+    fog: [0.74, 0.80, 0.90], fogDensity: 1.2,
+  },
+  {
+    id: 'goldreach', name: '黄金平原', en: 'Goldreach',
+    cx: 1180, cz: 520, r: 640, danger: 2,
+    base: 6, landAmp: 18, hillAmp: 5, ridgeAmp: 8, ridgeSharp: 2.8, rough: 0.75,
+    temp: 0.75, moist: 0.4,
+    grass: [0.52, 0.47, 0.20], grass2: [0.62, 0.56, 0.24], rock: [0.46, 0.43, 0.37],
+    tree: 'oak', treeDensity: 0.18, bushDensity: 0.3, grassDensity: 1.5,
+    fog: [0.78, 0.74, 0.60], fogDensity: 0.8,
+  },
+  {
+    id: 'riftvale', name: '裂罅の谷', en: 'Riftvale',
+    cx: -320, cz: 1420, r: 600, danger: 5,
+    base: 16, landAmp: 38, hillAmp: 18, ridgeAmp: 62, ridgeSharp: 1.7, rough: 1.9,
+    temp: 0.7, moist: 0.25,
+    grass: [0.45, 0.33, 0.22], grass2: [0.55, 0.42, 0.26], rock: [0.52, 0.38, 0.30],
+    tree: 'dead', treeDensity: 0.12, bushDensity: 0.25, grassDensity: 0.4,
+    fog: [0.80, 0.66, 0.52], fogDensity: 1.1,
+  },
+  {
+    id: 'coast', name: '海鳴りの岸', en: 'Sundering Coast',
+    cx: 1520, cz: 1360, r: 560, danger: 3,
+    base: 3, landAmp: 22, hillAmp: 9, ridgeAmp: 30, ridgeSharp: 2.0, rough: 1.2,
+    temp: 0.68, moist: 0.7,
+    grass: [0.30, 0.44, 0.28], grass2: [0.38, 0.50, 0.30], rock: [0.50, 0.48, 0.44],
+    tree: 'oak', treeDensity: 0.3, bushDensity: 0.45, grassDensity: 0.9,
+    fog: [0.68, 0.78, 0.86], fogDensity: 1.0,
+  },
+];
+
+const BLEND_KEYS = ['base', 'landAmp', 'hillAmp', 'ridgeAmp', 'ridgeSharp', 'rough',
+  'temp', 'moist', 'treeDensity', 'bushDensity', 'grassDensity', 'fogDensity', 'danger'];
+const BLEND_VEC = ['grass', 'grass2', 'rock', 'fog'];
+/** 地方パラメータをキャッシュする格子間隔（m）。地方は大きいので粗くて足りる */
+const PARAM_GRID = 28;
+
+export class WorldGen {
+  constructor(seed = 20260802) {
+    this.seed = seed;
+    this.n = new Noise(seed);
+    this.nWarp = new Noise(seed + 991);
+    this.nRiver = new Noise(seed + 4242);
+    this.nDetail = new Noise(seed + 777);
+    this.rng = makeRng(seed);
+
+    // 平坦化領域（集落・街道）を格納する一様グリッド
+    this.flatCell = 96;
+    this.flatGrid = new Map();
+    this.roads = [];
+
+    this._p = this._makeP();
+    this._hp = { base: 0, landAmp: 0, hillAmp: 0, ridgeAmp: 0, ridgeSharp: 0, rough: 0 };
+    this._bl = {
+      n00: null, n10: null, n01: null, n11: null,
+      w00: 0, w10: 0, w01: 0, w11: 0, tx: 0, tz: 0,
+    };
+    this.pcache = new Map();
+  }
+
+  _makeP() {
+    const o = { region: REGIONS[0] };
+    for (const k of BLEND_KEYS) o[k] = 0;
+    for (const k of BLEND_VEC) o[k] = [0, 0, 0];
+    return o;
+  }
+
+  /* -------------------------------------------------- リージョンブレンド */
+  /** 生のブレンド計算（8地方を走査するため重い） */
+  paramsRaw(x, z, out) {
+    // 境界を歪ませて自然な形にする
+    const wx = x + this.nWarp.n2(x * 0.0006, z * 0.0006) * 220;
+    const wz = z + this.nWarp.n2(x * 0.0006 + 31.7, z * 0.0006 - 12.3) * 220;
+    let total = 0;
+    for (const k of BLEND_KEYS) out[k] = 0;
+    for (const k of BLEND_VEC) { out[k][0] = 0; out[k][1] = 0; out[k][2] = 0; }
+    let best = -1, bestRegion = REGIONS[0];
+    for (const R of REGIONS) {
+      const dx = (wx - R.cx) / R.r, dz = (wz - R.cz) / R.r;
+      const d2 = dx * dx + dz * dz;
+      const w = Math.exp(-d2 * 1.35) + 1e-4;
+      if (w > best) { best = w; bestRegion = R; }
+      total += w;
+      for (const k of BLEND_KEYS) out[k] += R[k] * w;
+      for (const k of BLEND_VEC) {
+        out[k][0] += R[k][0] * w; out[k][1] += R[k][1] * w; out[k][2] += R[k][2] * w;
       }
     }
-    world.volcano = { x: bx, y: by };
-    const R = 46;
-    for (let y = by - R; y <= by + R; y++) {
-      for (let x = bx - R; x <= bx + R; x++) {
-        if (!world.inBounds(x, y)) continue;
-        const d = dist(x, y, bx, by) + (valueNoise2(x * 0.08, y * 0.08, S + 3) - 0.5) * 16;
-        if (d > R) continue;
-        const i = y * w + x;
-        if (world.biome[i] === B.DEEP || world.biome[i] === B.OCEAN) continue;
-        if (d < 8) world.biome[i] = B.PEAK;
-        else world.biome[i] = B.ASH;
-      }
-    }
-  }
-  yield { phase: '火山を灯す', t: 0.58 };
-
-  // ————————————————————————————————————— 3. rivers
-  const riverCount = 22;
-  for (let r = 0; r < riverCount; r++) {
-    // start high
-    let sx = 0, sy = 0, bestE = -1;
-    for (let k = 0; k < 220; k++) {
-      const x = rng.irange(24, w - 25), y = rng.irange(24, h - 25);
-      const e = world.height[y * w + x];
-      if (e > bestE && e < 0.9 && e > 0.62) { bestE = e; sx = x; sy = y; }
-    }
-    if (bestE < 0) continue;
-    let x = sx, y = sy;
-    const path = [];
-    for (let step = 0; step < 900; step++) {
-      path.push([x, y]);
-      const i = y * w + x;
-      if (WATER.has(world.biome[i]) && world.biome[i] !== B.RIVER) break;
-      // steepest descent with a wander term
-      let bx = x, by = y, bh = world.height[i] + 0.0008;
-      for (let oy = -1; oy <= 1; oy++) {
-        for (let ox = -1; ox <= 1; ox++) {
-          if (!ox && !oy) continue;
-          const nx2 = x + ox, ny2 = y + oy;
-          if (!world.inBounds(nx2, ny2)) continue;
-          const hh = world.height[ny2 * w + nx2] + (valueNoise2(nx2 * 0.2, ny2 * 0.2, S + r) - 0.5) * 0.02;
-          if (hh < bh) { bh = hh; bx = nx2; by = ny2; }
-        }
-      }
-      if (bx === x && by === y) {
-        // local minimum: carve onward in last direction, or stop
-        const a = rng() * Math.PI * 2;
-        bx = clamp(x + Math.round(Math.cos(a) * 2), 1, w - 2);
-        by = clamp(y + Math.round(Math.sin(a) * 2), 1, h - 2);
-        if (step > 400) break;
-      }
-      x = bx; y = by;
-    }
-    if (path.length < 40) continue;
-    // carve with widening downstream
-    for (let p = 0; p < path.length; p++) {
-      const [px, py] = path[p];
-      const wdt = 0.6 + (p / path.length) * 2.1;
-      const rad = Math.ceil(wdt);
-      for (let oy = -rad; oy <= rad; oy++) {
-        for (let ox = -rad; ox <= rad; ox++) {
-          const nx2 = px + ox, ny2 = py + oy;
-          if (!world.inBounds(nx2, ny2)) continue;
-          if (Math.hypot(ox, oy) > wdt) continue;
-          const i = ny2 * w + nx2;
-          if (world.biome[i] === B.DEEP || world.biome[i] === B.OCEAN) continue;
-          world.biome[i] = B.RIVER;
-          world.overlay[i] = 2;
-          world.height[i] = Math.min(world.height[i], SEA + 0.004);
-          world.moist[i] = 1;
-        }
-      }
-    }
-  }
-  yield { phase: '川を流す', t: 0.66 };
-
-  // ————————————————————————————————————— 4. settlements
-  const settleDefs = [
-    { type: 'capital', label: '王都', size: 30, minDist: 0 },
-    { type: 'town', label: '町', size: 21, minDist: 90 },
-    { type: 'town', label: '町', size: 20, minDist: 90 },
-    { type: 'village', label: '村', size: 15, minDist: 70 },
-    { type: 'village', label: '村', size: 15, minDist: 70 },
-    { type: 'village', label: '村', size: 14, minDist: 70 },
-    { type: 'hamlet', label: '集落', size: 11, minDist: 60 },
-    { type: 'hamlet', label: '集落', size: 11, minDist: 60 },
-    { type: 'hamlet', label: '集落', size: 10, minDist: 60 },
-  ];
-
-  const flatness = (cx, cy, rad) => {
-    let lo = 9, hi = -9, waterN = 0, n = 0, near = 0;
-    for (let y = cy - rad; y <= cy + rad; y += 2) {
-      for (let x = cx - rad; x <= cx + rad; x += 2) {
-        if (!world.inBounds(x, y)) return null;
-        const i = y * w + x;
-        const e = world.height[i];
-        const b = world.biome[i];
-        if (WATER.has(b)) { waterN++; if (b === B.RIVER || b === B.SHALLOW) near++; }
-        if (b === B.PEAK || b === B.ROCK || b === B.ASH) return null;
-        lo = Math.min(lo, e); hi = Math.max(hi, e); n++;
-      }
-    }
-    if (waterN / n > 0.16) return null;
-    return { relief: hi - lo, water: near, n };
-  };
-
-  for (const def of settleDefs) {
-    let best = null;
-    for (let k = 0; k < 2600; k++) {
-      const x = rng.irange(50, w - 51), y = rng.irange(50, h - 51);
-      const i = y * w + x;
-      const b = world.biome[i];
-      if (WATER.has(b) || b === B.PEAK || b === B.ROCK || b === B.ASH || b === B.BEACH) continue;
-      let tooClose = false;
-      for (const s of world.settlements) {
-        if (dist(x, y, s.x, s.y) < Math.max(def.minDist, s.size * 3)) { tooClose = true; break; }
-      }
-      if (tooClose) continue;
-      const f = flatness(x, y, def.size + 4);
-      if (!f) continue;
-      let score = 1 / (0.03 + f.relief) + f.water * 1.2;
-      if (b === B.GRASS || b === B.MEADOW) score *= 1.35;
-      if (b === B.SWAMP || b === B.DESERT || b === B.SNOW) score *= 0.6;
-      if (world.settlements.length === 0) {
-        // capital prefers world centre for a friendly starting area
-        score *= 1.6 - dist(x, y, w / 2, h / 2) / (w * 0.55);
-      }
-      if (!best || score > best.score) best = { x, y, score, biome: b };
-    }
-    if (!best) continue;
-    const name = rng.pick(NAMES_A) + rng.pick(NAMES_B);
-    world.settlements.push(buildSettlement(world, best.x, best.y, def, name, makeRNG(S + world.settlements.length * 7717)));
-    yield { phase: '街を興す', t: 0.66 + (world.settlements.length / settleDefs.length) * 0.16 };
+    const inv = 1 / total;
+    for (const k of BLEND_KEYS) out[k] *= inv;
+    for (const k of BLEND_VEC) { out[k][0] *= inv; out[k][1] *= inv; out[k][2] *= inv; }
+    out.region = bestRegion;
+    return out;
   }
 
-  // ————————————————————————————————————— 5. roads between settlements
-  const linked = new Set();
-  const list = world.settlements;
-  for (let i = 0; i < list.length; i++) {
-    // connect each settlement to its two nearest neighbours
-    const others = list
-      .map((s, j) => ({ s, j, d: dist(list[i].x, list[i].y, s.x, s.y) }))
-      .filter((o) => o.j !== i)
-      .sort((a, b) => a.d - b.d)
-      .slice(0, 2);
-    for (const o of others) {
-      const key = Math.min(i, o.j) + ':' + Math.max(i, o.j);
-      if (linked.has(key)) continue;
-      linked.add(key);
-      carveRoad(world, list[i], o.s);
+  /** 粗いグリッド上でキャッシュした地方パラメータを双一次補間する */
+  _node(ix, iz) {
+    const k = ix * 100003 + iz;
+    let n = this.pcache.get(k);
+    if (!n) {
+      n = this.paramsRaw(ix * PARAM_GRID, iz * PARAM_GRID, this._makeP());
+      this.pcache.set(k, n);
     }
-    yield { phase: '街道を敷く', t: 0.82 + (i / list.length) * 0.10 };
+    return n;
   }
 
-  // ————————————————————————————————————— 6. points of interest
-  placePOIs(world, rng);
-  yield { phase: '秘密を隠す', t: 0.97 };
+  /** 双一次補間の重みと 4 ノードを求める（内部用） */
+  _bilinear(x, z) {
+    const fx = x / PARAM_GRID, fz = z / PARAM_GRID;
+    const ix = Math.floor(fx), iz = Math.floor(fz);
+    const tx = fx - ix, tz = fz - iz;
+    const b = this._bl;
+    b.n00 = this._node(ix, iz); b.n10 = this._node(ix + 1, iz);
+    b.n01 = this._node(ix, iz + 1); b.n11 = this._node(ix + 1, iz + 1);
+    b.w00 = (1 - tx) * (1 - tz); b.w10 = tx * (1 - tz);
+    b.w01 = (1 - tx) * tz; b.w11 = tx * tz;
+    b.tx = tx; b.tz = tz;
+    return b;
+  }
 
-  world.start = findStart(world);
-  yield { phase: '完了', t: 1, world };
-  return world;
-}
+  /** 高さ計算に必要な 6 値だけを補間する高速版 */
+  heightParams(x, z) {
+    const b = this._bilinear(x, z);
+    const { n00, n10, n01, n11, w00, w10, w01, w11 } = b;
+    const o = this._hp;
+    o.base = n00.base * w00 + n10.base * w10 + n01.base * w01 + n11.base * w11;
+    o.landAmp = n00.landAmp * w00 + n10.landAmp * w10 + n01.landAmp * w01 + n11.landAmp * w11;
+    o.hillAmp = n00.hillAmp * w00 + n10.hillAmp * w10 + n01.hillAmp * w01 + n11.hillAmp * w11;
+    o.ridgeAmp = n00.ridgeAmp * w00 + n10.ridgeAmp * w10 + n01.ridgeAmp * w01 + n11.ridgeAmp * w11;
+    o.ridgeSharp = n00.ridgeSharp * w00 + n10.ridgeSharp * w10 + n01.ridgeSharp * w01 + n11.ridgeSharp * w11;
+    o.rough = n00.rough * w00 + n10.rough * w10 + n01.rough * w01 + n11.rough * w11;
+    return o;
+  }
 
-// ————————————————————————————————————————————————————————— settlements
-
-function buildSettlement(world, cx, cy, def, name, rng) {
-  const s = {
-    x: cx, y: cy, type: def.type, label: def.label, name, size: def.size,
-    buildings: [], props: [], npcSpawns: [], discovered: false,
-    id: 'settle_' + cx + '_' + cy,
-  };
-  const w = world.w;
-  const R = def.size;
-
-  // flatten & floor the town area
-  let sum = 0, n = 0;
-  for (let y = cy - R; y <= cy + R; y++) {
-    for (let x = cx - R; x <= cx + R; x++) {
-      if (!world.inBounds(x, y)) continue;
-      if (dist(x, y, cx, cy) > R) continue;
-      sum += world.height[y * w + x]; n++;
+  params(x, z, out = this._p) {
+    const b = this._bilinear(x, z);
+    const { n00, n10, n01, n11, w00, w10, w01, w11, tx, tz } = b;
+    out.base = n00.base * w00 + n10.base * w10 + n01.base * w01 + n11.base * w11;
+    out.landAmp = n00.landAmp * w00 + n10.landAmp * w10 + n01.landAmp * w01 + n11.landAmp * w11;
+    out.hillAmp = n00.hillAmp * w00 + n10.hillAmp * w10 + n01.hillAmp * w01 + n11.hillAmp * w11;
+    out.ridgeAmp = n00.ridgeAmp * w00 + n10.ridgeAmp * w10 + n01.ridgeAmp * w01 + n11.ridgeAmp * w11;
+    out.ridgeSharp = n00.ridgeSharp * w00 + n10.ridgeSharp * w10 + n01.ridgeSharp * w01 + n11.ridgeSharp * w11;
+    out.rough = n00.rough * w00 + n10.rough * w10 + n01.rough * w01 + n11.rough * w11;
+    out.temp = n00.temp * w00 + n10.temp * w10 + n01.temp * w01 + n11.temp * w11;
+    out.moist = n00.moist * w00 + n10.moist * w10 + n01.moist * w01 + n11.moist * w11;
+    out.treeDensity = n00.treeDensity * w00 + n10.treeDensity * w10 + n01.treeDensity * w01 + n11.treeDensity * w11;
+    out.bushDensity = n00.bushDensity * w00 + n10.bushDensity * w10 + n01.bushDensity * w01 + n11.bushDensity * w11;
+    out.grassDensity = n00.grassDensity * w00 + n10.grassDensity * w10 + n01.grassDensity * w01 + n11.grassDensity * w11;
+    out.fogDensity = n00.fogDensity * w00 + n10.fogDensity * w10 + n01.fogDensity * w01 + n11.fogDensity * w11;
+    out.danger = n00.danger * w00 + n10.danger * w10 + n01.danger * w01 + n11.danger * w11;
+    for (let vi = 0; vi < 4; vi++) {
+      const k = BLEND_VEC[vi];
+      const o = out[k], a = n00[k], b1 = n10[k], c = n01[k], d = n11[k];
+      o[0] = a[0] * w00 + b1[0] * w10 + c[0] * w01 + d[0] * w11;
+      o[1] = a[1] * w00 + b1[1] * w10 + c[1] * w01 + d[1] * w11;
+      o[2] = a[2] * w00 + b1[2] * w10 + c[2] * w01 + d[2] * w11;
     }
-  }
-  const avg = sum / Math.max(1, n);
-  for (let y = cy - R - 2; y <= cy + R + 2; y++) {
-    for (let x = cx - R - 2; x <= cx + R + 2; x++) {
-      if (!world.inBounds(x, y)) continue;
-      const d = dist(x, y, cx, cy);
-      if (d > R + 2) continue;
-      const i = y * w + x;
-      const t = clamp(1 - (d - R * 0.6) / (R * 0.5), 0, 1);
-      world.height[i] = lerp(world.height[i], avg, t * 0.92);
-      if (d <= R && !WATER.has(world.biome[i])) {
-        world.overlay[i] = 4;
-      }
-    }
-  }
-  // central plaza
-  const plazaR = Math.max(3, Math.floor(R * 0.26));
-  for (let y = cy - plazaR; y <= cy + plazaR; y++) {
-    for (let x = cx - plazaR; x <= cx + plazaR; x++) {
-      if (!world.inBounds(x, y)) continue;
-      if (dist(x, y, cx, cy) > plazaR) continue;
-      world.overlay[y * w + x] = 6;
-    }
+    out.region = (tx < 0.5 ? (tz < 0.5 ? n00 : n01) : (tz < 0.5 ? n10 : n11)).region;
+    return out;
   }
 
-  // radial streets
-  const streets = def.type === 'capital' ? 6 : def.type === 'town' ? 5 : 4;
-  for (let k = 0; k < streets; k++) {
-    const a = (k / streets) * Math.PI * 2 + rng() * 0.4;
-    for (let d = plazaR - 1; d < R + 3; d += 0.5) {
-      const x = Math.round(cx + Math.cos(a) * d);
-      const y = Math.round(cy + Math.sin(a) * d);
-      for (let oy = -1; oy <= 1; oy++) {
-        for (let ox = -1; ox <= 1; ox++) {
-          if (!world.inBounds(x + ox, y + oy)) continue;
-          const i = (y + oy) * w + (x + ox);
-          if (WATER.has(world.biome[i])) continue;
-          world.overlay[i] = 1;
-        }
-      }
+  regionAt(x, z) { return this.params(x, z).region; }
+  dangerAt(x, z) { return this.params(x, z).danger; }
+
+  /* ---------------------------------------------------------- 高さ関数 */
+  coastMask(x, z) {
+    const d = Math.hypot(x, z);
+    const wob = this.n.fbm(x * 0.0012, z * 0.0012, 3) * 260;
+    return 1 - smoothstep(WORLD_RADIUS - 420 + wob, WORLD_RADIUS + 120 + wob, d);
+  }
+
+  /** 平坦化・街道を含まない素の地形 */
+  heightBase(x, z) {
+    const p = this.heightParams(x, z);
+    const land = this.n.fbm(x * 0.00085, z * 0.00085, 5, 2.05, 0.5);
+    const hills = this.n.fbm(x * 0.0055, z * 0.0055, 4, 2.1, 0.5);
+    const detail = this.nDetail.fbm(x * 0.031, z * 0.031, 3, 2.2, 0.45);
+
+    let ridge = this.n.ridged(x * 0.0016, z * 0.0016, 5, 2.03, 0.52);
+    ridge = Math.pow(clamp01(ridge), p.ridgeSharp);
+
+    let h = p.base + land * p.landAmp + hills * p.hillAmp * p.rough
+      + ridge * p.ridgeAmp + detail * 1.4 * p.rough;
+
+    // 海岸へ向けて落ち込む
+    const cm = this.coastMask(x, z);
+    h = h * cm - (1 - cm) * 26;
+
+    // 湖
+    const lake = this.n.fbm(x * 0.0021 + 77, z * 0.0021 - 41, 3);
+    if (lake > 0.42 && h < 42) {
+      const t = smoothstep(0.42, 0.62, lake) * clamp01((42 - h) / 24);
+      h = lerp(h, -3.5 - t * 4, t);
     }
-    s.gates = s.gates || [];
-    s.gates.push({ x: cx + Math.cos(a) * (R + 2), y: cy + Math.sin(a) * (R + 2) });
-  }
 
-  // buildings: ring placement, rejection sampled
-  const buildingTypes = [];
-  if (def.type === 'capital') {
-    buildingTypes.push('castle', 'inn', 'shop', 'smith', 'alchemist', 'temple', 'guild');
-  } else if (def.type === 'town') {
-    buildingTypes.push('inn', 'shop', 'smith', 'alchemist', 'guild');
-  } else if (def.type === 'village') {
-    buildingTypes.push('inn', 'shop', 'smith');
-  } else {
-    buildingTypes.push('shop');
-  }
-  const houseCount = def.type === 'capital' ? 22 : def.type === 'town' ? 14 : def.type === 'village' ? 9 : 5;
-  for (let i = 0; i < houseCount; i++) buildingTypes.push('house');
-
-  const placed = [];
-  for (const type of buildingTypes) {
-    const big = type === 'castle' || type === 'temple';
-    const bw = big ? rng.irange(8, 10) : type === 'house' ? rng.irange(4, 6) : rng.irange(5, 7);
-    const bh = big ? rng.irange(7, 9) : type === 'house' ? rng.irange(4, 5) : rng.irange(4, 6);
-    let ok = false;
-    for (let attempt = 0; attempt < 200 && !ok; attempt++) {
-      const a = rng() * Math.PI * 2;
-      const rad = big ? rng.range(plazaR + 2, R * 0.55) : rng.range(plazaR + 2.5, R - 3);
-      const bx = Math.round(cx + Math.cos(a) * rad - bw / 2);
-      const by = Math.round(cy + Math.sin(a) * rad - bh / 2);
-      // must be on land, inside town, not overlapping
-      let valid = true;
-      for (let y = by - 1; y <= by + bh + 1 && valid; y++) {
-        for (let x = bx - 1; x <= bx + bw + 1 && valid; x++) {
-          if (!world.inBounds(x, y)) valid = false;
-          else if (WATER.has(world.biome[y * w + x])) valid = false;
-          else if (dist(x, y, cx, cy) > R - 0.5) valid = false;
-        }
-      }
-      if (!valid) continue;
-      for (const p of placed) {
-        if (bx < p.tx + p.tw + 2 && bx + bw + 2 > p.tx && by < p.ty + p.th + 2 && by + bh + 2 > p.ty) { valid = false; break; }
-      }
-      if (!valid) continue;
-      // door faces the plaza
-      const towards = Math.atan2(cy - (by + bh / 2), cx - (bx + bw / 2));
-      const b = {
-        type, tx: bx, ty: by, tw: bw, th: bh,
-        x: (bx + bw / 2) * TILE, y: (by + bh / 2) * TILE,
-        doorSide: Math.abs(Math.cos(towards)) > Math.abs(Math.sin(towards)) ? (Math.cos(towards) > 0 ? 'e' : 'w') : (Math.sin(towards) > 0 ? 's' : 'n'),
-        style: rng.int(4), roofHue: rng.range(0, 1), id: s.id + '_b' + placed.length,
-      };
-      b.doorX = b.doorSide === 'e' ? bx + bw : b.doorSide === 'w' ? bx - 0.2 : bx + bw / 2;
-      b.doorY = b.doorSide === 's' ? by + bh : b.doorSide === 'n' ? by - 0.2 : by + bh / 2;
-      placed.push(b);
-      s.buildings.push(b);
-      ok = true;
+    // 河川（低地のみ谷を刻む。高地では乾いた峡谷になる）
+    const rv = 1 - Math.abs(this.nRiver.n2(x * 0.00105 + 13.3, z * 0.00105 - 7.1));
+    const band = smoothstep(0.955, 0.999, rv);
+    if (band > 0) {
+      const alt = clamp01(1 - (h - 8) / 90);
+      const depth = band * (7 + 9 * alt) * clamp01(h / 6 + 0.3);
+      h -= depth;
+      if (alt > 0.65 && h < -2.2) h = -2.2 + (h + 2.2) * 0.25;
     }
+    return h;
   }
 
-  // clear floor under/around buildings and add a path to each door
-  for (const b of s.buildings) {
-    for (let y = b.ty - 1; y <= b.ty + b.th + 1; y++) {
-      for (let x = b.tx - 1; x <= b.tx + b.tw + 1; x++) {
-        if (!world.inBounds(x, y)) continue;
-        const i = y * w + x;
-        if (WATER.has(world.biome[i])) continue;
-        if (world.overlay[i] !== 1) world.overlay[i] = 4;
-      }
-    }
-    // path from door toward plaza
-    let px = b.doorX, py = b.doorY;
-    for (let k = 0; k < 40; k++) {
-      const a = Math.atan2(cy - py, cx - px);
-      px += Math.cos(a); py += Math.sin(a);
-      const gx = Math.round(px), gy = Math.round(py);
-      if (!world.inBounds(gx, gy)) break;
-      if (dist(gx, gy, cx, cy) < plazaR) break;
-      const i = gy * w + gx;
-      if (!WATER.has(world.biome[i])) world.overlay[i] = 1;
-    }
+  /** 平坦化・街道を反映した最終高さ */
+  height(x, z) {
+    const h = this.heightBase(x, z);
+    const f = this.flatAt(x, z);
+    return f ? lerp(h, f.h, f.w) : h;
   }
 
-  // farms outside the walls
-  if (def.type !== 'hamlet') {
-    const farmCount = def.type === 'capital' ? 7 : 4;
-    for (let k = 0; k < farmCount; k++) {
-      const a = rng() * Math.PI * 2;
-      const rad = R + rng.range(4, 13);
-      const fx = Math.round(cx + Math.cos(a) * rad);
-      const fy = Math.round(cy + Math.sin(a) * rad);
-      const fw = rng.irange(6, 11), fh = rng.irange(5, 9);
-      let valid = true;
-      for (let y = fy; y < fy + fh && valid; y++)
-        for (let x = fx; x < fx + fw && valid; x++)
-          if (!world.inBounds(x, y) || WATER.has(world.biome[y * w + x]) || world.biome[y * w + x] === B.ROCK) valid = false;
-      if (!valid) continue;
-      for (let y = fy; y < fy + fh; y++)
-        for (let x = fx; x < fx + fw; x++) world.overlay[y * w + x] = 3;
-    }
+  /** 有限差分による法線 */
+  normal(x, z, out) {
+    const e = 1.0;
+    const hL = this.height(x - e, z), hR = this.height(x + e, z);
+    const hD = this.height(x, z - e), hU = this.height(x, z + e);
+    const nx = hL - hR, ny = 2 * e, nz = hD - hU;
+    const l = Math.hypot(nx, ny, nz) || 1;
+    out[0] = nx / l; out[1] = ny / l; out[2] = nz / l;
+    return out;
   }
 
-  // decorations: wells, lamps, market stalls, benches, trees
-  s.props.push({ kind: 'well', x: cx * TILE + TILE / 2, y: cy * TILE + TILE / 2 });
-  for (let k = 0; k < streets * 2; k++) {
-    const a = (k / (streets * 2)) * Math.PI * 2;
-    const rad = (plazaR + 1.4) * TILE;
-    s.props.push({ kind: 'lamp', x: (cx + 0.5) * TILE + Math.cos(a) * rad, y: (cy + 0.5) * TILE + Math.sin(a) * rad });
+  slope(x, z) {
+    const e = 1.2;
+    const hL = this.height(x - e, z), hR = this.height(x + e, z);
+    const hD = this.height(x, z - e), hU = this.height(x, z + e);
+    return Math.hypot(hR - hL, hU - hD) / (2 * e);
   }
-  const stalls = def.type === 'capital' ? 6 : def.type === 'town' ? 4 : 2;
-  for (let k = 0; k < stalls; k++) {
-    const a = rng() * Math.PI * 2, rad = rng.range(1.2, plazaR - 0.6) * TILE;
-    s.props.push({ kind: 'stall', x: (cx + 0.5) * TILE + Math.cos(a) * rad, y: (cy + 0.5) * TILE + Math.sin(a) * rad, hue: rng() });
-  }
-  for (let k = 0; k < R; k++) {
-    const a = rng() * Math.PI * 2, rad = rng.range(plazaR + 2, R - 1) * TILE;
-    const px = (cx + 0.5) * TILE + Math.cos(a) * rad, py = (cy + 0.5) * TILE + Math.sin(a) * rad;
-    const tx = Math.floor(px / TILE), ty = Math.floor(py / TILE);
-    if (!world.inBounds(tx, ty)) continue;
-    if (world.overlay[ty * world.w + tx] !== 4) continue;
-    let clear = true;
-    for (const b of s.buildings) {
-      if (tx >= b.tx - 1 && tx <= b.tx + b.tw && ty >= b.ty - 1 && ty <= b.ty + b.th) { clear = false; break; }
-    }
-    if (clear) s.props.push({ kind: rng.chance(0.7) ? 'townTree' : 'barrel', x: px, y: py });
-  }
-  return s;
-}
 
-// ————————————————————————————————————————————————————————— roads
+  /* --------------------------------------------------------- 平坦化領域 */
+  _key(cx, cz) { return cx * 100003 + cz; }
 
-function carveRoad(world, a, b) {
-  // A* on a coarse grid with terrain costs, then paint a 3-wide road.
-  const STEP = 3;
-  const gw = Math.ceil(world.w / STEP), gh = Math.ceil(world.h / STEP);
-  const sx = Math.floor(a.x / STEP), sy = Math.floor(a.y / STEP);
-  const gx = Math.floor(b.x / STEP), gy = Math.floor(b.y / STEP);
-  const cost = (x, y) => {
-    const tx = x * STEP, ty = y * STEP;
-    if (!world.inBounds(tx, ty)) return Infinity;
-    const i = ty * world.w + tx;
-    const bi = world.biome[i];
-    if (bi === B.DEEP || bi === B.OCEAN) return Infinity;
-    if (bi === B.PEAK) return 90;
-    if (bi === B.ROCK) return 14;
-    if (bi === B.RIVER) return 26; // bridge
-    if (bi === B.SHALLOW) return 30;
-    if (bi === B.SWAMP) return 9;
-    if (bi === B.ASH) return 20;
-    if (world.overlay[i] === 1) return 0.6;
-    return 2.4;
-  };
-  const H = (x, y) => (Math.abs(x - gx) + Math.abs(y - gy)) * 2.4;
-  const open = [{ x: sx, y: sy, g: 0, f: H(sx, sy) }];
-  const gScore = new Map();
-  const came = new Map();
-  const key = (x, y) => y * gw + x;
-  gScore.set(key(sx, sy), 0);
-  let found = false, guard = 0;
-  while (open.length && guard++ < 200000) {
-    let bi2 = 0;
-    for (let i = 1; i < open.length; i++) if (open[i].f < open[bi2].f) bi2 = i;
-    const cur = open.splice(bi2, 1)[0];
-    if (cur.x === gx && cur.y === gy) { found = true; break; }
-    for (let oy = -1; oy <= 1; oy++) {
-      for (let ox = -1; ox <= 1; ox++) {
-        if (!ox && !oy) continue;
-        const nx = cur.x + ox, ny = cur.y + oy;
-        if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue;
-        const c = cost(nx, ny);
-        if (!isFinite(c)) continue;
-        // slope penalty keeps roads out of cliffs
-        const h1 = world.heightAt(cur.x * STEP, cur.y * STEP);
-        const h2 = world.heightAt(nx * STEP, ny * STEP);
-        const slope = Math.abs(h2 - h1) * 190;
-        const diag = ox && oy ? 1.42 : 1;
-        const ng = cur.g + (c + slope) * diag;
-        const k = key(nx, ny);
-        if (ng < (gScore.get(k) ?? Infinity)) {
-          gScore.set(k, ng);
-          came.set(k, cur);
-          open.push({ x: nx, y: ny, g: ng, f: ng + H(nx, ny) });
-        }
+  _addToGrid(item, minX, minZ, maxX, maxZ) {
+    const c = this.flatCell;
+    for (let cz = Math.floor(minZ / c); cz <= Math.floor(maxZ / c); cz++) {
+      for (let cx = Math.floor(minX / c); cx <= Math.floor(maxX / c); cx++) {
+        const k = this._key(cx, cz);
+        let list = this.flatGrid.get(k);
+        if (!list) { list = []; this.flatGrid.set(k, list); }
+        list.push(item);
       }
     }
   }
-  if (!found) return;
-  // rebuild path
-  const path = [];
-  let node = { x: gx, y: gy };
-  let safety = 0;
-  while (node && safety++ < 20000) {
-    path.push([node.x * STEP, node.y * STEP]);
-    node = came.get(key(node.x, node.y));
+
+  /** 円形の平坦地（集落・祭壇・ボス闘技場） */
+  addPlateau(x, z, radius, feather = 18, height = null) {
+    const h = height ?? this.heightBase(x, z);
+    const item = { kind: 'disc', x, z, r: radius, f: feather, h };
+    this._addToGrid(item, x - radius - feather, z - radius - feather, x + radius + feather, z + radius + feather);
+    return item;
   }
-  path.reverse();
-  // smooth + paint
-  for (let p = 0; p < path.length - 1; p++) {
-    const [x1, y1] = path[p], [x2, y2] = path[p + 1];
-    const steps = Math.ceil(Math.hypot(x2 - x1, y2 - y1));
-    for (let s = 0; s <= steps; s++) {
-      const t = s / Math.max(1, steps);
-      const px = Math.round(lerp(x1, x2, t)), py = Math.round(lerp(y1, y2, t));
-      for (let oy = -1; oy <= 1; oy++) {
-        for (let ox = -1; ox <= 1; ox++) {
-          const tx = px + ox, ty = py + oy;
-          if (!world.inBounds(tx, ty)) continue;
-          const i = ty * world.w + tx;
-          const bi = world.biome[i];
-          if (bi === B.DEEP || bi === B.OCEAN) continue;
-          if (bi === B.RIVER || bi === B.SHALLOW) { world.overlay[i] = 5; continue; }
-          if (world.overlay[i] === 4 || world.overlay[i] === 6) continue;
-          if (bi === B.PEAK) world.biome[i] = B.ROCK;
-          world.overlay[i] = 1;
-        }
+
+  /** 2点を結ぶ街道（幅 w、両端の高さを補間して均す） */
+  addRoad(x0, z0, x1, z1, w = 5, feather = 9) {
+    const h0 = this.height(x0, z0), h1 = this.height(x1, z1);
+    const item = { kind: 'seg', x0, z0, x1, z1, w, f: feather, h0, h1 };
+    const pad = w + feather + 2;
+    this._addToGrid(item, Math.min(x0, x1) - pad, Math.min(z0, z1) - pad,
+      Math.max(x0, x1) + pad, Math.max(z0, z1) + pad);
+    this.roads.push(item);
+    return item;
+  }
+
+  /** (x,z) における平坦化の目標高さと重み */
+  flatAt(x, z) {
+    const c = this.flatCell;
+    const list = this.flatGrid.get(this._key(Math.floor(x / c), Math.floor(z / c)));
+    if (!list) return null;
+    let bw = 0, bh = 0, road = 0;
+    for (let i = 0; i < list.length; i++) {
+      const it = list[i];
+      let w = 0, h = 0;
+      if (it.kind === 'disc') {
+        const d = Math.hypot(x - it.x, z - it.z);
+        w = 1 - smoothstep(it.r, it.r + it.f, d);
+        h = it.h;
+      } else {
+        const dx = it.x1 - it.x0, dz = it.z1 - it.z0;
+        const len2 = dx * dx + dz * dz || 1;
+        const t = clamp01(((x - it.x0) * dx + (z - it.z0) * dz) / len2);
+        const px = it.x0 + dx * t, pz = it.z0 + dz * t;
+        const d = Math.hypot(x - px, z - pz);
+        w = 1 - smoothstep(it.w, it.w + it.f, d);
+        h = lerp(it.h0, it.h1, t);
+        if (w > road) road = w;
       }
+      if (w > bw) { bw = w; bh = h; }
+      else if (w > 0) { bh = lerp(bh, h, w * 0.4); }
     }
+    if (bw <= 0) return null;
+    return { w: bw, h: bh, road };
   }
-  world.roadNodes.push(path);
-}
 
-// ————————————————————————————————————————————————————————— POIs
+  /** 道路の踏み固め度（0..1）。地表色と足音に使う */
+  roadAt(x, z) {
+    const f = this.flatAt(x, z);
+    return f ? f.road : 0;
+  }
 
-function placePOIs(world, rng) {
-  const w = world.w, h = world.h;
-  const far = (x, y, minD) => {
-    for (const s of world.settlements) if (dist(x, y, s.x, s.y) < minD) return false;
-    for (const p of world.pois) if (dist(x, y, p.tx, p.ty) < 26) return false;
-    return true;
-  };
-  const add = (kind, tx, ty, extra = {}) => {
-    world.pois.push({
-      kind, tx, ty, x: (tx + 0.5) * TILE, y: (ty + 0.5) * TILE,
-      discovered: false, cleared: false, id: kind + '_' + tx + '_' + ty, ...extra,
-    });
-  };
+  /* --------------------------------------------------------------- 色 */
+  surfaceColor(x, z, h, slope, out) {
+    const p = this.params(x, z);
+    const v = this.nDetail.fbm(x * 0.09, z * 0.09, 2) * 0.5 + 0.5;
+    const patch = this.n.fbm(x * 0.012 + 400, z * 0.012 - 220, 3) * 0.5 + 0.5;
 
-  // shrines — fast travel points, on hills & near roads
-  let tries = 0;
-  let shrines = 0;
-  while (shrines < 12 && tries++ < 40000) {
-    const x = rng.irange(20, w - 21), y = rng.irange(20, h - 21);
-    const b = world.biome[y * w + x];
-    if (WATER.has(b) || b === B.PEAK) continue;
-    if (world.overlay[y * w + x] === 4 || world.overlay[y * w + x] === 6) continue;
-    if (!far(x, y, 46)) continue;
-    add('shrine', x, y, { name: rng.pick(NAMES_A) + 'の祠' });
-    shrines++;
-  }
-  // dungeons — cave mouths in rocky terrain
-  let dungeons = 0; tries = 0;
-  const dungeonNames = ['忘れられた坑道', '朽ちた地下墓所', '氷結の洞', '砂中の遺構', '苔むす回廊', '深淵の巣', '嘆きの牢', '灰燼の炉'];
-  while (dungeons < 8 && tries++ < 60000) {
-    const x = rng.irange(20, w - 21), y = rng.irange(20, h - 21);
-    const b = world.biome[y * w + x];
-    if (b !== B.ROCK && b !== B.ASH && b !== B.SNOW && b !== B.DARKWOOD) continue;
-    if (!far(x, y, 42)) continue;
-    // must be reachable-ish: has a non-solid neighbour
-    let open = 0;
-    for (let oy = -2; oy <= 2; oy++) for (let ox = -2; ox <= 2; ox++)
-      if (!world.isSolidTile(x + ox, y + oy)) open++;
-    if (open < 8) continue;
-    add('dungeon', x, y, {
-      name: dungeonNames[dungeons % dungeonNames.length],
-      level: 1 + dungeons * 2 + rng.int(3),
-      floors: 2 + rng.int(2), seed: (rng() * 1e9) | 0,
-    });
-    dungeons++;
-  }
-  // bandit camps
-  let camps = 0; tries = 0;
-  while (camps < 16 && tries++ < 40000) {
-    const x = rng.irange(20, w - 21), y = rng.irange(20, h - 21);
-    const b = world.biome[y * w + x];
-    if (WATER.has(b) || b === B.PEAK || b === B.ROCK) continue;
-    if (!far(x, y, 40)) continue;
-    add('camp', x, y, { level: 1 + rng.int(10), seed: (rng() * 1e9) | 0 });
-    camps++;
-  }
-  // ruins & treasure
-  let ruins = 0; tries = 0;
-  while (ruins < 18 && tries++ < 40000) {
-    const x = rng.irange(20, w - 21), y = rng.irange(20, h - 21);
-    const b = world.biome[y * w + x];
-    if (WATER.has(b) || b === B.PEAK) continue;
-    if (!far(x, y, 34)) continue;
-    add('ruin', x, y, { seed: (rng() * 1e9) | 0 });
-    ruins++;
-  }
-  // the volcano lair (final dungeon)
-  if (world.volcano) {
-    let vx = world.volcano.x, vy = world.volcano.y;
-    for (let r = 6; r < 30; r++) {
-      let done = false;
-      for (let a = 0; a < 32; a++) {
-        const ang = (a / 32) * Math.PI * 2;
-        const x = Math.round(vx + Math.cos(ang) * r), y = Math.round(vy + Math.sin(ang) * r);
-        if (world.inBounds(x, y) && world.biome[y * w + x] === B.ASH) {
-          add('lair', x, y, { name: '竜の火口', level: 22, floors: 1, boss: true, seed: 12345 });
-          done = true; break;
-        }
-      }
-      if (done) break;
+    let r = lerp(p.grass[0], p.grass2[0], patch);
+    let g = lerp(p.grass[1], p.grass2[1], patch);
+    let b = lerp(p.grass[2], p.grass2[2], patch);
+
+    const rocky = smoothstep(0.55, 1.15, slope);
+    r = lerp(r, p.rock[0], rocky); g = lerp(g, p.rock[1], rocky); b = lerp(b, p.rock[2], rocky);
+
+    const snowLine = lerp(150, 42, clamp01(1 - p.temp));
+    const snow = smoothstep(snowLine, snowLine + 32, h) * (1 - rocky * 0.55);
+    r = lerp(r, 0.92, snow); g = lerp(g, 0.95, snow); b = lerp(b, 1.0, snow);
+
+    const sand = (1 - smoothstep(1.0, 4.2, h)) * (1 - smoothstep(0.5, 0.9, slope));
+    r = lerp(r, 0.72, sand); g = lerp(g, 0.66, sand); b = lerp(b, 0.50, sand);
+
+    if (h < 0) {
+      const t = clamp01(-h / 8);
+      r = lerp(r, 0.20, t); g = lerp(g, 0.22, t); b = lerp(b, 0.20, t);
     }
-  }
-}
 
-function findStart(world) {
-  const cap = world.settlements[0];
-  if (cap) {
-    return { x: (cap.x + 0.5) * TILE, y: (cap.y + cap.size * 0.45) * TILE };
+    const road = this.roadAt(x, z);
+    if (road > 0.01) {
+      const t = smoothstep(0.35, 0.95, road) * 0.88;
+      const dirt = this.nDetail.fbm(x * 0.35, z * 0.35, 2) * 0.06;
+      r = lerp(r, 0.30 + dirt, t); g = lerp(g, 0.245 + dirt, t); b = lerp(b, 0.185 + dirt, t);
+    }
+
+    const shade = 0.86 + v * 0.28;
+    out[0] = clamp(r * shade, 0, 1);
+    out[1] = clamp(g * shade, 0, 1);
+    out[2] = clamp(b * shade, 0, 1);
+    return out;
   }
-  return { x: (world.w / 2) * TILE, y: (world.h / 2) * TILE };
+
+  /** 地面の総合サンプル（ゲームロジック用） */
+  sample(x, z) {
+    const h = this.height(x, z);
+    const s = this.slope(x, z);
+    const p = this.params(x, z);
+    const road = this.roadAt(x, z);
+    let surface = 'grass';
+    if (road > 0.4) surface = 'dirt';
+    else if (h < 1.6) surface = 'sand';
+    else if (s > 0.85) surface = 'rock';
+    else if (h > lerp(150, 42, clamp01(1 - p.temp))) surface = 'snow';
+    else if (p.moist > 0.9) surface = 'marsh';
+    return { h, slope: s, region: p.region, danger: p.danger, surface, road, underwater: h < SEA_LEVEL };
+  }
+
+  /** 指定範囲内で歩行に適した平地を探す（スポーン配置用） */
+  findFlat(x, z, radius, tries = 24, maxSlope = 0.5, minH = 1.5) {
+    for (let i = 0; i < tries; i++) {
+      const a = hash2(i * 13 + (x | 0), i * 7 + (z | 0), this.seed) * Math.PI * 2;
+      const rr = Math.sqrt(hash2(i * 31 + (z | 0), i * 17 + (x | 0), this.seed + 5)) * radius;
+      const px = x + Math.cos(a) * rr, pz = z + Math.sin(a) * rr;
+      const h = this.height(px, pz);
+      if (h > minH && this.slope(px, pz) < maxSlope) return { x: px, z: pz, h };
+    }
+    const h = this.height(x, z);
+    return { x, z, h };
+  }
 }

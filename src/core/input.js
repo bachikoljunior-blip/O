@@ -1,219 +1,259 @@
-// input.js — unified touch / mouse / keyboard / gamepad input.
+// 入力：タッチ（仮想スティック + ボタン）/ キーボード + マウス / ゲームパッド
 
-import { clamp, dist } from './util.js';
+const KEY_MAP = {
+  KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right',
+  ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+  Space: 'dodge', ShiftLeft: 'sprint', ShiftRight: 'sprint',
+  KeyJ: 'attack', KeyK: 'heavy', KeyL: 'block', KeyQ: 'lock',
+  KeyE: 'interact', KeyR: 'item', KeyF: 'spell', KeyC: 'jump',
+  Escape: 'menu', KeyM: 'map', Tab: 'inventory',
+};
 
 export class Input {
   constructor(canvas) {
     this.canvas = canvas;
-    this.pointers = new Map();
+    this.move = { x: 0, y: 0 };
+    this.look = { x: 0, y: 0 };
+    this.btn = new Set();
+    this.btnPressed = new Set();
+    this.btnReleased = new Set();
     this.keys = new Set();
-    this.keysPressed = new Set();
-    this.buttons = [];              // [{id,x,y,r}] registered by the HUD
-    this.buttonDownIds = new Set();
-    this.buttonPressedIds = new Set();
-    this.buttonReleasedIds = new Set();
-    this.stick = { x: 0, y: 0, active: false, ox: 0, oy: 0, cx: 0, cy: 0, id: null };
-    this.stickZone = { x: 0, y: 0, w: 0, h: 0 };
-    this.dpr = 1;
-    /** UI pointer state for menus */
-    this.ui = { x: 0, y: 0, down: false, pressed: false, released: false, dragY: 0, dragX: 0, id: null, moved: false, wheel: 0 };
-    this.anyPress = false;
-    this.usingTouch = false;
-    this._bind();
+    this.stick = { active: false, id: -1, ox: 0, oy: 0, x: 0, y: 0, radius: 62 };
+    this.lookTouch = { active: false, id: -1, lx: 0, ly: 0 };
+    this.lookSensitivity = 0.0055;
+    this.enabled = true;
+    this.pointerLock = false;
+    this.holdTimers = new Map();
+    this.touchMode = false;
+
+    this._bindKeyboard();
+    this._bindMouse();
+    this._bindTouch();
   }
 
-  _pos(e) {
-    const r = this.canvas.getBoundingClientRect();
-    return {
-      x: ((e.clientX - r.left) / r.width) * this.canvas.width / this.dpr,
-      y: ((e.clientY - r.top) / r.height) * this.canvas.height / this.dpr,
-    };
+  down(n) { return this.btn.has(n); }
+  pressed(n) { return this.btnPressed.has(n); }
+  released(n) { return this.btnReleased.has(n); }
+
+  press(n) {
+    if (!this.btn.has(n)) this.btnPressed.add(n);
+    this.btn.add(n);
   }
-
-  _bind() {
-    const c = this.canvas;
-    const opts = { passive: false };
-    c.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      if (e.pointerType === 'touch') this.usingTouch = true;
-      c.setPointerCapture?.(e.pointerId);
-      const p = this._pos(e);
-      const rec = { id: e.pointerId, x: p.x, y: p.y, x0: p.x, y0: p.y, px: p.x, py: p.y, t0: performance.now(), role: null, moved: false };
-      this.pointers.set(e.pointerId, rec);
-      this.anyPress = true;
-      this._assign(rec);
-    }, opts);
-
-    c.addEventListener('pointermove', (e) => {
-      const rec = this.pointers.get(e.pointerId);
-      if (!rec) return;
-      e.preventDefault();
-      const p = this._pos(e);
-      rec.px = rec.x; rec.py = rec.y;
-      rec.x = p.x; rec.y = p.y;
-      if (dist(rec.x, rec.y, rec.x0, rec.y0) > 8) rec.moved = true;
-      if (rec.role === 'stick') this._updateStick(rec);
-      if (rec.role === 'ui') {
-        this.ui.x = rec.x; this.ui.y = rec.y;
-        this.ui.dragY += rec.y - rec.py;
-        this.ui.dragX += rec.x - rec.px;
-        this.ui.moved = rec.moved;
-      }
-    }, opts);
-
-    const up = (e) => {
-      const rec = this.pointers.get(e.pointerId);
-      if (!rec) return;
-      e.preventDefault?.();
-      if (rec.role === 'stick') {
-        this.stick.active = false; this.stick.x = 0; this.stick.y = 0; this.stick.id = null;
-      } else if (rec.role && rec.role.startsWith('btn:')) {
-        const id = rec.role.slice(4);
-        this.buttonDownIds.delete(id);
-        this.buttonReleasedIds.add(id);
-      } else if (rec.role === 'ui') {
-        this.ui.down = false;
-        this.ui.released = true;
-        this.ui.id = null;
-      }
-      this.pointers.delete(e.pointerId);
-    };
-    c.addEventListener('pointerup', up, opts);
-    c.addEventListener('pointercancel', up, opts);
-    c.addEventListener('lostpointercapture', up, opts);
-    c.addEventListener('contextmenu', (e) => e.preventDefault());
-    c.addEventListener('wheel', (e) => { e.preventDefault(); this.ui.wheel += e.deltaY; }, opts);
-
-    addEventListener('keydown', (e) => {
-      if (e.repeat) return;
-      const k = e.key.toLowerCase();
-      this.keys.add(k);
-      this.keysPressed.add(k);
-      this.anyPress = true;
-      if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'tab'].includes(k)) e.preventDefault();
-    });
-    addEventListener('keyup', (e) => this.keys.delete(e.key.toLowerCase()));
-    addEventListener('blur', () => { this.keys.clear(); this.pointers.clear(); this.stick.active = false; this.stick.x = this.stick.y = 0; });
-  }
-
-  _assign(rec) {
-    // buttons first (registered by the HUD)
-    for (const b of this.buttons) {
-      if (b.enabled === false) continue;
-      if (dist(rec.x, rec.y, b.x, b.y) <= b.r) {
-        rec.role = 'btn:' + b.id;
-        this.buttonDownIds.add(b.id);
-        this.buttonPressedIds.add(b.id);
-        return;
-      }
-    }
-    if (this.uiMode) {
-      rec.role = 'ui';
-      this.ui.x = rec.x; this.ui.y = rec.y;
-      this.ui.down = true; this.ui.pressed = true; this.ui.id = rec.id;
-      this.ui.dragX = this.ui.dragY = 0;
-      this.ui.moved = false;
-      return;
-    }
-    const z = this.stickZone;
-    if (!this.stick.active && rec.x >= z.x && rec.x <= z.x + z.w && rec.y >= z.y && rec.y <= z.y + z.h) {
-      rec.role = 'stick';
-      this.stick.active = true;
-      this.stick.id = rec.id;
-      this.stick.ox = rec.x0; this.stick.oy = rec.y0;
-      this.stick.cx = rec.x; this.stick.cy = rec.y;
-      this._updateStick(rec);
-      return;
-    }
-    rec.role = 'ui';
-    this.ui.x = rec.x; this.ui.y = rec.y;
-    this.ui.down = true; this.ui.pressed = true; this.ui.id = rec.id;
-    this.ui.dragX = this.ui.dragY = 0;
-    this.ui.moved = false;
-  }
-
-  _updateStick(rec) {
-    const R = 62;
-    let dx = rec.x - this.stick.ox, dy = rec.y - this.stick.oy;
-    const d = Math.hypot(dx, dy);
-    if (d > R) {
-      // drag the origin so the stick never sticks at the rim
-      this.stick.ox += (dx / d) * (d - R);
-      this.stick.oy += (dy / d) * (d - R);
-      dx = rec.x - this.stick.ox; dy = rec.y - this.stick.oy;
-    }
-    this.stick.cx = rec.x; this.stick.cy = rec.y;
-    const dead = 6;
-    const m = Math.hypot(dx, dy);
-    if (m < dead) { this.stick.x = 0; this.stick.y = 0; return; }
-    const k = clamp((m - dead) / (R - dead), 0, 1);
-    this.stick.x = (dx / m) * k;
-    this.stick.y = (dy / m) * k;
-  }
-
-  /** Called by the HUD each frame to declare touch button hit areas. */
-  setButtons(list) { this.buttons = list; }
-  setStickZone(x, y, w, h) { this.stickZone = { x, y, w, h }; }
-  setUIMode(on) { this.uiMode = on; }
-
-  down(id) { return this.buttonDownIds.has(id); }
-  pressed(id) { return this.buttonPressedIds.has(id); }
-  released(id) { return this.buttonReleasedIds.has(id); }
-  key(k) { return this.keys.has(k); }
-  keyPressed(k) { return this.keysPressed.has(k); }
-
-  /** Movement vector from stick + keyboard + gamepad. */
-  moveVector() {
-    let x = this.stick.x, y = this.stick.y;
-    let kx = 0, ky = 0;
-    if (this.keys.has('a') || this.keys.has('arrowleft')) kx -= 1;
-    if (this.keys.has('d') || this.keys.has('arrowright')) kx += 1;
-    if (this.keys.has('w') || this.keys.has('arrowup')) ky -= 1;
-    if (this.keys.has('s') || this.keys.has('arrowdown')) ky += 1;
-    if (kx || ky) {
-      const m = Math.hypot(kx, ky);
-      x = kx / m; y = ky / m;
-    }
-    const gp = this._gamepad();
-    if (gp) {
-      const ax = gp.axes[0] || 0, ay = gp.axes[1] || 0;
-      if (Math.hypot(ax, ay) > 0.18) { x = ax; y = ay; }
-    }
-    const m = Math.hypot(x, y);
-    if (m > 1) { x /= m; y /= m; }
-    return { x, y, m: Math.min(1, m) };
-  }
-
-  _gamepad() {
-    if (!navigator.getGamepads) return null;
-    const list = navigator.getGamepads();
-    for (const g of list) if (g && g.connected) return g;
-    return null;
-  }
-
-  gamepadPressed(index) {
-    const g = this._gamepad();
-    if (!g) return false;
-    const b = g.buttons[index];
-    const was = this._gpPrev && this._gpPrev[index];
-    return !!(b && b.pressed && !was);
-  }
-  gamepadDown(index) {
-    const g = this._gamepad();
-    return !!(g && g.buttons[index] && g.buttons[index].pressed);
+  release(n) {
+    if (this.btn.has(n)) this.btnReleased.add(n);
+    this.btn.delete(n);
   }
 
   endFrame() {
-    this.keysPressed.clear();
-    this.buttonPressedIds.clear();
-    this.buttonReleasedIds.clear();
-    this.ui.pressed = false;
-    this.ui.released = false;
-    this.ui.dragY = 0;
-    this.ui.dragX = 0;
-    this.ui.wheel = 0;
-    this.anyPress = false;
-    const g = this._gamepad();
-    this._gpPrev = g ? g.buttons.map((b) => b.pressed) : null;
+    this.btnPressed.clear();
+    this.btnReleased.clear();
+    this.look.x = 0;
+    this.look.y = 0;
+  }
+
+  /* ------------------------------------------------------ キーボード */
+  _bindKeyboard() {
+    addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+      const m = KEY_MAP[e.code];
+      if (!m) return;
+      if (e.code === 'Tab' || e.code === 'Space') e.preventDefault();
+      this.keys.add(m);
+      if (['up', 'down', 'left', 'right'].includes(m)) return;
+      if (m === 'sprint') { this.press('dodge'); this._sprintKey = true; return; }
+      this.press(m);
+    });
+    addEventListener('keyup', (e) => {
+      const m = KEY_MAP[e.code];
+      if (!m) return;
+      this.keys.delete(m);
+      if (['up', 'down', 'left', 'right'].includes(m)) return;
+      if (m === 'sprint') { this.release('dodge'); this._sprintKey = false; return; }
+      this.release(m);
+    });
+    addEventListener('blur', () => {
+      this.keys.clear();
+      for (const b of [...this.btn]) this.release(b);
+    });
+  }
+
+  _bindMouse() {
+    const c = this.canvas;
+    c.addEventListener('mousedown', (e) => {
+      if (this.touchMode) return;
+      if (e.button === 0) this.press('attack');
+      if (e.button === 2) this.press('block');
+      if (!this.pointerLock && c.requestPointerLock) {
+        c.requestPointerLock();
+      }
+    });
+    addEventListener('mouseup', (e) => {
+      if (this.touchMode) return;
+      if (e.button === 0) this.release('attack');
+      if (e.button === 2) this.release('block');
+    });
+    c.addEventListener('contextmenu', (e) => e.preventDefault());
+    addEventListener('mousemove', (e) => {
+      if (!this.pointerLock || this.touchMode) return;
+      this.look.x += e.movementX * 0.0022;
+      this.look.y += e.movementY * 0.0022;
+    });
+    document.addEventListener('pointerlockchange', () => {
+      this.pointerLock = document.pointerLockElement === c;
+    });
+    c.addEventListener('wheel', (e) => {
+      this.wheel = (this.wheel || 0) + Math.sign(e.deltaY);
+      e.preventDefault();
+    }, { passive: false });
+  }
+
+  /* ---------------------------------------------------------- タッチ */
+  _bindTouch() {
+    const c = this.canvas;
+    const opts = { passive: false };
+    c.addEventListener('touchstart', (e) => this._touchStart(e), opts);
+    c.addEventListener('touchmove', (e) => this._touchMove(e), opts);
+    c.addEventListener('touchend', (e) => this._touchEnd(e), opts);
+    c.addEventListener('touchcancel', (e) => this._touchEnd(e), opts);
+  }
+
+  _touchStart(e) {
+    this.touchMode = true;
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      if (t.clientX < innerWidth * 0.45 && !this.stick.active) {
+        this.stick.active = true;
+        this.stick.id = t.identifier;
+        this.stick.ox = t.clientX;
+        this.stick.oy = t.clientY;
+        this.stick.x = 0; this.stick.y = 0;
+        this.onStickShow?.(t.clientX, t.clientY);
+      } else if (!this.lookTouch.active) {
+        this.lookTouch.active = true;
+        this.lookTouch.id = t.identifier;
+        this.lookTouch.lx = t.clientX;
+        this.lookTouch.ly = t.clientY;
+        this.lookTouch.moved = 0;
+        this.lookTouch.t0 = performance.now();
+      }
+    }
+  }
+
+  _touchMove(e) {
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      if (this.stick.active && t.identifier === this.stick.id) {
+        let dx = t.clientX - this.stick.ox;
+        let dy = t.clientY - this.stick.oy;
+        const d = Math.hypot(dx, dy);
+        const r = this.stick.radius;
+        if (d > r) { dx = (dx / d) * r; dy = (dy / d) * r; }
+        this.stick.x = dx / r;
+        this.stick.y = dy / r;
+        this.onStickMove?.(dx, dy);
+      } else if (this.lookTouch.active && t.identifier === this.lookTouch.id) {
+        const dx = t.clientX - this.lookTouch.lx;
+        const dy = t.clientY - this.lookTouch.ly;
+        this.look.x += dx * this.lookSensitivity;
+        this.look.y += dy * this.lookSensitivity;
+        this.lookTouch.moved += Math.hypot(dx, dy);
+        this.lookTouch.lx = t.clientX;
+        this.lookTouch.ly = t.clientY;
+      }
+    }
+  }
+
+  _touchEnd(e) {
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      if (this.stick.active && t.identifier === this.stick.id) {
+        this.stick.active = false;
+        this.stick.id = -1;
+        this.stick.x = 0; this.stick.y = 0;
+        this.onStickHide?.();
+      } else if (this.lookTouch.active && t.identifier === this.lookTouch.id) {
+        this.lookTouch.active = false;
+        this.lookTouch.id = -1;
+      }
+    }
+  }
+
+  /** HUD ボタンをバインド。長押しで hold アクションを発火できる */
+  bindButton(el, name, opts = {}) {
+    if (!el) return;
+    const start = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      this.press(name);
+      el.classList.add('active');
+      if (opts.hold) {
+        const timer = setTimeout(() => {
+          if (this.btn.has(name)) {
+            this.press(opts.hold);
+            this.holdFired = this.holdFired || new Set();
+            this.holdFired.add(name);
+            el.classList.add('hold');
+          }
+        }, opts.holdMs || 260);
+        this.holdTimers.set(name, timer);
+      }
+    };
+    const end = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      this.release(name);
+      if (opts.hold) {
+        clearTimeout(this.holdTimers.get(name));
+        this.release(opts.hold);
+        this.holdFired?.delete(name);
+      }
+      el.classList.remove('active', 'hold');
+    };
+    el.addEventListener('touchstart', start, { passive: false });
+    el.addEventListener('touchend', end, { passive: false });
+    el.addEventListener('touchcancel', end, { passive: false });
+    el.addEventListener('mousedown', (e) => { if (!this.touchMode) start(e); });
+    el.addEventListener('mouseup', (e) => { if (!this.touchMode) end(e); });
+    el.addEventListener('mouseleave', (e) => { if (!this.touchMode && this.btn.has(name)) end(e); });
+  }
+
+  /* ------------------------------------------------------ 毎フレーム */
+  update() {
+    // 移動ベクトル
+    if (this.stick.active) {
+      this.move.x = this.stick.x;
+      this.move.y = this.stick.y;
+    } else {
+      let x = 0, y = 0;
+      if (this.keys.has('left')) x -= 1;
+      if (this.keys.has('right')) x += 1;
+      if (this.keys.has('up')) y -= 1;
+      if (this.keys.has('down')) y += 1;
+      const l = Math.hypot(x, y);
+      if (l > 1) { x /= l; y /= l; }
+      this.move.x = x; this.move.y = y;
+    }
+
+    // ゲームパッド
+    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    for (const p of pads) {
+      if (!p) continue;
+      const dz = (v) => (Math.abs(v) < 0.18 ? 0 : v);
+      const ax = dz(p.axes[0] || 0), ay = dz(p.axes[1] || 0);
+      if (ax || ay) { this.move.x = ax; this.move.y = ay; }
+      this.look.x += dz(p.axes[2] || 0) * 0.05;
+      this.look.y += dz(p.axes[3] || 0) * 0.05;
+      const map = [
+        [0, 'jump'], [1, 'dodge'], [2, 'item'], [3, 'spell'],
+        [4, 'block'], [5, 'attack'], [6, 'lock'], [7, 'heavy'],
+        [9, 'menu'], [8, 'map'], [12, 'interact'],
+      ];
+      for (const [i, name] of map) {
+        const b = p.buttons[i];
+        if (!b) continue;
+        if (b.pressed) this.press(name); else this.release(name);
+      }
+      break;
+    }
   }
 }

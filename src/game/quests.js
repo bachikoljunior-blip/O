@@ -1,266 +1,196 @@
-// quests.js — main storyline chapters plus procedurally generated side quests.
+// クエストと進行管理
 
-import { makeRNG, clamp, dist } from '../core/util.js';
-import { ITEMS, rollEquip } from './items.js';
-import { ENEMY_TYPES } from './entities.js';
-import { TILE } from '../world/worldgen.js';
+export const MAIN_ID = 'main';
 
-export const MAIN_CHAPTERS = [
-  {
-    id: 'mq0', title: '第一章・目覚め',
-    desc: '王都のギルド長に話を聞こう。',
-    hint: 'ギルド長を訪ねる',
-    type: 'talk', targetRole: 'guildmaster',
-    reward: { xp: 40, gold: 80, items: [{ id: 'potion_s', n: 3 }] },
+/**
+ * ステージ定義
+ *  text   : 目標表示
+ *  check  : (q, game) => boolean 完了条件
+ *  hint   : ワールドマップに表示する目的地（poi の tag）
+ */
+export const QUESTS = {
+  main: {
+    id: 'main', name: '王の残響', main: true,
+    stages: [
+      {
+        text: '灰かぶりの村へ向かい、長老エルダに話を聞く',
+        hint: 'hub',
+        check: (q) => q.flags.talkedElder,
+      },
+      {
+        text: '三つの標のうち二つを断つ',
+        hint: 'boss_wood',
+        progress: (q) => `${q.count.landmarkBosses || 0}/2`,
+        check: (q) => (q.count.landmarkBosses || 0) >= 2,
+      },
+      {
+        text: '蒼天嶺の頂で竜ヴァルドリスを討ち、竜の鍵を得る',
+        hint: 'boss_sky',
+        check: (q) => q.flags.dragonKey,
+      },
+      {
+        text: '裂罅の谷の門を開き、深淵の王ノクトゥルヌスと対峙する',
+        hint: 'boss_final',
+        check: (q) => q.flags.bossDefeated_nocturnus,
+      },
+      { text: '世界の残響は静まった', check: () => false, end: true },
+    ],
+    reward: { echo: 0 },
   },
-  {
-    id: 'mq1', title: '第二章・野盗の影',
-    desc: '街道を荒らす野盗の野営地を制圧せよ。',
-    hint: '野盗の野営地を制圧する',
-    type: 'clearCamp', count: 1,
-    reward: { xp: 140, gold: 220, equipLevel: 4 },
-  },
-  {
-    id: 'mq2', title: '第三章・古き祠',
-    desc: '大陸に散る祠を3つ見つけ、加護を受けよ。',
-    hint: '祠を3つ発見する',
-    type: 'shrines', count: 3,
-    reward: { xp: 260, gold: 320, items: [{ id: 'ether_m', n: 3 }] },
-  },
-  {
-    id: 'mq3', title: '第四章・地の底の囁き',
-    desc: '地下迷宮の最深部にひそむ主を討て。',
-    hint: 'ダンジョンのボスを倒す',
-    type: 'dungeonBoss', count: 1,
-    reward: { xp: 520, gold: 600, equipLevel: 12 },
-  },
-  {
-    id: 'mq4', title: '第五章・曙光の欠片',
-    desc: '封印の要となる欠片を4つ集めよ。迷宮の主が持っている。',
-    hint: '曙光の欠片を4つ集める',
-    type: 'collect', item: 'relic', count: 4,
-    reward: { xp: 900, gold: 1200, items: [{ id: 'elixir', n: 2 }], equipLevel: 18 },
-  },
-  {
-    id: 'mq5', title: '終章・灰燼竜ヴォルガ',
-    desc: '火口へ向かい、大陸を焼く竜を討て。',
-    hint: '竜の火口へ向かう',
-    type: 'killBoss', boss: 'dragon',
-    reward: { xp: 4000, gold: 5000, equipLevel: 24 },
-  },
-];
 
-const SIDE_TEMPLATES = [
-  {
-    kind: 'hunt', make(rng, level, world, from) {
-      const pool = ['slime', 'wolf', 'boar', 'spider', 'bandit', 'skeleton', 'ghost', 'imp', 'golem'];
-      const tiers = { slime: 1, wolf: 2, boar: 3, spider: 3, bandit: 4, skeleton: 6, ghost: 7, imp: 9, golem: 11 };
-      const ok = pool.filter((k) => tiers[k] <= level + 3);
-      const kind = rng.pick(ok.length ? ok : ['slime']);
-      const n = rng.irange(3, 8);
-      return {
-        type: 'kill', kind, count: n, progress: 0,
-        title: `${ENEMY_TYPES[kind].name}の討伐`,
-        desc: `${ENEMY_TYPES[kind].name}を${n}体倒してほしい。`,
-      };
-    },
+  herbs: {
+    id: 'herbs', name: '薬師の頼み',
+    giver: 'herbalist',
+    stages: [
+      {
+        text: '血赤花を 5 つ集めて薬師に届ける',
+        progress: (q, game) => `${Math.min(5, game.player.inventory.blood_flower || 0)}/5`,
+        check: (q, game) => (game.player.inventory.blood_flower || 0) >= 5,
+      },
+      { text: '薬師に報告する', check: (q) => q.flags.herbsTurnedIn },
+    ],
+    reward: { echo: 900, items: [['herb', 5], ['antidote', 3]] },
   },
-  {
-    kind: 'gather', make(rng, level, world, from) {
-      const mats = ['herb', 'wood', 'hide', 'ore_iron', 'fang', 'bone', 'jelly', 'silk'];
-      const id = rng.pick(mats);
-      const n = rng.irange(3, 8);
-      return {
-        type: 'collect', item: id, count: n, progress: 0,
-        title: `${ITEMS[id].name}の採集`,
-        desc: `${ITEMS[id].name}を${n}個 集めてきてくれ。`,
-      };
-    },
+
+  wolves: {
+    id: 'wolves', name: '群れを間引く',
+    giver: 'hunter',
+    stages: [
+      {
+        text: '狼を 8 体討伐する',
+        progress: (q) => `${Math.min(8, q.count.kill_wolf || 0)}/8`,
+        check: (q) => (q.count.kill_wolf || 0) >= 8,
+      },
+      { text: '狩人に報告する', check: (q) => q.flags.wolvesTurnedIn },
+    ],
+    reward: { echo: 1200, items: [['ore_iron', 3]], talisman: 'ring_hunter' },
   },
-  {
-    kind: 'deliver', make(rng, level, world, from) {
-      const others = world.settlements.filter((s) => s !== from);
-      if (!others.length) return null;
-      const to = rng.pick(others);
-      return {
-        type: 'deliver', to: to.id, count: 1, progress: 0,
-        marker: { x: (to.x + 0.5) * TILE, y: (to.y + 0.5) * TILE },
-        title: `${to.name}への配達`,
-        desc: `この荷を ${to.name}${to.label} まで届けてほしい。`,
-      };
-    },
+
+  smith: {
+    id: 'smith', name: '鍛冶の火',
+    giver: 'smith',
+    stages: [
+      {
+        text: '銀鉱石を 2 つ鍛冶屋に持ち込む',
+        progress: (q, game) => `${Math.min(2, game.player.inventory.ore_silver || 0)}/2`,
+        check: (q, game) => (game.player.inventory.ore_silver || 0) >= 2,
+      },
+      { text: '鍛冶屋に渡す', check: (q) => q.flags.smithTurnedIn },
+    ],
+    reward: { echo: 600, weapon: 'longsword' },
   },
-  {
-    kind: 'explore', make(rng, level, world, from) {
-      const undiscovered = world.pois.filter((p) => !p.discovered && (p.kind === 'ruin' || p.kind === 'dungeon' || p.kind === 'shrine'));
-      if (!undiscovered.length) return null;
-      undiscovered.sort((a, b) => dist(a.tx, a.ty, from.x, from.y) - dist(b.tx, b.ty, from.x, from.y));
-      const poi = undiscovered[rng.int(Math.min(4, undiscovered.length))];
-      return {
-        type: 'discover', poi: poi.id, count: 1, progress: 0,
-        marker: { x: poi.x, y: poi.y },
-        title: '未踏の地の調査',
-        desc: 'この先にある古い場所を調べてきてくれ。地図に印をつけておいた。',
-      };
-    },
+
+  wraiths: {
+    id: 'wraiths', name: '嘆きを鎮める',
+    giver: 'priest',
+    stages: [
+      {
+        text: '嘆きの亡霊を 6 体退ける',
+        progress: (q) => `${Math.min(6, q.count.kill_wraith || 0)}/6`,
+        check: (q) => (q.count.kill_wraith || 0) >= 6,
+      },
+      { text: '司祭に報告する', check: (q) => q.flags.wraithsTurnedIn },
+    ],
+    reward: { echo: 2000, spell: 'heal' },
   },
-];
+
+  towers: {
+    id: 'towers', name: '見張り塔の灯',
+    stages: [
+      {
+        text: '見張り塔を 3 つ調べて周辺の地図を得る',
+        progress: (q) => `${Math.min(3, q.count.towers || 0)}/3`,
+        check: (q) => (q.count.towers || 0) >= 3,
+      },
+    ],
+    reward: { echo: 1500, items: [['bone', 3]] },
+  },
+};
 
 export class QuestLog {
-  constructor(game) {
-    this.g = game;
-    this.active = [];
-    this.done = [];
-    this.chapter = 0;
-    this.mainQuest = null;
-    this.counters = { camps: 0, shrines: 0, dungeonBoss: 0 };
-    this.startChapter(0);
+  constructor() {
+    this.state = {};      // id -> {stage, done}
+    this.flags = {};
+    this.count = {};
+    this.listeners = [];
   }
 
-  startChapter(i) {
-    this.chapter = i;
-    if (i >= MAIN_CHAPTERS.length) { this.mainQuest = null; return; }
-    const c = MAIN_CHAPTERS[i];
-    this.mainQuest = {
-      ...c, main: true, progress: 0, count: c.count || 1, state: 'active', id: c.id,
-    };
-    this.active.unshift(this.mainQuest);
+  start(id) {
+    if (this.state[id]) return false;
+    this.state[id] = { stage: 0, done: false };
+    this.emit('start', id);
+    return true;
+  }
+  isActive(id) { return this.state[id] && !this.state[id].done; }
+  isDone(id) { return this.state[id]?.done; }
+  stageOf(id) { return this.state[id]?.stage ?? -1; }
+
+  emit(kind, id) {
+    for (const fn of this.listeners) fn(kind, id);
   }
 
-  addSide(quest) {
-    quest.state = 'active';
-    this.active.push(quest);
-    this.g.toast('クエストを受注: ' + quest.title, '#8fd0ff');
+  /** イベント通知 */
+  onKill(archetype) {
+    this.count[`kill_${archetype}`] = (this.count[`kill_${archetype}`] || 0) + 1;
   }
+  onBossDefeated(id) {
+    this.flags[`bossDefeated_${id}`] = true;
+    if (['orgren', 'galvan', 'leonhart', 'witch'].includes(id)) {
+      this.count.landmarkBosses = (this.count.landmarkBosses || 0) + 1;
+    }
+    if (id === 'dragon') this.flags.dragonKey = true;
+  }
+  onTower() { this.count.towers = (this.count.towers || 0) + 1; }
 
-  /** Build the quest board for a settlement. */
-  generateBoard(settlement, level, seed) {
-    const rng = makeRNG(seed);
-    const out = [];
-    for (let i = 0; i < 3; i++) {
-      const tpl = rng.pick(SIDE_TEMPLATES);
-      const q = tpl.make(rng, level, this.g.world, settlement);
+  /** 毎フレーム進行チェック */
+  update(game) {
+    for (const id of Object.keys(this.state)) {
+      const st = this.state[id];
+      if (st.done) continue;
+      const q = QUESTS[id];
       if (!q) continue;
-      const lv = clamp(level + rng.irange(-1, 2), 1, 30);
-      q.id = 'sq_' + settlement.id + '_' + seed + '_' + i;
-      q.level = lv;
-      q.giver = settlement.name;
-      q.reward = {
-        gold: Math.round((40 + lv * 26) * (0.8 + rng() * 0.6)),
-        xp: Math.round((36 + lv * 30) * (0.8 + rng() * 0.5)),
-      };
-      if (rng.chance(0.4)) q.reward.equipLevel = lv;
-      else if (rng.chance(0.5)) q.reward.items = [{ id: rng.pick(['potion_m', 'ether_m', 'tonic', 'ward']), n: rng.irange(1, 2) }];
-      out.push(q);
-    }
-    return out;
-  }
-
-  isTaken(id) {
-    return this.active.some((q) => q.id === id) || this.done.some((q) => q.id === id);
-  }
-
-  onKill(kind, x, y) {
-    for (const q of this.active) {
-      if (q.type === 'kill' && q.kind === kind && q.progress < q.count) {
-        q.progress++;
-        this.g.toast(`${q.title} ${q.progress}/${q.count}`, '#cfd6dd');
-        this.check(q);
+      const stage = q.stages[st.stage];
+      if (!stage) { st.done = true; continue; }
+      if (stage.end) continue;
+      if (stage.check(this, game)) {
+        st.stage++;
+        if (st.stage >= q.stages.length) {
+          st.done = true;
+          this.grant(q, game);
+          game.ui.questComplete(q.name);
+        } else {
+          game.ui.questUpdate(q.name, this.stageText(id, game));
+        }
       }
     }
   }
-  onCollect(id, n) {
-    for (const q of this.active) {
-      if (q.type === 'collect' && q.item === id) {
-        q.progress = this.g.countItem(id);
-        this.check(q);
-      }
-    }
-  }
-  onCampCleared() {
-    this.counters.camps++;
-    for (const q of this.active) if (q.type === 'clearCamp') { q.progress++; this.check(q); }
-  }
-  onShrine() {
-    this.counters.shrines++;
-    for (const q of this.active) if (q.type === 'shrines') { q.progress = this.counters.shrines; this.check(q); }
-  }
-  onDungeonBoss() {
-    this.counters.dungeonBoss++;
-    for (const q of this.active) if (q.type === 'dungeonBoss') { q.progress++; this.check(q); }
-  }
-  onBossKill(kind) {
-    for (const q of this.active) if (q.type === 'killBoss' && q.boss === kind) { q.progress = 1; this.check(q); }
-  }
-  onDiscover(poi) {
-    for (const q of this.active) if (q.type === 'discover' && q.poi === poi.id) { q.progress = 1; this.check(q); }
-  }
-  onTalk(npc) {
-    for (const q of this.active) {
-      if (q.type === 'talk' && npc.role === q.targetRole) { q.progress = 1; this.check(q); }
-      if (q.type === 'deliver' && npc.settlement && npc.settlement.id === q.to) { q.progress = 1; this.check(q); }
-    }
+
+  stageText(id, game) {
+    const q = QUESTS[id];
+    const st = this.state[id];
+    if (!q || !st) return '';
+    const stage = q.stages[Math.min(st.stage, q.stages.length - 1)];
+    if (!stage) return '';
+    let t = stage.text;
+    if (stage.progress) t = t.replace('{n}', '') + `  [${stage.progress(this, game)}]`;
+    return t;
   }
 
-  check(q) {
-    if (q.progress >= q.count && q.state === 'active') {
-      q.state = 'complete';
-      this.g.toast('クエスト達成: ' + q.title, '#ffd76a');
-      this.g.audio.sfx('quest');
-      if (q.main) this.turnIn(q);        // main chapters auto-complete
-    }
-  }
-
-  turnIn(q) {
-    const i = this.active.indexOf(q);
-    if (i >= 0) this.active.splice(i, 1);
-    q.state = 'done';
-    this.done.push(q);
-    const g = this.g;
+  grant(q, game) {
+    const p = game.player;
     const r = q.reward || {};
-    if (r.gold) { g.player.gold += r.gold; g.toast(`${r.gold} ゴールドを得た`, '#ffd76a'); }
-    if (r.xp) g.player.addXp(r.xp, g);
-    if (r.items) for (const it of r.items) g.giveItem(it.id, it.n);
-    if (r.equipLevel) {
-      const eq = rollEquip(makeRNG((Date.now() ^ (q.id.length * 7919)) >>> 0), r.equipLevel, 2);
-      g.giveEquip(eq);
-    }
-    g.audio.sfx('quest');
-    if (q.main) {
-      const next = this.chapter + 1;
-      if (next < MAIN_CHAPTERS.length) {
-        setTimeout(() => {
-          this.startChapter(next);
-          g.toast('新章: ' + MAIN_CHAPTERS[next].title, '#c58cff');
-          g.showBanner(MAIN_CHAPTERS[next].title, MAIN_CHAPTERS[next].desc);
-        }, 1400);
-      } else {
-        this.chapter = MAIN_CHAPTERS.length;
-        g.showBanner('伝説の終わり', '大陸に朝が還った。旅は続く。');
-      }
-    }
+    if (r.echo) { p.echo += r.echo; game.ui.toast(`残響 +${r.echo}`); }
+    for (const [item, n] of r.items || []) { p.addItem(item, n); game.ui.itemGain(item, n); }
+    if (r.weapon) game.unlockWeapon(r.weapon);
+    if (r.talisman) game.unlockTalisman(r.talisman);
+    if (r.spell) game.unlockSpell(r.spell);
   }
 
-  /** Nearest active marker for the compass. */
-  markers() {
-    const out = [];
-    for (const q of this.active) {
-      if (q.marker) out.push({ x: q.marker.x, y: q.marker.y, main: !!q.main, title: q.title });
-    }
-    return out;
-  }
-
-  save() {
-    return {
-      active: this.active, done: this.done.map((q) => q.id), chapter: this.chapter, counters: this.counters,
-    };
-  }
-  load(d) {
+  serialize() { return { state: this.state, flags: this.flags, count: this.count }; }
+  deserialize(d) {
     if (!d) return;
-    this.active = d.active || [];
-    this.done = (d.done || []).map((id) => ({ id, state: 'done' }));
-    this.chapter = d.chapter || 0;
-    this.counters = d.counters || { camps: 0, shrines: 0, dungeonBoss: 0 };
-    this.mainQuest = this.active.find((q) => q.main) || null;
+    this.state = d.state || {};
+    this.flags = d.flags || {};
+    this.count = d.count || {};
   }
 }

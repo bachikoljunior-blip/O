@@ -1,0 +1,669 @@
+// プレイヤー：操作・ステータス・装備・インベントリ・戦闘アクション
+
+import { Actor, TEAM, inAttackArc, isBehind } from './actor.js';
+import {
+  WEAPONS, SHIELDS, ARMORS, TALISMANS, SPELLS, ITEMS, UPGRADE, SCALE,
+  scalingFactor, maxHP, maxStamina, maxFP, equipLoad, levelCost, STAT_KEYS,
+} from './data.js';
+import { clamp, clamp01, lerp, angDelta, rotateTowards, TAU, v3 } from '../core/math.js';
+
+const _tip = v3.new();
+
+export class Player extends Actor {
+  constructor(opts = {}) {
+    super({ rig: 'humanoid', team: TEAM.PLAYER, radius: 0.4, height: 1.8, ...opts });
+    this.name = opts.name || '灰の落人';
+    this.level = 1;
+    this.stats = { vit: 12, end: 11, str: 12, dex: 12, arc: 8, fth: 8 };
+    this.echo = 0;
+    this.lostEcho = null;
+
+    this.equip = {
+      weapon: 'broken_sword', offhand: 'wooden_shield',
+      head: 'hood', body: 'rags',
+      talisman: [null, null],
+      spell: null,
+      item: 'herb',
+    };
+    this.upgrades = { broken_sword: 0 };
+    this.knownSpells = [];
+    this.inventory = { herb: 3, arrow: 20, throwing_knife: 3 };
+    this.flask = { hp: 5, hpMax: 5, fp: 2, fpMax: 2 };
+
+    this.stamina = 100;
+    this.fp = 40;
+    this.staminaDelay = 0;
+    this.comboIndex = 0;
+    this.comboTimer = 0;
+    this.lockTarget = null;
+    this.sprinting = false;
+    this.parryWindow = 0;
+    this.riposteTarget = null;
+    this.interactTarget = null;
+    this.lastShrine = null;
+    this.playtime = 0;
+    this.kills = 0;
+    this.deaths = 0;
+    this.discovered = new Set();
+    this.flags = {};
+
+    this.recalc();
+    this.hp = this.maxHp;
+    this.stamina = this.maxStamina;
+    this.fp = this.maxFP;
+  }
+
+  /* ------------------------------------------------------ 派生ステータス */
+  recalc() {
+    const s = this.stats;
+    let hpMul = 1, defMul = 1, staminaRegenMul = 1, critMul = 1, echoMul = 1, spellMul = 1;
+    for (const tid of this.equip.talisman) {
+      const t = TALISMANS[tid];
+      if (!t) continue;
+      const e = t.effect;
+      if (e.hpMul) hpMul *= e.hpMul;
+      if (e.defMul) defMul *= e.defMul;
+      if (e.staminaRegen) staminaRegenMul *= e.staminaRegen;
+      if (e.critMul) critMul *= e.critMul;
+      if (e.echoMul) echoMul *= e.echoMul;
+      if (e.spellMul) spellMul *= e.spellMul;
+    }
+    this.mods = { hpMul, defMul, staminaRegenMul, critMul, echoMul, spellMul };
+
+    const prevMax = this.maxHp;
+    this.maxHp = Math.floor(maxHP(s.vit) * hpMul);
+    this.maxStamina = maxStamina(s.end);
+    this.maxFP = maxFP(s.arc, s.fth);
+    if (prevMax && this.hp > 0) this.hp = Math.min(this.hp + (this.maxHp - prevMax), this.maxHp);
+
+    const head = ARMORS[this.equip.head], body = ARMORS[this.equip.body];
+    const shield = SHIELDS[this.equip.offhand];
+    this.def = (head?.def || 0) + (body?.def || 0) + s.vit * 0.35 + this.level * 0.25;
+    this.defBuff = defMul;
+    this.shieldData = shield || null;
+    this.shieldModel = shield ? shield.model : null;
+    this.shieldTint = shield ? shield.tint : null;
+
+    const w = WEAPONS[this.equip.weapon];
+    this.weaponModel = w ? w.model : null;
+    this.weaponTint = w ? w.tint : [0.8, 0.8, 0.85];
+    this.weaponGlow = w?.emissive || 0;
+    this.weaponScale = w?.cls === '大剣' ? 1.05 : 1;
+    this.tint = body ? body.tint.slice() : [0.5, 0.45, 0.4];
+    this.maxPoise = 18 + (body?.weight || 0) * 0.9 + (head?.weight || 0) * 0.8;
+    this.poise = Math.min(this.poise, this.maxPoise);
+
+    const load = (w?.weight || 0) + (shield?.weight || 0) + (head?.weight || 0) + (body?.weight || 0);
+    this.load = load;
+    this.loadMax = equipLoad(s.end, s.str);
+    this.loadRatio = load / this.loadMax;
+    this.rollType = this.loadRatio < 0.3 ? 'fast' : this.loadRatio < 0.7 ? 'normal' : this.loadRatio < 1 ? 'heavy' : 'over';
+    this.speed = 3.6 * (this.loadRatio > 1 ? 0.6 : 1);
+    this.runSpeed = 6.6 * (this.loadRatio > 1 ? 0.6 : this.loadRatio > 0.7 ? 0.9 : 1);
+  }
+
+  weapon() { return WEAPONS[this.equip.weapon]; }
+  weaponLevel() { return this.upgrades[this.equip.weapon] || 0; }
+
+  /** 現在の武器での攻撃力（モーション倍率適用前） */
+  weaponAttackPower() {
+    const w = this.weapon();
+    if (!w) return 20;
+    let atk = w.base * UPGRADE.mul(this.upgrades[w.id] || 0);
+    let bonus = 0;
+    for (const [stat, grade] of Object.entries(w.scale || {})) {
+      bonus += w.base * SCALE[grade] * scalingFactor(this.stats[stat]) * 1.15;
+    }
+    // 必要能力を満たさないと大幅減衰
+    let penalty = 1;
+    for (const [stat, req] of Object.entries(w.req || {})) {
+      if (this.stats[stat] < req) penalty *= 0.55;
+    }
+    return (atk + bonus) * penalty;
+  }
+
+  spellPower(spell) {
+    const st = spell.scale === 'fth' ? this.stats.fth : this.stats.arc;
+    return (spell.dmg || spell.heal || 0) * (0.55 + scalingFactor(st) * 1.35) * this.mods.spellMul;
+  }
+
+  /* --------------------------------------------------------- 更新 */
+  update(dt, game) {
+    this.playtime += dt;
+    if (this.dead) {
+      this.updateAnim(dt, 0);
+      this.updatePhysics(dt, game);
+      return;
+    }
+    const inp = game.input;
+    this.prevState = this.state;
+    this.aimPitch = -game.camera.pitch * 0.85;
+    this.updateStatus(dt, game);
+
+    if (this.frostSlow > 0) this.frostSlow -= dt;
+
+    // ---- スタミナ ----
+    this.staminaDelay = Math.max(0, this.staminaDelay - dt);
+    if (this.staminaDelay <= 0 && !this.sprinting) {
+      const rate = (this.blocking ? 14 : 34) * this.mods.staminaRegenMul;
+      this.stamina = Math.min(this.maxStamina, this.stamina + rate * dt);
+    }
+    this.comboTimer = Math.max(0, this.comboTimer - dt);
+    if (this.comboTimer <= 0) this.comboIndex = 0;
+    this.parryWindow = Math.max(0, this.parryWindow - dt);
+
+    // ---- ロックオン ----
+    if (inp.pressed('lock')) this.toggleLock(game);
+    if (this.lockTarget && (this.lockTarget.dead ||
+      Math.hypot(this.lockTarget.x - this.x, this.lockTarget.z - this.z) > 26)) {
+      this.lockTarget = null;
+    }
+
+    // ---- 移動入力 ----
+    let mx = inp.move.x, mz = inp.move.y;
+    const mag = Math.min(1, Math.hypot(mx, mz));
+    const camYaw = game.camera.yaw;
+    let wx = 0, wz = 0;
+    if (mag > 0.08) {
+      const fx = Math.sin(camYaw), fz = Math.cos(camYaw);
+      const rx = Math.cos(camYaw), rz = -Math.sin(camYaw);
+      wx = fx * (-mz) + rx * mx;
+      wz = fz * (-mz) + rz * mx;
+      const l = Math.hypot(wx, wz) || 1;
+      wx /= l; wz /= l;
+    }
+
+    // ---- 行動 ----
+    const canAct = this.canAct();
+    this.sprinting = false;
+
+    if (canAct) {
+      this.blocking = inp.down('block') && !!this.shieldData && this.stamina > 2;
+
+      if (inp.pressed('dodge')) {
+        this.doDodge(wx, wz, mag, game);
+      } else if (inp.down('dodge') && mag > 0.3 && this.stamina > 4) {
+        this.sprinting = true;
+      }
+
+      if (inp.pressed('attack')) this.doAttack('light', game);
+      if (inp.pressed('heavy')) this.doAttack('heavy', game);
+      if (inp.pressed('block') && this.shieldData) this.doParry(game);
+      if (inp.pressed('spell')) this.castSpell(game);
+      if (inp.pressed('item')) this.useItem(game);
+      if (inp.pressed('jump') && this.grounded && this.stamina > 12) {
+        this.vy = 7.2;
+        this.grounded = false;
+        this.stamina -= 12;
+        this.staminaDelay = 0.4;
+        game.audio.play('jump');
+      }
+    }
+
+    // ---- 移動 ----
+    let speed = 0;
+    if (this.state === 'roll' || this.state === 'backstep') {
+      const p = clamp01(this.animT / this.motionDur);
+      const push = (1 - p) * (this.state === 'roll' ? 9.5 : 7.0);
+      const dir = this.rollDir;
+      this.tryMove(game, this.x + dir[0] * push * dt, this.z + dir[1] * push * dt);
+      speed = push * 0.4;
+    } else if (this.state === 'attack') {
+      const a = this.attack;
+      if (a?.dash && !this.attackDashDone && this.animT >= a.windup * 0.6) {
+        this.attackDashDone = true;
+      }
+      const ext = this.animExtra;
+      if (ext?.lunge) {
+        this.tryMove(game, this.x + Math.sin(this.yaw) * ext.lunge * 9 * dt,
+          this.z + Math.cos(this.yaw) * ext.lunge * 9 * dt);
+      }
+    } else if (canAct && mag > 0.08) {
+      let base = this.sprinting ? this.runSpeed : this.speed * lerp(0.45, 1, mag);
+      if (this.blocking) base *= 0.55;
+      if (this.frostSlow > 0) base *= 0.75;
+      const gh = game.world.height(this.x, this.z);
+      if (gh < -0.4) base *= 0.55;                        // 水中
+      speed = base;
+      this.moveOnGround(dt, game, wx, wz, base);
+      if (this.sprinting) {
+        this.stamina -= 13 * dt;
+        this.staminaDelay = 0.5;
+        if (this.stamina <= 0) { this.stamina = 0; this.sprinting = false; }
+      }
+      // 向き
+      if (this.lockTarget && !this.sprinting) {
+        this.faceTowards(this.lockTarget.x, this.lockTarget.z, dt, 12);
+      } else {
+        const want = Math.atan2(wx, wz);
+        this.yaw = rotateTowards(this.yaw, want, (this.sprinting ? 9 : 14) * dt);
+      }
+    } else if (this.lockTarget && canAct) {
+      this.faceTowards(this.lockTarget.x, this.lockTarget.z, dt, 10);
+    }
+
+    // 攻撃中の判定
+    if (this.state === 'attack') this.processAttack(dt, game);
+
+    this.updatePhysics(dt, game);
+    this.updateAnim(dt, speed);
+
+    // 足音
+    if (speed > 0.6 && this.grounded) {
+      this._step = (this._step || 0) + dt * (2.0 + this.speed01 * 3.2);
+      if (this._step > 1) {
+        this._step = 0;
+        const s = game.world.sample(this.x, this.z);
+        game.audio.footstep(s.surface, this.sprinting ? 0.6 : 0.36);
+        if (s.surface === 'grass' || s.surface === 'marsh') {
+          game.fx.dust(this.x, this.y + 0.05, this.z, 2);
+        }
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------ 回避 */
+  doDodge(wx, wz, mag, game) {
+    const cost = this.rollType === 'heavy' ? 30 : 22;
+    if (this.stamina < cost) { game.audio.play('fail'); return; }
+    this.stamina -= cost;
+    this.staminaDelay = 0.55;
+    if (mag > 0.2) {
+      this.rollDir = [wx, wz];
+      this.yaw = Math.atan2(wx, wz);
+      const dur = this.rollType === 'fast' ? 0.52 : this.rollType === 'normal' ? 0.6 : 0.75;
+      this.setState('roll', dur);
+      this.iframes = this.rollType === 'fast' ? 0.42 : this.rollType === 'normal' ? 0.34 : 0.22;
+    } else {
+      this.rollDir = [-Math.sin(this.yaw), -Math.cos(this.yaw)];
+      this.setState('backstep', 0.42);
+      this.iframes = 0.14;
+    }
+    game.audio.play('roll');
+    game.fx.dust(this.x, this.y + 0.05, this.z, 8);
+  }
+
+  /* ------------------------------------------------------------ 攻撃 */
+  doAttack(kind, game) {
+    const w = this.weapon();
+    if (!w) return;
+    const ms = w.moveset;
+    let key;
+    if (kind === 'heavy') {
+      key = this.comboIndex > 0 && this.comboTimer > 0 ? 'h2' : 'h1';
+    } else if (this.sprinting) {
+      key = 'run';
+    } else if (this.state === 'roll' || (this.prevState === 'roll' && this.animT < 0.25)) {
+      key = 'roll';
+    } else {
+      key = this.comboIndex === 0 ? 'l1' : this.comboIndex === 1 ? 'l2' : 'l3';
+    }
+    const def = ms[key];
+    if (!def) return;
+    if (w.ranged && (this.inventory.arrow || 0) <= 0) {
+      game.ui.toast('矢が足りない');
+      game.audio.play('fail');
+      return;
+    }
+    if (this.stamina < def.stam * 0.5) { game.audio.play('fail'); return; }
+
+    // 致命の一撃（背後・パリィ後）
+    const crit = this.findCritTarget(game);
+    if (crit && kind === 'light') {
+      this.executeCritical(crit.target, crit.type, game);
+      return;
+    }
+
+    this.stamina -= def.stam;
+    this.staminaDelay = 0.45;
+    this.comboIndex = kind === 'heavy' ? 1 : Math.min(2, this.comboIndex + 1);
+    this.comboTimer = def.windup + def.active + def.recover + 0.45;
+    this.startAttack(def, game);
+    if (w.ranged) this.pendingShot = def;
+  }
+
+  findCritTarget(game) {
+    if (this.riposteTarget && !this.riposteTarget.dead &&
+      Math.hypot(this.riposteTarget.x - this.x, this.riposteTarget.z - this.z) < 2.6) {
+      return { target: this.riposteTarget, type: 'riposte' };
+    }
+    for (const e of game.enemies) {
+      if (e.dead || e.boss) continue;
+      const d = Math.hypot(e.x - this.x, e.z - this.z);
+      if (d < 1.9 && isBehind(this, e, 0.95) && e.state !== 'stagger') {
+        return { target: e, type: 'backstab' };
+      }
+    }
+    return null;
+  }
+
+  executeCritical(target, type, game) {
+    const w = this.weapon();
+    const base = this.weaponAttackPower() * (w?.crit || 1.1) * this.mods.critMul;
+    const dmg = base * (type === 'riposte' ? 3.4 : 2.9);
+    this.setState('attack', 0.85, type === 'riposte' ? 'thrust' : 'overhead');
+    this.attack = null;
+    this.stamina -= 16;
+    this.riposteTarget = null;
+    target.iframes = 0;
+    game.audio.play('critical');
+    game.time.hitstop(0.14);
+    game.camera.shake(0.5);
+    setTimeout(() => {
+      if (target.dead) return;
+      target.takeDamage(dmg, { source: this, poise: 999, ignoreIFrames: true, type: 'critical' }, game);
+      game.fx.blood(target.x, target.y + target.height * 0.6, target.z, 34);
+    }, 260);
+    game.ui.toast(type === 'riposte' ? '致命の一撃' : '背面攻撃');
+  }
+
+  processAttack(dt, game) {
+    const a = this.attack;
+    if (!a) return;
+    const phase = this.attackPhase();
+    const w = this.weapon();
+
+    if (w?.ranged && this.pendingShot && this.animT >= a.windup) {
+      this.pendingShot = null;
+      this.inventory.arrow = Math.max(0, (this.inventory.arrow || 0) - 1);
+      const power = this.weaponAttackPower() * a.dmg;
+      game.spawnProjectile({
+        kind: a.projectile || 'arrow', owner: this, damage: power,
+        x: this.x, y: this.y + 1.35, z: this.z,
+        yaw: this.yaw, pitch: this.aimPitch || -0.03, speed: 46, team: TEAM.PLAYER,
+      });
+      game.audio.play('bow');
+      return;
+    }
+
+    if (phase !== 'active') return;
+    const power = this.weaponAttackPower() * a.dmg;
+    for (const e of game.enemies) {
+      if (e.dead || this.attackHits.has(e.id)) continue;
+      if (!inAttackArc(this, e, a.range, a.arc)) continue;
+      this.attackHits.add(e.id);
+      const opts = {
+        source: this, poise: a.poise, type: 'physical',
+        bleed: w?.bleed, magic: w?.magic, holy: w?.holy,
+      };
+      let dmg = power;
+      if (w?.magic) dmg += w.magic * (0.6 + scalingFactor(this.stats.arc));
+      if (w?.holy) dmg += w.holy * (0.6 + scalingFactor(this.stats.fth));
+      e.takeDamage(dmg, opts, game);
+      this.weaponTip(_tip);
+      game.fx.slash(_tip[0], _tip[1], _tip[2], this.yaw);
+      game.time.hitstop(0.055);
+      game.camera.shake(0.18);
+      game.audio.play('hit');
+    }
+    // 破壊可能オブジェクト
+    game.hitProps(this, a);
+  }
+
+  /* ---------------------------------------------------------- パリィ */
+  doParry(game) {
+    if (!this.shieldData || this.stamina < 14) return;
+    this.stamina -= 14;
+    this.staminaDelay = 0.5;
+    this.setState('parry', 0.55);
+    this.parryWindow = 0.22;
+    game.audio.play('parry_swing');
+  }
+
+  onParrySuccess(attacker, game) {
+    this.riposteTarget = attacker;
+    attacker.setState('stagger', 1.6);
+    attacker.poise = attacker.maxPoise;
+    game.audio.play('parry');
+    game.time.hitstop(0.16);
+    game.camera.shake(0.4);
+    game.fx.sparks(attacker.x, attacker.y + attacker.height * 0.6, attacker.z, 22, [1, 0.95, 0.7]);
+    game.ui.toast('パリィ成功！ 致命の一撃を狙え');
+    setTimeout(() => { if (this.riposteTarget === attacker) this.riposteTarget = null; }, 2600);
+  }
+
+  /* ---------------------------------------------------------- 魔法 */
+  castSpell(game) {
+    const id = this.equip.spell;
+    const sp = SPELLS[id];
+    if (!sp) { game.ui.toast('魔法を装備していない'); return; }
+    const w = this.weapon();
+    if (sp.type === 'arc' && !w?.catalyst) { game.ui.toast('杖が必要だ'); game.audio.play('fail'); return; }
+    if (this.fp < sp.fp) { game.ui.toast('FPが足りない'); game.audio.play('fail'); return; }
+    this.fp -= sp.fp;
+    this.setState('cast', sp.cast + sp.recover, 'cast');
+    this.pendingSpell = { sp, at: sp.cast };
+    game.audio.play('cast_start');
+  }
+
+  processSpell(dt, game) {
+    if (!this.pendingSpell) return;
+    if (this.animT < this.pendingSpell.at) return;
+    const { sp } = this.pendingSpell;
+    this.pendingSpell = null;
+    const power = this.spellPower(sp);
+    if (sp.heal) {
+      this.hp = Math.min(this.maxHp, this.hp + power);
+      game.fx.heal(this.x, this.y + 1, this.z);
+      game.audio.play('heal');
+    } else if (sp.buff) {
+      this.spellBuff = { ...sp.buff, t: sp.buff.dur };
+      game.fx.heal(this.x, this.y + 1, this.z);
+      game.audio.play('buff');
+    } else if (sp.projectile) {
+      game.spawnProjectile({
+        kind: sp.projectile, owner: this, damage: power,
+        x: this.x, y: this.y + 1.3, z: this.z,
+        yaw: this.yaw, pitch: this.aimPitch || 0, speed: sp.projectile === 'ice' ? 34 : 26,
+        team: TEAM.PLAYER, frost: sp.frost, fire: sp.projectile === 'fire' ? 30 : 0,
+        splash: sp.projectile === 'fire' ? 3.0 : 0,
+      });
+      game.audio.play('cast');
+    }
+  }
+
+  /* --------------------------------------------------------- アイテム */
+  useItem(game) {
+    // 優先: 回復瓶 → 選択中アイテム
+    if (this.flask.hp > 0 && this.hp < this.maxHp * 0.98) return this.drinkFlask(game, 'hp');
+    const id = this.equip.item;
+    const it = ITEMS[id];
+    if (!it || (this.inventory[id] || 0) <= 0) {
+      if (this.flask.hp > 0) return this.drinkFlask(game, 'hp');
+      game.ui.toast('使えるものがない');
+      return;
+    }
+    this.consume(id, game);
+  }
+
+  drinkFlask(game, kind = 'hp') {
+    if (kind === 'hp' && this.flask.hp <= 0) return;
+    if (kind === 'fp' && this.flask.fp <= 0) return;
+    this.setState('drink', 0.95);
+    const self = this;
+    setTimeout(() => {
+      if (self.dead) return;
+      if (kind === 'hp') {
+        self.flask.hp--;
+        self.hp = Math.min(self.maxHp, self.hp + self.maxHp * 0.55 + 60);
+      } else {
+        self.flask.fp--;
+        self.fp = Math.min(self.maxFP, self.fp + self.maxFP * 0.6 + 12);
+      }
+      game.fx.heal(self.x, self.y + 1, self.z);
+      game.audio.play('drink');
+    }, 420);
+  }
+
+  consume(id, game) {
+    const it = ITEMS[id];
+    if (!it) return;
+    if ((this.inventory[id] || 0) <= 0) return;
+    if (it.kind === 'throw') {
+      this.setState('attack', 0.55, 'overhead');
+      this.attack = null;
+      this.inventory[id]--;
+      const self = this;
+      setTimeout(() => {
+        game.spawnProjectile({
+          kind: id === 'firebomb' ? 'firebomb' : 'knife', owner: self, damage: it.dmg,
+          x: self.x, y: self.y + 1.4, z: self.z, yaw: self.yaw, pitch: 0.14,
+          speed: 24, team: TEAM.PLAYER, gravity: 12, splash: it.splash || 0,
+          fire: it.fire ? 40 : 0,
+        });
+      }, 220);
+      game.audio.play('throw');
+      return;
+    }
+    this.setState('drink', it.use || 0.8);
+    this.inventory[id]--;
+    const self = this;
+    setTimeout(() => {
+      if (it.heal) self.hp = Math.min(self.maxHp, self.hp + it.heal);
+      if (it.cure === 'poison') self.statusTimers.poison = 0;
+      if (it.echo) { self.echo += it.echo; game.ui.toast(`残響 +${it.echo}`); }
+      game.fx.heal(self.x, self.y + 1, self.z);
+      game.audio.play('drink');
+    }, 300);
+  }
+
+  addItem(id, n = 1) {
+    this.inventory[id] = (this.inventory[id] || 0) + n;
+  }
+
+  /* ------------------------------------------------------- ロックオン */
+  toggleLock(game) {
+    if (this.lockTarget) { this.lockTarget = null; game.audio.play('ui_off'); return; }
+    let best = null, bestScore = Infinity;
+    const camYaw = game.camera.yaw;
+    for (const e of game.enemies) {
+      if (e.dead) continue;
+      const dx = e.x - this.x, dz = e.z - this.z;
+      const d = Math.hypot(dx, dz);
+      if (d > 24) continue;
+      const ang = Math.abs(angDelta(camYaw, Math.atan2(dx, dz)));
+      if (ang > 1.1) continue;
+      const score = d + ang * 9;
+      if (score < bestScore) { bestScore = score; best = e; }
+    }
+    this.lockTarget = best;
+    game.audio.play(best ? 'ui_on' : 'fail');
+  }
+
+  /* ------------------------------------------------------- 成長・強化 */
+  canLevel() { return this.echo >= levelCost(this.level); }
+  levelUp(stat) {
+    const cost = levelCost(this.level);
+    if (this.echo < cost) return false;
+    if (!STAT_KEYS.includes(stat)) return false;
+    if (this.stats[stat] >= 99) return false;
+    this.echo -= cost;
+    this.stats[stat]++;
+    this.level++;
+    this.recalc();
+    this.hp = this.maxHp;
+    this.stamina = this.maxStamina;
+    this.fp = this.maxFP;
+    return true;
+  }
+
+  upgradeWeapon(game) {
+    const id = this.equip.weapon;
+    const lv = this.upgrades[id] || 0;
+    if (lv >= UPGRADE.maxLevel) { game.ui.toast('これ以上は強化できない'); return false; }
+    const c = UPGRADE.cost(lv);
+    if (this.echo < c.echo || (this.inventory[c.mat] || 0) < c.matCount) {
+      game.ui.toast('素材か残響が足りない');
+      return false;
+    }
+    this.echo -= c.echo;
+    this.inventory[c.mat] -= c.matCount;
+    this.upgrades[id] = lv + 1;
+    this.recalc();
+    game.audio.play('upgrade');
+    game.ui.toast(`${WEAPONS[id].name} +${lv + 1}`);
+    return true;
+  }
+
+  restAtShrine(poi, game) {
+    this.hp = this.maxHp;
+    this.stamina = this.maxStamina;
+    this.fp = this.maxFP;
+    this.flask.hp = this.flask.hpMax;
+    this.flask.fp = this.flask.fpMax;
+    this.statusTimers.poison = 0;
+    this.statusTimers.burn = 0;
+    for (const k in this.status) this.status[k] = 0;
+    this.lastShrine = poi;
+    game.respawnWorld();
+  }
+
+  onDeath(game) {
+    this.deaths++;
+    this.lostEcho = { x: this.x, y: this.y, z: this.z, echo: this.echo };
+    this.echo = 0;
+    game.onPlayerDeath();
+  }
+
+  /** 死亡後の復活 */
+  respawn(game) {
+    const s = this.lastShrine;
+    this.dead = false;
+    this.deathT = 0;
+    this.hp = this.maxHp;
+    this.stamina = this.maxStamina;
+    this.fp = this.maxFP;
+    this.flask.hp = this.flask.hpMax;
+    this.flask.fp = this.flask.fpMax;
+    this.state = 'idle';
+    this.animT = 0;
+    this.statusTimers.poison = 0;
+    this.statusTimers.burn = 0;
+    for (const k in this.status) this.status[k] = 0;
+    if (s) { this.x = s.x + 1.5; this.z = s.z + 1.5; }
+    else { this.x = 40; this.z = 300; }
+    this.y = game.world.height(this.x, this.z);
+    this.lockTarget = null;
+    game.respawnWorld();
+  }
+
+  /* ------------------------------------------------------------ 保存 */
+  serialize() {
+    return {
+      level: this.level, stats: this.stats, echo: this.echo, lostEcho: this.lostEcho,
+      equip: this.equip, upgrades: this.upgrades, inventory: this.inventory,
+      flask: this.flask, knownSpells: this.knownSpells,
+      x: this.x, y: this.y, z: this.z, yaw: this.yaw,
+      hp: this.hp, playtime: this.playtime, kills: this.kills, deaths: this.deaths,
+      shrine: this.lastShrine ? { x: this.lastShrine.x, z: this.lastShrine.z, id: this.lastShrine.id } : null,
+      discovered: [...this.discovered], flags: this.flags,
+    };
+  }
+  deserialize(d, game) {
+    Object.assign(this.stats, d.stats || {});
+    this.level = d.level || 1;
+    this.echo = d.echo || 0;
+    this.lostEcho = d.lostEcho || null;
+    Object.assign(this.equip, d.equip || {});
+    this.upgrades = d.upgrades || {};
+    this.inventory = d.inventory || {};
+    this.flask = d.flask || this.flask;
+    this.knownSpells = d.knownSpells || [];
+    this.x = d.x ?? this.x; this.y = d.y ?? this.y; this.z = d.z ?? this.z;
+    this.yaw = d.yaw ?? 0;
+    this.playtime = d.playtime || 0;
+    this.kills = d.kills || 0;
+    this.deaths = d.deaths || 0;
+    this.discovered = new Set(d.discovered || []);
+    this.flags = d.flags || {};
+    this.recalc();
+    this.hp = Math.min(this.maxHp, d.hp || this.maxHp);
+    this.stamina = this.maxStamina;
+    this.fp = this.maxFP;
+    if (d.shrine && game) {
+      this.lastShrine = game.pois.find((p) => p.id === d.shrine.id) || null;
+    }
+  }
+}
+
+export { clamp, clamp01, lerp, TAU };
