@@ -34,6 +34,9 @@ export class UI {
     this.bossbar = $('#bossbar');
     this.minimap = $('#minimap');
     this.mctx = this.minimap.getContext('2d');
+    this.compass = $('#compass');
+    this.cctx = this.compass ? this.compass.getContext('2d') : null;
+    this.targetbar = $('#targetbar');
     this.stick = $('#stick');
 
     this.game = null;
@@ -50,6 +53,7 @@ export class UI {
     this.settings = {
       quality: 'medium', master: 0.8, sfx: 0.9, music: 0.5,
       sensitivity: 1.0, invertY: false, autoLock: true,
+      lefty: false, buttonSize: 'normal', compass: true, damageNumbers: true,
     };
     this.loadSettings();
   }
@@ -141,6 +145,8 @@ export class UI {
     $('b', hpBar).style.width = `${hpR * 100}%`;
     $('i', hpBar).style.width = `${this.hpLag * 100}%`;
     $('span', hpBar).textContent = `${Math.ceil(p.hp)} / ${p.maxHp}`;
+    // 瀕死は脈打たせる（画面の彩度低下だけでは気づきにくい）
+    $('.vitals', this.hud).classList.toggle('low', hpR < 0.3 && !p.dead);
     $('.bar.fp b', this.hud).style.width = `${clamp01(p.fp / p.maxFP) * 100}%`;
     $('.bar.st b', this.hud).style.width = `${clamp01(p.stamina / p.maxStamina) * 100}%`;
 
@@ -174,6 +180,18 @@ export class UI {
       this.bossLag = Math.max(r, this.bossLag - dt * 0.35);
       $('.bbar b', this.bossbar).style.width = `${r * 100}%`;
       $('.bbar i', this.bossbar).style.width = `${this.bossLag * 100}%`;
+    }
+
+    // 固定した相手の体力
+    this.updateTargetBar(dt, game);
+
+    // 方位帯
+    if (this.settings.compass && this.cctx) {
+      this.compass.classList.remove('hidden');
+      this.compassTick = (this.compassTick || 0) + dt;
+      if (this.compassTick > 0.05) { this.compassTick = 0; this.drawCompass(game); }
+    } else if (this.compass) {
+      this.compass.classList.add('hidden');
     }
 
     // ミニマップ
@@ -210,6 +228,135 @@ export class UI {
     }
   }
 
+  /* ------------------------------------------------------- 方位帯 */
+  /**
+   * 向いている方角と、視界前方にある目印を横一列に描く。
+   * ミニマップは「自分の周り」を見せるが、方位帯は「どちらへ行けばいいか」を見せる。
+   */
+  drawCompass(game) {
+    const c = this.cctx;
+    const W = this.compass.width, H = this.compass.height;
+    c.clearRect(0, 0, W, H);
+    if (game.dungeon) return;                 // 地下では方角に意味がない
+
+    const p = game.player;
+    const yaw = game.camera.yaw;
+    const HALF = 1.30;                        // 表示する視野の半分（±約75°）
+    const toX = (rel) => W / 2 + (rel / HALF) * (W / 2);
+    const wrap = (a) => {
+      let d = a;
+      while (d > Math.PI) d -= Math.PI * 2;
+      while (d < -Math.PI) d += Math.PI * 2;
+      return d;
+    };
+
+    // 帯
+    const g = c.createLinearGradient(0, 0, W, 0);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(0.5, 'rgba(0,0,0,.58)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(0, H * 0.38, W, H * 0.46);
+
+    // 目盛り（15°ごと、90°ごとに方角名）
+    const NAMES = { 0: '北', 90: '東', 180: '南', 270: '西' };
+    c.textAlign = 'center';
+    c.font = '600 15px system-ui, sans-serif';
+    for (let deg = 0; deg < 360; deg += 15) {
+      const rel = wrap(deg * Math.PI / 180 - yaw);
+      if (Math.abs(rel) > HALF) continue;
+      const x = toX(rel);
+      const fade = 1 - Math.abs(rel) / HALF;
+      const name = NAMES[deg];
+      if (name) {
+        c.fillStyle = `rgba(240,232,208,${0.42 + fade * 0.56})`;
+        c.fillText(name, x, H * 0.74);
+      } else {
+        c.fillStyle = `rgba(232,223,200,${0.22 + fade * 0.46})`;
+        c.fillRect(x - 1, H * 0.44, 2, deg % 45 === 0 ? 9 : 5);
+      }
+    }
+
+    // 目印
+    const marks = this._compassMarks || (this._compassMarks = []);
+    marks.length = 0;
+    const hintId = this.questHintPOI(game)?.id;
+    for (const poi of game.pois) {
+      if (!poi.discovered && poi.id !== hintId) continue;
+      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
+      if (d > 700) continue;
+      const rel = wrap(Math.atan2(poi.x - p.x, poi.z - p.z) - yaw);
+      if (Math.abs(rel) > HALF) continue;
+      let col = 'rgba(190,185,170,.85)', size = 3;
+      if (poi.type === 'shrine') col = '#e8c86a';
+      else if (poi.type === 'village') col = '#8fd0e8';
+      else if (poi.type === 'boss') { col = poi.cleared ? '#6f7f6f' : '#e0464e'; size = 4; }
+      else if (poi.type === 'grave' || poi.type === 'ruin') col = '#b48fe8';
+      marks.push({ x: toX(rel), col, size, d, quest: poi.id === hintId });
+    }
+    // 遠いものから描いて、近いものを手前に
+    marks.sort((a, b) => b.d - a.d);
+    for (const m of marks) {
+      const y = H * 0.26;
+      if (m.quest) {
+        c.fillStyle = '#ffd76a';
+        c.beginPath();
+        c.moveTo(m.x, y - 6); c.lineTo(m.x + 5, y); c.lineTo(m.x, y + 6); c.lineTo(m.x - 5, y);
+        c.closePath(); c.fill();
+      } else {
+        c.globalAlpha = m.d > 400 ? 0.45 : 0.95;
+        c.fillStyle = m.col;
+        c.beginPath();
+        c.arc(m.x, y, m.size, 0, Math.PI * 2);
+        c.fill();
+        c.globalAlpha = 1;
+      }
+    }
+
+    // 中央の指針
+    c.fillStyle = 'rgba(255,240,205,.95)';
+    c.beginPath();
+    c.moveTo(W / 2, H * 0.44);
+    c.lineTo(W / 2 - 5, H * 0.30);
+    c.lineTo(W / 2 + 5, H * 0.30);
+    c.closePath();
+    c.fill();
+  }
+
+  /** 追跡中のクエストが指し示す POI */
+  questHintPOI(game) {
+    let id = null;
+    for (const qid of Object.keys(game.quests.state)) {
+      if (!game.quests.isDone(qid)) { id = qid; if (qid === 'main') break; }
+    }
+    if (!id) return null;
+    const q = QUESTS[id];
+    const st = game.quests.state[id];
+    const stage = q?.stages?.[st.stage];
+    if (!stage?.hint) return null;
+    return game.pois.find((po) => po.tag === stage.hint) || null;
+  }
+
+  /* --------------------------------------------- 固定した相手の体力 */
+  updateTargetBar(dt, game) {
+    const t = game.player.lockTarget;
+    const bar = this.targetbar;
+    if (!bar) return;
+    // ボスバーが出ているときは重複させない
+    if (!t || t.dead || (this.bossRef && this.bossRef === t)) {
+      bar.classList.add('hidden');
+      this.targetLag = 1;
+      return;
+    }
+    bar.classList.remove('hidden');
+    if (this._lastTarget !== t) { this._lastTarget = t; this.targetLag = 1; }
+    const r = clamp01(t.hp / t.maxHp);
+    this.targetLag = Math.max(r, (this.targetLag ?? 1) - dt * 0.4);
+    $('.tname', bar).textContent = t.name || '';
+    $('.tbar b', bar).style.width = `${r * 100}%`;
+    $('.tbar i', bar).style.width = `${this.targetLag * 100}%`;
+  }
+
   updateQuestTrack(game) {
     const track = $('.questtrack', this.hud);
     let id = null;
@@ -219,7 +366,15 @@ export class UI {
     if (!id) { track.classList.add('hidden'); return; }
     track.classList.remove('hidden');
     $('.qname', track).textContent = QUESTS[id]?.name || '';
-    $('.qstage', track).textContent = game.quests.stageText(id, game);
+    // 目的地が分かっているなら距離も出す（どれだけ歩けばいいかが分かる）
+    let suffix = '';
+    const hint = this.questHintPOI(game);
+    if (hint && !game.dungeon) {
+      const d = Math.hypot(hint.x - game.player.x, hint.z - game.player.z);
+      suffix = d > 999 ? `　— ${hint.name} ${(d / 1000).toFixed(1)}km`
+        : `　— ${hint.name} ${Math.round(d)}m`;
+    }
+    $('.qstage', track).textContent = game.quests.stageText(id, game) + suffix;
   }
 
   /* ------------------------------------------------------ 通知系 */
@@ -273,7 +428,7 @@ export class UI {
 
   damageNumber(target, dmg, blocked, opts) {
     const g = this.game;
-    if (!g) return;
+    if (!g || !this.settings.damageNumbers) return;
     const isPlayer = target === g.player;
     const n = {
       x: target.x + (Math.random() - 0.5) * 0.6,
@@ -539,6 +694,16 @@ export class UI {
   }
 
   /* ------------------------------------------------------- 装備 */
+  /** 「今より良くなるか」を ↑↓ で示す。数値だけ並べても比較にならない */
+  delta(now, next, digits = 0, lowerIsBetter = false) {
+    const d = next - now;
+    if (Math.abs(d) < (digits ? 0.05 : 0.5)) return '';
+    const good = lowerIsBetter ? d < 0 : d > 0;
+    const sign = d > 0 ? '+' : '−';
+    const v = Math.abs(d).toFixed(digits);
+    return `<em class="${good ? 'up' : 'down'}">${good ? '▲' : '▼'}${sign}${v}</em>`;
+  }
+
   renderEquip(root) {
     const game = this.game;
     const p = game.player;
@@ -555,30 +720,81 @@ export class UI {
       root.appendChild(panel);
     };
 
+    // 現在の積載を先頭に出す（何を持ち替えると転がりが鈍るのかを見せる）
+    const ROLL = { fast: '軽やか', normal: '標準', heavy: '重い', over: '重量超過' };
+    const sum = el('div', 'panel');
+    sum.appendChild(el('h3', '', '装備の重さ'));
+    const lr = clamp01(p.loadRatio);
+    const loadRow = el('div', 'row');
+    loadRow.innerHTML = `<span>積載<span class="sub">転がり：${ROLL[p.rollType]}`
+      + `${p.rollType === 'over' ? '（速度低下）' : ''}</span></span>`
+      + `<span class="v">${p.load.toFixed(1)} / ${p.loadMax.toFixed(1)}</span>`;
+    sum.appendChild(loadRow);
+    const meter = el('div', 'loadmeter', '<i></i>');
+    $('i', meter).style.width = `${Math.min(100, lr * 100)}%`;
+    $('i', meter).className = p.rollType;
+    sum.appendChild(meter);
+    sum.appendChild(el('div', 'row',
+      `<span>攻撃力</span><span class="v">${Math.round(p.weaponAttackPower())}</span>`));
+    sum.appendChild(el('div', 'row',
+      `<span>防御力</span><span class="v">${Math.round(p.def)}</span>`));
+    sum.appendChild(el('div', 'row',
+      `<span>体勢（ポイズ）</span><span class="v">${Math.round(p.maxPoise)}</span>`));
+    root.appendChild(sum);
+
+    const nowAtk = p.attackPowerOf(p.equip.weapon);
     mk('武器', [...game.unlocked.weapons], p.equip.weapon,
       (id) => { p.equip.weapon = id; p.recalc(); },
       (id) => {
         const w = WEAPONS[id];
         const lv = p.upgrades[id] || 0;
-        return `<span>${w.name} ${lv ? `+${lv}` : ''}<span class="sub">${w.cls}・重量${w.weight}・${w.desc}</span></span><span class="v">${Math.round(w.base * UPGRADE.mul(lv))}</span>`;
+        const atk = p.attackPowerOf(id);
+        const cmp = id === p.equip.weapon ? '' : this.delta(nowAtk, atk);
+        const unmet = p.unmetReqs(w);
+        const warn = unmet.length
+          ? `<span class="warn">能力不足：${unmet.map((u) => `${STAT_NAMES[u.stat]} ${u.have}/${u.req}`).join('・')}</span>`
+          : '';
+        const scales = Object.entries(w.scale || {})
+          .map(([st, gr]) => `${STAT_NAMES[st]}${gr}`).join(' ');
+        return `<span>${w.name} ${lv ? `+${lv}` : ''}`
+          + `<span class="sub">${w.cls}・重量${w.weight}・補正 ${scales || '—'}</span>`
+          + `<span class="sub">${w.desc}</span>${warn}</span>`
+          + `<span class="v">${Math.round(atk)}${cmp}</span>`;
       });
 
+    const nowBlock = p.equip.offhand ? SHIELDS[p.equip.offhand].block : 0;
     mk('盾 / 左手', ['none', ...game.unlocked.shields], p.equip.offhand || 'none',
       (id) => { p.equip.offhand = id === 'none' ? null : id; p.recalc(); },
       (id) => {
-        if (id === 'none') return '<span>なし<span class="sub">両手を空ける</span></span>';
+        if (id === 'none') {
+          return `<span>なし<span class="sub">両手を空ける</span></span>`
+            + `<span class="v">受け0%${this.delta(nowBlock * 100, 0)}</span>`;
+        }
         const s = SHIELDS[id];
-        return `<span>${s.name}<span class="sub">${s.desc}</span></span><span class="v">受け${Math.round(s.block * 100)}%</span>`;
+        const unmet = p.unmetReqs(s);
+        const warn = unmet.length
+          ? `<span class="warn">能力不足：${unmet.map((u) => `${STAT_NAMES[u.stat]} ${u.have}/${u.req}`).join('・')}</span>`
+          : '';
+        const cmp = id === p.equip.offhand ? '' : this.delta(nowBlock * 100, s.block * 100);
+        return `<span>${s.name}<span class="sub">安定度 ${s.stability}・重量 ${s.weight}</span>`
+          + `<span class="sub">${s.desc}</span>${warn}</span>`
+          + `<span class="v">受け${Math.round(s.block * 100)}%${cmp}</span>`;
       });
 
     const heads = [...game.unlocked.armors].filter((a) => ARMORS[a].slot === 'head');
     const bodies = [...game.unlocked.armors].filter((a) => ARMORS[a].slot === 'body');
+    const armorRow = (slot) => (id) => {
+      const a = ARMORS[id];
+      const cur = ARMORS[p.equip[slot]];
+      const cmp = id === p.equip[slot] ? '' : this.delta(cur?.def || 0, a.def);
+      const wd = id === p.equip[slot] ? '' : this.delta(cur?.weight || 0, a.weight, 1, true);
+      return `<span>${a.name}<span class="sub">重量 ${a.weight}${wd}</span></span>`
+        + `<span class="v">防御 ${a.def}${cmp}</span>`;
+    };
     mk('頭防具', heads, p.equip.head,
-      (id) => { p.equip.head = id; p.recalc(); },
-      (id) => `<span>${ARMORS[id].name}<span class="sub">重量 ${ARMORS[id].weight}</span></span><span class="v">防御 ${ARMORS[id].def}</span>`);
+      (id) => { p.equip.head = id; p.recalc(); }, armorRow('head'));
     mk('胴防具', bodies, p.equip.body,
-      (id) => { p.equip.body = id; p.recalc(); },
-      (id) => `<span>${ARMORS[id].name}<span class="sub">重量 ${ARMORS[id].weight}</span></span><span class="v">防御 ${ARMORS[id].def}</span>`);
+      (id) => { p.equip.body = id; p.recalc(); }, armorRow('body'));
 
     // 護符 2 スロット
     for (let slot = 0; slot < 2; slot++) {
@@ -1012,7 +1228,47 @@ export class UI {
     si.onchange = () => this.saveSettings();
     sr.appendChild(si);
     cp.appendChild(sr);
+
+    // 切り替え式の設定をまとめて作る
+    const toggle = (label, sub, key, apply) => {
+      const r = el('div', 'row clickable');
+      r.innerHTML = `<span>${label}${sub ? `<span class="sub">${sub}</span>` : ''}</span>`
+        + `<span class="v">${s[key] ? 'オン' : 'オフ'}</span>`;
+      r.onclick = () => {
+        s[key] = !s[key];
+        apply?.();
+        this.applySettings();
+        this.saveSettings();
+        this.game?.audio.play('ui_move');
+        this.renderOverlay();
+      };
+      return r;
+    };
+    cp.appendChild(toggle('左利き配置', '操作ボタンと情報表示を左右反転する', 'lefty'));
+    cp.appendChild(toggle('自動ロックオン', '近い敵に自動で照準を合わせる', 'autoLock'));
+
+    // ボタンの大きさ
+    const br = el('div', 'row');
+    br.appendChild(el('span', '', 'ボタンの大きさ<span class="sub">指の太さに合わせる</span>'));
+    const bbox = el('span', '');
+    for (const [id, label] of [['small', '小'], ['normal', '中'], ['big', '大']]) {
+      const b = el('button', 'btn', label);
+      b.style.opacity = s.buttonSize === id ? '1' : '.45';
+      b.onclick = () => {
+        s.buttonSize = id;
+        this.applySettings(); this.saveSettings(); this.renderOverlay();
+      };
+      bbox.appendChild(b);
+    }
+    br.appendChild(bbox);
+    cp.appendChild(br);
     root.appendChild(cp);
+
+    const hp = el('div', 'panel');
+    hp.appendChild(el('h3', '', '表示'));
+    hp.appendChild(toggle('方位帯', '画面上部に方角と目印を出す', 'compass'));
+    hp.appendChild(toggle('ダメージ数値', '与えたダメージを数字で出す', 'damageNumbers'));
+    root.appendChild(hp);
 
     const dp = el('div', 'panel');
     dp.appendChild(el('h3', '', 'データ'));
@@ -1033,6 +1289,12 @@ export class UI {
     const s = this.settings;
     this.game?.audio.setVolumes({ master: s.master, sfx: s.sfx, music: s.music });
     if (this.game) this.game.input.lookSensitivity = 0.0055 * s.sensitivity;
+    // 画面レイアウト（左利き・ボタンの大きさ）は body のクラスで切り替える
+    const b = document.body;
+    b.classList.toggle('lefty', !!s.lefty);
+    b.classList.toggle('tbig', s.buttonSize === 'big');
+    b.classList.toggle('tsmall', s.buttonSize === 'small');
+    if (this.compass) this.compass.classList.toggle('hidden', !s.compass);
   }
   saveSettings() {
     try { localStorage.setItem('aetheria_settings', JSON.stringify(this.settings)); } catch { /* noop */ }

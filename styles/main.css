@@ -88,6 +88,41 @@ button {
 .worldinfo .region { font-size: 12px; color: var(--gold); letter-spacing: .08em; }
 .worldinfo .clock { font-size: 10px; opacity: .72; }
 
+/* 方位帯：向いている方角と、周囲の目印を横一列に並べる */
+#compass {
+  position: absolute; left: 50%; top: calc(8px + var(--safe-t));
+  transform: translateX(-50%);
+  width: min(62vw, 400px); height: 26px;
+  opacity: .95; filter: drop-shadow(0 1px 3px rgba(0,0,0,.8));
+}
+#compass.hidden { display: none; }
+
+/* 固定した相手の体力 */
+#targetbar {
+  position: absolute; left: 50%; top: calc(40px + var(--safe-t));
+  transform: translateX(-50%); width: min(46vw, 280px);
+  text-align: center; text-shadow: 0 1px 3px #000;
+}
+#targetbar .tname { font-size: 11px; letter-spacing: .08em; opacity: .88; margin-bottom: 3px; }
+#targetbar .tbar {
+  position: relative; height: 6px; background: rgba(0,0,0,.66);
+  border: 1px solid rgba(0,0,0,.85); border-radius: 2px; overflow: hidden;
+}
+#targetbar .tbar i {
+  position: absolute; inset: 0; width: 100%;
+  background: rgba(255,235,190,.45); transition: width .4s cubic-bezier(.2,.7,.3,1);
+}
+#targetbar .tbar b {
+  position: absolute; inset: 0; width: 100%;
+  background: linear-gradient(180deg, #d8555c, #a02a33);
+  transition: width .1s linear;
+}
+
+/* 残り HP が僅かなときは脈打たせる */
+@keyframes lowpulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+.vitals.low .bar.hp b { animation: lowpulse .85s ease-in-out infinite; }
+.vitals.low .bar.hp { box-shadow: 0 0 8px rgba(200,50,60,.55), 0 1px 3px rgba(0,0,0,.7); }
+
 .echo {
   position: absolute; left: calc(16px + var(--safe-l)); bottom: calc(14px + var(--safe-b));
   font-size: 15px; letter-spacing: .06em; text-shadow: 0 1px 4px #000;
@@ -232,6 +267,42 @@ button {
   border-radius: 22px; font-size: 13px;
 }
 
+/* 左利き配置：操作ボタン群と情報表示を左右反転する */
+body.lefty .cluster {
+  right: auto; left: calc(14px + var(--safe-l)); align-items: flex-start;
+}
+body.lefty .diamond { transform: scaleX(-1); }
+body.lefty .diamond .tb { transform: scaleX(-1); }
+body.lefty .diamond .tb.active { transform: scaleX(-1) scale(.93); }
+body.lefty .topbtns { right: auto; left: calc(12px + var(--safe-l)); }
+body.lefty .topright {
+  right: auto; left: calc(12px + var(--safe-l)); align-items: flex-start;
+}
+body.lefty .worldinfo { text-align: left; }
+body.lefty .vitals { left: auto; right: calc(14px + var(--safe-r)); }
+body.lefty .statuses { justify-content: flex-end; }
+body.lefty .questtrack { left: auto; right: calc(14px + var(--safe-r)); text-align: right; }
+body.lefty .echo { left: auto; right: calc(16px + var(--safe-r)); }
+
+/* 操作ボタンの大きさ（指の太さは人によって違う） */
+body.tbig .tb.main { width: 70px; height: 70px; font-size: 19px; }
+body.tbig .tb.main.big { width: 90px; height: 90px; font-size: 24px; }
+body.tbig .diamond { width: 214px; height: 200px; }
+body.tbig .tb.main.up { right: 72px; top: 0; }
+body.tbig .tb.main.left { right: 138px; top: 64px; }
+body.tbig .tb.main.right { right: 0; top: 55px; }
+body.tbig .tb.main.down { right: 72px; top: 126px; }
+body.tbig .tb.sub { width: 52px; height: 52px; font-size: 15px; }
+
+body.tsmall .tb.main { width: 52px; height: 52px; font-size: 15px; }
+body.tsmall .tb.main.big { width: 66px; height: 66px; font-size: 18px; }
+body.tsmall .diamond { width: 162px; height: 148px; }
+body.tsmall .tb.main.up { right: 54px; top: 0; }
+body.tsmall .tb.main.left { right: 102px; top: 48px; }
+body.tsmall .tb.main.right { right: 0; top: 41px; }
+body.tsmall .tb.main.down { right: 54px; top: 94px; }
+body.tsmall .tb.sub { width: 38px; height: 38px; font-size: 12px; }
+
 /* ========================== オーバーレイ ========================== */
 #overlay {
   position: fixed; inset: 0; z-index: 40; background: rgba(4,4,6,.86);
@@ -271,6 +342,24 @@ button {
 .row .sub { font-size: 10px; opacity: .55; display: block; margin-top: 2px; line-height: 1.5; }
 .row .v { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .row.sel { background: rgba(216,184,98,.1); }
+/* 装備比較の増減 */
+.row .v em { font-style: normal; font-size: 10px; margin-left: 6px; }
+.row .v em.up { color: #86d47a; }
+.row .v em.down { color: #d4756a; }
+.row .sub em { font-style: normal; margin-left: 5px; }
+.row .sub em.up { color: #86d47a; }
+.row .sub em.down { color: #d4756a; }
+.row .warn { display: block; font-size: 10px; margin-top: 2px; color: #e0844e; }
+/* 積載メーター */
+.loadmeter {
+  height: 6px; margin: 2px 12px 10px; border-radius: 3px;
+  background: rgba(0,0,0,.5); overflow: hidden;
+}
+.loadmeter i { display: block; height: 100%; transition: width .18s; }
+.loadmeter i.fast { background: #8fd0e8; }
+.loadmeter i.normal { background: #a8d47a; }
+.loadmeter i.heavy { background: #e0c24e; }
+.loadmeter i.over { background: #d4514e; }
 .row.clickable:active { background: rgba(216,184,98,.16); }
 
 .btn {

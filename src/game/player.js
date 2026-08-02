@@ -184,9 +184,17 @@ export class Player extends Actor {
 
   /** 現在の武器での攻撃力（モーション倍率適用前） */
   weaponAttackPower() {
-    const w = this.weapon();
+    return this.attackPowerOf(this.equip.weapon);
+  }
+
+  /**
+   * 任意の武器を装備したときの攻撃力。
+   * 装備画面で「持ち替えたらどうなるか」を出すために使う。
+   */
+  attackPowerOf(id) {
+    const w = WEAPONS[id];
     if (!w) return 20;
-    let atk = w.base * UPGRADE.mul(this.upgrades[w.id] || 0);
+    const atk = w.base * UPGRADE.mul(this.upgrades[id] || 0);
     let bonus = 0;
     for (const [stat, grade] of Object.entries(w.scale || {})) {
       bonus += w.base * SCALE[grade] * scalingFactor(this.stats[stat]) * 1.15;
@@ -197,6 +205,15 @@ export class Player extends Actor {
       if (this.stats[stat] < req) penalty *= 0.55;
     }
     return (atk + bonus) * penalty;
+  }
+
+  /** 必要能力を満たしていない項目（装備画面の警告用） */
+  unmetReqs(def) {
+    const out = [];
+    for (const [stat, req] of Object.entries(def?.req || {})) {
+      if (this.stats[stat] < req) out.push({ stat, req, have: this.stats[stat] });
+    }
+    return out;
   }
 
   spellPower(spell) {
