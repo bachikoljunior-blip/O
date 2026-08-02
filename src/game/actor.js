@@ -139,8 +139,24 @@ export class Actor {
 
   updatePhysics(dt, game) {
     const gh = game.groundHeight(this.x, this.z);
+    // 水深（足元から水面まで）。地下では水は無い
+    const prevWade = this.waterDepth || 0;
+    this.waterDepth = game.dungeon ? 0 : Math.max(0, game.seaLevel - gh);
+    this.wading = this.waterDepth > 0.25;
+    this.swimming = this.waterDepth > this.height * 0.82;
+    // 入水・出水の瞬間だけ大きく跳ねさせる
+    if (game.onWaterCross && (prevWade > 0.25) !== this.wading) {
+      game.onWaterCross(this, this.wading);
+    }
     const target = this.floating ? gh + 0.65 : gh;
-    if (this.floating) {
+    if (this.swimming) {
+      // 泳いでいるあいだは重力ではなく浮力で位置が決まる。
+      // 落下処理と綱引きさせると、水面より下で釣り合ってしまう
+      const surf = game.seaLevel - this.height * 0.30;
+      this.y = lerp(this.y, surf, 1 - Math.exp(-6 * dt));
+      this.vy = 0;
+      this.grounded = true;
+    } else if (this.floating) {
       this.y = lerp(this.y, target, 1 - Math.exp(-6 * dt));
       this.grounded = true;
     } else if (this.y > target + 0.02 || this.vy > 0) {

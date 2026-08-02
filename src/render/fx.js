@@ -346,6 +346,35 @@ export class FX {
     });
   }
 
+  /**
+   * 水しぶき。上へ跳ねる粒と、水面を広がる薄い輪。
+   * @param y 水面の高さ
+   * @param r 波紋の初期半径
+   */
+  splash(x, y, z, n = 12, r = 0.5) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * 6.28;
+      const s = 0.8 + Math.random() * 2.6;
+      this.spawn({
+        x: x + Math.cos(a) * r, y: y + 0.05, z: z + Math.sin(a) * r,
+        vx: Math.cos(a) * s, vy: 1.8 + Math.random() * 3.2, vz: Math.sin(a) * s,
+        life: 0.35 + Math.random() * 0.35, size: 0.07 + Math.random() * 0.06, sizeEnd: 0.02,
+        r: 0.82, g: 0.92, b: 1.0, a: 0.85, kind: KIND.SOFT,
+        glow: 0.25, gravity: 16, drag: 0.5,
+      });
+    }
+    // 広がる波紋（地面に貼りつく薄い煙で代用）
+    for (let i = 0; i < 3; i++) {
+      this.spawn({
+        x, y: y + 0.03, z,
+        vx: 0, vy: 0.02, vz: 0,
+        life: 0.7 + i * 0.22, size: r + i * 0.3, sizeEnd: r + 2.6 + i * 0.9,
+        r: 0.86, g: 0.94, b: 1.0, a: 0.26 - i * 0.06, kind: KIND.SMOKE,
+        glow: 0.1, drag: 2.4, fade: 1.4,
+      });
+    }
+  }
+
   /** 霧の門から立ち上る霧（門の面に沿って左右に散らす） */
   fogGate(x, z, yaw, dt, color) {
     if (Math.random() > dt * 26) return;

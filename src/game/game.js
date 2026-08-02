@@ -88,6 +88,8 @@ export class Game {
     this.running = false;
     this.worldRadius = WORLD_RADIUS - 20;
     this.exposureMul = 1;
+    /** 水面の高さ。アクターの水深判定と描画で共有する */
+    this.seaLevel = 0;
   }
 
   async init(opts = {}) {
@@ -221,6 +223,9 @@ export class Game {
     this.renderer.damage = lerp(this.renderer.damage, this.damageFlash || 0, 0.2);
     this.damageFlash = Math.max(0, (this.damageFlash || 0) - this.time.raw * 2.4);
     this.renderer.aberration = this.activeBoss ? 0.022 : 0;
+    // 水面をくぐる瞬間に切り替わらないよう、なめらかに混ぜる
+    this.renderer.underwaterMix = lerp(this.renderer.underwaterMix || 0,
+      this.renderer.underwater || 0, 0.18);
     this.renderer.render(this);
   }
 
@@ -332,6 +337,7 @@ export class Game {
     }
     if (!this.dungeon) this.mount.update(dt, this);
     this.updateProjectiles(dt);
+    this.updateSwimming(dt);
     if (this.dungeon) {
       this.updateDungeon(dt);
     } else {
@@ -725,6 +731,62 @@ export class Game {
     this.audio.play('boss_phase');
     this.fx.bossPhase(b.x, b.y, b.z, [0.6, 0.7, 1]);
     this.camera.shake(0.6);
+  }
+
+  /* ---------------------------------------------------------- 水 */
+  /** 水際を跨いだ瞬間の飛沫 */
+  onWaterCross(actor, entering) {
+    if (Math.hypot(actor.x - this.player.x, actor.z - this.player.z) > 60) return;
+    this.fx.splash(actor.x, this.seaLevel, actor.z, entering ? 22 : 12, actor.radius);
+    this.audio.play('splash', { pitch: 0.85 + Math.random() * 0.35 });
+  }
+
+  /**
+   * 水の中の移動。浅瀬は歩けるが遅く、深いところでは泳ぐことになる。
+   * 泳いでいるあいだは武器を振れず、スタミナを食う。
+   */
+  updateSwimming(dt) {
+    const p = this.player;
+    if (this.dungeon) { p.waterDepth = 0; p.wading = false; p.swimming = false; return; }
+
+    // 波紋と飛沫（歩いているときだけ）
+    if (p.wading && !p.dead) {
+      const speed = Math.hypot(p.x - (this._wx ?? p.x), p.z - (this._wz ?? p.z)) / Math.max(dt, 1e-4);
+      if (speed > 0.6) {
+        this._splashAcc = (this._splashAcc || 0) + dt * Math.min(speed, 8);
+        if (this._splashAcc > 0.55) {
+          this._splashAcc = 0;
+          this.fx.splash(p.x, this.seaLevel, p.z, 5, p.radius * 0.8);
+          this.audio.footstep('water', 0.4);
+        }
+      }
+    }
+    this._wx = p.x; this._wz = p.z;
+
+    if (p.swimming) {
+      // 泳ぎ：構えも攻撃も解く
+      if (p.state === 'attack' || p.state === 'block') p.setState('idle', 0.1);
+      p.blocking = false;
+      // 泳いでいるあいだはスタミナが回復しない。
+      // これを止めないと回復量（34/秒）が消費量を上回って永遠に泳げてしまう
+      p.staminaDelay = Math.max(p.staminaDelay, 0.25);
+      p.stamina = Math.max(0, p.stamina - 8.5 * dt);
+      if (p.stamina <= 0) {
+        // 力尽きると溺れる
+        this._drown = (this._drown || 0) + dt;
+        if (this._drown > 1.0) {
+          this._drown = 0;
+          p.takeDamage(p.maxHp * 0.10 + 8, { type: 'fall', noFlinch: true }, this);
+          this.fx.splash(p.x, this.seaLevel, p.z, 10, 0.5);
+        }
+      } else this._drown = 0;
+    } else {
+      this._drown = 0;
+    }
+
+    // 水面より下にカメラがあるなら画面を水中にする
+    const cam = this.camera.pos;
+    this.renderer.underwater = (!this.dungeon && cam[1] < this.seaLevel) ? 1 : 0;
   }
 
   /* ------------------------------------------------ 群れの間合い管理 */

@@ -439,8 +439,11 @@ void main(){
 
   vec3 col = mix(body, refl, fres);
 
+  // 水面下から見上げているか（潜ったときの見え方は水面の上とは別物）
+  float below = step(u_camPos.y, v_world.y);
+
   // ---- 岸の泡（ごく浅い帯のみ）----
-  float shore = 1.0 - smoothstep(0.0, 0.55, vertical);
+  float shore = (1.0 - below) * (1.0 - smoothstep(0.0, 0.55, vertical));
   float foamN = vnoise(v_world.xz * 3.4 + vec2(u_time * 0.5, -u_time * 0.35)) * 0.62
               + vnoise(v_world.xz * 9.0 - u_time * 0.7) * 0.38;
   float band = sin(vertical * 11.0 - u_time * 2.2) * 0.5 + 0.5;
@@ -459,6 +462,11 @@ void main(){
   float alpha = mix(0.20, 0.96, clamp(vertical / 1.8, 0.0, 1.0));
   alpha = max(alpha, fres * 0.85);
   alpha = max(alpha, foam);
+  // 水面下から見上げるときは、ディザで斑にならないよう一定の薄い膜にする
+  if(below > 0.5){
+    col = mix(col, refl * 0.55 + vec3(0.10, 0.22, 0.30), 0.55);
+    alpha = 0.42;
+  }
   // 水面プレーンの外縁は霧に溶かして、切れ目が見えないようにする
   alpha *= 1.0 - smoothstep(0.62, 0.96, v_edge);
   outColor = vec4(col, clamp(alpha, 0.0, 1.0));
@@ -611,6 +619,7 @@ uniform float u_desat;      // 瀕死のとき彩度低下
 uniform vec3 u_grade;       // カラーグレーディング（乗算）
 uniform float u_time;
 uniform float u_aberration;
+uniform float u_underwater;  // カメラが水面下にある度合い
 out vec4 outColor;
 
 vec3 aces(vec3 x){
@@ -620,6 +629,12 @@ vec3 aces(vec3 x){
 
 void main(){
   vec2 uv = v_uv;
+  // 水中では画面全体をゆらす
+  if(u_underwater > 0.001){
+    uv += vec2(
+      sin(uv.y * 26.0 + u_time * 1.9) * 0.0035,
+      cos(uv.x * 21.0 + u_time * 1.5) * 0.0030) * u_underwater;
+  }
   vec2 d = uv - 0.5;
   float r2 = dot(d, d);
   vec3 col;
@@ -658,6 +673,14 @@ void main(){
   if(u_desat > 0.001){
     float l = dot(col, vec3(0.299, 0.587, 0.114));
     col = mix(col, vec3(l) * vec3(1.06, 0.92, 0.92), u_desat);
+  }
+
+  // 水中：青緑に沈め、周辺を暗くする
+  if(u_underwater > 0.001){
+    float l2 = dot(col, vec3(0.299, 0.587, 0.114));
+    vec3 deep = mix(vec3(l2), col, 0.55) * vec3(0.34, 0.68, 0.88);
+    col = mix(col, deep, u_underwater);
+    col *= 1.0 - u_underwater * 0.45 * smoothstep(0.05, 0.62, r2);
   }
 
   // わずかなフィルムグレイン（バンディング低減）

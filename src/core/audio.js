@@ -151,6 +151,11 @@ export class AudioEngine {
     const p = opts.pitch || 1;
     const d = opts.delay || 0;
     switch (name) {
+      case 'splash':
+        // 白色ノイズを高域から低域へ落として「ばしゃっ」を作る
+        this.noise({ dur: 0.34, gain: 0.16, freq: 2600 * p, sweep: 0.12, q: 0.5, delay: d });
+        this.noise({ dur: 0.5, gain: 0.07, freq: 700 * p, sweep: 0.4, q: 0.8, delay: d + 0.03 });
+        break;
       case 'swing':
         this.noise({ dur: 0.16, gain: 0.16, freq: 900 * p, sweep: 0.35, q: 1.4, delay: d });
         break;
@@ -293,6 +298,7 @@ export class AudioEngine {
       rock: { f: 1100, q: 2.2, d: 0.07, g: 0.16 },
       snow: { f: 3000, q: 0.6, d: 0.12, g: 0.08 },
       marsh: { f: 500, q: 0.6, d: 0.16, g: 0.14 },
+      water: { f: 2100, q: 0.35, d: 0.22, g: 0.15 },
     }[surface] || { f: 1000, q: 1, d: 0.1, g: 0.12 };
     this.noise({ dur: cfg.d, gain: cfg.g * vol * 2.4, freq: cfg.f * (0.85 + Math.random() * 0.3), q: cfg.q, sweep: 0.5 });
   }

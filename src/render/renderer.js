@@ -481,6 +481,7 @@ export class Renderer {
     cp.v3('u_grade', game.sky.grade);
     cp.f('u_time', game.time.now);
     cp.f('u_aberration', this.aberration);
+    cp.f('u_underwater', this.underwaterMix || 0);
     this.quad.draw();
   }
 }

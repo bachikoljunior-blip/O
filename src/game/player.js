@@ -329,8 +329,13 @@ export class Player extends Actor {
       let base = this.sprinting ? this.runSpeed : this.speed * lerp(0.45, 1, mag);
       if (this.blocking) base *= 0.55;
       if (this.frostSlow > 0) base *= 0.75;
-      const gh = game.groundHeight(this.x, this.z);
-      if (gh < -0.4) base *= 0.55;                        // 水中
+      // 水は深くなるほど足を取られ、泳ぎに変わると一定速になる
+      if (this.swimming) {
+        base = 2.4;
+        this.sprinting = false;
+      } else if (this.wading) {
+        base *= lerp(0.92, 0.5, clamp01(this.waterDepth / (this.height * 0.8)));
+      }
       speed = base;
       this.moveOnGround(dt, game, wx, wz, base);
       if (this.sprinting) {
@@ -361,7 +366,7 @@ export class Player extends Actor {
       if (this._step > 1) {
         this._step = 0;
         const s = game.surfaceAt(this.x, this.z);
-        game.audio.footstep(s.surface, this.sprinting ? 0.6 : 0.36);
+        game.audio.footstep(this.wading ? 'water' : s.surface, this.sprinting ? 0.6 : 0.36);
         if (s.surface === 'grass' || s.surface === 'marsh') {
           game.fx.dust(this.x, this.y + 0.05, this.z, 2);
         }
