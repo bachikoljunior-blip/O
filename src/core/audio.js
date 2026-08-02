@@ -256,6 +256,14 @@ export class AudioEngine {
       case 'echo':
         this.tone({ freq: note(12 + (Math.random() * 4 | 0)), dur: 0.22, type: 'sine', gain: 0.07, delay: d });
         break;
+      case 'whistle':
+        this.tone({ freq: 1400, dur: 0.20, type: 'sine', gain: 0.09, sweep: 1.5, delay: d, reverb: 0.6 });
+        this.tone({ freq: 2100, dur: 0.26, type: 'sine', gain: 0.07, sweep: 0.7, delay: d + 0.18, reverb: 0.7 });
+        break;
+      case 'mount_up':
+        this.noise({ dur: 0.22, gain: 0.16, freq: 300, sweep: 0.5, q: 0.8, delay: d });
+        this.tone({ freq: 160, dur: 0.3, type: 'triangle', gain: 0.10, sweep: 0.7, delay: d });
+        break;
       case 'ui_on':
         this.tone({ freq: 880, dur: 0.09, type: 'square', gain: 0.06, delay: d });
         break;
@@ -287,6 +295,104 @@ export class AudioEngine {
       marsh: { f: 500, q: 0.6, d: 0.16, g: 0.14 },
     }[surface] || { f: 1000, q: 1, d: 0.1, g: 0.12 };
     this.noise({ dur: cfg.d, gain: cfg.g * vol * 2.4, freq: cfg.f * (0.85 + Math.random() * 0.3), q: cfg.q, sweep: 0.5 });
+  }
+
+  /* ---------------------------------------------------------- 環境音 */
+  startAmbience() {
+    if (!this.ready || this.ambience) return;
+    const ctx = this.ctx;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuf;
+    src.loop = true;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 420;
+    lp.Q.value = 0.5;
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 90;
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(this.masterGain);
+    src.start();
+
+    // 水辺用の別レイヤ
+    const wsrc = ctx.createBufferSource();
+    wsrc.buffer = this.noiseBuf;
+    wsrc.loop = true;
+    const wf = ctx.createBiquadFilter();
+    wf.type = 'bandpass';
+    wf.frequency.value = 900;
+    wf.Q.value = 0.7;
+    const wg = ctx.createGain();
+    wg.gain.value = 0;
+    wsrc.connect(wf); wf.connect(wg); wg.connect(this.masterGain);
+    wsrc.start();
+
+    this.ambience = { g, lp, wg, wf, chirp: 2, lfo: 0 };
+  }
+
+  /** 風・水音・鳥の声を状況に合わせて鳴らす */
+  updateAmbience(dt, game) {
+    if (!this.ready || this.muted) return;
+    if (!this.ambience) this.startAmbience();
+    const a = this.ambience;
+    if (!a) return;
+    const ctx = this.ctx;
+    const sky = game.sky;
+    const p = game.player;
+
+    // 風：天候と標高で強くなる。ゆっくり息づかせる
+    a.lfo += dt * 0.23;
+    const gust = 0.65 + 0.35 * Math.sin(a.lfo * 1.7) * Math.sin(a.lfo * 0.53 + 1.2);
+    const alt = Math.max(0, (p.y - 40) / 160);
+    const windAmt = Math.min(1.6, sky.wind * (0.55 + alt * 0.9)) * gust;
+    a.g.gain.setTargetAtTime(0.035 * windAmt * this.sfxVol, ctx.currentTime, 0.5);
+    a.lp.frequency.setTargetAtTime(360 + windAmt * 700, ctx.currentTime, 0.6);
+
+    // 水辺：近くの海面／湖面
+    const gh = game.world.height(p.x, p.z);
+    const nearWater = Math.max(0, 1 - Math.max(0, gh) / 7);
+    a.wg.gain.setTargetAtTime(0.030 * nearWater * this.sfxVol, ctx.currentTime, 0.7);
+    a.wf.frequency.setTargetAtTime(700 + nearWater * 500, ctx.currentTime, 0.8);
+
+    // 雨は高域のホワイトノイズを足す
+    if (sky.rainAmount > 0.05) {
+      a.wg.gain.setTargetAtTime(
+        (0.030 * nearWater + 0.055 * sky.rainAmount) * this.sfxVol, ctx.currentTime, 0.5);
+      a.wf.frequency.setTargetAtTime(2400 + sky.rainAmount * 1800, ctx.currentTime, 0.5);
+    }
+
+    // 生き物の声
+    a.chirp -= dt;
+    if (a.chirp <= 0) {
+      const region = game.world.regionAt(p.x, p.z);
+      const night = sky.isNight;
+      a.chirp = 1.6 + Math.random() * 5.5;
+      if (sky.rainAmount > 0.4) return;
+      if (!night && (region.id === 'downs' || region.id === 'goldreach' || region.id === 'coast')) {
+        // 小鳥
+        const base = 1800 + Math.random() * 1400;
+        for (let i = 0; i < 2 + (Math.random() * 3 | 0); i++) {
+          this.tone({
+            freq: base * (1 + Math.random() * 0.3), dur: 0.07, type: 'sine',
+            gain: 0.022, sweep: 1.4 + Math.random(), delay: i * 0.09, reverb: 0.5,
+          });
+        }
+      } else if (!night && region.id === 'gloomwood') {
+        this.tone({ freq: 420 + Math.random() * 160, dur: 0.5, type: 'sine', gain: 0.02, sweep: 0.7, reverb: 0.9 });
+      } else if (night) {
+        // 虫の音／梟
+        if (Math.random() < 0.5) {
+          for (let i = 0; i < 6; i++) {
+            this.noise({ dur: 0.02, gain: 0.012, freq: 5200, q: 8, delay: i * 0.045 });
+          }
+        } else {
+          this.tone({ freq: 300, dur: 0.35, type: 'sine', gain: 0.018, sweep: 0.85, reverb: 0.8 });
+          this.tone({ freq: 300, dur: 0.3, type: 'sine', gain: 0.014, sweep: 0.9, delay: 0.42, reverb: 0.8 });
+        }
+      }
+    }
   }
 
   /* ------------------------------------------------------------ BGM */

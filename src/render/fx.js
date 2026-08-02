@@ -145,6 +145,27 @@ export class FX {
     }
   }
 
+  /** 武器の軌跡（前フレームの刃先から現在の刃先へ弧を描く） */
+  weaponTrail(px, py, pz, x, y, z, bx, by, bz, color, power = 1) {
+    const seg = 4;
+    for (let i = 1; i <= seg; i++) {
+      const t = i / seg;
+      const tx = px + (x - px) * t, ty = py + (y - py) * t, tz = pz + (z - pz) * t;
+      // 刃先から柄元へ向かって細くなる帯
+      for (let u = 0; u < 3; u++) {
+        const k = u / 3;
+        const wx = tx + (bx - tx) * k, wy = ty + (by - ty) * k, wz = tz + (bz - tz) * k;
+        this.spawn({
+          x: wx, y: wy, z: wz,
+          life: 0.10 + 0.06 * (1 - k),
+          size: (0.26 - k * 0.10) * power, sizeEnd: 0.02,
+          r: color[0], g: color[1], b: color[2], a: 0.55 * (1 - k * 0.45),
+          kind: KIND.SOFT, glow: 1.1, drag: 4, fade: 0.7,
+        });
+      }
+    }
+  }
+
   slash(x, y, z, yaw) {
     for (let i = 0; i < 8; i++) {
       const t = i / 8;

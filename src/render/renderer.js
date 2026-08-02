@@ -6,7 +6,7 @@ import {
 import {
   MESH_VS, MESH_FS, SHADOW_VS, SHADOW_FS, SKY_VS, SKY_FS,
   WATER_VS, WATER_FS, PARTICLE_VS, PARTICLE_FS,
-  POST_VS, BRIGHT_FS, BLUR_FS, COMPOSITE_FS,
+  POST_VS, BRIGHT_FS, BLUR_FS, COMPOSITE_FS, RAYS_FS, LINDEPTH_FS,
 } from './shaders.js';
 import { buildModels } from './mesh.js';
 import { m4, v3, Frustum, clamp, clamp01, lerp } from '../core/math.js';
@@ -35,7 +35,11 @@ export class Renderer {
     this.progParticle = new Program(gl, PARTICLE_VS, PARTICLE_FS, 'particle');
     this.progBright = new Program(gl, POST_VS, BRIGHT_FS, 'bright');
     this.progBlur = new Program(gl, POST_VS, BLUR_FS, 'blur');
+    this.progRays = new Program(gl, POST_VS, RAYS_FS, 'rays');
+    this.progLinDepth = new Program(gl, POST_VS, LINDEPTH_FS, 'lindepth');
     this.progComposite = new Program(gl, POST_VS, COMPOSITE_FS, 'composite');
+    this.sunUV = [0.5, 0.5, -1];
+    this.rayStrength = 0;
 
     this.quad = fullscreenQuad(gl);
     this.shadow = new ShadowMap(gl, quality.shadowSize);
@@ -43,7 +47,8 @@ export class Renderer {
     this.lightView = m4.new();
     this.lightProj = m4.new();
 
-    this.water = this.buildWaterGrid(gl, 640, 88);
+    this.waterSize = 900;
+    this.water = this.buildWaterGrid(gl, this.waterSize, 92);
     this.scene = null;
     this.bloomA = null;
     this.bloomB = null;
@@ -95,14 +100,19 @@ export class Renderer {
     const rw = Math.max(2, Math.round(w * s));
     const rh = Math.max(2, Math.round(h * s));
     const float = !!gl.getExtension('EXT_color_buffer_half_float');
+    const bw = Math.max(2, rw >> 2), bh = Math.max(2, rh >> 2);
     if (!this.scene) {
-      this.scene = new RenderTarget(gl, rw, rh, { float, depth: true });
-      this.bloomA = new RenderTarget(gl, rw >> 2, rh >> 2, { float, depth: false });
-      this.bloomB = new RenderTarget(gl, rw >> 2, rh >> 2, { float, depth: false });
+      this.scene = new RenderTarget(gl, rw, rh, { float, depth: true, depthTexture: true });
+      this.linDepth = new RenderTarget(gl, rw, rh, { depth: false, filter: gl.NEAREST });
+      this.bloomA = new RenderTarget(gl, bw, bh, { float, depth: false });
+      this.bloomB = new RenderTarget(gl, bw, bh, { float, depth: false });
+      this.rays = new RenderTarget(gl, bw, bh, { float, depth: false });
     } else {
       this.scene.resize(rw, rh);
-      this.bloomA.resize(Math.max(2, rw >> 2), Math.max(2, rh >> 2));
-      this.bloomB.resize(Math.max(2, rw >> 2), Math.max(2, rh >> 2));
+      this.linDepth.resize(rw, rh);
+      this.bloomA.resize(bw, bh);
+      this.bloomB.resize(bw, bh);
+      this.rays.resize(bw, bh);
     }
   }
 
@@ -143,6 +153,8 @@ export class Renderer {
     prog.f('u_fogDensity', sky.fogDensity);
     prog.f('u_fogHeight', 12);
     prog.f('u_time', game.time.now);
+    prog.f('u_cloudShadow', this.q.cloudShadows ? sky.cloud * 0.62 * (1 - sky.night * 0.7) : 0);
+    prog.f('u_cloudTime', game.time.now);
   }
 
   setShadowUniforms(prog) {
@@ -250,8 +262,20 @@ export class Renderer {
     // 草（距離帯ごとにアルファを変えてフェード）
     this.drawGrass(game, mp);
 
-    // 水
-    if (this.q.water) this.drawWater(game);
+    // 不透明シーンのデプスを線形化して別ターゲットへ（水の厚み計算に使う）
+    if (this.q.water) {
+      this.linDepth.bind();
+      gl.disable(gl.DEPTH_TEST);
+      gl.disable(gl.CULL_FACE);
+      const lp = this.progLinDepth.use();
+      lp.tex('u_depthTex', 6, this.scene.depthTex);
+      lp.v2('u_nearFar', cam.near, cam.far);
+      this.quad.draw();
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+      this.scene.bind();
+      this.drawWater(game);
+    }
 
     // パーティクル
     this.drawParticles(game);
@@ -324,6 +348,7 @@ export class Renderer {
     wp.f('u_time', game.time.now);
     wp.f('u_seaLevel', 0);
     wp.f('u_waveScale', lerp(0.6, 2.2, clamp01(game.sky.wind / 2)));
+    wp.f('u_planeSize', this.waterSize);
     wp.v3('u_deepColor', 0.02, 0.07, 0.11);
     wp.v3('u_shallowColor', 0.08, 0.20, 0.22);
     wp.v3('u_zenith', game.sky.zenith);
@@ -332,6 +357,11 @@ export class Renderer {
     wp.v3('u_sunDir', game.sky.sunDir);
     wp.f('u_night', game.sky.night);
     wp.f('u_fogDensity', game.sky.fogDensity);
+    wp.f('u_cloudShadow', this.q.cloudShadows ? game.sky.cloud * 0.62 * (1 - game.sky.night * 0.7) : 0);
+    wp.f('u_cloudTime', game.time.now);
+    wp.tex('u_depth', 5, this.linDepth.tex);
+    wp.v2('u_resolution', this.scene.w, this.scene.h);
+    wp.v2('u_nearFar', cam.near, cam.far);
     gl.bindVertexArray(this.water.vao);
     gl.drawElements(gl.TRIANGLES, this.water.count, gl.UNSIGNED_INT, 0);
     gl.enable(gl.CULL_FACE);
@@ -362,6 +392,22 @@ export class Renderer {
     this.stats.draws++;
   }
 
+  /** 太陽のスクリーン座標と薄明光線の強さを求める */
+  updateSunUV(game) {
+    const cam = game.camera;
+    const sd = game.sky.sunDir;
+    const out = this.sunUV;
+    cam.project(cam.pos[0] + sd[0] * 900, cam.pos[1] + sd[1] * 900, cam.pos[2] + sd[2] * 900, out);
+    if (out[2] <= 0 || sd[1] < -0.02) { this.rayStrength = 0; return; }
+    // 画面中心から離れるほど、また太陽が低い/雲が厚いほど弱める
+    const off = Math.max(Math.abs(out[0] - 0.5), Math.abs(out[1] - 0.5));
+    const onScreen = 1 - clamp01((off - 0.5) / 0.55);
+    const elev = clamp01(sd[1] * 3.2);
+    const horizonBoost = 1 - clamp01(Math.abs(sd[1] - 0.12) * 3.0);
+    this.rayStrength = this.q.rayStrength * onScreen * (0.35 + horizonBoost * 0.65)
+      * (1 - game.sky.night) * (1 - game.sky.cloud * 0.45) * clamp01(elev * 4);
+  }
+
   postProcess(game) {
     const gl = this.gl;
     gl.disable(gl.DEPTH_TEST);
@@ -375,6 +421,17 @@ export class Renderer {
       bp.f('u_threshold', 1.15);
       this.quad.draw();
 
+      // 薄明光線：明部を太陽方向へ引き伸ばす
+      this.updateSunUV(game);
+      if (this.q.godRays && this.rayStrength > 0.002) {
+        this.rays.bind();
+        const rp = this.progRays.use();
+        rp.tex('u_tex', 0, this.bloomA.tex);
+        rp.v2('u_sunUV', this.sunUV[0], this.sunUV[1]);
+        rp.f('u_decay', 0.93);
+        this.quad.draw();
+      }
+
       const blur = this.progBlur.use();
       for (let i = 0; i < this.q.bloomPasses; i++) {
         this.bloomB.bind();
@@ -386,6 +443,8 @@ export class Renderer {
         blur.v2('u_dir', 0, 1 / this.bloomA.h);
         this.quad.draw();
       }
+    } else {
+      this.rayStrength = 0;
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -394,6 +453,12 @@ export class Renderer {
     cp.tex('u_scene', 0, this.scene.tex);
     cp.tex('u_bloom', 1, this.q.bloom ? this.bloomA.tex : this.scene.tex);
     cp.f('u_bloomStrength', this.q.bloom ? this.q.bloomStrength : 0);
+    const rayOn = this.q.godRays && this.rayStrength > 0.002;
+    cp.tex('u_rays', 2, rayOn ? this.rays.tex : this.scene.tex);
+    cp.f('u_rayStrength', rayOn ? this.rayStrength : 0);
+    const sc = game.sky.sunColor;
+    const m = Math.max(0.001, Math.max(sc[0], Math.max(sc[1], sc[2])));
+    cp.v3('u_rayColor', sc[0] / m, sc[1] / m, sc[2] / m);
     cp.f('u_exposure', game.sky.exposure * (game.exposureMul || 1));
     cp.f('u_vignette', 0.42);
     cp.f('u_damage', this.damage);

@@ -1,7 +1,7 @@
 // 手続き的メッシュ生成（プリミティブ + モデルライブラリ）
 
 import { Geometry, VERT_FLOATS } from '../core/gl.js';
-import { m4, quat, v3 } from '../core/math.js';
+import { m4, quat, v3, lerp } from '../core/math.js';
 import { makeRng } from '../core/noise.js';
 
 const _q = quat.new();
@@ -204,6 +204,38 @@ export class MeshBuilder {
     return this;
   }
 
+  /** 先細りの葉（草・羽根）。根元 w、先端はほぼ点 */
+  blade(w, h, c, cTop = null, curve = 0.12) {
+    const c1 = cTop || c;
+    const seg = 3;
+    let prevL = -1, prevR = -1;
+    for (let i = 0; i <= seg; i++) {
+      const t = i / seg;
+      const hw = (w / 2) * (1 - t * 0.92);
+      const y = h * t;
+      const z = curve * t * t * h;
+      const col = [lerp(c[0], c1[0], t), lerp(c[1], c1[1], t), lerp(c[2], c1[2], t)];
+      const l = this.vert(-hw, y, z, 0, 0.25, 0.97, col);
+      const r = this.vert(hw, y, z, 0, 0.25, 0.97, col);
+      if (prevL >= 0) this.quad(prevL, prevR, r, l);
+      prevL = l; prevR = r;
+    }
+    // 裏面
+    prevL = -1; prevR = -1;
+    for (let i = 0; i <= seg; i++) {
+      const t = i / seg;
+      const hw = (w / 2) * (1 - t * 0.92);
+      const y = h * t;
+      const z = curve * t * t * h;
+      const col = [lerp(c[0], c1[0], t) * 0.82, lerp(c[1], c1[1], t) * 0.82, lerp(c[2], c1[2], t) * 0.82];
+      const l = this.vert(-hw, y, z, 0, 0.25, -0.97, col);
+      const r = this.vert(hw, y, z, 0, 0.25, -0.97, col);
+      if (prevL >= 0) this.quad(prevL, l, r, prevR);
+      prevL = l; prevR = r;
+    }
+    return this;
+  }
+
   /** 三角柱（切妻屋根） */
   prism(w, h, d, c) {
     const hw = w / 2, hd = d / 2;
@@ -246,48 +278,74 @@ const C = {
 
 /* --------------------------------------------------------------- 樹木 */
 function treePine(b, rng) {
-  const h = 7 + rng() * 7;
+  const h = 6 + rng() * 4.5;
   b.cylinder(0.34, 0.16, h * 0.55, 6, C.barkDark, true, C.bark);
   const tiers = 4 + (rng() * 2 | 0);
   for (let i = 0; i < tiers; i++) {
     const t = i / tiers;
     const y = h * (0.22 + t * 0.62);
-    const r = (2.5 - t * 1.7) * (0.9 + rng() * 0.25);
+    const r = (2.0 - t * 1.35) * (0.9 + rng() * 0.25);
     b.push().translate(0, y, 0);
     const k = 0.85 + t * 0.35;
     b.cylinder(r, r * 0.15, h * 0.30, 7, [C.leafPine[0] * k, C.leafPine[1] * k, C.leafPine[2] * k], false);
     b.pop();
   }
 }
-function treeOak(b, rng) {
-  const h = 5.5 + rng() * 4;
-  b.cylinder(0.45, 0.28, h * 0.55, 6, C.barkDark, true, C.bark);
-  for (let i = 0; i < 4; i++) {
-    const a = rng() * Math.PI * 2;
-    const rr = 0.7 + rng() * 1.2;
-    b.push().translate(Math.cos(a) * rr * 0.6, h * (0.55 + rng() * 0.3), Math.sin(a) * rr * 0.6);
-    b.scale(1, 0.72, 1);
-    const k = 0.85 + rng() * 0.3;
-    b.sphere(1.7 + rng() * 1.1, 7, 5, [C.leafA[0] * k, C.leafA[1] * k, C.leafA[2] * k]);
+/** 枝分かれする幹を再帰的に生成する */
+function branch(b, rng, len, r0, depth, leaf, leafSize) {
+  const r1 = r0 * (0.62 + rng() * 0.12);
+  b.cylinder(r0, r1, len, depth > 1 ? 6 : 4, C.barkDark, true, C.bark);
+  if (depth <= 0) {
+    if (leaf) {
+      b.push().translate(0, len, 0).scale(1, 0.72 + rng() * 0.3, 1);
+      const k = 0.82 + rng() * 0.36;
+      b.sphere(leafSize * (0.8 + rng() * 0.5), 7, 5, [leaf[0] * k, leaf[1] * k, leaf[2] * k]);
+      b.pop();
+    }
+    return;
+  }
+  const n = 2 + ((rng() * 2) | 0);
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + rng() * 0.9;
+    b.push()
+      .translate(0, len * (0.72 + rng() * 0.26), 0)
+      .rotate(0, a, 0)
+      .rotate(0.42 + rng() * 0.46, 0, 0);
+    branch(b, rng, len * (0.62 + rng() * 0.18), r1 * 0.78, depth - 1, leaf, leafSize * 0.82);
     b.pop();
   }
 }
-function treeBirch(b, rng) {
-  const h = 6 + rng() * 4;
-  b.push().rotate(rng() * 0.06, 0, rng() * 0.06);
-  b.cylinder(0.19, 0.12, h * 0.68, 6, C.birch, true, [0.9, 0.9, 0.86]);
+
+function treeOak(b, rng) {
+  const h = 3.0 + rng() * 1.6;
+  b.push().rotate((rng() - 0.5) * 0.08, rng() * 6.28, (rng() - 0.5) * 0.08);
+  branch(b, rng, h, 0.40 + rng() * 0.12, 2, C.leafA, 1.9);
   b.pop();
+}
+
+function treeBirch(b, rng) {
+  const h = 4.4 + rng() * 2.2;
+  b.push().rotate((rng() - 0.5) * 0.1, 0, (rng() - 0.5) * 0.1);
+  b.cylinder(0.19, 0.11, h, 6, C.birch, true, [0.92, 0.92, 0.88]);
+  // 樹皮の黒い横縞
+  for (let i = 0; i < 4; i++) {
+    const y = h * (0.15 + rng() * 0.7);
+    b.push().translate(0, y, 0)
+      .cylinder(0.20 - y / h * 0.07, 0.20 - y / h * 0.07, 0.05 + rng() * 0.05, 6, [0.22, 0.21, 0.20], false).pop();
+  }
   for (let i = 0; i < 3; i++) {
     const a = rng() * Math.PI * 2;
-    b.push().translate(Math.cos(a) * 0.7, h * (0.66 + rng() * 0.25), Math.sin(a) * 0.7);
-    b.scale(1, 0.66, 1);
-    const k = 0.9 + rng() * 0.3;
-    b.sphere(1.5 + rng() * 0.8, 7, 5, [C.leafB[0] * k, C.leafB[1] * k, C.leafB[2] * k]);
+    b.push().translate(0, h * (0.55 + rng() * 0.3), 0).rotate(0, a, 0).rotate(0.7 + rng() * 0.4, 0, 0);
+    branch(b, rng, 1.0 + rng() * 0.7, 0.07, 1, C.leafB, 1.35);
     b.pop();
   }
+  b.push().translate(0, h * 0.96, 0).scale(1, 0.7, 1);
+  b.sphere(1.3 + rng() * 0.5, 7, 5, C.leafB);
+  b.pop();
+  b.pop();
 }
 function treeWillow(b, rng) {
-  const h = 5 + rng() * 3;
+  const h = 4.4 + rng() * 2.4;
   b.cylinder(0.5, 0.3, h * 0.5, 6, C.barkDark, true, C.bark);
   b.push().translate(0, h * 0.55, 0).scale(1, 0.6, 1);
   b.sphere(2.6, 8, 5, C.leafWillow);
@@ -301,15 +359,10 @@ function treeWillow(b, rng) {
   }
 }
 function treeDead(b, rng) {
-  const h = 4.5 + rng() * 4;
-  b.cylinder(0.38, 0.14, h, 6, C.barkDark, true, [0.30, 0.26, 0.22]);
-  for (let i = 0; i < 4; i++) {
-    const a = rng() * Math.PI * 2;
-    b.push().translate(0, h * (0.45 + rng() * 0.45), 0)
-      .rotate(0, a, 0.7 + rng() * 0.5);
-    b.cylinder(0.12, 0.03, 1.4 + rng() * 1.6, 4, [0.30, 0.25, 0.21], false);
-    b.pop();
-  }
+  const h = 3.4 + rng() * 2.4;
+  b.push().rotate((rng() - 0.5) * 0.12, rng() * 6.28, (rng() - 0.5) * 0.12);
+  branch(b, rng, h, 0.34 + rng() * 0.10, 2, null, 0);
+  b.pop();
 }
 
 const TREE_FN = { pine: treePine, oak: treeOak, birch: treeBirch, willow: treeWillow, dead: treeDead };
@@ -334,9 +387,10 @@ function grassTuft(b, rng) {
       .rotate(0, a, 0)
       .translate(off, 0, 0)
       .rotate((rng() - 0.5) * 0.3, 0, (rng() - 0.5) * 0.4);
-    b.plane(0.10 + rng() * 0.05, hh,
+    b.blade(0.11 + rng() * 0.05, hh,
       [C.grassLow[0] * k, C.grassLow[1] * k, C.grassLow[2] * k],
-      [C.grassTop[0] * k, C.grassTop[1] * k, C.grassTop[2] * k]);
+      [C.grassTop[0] * k, C.grassTop[1] * k, C.grassTop[2] * k],
+      0.10 + rng() * 0.22);
     b.pop();
   }
 }

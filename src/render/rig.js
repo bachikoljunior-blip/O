@@ -18,21 +18,23 @@ function P(name, parent, offset, shape, size, center, shade = 1, opts = {}) {
 
 const HUMANOID = [
   P('root', null, [0, 0, 0], null, null, null),
-  P('pelvis', 'root', [0, 0.92, 0], 'part', [0.44, 0.28, 0.30], [0, 0, 0], 0.9),
-  P('chest', 'pelvis', [0, 0.18, 0], 'part', [0.54, 0.58, 0.34], [0, 0.25, 0], 1.0),
-  P('head', 'chest', [0, 0.56, 0], 'ball', [0.36, 0.40, 0.36], [0, 0.13, 0], 1.08, { skin: true }),
-  P('shoulderL', 'chest', [-0.33, 0.42, 0], 'partSlim', [0.18, 0.44, 0.18], [0, -0.20, 0], 0.95),
-  P('elbowL', 'shoulderL', [0, -0.42, 0], 'partSlim', [0.155, 0.40, 0.155], [0, -0.19, 0], 0.92, { skin: true }),
-  P('handL', 'elbowL', [0, -0.40, 0], 'part', [0.16, 0.16, 0.14], [0, -0.05, 0], 0.9, { skin: true }),
-  P('shoulderR', 'chest', [0.33, 0.42, 0], 'partSlim', [0.18, 0.44, 0.18], [0, -0.20, 0], 0.95),
-  P('elbowR', 'shoulderR', [0, -0.42, 0], 'partSlim', [0.155, 0.40, 0.155], [0, -0.19, 0], 0.92, { skin: true }),
-  P('handR', 'elbowR', [0, -0.40, 0], 'part', [0.16, 0.16, 0.14], [0, -0.05, 0], 0.9, { skin: true }),
-  P('hipL', 'pelvis', [-0.17, -0.14, 0], 'partSlim', [0.21, 0.48, 0.21], [0, -0.22, 0], 0.88),
-  P('kneeL', 'hipL', [0, -0.46, 0], 'partSlim', [0.18, 0.44, 0.18], [0, -0.21, 0], 0.85),
-  P('footL', 'kneeL', [0, -0.43, 0], 'part', [0.19, 0.13, 0.32], [0, -0.05, 0.06], 0.75),
-  P('hipR', 'pelvis', [0.17, -0.14, 0], 'partSlim', [0.21, 0.48, 0.21], [0, -0.22, 0], 0.88),
-  P('kneeR', 'hipR', [0, -0.46, 0], 'partSlim', [0.18, 0.44, 0.18], [0, -0.21, 0], 0.85),
-  P('footR', 'kneeR', [0, -0.43, 0], 'part', [0.19, 0.13, 0.32], [0, -0.05, 0.06], 0.75),
+  P('pelvis', 'root', [0, 0.92, 0], 'part', [0.42, 0.30, 0.30], [0, 0, 0], 0.9),
+  P('chest', 'pelvis', [0, 0.16, 0], 'part', [0.50, 0.62, 0.33], [0, 0.27, 0], 1.0),
+  P('shoulders', 'chest', [0, 0.44, 0], 'partSlim', [0.72, 0.26, 0.34], [0, 0, 0], 1.02),
+  P('neck', 'chest', [0, 0.50, 0], 'partSlim', [0.20, 0.20, 0.20], [0, 0.02, 0], 0.94, { skin: true }),
+  P('head', 'chest', [0, 0.58, 0], 'ball', [0.35, 0.40, 0.36], [0, 0.13, 0], 1.08, { skin: true }),
+  P('shoulderL', 'chest', [-0.32, 0.42, 0], 'partSlim', [0.19, 0.50, 0.19], [0, -0.21, 0], 0.95),
+  P('elbowL', 'shoulderL', [0, -0.42, 0], 'partSlim', [0.165, 0.46, 0.165], [0, -0.19, 0], 0.92, { skin: true }),
+  P('handL', 'elbowL', [0, -0.40, 0], 'part', [0.17, 0.18, 0.15], [0, -0.05, 0], 0.9, { skin: true }),
+  P('shoulderR', 'chest', [0.32, 0.42, 0], 'partSlim', [0.19, 0.50, 0.19], [0, -0.21, 0], 0.95),
+  P('elbowR', 'shoulderR', [0, -0.42, 0], 'partSlim', [0.165, 0.46, 0.165], [0, -0.19, 0], 0.92, { skin: true }),
+  P('handR', 'elbowR', [0, -0.40, 0], 'part', [0.17, 0.18, 0.15], [0, -0.05, 0], 0.9, { skin: true }),
+  P('hipL', 'pelvis', [-0.16, -0.14, 0], 'partSlim', [0.22, 0.56, 0.22], [0, -0.23, 0], 0.88),
+  P('kneeL', 'hipL', [0, -0.46, 0], 'partSlim', [0.19, 0.52, 0.19], [0, -0.22, 0], 0.85),
+  P('footL', 'kneeL', [0, -0.43, 0], 'part', [0.20, 0.14, 0.34], [0, -0.05, 0.07], 0.75),
+  P('hipR', 'pelvis', [0.16, -0.14, 0], 'partSlim', [0.22, 0.56, 0.22], [0, -0.23, 0], 0.88),
+  P('kneeR', 'hipR', [0, -0.46, 0], 'partSlim', [0.19, 0.52, 0.19], [0, -0.22, 0], 0.85),
+  P('footR', 'kneeR', [0, -0.43, 0], 'part', [0.20, 0.14, 0.34], [0, -0.05, 0.07], 0.75),
 ];
 
 const IMP = [
@@ -58,21 +60,28 @@ const IMP = [
 
 const BEAST = [
   P('root', null, [0, 0, 0], null, null, null),
-  P('body', 'root', [0, 0.78, 0], 'part', [0.52, 0.52, 1.25], [0, 0, 0], 1.0),
-  P('neck', 'body', [0, 0.16, 0.58], 'partSlim', [0.32, 0.34, 0.42], [0, 0.05, 0.18], 0.95),
-  P('head', 'neck', [0, 0.06, 0.34], 'part', [0.32, 0.30, 0.50], [0, 0, 0.20], 1.05),
-  P('jaw', 'head', [0, -0.12, 0.30], 'part', [0.26, 0.12, 0.34], [0, 0, 0.14], 0.85),
-  P('earL', 'head', [-0.12, 0.16, 0.06], 'spike', [0.10, 0.22, 0.10], [0, 0.10, 0], 0.8),
-  P('earR', 'head', [0.12, 0.16, 0.06], 'spike', [0.10, 0.22, 0.10], [0, 0.10, 0], 0.8),
-  P('tail', 'body', [0, 0.12, -0.62], 'spike', [0.16, 0.70, 0.16], [0, -0.30, 0], 0.85, { tailDir: true }),
-  P('flHip', 'body', [-0.22, -0.10, 0.44], 'partSlim', [0.17, 0.40, 0.17], [0, -0.19, 0], 0.9),
-  P('flKnee', 'flHip', [0, -0.38, 0], 'partSlim', [0.15, 0.36, 0.15], [0, -0.17, 0], 0.85),
-  P('frHip', 'body', [0.22, -0.10, 0.44], 'partSlim', [0.17, 0.40, 0.17], [0, -0.19, 0], 0.9),
-  P('frKnee', 'frHip', [0, -0.38, 0], 'partSlim', [0.15, 0.36, 0.15], [0, -0.17, 0], 0.85),
-  P('blHip', 'body', [-0.22, -0.10, -0.42], 'partSlim', [0.19, 0.42, 0.19], [0, -0.20, 0], 0.9),
-  P('blKnee', 'blHip', [0, -0.40, 0], 'partSlim', [0.16, 0.36, 0.16], [0, -0.17, 0], 0.85),
-  P('brHip', 'body', [0.22, -0.10, -0.42], 'partSlim', [0.19, 0.42, 0.19], [0, -0.20, 0], 0.9),
-  P('brKnee', 'brHip', [0, -0.40, 0], 'partSlim', [0.16, 0.36, 0.16], [0, -0.17, 0], 0.85),
+  P('body', 'root', [0, 0.66, 0], 'partSlim', [0.50, 0.46, 1.02], [0, 0, -0.04], 1.0),
+  P('rump', 'body', [0, 0.02, -0.42], 'partSlim', [0.48, 0.46, 0.42], [0, 0, 0], 0.96),
+  P('withers', 'body', [0, 0.10, 0.38], 'partSlim', [0.50, 0.42, 0.40], [0, 0, 0], 1.02),
+  P('neck', 'body', [0, 0.14, 0.50], 'partSlim', [0.30, 0.30, 0.44], [0, 0.02, 0.16], 0.96),
+  P('head', 'neck', [0, 0.02, 0.32], 'partSlim', [0.29, 0.27, 0.42], [0, 0, 0.16], 1.05),
+  P('snout', 'head', [0, -0.05, 0.32], 'partSlim', [0.19, 0.17, 0.26], [0, 0, 0.11], 0.98),
+  P('jaw', 'head', [0, -0.11, 0.28], 'partSlim', [0.17, 0.09, 0.26], [0, 0, 0.11], 0.82),
+  P('earL', 'head', [-0.11, 0.14, -0.02], 'spike', [0.10, 0.20, 0.10], [0, 0.09, 0], 0.8),
+  P('earR', 'head', [0.11, 0.14, -0.02], 'spike', [0.10, 0.20, 0.10], [0, 0.09, 0], 0.8),
+  P('tail', 'rump', [0, 0.12, -0.24], 'spike', [0.15, 0.62, 0.15], [0, -0.28, 0], 0.85),
+  P('flHip', 'withers', [-0.20, -0.14, 0.04], 'partSlim', [0.17, 0.38, 0.17], [0, -0.17, 0], 0.9),
+  P('flKnee', 'flHip', [0, -0.32, 0], 'partSlim', [0.145, 0.34, 0.145], [0, -0.15, 0], 0.86),
+  P('flPaw', 'flKnee', [0, -0.29, 0], 'partSlim', [0.16, 0.11, 0.24], [0, -0.04, 0.03], 0.78),
+  P('frHip', 'withers', [0.20, -0.14, 0.04], 'partSlim', [0.17, 0.38, 0.17], [0, -0.17, 0], 0.9),
+  P('frKnee', 'frHip', [0, -0.32, 0], 'partSlim', [0.145, 0.34, 0.145], [0, -0.15, 0], 0.86),
+  P('frPaw', 'frKnee', [0, -0.29, 0], 'partSlim', [0.16, 0.11, 0.24], [0, -0.04, 0.03], 0.78),
+  P('blHip', 'rump', [-0.20, -0.12, -0.04], 'partSlim', [0.21, 0.40, 0.22], [0, -0.17, 0], 0.9),
+  P('blKnee', 'blHip', [0, -0.32, 0], 'partSlim', [0.155, 0.34, 0.155], [0, -0.15, 0], 0.86),
+  P('blPaw', 'blKnee', [0, -0.29, 0], 'partSlim', [0.17, 0.11, 0.24], [0, -0.04, 0.03], 0.78),
+  P('brHip', 'rump', [0.20, -0.12, -0.04], 'partSlim', [0.21, 0.40, 0.22], [0, -0.17, 0], 0.9),
+  P('brKnee', 'brHip', [0, -0.32, 0], 'partSlim', [0.155, 0.34, 0.155], [0, -0.15, 0], 0.86),
+  P('brPaw', 'brKnee', [0, -0.29, 0], 'partSlim', [0.17, 0.11, 0.24], [0, -0.04, 0.03], 0.78),
 ];
 
 const DRAGON = [
@@ -418,6 +427,24 @@ export function poseActor(pose, st) {
       pose.set('head', 0.25, 0, 0);
       break;
     }
+    case 'ride': {
+      const bob = Math.sin(t * 6.5) * 0.05 * (st.gallop || 0);
+      pose.offset('pelvis', 0, -0.05 + bob * 0.8, 0);
+      pose.set('pelvis', 0.10 + bob, 0, 0);
+      pose.set('chest', 0.14 - bob * 0.6, 0, 0);
+      pose.set('head', -0.10, 0, 0);
+      pose.set('hipL', -0.62, 0.10, 0.66);
+      pose.set('hipR', -0.62, -0.10, -0.66);
+      pose.set('kneeL', 1.20, 0, 0);
+      pose.set('kneeR', 1.20, 0, 0);
+      pose.set('footL', -0.42, 0, 0);
+      pose.set('footR', -0.42, 0, 0);
+      pose.set('shoulderL', -1.00 + bob * 0.5, 0.22, 0.24);
+      pose.set('shoulderR', -1.00 + bob * 0.5, -0.22, -0.24);
+      pose.set('elbowL', -0.72, 0, 0);
+      pose.set('elbowR', -0.72, 0, 0);
+      break;
+    }
     case 'fall': {
       pose.set('shoulderL', -2.0, 0, 0.6);
       pose.set('shoulderR', -2.0, 0, -0.6);
@@ -446,19 +473,28 @@ function poseQuadruped(pose, st) {
   const s = Math.sin(phase), c = Math.cos(phase);
   const amp = lerp(0.35, 0.95, walk);
 
-  pose.set('body', Math.sin(t * 1.4) * 0.015 + walk * 0.05, 0, 0);
-  pose.set('neck', -0.12 + Math.sin(t * 1.1) * 0.04, 0, 0);
-  pose.set('head', 0.05, Math.sin(t * 0.6) * 0.12 * (1 - walk), 0);
-  pose.set('tail', 0.2 + Math.sin(t * 2.2 + walk * 4) * 0.18, Math.sin(t * 1.7) * 0.25, 0);
+  // 基本姿勢：やや前傾で頭を低く構える
+  pose.set('body', 0.06 + Math.sin(t * 1.4) * 0.015 + walk * 0.05, 0, 0);
+  pose.set('neck', -0.52 + Math.sin(t * 1.1) * 0.04 + walk * 0.12, 0, 0);
+  pose.set('head', 0.44 - walk * 0.10, Math.sin(t * 0.6) * 0.12 * (1 - walk), 0);
+  pose.set('jaw', 0.06 + Math.sin(t * 0.9) * 0.03, 0, 0);
+  pose.set('tail', 0.35 + Math.sin(t * 2.2 + walk * 4) * 0.2, Math.sin(t * 1.7) * 0.3, 0);
+  pose.set('earL', -0.12, 0, -0.18);
+  pose.set('earR', -0.12, 0, 0.18);
 
-  pose.set('flHip', s * amp, 0, 0);
-  pose.set('frHip', -s * amp, 0, 0);
-  pose.set('blHip', -c * amp * 0.9, 0, 0);
-  pose.set('brHip', c * amp * 0.9, 0, 0);
-  pose.set('flKnee', Math.max(0, -s) * amp * 0.9 + 0.15, 0, 0);
-  pose.set('frKnee', Math.max(0, s) * amp * 0.9 + 0.15, 0, 0);
-  pose.set('blKnee', Math.max(0, c) * amp * 0.9 + 0.2, 0, 0);
-  pose.set('brKnee', Math.max(0, -c) * amp * 0.9 + 0.2, 0, 0);
+  // 前脚はやや後傾、後脚は飛節を曲げる
+  pose.set('flHip', 0.14 + s * amp, 0, 0);
+  pose.set('frHip', 0.14 - s * amp, 0, 0);
+  pose.set('blHip', -0.22 - c * amp * 0.9, 0, 0);
+  pose.set('brHip', -0.22 + c * amp * 0.9, 0, 0);
+  pose.set('flKnee', 0.26 + Math.max(0, -s) * amp * 0.9, 0, 0);
+  pose.set('frKnee', 0.26 + Math.max(0, s) * amp * 0.9, 0, 0);
+  pose.set('blKnee', 0.62 + Math.max(0, c) * amp * 0.9, 0, 0);
+  pose.set('brKnee', 0.62 + Math.max(0, -c) * amp * 0.9, 0, 0);
+  pose.set('flPaw', -0.34 - Math.max(0, -s) * amp * 0.5, 0, 0);
+  pose.set('frPaw', -0.34 - Math.max(0, s) * amp * 0.5, 0, 0);
+  pose.set('blPaw', -0.36 - Math.max(0, c) * amp * 0.5, 0, 0);
+  pose.set('brPaw', -0.36 - Math.max(0, -c) * amp * 0.5, 0, 0);
   pose.offset('body', 0, Math.abs(Math.sin(phase)) * 0.06 * walk, 0);
 
   if (pose.rig.index.has('wingL')) {
@@ -498,13 +534,15 @@ function poseQuadruped(pose, st) {
     case 'death': {
       const p = clamp01(st.animT / 1.2);
       const e = p * p * (3 - 2 * p);
-      pose.offset('body', 0, -0.55 * e, 0);
+      pose.offset('body', 0, -0.42 * e, 0);
       pose.add('body', 0, 0, 1.5 * e);
-      pose.add('neck', 0.6 * e, 0, 0);
-      pose.set('flHip', -0.9 * e, 0, 0);
-      pose.set('frHip', -0.7 * e, 0, 0);
-      pose.set('blHip', 0.8 * e, 0, 0);
-      pose.set('brHip', 0.6 * e, 0, 0);
+      pose.add('neck', 0.5 * e, 0, 0);
+      pose.add('flHip', -0.9 * e, 0, 0);
+      pose.add('frHip', -0.7 * e, 0, 0);
+      pose.add('blHip', 0.8 * e, 0, 0);
+      pose.add('brHip', 0.6 * e, 0, 0);
+      pose.add('flKnee', 0.5 * e, 0, 0);
+      pose.add('blKnee', -0.4 * e, 0, 0);
       break;
     }
   }

@@ -93,6 +93,10 @@ export class Player extends Actor {
     this.maxPoise = 18 + (body?.weight || 0) * 0.9 + (head?.weight || 0) * 0.8;
     this.poise = Math.min(this.poise, this.maxPoise);
 
+    this.trailColor = w?.emissive ? [w.tint[0] + 0.3, w.tint[1] + 0.3, w.tint[2] + 0.4]
+      : [0.88, 0.93, 1.0];
+    this.buildEquipVisuals(head, body, shield);
+
     const load = (w?.weight || 0) + (shield?.weight || 0) + (head?.weight || 0) + (body?.weight || 0);
     this.load = load;
     this.loadMax = equipLoad(s.end, s.str);
@@ -100,6 +104,79 @@ export class Player extends Actor {
     this.rollType = this.loadRatio < 0.3 ? 'fast' : this.loadRatio < 0.7 ? 'normal' : this.loadRatio < 1 ? 'heavy' : 'over';
     this.speed = 3.6 * (this.loadRatio > 1 ? 0.6 : 1);
     this.runSpeed = 6.6 * (this.loadRatio > 1 ? 0.6 : this.loadRatio > 0.7 ? 0.9 : 1);
+  }
+
+  /** 装備に応じた見た目パーツ（兜・肩当て・マント・帯）を組み立てる */
+  buildEquipVisuals(head, body, shield) {
+    const ex = [];
+    if (head) {
+      const t = head.tint;
+      const heavy = head.weight >= 4;
+      ex.push({
+        joint: 'head', shape: heavy ? 'part' : 'partSlim',
+        offset: [0, 0.13, heavy ? -0.01 : 0],
+        size: heavy ? [0.44, 0.46, 0.44] : [0.40, 0.36, 0.40],
+        tint: t, emissive: head.emissive || 0,
+      });
+      if (heavy) {
+        // 面頬（前面の暗いスリット）
+        ex.push({
+          joint: 'head', shape: 'part', offset: [0, 0.10, 0.19],
+          size: [0.30, 0.10, 0.10], tint: [0.06, 0.06, 0.08],
+        });
+      }
+      if (head.id === 'crown') {
+        for (let i = 0; i < 5; i++) {
+          const a = (i / 5) * Math.PI * 2;
+          ex.push({
+            joint: 'head', shape: 'spike',
+            offset: [Math.sin(a) * 0.17, 0.28, Math.cos(a) * 0.17],
+            size: [0.07, 0.22, 0.07], tint: t, emissive: 0.5,
+          });
+        }
+      }
+    }
+    if (body) {
+      const t = body.tint;
+      const heavy = body.weight >= 10;
+      if (heavy) {
+        for (const side of ['shoulderL', 'shoulderR']) {
+          ex.push({
+            joint: side, shape: 'part', offset: [0, -0.03, 0],
+            size: [0.30, 0.22, 0.30], tint: [t[0] * 1.08, t[1] * 1.08, t[2] * 1.08],
+          });
+        }
+        ex.push({
+          joint: 'chest', shape: 'part', offset: [0, 0.24, 0.02],
+          size: [0.58, 0.60, 0.36], tint: [t[0] * 1.05, t[1] * 1.05, t[2] * 1.05],
+          emissive: body.emissive || 0,
+        });
+      }
+      // 帯
+      ex.push({
+        joint: 'pelvis', shape: 'part', offset: [0, 0.02, 0],
+        size: [0.48, 0.12, 0.34], tint: [t[0] * 0.6, t[1] * 0.55, t[2] * 0.5],
+      });
+      // 腰布・マント（重装ほど長い）
+      const segs = heavy ? 3 : 2;
+      const cloth = body.id === 'rags' ? [0.36, 0.33, 0.28]
+        : [t[0] * 0.72, t[1] * 0.68, t[2] * 0.66];
+      for (let i = 0; i < segs; i++) {
+        ex.push({
+          joint: 'pelvis', shape: 'partSlim',
+          offset: [0, -0.06 - i * 0.26, -0.16 - i * 0.03],
+          size: [0.46 - i * 0.05, 0.30, 0.10],
+          tint: cloth, cloth: true, seg: i,
+        });
+      }
+    }
+    if (shield && shield.weight >= 10) {
+      ex.push({
+        joint: 'shoulderL', shape: 'part', offset: [0, -0.05, 0],
+        size: [0.28, 0.20, 0.28], tint: shield.tint,
+      });
+    }
+    this.extras = ex;
   }
 
   weapon() { return WEAPONS[this.equip.weapon]; }
@@ -139,6 +216,19 @@ export class Player extends Actor {
     this.prevState = this.state;
     this.aimPitch = -game.camera.pitch * 0.85;
     this.updateStatus(dt, game);
+
+    // 騎乗中は馬が位置と向きを制御する
+    if (this.riding) {
+      this.staminaDelay = Math.max(0, this.staminaDelay - dt);
+      this.stamina = Math.min(this.maxStamina, this.stamina + 30 * dt);
+      this.blocking = false;
+      this.sprinting = false;
+      if (this.state !== 'ride') this.state = 'ride';
+      if (inp.pressed('jump')) this.riding.dismount(game);
+      else if (inp.pressed('item')) this.useItem(game);
+      this.updateAnim(dt, 0);
+      return;
+    }
 
     if (this.frostSlow > 0) this.frostSlow -= dt;
 

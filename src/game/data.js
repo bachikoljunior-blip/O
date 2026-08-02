@@ -331,6 +331,15 @@ export const ENEMIES = {
     ],
     ai: { aggression: 0.75, circling: 0.5, retreat: 0.25, guard: 0 },
   },
+  deer: {
+    id: 'deer', name: '林の鹿', tier: 1, hp: 90, poise: 12, def: 0,
+    speed: 3.0, runSpeed: 8.4, aggro: 0, echo: 30, body: 'beast',
+    tint: [0.52, 0.40, 0.28], h: 0.95, weapon: null, group: 3, passive: true,
+    attacks: [
+      { id: 'kick', windup: 0.4, active: 0.12, recover: 0.7, dmg: 22, range: 2.0, arc: 1.2, poise: 10, motion: 'lunge' },
+    ],
+    ai: { aggression: 0.05, circling: 0.2, retreat: 1.0, guard: 0 },
+  },
   boar: {
     id: 'boar', name: '荒れ猪', tier: 1, hp: 165, poise: 40, def: 5,
     speed: 3.2, runSpeed: 7.0, aggro: 18, echo: 60, body: 'beast',
@@ -629,19 +638,20 @@ export const BOSSES = {
 
 /* ==================================================== 地方ごとの湧き表 */
 export const SPAWN_TABLE = {
-  downs: [['wolf', 3], ['boar', 2], ['bandit', 2], ['skeleton', 1]],
-  gloomwood: [['wolf', 3], ['skeleton', 2], ['bandit', 2], ['wraith', 1], ['troll', 0.4]],
+  downs: [['deer', 3], ['wolf', 3], ['boar', 2], ['bandit', 2], ['skeleton', 1]],
+  gloomwood: [['wolf', 3], ['deer', 2], ['skeleton', 2], ['bandit', 2], ['wraith', 1], ['troll', 0.4]],
   cinder: [['imp', 4], ['brute', 2], ['mage', 1.5], ['knight', 1]],
   mistfen: [['wraith', 3], ['skeleton', 2], ['boar', 1], ['mage', 1]],
   skyspire: [['wolf', 2], ['knight', 2], ['troll', 1.2], ['archer', 1]],
-  goldreach: [['bandit', 3], ['archer', 2], ['boar', 2], ['knight', 1]],
+  goldreach: [['bandit', 3], ['deer', 2.5], ['archer', 2], ['boar', 2], ['knight', 1]],
   riftvale: [['imp', 3], ['wraith', 2], ['brute', 1.5], ['troll', 1]],
-  coast: [['bandit', 2], ['wolf', 2], ['skeleton', 2], ['archer', 1]],
+  coast: [['bandit', 2], ['deer', 2], ['wolf', 2], ['skeleton', 2], ['archer', 1]],
 };
 
 /** 敵の落とすもの */
 export const DROPS = {
   wolf: [['beast_bone', 0.55, 1], ['herb', 0.2, 1]],
+  deer: [['beast_bone', 0.8, 2], ['herb', 0.3, 1]],
   boar: [['beast_bone', 0.7, 2], ['herb', 0.25, 1]],
   bandit: [['ore_iron', 0.3, 1], ['herb', 0.25, 1], ['throwing_knife', 0.2, 2], ['echo_shard', 0.06, 1]],
   archer: [['arrow', 0.7, 8], ['ore_iron', 0.2, 1]],

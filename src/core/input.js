@@ -5,7 +5,7 @@ const KEY_MAP = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
   Space: 'dodge', ShiftLeft: 'sprint', ShiftRight: 'sprint',
   KeyJ: 'attack', KeyK: 'heavy', KeyL: 'block', KeyQ: 'lock',
-  KeyE: 'interact', KeyR: 'item', KeyF: 'spell', KeyC: 'jump',
+  KeyE: 'interact', KeyR: 'item', KeyF: 'spell', KeyC: 'jump', KeyG: 'mount',
   Escape: 'menu', KeyM: 'map', Tab: 'inventory',
 };
 
@@ -246,7 +246,7 @@ export class Input {
       const map = [
         [0, 'jump'], [1, 'dodge'], [2, 'item'], [3, 'spell'],
         [4, 'block'], [5, 'attack'], [6, 'lock'], [7, 'heavy'],
-        [9, 'menu'], [8, 'map'], [12, 'interact'],
+        [9, 'menu'], [8, 'map'], [12, 'interact'], [13, 'mount'],
       ];
       for (const [i, name] of map) {
         const b = p.buttons[i];

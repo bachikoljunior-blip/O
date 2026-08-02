@@ -5,10 +5,11 @@ import { m4, v3, clamp, clamp01, lerp, damp, dampAngle, angDelta, TAU } from '..
 export class Camera {
   constructor() {
     this.yaw = 0;
-    this.pitch = 0.30;
-    this.distance = 5.4;
-    this.targetDistance = 5.4;
-    this.height = 1.55;
+    this.pitch = 0.26;
+    this.distance = 6.1;
+    this.targetDistance = 6.1;
+    this.height = 1.72;
+    this.shoulder = 0.62;      // 肩越し視点の横オフセット
     this.pos = v3.new(0, 5, 10);
     this.look = v3.new();
     this.view = m4.new();
@@ -80,22 +81,35 @@ export class Camera {
     const cp = Math.cos(this.pitch), sp = Math.sin(this.pitch);
     const dirX = Math.sin(this.yaw) * cp;
     const dirZ = Math.cos(this.yaw) * cp;
-    let camX = this.smooth[0] - dirX * this.distance;
-    let camZ = this.smooth[2] - dirZ * this.distance;
-    let camY = this.smooth[1] + sp * this.distance + 0.35;
+    // 肩越しに少しずらす（真後ろだとキャラで視界が塞がるため）
+    const sideX = Math.cos(this.yaw), sideZ = -Math.sin(this.yaw);
+    const side = this.shoulder * (p.lockTarget ? 0.45 : 1);
+    const pivotX = this.smooth[0] + sideX * side * 0.55;
+    const pivotY = this.smooth[1];
+    const pivotZ = this.smooth[2] + sideZ * side * 0.55;
+    let camX = pivotX - dirX * this.distance + sideX * side * 0.45;
+    let camZ = pivotZ - dirZ * this.distance + sideZ * side * 0.45;
+    let camY = pivotY + sp * this.distance + 0.35;
 
     // 地形との衝突：視線に沿ってサンプリングし、埋まるなら手前へ
     const steps = 7;
     for (let i = 1; i <= steps; i++) {
       const t = i / steps;
-      const sx = lerp(this.smooth[0], camX, t);
-      const sz = lerp(this.smooth[2], camZ, t);
-      const sy = lerp(this.smooth[1], camY, t);
+      const sx = lerp(pivotX, camX, t);
+      const sz = lerp(pivotZ, camZ, t);
+      const sy = lerp(pivotY, camY, t);
       const gh = game.world.height(sx, sz) + 0.55;
+      // 木や岩に潜り込まないよう、障害物にぶつかったら手前で止める
+      if (game.terrain.collide(sx, sz, 0.75, _probe)) {
+        camX = lerp(pivotX, camX, Math.max(0.25, t * 0.85));
+        camZ = lerp(pivotZ, camZ, Math.max(0.25, t * 0.85));
+        camY = lerp(pivotY, camY, Math.max(0.25, t * 0.85));
+        break;
+      }
       if (sy < gh) {
-        camX = lerp(this.smooth[0], camX, t * 0.92);
-        camZ = lerp(this.smooth[2], camZ, t * 0.92);
-        camY = Math.max(lerp(this.smooth[1], camY, t * 0.92), gh);
+        camX = lerp(pivotX, camX, t * 0.92);
+        camZ = lerp(pivotZ, camZ, t * 0.92);
+        camY = Math.max(lerp(pivotY, camY, t * 0.92), gh);
         break;
       }
     }
@@ -115,7 +129,7 @@ export class Camera {
     }
 
     v3.set(this.pos, camX + this.shakeOffset[0], camY + this.shakeOffset[1], camZ + this.shakeOffset[2]);
-    v3.set(this.look, this.smooth[0], this.smooth[1] + 0.25, this.smooth[2]);
+    v3.set(this.look, pivotX, pivotY + 0.25, pivotZ);
 
     m4.lookAt(this.view, this.pos, this.look, UP);
     m4.perspective(this.proj, this.fov, this.aspect, this.near, this.far);
@@ -138,5 +152,6 @@ export class Camera {
 }
 
 const UP = v3.new(0, 1, 0);
+const _probe = [0, 0];
 
 export { clamp01, angDelta, TAU };

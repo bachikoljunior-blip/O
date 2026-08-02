@@ -15,6 +15,16 @@ float vnoise(vec2 p){
   float c = hash12(i+vec2(0,1)), d = hash12(i+vec2(1,1));
   return mix(mix(a,b,f.x), mix(c,d,f.x), f.y);
 }
+/** 4x4 秩序ディザ（白色ノイズより粒立ちが穏やか） */
+float bayer4(vec2 p){
+  const float m[16] = float[16](
+    0.0,  8.0,  2.0, 10.0,
+   12.0,  4.0, 14.0,  6.0,
+    3.0, 11.0,  1.0,  9.0,
+   15.0,  7.0, 13.0,  5.0);
+  ivec2 i = ivec2(mod(p, 4.0));
+  return (m[i.y * 4 + i.x] + 0.5) / 16.0;
+}
 float fbm2(vec2 p){
   float v = 0.0, a = 0.5;
   for(int i=0;i<4;i++){ v += a*vnoise(p); p *= 2.03; a *= 0.5; }
@@ -40,6 +50,19 @@ vec3 skyColor(vec3 dir){
   // 地平線下は地面の反射色へ
   col = mix(col, u_horizon * 0.30, smoothstep(0.0, -0.25, up));
   return col;
+}
+`;
+
+/** 流れる雲が落とす影。空の雲量と連動する */
+const CLOUD_FN = /* glsl */`
+uniform float u_cloudShadow;
+uniform float u_cloudTime;
+
+float cloudShadow(vec2 p){
+  if(u_cloudShadow <= 0.002) return 1.0;
+  vec2 uv = p * 0.0021 + vec2(u_cloudTime * 0.0042, u_cloudTime * 0.0026);
+  float n = vnoise(uv) * 0.62 + vnoise(uv * 2.4 + 7.3) * 0.38;
+  return 1.0 - u_cloudShadow * smoothstep(0.36, 0.78, n);
 }
 `;
 
@@ -117,6 +140,7 @@ void main(){
 export const MESH_FS = /* glsl */`#version 300 es
 ${COMMON}
 ${SKY_FN}
+${CLOUD_FN}
 ${SHADOW_FN}
 in vec3 v_world;
 in vec3 v_nrm;
@@ -135,32 +159,51 @@ uniform float u_time;
 out vec4 outColor;
 
 void main(){
-  if(v_alpha < 0.999){
-    if(v_alpha < hash12(gl_FragCoord.xy + fract(u_time) * 13.0)) discard;
-  }
   vec3 N = normalize(v_nrm);
   vec3 V = normalize(u_camPos - v_world);
+  float dist = length(u_camPos - v_world);
+
+  // v_detail: 1=地形 / 0.5=静物（木・岩・建物）/ 0=アクター
+  // 静物はカメラに近すぎるとディザで消す（視界を塞がないように）
+  float a = v_alpha;
+  if(v_detail > 0.25 && v_detail < 0.75) a *= smoothstep(1.0, 4.8, dist);
+  if(a < 0.999){
+    if(a < bayer4(gl_FragCoord.xy)) discard;
+  }
   if(dot(N, V) < 0.0 && v_alpha < 0.999) N = -N;   // 薄板（草）の両面対応
 
   float ndl = max(dot(N, u_sunDir), 0.0);
-  float dist = length(u_camPos - v_world);
-  float sh = shadowFactor(v_world, ndl, dist);
+  float sh = shadowFactor(v_world, ndl, dist) * cloudShadow(v_world.xz);
 
   // 地表のディテール（頂点カラーだけでは平坦に見えるため）
   vec3 albedo = v_col;
-  if(v_detail > 0.5){
-    float fade = exp(-dist * 0.012);
-    float d = vnoise(v_world.xz * 0.42) * 0.55 + vnoise(v_world.xz * 2.6) * 0.30
-            + vnoise(v_world.xz * 11.0) * 0.15;
-    d = mix(0.5, d, fade);
-    albedo *= 0.74 + 0.56 * d;
+  if(v_detail > 0.75){
+    float fade = exp(-dist * 0.010);
+    float near = exp(-dist * 0.075);          // 近景だけ細かい粒を足す
+    float d = vnoise(v_world.xz * 0.38) * 0.58
+            + vnoise(v_world.xz * 1.7 + 3.1) * 0.28
+            + vnoise(v_world.xz * 5.1 - 1.7) * 0.14 * near;
+    d = mix(0.5, d / (0.86 + 0.14 * near), fade);
+    albedo *= 0.80 + 0.44 * d;
     // 傾斜に応じてわずかに露出した土を混ぜる
-    float bare = smoothstep(0.72, 0.30, N.y) * fade;
-    albedo = mix(albedo, albedo * vec3(1.18, 0.94, 0.76), bare * 0.6);
+    float bare = smoothstep(0.74, 0.34, N.y) * fade;
+    albedo = mix(albedo, albedo * vec3(1.16, 0.95, 0.78), bare * 0.55);
+    // 崖面には水平の地層を出す
+    float cliff = smoothstep(0.66, 0.26, N.y);
+    if(cliff > 0.01){
+      float warp = vnoise(v_world.xz * 0.22) * 3.4;
+      float band = sin(v_world.y * 1.55 + warp) * 0.55 + sin(v_world.y * 4.3 + warp * 1.7) * 0.25;
+      albedo *= 1.0 + cliff * band * 0.16 * fade;
+      albedo = mix(albedo, albedo * vec3(1.05, 0.99, 0.92), cliff * 0.35);
+    }
   }
 
   vec3 amb = mix(u_ambGnd, u_ambSky, N.y * 0.5 + 0.5);
   vec3 col = albedo * (amb + u_sunColor * ndl * sh);
+  // キャラクター・小物には弱いフィル光を足して日陰でも形が読めるようにする
+  if(v_detail < 0.75){
+    col += albedo * u_ambSky * 0.42 * (0.35 + 0.65 * max(dot(N, V), 0.0));
+  }
 
   // 簡易スペキュラ
   vec3 H = normalize(u_sunDir + V);
@@ -277,8 +320,10 @@ uniform vec2 u_origin;
 uniform float u_time;
 uniform float u_seaLevel;
 uniform float u_waveScale;
+uniform float u_planeSize;
 out vec3 v_world;
 out vec3 v_nrm;
+out float v_edge;
 
 void wave(vec2 p, out float h, out vec2 grad){
   h = 0.0; grad = vec2(0.0);
@@ -302,6 +347,7 @@ void main(){
   h *= u_waveScale; g *= u_waveScale;
   v_world = vec3(wp.x, u_seaLevel + h, wp.y);
   v_nrm = normalize(vec3(-g.x, 1.0, -g.y));
+  v_edge = length(a_pos) / u_planeSize;
   gl_Position = u_viewProj * vec4(v_world, 1.0);
 }
 `;
@@ -309,14 +355,29 @@ void main(){
 export const WATER_FS = /* glsl */`#version 300 es
 ${COMMON}
 ${SKY_FN}
+${CLOUD_FN}
 in vec3 v_world;
 in vec3 v_nrm;
+in float v_edge;
 uniform vec3 u_camPos;
 uniform vec3 u_deepColor;
 uniform vec3 u_shallowColor;
 uniform float u_fogDensity;
 uniform float u_time;
+uniform sampler2D u_depth;      // パックされた不透明シーンの線形デプス
+uniform vec2 u_resolution;
+uniform vec2 u_nearFar;
 out vec4 outColor;
+
+float sceneZ(vec2 uv){
+  vec3 c = texture(u_depth, clamp(uv, 0.0, 1.0)).rgb;
+  return dot(c, vec3(1.0, 1.0 / 255.0, 1.0 / 65025.0)) * u_nearFar.y;
+}
+float linearZ(float d){
+  float n = u_nearFar.x, f = u_nearFar.y;
+  float z = d * 2.0 - 1.0;
+  return (2.0 * n * f) / (f + n - z * (f - n));
+}
 
 void main(){
   vec3 N = normalize(v_nrm);
@@ -327,23 +388,50 @@ void main(){
   N = normalize(N + vec3(n1, 0.0, n2) * 0.22);
 
   vec3 V = normalize(u_camPos - v_world);
+  float dist = length(u_camPos - v_world);
+
+  // ---- 水中の厚み（シーンデプスとの差）----
+  vec2 suv = gl_FragCoord.xy / u_resolution;
+  float wz = linearZ(gl_FragCoord.z);
+  float thickness = max(0.0, sceneZ(suv) - wz);
+  // 屈折っぽく、深いところほど背景をずらす
+  vec2 refrUV = suv + vec2(n1, n2) * 0.018 * clamp(thickness * 0.3, 0.0, 1.0);
+  thickness = min(thickness, max(0.0, sceneZ(refrUV) - wz) + 0.5);
+  // 視線が寝ているほど水中を長く通るので、垂直方向の深さに直す
+  float vertical = thickness * max(0.18, abs(normalize(v_world - u_camPos).y));
+
   float fres = pow(1.0 - max(dot(N, V), 0.0), 4.0);
-  fres = mix(0.03, 1.0, fres);
+  fres = mix(0.025, 1.0, fres);
 
   vec3 R = reflect(-V, N);
   vec3 refl = skyColor(normalize(R));
-  vec3 body = mix(u_shallowColor, u_deepColor, clamp(length(u_camPos - v_world) * 0.004, 0.0, 1.0));
+  vec3 body = mix(u_shallowColor, u_deepColor, clamp(vertical / 3.2, 0.0, 1.0));
 
   vec3 col = mix(body, refl, fres);
+
+  // ---- 岸の泡（ごく浅い帯のみ）----
+  float shore = 1.0 - smoothstep(0.0, 0.55, vertical);
+  float foamN = vnoise(v_world.xz * 3.4 + vec2(u_time * 0.5, -u_time * 0.35)) * 0.62
+              + vnoise(v_world.xz * 9.0 - u_time * 0.7) * 0.38;
+  float band = sin(vertical * 11.0 - u_time * 2.2) * 0.5 + 0.5;
+  float foam = shore * shore * smoothstep(0.52, 0.86, foamN * 0.55 + band * 0.5);
+  col = mix(col, vec3(0.93, 0.97, 1.0), clamp(foam, 0.0, 0.88));
+
   // 太陽のきらめき
   vec3 H = normalize(u_sunDir + V);
-  col += u_sunColor * pow(max(dot(N, H), 0.0), 220.0) * 2.4;
+  float cs = cloudShadow(v_world.xz);
+  col += u_sunColor * pow(max(dot(N, H), 0.0), 220.0) * 2.4 * cs;
 
-  float dist = length(u_camPos - v_world);
   float fog = 1.0 - exp(-dist * u_fogDensity);
   col = mix(col, skyColor(normalize(v_world - u_camPos)), clamp(fog, 0.0, 1.0));
 
-  outColor = vec4(col, clamp(0.62 + fres * 0.38, 0.0, 1.0));
+  // 浅いほど透け、深いほど不透明
+  float alpha = mix(0.20, 0.96, clamp(vertical / 1.8, 0.0, 1.0));
+  alpha = max(alpha, fres * 0.85);
+  alpha = max(alpha, foam);
+  // 水面プレーンの外縁は霧に溶かして、切れ目が見えないようにする
+  alpha *= 1.0 - smoothstep(0.62, 0.96, v_edge);
+  outColor = vec4(col, clamp(alpha, 0.0, 1.0));
 }
 `;
 
@@ -436,11 +524,55 @@ void main(){
 }
 `;
 
+/** デプスバッファを線形距離に変換し RGB へ 24bit パックする */
+export const LINDEPTH_FS = /* glsl */`#version 300 es
+precision highp float;
+in vec2 v_uv;
+uniform highp sampler2D u_depthTex;
+uniform vec2 u_nearFar;
+out vec4 outColor;
+void main(){
+  float d = texture(u_depthTex, v_uv).r;
+  float n = u_nearFar.x, f = u_nearFar.y;
+  float z = d * 2.0 - 1.0;
+  float lin = (2.0 * n * f) / (f + n - z * (f - n));
+  float v = clamp(lin / f, 0.0, 0.999999);
+  vec3 enc = fract(v * vec3(1.0, 255.0, 65025.0));
+  enc -= enc.yzz * vec3(1.0 / 255.0, 1.0 / 255.0, 0.0);
+  outColor = vec4(enc, 1.0);
+}
+`;
+
+/** 太陽方向へのラジアルブラー（薄明光線） */
+export const RAYS_FS = /* glsl */`#version 300 es
+precision mediump float;
+in vec2 v_uv;
+uniform sampler2D u_tex;
+uniform vec2 u_sunUV;
+uniform float u_decay;
+out vec4 outColor;
+void main(){
+  vec2 dir = (v_uv - u_sunUV) / 12.0;
+  vec2 uv = v_uv;
+  vec3 sum = vec3(0.0);
+  float w = 1.0;
+  for(int i = 0; i < 12; i++){
+    sum += texture(u_tex, clamp(uv, 0.0, 1.0)).rgb * w;
+    uv -= dir;
+    w *= u_decay;
+  }
+  outColor = vec4(sum / 12.0, 1.0);
+}
+`;
+
 export const COMPOSITE_FS = /* glsl */`#version 300 es
 ${COMMON}
 in vec2 v_uv;
 uniform sampler2D u_scene;
 uniform sampler2D u_bloom;
+uniform sampler2D u_rays;
+uniform vec3 u_rayColor;
+uniform float u_rayStrength;
 uniform float u_bloomStrength;
 uniform float u_exposure;
 uniform float u_vignette;
@@ -470,6 +602,9 @@ void main(){
     col = texture(u_scene, uv).rgb;
   }
   col += texture(u_bloom, uv).rgb * u_bloomStrength;
+  if(u_rayStrength > 0.001){
+    col += texture(u_rays, uv).rgb * u_rayColor * u_rayStrength;
+  }
 
   col *= u_exposure;
   col = aces(col);

@@ -249,7 +249,7 @@ export class Terrain {
         let kind = p.region.tree;
         if (rng() < 0.12) kind = TREE_KINDS[(rng() * TREE_KINDS.length) | 0];
         const v = (rng() * 3) | 0;
-        const s = 0.75 + rng() * 0.7;
+        const s = 0.72 + rng() * 0.5;
         const tint = 0.85 + rng() * 0.3;
         pushProp(`tree_${kind}_${v}`, [x, h - 0.3, z, rng() * Math.PI * 2, s, s, s,
           tint, tint * (0.96 + rng() * 0.08), tint, 1, 0.35, 0]);
@@ -269,13 +269,23 @@ export class Terrain {
         if (h < 0.6) continue;
         const slope = sampleSlope(x, z);
         const r = rng();
-        if (r < 0.16 + slope * 0.3) {
+        if (r < 0.16 + slope * 0.42) {
           const v = (rng() * 3) | 0;
-          const s = 0.5 + rng() * 1.1;
-          const g = 0.8 + rng() * 0.35;
-          pushProp(`rock_${v}`, [x, h - 0.25 * s, z, rng() * Math.PI * 2, s, s * (0.7 + rng() * 0.5), s,
+          // 急斜面では巨岩・露頭になり、稜線に表情を与える
+          const outcrop = slope > 0.95 && rng() < 0.45;
+          const s = outcrop ? 1.5 + rng() * 1.7 : 0.5 + rng() * 1.1;
+          const g = (0.8 + rng() * 0.35) * (outcrop ? 0.94 : 1);
+          pushProp(`rock_${v}`, [x, h - (outcrop ? 0.9 : 0.25) * s, z, rng() * Math.PI * 2,
+            s, s * (outcrop ? 0.85 + rng() * 0.8 : 0.7 + rng() * 0.5), s,
             g, g, g * 1.02, 1, 0, 0]);
-          if (s > 0.8) colliders.push(x, z, 0.8 * s);
+          if (s > 0.8) colliders.push(x, z, (outcrop ? 0.62 : 0.8) * s);
+          // 尖塔状の岩（荒野・高山帯）
+          if (outcrop && p.rough > 1.45 && rng() < 0.35) {
+            const ps = 0.8 + rng() * 0.9;
+            pushProp('pillar', [x + (rng() - 0.5) * 3, h - 0.4, z + (rng() - 0.5) * 3,
+              rng() * Math.PI * 2, ps, ps * (1.1 + rng() * 0.9), ps,
+              g * 0.95, g * 0.93, g * 0.92, 1, 0, 0]);
+          }
         } else if (rng() < p.bushDensity * 0.35 * detail && slope < 0.7 && h > 1.6) {
           const v = (rng() * 3) | 0;
           const s = 0.7 + rng() * 0.7;
@@ -289,7 +299,7 @@ export class Terrain {
       let o = 0;
       for (const d of arr) {
         o = writeInstance(data, o, d[0], d[1], d[2], d[3], d[4], d[5], d[6],
-          d[7], d[8], d[9], d[10], d[11], d[12]);
+          d[7], d[8], d[9], d[10], d[11], d[12], 0, 0.5);
       }
       props.set(model, data);
     }
@@ -323,7 +333,7 @@ export class Terrain {
       let o = 0;
       for (const d of tmp) {
         o = writeInstance(g, o, d[0], d[1], d[2], d[3], d[4], d[5], d[6],
-          d[7], d[8], d[9], 1, 1.0, 0, 0);
+          d[7], d[8], d[9], 1, 1.0, 0, 0, 0.5);
       }
       c.grass = g;
     }

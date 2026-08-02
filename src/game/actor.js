@@ -10,6 +10,7 @@ const _s = v3.new(1, 1, 1);
 const _m = m4.new();
 const _m2 = m4.new();
 const _tmp = [0, 0];
+const _tip = v3.new();
 
 export const TEAM = { PLAYER: 0, ENEMY: 1, NEUTRAL: 2 };
 
@@ -330,7 +331,7 @@ export class Actor {
 
   /* -------------------------------------------------------- 描画出力 */
   /** ポーズを解いてインスタンスを書き出す */
-  emit(renderer, time) {
+  emit(renderer, time, game) {
     const rig = this.pose.rig;
     const st = {
       state: this.dead ? 'death' : this.state,
@@ -340,6 +341,7 @@ export class Actor {
       speed01: this.speed01,
       gait: this.gait,
       blocking: this.blocking,
+      gallop: this.riding ? (this.riding.galloping ? 1 : 0.45) : 0,
       t: time + this.id * 0.7,
     };
     const extra = poseActor(this.pose, st);
@@ -378,6 +380,53 @@ export class Actor {
       writeInstanceMat(batch.data, o, _m2,
         r * sh + flash * 0.9, g * sh + flash * 0.55, b * sh + flash * 0.55,
         this.alpha ?? 1, 0, this.emissive + flash * 0.5, 0);
+    }
+
+    // 装備の追加パーツ（兜・肩当て・マント）
+    if (this.extras) {
+      for (const ex of this.extras) {
+        const idx = rig.index.get(ex.joint);
+        if (idx === undefined) continue;
+        const batch = renderer.batchFor(ex.shape);
+        if (!batch) continue;
+        let rx = ex.rot ? ex.rot[0] : 0;
+        let rz = ex.rot ? ex.rot[2] : 0;
+        if (ex.cloth) {
+          // 走ると後ろへなびき、微かに揺れる
+          const sway = Math.sin(time * 3.1 + this.id + ex.seg * 0.7) * 0.10;
+          rx += -0.20 - this.speed01 * (0.55 + ex.seg * 0.32) + sway * (0.4 + ex.seg * 0.3);
+          rz += sway * 0.5;
+        }
+        quat.fromEuler(_q, rx, ex.rot ? ex.rot[1] : 0, rz);
+        v3.set(_t, ex.offset[0], ex.offset[1], ex.offset[2]);
+        v3.set(_s, ex.size[0], ex.size[1], ex.size[2]);
+        m4.fromRTS(_m, _q, _t, _s);
+        m4.mul(_m2, world[idx], _m);
+        const t = ex.tint;
+        // alloc() がバッファを再確保しうるので、先にオフセットを取ってから data を参照する
+        const eo = batch.alloc();
+        writeInstanceMat(batch.data, eo, _m2,
+          t[0] + flash * 0.9, t[1] + flash * 0.5, t[2] + flash * 0.5,
+          1, 0, (ex.emissive || 0) + flash * 0.5, 1);
+      }
+    }
+
+    // 武器の軌跡
+    if (game && this.weaponModel && this.state === 'attack' && this.attackPhase() === 'active') {
+      this.weaponTip(_tip);
+      const mount = rig.weaponMount ? rig.index.get(rig.weaponMount) : undefined;
+      const hw = mount !== undefined ? this.pose.world[mount] : null;
+      const bx = hw ? hw[12] : this.x, by = hw ? hw[13] : this.y + 1, bz = hw ? hw[14] : this.z;
+      if (this._trail) {
+        game.fx.weaponTrail(this._trail[0], this._trail[1], this._trail[2],
+          _tip[0], _tip[1], _tip[2], bx, by, bz,
+          this.trailColor || [0.85, 0.92, 1.0], this.scale);
+      } else {
+        this._trail = [0, 0, 0];
+      }
+      this._trail[0] = _tip[0]; this._trail[1] = _tip[1]; this._trail[2] = _tip[2];
+    } else {
+      this._trail = null;
     }
 
     // 武器・盾

@@ -216,35 +216,62 @@ export class DynamicVAO {
 }
 
 export class RenderTarget {
-  constructor(gl, w, h, { float = false, depth = true, filter = null } = {}) {
+  /**
+   * @param depth       true でデプスを持つ
+   * @param depthTexture true ならデプスをテクスチャとして持つ（サンプル可能）
+   * @param colorless   true なら色バッファを持たない（デプスコピー用）
+   */
+  constructor(gl, w, h, { float = false, depth = true, filter = null,
+    depthTexture = false, colorless = false } = {}) {
     this.gl = gl;
     this.w = w; this.h = h;
     this.float = float;
     this.depthEnabled = depth;
+    this.depthTexture = depthTexture;
+    this.colorless = colorless;
     this.filter = filter ?? gl.LINEAR;
     this.fbo = gl.createFramebuffer();
-    this.tex = gl.createTexture();
-    if (depth) this.depth = gl.createRenderbuffer();
+    if (!colorless) this.tex = gl.createTexture();
+    if (depth) {
+      if (depthTexture) this.depthTex = gl.createTexture();
+      else this.depth = gl.createRenderbuffer();
+    }
     this.resize(w, h);
   }
   resize(w, h) {
     const gl = this.gl;
     w = Math.max(1, w | 0); h = Math.max(1, h | 0);
     this.w = w; this.h = h;
-    gl.bindTexture(gl.TEXTURE_2D, this.tex);
-    const ifmt = this.float ? gl.RGBA16F : gl.RGBA8;
-    const type = this.float ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
-    gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, w, h, 0, gl.RGBA, type, null);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.filter);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.filter);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.tex, 0);
+    if (!this.colorless) {
+      gl.bindTexture(gl.TEXTURE_2D, this.tex);
+      const ifmt = this.float ? gl.RGBA16F : gl.RGBA8;
+      const type = this.float ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
+      gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, w, h, 0, gl.RGBA, type, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.filter);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.filter);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.tex, 0);
+    } else {
+      gl.drawBuffers([gl.NONE]);
+      gl.readBuffer(gl.NONE);
+    }
     if (this.depthEnabled) {
-      gl.bindRenderbuffer(gl.RENDERBUFFER, this.depth);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, w, h);
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.depth);
+      if (this.depthTexture) {
+        gl.bindTexture(gl.TEXTURE_2D, this.depthTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, w, h, 0,
+          gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTex, 0);
+      } else {
+        gl.bindRenderbuffer(gl.RENDERBUFFER, this.depth);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, w, h);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.depth);
+      }
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }

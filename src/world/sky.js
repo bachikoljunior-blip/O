@@ -175,9 +175,9 @@ export class Sky {
 
     // 環境光（低めに抑え、太陽光との明暗差でコントラストを出す）
     this.ambSky = [
-      lerp(0.022, 0.150, above) + 0.016 + this.night * 0.030,
-      lerp(0.030, 0.176, above) + 0.018 + this.night * 0.036,
-      lerp(0.052, 0.240, above) + 0.026 + this.night * 0.058,
+      lerp(0.048, 0.165, above) + 0.020 + this.night * 0.028,
+      lerp(0.058, 0.192, above) + 0.023 + this.night * 0.034,
+      lerp(0.085, 0.258, above) + 0.032 + this.night * 0.054,
     ];
     // 地面からの照り返し（暖色）。日陰が青く沈みすぎるのを防ぐ
     const bounce = 0.55 + above * 0.25;

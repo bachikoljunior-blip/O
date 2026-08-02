@@ -20,6 +20,7 @@ import { Player } from './player.js';
 import { Enemy, spawnEnemy, spawnBoss } from './enemies.js';
 import { NPC, populateVillage } from './npc.js';
 import { QuestLog } from './quests.js';
+import { Mount } from './mount.js';
 import { TEAM } from './actor.js';
 import {
   SPAWN_TABLE, CHEST_TABLE, WEAPONS, ARMORS, SHIELDS, TALISMANS, SPELLS, ITEMS,
@@ -30,16 +31,19 @@ export const QUALITY_PRESETS = {
     name: '軽量', renderScale: 0.62, viewChunks: 6, lodScale: 0.7, shadows: true, shadowSize: 1024,
     shadowRange: 42, grassDensity: 0.55, grassDist: 60, grassShadow: false, treeDensity: 0.6,
     bloom: false, bloomPasses: 1, bloomStrength: 0.5, water: true, skyQuality: 0, maxEnemies: 12,
+    cloudShadows: false, godRays: false, rayStrength: 0,
   },
   medium: {
     name: '標準', renderScale: 0.82, viewChunks: 8, lodScale: 1.0, shadows: true, shadowSize: 1536,
     shadowRange: 58, grassDensity: 0.85, grassDist: 84, grassShadow: false, treeDensity: 0.85,
     bloom: true, bloomPasses: 2, bloomStrength: 0.55, water: true, skyQuality: 1, maxEnemies: 18,
+    cloudShadows: true, godRays: true, rayStrength: 0.55,
   },
   high: {
     name: '高品質', renderScale: 1.0, viewChunks: 11, lodScale: 1.3, shadows: true, shadowSize: 2048,
     shadowRange: 78, grassDensity: 1.15, grassDist: 108, grassShadow: true, treeDensity: 1.0,
     bloom: true, bloomPasses: 3, bloomStrength: 0.6, water: true, skyQuality: 1, maxEnemies: 26,
+    cloudShadows: true, godRays: true, rayStrength: 0.7,
   },
 };
 
@@ -123,11 +127,22 @@ export class Game {
     for (const p of this.pois) {
       if (p.type === 'village') this.npcs.push(...populateVillage(p, this.world));
     }
+    // 相棒の馬
+    this.mount = new Mount({ x: this.player.x + 5, z: this.player.z + 4 });
+    this.mount.y = this.world.height(this.mount.x, this.mount.z);
+
     // 開始地点の篝火
     const start = this.pois.find((p) => p.tag === 'start');
     if (start) { this.player.lastShrine = start; start.discovered = true; this.player.discovered.add(start.id); }
 
-    this.ui.progress('残響が満ちるのを待っています…', 0.85);
+    // 全図をあらかじめ焼いておく（ミニマップが最初から使えるように）
+    for (let i = 0; i < 8; i++) {
+      this.ui.bakeMap(this, 24);
+      this.ui.progress('地図を写しています…', 0.7 + i * 0.02);
+      await frame();
+    }
+
+    this.ui.progress('残響が満ちるのを待っています…', 0.88);
     await frame();
 
     this.mapBake = { canvas: null, row: 0, size: 176, done: false };
@@ -208,6 +223,7 @@ export class Game {
     this.sky.applyRegion(this.world.params(p.x, p.z));
 
     this.camera.update(dt, this);
+    if (this.input.pressed('mount')) this.handleMountButton();
     p.update(dt, this);
     if (p.state === 'cast') p.processSpell(dt, this);
 
@@ -225,6 +241,7 @@ export class Game {
     for (const n of this.npcs) {
       if (Math.hypot(n.x - p.x, n.z - p.z) < 70) n.update(dt, this);
     }
+    this.mount.update(dt, this);
     this.updateProjectiles(dt);
     this.updateSpawning(dt);
     this.updateGatherables();
@@ -236,6 +253,7 @@ export class Game {
     this.updateDiscovery();
     this.updateMusic();
     this.audio.update(dt, this);
+    this.audio.updateAmbience(dt, this);
 
     // バフ
     if (p.spellBuff) {
@@ -247,6 +265,33 @@ export class Game {
     // オートセーブ
     this.lastSave += dt;
     if (this.lastSave > 30) { this.lastSave = 0; this.save(); }
+  }
+
+  /** 馬ボタン：近ければ騎乗、遠ければ口笛で呼ぶ */
+  handleMountButton() {
+    const p = this.player;
+    if (p.riding) { this.mount.dismount(this); return; }
+    if (p.dead || !p.canAct()) return;
+    const d = Math.hypot(this.mount.x - p.x, this.mount.z - p.z);
+    if (d < 4.2 && !this.mount.dead) {
+      this.mount.mount(this);
+      return;
+    }
+    // 口笛で呼び寄せる
+    this.audio.play('whistle');
+    if (this.mount.dead) {
+      this.mount.dead = false;
+      this.mount.hp = this.mount.maxHp;
+      this.mount.state = 'idle';
+      this.mount.deathT = 0;
+    }
+    const a = this.camera.yaw + Math.PI + (Math.random() - 0.5) * 1.2;
+    const spot = this.world.findFlat(p.x + Math.sin(a) * 11, p.z + Math.cos(a) * 11, 8, 12, 0.7, 0.5);
+    this.mount.x = spot.x; this.mount.z = spot.z;
+    this.mount.y = this.world.height(spot.x, spot.z);
+    this.mount.yaw = Math.atan2(p.x - spot.x, p.z - spot.z);
+    this.fx.dust(this.mount.x, this.mount.y + 0.1, this.mount.z, 8);
+    this.ui.toast('灰毛を呼んだ');
   }
 
   /* -------------------------------------------------------- スポーン */
@@ -573,6 +618,10 @@ export class Game {
       const d = Math.hypot(g.x - p.x, g.z - p.z);
       if (d < bestD) { bestD = d; best = { type: 'gather', obj: g, label: `${ITEMS[g.type].name}を採る` }; }
     }
+    if (!p.riding && !this.mount.dead) {
+      const d = Math.hypot(this.mount.x - p.x, this.mount.z - p.z);
+      if (d < bestD) { bestD = d; best = { type: 'mount', obj: this.mount, label: '灰毛に騎乗する' }; }
+    }
     if (p.lostEcho) {
       const d = Math.hypot(p.lostEcho.x - p.x, p.lostEcho.z - p.z);
       if (d < 2.6) { bestD = d; best = { type: 'echo', obj: p.lostEcho, label: `残響を回収する（${p.lostEcho.echo}）` }; }
@@ -635,6 +684,9 @@ export class Game {
         this.fx.dust(g.x, g.y + 0.3, g.z, 6);
         break;
       }
+      case 'mount':
+        this.mount.mount(this);
+        break;
       case 'echo': {
         p.echo += p.lostEcho.echo;
         this.ui.toast(`残響を取り戻した（+${p.lostEcho.echo}）`);
@@ -724,6 +776,7 @@ export class Game {
   onDamage(target, dmg, opts, blocked) {
     this.ui.damageNumber(target, dmg, blocked, opts);
     if (target === this.player) {
+      if (this.player.riding && dmg > this.player.maxHp * 0.10) this.mount.dismount(this, true);
       this.damageFlash = Math.min(1, (this.damageFlash || 0) + dmg / this.player.maxHp * 2.4);
       this.camera.shake(0.3 + Math.min(0.5, dmg / 120));
       this.audio.play('hit', { pitch: 0.8 });
@@ -767,7 +820,7 @@ export class Game {
         if (!b) continue;
         const o = b.alloc();
         writeInstance(b.data, o, s.x, s.y, s.z, s.rotY, s.sx, s.sy, s.sz,
-          s.r, s.g, s.b, 1, s.wind, s.emissive, 0);
+          s.r, s.g, s.b, 1, s.wind, s.emissive, 0, 0.5);
       }
       // 宝箱
       if (poi.chest && !this.openedChests.has(poi.id) && d < 200) {
@@ -776,7 +829,7 @@ export class Game {
           const o = b.alloc();
           const cy = this.world.height(poi.chest.x, poi.chest.z);
           writeInstance(b.data, o, poi.chest.x, cy, poi.chest.z, 0, 1, 1, 1,
-            1, 0.95, 0.7, 1, 0, 0.12 + Math.sin(time * 2) * 0.05, 0);
+            1, 0.95, 0.7, 1, 0, 0.12 + Math.sin(time * 2) * 0.05, 0, 0.5);
         }
       }
     }
@@ -791,20 +844,21 @@ export class Game {
       const c = GATHER_COLOR[g.type];
       writeInstance(b.data, o, g.x, g.y, g.z, g.key % 6, 0.6, 0.7, 0.6,
         c[0], c[1], c[2], 1, g.type === 'herb' || g.type === 'blood_flower' ? 0.6 : 0,
-        0.35 + Math.sin(time * 1.7 + g.key) * 0.12, 0.55);
+        0.35 + Math.sin(time * 1.7 + g.key) * 0.12, 0.55, 0.5);
     }
 
     // アクター
-    p.emit(renderer, time);
+    p.emit(renderer, time, this);
+    if (Math.hypot(this.mount.x - px, this.mount.z - pz) < 140) this.mount.emit(renderer, time, this);
     for (const e of this.enemies) {
       if (Math.hypot(e.x - px, e.z - pz) > 140) continue;
       if (!frustum.sphere(e.x, e.y + e.height * 0.5, e.z, e.height)) continue;
-      e.emit(renderer, time);
+      e.emit(renderer, time, this);
     }
     for (const n of this.npcs) {
       if (Math.hypot(n.x - px, n.z - pz) > 90) continue;
       if (!frustum.sphere(n.x, n.y + n.height * 0.5, n.z, n.height)) continue;
-      n.emit(renderer, time);
+      n.emit(renderer, time, this);
     }
 
     // 発射物

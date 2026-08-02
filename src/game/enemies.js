@@ -7,6 +7,84 @@ import { clamp, clamp01, lerp, angDelta, rotateTowards, TAU, v3 } from '../core/
 const RIG_FOR = { humanoid: 'humanoid', beast: 'beast', imp: 'imp', wraith: 'wraith', dragon: 'dragon' };
 const _tip = v3.new();
 
+/** 敵の見た目を種別ごとに味付けする（フード・兜・肩当て・襤褸など） */
+function buildEnemyExtras(def) {
+  const ex = [];
+  const t = def.tint;
+  const dark = [t[0] * 0.45, t[1] * 0.45, t[2] * 0.48];
+  const cloth = (i, tint, joint = 'pelvis', segs = 2) => {
+    for (let k = 0; k < segs; k++) {
+      ex.push({
+        joint, shape: 'partSlim',
+        offset: [0, -0.06 - k * 0.24, -0.14 - k * 0.03],
+        size: [0.42 - k * 0.05, 0.28, 0.09],
+        tint, cloth: true, seg: k + i,
+      });
+    }
+  };
+  switch (def.id) {
+    case 'bandit':
+      ex.push({ joint: 'head', shape: 'partSlim', offset: [0, 0.15, -0.03], size: [0.40, 0.36, 0.42], tint: dark });
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.05, 0.15], size: [0.28, 0.12, 0.12], tint: [0.5, 0.42, 0.3] });
+      cloth(0, [t[0] * 0.7, t[1] * 0.62, t[2] * 0.55]);
+      break;
+    case 'archer':
+      ex.push({ joint: 'head', shape: 'partSlim', offset: [0, 0.15, -0.03], size: [0.40, 0.34, 0.42], tint: dark });
+      ex.push({ joint: 'chest', shape: 'partSlim', offset: [-0.14, 0.34, -0.18], size: [0.14, 0.42, 0.14], tint: [0.42, 0.30, 0.20], rot: [0.3, 0, 0.3] });
+      cloth(0, [t[0] * 0.75, t[1] * 0.7, t[2] * 0.6], 'pelvis', 1);
+      break;
+    case 'knight':
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.14, -0.01], size: [0.42, 0.44, 0.42], tint: [t[0] * 1.1, t[1] * 1.1, t[2] * 1.12] });
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.11, 0.19], size: [0.28, 0.09, 0.10], tint: [0.05, 0.05, 0.07] });
+      for (const s of ['shoulderL', 'shoulderR']) {
+        ex.push({ joint: s, shape: 'part', offset: [0, -0.03, 0], size: [0.30, 0.22, 0.30], tint: [t[0] * 1.12, t[1] * 1.12, t[2] * 1.15] });
+      }
+      cloth(0, [0.42, 0.16, 0.18], 'pelvis', 3);
+      break;
+    case 'brute':
+      for (const s of ['shoulderL', 'shoulderR']) {
+        ex.push({ joint: s, shape: 'part', offset: [0, -0.04, 0], size: [0.34, 0.26, 0.34], tint: [0.30, 0.26, 0.24] });
+        ex.push({ joint: s, shape: 'spike', offset: [0, 0.06, 0], size: [0.12, 0.20, 0.12], tint: [0.55, 0.5, 0.45] });
+      }
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.12, 0.10], size: [0.34, 0.26, 0.24], tint: [0.55, 0.52, 0.48] });
+      cloth(0, [0.30, 0.25, 0.20], 'pelvis', 2);
+      break;
+    case 'skeleton':
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.06, 0.14], size: [0.20, 0.12, 0.14], tint: [0.08, 0.07, 0.06] });
+      ex.push({ joint: 'chest', shape: 'partSlim', offset: [0, 0.28, 0.14], size: [0.36, 0.40, 0.10], tint: [t[0] * 0.9, t[1] * 0.9, t[2] * 0.86] });
+      cloth(0, [0.34, 0.31, 0.26], 'pelvis', 2);
+      break;
+    case 'mage':
+      ex.push({ joint: 'head', shape: 'partSlim', offset: [0, 0.16, -0.04], size: [0.44, 0.42, 0.46], tint: dark });
+      cloth(0, [t[0] * 1.2, t[1] * 1.15, t[2] * 1.3], 'pelvis', 3);
+      break;
+    case 'wraith':
+      cloth(0, [t[0] * 0.8, t[1] * 0.85, t[2] * 1.0], 'chest', 2);
+      break;
+    case 'troll':
+      for (const s of ['shoulderL', 'shoulderR']) {
+        ex.push({ joint: s, shape: 'part', offset: [0, -0.05, 0], size: [0.40, 0.30, 0.40], tint: [t[0] * 0.8, t[1] * 0.8, t[2] * 0.8] });
+      }
+      ex.push({ joint: 'head', shape: 'spike', offset: [-0.10, 0.22, 0], size: [0.12, 0.26, 0.12], tint: [0.72, 0.70, 0.62] });
+      ex.push({ joint: 'head', shape: 'spike', offset: [0.10, 0.22, 0], size: [0.12, 0.26, 0.12], tint: [0.72, 0.70, 0.62] });
+      cloth(0, [0.28, 0.26, 0.20], 'pelvis', 1);
+      break;
+    case 'imp':
+      cloth(0, [0.30, 0.16, 0.12], 'pelvis', 1);
+      break;
+    case 'deer':
+      for (const sx of [-1, 1]) {
+        ex.push({ joint: 'head', shape: 'spike', offset: [sx * 0.09, 0.16, -0.02], size: [0.05, 0.30, 0.05], tint: [0.62, 0.55, 0.42], rot: [0, 0, -sx * 0.35] });
+        ex.push({ joint: 'head', shape: 'spike', offset: [sx * 0.16, 0.30, 0.02], size: [0.04, 0.18, 0.04], tint: [0.62, 0.55, 0.42], rot: [0.3, 0, -sx * 0.7] });
+      }
+      ex.push({ joint: 'rump', shape: 'partSlim', offset: [0, 0.06, -0.20], size: [0.22, 0.20, 0.10], tint: [0.86, 0.82, 0.74] });
+      break;
+    default:
+      break;
+  }
+  return ex;
+}
+
 export class Enemy extends Actor {
   constructor(def, opts = {}) {
     const rig = RIG_FOR[def.body] || 'humanoid';
@@ -42,6 +120,8 @@ export class Enemy extends Actor {
     this.poi = opts.poi || null;
     this.superArmor = def.h >= 1.6;
     this.spawnFade = 0;
+    this.extras = buildEnemyExtras(def);
+    this.trailColor = def.emissive ? [0.7, 0.85, 1.0] : [0.9, 0.85, 0.78];
   }
 
   update(dt, game) {
@@ -59,6 +139,28 @@ export class Enemy extends Actor {
     const p = game.player;
     const dx = p.x - this.x, dz = p.z - this.z;
     const dist = Math.hypot(dx, dz);
+
+    // ---- 温厚な動物は逃げる ----
+    if (this.arch.passive) {
+      let speed = 0;
+      const flee = this.hp < this.maxHp ? 26 : 13;
+      if (dist < flee && !p.dead) {
+        this.fleeing = 3.5;
+        this.aggro = false;
+      }
+      if (this.fleeing > 0) {
+        this.fleeing -= dt;
+        const ang = Math.atan2(this.x - p.x, this.z - p.z);
+        this.yaw = rotateTowards(this.yaw, ang, 6 * dt);
+        this.moveOnGround(dt, game, Math.sin(this.yaw), Math.cos(this.yaw), this.runSpeed);
+        speed = this.runSpeed;
+      } else {
+        speed = this.idle(dt, game);
+      }
+      this.updatePhysics(dt, game);
+      this.updateAnim(dt, speed);
+      return;
+    }
 
     // ---- 索敵 ----
     if (!this.aggro && !p.dead) {
