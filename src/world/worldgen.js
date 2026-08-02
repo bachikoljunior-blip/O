@@ -18,6 +18,7 @@ export const REGIONS = [
     temp: 0.62, moist: 0.55,
     grass: [0.30, 0.48, 0.22], grass2: [0.42, 0.55, 0.24], rock: [0.42, 0.41, 0.38],
     tree: 'birch', treeDensity: 0.35, bushDensity: 0.5, grassDensity: 1.0,
+    terrace: 0.00, terraceStep: 6,  mesa: 0.00, canyon: 0.00, snowLine: 360,
     fog: [0.62, 0.72, 0.82], fogDensity: 0.9,
   },
   {
@@ -27,6 +28,7 @@ export const REGIONS = [
     temp: 0.48, moist: 0.85,
     grass: [0.14, 0.26, 0.15], grass2: [0.19, 0.33, 0.16], rock: [0.30, 0.31, 0.30],
     tree: 'pine', treeDensity: 1.0, bushDensity: 0.7, grassDensity: 0.6,
+    terrace: 0.22, terraceStep: 7,  mesa: 0.00, canyon: 0.00, snowLine: 260,
     fog: [0.36, 0.44, 0.42], fogDensity: 1.9,
   },
   {
@@ -36,6 +38,7 @@ export const REGIONS = [
     temp: 0.95, moist: 0.08,
     grass: [0.36, 0.20, 0.14], grass2: [0.46, 0.26, 0.15], rock: [0.28, 0.20, 0.19],
     tree: 'dead', treeDensity: 0.16, bushDensity: 0.15, grassDensity: 0.25,
+    terrace: 0.62, terraceStep: 9,  mesa: 0.85, canyon: 0.25, snowLine: 900,
     fog: [0.62, 0.32, 0.22], fogDensity: 2.4,
   },
   {
@@ -45,6 +48,7 @@ export const REGIONS = [
     temp: 0.55, moist: 1.0,
     grass: [0.24, 0.31, 0.20], grass2: [0.32, 0.36, 0.19], rock: [0.30, 0.32, 0.30],
     tree: 'willow', treeDensity: 0.45, bushDensity: 0.9, grassDensity: 1.3,
+    terrace: 0.00, terraceStep: 4,  mesa: 0.00, canyon: 0.00, snowLine: 340,
     fog: [0.58, 0.64, 0.60], fogDensity: 3.2,
   },
   {
@@ -54,6 +58,7 @@ export const REGIONS = [
     temp: 0.12, moist: 0.45,
     grass: [0.34, 0.37, 0.32], grass2: [0.44, 0.46, 0.42], rock: [0.48, 0.49, 0.52],
     tree: 'pine', treeDensity: 0.4, bushDensity: 0.2, grassDensity: 0.35,
+    terrace: 0.70, terraceStep: 15, mesa: 0.20, canyon: 0.15, snowLine: 82,
     fog: [0.74, 0.80, 0.90], fogDensity: 1.2,
   },
   {
@@ -63,6 +68,7 @@ export const REGIONS = [
     temp: 0.75, moist: 0.4,
     grass: [0.52, 0.47, 0.20], grass2: [0.62, 0.56, 0.24], rock: [0.46, 0.43, 0.37],
     tree: 'oak', treeDensity: 0.18, bushDensity: 0.3, grassDensity: 1.5,
+    terrace: 0.10, terraceStep: 6,  mesa: 0.12, canyon: 0.00, snowLine: 900,
     fog: [0.78, 0.74, 0.60], fogDensity: 0.8,
   },
   {
@@ -72,6 +78,7 @@ export const REGIONS = [
     temp: 0.7, moist: 0.25,
     grass: [0.45, 0.33, 0.22], grass2: [0.55, 0.42, 0.26], rock: [0.52, 0.38, 0.30],
     tree: 'dead', treeDensity: 0.12, bushDensity: 0.25, grassDensity: 0.4,
+    terrace: 0.45, terraceStep: 10, mesa: 0.35, canyon: 1.00, snowLine: 620,
     fog: [0.80, 0.66, 0.52], fogDensity: 1.1,
   },
   {
@@ -81,12 +88,14 @@ export const REGIONS = [
     temp: 0.68, moist: 0.7,
     grass: [0.30, 0.44, 0.28], grass2: [0.38, 0.50, 0.30], rock: [0.50, 0.48, 0.44],
     tree: 'oak', treeDensity: 0.3, bushDensity: 0.45, grassDensity: 0.9,
+    terrace: 0.55, terraceStep: 8,  mesa: 0.05, canyon: 0.00, snowLine: 400,
     fog: [0.68, 0.78, 0.86], fogDensity: 1.0,
   },
 ];
 
 const BLEND_KEYS = ['base', 'landAmp', 'hillAmp', 'ridgeAmp', 'ridgeSharp', 'rough',
-  'temp', 'moist', 'treeDensity', 'bushDensity', 'grassDensity', 'fogDensity', 'danger'];
+  'temp', 'moist', 'treeDensity', 'bushDensity', 'grassDensity', 'fogDensity', 'danger',
+  'terrace', 'terraceStep', 'mesa', 'canyon', 'snowLine'];
 const BLEND_VEC = ['grass', 'grass2', 'rock', 'fog'];
 /** 地方パラメータをキャッシュする格子間隔（m）。地方は大きいので粗くて足りる */
 const PARAM_GRID = 28;
@@ -106,7 +115,22 @@ export class WorldGen {
     this.roads = [];
 
     this._p = this._makeP();
-    this._hp = { base: 0, landAmp: 0, hillAmp: 0, ridgeAmp: 0, ridgeSharp: 0, rough: 0 };
+    this._hp = {
+      base: 0, landAmp: 0, hillAmp: 0, ridgeAmp: 0, ridgeSharp: 0, rough: 0,
+      terrace: 0, terraceStep: 6, mesa: 0, canyon: 0,
+    };
+    /**
+     * 名のある峰。地方の平均を大きく超える高さを持たせ、
+     * どこからでも見える「目印」にする。遠景の骨格はこれで決まる。
+     */
+    this.landmarks = [
+      { name: '天衝の尖塔', x: 300, z: -1700, r: 300, h: 300, sharp: 2.4 },
+      { name: '双子の岩', x: 700, z: -1380, r: 200, h: 205, sharp: 2.0 },
+      { name: '灰かぶりの角', x: 1150, z: -1080, r: 230, h: 165, sharp: 1.7 },
+      { name: '裂罅の背', x: -430, z: 1560, r: 250, h: 150, sharp: 1.8 },
+      { name: '常闇の丘', x: -900, z: -640, r: 260, h: 130, sharp: 1.5 },
+    ];
+    for (const l of this.landmarks) { l.r2 = l.r * l.r; l.invR = 1 / l.r; }
     this._bl = {
       n00: null, n10: null, n01: null, n11: null,
       w00: 0, w10: 0, w01: 0, w11: 0, tx: 0, tz: 0,
@@ -185,6 +209,11 @@ export class WorldGen {
     o.ridgeAmp = n00.ridgeAmp * w00 + n10.ridgeAmp * w10 + n01.ridgeAmp * w01 + n11.ridgeAmp * w11;
     o.ridgeSharp = n00.ridgeSharp * w00 + n10.ridgeSharp * w10 + n01.ridgeSharp * w01 + n11.ridgeSharp * w11;
     o.rough = n00.rough * w00 + n10.rough * w10 + n01.rough * w01 + n11.rough * w11;
+    o.terrace = n00.terrace * w00 + n10.terrace * w10 + n01.terrace * w01 + n11.terrace * w11;
+    o.terraceStep = n00.terraceStep * w00 + n10.terraceStep * w10
+      + n01.terraceStep * w01 + n11.terraceStep * w11;
+    o.mesa = n00.mesa * w00 + n10.mesa * w10 + n01.mesa * w01 + n11.mesa * w11;
+    o.canyon = n00.canyon * w00 + n10.canyon * w10 + n01.canyon * w01 + n11.canyon * w11;
     return o;
   }
 
@@ -204,6 +233,8 @@ export class WorldGen {
     out.grassDensity = n00.grassDensity * w00 + n10.grassDensity * w10 + n01.grassDensity * w01 + n11.grassDensity * w11;
     out.fogDensity = n00.fogDensity * w00 + n10.fogDensity * w10 + n01.fogDensity * w01 + n11.fogDensity * w11;
     out.danger = n00.danger * w00 + n10.danger * w10 + n01.danger * w01 + n11.danger * w11;
+    out.snowLine = n00.snowLine * w00 + n10.snowLine * w10
+      + n01.snowLine * w01 + n11.snowLine * w11;
     for (let vi = 0; vi < 4; vi++) {
       const k = BLEND_VEC[vi];
       const o = out[k], a = n00[k], b1 = n10[k], c = n01[k], d = n11[k];
@@ -225,6 +256,61 @@ export class WorldGen {
     return 1 - smoothstep(WORLD_RADIUS - 420 + wob, WORLD_RADIUS + 120 + wob, d);
   }
 
+  /**
+   * 卓状台地（メサ）。平たい頂と切り立った側面を持つ孤立した高台。
+   * 中心をセルの内側に閉じ込め、半径をセルの 22% 以下に抑えることで、
+   * 自分のセルだけ見れば済むようにしてある（height は毎フレーム大量に呼ばれる）。
+   */
+  mesaAt(x, z, amount) {
+    const C = 380;
+    const cx = Math.floor(x / C), cz = Math.floor(z / C);
+    const pick = hash2(cx, cz, this.seed + 313);
+    if (pick > amount * 0.42) return 0;                 // このセルにはメサが無い
+    const ox = 0.28 + hash2(cx, cz, this.seed + 5) * 0.44;
+    const oz = 0.28 + hash2(cx, cz, this.seed + 9) * 0.44;
+    const mx = (cx + ox) * C, mz = (cz + oz) * C;
+    const r = C * (0.10 + hash2(cx, cz, this.seed + 17) * 0.11);
+    const d = Math.hypot(x - mx, z - mz);
+    if (d > r) return 0;
+    // 縁は急に、頂は平らに
+    const t = 1 - smoothstep(r * 0.72, r, d);
+    const height = 22 + hash2(cx, cz, this.seed + 23) * 40;
+    return t * t * (3 - 2 * t) * height;
+  }
+
+  /**
+   * 溝状の峡谷。尾根ノイズの「谷側」を細く深く抜き取る。
+   * 裂罅の谷でだけ本気で効かせる。
+   */
+  canyonAt(x, z, amount) {
+    const v = 1 - Math.abs(this.nRiver.n2(x * 0.00062 - 91.3, z * 0.00062 + 55.7));
+    const band = smoothstep(0.972, 0.9995, v);
+    if (band <= 0) return 0;
+    return band * band * (26 + 34 * amount) * amount;
+  }
+
+  /**
+   * 名のある峰の盛り上がり。
+   * height は毎フレーム何万回も呼ばれるので、まず軸並行の矩形で弾く。
+   * ほとんどの地点は比較 2 回で抜ける。
+   */
+  landmarkAt(x, z) {
+    let add = 0;
+    const L = this.landmarks;
+    for (let i = 0; i < L.length; i++) {
+      const l = L[i];
+      const dx = x - l.x;
+      if (dx > l.r || dx < -l.r) continue;
+      const dz = z - l.z;
+      if (dz > l.r || dz < -l.r) continue;
+      const d2 = dx * dx + dz * dz;
+      if (d2 >= l.r2) continue;
+      const t = 1 - Math.sqrt(d2) * l.invR;
+      add += Math.pow(t, l.sharp) * l.h;
+    }
+    return add;
+  }
+
   /** 平坦化・街道を含まない素の地形 */
   heightBase(x, z) {
     const p = this.heightParams(x, z);
@@ -237,6 +323,26 @@ export class WorldGen {
 
     let h = p.base + land * p.landAmp + hills * p.hillAmp * p.rough
       + ridge * p.ridgeAmp + detail * 1.4 * p.rough;
+
+    // 名のある峰（遠景の骨格）
+    h += this.landmarkAt(x, z);
+
+    // 卓状台地
+    if (p.mesa > 0.06) h += this.mesaAt(x, z, p.mesa);
+
+    // 段丘：高さを段に量子化して、平らな棚と切り立った段差をつくる。
+    // 一様にかけると人工物になるので、丘ノイズで濃淡をつける。
+    if (p.terrace > 0.01) {
+      const step = p.terraceStep;
+      const mask = clamp01(hills * 1.6 + 0.55);
+      const q = Math.floor(h / step) * step;
+      const frac = (h - q) / step;
+      const shaped = q + step * smoothstep(0.34, 0.66, frac);
+      h = lerp(h, shaped, p.terrace * mask);
+    }
+
+    // 峡谷（段丘の後に抜く。段差の途中を割って落とす方が険しく見える）
+    if (p.canyon > 0.10) h -= this.canyonAt(x, z, p.canyon);
 
     // 海岸へ向けて落ち込む
     const cm = this.coastMask(x, z);
@@ -256,7 +362,12 @@ export class WorldGen {
       const alt = clamp01(1 - (h - 8) / 90);
       const depth = band * (7 + 9 * alt) * clamp01(h / 6 + 0.3);
       h -= depth;
-      if (alt > 0.65 && h < -2.2) h = -2.2 + (h + 2.2) * 0.25;
+      // 低地の川床は掘りすぎないよう底上げする。
+      // 高度の閾値で on/off すると河床に垂直の壁ができるので滑らかに混ぜ、
+      // さらに川の影響帯（band）で重みを掛ける。
+      // band が立ち上がった瞬間に全力で底上げすると、川の縁が 12m の崖になる。
+      const bedK = smoothstep(0.55, 0.75, alt) * band;
+      if (bedK > 0 && h < -2.2) h = lerp(h, -2.2 + (h + 2.2) * 0.25, bedK);
     }
     return h;
   }
@@ -369,8 +480,8 @@ export class WorldGen {
     const rocky = smoothstep(0.55, 1.15, slope);
     r = lerp(r, p.rock[0], rocky); g = lerp(g, p.rock[1], rocky); b = lerp(b, p.rock[2], rocky);
 
-    const snowLine = lerp(150, 42, clamp01(1 - p.temp));
-    const snow = smoothstep(snowLine, snowLine + 32, h) * (1 - rocky * 0.55);
+    const snowLine = p.snowLine;
+    const snow = smoothstep(snowLine, snowLine + 34, h) * (1 - rocky * 0.55);
     r = lerp(r, 0.92, snow); g = lerp(g, 0.95, snow); b = lerp(b, 1.0, snow);
 
     const sand = (1 - smoothstep(1.0, 4.2, h)) * (1 - smoothstep(0.5, 0.9, slope));
@@ -405,7 +516,7 @@ export class WorldGen {
     if (road > 0.4) surface = 'dirt';
     else if (h < 1.6) surface = 'sand';
     else if (s > 0.85) surface = 'rock';
-    else if (h > lerp(150, 42, clamp01(1 - p.temp))) surface = 'snow';
+    else if (h > p.snowLine) surface = 'snow';
     else if (p.moist > 0.9) surface = 'marsh';
     return { h, slope: s, region: p.region, danger: p.danger, surface, road, underwater: h < SEA_LEVEL };
   }
