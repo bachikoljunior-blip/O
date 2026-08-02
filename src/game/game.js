@@ -747,7 +747,11 @@ export class Game {
    */
   updateSwimming(dt) {
     const p = this.player;
-    if (this.dungeon) { p.waterDepth = 0; p.wading = false; p.swimming = false; return; }
+    if (this.dungeon) {
+      p.waterDepth = 0; p.wading = false; p.swimming = false;
+      this.renderer.underwater = 0;   // 水中に潜ったまま地下へ入っても青みを残さない
+      return;
+    }
 
     // 波紋と飛沫（歩いているときだけ）
     if (p.wading && !p.dead) {

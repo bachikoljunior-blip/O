@@ -227,6 +227,7 @@ export class Enemy extends Actor {
     this.feintCd = 0;        // フェイントの連発を防ぐ
     this.summonCd = 0;       // 死者を起こす間隔
     this.rallyCd = 0;        // 遠吠えの間隔
+    this.teleportCd = 0;     // 瞬間移動の間隔
     this.poi = opts.poi || null;
     this.superArmor = def.h >= 1.6;
     this.spawnFade = 0;
@@ -249,6 +250,7 @@ export class Enemy extends Actor {
     this.feintCd -= dt;
     this.summonCd -= dt;
     this.rallyCd -= dt;
+    this.teleportCd -= dt;
     if (this.rally > 0) this.rally -= dt;
     // スタミナ回復（盾持ちが一度崩されたきりにならないように）
     if (this.stamina < this.maxStamina) {
@@ -389,6 +391,9 @@ export class Enemy extends Actor {
       const options = this.attackList().filter((a) => {
         if (a.summon) return this.summonCd <= 0 && dist < 22;
         if (a.rally) return this.rallyCd <= 0 && dist < 24;
+        // 瞬間移動は「間合いを外された」ときの選択肢。
+        // 間隔を空けないと、無敵ではないのに捕まえられない相手になってしまう
+        if (a.teleport) return this.teleportCd <= 0 && dist < 6;
         if (!a.range) return true;
         if (a.dash) return dist <= a.range && dist > 2.2;   // 突進は離れてこそ
         return dist <= a.range + p.radius * 0.5;
@@ -509,6 +514,7 @@ export class Enemy extends Actor {
     if (a.volley) this.volleyLeft = a.volley;
     if (a.summon) this.summonCd = 12 + Math.random() * 6;
     if (a.rally) this.rallyCd = 14 + Math.random() * 6;
+    if (a.teleport) this.teleportCd = 7 + Math.random() * 5;
     game.onEnemyAttack?.(this, a);
   }
 

@@ -65,6 +65,8 @@ export class Actor {
      * プレイヤーだけに与える。
      */
     this.hitGrace = opts.hitGrace || 0;
+    /** 体勢崩し直後の猶予。連続で崩されてハメられるのを防ぐ */
+    this.staggerImmune = 0;
     this.weaponModel = opts.weapon || null;
     this.weaponTint = opts.weaponTint || [0.8, 0.82, 0.86];
     this.weaponScale = opts.weaponScale || 1;
@@ -207,6 +209,7 @@ export class Actor {
     }
     this.hitFlash = Math.max(0, this.hitFlash - dt * 3.5);
     this.iframes = Math.max(0, this.iframes - dt);
+    this.staggerImmune = Math.max(0, this.staggerImmune - dt);
     if (this.poiseTimer > 0) {
       this.poiseTimer -= dt;
       if (this.poiseTimer <= 0) this.poise = this.maxPoise;
@@ -282,9 +285,15 @@ export class Actor {
       const poiseDmg = opts.poise || dmg * 0.5;
       this.poise -= poiseDmg;
       this.poiseTimer = 2.4;
-      if (this.poise <= 0) {
+      // 体勢を崩された直後は、続けざまに崩されない。
+      // これが無いと、崩し値の高い相手に一度捕まった時点で
+      // 硬直が上書きされ続け、二度と動けなくなる
+      if (this.poise <= 0 && this.staggerImmune > 0) {
+        this.poise = this.maxPoise * 0.5;
+      } else if (this.poise <= 0) {
         this.poise = this.maxPoise;
         this.poiseTimer = 0;
+        this.staggerImmune = this.team === TEAM.PLAYER ? 2.2 : 1.2;
         this.setState('stagger', this.boss ? 1.4 : 1.0);
         if (opts.source) {
           const dx = this.x - opts.source.x, dz = this.z - opts.source.z;
