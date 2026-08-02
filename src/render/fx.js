@@ -346,6 +346,23 @@ export class FX {
     });
   }
 
+  /** 霧の門から立ち上る霧（門の面に沿って左右に散らす） */
+  fogGate(x, z, yaw, dt, color) {
+    if (Math.random() > dt * 26) return;
+    const tx = Math.cos(yaw), tz = -Math.sin(yaw);   // 門の面に沿う方向
+    const u = (Math.random() - 0.5) * 5.0;
+    this.spawn({
+      x: x + tx * u + (Math.random() - 0.5) * 0.3,
+      y: 0.1 + Math.random() * 3.2,
+      z: z + tz * u + (Math.random() - 0.5) * 0.3,
+      vx: tx * (Math.random() - 0.5) * 0.3, vy: 0.24 + Math.random() * 0.34,
+      vz: tz * (Math.random() - 0.5) * 0.3,
+      life: 2.6 + Math.random() * 1.6, size: 0.42, sizeEnd: 1.05,
+      r: 0.45 + color[0] * 0.24, g: 0.52 + color[1] * 0.24, b: 0.64 + color[2] * 0.2,
+      a: 0.15, kind: KIND.SMOKE, glow: 0.12, drag: 1.2, fade: 0.7,
+    });
+  }
+
   shrineGlow(x, y, z, dt) {
     if (Math.random() > dt * 14) return;
     const a = Math.random() * 6.28, r = Math.random() * 1.2;

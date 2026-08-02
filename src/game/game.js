@@ -120,6 +120,8 @@ export class Game {
     this.harvested = new Set();
     this.openedChests = new Set();
     this.clearedPOIs = new Set();
+    this.dungeonProgress = new Map();   // POI id -> 踏破した最深層
+    this.deepestDepth = 0;
     this.activeBoss = null;
     this.bossPOI = null;
     this.dungeon = null;
@@ -251,9 +253,15 @@ export class Game {
         0.62, 0.50, 0.36, 0);
       for (const t of this.dungeon.torches) {
         const c = t.color;
-        const r = t.big ? 14 : 10;
-        const k = t.big ? 1.5 : 1.15;
+        const r = t.arena ? 22 : t.big ? 14 : 10;
+        const k = t.arena ? 1.85 : t.big ? 1.5 : 1.15;
         add(t.x, t.y, t.z, r, c[0] * k, c[1] * k, c[2] * k, t.x * 0.13 + t.z * 0.07);
+      }
+      // 開放された下り階段
+      const st = this.dungeon.bossDefeated ? this.dungeon.stairPoint : null;
+      if (st) {
+        const c = this.dungeon.theme.torchColor;
+        add(st.x, 1.6, st.z, 13, c[0] * 1.4, c[1] * 1.4, c[2] * 1.5, 3.3);
       }
     } else {
       const night = 0.35 + this.sky.night * 0.9;
@@ -541,15 +549,24 @@ export class Game {
   hitProps() { /* 予約：破壊可能オブジェクト */ }
 
   /* ---------------------------------------------------- ダンジョン */
-  enterDungeon(poi) {
+  /**
+   * ダンジョンに入る（または下層へ降りる）。
+   * @param poi   入口の POI
+   * @param depth 階層。省略時は 1（最上層）
+   */
+  enterDungeon(poi, depth = 1) {
     const p = this.player;
-    this.outsideReturn = { x: p.x, y: p.y, z: p.z, yaw: p.yaw };
-    const depth = 1 + Math.min(3, Math.floor((poi.danger || 1) / 3));
-    this.dungeon = new Dungeon(poi, (poi.x * 7919 + poi.z * 104729 + this.seed) | 0, depth);
+    // 降下中は最初の地上座標を保持し続ける（何層潜っても地上へ一度で戻れる）
+    if (!this.dungeon) this.outsideReturn = { x: p.x, y: p.y, z: p.z, yaw: p.yaw };
+    const d = Math.max(1, depth);
+    const tier = 1 + Math.min(3, Math.floor((poi.danger || 1) / 3));
+    this.dungeon = new Dungeon(poi, (poi.x * 7919 + poi.z * 104729 + this.seed + d * 6151) | 0, d, tier);
     this.dungeonPOI = poi;
     this.enemies.length = 0;
     this.activeBoss = null;
+    this.bossPOI = null;
     this.ui.hideBoss();
+    this.audio.setMode('explore');
     p.x = this.dungeon.spawnPoint.x;
     p.z = this.dungeon.spawnPoint.z;
     p.y = 0;
@@ -558,8 +575,16 @@ export class Game {
     this.dungeonSpawned = false;
     this.quests.start('delve');
     this.audio.play('discover');
-    this.ui.showRegion({ name: this.dungeon.name, en: 'DUNGEON' });
-    this.ui.toast('松明の灯りだけが頼りだ');
+    this.ui.showRegion({ name: this.dungeon.name, en: `DUNGEON B${d}F` });
+    this.ui.toast(d > 1 ? `さらに深く潜った（第${d}層）` : '松明の灯りだけが頼りだ');
+    this.deepestDepth = Math.max(this.deepestDepth || 0, d);
+  }
+
+  /** 主を倒したあとの下り階段 */
+  descendDungeon() {
+    const poi = this.dungeonPOI;
+    const next = this.dungeon.depth + 1;
+    this.enterDungeon(poi, next);
   }
 
   exitDungeon() {
@@ -568,6 +593,10 @@ export class Game {
     this.dungeon = null;
     this.dungeonPOI = null;
     this.enemies.length = 0;
+    this.activeBoss = null;
+    this.bossPOI = null;
+    this.ui.hideBoss();
+    this.audio.setMode('explore');
     if (r) { p.x = r.x; p.z = r.z; p.yaw = r.yaw; p.y = this.world.height(r.x, r.z); }
     p.lockTarget = null;
     for (const poi of this.pois) poi.spawned = false;
@@ -584,7 +613,7 @@ export class Game {
     sky.sunColor = [0, 0, 0];
     sky.ambSky = [f[0] * 3.2 + 0.048, f[1] * 3.2 + 0.050, f[2] * 3.2 + 0.062];
     sky.ambGnd = [f[0] * 2.0 + 0.030, f[1] * 2.0 + 0.031, f[2] * 2.0 + 0.036];
-    sky.fogDensity = 0.030;
+    sky.fogDensity = 0.023;
     sky.night = 1;
     sky.cloud = 0;
     sky.rainAmount = 0;
@@ -607,20 +636,92 @@ export class Game {
           if (!d.isOpenAt(x, z)) continue;
           const e = spawnEnemy(sp.kind, {
             x, y: 0, z, yaw: rng() * TAU, leash: 200,
-            hpMul: 1 + d.depth * 0.25 + (sp.elite ? 0.5 : 0),
-            echoMul: 1.5 + d.depth * 0.4 + (sp.elite ? 1 : 0),
+            hpMul: 1 + d.rank * 0.25 + (sp.elite ? 0.5 : 0),
+            echoMul: 1.5 + d.rank * 0.4 + (sp.elite ? 1 : 0),
             scaleMul: sp.elite ? 1.15 : 1,
           });
           if (e) this.enemies.push(e);
         }
       }
     }
+    this.updateDungeonBoss(dt);
+
     // 松明の火の粉
     for (const t of d.torches) {
       if (Math.hypot(t.x - p.x, t.z - p.z) > 26) continue;
       this.fx.campfireEmbers(t.x, t.y - 0.2, t.z, dt * (t.big ? 1 : 0.5));
     }
-    void dt;
+    // 霧の門から立ち上る霧
+    if (!d.bossDefeated) {
+      for (const g of d.gates) {
+        if (Math.hypot(g.x - p.x, g.z - p.z) > 22) continue;
+        this.fx.fogGate(g.x, g.z, g.yaw, dt, d.theme.torchColor);
+      }
+    }
+  }
+
+  /** 主の間に踏み込んだら階層ボスを起こす */
+  updateDungeonBoss(dt) {
+    const d = this.dungeon;
+    const p = this.player;
+    if (!d.bossArena || !d.bossId) return;
+
+    if (!this.activeBoss) {
+      if (!d.bossDefeated && !p.dead && d.inBossRoom(p.x, p.z)) this.startDungeonBoss();
+      return;
+    }
+    const b = this.activeBoss;
+    if (b.dead) {
+      this.bossDeathT = (this.bossDeathT || 0) + dt;
+      if (this.bossDeathT > 3.2) {
+        this.activeBoss = null;
+        this.bossPOI = null;
+        this.ui.hideBoss();
+      }
+      return;
+    }
+    // 主の間から大きく離れる／死ぬと戦闘リセット
+    const dist = Math.hypot(b.x - d.bossArena.x, b.z - d.bossArena.z);
+    const pd = Math.hypot(p.x - d.bossArena.x, p.z - d.bossArena.z);
+    void dist;
+    if (p.dead || pd > d.bossArena.r + 30) {
+      const i = this.enemies.indexOf(b);
+      if (i >= 0) this.enemies.splice(i, 1);
+      this.activeBoss = null;
+      this.bossPOI = null;
+      this.ui.hideBoss();
+      this.audio.setMode('explore');
+    }
+  }
+
+  startDungeonBoss() {
+    const d = this.dungeon;
+    const p = this.player;
+    const a = d.bossArena;
+    // 深度に応じて硬く・重くする
+    const k = 1 + (d.rank - 1) * 0.24;
+    const b = spawnBoss(d.bossId, {
+      x: a.x, y: 0, z: a.z,
+      yaw: Math.atan2(p.x - a.x, p.z - a.z),
+      arenaR: a.r,
+      hpMul: k,
+      echoMul: 1 + (d.rank - 1) * 0.35,
+      powerMul: 1 + (d.rank - 1) * 0.10,
+      scaleMul: 1 + Math.min(0.18, (d.rank - 1) * 0.04),
+    });
+    if (!b) return;
+    b.aggro = true;
+    b.aiState = 'chase';
+    b.dungeonBoss = true;
+    this.activeBoss = b;
+    this.bossPOI = null;
+    this.bossDeathT = 0;
+    this.enemies.push(b);
+    this.ui.showBoss(b);
+    this.audio.setMode('boss');
+    this.audio.play('boss_phase');
+    this.fx.bossPhase(b.x, b.y, b.z, [0.6, 0.7, 1]);
+    this.camera.shake(0.6);
   }
 
   /* -------------------------------------------------------- ボス */
@@ -675,11 +776,6 @@ export class Game {
     }
     this.activeBoss = null;
     this.bossPOI = null;
-    this.dungeon = null;
-    this.lightPos = new Float32Array(8 * 4);
-    this.lightCol = new Float32Array(8 * 4);
-    this._lights = { count: 0, pos: this.lightPos, col: this.lightCol };
-    this._lightCand = [];
     this.ui.hideBoss();
   }
 
@@ -692,10 +788,26 @@ export class Game {
     const r = boss.bossDef.reward || {};
     if (r.weapon) this.unlockWeapon(r.weapon);
     if (r.armor) this.unlockArmor(r.armor);
+    if (r.shield) this.unlockShield(r.shield);
     if (r.talisman) this.unlockTalisman(r.talisman);
     if (r.spell) this.unlockSpell(r.spell);
     if (r.item) { this.player.addItem(r.item, r.count || 1); this.ui.itemGain(r.item, r.count || 1); }
     if (boss.bossDef.final) this.ui.showEnding(this);
+
+    // 階層ボス：宝箱と下り階段を開放し、到達記録を残す
+    if (boss.dungeonBoss && this.dungeon) {
+      const d = this.dungeon;
+      d.bossDefeated = true;
+      const id = this.dungeonPOI?.id;
+      if (id) {
+        const prev = this.dungeonProgress.get(id) || 0;
+        if (d.depth > prev) this.dungeonProgress.set(id, d.depth);
+      }
+      this.quests.count.dungeonBosses = (this.quests.count.dungeonBosses || 0) + 1;
+      this.quests.start('depths');
+      this.ui.toast('奥に下りの階段が現れた', 'gold');
+      if (d.stairPoint) this.fx.bossPhase(d.stairPoint.x, 0.6, d.stairPoint.z, [0.75, 0.85, 1.0]);
+    }
     this.save();
   }
 
@@ -772,8 +884,17 @@ export class Game {
       if (de < 3.4) { bestD = de; best = { type: 'dungeon_exit', obj: ex, label: '地上へ戻る' }; }
       for (const c of this.dungeon.chests) {
         if (c.opened) continue;
+        if (c.boss && !this.dungeon.bossDefeated) continue;
         const d = Math.hypot(c.x - p.x, c.z - p.z);
         if (d < bestD) { bestD = d; best = { type: 'dungeon_chest', obj: c, label: '宝箱を開ける' }; }
+      }
+      const st = this.dungeon.stairPoint;
+      if (st && this.dungeon.bossDefeated && !this.activeBoss) {
+        const d = Math.hypot(st.x - p.x, st.z - p.z);
+        if (d < bestD) {
+          bestD = d;
+          best = { type: 'dungeon_descend', obj: st, label: `第${this.dungeon.depth + 1}層へ降りる` };
+        }
       }
       this.interact = best;
       this.ui.setPrompt(best ? best.label : null);
@@ -881,6 +1002,9 @@ export class Game {
         break;
       case 'dungeon_exit':
         this.exitDungeon();
+        break;
+      case 'dungeon_descend':
+        this.descendDungeon();
         break;
       case 'dungeon_chest': {
         const c = t.obj;
@@ -1000,6 +1124,46 @@ export class Game {
     this.ui.showDeath();
   }
 
+  /** 霧の門と、討伐後に現れる下り階段 */
+  emitDungeonGates(renderer, time) {
+    const d = this.dungeon;
+    const tc = d.theme.torchColor;
+    for (const g of d.gates) {
+      const frame = renderer.batchFor('fog_gate');
+      if (frame) {
+        const o = frame.alloc();
+        writeInstance(frame.data, o, g.x, 0, g.z, g.yaw, 1, 1, 1,
+          d.theme.wall[0] * 0.9, d.theme.wall[1] * 0.9, d.theme.wall[2] * 0.9, 1, 0, 0, 0, 0.5);
+      }
+      if (d.bossDefeated) continue;    // 討伐後は霧が晴れる
+      const veil = renderer.batchFor('fog_veil');
+      if (veil) {
+        const o = veil.alloc();
+        // 濃いめのアルファ（ディザが目立たない）＋ 近づくと溶ける
+        const shimmer = 0.80 + Math.sin(time * 1.6 + g.x * 0.31) * 0.05;
+        writeInstance(veil.data, o, g.x, 0, g.z, g.yaw, 1, 1, 1,
+          0.46 + tc[0] * 0.20, 0.52 + tc[1] * 0.20, 0.64 + tc[2] * 0.16,
+          shimmer, 0, 0.13, 0, 0.5);
+      }
+    }
+    if (d.bossDefeated && d.stairPoint) {
+      const b = renderer.batchFor('stairs_down');
+      if (b) {
+        const o = b.alloc();
+        writeInstance(b.data, o, d.stairPoint.x, 0, d.stairPoint.z, 0, 1, 1, 1,
+          d.theme.wall[0], d.theme.wall[1], d.theme.wall[2], 1, 0, 0, 0, 0.5);
+      }
+      // 階段口の淡い光（見落とさないように）
+      const ball = renderer.batchFor('ball');
+      if (ball) {
+        const o = ball.alloc();
+        const s = 0.3 + Math.sin(time * 2.2) * 0.05;
+        writeInstance(ball.data, o, d.stairPoint.x, 1.5 + Math.sin(time * 0.9) * 0.12, d.stairPoint.z,
+          time, s, s, s, tc[0], tc[1], tc[2], 1, 0, 1.6, 0, 0);
+      }
+    }
+  }
+
   /* -------------------------------------------------- インスタンス出力 */
   emitInstances(renderer) {
     const p = this.player;
@@ -1015,12 +1179,14 @@ export class Game {
       }
       for (const c of this.dungeon.chests) {
         if (c.opened) continue;
+        if (c.boss && !this.dungeon.bossDefeated) continue;
         const b = renderer.batchFor('chest');
         if (!b) continue;
         const o = b.alloc();
         writeInstance(b.data, o, c.x, 0, c.z, 0, 1, 1, 1,
           1, 0.95, 0.7, 1, 0, 0.12 + Math.sin(time * 2) * 0.05, 0, 0.5);
       }
+      this.emitDungeonGates(renderer, time);
       p.emit(renderer, time, this);
       for (const e of this.enemies) {
         if (Math.hypot(e.x - px, e.z - pz) > 90) continue;
@@ -1143,8 +1309,10 @@ export class Game {
         ps.x = this.outsideReturn.x; ps.y = this.outsideReturn.y; ps.z = this.outsideReturn.z;
       }
       const data = {
-        v: 4, seed: this.seed,
+        v: 5, seed: this.seed,
         player: ps,
+        delve: [...this.dungeonProgress],
+        deepest: this.deepestDepth || 0,
         quests: this.quests.serialize(),
         sky: this.sky.serialize(),
         opened: [...this.openedChests],
@@ -1181,6 +1349,8 @@ export class Game {
       this.sky.deserialize(d.sky);
       this.openedChests = new Set(d.opened || []);
       this.clearedPOIs = new Set(d.cleared || []);
+      this.dungeonProgress = new Map(d.delve || []);
+      this.deepestDepth = d.deepest || 0;
       for (const id of d.climbed || []) {
         const poi = this.pois.find((p) => p.id === id);
         if (poi) poi.climbed = true;

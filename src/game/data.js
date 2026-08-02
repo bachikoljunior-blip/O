@@ -128,6 +128,21 @@ export const WEAPONS = {
       roll: M(0.15, 0.10, 0.30, 1.16, 3.4, 0.9, 20, 16, 'thrust'),
     },
   },
+  scythe: {
+    id: 'scythe', name: '墓守の大鎌', model: 'w_scythe', cls: '大鎌',
+    base: 58, scale: { str: 'C', dex: 'B' }, weight: 9.0, req: { str: 15, dex: 15 },
+    crit: 1.2, tint: [0.66, 0.68, 0.72], bleed: 20,
+    desc: '刈り取るための刃。横薙ぎが広く、間合いの外から巻き込む。',
+    moveset: {
+      l1: M(0.22, 0.14, 0.32, 1.00, 3.4, 2.6, 30, 20, 'slash_l'),
+      l2: M(0.20, 0.14, 0.36, 1.06, 3.4, 2.8, 30, 20, 'slash_r'),
+      l3: M(0.28, 0.18, 0.52, 1.34, 3.7, 3.4, 40, 26, 'spin'),
+      h1: M(0.50, 0.18, 0.60, 1.90, 3.9, 3.0, 58, 36, 'spin'),
+      h2: M(0.46, 0.20, 0.66, 2.05, 4.1, 3.8, 62, 40, 'spin'),
+      run: M(0.24, 0.16, 0.40, 1.40, 3.8, 2.4, 38, 26, 'slash_l'),
+      roll: M(0.20, 0.14, 0.36, 1.20, 3.3, 2.4, 30, 22, 'slash_r'),
+    },
+  },
   katana: {
     id: 'katana', name: '流麗なる打刀', model: 'w_sword', cls: '刺剣',
     base: 48, scale: { dex: 'A' }, weight: 5.5, req: { str: 11, dex: 18 },
@@ -220,6 +235,11 @@ export const SHIELDS = {
     block: 0.95, stability: 78, req: { str: 22 }, tint: [0.5, 0.5, 0.55],
     desc: 'ほぼ全ての物理を受け止めるが、重い。',
   },
+  stone_shield: {
+    id: 'stone_shield', name: '石翼の盾', model: 'w_shield', weight: 8.5,
+    block: 0.88, stability: 66, req: { str: 17 }, tint: [0.44, 0.47, 0.5],
+    desc: '番人の翼を削り出した盾。衝撃をよく殺す。',
+  },
 };
 
 /* ============================================================== 防具 */
@@ -243,6 +263,7 @@ export const TALISMANS = {
   ring_hunter: { id: 'ring_hunter', name: '狩人の指輪', desc: '致命の一撃の威力が20%上がる。', effect: { critMul: 1.2 } },
   ring_echo: { id: 'ring_echo', name: '残響の指輪', desc: '獲得する残響が15%増える。', effect: { echoMul: 1.15 } },
   ring_moon: { id: 'ring_moon', name: '月影の指輪', desc: '魔術の威力が12%上がる。', effect: { spellMul: 1.12 } },
+  ring_delver: { id: 'ring_delver', name: '坑夫の指輪', desc: '最大HPが5%、獲得する残響が10%増える。', effect: { hpMul: 1.05, echoMul: 1.10 } },
 };
 
 /* ============================================================== 魔法 */
@@ -289,6 +310,7 @@ export const ITEMS = {
   crystal: { id: 'crystal', name: '魔力の結晶', kind: 'material', desc: '魔術の触媒。', stack: 99 },
   beast_bone: { id: 'beast_bone', name: '獣の骨', kind: 'material', desc: '獣から得られる素材。', stack: 99 },
   blood_flower: { id: 'blood_flower', name: '血赤花', kind: 'material', desc: '湿原に咲く赤い花。', stack: 99 },
+  bone_ash: { id: 'bone_ash', name: '骨灰', kind: 'material', desc: '墓所の主から得られる灰。強化の触媒。', stack: 99 },
   echo_shard: { id: 'echo_shard', name: '残響の欠片', kind: 'valuable', echo: 400, desc: '砕くと残響が得られる。', stack: 20 },
 };
 
@@ -313,6 +335,8 @@ export const RECIPES = [
   { id: 'throwing_knife', out: 'throwing_knife', count: 5, need: { ore_iron: 1 }, echo: 40 },
   { id: 'arrow', out: 'arrow', count: 20, need: { beast_bone: 1 }, echo: 30 },
   { id: 'antidote', out: 'antidote', count: 2, need: { herb: 1, crystal: 1 }, echo: 30 },
+  { id: 'ore_silver', out: 'ore_silver', count: 1, need: { bone_ash: 1, ore_iron: 3 }, echo: 220 },
+  { id: 'shard_ancient', out: 'shard_ancient', count: 1, need: { bone_ash: 2, ore_silver: 2 }, echo: 900 },
 ];
 
 /* ============================================================== 敵 */
@@ -655,6 +679,100 @@ export const BOSSES = {
       },
     ],
   },
+};
+
+/* ======================================================= ダンジョンの主 */
+/**
+ * 階層ボス。地上のボスと違い何度でも挑めるので、
+ * 報酬は初回のみ効く解放系＋常に入る素材にしてある。
+ * hp / 与ダメージは潜った深度で game 側が倍率を掛ける。
+ */
+export const DUNGEON_BOSSES = {
+  catacomb: 'ossuar',
+  ruin: 'stonewing',
+  mine: 'gnawer',
+};
+
+BOSSES.ossuar = {
+  id: 'ossuar', name: '骸の主 オスアール', title: '墓所に坐す王', dungeon: true,
+  hp: 1450, poise: 95, def: 16, speed: 3.4, runSpeed: 6.2, echo: 2200,
+  body: 'humanoid', tint: [0.74, 0.71, 0.60], h: 1.58, weapon: 'w_scythe', emissive: 0.12,
+  music: 'boss', reward: { weapon: 'scythe', item: 'bone_ash', count: 3 },
+  phases: [
+    {
+      hpAbove: 0.5,
+      attacks: [
+        { id: 'reap', windup: 0.5, active: 0.16, recover: 0.6, dmg: 92, range: 4.4, arc: 2.6, poise: 60, motion: 'slash_r', chain: 'reap2' },
+        { id: 'reap2', windup: 0.3, active: 0.16, recover: 0.78, dmg: 96, range: 4.4, arc: 3.0, poise: 60, motion: 'spin' },
+        { id: 'grave_thrust', windup: 0.56, active: 0.16, recover: 0.74, dmg: 104, range: 7.0, arc: 1.0, poise: 70, motion: 'thrust', dash: 7 },
+        { id: 'bone_shard', windup: 0.62, active: 0.06, recover: 0.5, dmg: 58, range: 26, arc: 0.2, poise: 30, motion: 'cast', projectile: 'soul', volley: 3 },
+      ],
+    },
+    {
+      hpAbove: 0, enrage: true, speedMul: 1.24, dmgMul: 1.2,
+      attacks: [
+        { id: 'dirge', windup: 0.34, active: 0.14, recover: 0.26, dmg: 84, range: 4.4, arc: 2.6, poise: 55, motion: 'slash_l', chain: 'dirge2' },
+        { id: 'dirge2', windup: 0.26, active: 0.14, recover: 0.3, dmg: 88, range: 4.4, arc: 2.6, poise: 55, motion: 'slash_r', chain: 'dirge3' },
+        { id: 'dirge3', windup: 0.42, active: 0.2, recover: 0.82, dmg: 118, range: 5.0, arc: 3.6, poise: 80, motion: 'spin' },
+        { id: 'ossuary', windup: 1.15, active: 0.34, recover: 1.05, dmg: 150, range: 9.0, arc: 6.28, poise: 110, motion: 'overhead', shock: 8 },
+        { id: 'crypt_step', windup: 0.24, active: 0, recover: 0.3, dmg: 0, range: 0, arc: 0, poise: 0, motion: 'cast', teleport: 9 },
+      ],
+    },
+  ],
+};
+
+BOSSES.stonewing = {
+  id: 'stonewing', name: '石翼の番人', title: '沈んだ回廊の守り手', dungeon: true,
+  hp: 1650, poise: 130, def: 24, speed: 3.0, runSpeed: 6.6, echo: 2600,
+  body: 'humanoid', tint: [0.42, 0.45, 0.48], h: 1.6, weapon: null,
+  music: 'boss', reward: { shield: 'stone_shield', item: 'ore_iron', count: 4 },
+  phases: [
+    {
+      hpAbove: 0.55,
+      attacks: [
+        { id: 'rake', windup: 0.5, active: 0.16, recover: 0.6, dmg: 88, range: 3.6, arc: 2.2, poise: 70, motion: 'slash_l', chain: 'rake2' },
+        { id: 'rake2', windup: 0.3, active: 0.16, recover: 0.72, dmg: 92, range: 3.6, arc: 2.4, poise: 70, motion: 'slash_r' },
+        { id: 'swoop', windup: 0.62, active: 0.24, recover: 0.86, dmg: 110, range: 11, arc: 1.3, poise: 90, motion: 'pounce', dash: 12 },
+        { id: 'tail_slam', windup: 0.78, active: 0.22, recover: 0.9, dmg: 100, range: 5.0, arc: 3.6, poise: 80, motion: 'spin', shock: 5 },
+      ],
+    },
+    {
+      hpAbove: 0, enrage: true, speedMul: 1.28, dmgMul: 1.22,
+      attacks: [
+        { id: 'gale', windup: 0.72, active: 0.26, recover: 0.82, dmg: 104, range: 7.0, arc: 6.28, poise: 100, motion: 'spin', shock: 7 },
+        { id: 'dive', windup: 0.66, active: 0.28, recover: 0.9, dmg: 132, range: 15, arc: 1.5, poise: 110, motion: 'pounce', dash: 15 },
+        { id: 'shred', windup: 0.28, active: 0.14, recover: 0.24, dmg: 78, range: 3.8, arc: 2.4, poise: 60, motion: 'slash_r', chain: 'shred2' },
+        { id: 'shred2', windup: 0.24, active: 0.14, recover: 0.62, dmg: 82, range: 3.8, arc: 2.4, poise: 60, motion: 'slash_l' },
+      ],
+    },
+  ],
+};
+
+BOSSES.gnawer = {
+  id: 'gnawer', name: '坑道喰らい', title: '岩を噛み砕くもの', dungeon: true,
+  hp: 1800, poise: 120, def: 14, speed: 4.0, runSpeed: 7.6, echo: 2800,
+  body: 'beast', tint: [0.32, 0.24, 0.20], h: 2.0, weapon: null,
+  music: 'boss', reward: { talisman: 'ring_delver', item: 'crystal', count: 4 },
+  phases: [
+    {
+      hpAbove: 0.5,
+      attacks: [
+        { id: 'maw', windup: 0.42, active: 0.15, recover: 0.58, dmg: 86, range: 3.8, arc: 1.6, poise: 50, motion: 'lunge' },
+        { id: 'burrow_rush', windup: 0.58, active: 0.24, recover: 0.8, dmg: 112, range: 12, arc: 1.2, poise: 80, motion: 'pounce', dash: 13 },
+        { id: 'swipe', windup: 0.46, active: 0.16, recover: 0.6, dmg: 90, range: 3.8, arc: 2.8, poise: 55, motion: 'slash_l', chain: 'swipe2' },
+        { id: 'swipe2', windup: 0.3, active: 0.16, recover: 0.72, dmg: 94, range: 3.8, arc: 2.8, poise: 55, motion: 'slash_r' },
+      ],
+    },
+    {
+      hpAbove: 0, enrage: true, speedMul: 1.32, dmgMul: 1.24,
+      attacks: [
+        { id: 'frenzy', windup: 0.26, active: 0.13, recover: 0.24, dmg: 76, range: 3.8, arc: 2.6, poise: 50, motion: 'slash_r', chain: 'frenzy2' },
+        { id: 'frenzy2', windup: 0.24, active: 0.13, recover: 0.26, dmg: 80, range: 3.8, arc: 2.6, poise: 50, motion: 'slash_l', chain: 'maw2' },
+        { id: 'maw2', windup: 0.34, active: 0.16, recover: 0.66, dmg: 118, range: 4.2, arc: 1.8, poise: 70, motion: 'lunge' },
+        { id: 'collapse', windup: 1.2, active: 0.36, recover: 1.1, dmg: 156, range: 9.5, arc: 6.28, poise: 120, motion: 'overhead', shock: 9 },
+      ],
+    },
+  ],
 };
 
 /* ==================================================== 地方ごとの湧き表 */

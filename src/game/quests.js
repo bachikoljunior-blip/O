@@ -106,6 +106,23 @@ export const QUESTS = {
     reward: { echo: 2600, items: [['shard_ancient', 1], ['bone', 2]], talisman: 'ring_echo' },
   },
 
+  depths: {
+    id: 'depths', name: '底へ至る道',
+    stages: [
+      {
+        text: '遺跡の主を 3 体討つ',
+        progress: (q) => `${Math.min(3, q.count.dungeonBosses || 0)}/3`,
+        check: (q) => (q.count.dungeonBosses || 0) >= 3,
+      },
+      {
+        text: 'いずれかの遺跡の第 4 層まで潜る',
+        progress: (q, game) => `${Math.min(4, game.deepestDepth || 0)}/4`,
+        check: (q, game) => (game.deepestDepth || 0) >= 4,
+      },
+    ],
+    reward: { echo: 6000, items: [['ore_silver', 3], ['shard_ancient', 2]], shield: 'tower_shield' },
+  },
+
   towers: {
     id: 'towers', name: '見張り塔の灯',
     stages: [
@@ -194,6 +211,8 @@ export class QuestLog {
     if (r.echo) { p.echo += r.echo; game.ui.toast(`残響 +${r.echo}`); }
     for (const [item, n] of r.items || []) { p.addItem(item, n); game.ui.itemGain(item, n); }
     if (r.weapon) game.unlockWeapon(r.weapon);
+    if (r.armor) game.unlockArmor(r.armor);
+    if (r.shield) game.unlockShield(r.shield);
     if (r.talisman) game.unlockTalisman(r.talisman);
     if (r.spell) game.unlockSpell(r.spell);
   }

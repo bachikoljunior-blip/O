@@ -92,6 +92,49 @@ function buildEnemyExtras(def) {
       }
       ex.push({ joint: 'rump', shape: 'partSlim', offset: [0, 0.06, -0.20], size: [0.22, 0.20, 0.10], tint: [0.86, 0.82, 0.74] });
       break;
+    /* ------------------------------------------------ ダンジョンの主 */
+    case 'ossuar':
+      // 冠と、肋を思わせる胸甲、引きずる長衣
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.24, 0], size: [0.42, 0.10, 0.42], tint: [0.72, 0.60, 0.28], emissive: 0.3 });
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2;
+        ex.push({
+          joint: 'head', shape: 'spike', emissive: 0.3,
+          offset: [Math.sin(a) * 0.19, 0.34, Math.cos(a) * 0.19],
+          size: [0.06, 0.20, 0.06], tint: [0.78, 0.66, 0.32],
+        });
+      }
+      ex.push({ joint: 'chest', shape: 'partSlim', offset: [0, 0.26, 0.10], size: [0.56, 0.56, 0.26], tint: [0.80, 0.77, 0.66] });
+      for (const s of ['shoulderL', 'shoulderR']) {
+        ex.push({ joint: s, shape: 'part', offset: [0, -0.02, 0], size: [0.34, 0.24, 0.34], tint: [0.56, 0.53, 0.44] });
+      }
+      cloth(0, [0.20, 0.18, 0.22], 'pelvis', 4);
+      break;
+    case 'stonewing':
+      for (const sx of [-1, 1]) {
+        // 折り畳んだ石翼（三枚重ね）
+        for (let k = 0; k < 3; k++) {
+          ex.push({
+            joint: sx < 0 ? 'shoulderL' : 'shoulderR', shape: 'part',
+            offset: [sx * (0.04 + k * 0.05), 0.02 - k * 0.16, -0.18 - k * 0.16],
+            size: [0.14, 0.74 - k * 0.14, 0.50], tint: [t[0] * (0.78 + k * 0.06), t[1] * (0.80 + k * 0.06), t[2] * (0.84 + k * 0.06)],
+            rot: [0.24 + k * 0.16, 0, sx * (0.34 + k * 0.12)],
+          });
+        }
+        ex.push({ joint: 'head', shape: 'spike', offset: [sx * 0.14, 0.22, -0.02], size: [0.09, 0.34, 0.09], tint: [t[0] * 0.78, t[1] * 0.8, t[2] * 0.84], rot: [-0.34, 0, -sx * 0.55] });
+      }
+      ex.push({ joint: 'chest', shape: 'part', offset: [0, 0.26, 0.03], size: [0.60, 0.62, 0.38], tint: [t[0] * 1.1, t[1] * 1.1, t[2] * 1.12] });
+      ex.push({ joint: 'head', shape: 'ball', offset: [0, 0.02, 0.15], size: [0.14, 0.10, 0.10], tint: [1.0, 0.72, 0.35], emissive: 0.9 });
+      break;
+    case 'gnawer':
+      for (const sx of [-1, 1]) {
+        ex.push({ joint: 'withers', shape: 'spike', offset: [sx * 0.16, 0.20, 0.04], size: [0.10, 0.36, 0.10], tint: [0.52, 0.46, 0.40], rot: [-0.28, 0, -sx * 0.36] });
+        ex.push({ joint: 'rump', shape: 'spike', offset: [sx * 0.14, 0.18, -0.02], size: [0.09, 0.28, 0.09], tint: [0.52, 0.46, 0.40], rot: [-0.20, 0, -sx * 0.30] });
+        ex.push({ joint: 'head', shape: 'spike', offset: [sx * 0.13, -0.02, 0.16], size: [0.07, 0.22, 0.07], tint: [0.86, 0.84, 0.76], rot: [1.5, 0, -sx * 0.2] });
+      }
+      ex.push({ joint: 'head', shape: 'ball', offset: [-0.09, 0.06, 0.13], size: [0.09, 0.08, 0.08], tint: [1.0, 0.42, 0.22], emissive: 0.9 });
+      ex.push({ joint: 'head', shape: 'ball', offset: [0.09, 0.06, 0.13], size: [0.09, 0.08, 0.08], tint: [1.0, 0.42, 0.22], emissive: 0.9 });
+      break;
     default:
       break;
   }
@@ -470,7 +513,8 @@ export class Boss extends Enemy {
     this.superArmor = true;
     this.phaseIndex = 0;
     this.speedMul = 1;
-    this.dmgMul = 1;
+    this.powerMul = opts.powerMul || 1;   // 階層ボスの深度補正
+    this.dmgMul = this.powerMul;
     this.name = def.name;
     this.title = def.title;
     this.maxPoise = def.poise;
@@ -516,7 +560,7 @@ export class Boss extends Enemy {
     this.phaseIndex = i;
     const ph = this.bossDef.phases[i];
     this.speedMul = ph.speedMul || 1;
-    this.dmgMul = ph.dmgMul || 1;
+    this.dmgMul = (ph.dmgMul || 1) * this.powerMul;
     this.transitioning = 1.6;
     this.setState('cast', 1.6, 'cast');
     this.attack = null;

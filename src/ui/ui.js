@@ -675,9 +675,15 @@ export class UI {
   renderMap(root) {
     const game = this.game;
     if (game.dungeon) {
+      const d = game.dungeon;
       const p = el('div', 'panel');
-      p.appendChild(el('h3', '', game.dungeon.name));
+      p.appendChild(el('h3', '', d.name));
       p.appendChild(el('div', 'row', '<span class="sub">地下では全図を開けない。ミニマップと松明を頼りに進め。</span>'));
+      const best = game.dungeonProgress?.get(game.dungeonPOI?.id) || 0;
+      p.appendChild(el('div', 'row', `<span>現在の階層</span><span>第${d.depth}層</span>`));
+      p.appendChild(el('div', 'row',
+        `<span>この遺跡の主</span><span>${d.bossDefeated ? '討伐済み — 下り階段が開いた' : '未討伐'}</span>`));
+      p.appendChild(el('div', 'row', `<span>踏破記録</span><span>第${best}層まで</span>`));
       root.appendChild(p);
       return;
     }
@@ -1213,9 +1219,21 @@ export class UI {
         c.fillRect(i * cell - cell / 2, j * cell - cell / 2, cell + 1, cell + 1);
       }
     }
+    // 主の間（見えている範囲だけ赤く染める）
+    if (d.bossRoom) {
+      const r = d.bossRoom;
+      c.fillStyle = d.bossDefeated ? 'rgba(120,180,140,.30)' : 'rgba(190,70,70,.30)';
+      for (let j = r.z; j < r.z + r.h; j++) {
+        for (let i = r.x; i < r.x + r.w; i++) {
+          if (!d.seen.has(j * d.gw + i)) continue;
+          c.fillRect((i - pcx) * cell - cell / 2, (j - pcz) * cell - cell / 2, cell + 1, cell + 1);
+        }
+      }
+    }
     // 宝箱と出口
     for (const ch of d.chests) {
       if (ch.opened) continue;
+      if (ch.boss && !d.bossDefeated) continue;
       const [bx, bz] = d.toCell(ch.x, ch.z);
       if (!d.seen.has(bz * d.gw + bx)) continue;
       c.fillStyle = '#e8c86a';
@@ -1225,6 +1243,19 @@ export class UI {
     if (d.seen.has(ez * d.gw + ex)) {
       c.fillStyle = '#8fd0e8';
       c.fillRect((ex - pcx) * cell - 2.5, (ez - pcz) * cell - 2.5, 5, 5);
+    }
+    // 下り階段
+    if (d.bossDefeated && d.stairPoint) {
+      const [sx, sz] = d.toCell(d.stairPoint.x, d.stairPoint.z);
+      if (d.seen.has(sz * d.gw + sx)) {
+        c.fillStyle = '#b9e8a0';
+        c.beginPath();
+        c.moveTo((sx - pcx) * cell, (sz - pcz) * cell + 3.5);
+        c.lineTo((sx - pcx) * cell - 3.5, (sz - pcz) * cell - 2.5);
+        c.lineTo((sx - pcx) * cell + 3.5, (sz - pcz) * cell - 2.5);
+        c.closePath();
+        c.fill();
+      }
     }
     for (const e of game.enemies) {
       if (e.dead || !e.aggro) continue;

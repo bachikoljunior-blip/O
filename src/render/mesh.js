@@ -525,6 +525,43 @@ function gate(b) {
   b.push().translate(0, 5.6, 0).box(8.0, 1.0, 1.2, C.stone).pop();
 }
 
+/** 下層へ降りる階段（ダンジョン）：石の井桁と、闇に沈む段 */
+function stairsDown(b) {
+  b.push().translate(0, 0.26, 0).cylinder(1.9, 1.75, 0.52, 8, C.stoneDark, true, C.stone).pop();
+  // 内側の闇
+  b.push().translate(0, 0.05, 0).cylinder(1.45, 1.45, 0.02, 8, [0.02, 0.02, 0.03]).pop();
+  // 降りていく段（奥へ行くほど暗く沈む）
+  for (let i = 0; i < 6; i++) {
+    const t = i / 5;
+    const y = 0.42 - t * 0.46;
+    const k = 0.85 - t * 0.55;
+    b.push().translate(0, y, -0.5 + t * 1.5)
+      .box(2.2 - t * 0.4, 0.16, 0.42, [C.stone[0] * k, C.stone[1] * k, C.stone[2] * k]).pop();
+  }
+  // 左右の親柱
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 1.75, 0.95, -0.15).box(0.34, 1.9, 0.34, C.stone).pop();
+    b.push().translate(sx * 1.75, 1.98, -0.15).box(0.46, 0.18, 0.46, C.stoneDark).pop();
+  }
+}
+
+/** 霧の門（ボス部屋の入口）の石枠。通路一杯（6.4m）に渡す */
+function fogGate(b) {
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 2.45, 1.95, 0).box(0.62, 3.9, 0.72, C.stoneDark).pop();
+    b.push().translate(sx * 2.45, 3.72, 0).box(0.82, 0.3, 0.9, C.stone).pop();
+    // 意匠の渦巻き
+    b.push().translate(sx * 2.12, 3.1, 0.38).box(0.16, 0.5, 0.1, C.stone).pop();
+  }
+  b.push().translate(0, 3.72, 0).box(6.4, 0.42, 0.78, C.stone).pop();
+  b.push().translate(0, 3.42, 0.30).box(5.2, 0.2, 0.14, C.stoneDark).pop();
+}
+
+/** 霧の門の薄膜（アルファ・発光をインスタンス側で振るため独立モデル） */
+function fogVeil(b) {
+  b.push().translate(0, 1.9, 0).box(4.3, 3.8, 0.05, C.white, 0).pop();
+}
+
 function crystal(b, rng) {
   for (let i = 0; i < 4; i++) {
     const a = rng() * Math.PI * 2;
@@ -554,6 +591,21 @@ function axeMesh(b) {
   b.push().translate(0, 0.2, 0).cylinder(0.06, 0.05, 1.0, 5, C.woodDark).pop();
   b.push().translate(0.16, 1.0, 0).box(0.42, 0.5, 0.08, C.metal).pop();
   b.push().translate(0.42, 1.0, 0).box(0.12, 0.62, 0.05, [0.75, 0.77, 0.8]).pop();
+}
+function scytheMesh(b) {
+  b.push().translate(0, 0.15, 0).cylinder(0.055, 0.05, 1.7, 5, C.woodDark).pop();
+  // 柄頭から前方へ伸びる湾曲した刃
+  b.push().translate(0, 1.82, 0).box(0.14, 0.16, 0.14, C.metalDark).pop();
+  for (let i = 0; i < 7; i++) {
+    const t = i / 6;
+    const a = t * 1.5;
+    b.push()
+      .translate(Math.sin(a) * 0.95, 1.85 + Math.cos(a) * 0.28 - 0.28, 0)
+      .rotate(0, 0, -a)
+      .box(0.26, 0.05 + (1 - t) * 0.06, 0.04 + (1 - t) * 0.03,
+        [0.80 - t * 0.06, 0.82 - t * 0.06, 0.86 - t * 0.05])
+      .pop();
+  }
 }
 function spearMesh(b) {
   b.push().translate(0, 0.1, 0).cylinder(0.05, 0.045, 2.0, 5, C.wood).pop();
@@ -639,11 +691,15 @@ export function buildModels(gl) {
   add('statue', statue);
   add('barrel', barrel);
   add('gate', gate);
+  add('stairs_down', stairsDown);
+  add('fog_gate', fogGate);
+  add('fog_veil', fogVeil);
 
   add('w_sword', (b) => sword(b));
   add('w_greatsword', greatsword);
   add('w_axe', axeMesh);
   add('w_spear', spearMesh);
+  add('w_scythe', scytheMesh);
   add('w_bow', bowMesh);
   add('w_staff', staffMesh);
   add('w_shield', shieldMesh);

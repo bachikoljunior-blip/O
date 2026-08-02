@@ -4,6 +4,7 @@ import { makeRng } from '../core/noise.js';
 import { INST_FLOATS } from '../core/gl.js';
 import { writeInstance } from '../render/instance.js';
 import { TAU } from '../core/math.js';
+import { DUNGEON_BOSSES } from '../game/data.js';
 
 /** ダンジョンはワールドから遠く離れた座標空間に置く（POI と干渉させないため） */
 export const DUNGEON_ORIGIN = 50000;
@@ -32,26 +33,34 @@ const THEMES = {
   mine: {
     name: '崩れた坑道', floor: [0.34, 0.29, 0.25], wall: [0.38, 0.32, 0.27],
     accent: [0.45, 0.30, 0.18],
-    torchColor: [1.0, 0.55, 0.20], enemies: ['imp', 'crawler', 'brute'],
-    fog: [0.07, 0.05, 0.04],
+    torchColor: [1.0, 0.58, 0.22], enemies: ['imp', 'crawler', 'brute'],
+    fog: [0.050, 0.038, 0.031],
   },
 };
 
 export class Dungeon {
   /**
    * @param poi   入口となる POI
-   * @param depth 階層の深さ（難度と規模に影響）
+   * @param seed  生成シード
+   * @param depth 階層（1 が最上層。深いほど広く・強く）
+   * @param tier  入口 POI の危険度から来る基礎難度
    */
-  constructor(poi, seed, depth = 1) {
+  constructor(poi, seed, depth = 1, tier = 1) {
     this.poi = poi;
     this.depth = depth;
-    this.theme = THEMES[poi.dungeonTheme] || THEMES.catacomb;
-    this.name = `${poi.name}・${this.theme.name}`;
+    this.tier = tier;
+    /** 敵・報酬のスケール指標 */
+    this.rank = depth + tier - 1;
+    this.themeKey = THEMES[poi.dungeonTheme] ? poi.dungeonTheme : 'catacomb';
+    this.theme = THEMES[this.themeKey];
+    this.bossId = DUNGEON_BOSSES[this.themeKey];
+    this.bossDefeated = false;
+    this.name = `${poi.name}・${this.theme.name} 第${depth}層`;
     const rng = makeRng(seed | 0);
     this.rng = rng;
 
-    this.gw = 18 + Math.min(8, depth * 2);
-    this.gh = 18 + Math.min(8, depth * 2);
+    this.gw = 18 + Math.min(10, depth * 2);
+    this.gh = 18 + Math.min(10, depth * 2);
     this.grid = new Uint8Array(this.gw * this.gh);   // 0=岩盤 1=部屋 2=通路
     this.rooms = [];
     this.generate(rng);
@@ -59,6 +68,10 @@ export class Dungeon {
     this.torches = [];
     this.chests = [];
     this.spawns = [];
+    this.gates = [];
+    this.bossArena = null;
+    this.bossChest = null;
+    this.stairPoint = null;
     this.props = new Map();       // model -> Float32Array
     this.colliderGrid = this.grid; // 壁判定はグリッドをそのまま使う
     this.build(rng);
@@ -112,7 +125,56 @@ export class Dungeon {
       this.carveCorridor(a.cx, a.cz, b.cx, b.cz, rng() < 0.5);
     }
     this.entry = this.rooms[0];
-    this.bossRoom = this.rooms[this.rooms.length - 1];
+    // 主の間は「入口から遠く、かつ広い」部屋を選ぶ
+    let best = null, bestScore = -1;
+    for (let i = 1; i < this.rooms.length; i++) {
+      const r = this.rooms[i];
+      const dist = Math.hypot(r.cx - this.entry.cx, r.cz - this.entry.cz);
+      const score = dist * (r.w * r.h);
+      if (score > bestScore) { bestScore = score; best = r; }
+    }
+    this.bossRoom = best || this.rooms[this.rooms.length - 1];
+    // 狭すぎる主の間は岩盤を削って広げる（戦えないと話にならない）
+    this.widenRoom(this.bossRoom, 5);
+    this.bossRoom.boss = true;
+  }
+
+  /** 部屋を最低 min×min まで広げる。他の部屋には食い込ませない */
+  widenRoom(r, min) {
+    const blocked = (i, j) => {
+      for (const o of this.rooms) {
+        if (o === r) continue;
+        if (i >= o.x && i < o.x + o.w && j >= o.z && j < o.z + o.h) return true;
+      }
+      return false;
+    };
+    const canTake = (x, z, w, h) => {
+      if (x < 1 || z < 1 || x + w > this.gw - 1 || z + h > this.gh - 1) return false;
+      for (let j = z; j < z + h; j++) {
+        for (let i = x; i < x + w; i++) if (blocked(i, j)) return false;
+      }
+      return true;
+    };
+    let guard = 40;
+    while (guard-- > 0 && (r.w < min || r.h < min)) {
+      let grew = false;
+      const sides = r.w < min
+        ? [[-1, 0, 1, 0], [0, 0, 1, 0]]     // 左へ / 右へ
+        : [[0, -1, 0, 1], [0, 0, 0, 1]];    // 上へ / 下へ
+      for (const [dx, dz, dw, dh] of sides) {
+        const nx = r.x + dx, nz = r.z + dz, nw = r.w + dw, nh = r.h + dh;
+        if (!canTake(nx, nz, nw, nh)) continue;
+        r.x = nx; r.z = nz; r.w = nw; r.h = nh;
+        grew = true;
+        break;
+      }
+      if (!grew) break;
+    }
+    r.cx = r.x + (r.w >> 1);
+    r.cz = r.z + (r.h >> 1);
+    for (let j = r.z; j < r.z + r.h; j++) {
+      for (let i = r.x; i < r.x + r.w; i++) this.grid[this.idx(i, j)] = 1;
+    }
   }
 
   carveCorridor(x0, z0, x1, z1, horizFirst) {
@@ -201,27 +263,50 @@ export class Dungeon {
         this.exitPoint = { x: wx, z: wz };
         return;
       }
-      const boss = i === this.rooms.length - 1;
-      if (boss) {
-        push('statue', [wx, 0, wz - CELL, Math.PI, 1.1, 1.1, 1.1,
-          this.theme.wall[0] * 0.8, this.theme.wall[1] * 0.8, this.theme.wall[2] * 0.8, 0, 0]);
-        this.chests.push({ x: wx + 1.6, z: wz + 1.6, tier: Math.min(5, 3 + this.depth), opened: false, id: `d${i}` });
-        this.spawns.push({
-          kind: this.theme.enemies[0], count: 2 + this.depth, radius: r.w * CELL * 0.4,
-          x: wx, z: wz, elite: true,
-        });
+      if (r === this.bossRoom) {
+        // 主の間：戦利品の宝箱と、討伐後に現れる下り階段。雑魚は湧かせない
+        const hx = (r.w - 1) * CELL * 0.5;
+        const hz = (r.h - 1) * CELL * 0.5;
+        for (const sx of [-1, 1]) {
+          push('statue', [wx + sx * hx, 0, wz - hz, Math.PI, 1.0, 1.0, 1.0,
+            this.theme.wall[0] * 0.8, this.theme.wall[1] * 0.8, this.theme.wall[2] * 0.8, 0, 0]);
+        }
+        // 四隅の篝火：闘技場として最低限の明るさを確保する
+        for (const sx of [-1, 1]) {
+          for (const sz of [-1, 1]) {
+            const bx = wx + sx * (hx - 1.4), bz = wz + sz * (hz - 1.4);
+            push('campfire', [bx, 0, bz, 0, 1.25, 1.25, 1.25, 1, 0.82, 0.5, 0, 0.75]);
+            this.torches.push({ x: bx, y: 1.1, z: bz, color: th.torchColor, big: true, arena: true });
+          }
+        }
+        // 壁沿いの列柱
+        for (const sx of [-1, 1]) {
+          for (let k = 0; k < r.h - 1; k++) {
+            const pz = wz - hz + (k + 0.5) * CELL;
+            push('pillar', [wx + sx * (hx + CELL * 0.28), 0, pz, 0, 1.15, CEIL / 3.3, 1.15,
+              th.wall[0] * 1.05, th.wall[1] * 1.05, th.wall[2] * 1.05, 0, 0]);
+          }
+        }
+        this.bossArena = { x: wx, z: wz, r: Math.max(r.w, r.h) * CELL * 0.55 };
+        this.bossChest = {
+          x: wx + 1.8, z: wz - (r.h - 1) * CELL * 0.4,
+          tier: Math.min(5, 2 + this.rank), opened: false, id: `dboss`, boss: true,
+        };
+        this.chests.push(this.bossChest);
+        this.stairPoint = { x: wx, z: wz + (r.h - 1) * CELL * 0.36 };
+        this.gates = this.findGates(r);
       } else {
         if (this.rng() < 0.55) {
-          this.chests.push({ x: wx, z: wz, tier: Math.min(5, 2 + this.depth), opened: false, id: `d${i}` });
+          this.chests.push({ x: wx, z: wz, tier: Math.min(5, 1 + this.rank), opened: false, id: `d${i}` });
         }
         this.spawns.push({
           kind: this.theme.enemies[(this.rng() * this.theme.enemies.length) | 0],
-          count: 1 + (this.rng() * (1 + this.depth) | 0),
+          count: 1 + (this.rng() * (1 + Math.min(4, this.rank)) | 0),
           radius: r.w * CELL * 0.35, x: wx, z: wz,
         });
       }
-      // 灯り
-      if (this.rng() < 0.7) {
+      // 灯り（主の間は四隅の篝火で足りている）
+      if (r !== this.bossRoom && this.rng() < 0.7) {
         push('campfire', [wx + (this.rng() - 0.5) * 2, 0, wz + (this.rng() - 0.5) * 2, 0, 1, 1, 1,
           1, 0.8, 0.5, 0, 0.7]);
         this.torches.push({ x: wx, y: 0.9, z: wz, color: this.theme.torchColor, big: true });
@@ -245,6 +330,29 @@ export class Dungeon {
 
     const [ex, ez] = this.toWorld(this.entry.cx, this.entry.cz);
     this.spawnPoint = { x: ex + 2.5, z: ez + 2.5 };
+  }
+
+  /**
+   * 部屋の外周のうち、外側に通路が接している場所＝霧の門を立てる位置を拾う。
+   * @returns {{x:number,z:number,yaw:number}[]}
+   */
+  findGates(r) {
+    const out = [];
+    const dirs = [[1, 0, Math.PI / 2], [-1, 0, -Math.PI / 2], [0, 1, 0], [0, -1, Math.PI]];
+    for (let j = r.z; j < r.z + r.h; j++) {
+      for (let i = r.x; i < r.x + r.w; i++) {
+        // 外周セルのみ
+        if (i > r.x && i < r.x + r.w - 1 && j > r.z && j < r.z + r.h - 1) continue;
+        for (const [dx, dz, yaw] of dirs) {
+          const nx = i + dx, nz = j + dz;
+          if (nx >= r.x && nx < r.x + r.w && nz >= r.z && nz < r.z + r.h) continue;
+          if (!this.open(nx, nz)) continue;
+          const [wx, wz] = this.toWorld(i, j);
+          out.push({ x: wx + dx * CELL * 0.5, z: wz + dz * CELL * 0.5, yaw });
+        }
+      }
+    }
+    return out;
   }
 
   /* ----------------------------------------------------------- 問い合わせ */
@@ -281,6 +389,14 @@ export class Dungeon {
       }
     }
     return hit;
+  }
+
+  /** 主の間の内側にいるか */
+  inBossRoom(x, z) {
+    const r = this.bossRoom;
+    if (!r) return false;
+    const [cx, cz] = this.toCell(x, z);
+    return cx >= r.x && cx < r.x + r.w && cz >= r.z && cz < r.z + r.h;
   }
 
   /** ダンジョン内で歩ける座標か */
