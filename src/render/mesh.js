@@ -562,6 +562,198 @@ function fogVeil(b) {
   b.push().translate(0, 1.9, 0).box(4.3, 3.8, 0.05, C.white, 0).pop();
 }
 
+/* ---------------------------------------------- 拠点を彩る構造物たち */
+
+/** 井戸：石積みの円筒に屋根と滑車 */
+function well(b) {
+  b.push().translate(0, 0.55, 0).cylinder(1.05, 0.98, 1.1, 10, C.stoneDark, false, C.stone).pop();
+  b.push().translate(0, 1.1, 0).cylinder(1.12, 1.12, 0.14, 10, C.stone).pop();
+  b.push().translate(0, 0.6, 0).cylinder(0.86, 0.86, 0.06, 10, [0.06, 0.08, 0.10]).pop();
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 0.9, 1.9, 0).box(0.16, 1.6, 0.16, C.woodDark).pop();
+  }
+  b.push().translate(0, 2.72, 0).rotate(0, 0, 0.42).box(1.5, 0.1, 1.5, C.thatch).pop();
+  b.push().translate(0, 2.72, 0).rotate(0, 0, -0.42).box(1.5, 0.1, 1.5, C.thatch).pop();
+  b.push().translate(0, 2.5, 0).rotate(Math.PI / 2, 0, 0).cylinder(0.09, 0.09, 1.7, 6, C.wood).pop();
+}
+
+/** 荷車：木枠と二輪 */
+function cart(b) {
+  b.push().translate(0, 0.78, 0).box(2.4, 0.16, 1.25, C.wood).pop();
+  for (const sz of [-1, 1]) {
+    b.push().translate(0, 1.05, sz * 0.6).box(2.4, 0.42, 0.1, C.woodDark).pop();
+  }
+  b.push().translate(-1.2, 1.05, 0).box(0.1, 0.42, 1.25, C.woodDark).pop();
+  for (const sz of [-1, 1]) {
+    b.push().translate(0.35, 0.62, sz * 0.72).rotate(Math.PI / 2, 0, 0)
+      .cylinder(0.62, 0.62, 0.14, 10, C.woodDark).pop();
+  }
+  b.push().translate(1.7, 0.72, 0).rotate(0, 0, 0.22).box(1.4, 0.1, 0.1, C.wood).pop();
+}
+
+/** 露店：布屋根の台 */
+function stall(b) {
+  b.push().translate(0, 0.9, 0).box(2.0, 0.12, 1.0, C.wood).pop();
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    b.push().translate(sx * 0.9, 0.45, sz * 0.42).box(0.1, 0.9, 0.1, C.woodDark).pop();
+    b.push().translate(sx * 0.9, 1.55, sz * 0.42).box(0.09, 1.2, 0.09, C.woodDark).pop();
+  }
+  b.push().translate(0, 2.2, 0).box(2.4, 0.1, 1.4, [0.62, 0.28, 0.24]).pop();
+  b.push().translate(0, 2.05, -0.72).box(2.4, 0.34, 0.06, [0.70, 0.34, 0.28]).pop();
+  // 並んだ品物
+  for (let i = 0; i < 4; i++) {
+    b.push().translate(-0.7 + i * 0.46, 1.06, 0).box(0.24, 0.2, 0.3, C.woodDark).pop();
+  }
+}
+
+/** 旗竿 */
+function banner(b) {
+  b.cylinder(0.07, 0.06, 4.2, 5, C.woodDark);
+  b.push().translate(0, 4.2, 0).sphere(0.11, 5, 4, C.gold).pop();
+  b.push().translate(0.42, 3.1, 0).box(0.78, 1.6, 0.05, C.cloth).pop();
+}
+
+/** 丸太の柵（陣地の囲い） */
+function palisade(b) {
+  for (let i = 0; i < 4; i++) {
+    const h = 2.2 + (i % 2) * 0.25;
+    b.push().translate(-0.9 + i * 0.6, h / 2, 0).cylinder(0.17, 0.13, h, 6, C.woodDark).pop();
+    b.push().translate(-0.9 + i * 0.6, h, 0).cylinder(0.13, 0.0, 0.3, 6, C.wood).pop();
+  }
+  b.push().translate(-0.3, 1.6, 0.1).box(2.6, 0.14, 0.1, C.wood).pop();
+}
+
+/** 環状列石の一本 */
+function standingStone(b) {
+  const c = C.stoneDark;
+  b.push().translate(0, 2.3, 0).rotate(0.05, 0, 0.04).box(1.1, 4.6, 0.72, c).pop();
+  b.push().translate(0, 4.6, 0).rotate(0, 0.2, 0).box(0.9, 0.34, 0.6, C.stone).pop();
+  b.push().translate(0, 0.16, 0).cylinder(0.9, 0.8, 0.3, 8, C.stone).pop();
+}
+
+/** 祭壇：低い石卓 */
+function altar(b) {
+  b.push().translate(0, 0.2, 0).cylinder(1.9, 1.75, 0.4, 10, C.stoneDark, true, C.stone).pop();
+  b.push().translate(0, 0.72, 0).box(2.0, 0.66, 1.2, C.stone).pop();
+  b.push().translate(0, 1.12, 0).box(2.3, 0.16, 1.5, C.stoneDark).pop();
+}
+
+/** 石碑 */
+function obelisk(b) {
+  b.push().translate(0, 0.3, 0).box(1.6, 0.6, 1.6, C.stoneDark).pop();
+  b.push().translate(0, 3.2, 0).cylinder(0.62, 0.30, 5.2, 4, C.stone).pop();
+  b.push().translate(0, 5.9, 0).cylinder(0.3, 0.0, 0.8, 4, C.stoneDark).pop();
+}
+
+/** 地面に突き立った剣（墓標） */
+function swordStuck(b) {
+  b.push().translate(0, 0.08, 0).cylinder(0.42, 0.34, 0.16, 7, C.stoneDark).pop();
+  b.push().translate(0, 0.95, 0).rotate(0.10, 0, 0.06).box(0.14, 1.7, 0.05, [0.46, 0.44, 0.42]).pop();
+  b.push().translate(0, 1.72, 0).rotate(0.10, 0, 0.06).box(0.62, 0.09, 0.11, C.metalDark).pop();
+  b.push().translate(0, 2.05, 0).rotate(0.10, 0, 0.06).cylinder(0.05, 0.045, 0.3, 5, C.woodDark).pop();
+}
+
+/** 散らばった骨 */
+function bones(b, rng) {
+  for (let i = 0; i < 5; i++) {
+    const a = rng() * Math.PI * 2, r = rng() * 1.3;
+    b.push().translate(Math.cos(a) * r, 0.09, Math.sin(a) * r)
+      .rotate(Math.PI / 2, rng() * Math.PI, 0)
+      .cylinder(0.055, 0.05, 0.5 + rng() * 0.4, 5, [0.76, 0.74, 0.66]).pop();
+  }
+  b.push().translate(0, 0.17, 0).sphere(0.19, 6, 5, [0.78, 0.76, 0.68]).pop();
+}
+
+/** 割れた盾 */
+function brokenShield(b) {
+  b.push().translate(0, 0.34, 0).rotate(1.15, 0.4, 0)
+    .cylinder(0.55, 0.5, 0.09, 7, [0.38, 0.30, 0.24], true, [0.46, 0.38, 0.3]).pop();
+  b.push().translate(0.1, 0.42, 0.12).rotate(1.15, 0.4, 0)
+    .cylinder(0.2, 0.18, 0.12, 6, C.metalDark).pop();
+}
+
+/** 納屋 */
+function barn(b) {
+  b.push().translate(0, 1.7, 0).box(7.0, 3.4, 5.0, [0.46, 0.28, 0.22]).pop();
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 3.5, 1.7, 0).box(0.16, 3.4, 5.0, C.woodDark).pop();
+  }
+  // 切妻屋根
+  for (const s of [-1, 1]) {
+    b.push().translate(0, 4.1, s * 1.35).rotate(s * 0.62, 0, 0)
+      .box(7.3, 0.2, 3.2, C.thatch).pop();
+  }
+  b.push().translate(0, 1.35, 2.52).box(2.2, 2.7, 0.14, C.woodDark).pop();
+  b.push().translate(0, 3.7, 2.52).box(0.9, 0.7, 0.1, C.dark).pop();
+}
+
+/** 案山子 */
+function scarecrow(b) {
+  b.cylinder(0.09, 0.08, 2.0, 5, C.woodDark);
+  b.push().translate(0, 1.5, 0).box(1.5, 0.09, 0.09, C.woodDark).pop();
+  b.push().translate(0, 1.72, 0).sphere(0.26, 6, 5, [0.62, 0.52, 0.28]).pop();
+  b.push().translate(0, 1.95, 0).rotate(0, 0, 0.16).cylinder(0.42, 0.30, 0.16, 8, C.thatch).pop();
+  b.push().translate(0, 1.1, 0).box(0.62, 0.8, 0.22, [0.42, 0.34, 0.30]).pop();
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 0.6, 1.32, 0).rotate(0, 0, sx * 0.3)
+      .box(0.14, 0.5, 0.14, C.thatch).pop();
+  }
+}
+
+/** 畑の畝 */
+function cropRow(b, rng) {
+  for (let i = 0; i < 9; i++) {
+    const x = -2.0 + i * 0.5;
+    b.push().translate(x, 0.09, 0).box(0.34, 0.18, 3.4, [0.32, 0.24, 0.17]).pop();
+    for (let j = 0; j < 5; j++) {
+      const z = -1.4 + j * 0.7 + (rng() - 0.5) * 0.2;
+      b.push().translate(x, 0.42, z).rotate((rng() - 0.5) * 0.2, rng() * 3, 0)
+        .box(0.1, 0.66, 0.1, [0.58, 0.56, 0.24]).pop();
+    }
+  }
+}
+
+/** 難破船の船体 */
+function wreckHull(b) {
+  // 竜骨と肋材だけが残った骨組み
+  b.push().translate(0, 0.5, 0).rotate(0, 0, 0.20).box(9.5, 0.5, 1.0, C.woodDark).pop();
+  for (let i = 0; i < 8; i++) {
+    const t = i / 7;
+    const x = -4.2 + t * 8.4;
+    const h = 2.6 * Math.sin(t * Math.PI) + 0.7;
+    for (const sz of [-1, 1]) {
+      b.push().translate(x, 0.5 + h * 0.5 + x * 0.2, sz * (0.5 + h * 0.42))
+        .rotate(sz * 0.5, 0, 0.20).box(0.22, h, 0.2, [0.34, 0.26, 0.20]).pop();
+    }
+  }
+  b.push().translate(-1.2, 2.4, 0).rotate(0.3, 0.2, 0.55).cylinder(0.24, 0.16, 5.2, 6, C.woodDark).pop();
+  b.push().translate(-2.2, 4.4, 0).rotate(0.3, 0.2, 0.55).box(0.1, 0.1, 2.6, C.wood).pop();
+}
+
+/** 坑道の櫓 */
+function mineHead(b) {
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    b.push().translate(sx * 1.4, 2.2, sz * 1.4).rotate(sz * 0.10, 0, -sx * 0.10)
+      .box(0.24, 4.4, 0.24, C.woodDark).pop();
+  }
+  b.push().translate(0, 4.5, 0).box(3.4, 0.2, 3.4, C.wood).pop();
+  b.push().translate(0, 5.0, 0).rotate(Math.PI / 2, 0, 0).cylinder(0.5, 0.5, 0.3, 8, C.metalDark).pop();
+  // 坑口
+  b.push().translate(0, 1.1, 2.1).box(2.6, 2.2, 0.3, [0.10, 0.09, 0.09]).pop();
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 1.35, 1.2, 2.2).box(0.28, 2.4, 0.4, C.woodDark).pop();
+  }
+  b.push().translate(0, 2.5, 2.2).box(3.1, 0.3, 0.45, C.woodDark).pop();
+}
+
+/** 小屋（隠者の庵） */
+function hut(b) {
+  b.push().translate(0, 1.1, 0).cylinder(2.2, 2.0, 2.2, 8, C.plaster).pop();
+  b.push().translate(0, 3.0, 0).cylinder(2.5, 0.1, 1.8, 8, C.thatch).pop();
+  b.push().translate(0, 1.0, 2.0).box(0.9, 2.0, 0.16, C.woodDark).pop();
+  b.push().translate(1.6, 2.6, -0.8).cylinder(0.3, 0.28, 1.4, 6, C.stoneDark).pop();
+}
+
 function crystal(b, rng) {
   for (let i = 0; i < 4; i++) {
     const a = rng() * Math.PI * 2;
@@ -691,6 +883,23 @@ export function buildModels(gl) {
   add('statue', statue);
   add('barrel', barrel);
   add('gate', gate);
+  add('well', well);
+  add('cart', cart);
+  add('stall', stall);
+  add('banner', banner);
+  add('palisade', palisade);
+  add('standing_stone', standingStone);
+  add('altar', altar);
+  add('obelisk', obelisk);
+  add('sword_stuck', swordStuck);
+  add('bones', (b) => bones(b, makeRng(4242)));
+  add('broken_shield', brokenShield);
+  add('barn', barn);
+  add('scarecrow', scarecrow);
+  add('crop_row', (b) => cropRow(b, makeRng(7171)));
+  add('wreck_hull', wreckHull);
+  add('mine_head', mineHead);
+  add('hut', hut);
   add('stairs_down', stairsDown);
   add('fog_gate', fogGate);
   add('fog_veil', fogVeil);

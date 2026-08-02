@@ -464,6 +464,18 @@ export class NPC extends Actor {
 /** 村 POI に NPC を配置 */
 export function populateVillage(poi, world) {
   const rng = makeRng((poi.x * 7919 + poi.z * 104729 + 13) | 0);
+
+  // 隠者の庵には一人だけ住んでいる
+  if (poi.type === 'hermit') {
+    const solo = ['herbalist', 'hunter', 'merchant'][(rng() * 3) | 0];
+    const a = rng() * TAU, r = 3.5 + rng() * 2;
+    const x = poi.x + Math.cos(a) * r, z = poi.z + Math.sin(a) * r;
+    return [new NPC({
+      role: solo, name: FIRST[(rng() * FIRST.length) | 0],
+      x, y: world.height(x, z), z, yaw: -a + Math.PI, poi,
+    })];
+  }
+
   const roles = ['elder', 'merchant', 'smith', 'herbalist', 'hunter', 'priest', 'innkeeper'];
   const services = poi.services || ['merchant'];
   const chosen = ['merchant'];

@@ -292,6 +292,9 @@ export class UI {
       else if (poi.type === 'village') col = '#8fd0e8';
       else if (poi.type === 'boss') { col = poi.cleared ? '#6f7f6f' : '#e0464e'; size = 4; }
       else if (poi.type === 'grave' || poi.type === 'ruin') col = '#b48fe8';
+      else if (poi.type === 'hermit' || poi.type === 'farm') col = '#a8c880';
+      else if (poi.type === 'mine' || poi.type === 'wreck') col = '#b09070';
+      else if (poi.type === 'stones' || poi.type === 'battlefield') col = '#c0a0d8';
       marks.push({ x: toX(rel), col, size, d, quest: poi.id === hintId });
     }
     // 遠いものから描いて、近いものを手前に
@@ -1628,6 +1631,8 @@ export class UI {
 const POI_COLOR = {
   shrine: '#e8c86a', village: '#8fd0e8', camp: '#e07050', ruin: '#b0a898',
   grave: '#a68ad0', tower: '#90d090', boss: '#ff6a4a', crystal: '#7fb0ff',
+  stones: '#c0a8e0', farm: '#c8c058', battlefield: '#d08878',
+  mine: '#b08850', wreck: '#78b0b8', hermit: '#a0c890',
 };
 const ROLL_LABEL = { fast: '軽装', normal: '中装', heavy: '重装', over: '重量超過' };
 

@@ -134,6 +134,7 @@ export class Game {
     // 村に NPC を配置
     for (const p of this.pois) {
       if (p.type === 'village') this.npcs.push(...populateVillage(p, this.world));
+      else if (p.type === 'hermit') this.npcs.push(...populateVillage(p, this.world));
     }
     // 相棒の馬
     this.mount = new Mount({ x: this.player.x + 5, z: this.player.z + 4 });
@@ -269,7 +270,8 @@ export class Game {
         if (Math.hypot(poi.x - cam[0], poi.z - cam[2]) > 60) continue;
         if (poi.type === 'shrine') {
           add(poi.x, poi.y + 1.5, poi.z, 13, 1.5 * night, 1.15 * night, 0.55 * night, poi.id);
-        } else if (poi.type === 'village' || poi.type === 'camp') {
+        } else if (poi.type === 'village' || poi.type === 'camp'
+          || poi.type === 'hermit' || poi.type === 'wreck') {
           add(poi.x, poi.y + 0.9, poi.z, 12, 1.6 * night, 0.95 * night, 0.4 * night, poi.id);
         } else if (poi.type === 'crystal') {
           add(poi.x, poi.y + 1.2, poi.z, 10, 0.5 * night, 0.85 * night, 1.5 * night, poi.id);
@@ -1008,7 +1010,7 @@ export class Game {
       if (poi.type === 'shrine' && d < 3.2) {
         if (d < bestD) { bestD = d; best = { type: 'shrine', obj: poi, label: `${poi.name}で休息する` }; }
       }
-      if ((poi.type === 'grave' || poi.type === 'ruin') && d < 4.0) {
+      if ((poi.type === 'grave' || poi.type === 'ruin' || poi.type === 'mine') && d < 4.5) {
         if (d < bestD) { bestD = d; best = { type: 'dungeon_enter', obj: poi, label: `${poi.name}へ潜る` }; }
       }
       if (poi.type === 'tower' && d < 4.5 && !poi.climbed) {
@@ -1184,7 +1186,8 @@ export class Game {
       const d = Math.hypot(poi.x - p.x, poi.z - p.z);
       if (d > 40) continue;
       if (poi.type === 'shrine') this.fx.shrineGlow(poi.x, poi.y + 1.2, poi.z, dt);
-      else if (poi.type === 'village' || poi.type === 'camp') {
+      else if (poi.type === 'village' || poi.type === 'camp'
+        || poi.type === 'hermit' || poi.type === 'wreck') {
         this.fx.campfireEmbers(poi.x, poi.y + 0.4, poi.z, dt);
       }
     }
