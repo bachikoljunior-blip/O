@@ -101,37 +101,38 @@ export class Actor {
   }
 
   tryMove(game, nx, nz) {
-    const world = game.world;
     // 急斜面は登れない
-    const h0 = world.height(this.x, this.z);
-    const h1 = world.height(nx, nz);
+    const h0 = game.groundHeight(this.x, this.z);
+    const h1 = game.groundHeight(nx, nz);
     const dist = Math.hypot(nx - this.x, nz - this.z) || 1e-4;
     const grade = (h1 - h0) / dist;
     if (grade > 1.35) {
       // 壁沿いに滑らせる
       const sx = nx - this.x, sz = nz - this.z;
-      const hx = world.height(this.x + sx, this.z);
-      const hz = world.height(this.x, this.z + sz);
+      const hx = game.groundHeight(this.x + sx, this.z);
+      const hz = game.groundHeight(this.x, this.z + sz);
       if ((hx - h0) / (Math.abs(sx) || 1e-4) <= 1.35) { nz = this.z; }
       else if ((hz - h0) / (Math.abs(sz) || 1e-4) <= 1.35) { nx = this.x; }
       else return false;
     }
     // 障害物
-    if (game.terrain.collide(nx, nz, this.radius, _tmp)) {
+    if (game.collide(nx, nz, this.radius, _tmp)) {
       nx = _tmp[0]; nz = _tmp[1];
     }
-    // 世界の縁
-    const d = Math.hypot(nx, nz);
-    if (d > game.worldRadius) {
-      nx = (nx / d) * game.worldRadius;
-      nz = (nz / d) * game.worldRadius;
+    // 世界の縁（屋外のみ）
+    if (!game.dungeon) {
+      const d = Math.hypot(nx, nz);
+      if (d > game.worldRadius) {
+        nx = (nx / d) * game.worldRadius;
+        nz = (nz / d) * game.worldRadius;
+      }
     }
     this.x = nx; this.z = nz;
     return true;
   }
 
   updatePhysics(dt, game) {
-    const gh = game.world.height(this.x, this.z);
+    const gh = game.groundHeight(this.x, this.z);
     const target = this.floating ? gh + 0.65 : gh;
     if (this.floating) {
       this.y = lerp(this.y, target, 1 - Math.exp(-6 * dt));

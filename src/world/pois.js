@@ -223,6 +223,7 @@ function buildStructures(world, p, rng) {
       break;
     }
     case 'ruin': {
+      p.dungeonTheme = rng() < 0.5 ? 'ruin' : 'mine';
       const n = 4 + (rng() * 4 | 0);
       for (let i = 0; i < n; i++) {
         const a = (i / n) * TAU, r = 7 + rng() * 4;
@@ -235,6 +236,7 @@ function buildStructures(world, p, rng) {
       break;
     }
     case 'grave': {
+      p.dungeonTheme = rng() < 0.5 ? 'catacomb' : 'ruin';
       place(p, 'ruin_arch', 0, 0, rng() * TAU, 1.2, 1.2, 1.2, world, [0.7, 0.7, 0.75]);
       for (let i = 0; i < 6; i++) {
         const a = rng() * TAU, r = 4 + rng() * 6;

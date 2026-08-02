@@ -72,6 +72,19 @@ function buildEnemyExtras(def) {
     case 'imp':
       cloth(0, [0.30, 0.16, 0.12], 'pelvis', 1);
       break;
+    case 'gargoyle':
+      for (const sx of [-1, 1]) {
+        ex.push({ joint: 'head', shape: 'spike', offset: [sx * 0.12, 0.20, -0.02], size: [0.09, 0.30, 0.09], tint: [t[0] * 0.8, t[1] * 0.8, t[2] * 0.8], rot: [-0.3, 0, -sx * 0.5] });
+        ex.push({ joint: sx < 0 ? 'shoulderL' : 'shoulderR', shape: 'part', offset: [0, -0.02, -0.14], size: [0.16, 0.62, 0.42], tint: [t[0] * 0.72, t[1] * 0.74, t[2] * 0.78], rot: [0.2, 0, sx * 0.3] });
+      }
+      ex.push({ joint: 'chest', shape: 'part', offset: [0, 0.26, 0.03], size: [0.56, 0.58, 0.36], tint: [t[0] * 1.08, t[1] * 1.08, t[2] * 1.1] });
+      break;
+    case 'crawler':
+      for (const sx of [-1, 1]) {
+        ex.push({ joint: 'withers', shape: 'spike', offset: [sx * 0.14, 0.16, 0], size: [0.07, 0.24, 0.07], tint: [t[0] * 1.5, t[1] * 1.4, t[2] * 1.5], rot: [-0.3, 0, -sx * 0.4] });
+      }
+      ex.push({ joint: 'head', shape: 'ball', offset: [0, 0.02, 0.12], size: [0.12, 0.10, 0.12], tint: [1.0, 0.55, 0.35], emissive: 0.8 });
+      break;
     case 'deer':
       for (const sx of [-1, 1]) {
         ex.push({ joint: 'head', shape: 'spike', offset: [sx * 0.09, 0.16, -0.02], size: [0.05, 0.30, 0.05], tint: [0.62, 0.55, 0.42], rot: [0, 0, -sx * 0.35] });
@@ -310,7 +323,7 @@ export class Enemy extends Actor {
     const nz = p.z + Math.cos(ang) * r;
     game.fx.voidBurst(this.x, this.y + this.height * 0.5, this.z);
     this.x = nx; this.z = nz;
-    this.y = game.world.height(nx, nz);
+    this.y = game.groundHeight(nx, nz);
     this.faceTowards(p.x, p.z, 1, 99);
     game.fx.voidBurst(this.x, this.y + this.height * 0.5, this.z);
     game.audio.play('teleport');

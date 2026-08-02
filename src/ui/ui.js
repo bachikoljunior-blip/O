@@ -153,10 +153,16 @@ export class UI {
     if (cnt) cnt.textContent = p.flask.hp;
 
     // 世界情報
-    const region = game.world.regionAt(p.x, p.z);
-    $('.worldinfo .region', this.hud).textContent = region.name;
-    $('.worldinfo .time', this.hud).textContent = game.sky.timeLabel();
-    $('.worldinfo .weather', this.hud).textContent = `${game.sky.phaseLabel()}・${game.sky.weatherLabel()}`;
+    if (game.dungeon) {
+      $('.worldinfo .region', this.hud).textContent = game.dungeon.name;
+      $('.worldinfo .time', this.hud).textContent = '地下';
+      $('.worldinfo .weather', this.hud).textContent = `深度 ${game.dungeon.depth}`;
+    } else {
+      const region = game.world.regionAt(p.x, p.z);
+      $('.worldinfo .region', this.hud).textContent = region.name;
+      $('.worldinfo .time', this.hud).textContent = game.sky.timeLabel();
+      $('.worldinfo .weather', this.hud).textContent = `${game.sky.phaseLabel()}・${game.sky.weatherLabel()}`;
+    }
 
     // クエスト
     this.updateQuestTrack(game);
@@ -668,6 +674,13 @@ export class UI {
   /* -------------------------------------------------------- 地図 */
   renderMap(root) {
     const game = this.game;
+    if (game.dungeon) {
+      const p = el('div', 'panel');
+      p.appendChild(el('h3', '', game.dungeon.name));
+      p.appendChild(el('div', 'row', '<span class="sub">地下では全図を開けない。ミニマップと松明を頼りに進め。</span>'));
+      root.appendChild(p);
+      return;
+    }
     const wrap = el('div', 'panel');
     wrap.appendChild(el('h3', '', 'アエテリア全図'));
     const c = el('canvas');
@@ -1106,6 +1119,7 @@ export class UI {
   }
 
   drawMinimap(game) {
+    if (game.dungeon) return this.drawDungeonMap(game);
     const c = this.mctx;
     const S = this.minimap.width;
     const p = game.player;
@@ -1156,6 +1170,71 @@ export class UI {
       c.beginPath(); c.arc(x, y, e.boss ? 3.4 : 2, 0, Math.PI * 2); c.fill();
     }
     // 自機
+    c.fillStyle = '#e8dfc8';
+    c.beginPath();
+    c.moveTo(S / 2, S / 2 - 5);
+    c.lineTo(S / 2 - 4, S / 2 + 4);
+    c.lineTo(S / 2 + 4, S / 2 + 4);
+    c.closePath();
+    c.fill();
+    c.restore();
+  }
+
+  /** ダンジョン内のミニマップ（探索済みのセルだけ描く） */
+  drawDungeonMap(game) {
+    const c = this.mctx;
+    const S = this.minimap.width;
+    const d = game.dungeon;
+    const p = game.player;
+    if (!d.seen) d.seen = new Set();
+    const [pcx, pcz] = d.toCell(p.x, p.z);
+    for (let j = -2; j <= 2; j++) {
+      for (let i = -2; i <= 2; i++) {
+        if (d.open(pcx + i, pcz + j)) d.seen.add((pcz + j) * d.gw + (pcx + i));
+      }
+    }
+    c.clearRect(0, 0, S, S);
+    c.save();
+    c.beginPath();
+    c.arc(S / 2, S / 2, S / 2 - 1, 0, Math.PI * 2);
+    c.clip();
+    c.fillStyle = '#08080b';
+    c.fillRect(0, 0, S, S);
+    const view = 7;                       // 表示するセル半径
+    const cell = S / (view * 2 + 1);
+    c.save();
+    c.translate(S / 2, S / 2);
+    c.rotate(-game.camera.yaw);
+    for (let j = -view; j <= view; j++) {
+      for (let i = -view; i <= view; i++) {
+        const cx = pcx + i, cz = pcz + j;
+        if (!d.seen.has(cz * d.gw + cx)) continue;
+        c.fillStyle = d.grid[d.idx(cx, cz)] === 1 ? 'rgba(180,160,110,.55)' : 'rgba(120,110,86,.42)';
+        c.fillRect(i * cell - cell / 2, j * cell - cell / 2, cell + 1, cell + 1);
+      }
+    }
+    // 宝箱と出口
+    for (const ch of d.chests) {
+      if (ch.opened) continue;
+      const [bx, bz] = d.toCell(ch.x, ch.z);
+      if (!d.seen.has(bz * d.gw + bx)) continue;
+      c.fillStyle = '#e8c86a';
+      c.fillRect((bx - pcx) * cell - 2, (bz - pcz) * cell - 2, 4, 4);
+    }
+    const [ex, ez] = d.toCell(d.exitPoint.x, d.exitPoint.z);
+    if (d.seen.has(ez * d.gw + ex)) {
+      c.fillStyle = '#8fd0e8';
+      c.fillRect((ex - pcx) * cell - 2.5, (ez - pcz) * cell - 2.5, 5, 5);
+    }
+    for (const e of game.enemies) {
+      if (e.dead || !e.aggro) continue;
+      const [bx, bz] = d.toCell(e.x, e.z);
+      c.fillStyle = '#e0464e';
+      c.beginPath();
+      c.arc((bx - pcx) * cell, (bz - pcz) * cell, 2, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.restore();
     c.fillStyle = '#e8dfc8';
     c.beginPath();
     c.moveTo(S / 2, S / 2 - 5);

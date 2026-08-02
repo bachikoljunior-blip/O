@@ -66,6 +66,33 @@ float cloudShadow(vec2 p){
 }
 `;
 
+/** 点光源（松明・篝火・魔法）。近い順に最大 8 個 */
+const LIGHT_FN = /* glsl */`
+#define MAX_LIGHTS 8
+uniform int u_lightCount;
+uniform vec4 u_lightPos[MAX_LIGHTS];    // xyz=位置, w=半径
+uniform vec4 u_lightColor[MAX_LIGHTS];  // rgb=色*強度, a=ゆらぎ位相
+
+vec3 pointLights(vec3 pos, vec3 N, float time){
+  vec3 sum = vec3(0.0);
+  for(int i = 0; i < MAX_LIGHTS; i++){
+    if(i >= u_lightCount) break;
+    vec3 d = u_lightPos[i].xyz - pos;
+    float r = u_lightPos[i].w;
+    float dist = length(d);
+    if(dist > r) continue;
+    float att = 1.0 - dist / r;
+    att *= att;
+    float ndl = max(dot(N, d / max(dist, 0.001)), 0.0) * 0.82 + 0.18;
+    // 炎のゆらぎ
+    float flick = 0.88 + 0.12 * sin(time * 9.3 + u_lightColor[i].a * 12.0)
+                       * sin(time * 5.1 + u_lightColor[i].a * 7.0);
+    sum += u_lightColor[i].rgb * att * ndl * flick;
+  }
+  return sum;
+}
+`;
+
 const SHADOW_FN = /* glsl */`
 uniform highp sampler2DShadow u_shadow;
 uniform mat4 u_lightVP;
@@ -141,6 +168,7 @@ export const MESH_FS = /* glsl */`#version 300 es
 ${COMMON}
 ${SKY_FN}
 ${CLOUD_FN}
+${LIGHT_FN}
 ${SHADOW_FN}
 in vec3 v_world;
 in vec3 v_nrm;
@@ -211,6 +239,8 @@ void main(){
   // リムライト（シルエットを立たせる）
   float rim = pow(1.0 - max(dot(N, V), 0.0), 4.0);
   col += mix(u_ambSky, u_sunColor, 0.5) * rim * 0.13;
+  // 点光源
+  col += albedo * pointLights(v_world, N, u_time);
   // 自己発光
   col += albedo * v_emissive;
 

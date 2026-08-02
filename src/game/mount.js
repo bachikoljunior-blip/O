@@ -139,7 +139,7 @@ export class Mount extends Actor {
       this._step = (this._step || 0) + dt * (1.6 + speed * 0.30);
       if (this._step > 1) {
         this._step = 0;
-        const sf = game.world.sample(this.x, this.z);
+        const sf = game.surfaceAt(this.x, this.z);
         game.audio.footstep(sf.surface, 0.55);
         game.fx.dust(this.x, this.y + 0.05, this.z, 3);
       }
@@ -165,7 +165,7 @@ export class Mount extends Actor {
     const sx = Math.cos(this.yaw), sz = -Math.sin(this.yaw);
     p.x = this.x + sx * 1.4;
     p.z = this.z + sz * 1.4;
-    p.y = game.world.height(p.x, p.z);
+    p.y = game.groundHeight(p.x, p.z);
     if (thrown) {
       p.setState('hit', 0.6);
       game.camera.shake(0.5);

@@ -155,6 +155,18 @@ export class Renderer {
     prog.f('u_time', game.time.now);
     prog.f('u_cloudShadow', this.q.cloudShadows ? sky.cloud * 0.62 * (1 - sky.night * 0.7) : 0);
     prog.f('u_cloudTime', game.time.now);
+    this.setLights(prog, game);
+  }
+
+  /** 近い順に点光源を送る */
+  setLights(prog, game) {
+    const gl = this.gl;
+    const lights = game.collectLights(this.q.maxLights);
+    prog.i('u_lightCount', lights.count);
+    if (lights.count > 0) {
+      gl.uniform4fv(prog.u('u_lightPos[0]'), lights.pos.subarray(0, lights.count * 4));
+      gl.uniform4fv(prog.u('u_lightColor[0]'), lights.col.subarray(0, lights.count * 4));
+    }
   }
 
   setShadowUniforms(prog) {
@@ -198,9 +210,11 @@ export class Renderer {
     game.emitInstances(this);
     for (const b of this.batches.values()) b.upload();
 
+    const inDungeon = !!game.dungeon;
+
     // ---- 影パス ----
     this.computeLightMatrix(game);
-    if (this.q.shadows) {
+    if (this.q.shadows && !inDungeon) {
       this.shadow.bind();
       gl.enable(gl.DEPTH_TEST);
       gl.depthMask(true);
@@ -254,16 +268,16 @@ export class Renderer {
     this.setSceneUniforms(mp, game);
     this.setShadowUniforms(mp);
 
-    this.drawTerrain(game, false);
+    if (!inDungeon) this.drawTerrain(game, false);
     for (const [name, b] of this.batches) {
       if (name === 'grass') continue;
       if (b.count) { b.draw(); this.stats.draws++; this.stats.instances += b.count; }
     }
     // 草（距離帯ごとにアルファを変えてフェード）
-    this.drawGrass(game, mp);
+    if (!inDungeon) this.drawGrass(game, mp);
 
     // 不透明シーンのデプスを線形化して別ターゲットへ（水の厚み計算に使う）
-    if (this.q.water) {
+    if (this.q.water && !inDungeon) {
       this.linDepth.bind();
       gl.disable(gl.DEPTH_TEST);
       gl.disable(gl.CULL_FACE);

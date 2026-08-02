@@ -433,6 +433,27 @@ export const ENEMIES = {
     ],
     ai: { aggression: 0.85, circling: 0.35, retreat: 0.3, guard: 0 },
   },
+  crawler: {
+    id: 'crawler', name: '這うもの', tier: 2, hp: 95, poise: 10, def: 2,
+    speed: 4.8, runSpeed: 7.2, aggro: 16, echo: 65, body: 'beast',
+    tint: [0.30, 0.26, 0.30], h: 0.55, weapon: null, group: 4,
+    attacks: [
+      { id: 'bite', windup: 0.26, active: 0.10, recover: 0.38, dmg: 28, range: 1.9, arc: 1.3, poise: 10, motion: 'lunge' },
+      { id: 'leap', windup: 0.40, active: 0.16, recover: 0.56, dmg: 40, range: 5.0, arc: 1.0, poise: 16, motion: 'pounce', dash: 6 },
+    ],
+    ai: { aggression: 0.9, circling: 0.25, retreat: 0.2, guard: 0 },
+  },
+  gargoyle: {
+    id: 'gargoyle', name: '石像鬼', tier: 4, hp: 330, poise: 90, def: 22,
+    speed: 2.9, runSpeed: 5.0, aggro: 15, echo: 280, body: 'humanoid',
+    tint: [0.40, 0.41, 0.43], h: 1.25, weapon: null, group: 1,
+    attacks: [
+      { id: 'claw', windup: 0.52, active: 0.16, recover: 0.62, dmg: 74, range: 3.0, arc: 2.0, poise: 50, motion: 'slash_r', chain: 'claw2' },
+      { id: 'claw2', windup: 0.34, active: 0.16, recover: 0.75, dmg: 78, range: 3.0, arc: 2.2, poise: 50, motion: 'slash_l' },
+      { id: 'slam', windup: 0.82, active: 0.20, recover: 0.95, dmg: 108, range: 3.8, arc: 2.4, poise: 70, motion: 'overhead', shock: 4.5 },
+    ],
+    ai: { aggression: 0.6, circling: 0.2, retreat: 0.1, guard: 0 },
+  },
   troll: {
     id: 'troll', name: '岩喰いのトロル', tier: 4, hp: 640, poise: 110, def: 14,
     speed: 2.4, runSpeed: 4.6, aggro: 24, echo: 520, body: 'humanoid',
@@ -662,6 +683,8 @@ export const DROPS = {
   mage: [['crystal', 0.6, 2], ['echo_shard', 0.15, 1]],
   imp: [['ore_iron', 0.25, 1], ['blood_flower', 0.2, 1]],
   troll: [['ore_silver', 0.6, 2], ['shard_ancient', 0.12, 1]],
+  crawler: [['beast_bone', 0.5, 1], ['blood_flower', 0.2, 1]],
+  gargoyle: [['ore_silver', 0.45, 1], ['shard_ancient', 0.08, 1], ['echo_shard', 0.2, 1]],
 };
 
 /** 宝箱の中身（tier ごと） */

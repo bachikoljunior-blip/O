@@ -98,9 +98,9 @@ export class Camera {
       const sx = lerp(pivotX, camX, t);
       const sz = lerp(pivotZ, camZ, t);
       const sy = lerp(pivotY, camY, t);
-      const gh = game.world.height(sx, sz) + 0.55;
+      const gh = game.groundHeight(sx, sz) + 0.55;
       // 木や岩に潜り込まないよう、障害物にぶつかったら手前で止める
-      if (game.terrain.collide(sx, sz, 0.75, _probe)) {
+      if (game.collide(sx, sz, 0.75, _probe)) {
         camX = lerp(pivotX, camX, Math.max(0.25, t * 0.85));
         camZ = lerp(pivotZ, camZ, Math.max(0.25, t * 0.85));
         camY = lerp(pivotY, camY, Math.max(0.25, t * 0.85));
@@ -113,7 +113,7 @@ export class Camera {
         break;
       }
     }
-    const minY = game.world.height(camX, camZ) + 0.5;
+    const minY = game.groundHeight(camX, camZ) + 0.5;
     if (camY < minY) camY = minY;
 
     // シェイク

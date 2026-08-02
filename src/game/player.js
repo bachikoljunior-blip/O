@@ -312,7 +312,7 @@ export class Player extends Actor {
       let base = this.sprinting ? this.runSpeed : this.speed * lerp(0.45, 1, mag);
       if (this.blocking) base *= 0.55;
       if (this.frostSlow > 0) base *= 0.75;
-      const gh = game.world.height(this.x, this.z);
+      const gh = game.groundHeight(this.x, this.z);
       if (gh < -0.4) base *= 0.55;                        // 水中
       speed = base;
       this.moveOnGround(dt, game, wx, wz, base);
@@ -343,7 +343,7 @@ export class Player extends Actor {
       this._step = (this._step || 0) + dt * (2.0 + this.speed01 * 3.2);
       if (this._step > 1) {
         this._step = 0;
-        const s = game.world.sample(this.x, this.z);
+        const s = game.surfaceAt(this.x, this.z);
         game.audio.footstep(s.surface, this.sprinting ? 0.6 : 0.36);
         if (s.surface === 'grass' || s.surface === 'marsh') {
           game.fx.dust(this.x, this.y + 0.05, this.z, 2);
@@ -697,6 +697,7 @@ export class Player extends Actor {
 
   /** 死亡後の復活 */
   respawn(game) {
+    if (game.dungeon) game.exitDungeon();
     const s = this.lastShrine;
     this.dead = false;
     this.deathT = 0;
@@ -712,7 +713,7 @@ export class Player extends Actor {
     for (const k in this.status) this.status[k] = 0;
     if (s) { this.x = s.x + 1.5; this.z = s.z + 1.5; }
     else { this.x = 40; this.z = 300; }
-    this.y = game.world.height(this.x, this.z);
+    this.y = game.groundHeight(this.x, this.z);
     this.lockTarget = null;
     game.respawnWorld();
   }

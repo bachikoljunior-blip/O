@@ -94,6 +94,18 @@ export const QUESTS = {
     reward: { echo: 2000, spell: 'heal' },
   },
 
+  delve: {
+    id: 'delve', name: '地の底を漁る',
+    stages: [
+      {
+        text: '地下の宝箱を 4 つ開ける',
+        progress: (q) => `${Math.min(4, q.count.dungeonChests || 0)}/4`,
+        check: (q) => (q.count.dungeonChests || 0) >= 4,
+      },
+    ],
+    reward: { echo: 2600, items: [['shard_ancient', 1], ['bone', 2]], talisman: 'ring_echo' },
+  },
+
   towers: {
     id: 'towers', name: '見張り塔の灯',
     stages: [

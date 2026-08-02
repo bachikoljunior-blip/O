@@ -67,7 +67,7 @@ export class FX {
       p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
       p.rot += p.rotV * dt;
       if (p.ground && game) {
-        const h = game.world.height(p.x, p.z);
+        const h = game.groundHeight(p.x, p.z);
         if (p.y < h) { p.y = h; p.vx *= 0.3; p.vz *= 0.3; p.vy = 0; p.gravity = 0; }
       }
     }

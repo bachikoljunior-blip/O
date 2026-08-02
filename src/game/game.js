@@ -10,6 +10,7 @@ import { WorldGen, WORLD_RADIUS } from '../world/worldgen.js';
 import { Terrain, CHUNK } from '../world/terrain.js';
 import { generatePOIs } from '../world/pois.js';
 import { Sky } from '../world/sky.js';
+import { Dungeon } from '../world/dungeon.js';
 
 import { Renderer } from '../render/renderer.js';
 import { Camera } from '../render/camera.js';
@@ -31,19 +32,19 @@ export const QUALITY_PRESETS = {
     name: '軽量', renderScale: 0.62, viewChunks: 6, lodScale: 0.7, shadows: true, shadowSize: 1024,
     shadowRange: 42, grassDensity: 0.55, grassDist: 60, grassShadow: false, treeDensity: 0.6,
     bloom: false, bloomPasses: 1, bloomStrength: 0.5, water: true, skyQuality: 0, maxEnemies: 12,
-    cloudShadows: false, godRays: false, rayStrength: 0,
+    cloudShadows: false, godRays: false, rayStrength: 0, maxLights: 4,
   },
   medium: {
     name: '標準', renderScale: 0.82, viewChunks: 8, lodScale: 1.0, shadows: true, shadowSize: 1536,
     shadowRange: 58, grassDensity: 0.85, grassDist: 84, grassShadow: false, treeDensity: 0.85,
     bloom: true, bloomPasses: 2, bloomStrength: 0.55, water: true, skyQuality: 1, maxEnemies: 18,
-    cloudShadows: true, godRays: true, rayStrength: 0.55,
+    cloudShadows: true, godRays: true, rayStrength: 0.55, maxLights: 6,
   },
   high: {
     name: '高品質', renderScale: 1.0, viewChunks: 11, lodScale: 1.3, shadows: true, shadowSize: 2048,
     shadowRange: 78, grassDensity: 1.15, grassDist: 108, grassShadow: true, treeDensity: 1.0,
     bloom: true, bloomPasses: 3, bloomStrength: 0.6, water: true, skyQuality: 1, maxEnemies: 26,
-    cloudShadows: true, godRays: true, rayStrength: 0.7,
+    cloudShadows: true, godRays: true, rayStrength: 0.7, maxLights: 8,
   },
 };
 
@@ -121,6 +122,11 @@ export class Game {
     this.clearedPOIs = new Set();
     this.activeBoss = null;
     this.bossPOI = null;
+    this.dungeon = null;
+    this.lightPos = new Float32Array(8 * 4);
+    this.lightCol = new Float32Array(8 * 4);
+    this._lights = { count: 0, pos: this.lightPos, col: this.lightCol };
+    this._lightCand = [];
     this.unlocked = { weapons: new Set(['broken_sword']), armors: new Set(['rags', 'hood']), shields: new Set(['wooden_shield']), talismans: new Set(), spells: new Set() };
 
     // 村に NPC を配置
@@ -215,20 +221,92 @@ export class Game {
     this.renderer.render(this);
   }
 
+  /* ------------------------------------------- 地面・衝突のディスパッチ */
+  groundHeight(x, z) {
+    return this.dungeon ? this.dungeon.groundHeight(x, z) : this.world.height(x, z);
+  }
+  collide(x, z, radius, out) {
+    return this.dungeon
+      ? this.dungeon.collide(x, z, radius, out)
+      : this.terrain.collide(x, z, radius, out);
+  }
+  surfaceAt(x, z) {
+    if (this.dungeon) return { h: 0, slope: 0, surface: 'rock', road: 0, underwater: false };
+    return this.world.sample(x, z);
+  }
+
+  /** 近い順に点光源を集める（松明・篝火・魔法・炎） */
+  collectLights(max) {
+    const cam = this.camera.pos;
+    const cand = this._lightCand;
+    cand.length = 0;
+    const add = (x, y, z, r, cr, cg, cb, phase) => {
+      const d = Math.hypot(x - cam[0], z - cam[2]);
+      if (d > r + 40) return;
+      cand.push({ x, y, z, r, cr, cg, cb, phase, d });
+    };
+    if (this.dungeon) {
+      // 手持ちの灯り（足元が見えないと遊べないので常設）
+      add(this.player.x, this.player.y + 1.5, this.player.z, 9.5,
+        0.62, 0.50, 0.36, 0);
+      for (const t of this.dungeon.torches) {
+        const c = t.color;
+        const r = t.big ? 14 : 10;
+        const k = t.big ? 1.5 : 1.15;
+        add(t.x, t.y, t.z, r, c[0] * k, c[1] * k, c[2] * k, t.x * 0.13 + t.z * 0.07);
+      }
+    } else {
+      const night = 0.35 + this.sky.night * 0.9;
+      for (const poi of this.pois) {
+        if (Math.hypot(poi.x - cam[0], poi.z - cam[2]) > 60) continue;
+        if (poi.type === 'shrine') {
+          add(poi.x, poi.y + 1.5, poi.z, 13, 1.5 * night, 1.15 * night, 0.55 * night, poi.id);
+        } else if (poi.type === 'village' || poi.type === 'camp') {
+          add(poi.x, poi.y + 0.9, poi.z, 12, 1.6 * night, 0.95 * night, 0.4 * night, poi.id);
+        } else if (poi.type === 'crystal') {
+          add(poi.x, poi.y + 1.2, poi.z, 10, 0.5 * night, 0.85 * night, 1.5 * night, poi.id);
+        }
+      }
+    }
+    // 飛翔中の魔法弾も光る
+    for (const b of this.projectiles) {
+      const c = PROJ_COLOR[b.kind];
+      if (!c || b.kind === 'arrow' || b.kind === 'arrow_heavy' || b.kind === 'knife') continue;
+      add(b.x, b.y, b.z, 8, c[0] * 1.6, c[1] * 1.6, c[2] * 1.6, b.x);
+    }
+    cand.sort((a, b) => a.d - b.d);
+    const n = Math.min(max, 8, cand.length);
+    for (let i = 0; i < n; i++) {
+      const l = cand[i];
+      this.lightPos[i * 4] = l.x; this.lightPos[i * 4 + 1] = l.y;
+      this.lightPos[i * 4 + 2] = l.z; this.lightPos[i * 4 + 3] = l.r;
+      this.lightCol[i * 4] = l.cr; this.lightCol[i * 4 + 1] = l.cg;
+      this.lightCol[i * 4 + 2] = l.cb; this.lightCol[i * 4 + 3] = l.phase % 10;
+    }
+    this._lights.count = n;
+    return this._lights;
+  }
+
   /* ============================================================ 更新 */
   update(dt) {
     const p = this.player;
 
     this.sky.update(dt, this);
-    this.sky.applyRegion(this.world.params(p.x, p.z));
+    if (this.dungeon) this.applyDungeonAtmosphere();
+    else this.sky.applyRegion(this.world.params(p.x, p.z));
 
     this.camera.update(dt, this);
     if (this.input.pressed('mount')) this.handleMountButton();
     p.update(dt, this);
     if (p.state === 'cast') p.processSpell(dt, this);
 
-    // 地形ストリーミング
-    this.terrain.update(p.x, p.z, this.time.now, this.quality.viewChunks > 8 ? 7 : 5);
+    // 地形ストリーミング（ダンジョン内では止める）
+    if (this.dungeon) {
+      this.terrain.visible.length = 0;
+      this.terrain.grassChunks.length = 0;
+    } else {
+      this.terrain.update(p.x, p.z, this.time.now, this.quality.viewChunks > 8 ? 7 : 5);
+    }
 
     // エンティティ
     for (let i = this.enemies.length - 1; i >= 0; i--) {
@@ -241,19 +319,23 @@ export class Game {
     for (const n of this.npcs) {
       if (Math.hypot(n.x - p.x, n.z - p.z) < 70) n.update(dt, this);
     }
-    this.mount.update(dt, this);
+    if (!this.dungeon) this.mount.update(dt, this);
     this.updateProjectiles(dt);
-    this.updateSpawning(dt);
-    this.updateGatherables();
-    this.updateBoss(dt);
-    this.updateAmbient(dt);
+    if (this.dungeon) {
+      this.updateDungeon(dt);
+    } else {
+      this.updateSpawning(dt);
+      this.updateGatherables();
+      this.updateBoss(dt);
+      this.updateAmbient(dt);
+    }
     this.fx.update(dt, this);
     this.quests.update(this);
     this.updateInteract();
-    this.updateDiscovery();
+    if (!this.dungeon) this.updateDiscovery();
     this.updateMusic();
     this.audio.update(dt, this);
-    this.audio.updateAmbience(dt, this);
+    if (!this.dungeon) this.audio.updateAmbience(dt, this);
 
     // バフ
     if (p.spellBuff) {
@@ -458,6 +540,89 @@ export class Game {
   /** 攻撃で樽などを壊す（簡易） */
   hitProps() { /* 予約：破壊可能オブジェクト */ }
 
+  /* ---------------------------------------------------- ダンジョン */
+  enterDungeon(poi) {
+    const p = this.player;
+    this.outsideReturn = { x: p.x, y: p.y, z: p.z, yaw: p.yaw };
+    const depth = 1 + Math.min(3, Math.floor((poi.danger || 1) / 3));
+    this.dungeon = new Dungeon(poi, (poi.x * 7919 + poi.z * 104729 + this.seed) | 0, depth);
+    this.dungeonPOI = poi;
+    this.enemies.length = 0;
+    this.activeBoss = null;
+    this.ui.hideBoss();
+    p.x = this.dungeon.spawnPoint.x;
+    p.z = this.dungeon.spawnPoint.z;
+    p.y = 0;
+    p.lockTarget = null;
+    if (p.riding) this.mount.dismount(this);
+    this.dungeonSpawned = false;
+    this.quests.start('delve');
+    this.audio.play('discover');
+    this.ui.showRegion({ name: this.dungeon.name, en: 'DUNGEON' });
+    this.ui.toast('松明の灯りだけが頼りだ');
+  }
+
+  exitDungeon() {
+    const p = this.player;
+    const r = this.outsideReturn;
+    this.dungeon = null;
+    this.dungeonPOI = null;
+    this.enemies.length = 0;
+    if (r) { p.x = r.x; p.z = r.z; p.yaw = r.yaw; p.y = this.world.height(r.x, r.z); }
+    p.lockTarget = null;
+    for (const poi of this.pois) poi.spawned = false;
+    this.audio.play('ui_off');
+    this.ui.showRegion(this.world.regionAt(p.x, p.z));
+  }
+
+  /** ダンジョン内の大気：太陽を消し、濃い闇と霧にする */
+  applyDungeonAtmosphere() {
+    const sky = this.sky;
+    const f = this.dungeon.theme.fog;
+    sky.zenith = [f[0], f[1], f[2]];
+    sky.horizon = [f[0] * 1.2, f[1] * 1.2, f[2] * 1.25];
+    sky.sunColor = [0, 0, 0];
+    sky.ambSky = [f[0] * 3.2 + 0.048, f[1] * 3.2 + 0.050, f[2] * 3.2 + 0.062];
+    sky.ambGnd = [f[0] * 2.0 + 0.030, f[1] * 2.0 + 0.031, f[2] * 2.0 + 0.036];
+    sky.fogDensity = 0.030;
+    sky.night = 1;
+    sky.cloud = 0;
+    sky.rainAmount = 0;
+    sky.snowAmount = 0;
+    sky.wind = 0.15;
+    sky.exposure = 1.16;
+    sky.grade = [1.03, 0.99, 0.97];
+  }
+
+  updateDungeon(dt) {
+    const d = this.dungeon;
+    const p = this.player;
+    if (!this.dungeonSpawned) {
+      this.dungeonSpawned = true;
+      const rng = makeRng((d.rooms.length * 7919 + this.seed) | 0);
+      for (const sp of d.spawns) {
+        for (let i = 0; i < sp.count; i++) {
+          const a = rng() * TAU, r = rng() * sp.radius;
+          const x = sp.x + Math.cos(a) * r, z = sp.z + Math.sin(a) * r;
+          if (!d.isOpenAt(x, z)) continue;
+          const e = spawnEnemy(sp.kind, {
+            x, y: 0, z, yaw: rng() * TAU, leash: 200,
+            hpMul: 1 + d.depth * 0.25 + (sp.elite ? 0.5 : 0),
+            echoMul: 1.5 + d.depth * 0.4 + (sp.elite ? 1 : 0),
+            scaleMul: sp.elite ? 1.15 : 1,
+          });
+          if (e) this.enemies.push(e);
+        }
+      }
+    }
+    // 松明の火の粉
+    for (const t of d.torches) {
+      if (Math.hypot(t.x - p.x, t.z - p.z) > 26) continue;
+      this.fx.campfireEmbers(t.x, t.y - 0.2, t.z, dt * (t.big ? 1 : 0.5));
+    }
+    void dt;
+  }
+
   /* -------------------------------------------------------- ボス */
   updateBoss(dt) {
     const p = this.player;
@@ -510,6 +675,11 @@ export class Game {
     }
     this.activeBoss = null;
     this.bossPOI = null;
+    this.dungeon = null;
+    this.lightPos = new Float32Array(8 * 4);
+    this.lightCol = new Float32Array(8 * 4);
+    this._lights = { count: 0, pos: this.lightPos, col: this.lightCol };
+    this._lightCand = [];
     this.ui.hideBoss();
   }
 
@@ -596,6 +766,21 @@ export class Game {
     const p = this.player;
     let best = null, bestD = 3.4;
 
+    if (this.dungeon) {
+      const ex = this.dungeon.exitPoint;
+      const de = Math.hypot(ex.x - p.x, ex.z - p.z);
+      if (de < 3.4) { bestD = de; best = { type: 'dungeon_exit', obj: ex, label: '地上へ戻る' }; }
+      for (const c of this.dungeon.chests) {
+        if (c.opened) continue;
+        const d = Math.hypot(c.x - p.x, c.z - p.z);
+        if (d < bestD) { bestD = d; best = { type: 'dungeon_chest', obj: c, label: '宝箱を開ける' }; }
+      }
+      this.interact = best;
+      this.ui.setPrompt(best ? best.label : null);
+      if (best && this.input.pressed('interact')) this.doInteract(best);
+      return;
+    }
+
     for (const n of this.npcs) {
       const d = Math.hypot(n.x - p.x, n.z - p.z);
       if (d < bestD) { bestD = d; best = { type: 'npc', obj: n, label: `${n.npcName}（${n.title}）と話す` }; }
@@ -604,6 +789,9 @@ export class Game {
       const d = Math.hypot(poi.x - p.x, poi.z - p.z);
       if (poi.type === 'shrine' && d < 3.2) {
         if (d < bestD) { bestD = d; best = { type: 'shrine', obj: poi, label: `${poi.name}で休息する` }; }
+      }
+      if ((poi.type === 'grave' || poi.type === 'ruin') && d < 4.0) {
+        if (d < bestD) { bestD = d; best = { type: 'dungeon_enter', obj: poi, label: `${poi.name}へ潜る` }; }
       }
       if (poi.type === 'tower' && d < 4.5 && !poi.climbed) {
         if (d < bestD) { bestD = d; best = { type: 'tower', obj: poi, label: '望楼に登る' }; }
@@ -650,6 +838,7 @@ export class Game {
       }
       case 'tower': {
         t.obj.climbed = true;
+        this.quests.start('towers');
         this.quests.onTower();
         this.revealAround(t.obj.x, t.obj.z, 380);
         this.audio.play('discover');
@@ -687,6 +876,24 @@ export class Game {
       case 'mount':
         this.mount.mount(this);
         break;
+      case 'dungeon_enter':
+        this.enterDungeon(t.obj);
+        break;
+      case 'dungeon_exit':
+        this.exitDungeon();
+        break;
+      case 'dungeon_chest': {
+        const c = t.obj;
+        c.opened = true;
+        const loot = CHEST_TABLE[clamp(c.tier, 1, CHEST_TABLE.length - 1)];
+        p.echo += loot.echo;
+        for (const [item, n] of loot.items) { p.addItem(item, n); this.ui.itemGain(item, n); }
+        this.ui.toast(`宝箱：残響 +${loot.echo}`);
+        this.audio.play('chest');
+        this.fx.heal(c.x, 0.6, c.z);
+        this.quests.count.dungeonChests = (this.quests.count.dungeonChests || 0) + 1;
+        break;
+      }
       case 'echo': {
         p.echo += p.lostEcho.echo;
         this.ui.toast(`残響を取り戻した（+${p.lostEcho.echo}）`);
@@ -800,6 +1007,48 @@ export class Game {
     const px = p.x, pz = p.z;
     const frustum = renderer.frustum;
 
+    // ダンジョン内はダンジョンのジオメトリだけを出す
+    if (this.dungeon) {
+      for (const [model, data] of this.dungeon.props) {
+        const b = renderer.batchFor(model);
+        if (b) b.append(data);
+      }
+      for (const c of this.dungeon.chests) {
+        if (c.opened) continue;
+        const b = renderer.batchFor('chest');
+        if (!b) continue;
+        const o = b.alloc();
+        writeInstance(b.data, o, c.x, 0, c.z, 0, 1, 1, 1,
+          1, 0.95, 0.7, 1, 0, 0.12 + Math.sin(time * 2) * 0.05, 0, 0.5);
+      }
+      p.emit(renderer, time, this);
+      for (const e of this.enemies) {
+        if (Math.hypot(e.x - px, e.z - pz) > 90) continue;
+        e.emit(renderer, time, this);
+      }
+      for (const b of this.projectiles) {
+        const model = b.kind === 'arrow' || b.kind === 'arrow_heavy' ? 'w_dagger' : 'ball';
+        const batch = renderer.batchFor(model);
+        if (!batch) continue;
+        const o = batch.alloc();
+        const c = PROJ_COLOR[b.kind] || [1, 1, 1];
+        const s = b.kind === 'firebomb' ? 0.5 : 0.32;
+        writeInstance(batch.data, o, b.x, b.y, b.z, Math.atan2(b.vx, b.vz), s, s, s,
+          c[0], c[1], c[2], 1, 0, 1.2, 0.6);
+      }
+      if (p.lockTarget && !p.lockTarget.dead) {
+        const t = p.lockTarget;
+        const b = renderer.batchFor('ball');
+        if (b) {
+          const o = b.alloc();
+          const s = 0.16 + Math.sin(time * 5) * 0.02;
+          writeInstance(b.data, o, t.x, t.y + t.height * 1.16, t.z, time, s, s, s,
+            1, 0.85, 0.5, 1, 0, 1.5, 0.8);
+        }
+      }
+      return;
+    }
+
     // 地形の散布物
     for (const c of this.terrain.visible) {
       if (!c.props) continue;
@@ -889,9 +1138,13 @@ export class Game {
   /* ---------------------------------------------------------- セーブ */
   save() {
     try {
+      const ps = this.player.serialize();
+      if (this.dungeon && this.outsideReturn) {
+        ps.x = this.outsideReturn.x; ps.y = this.outsideReturn.y; ps.z = this.outsideReturn.z;
+      }
       const data = {
-        v: 3, seed: this.seed,
-        player: this.player.serialize(),
+        v: 4, seed: this.seed,
+        player: ps,
         quests: this.quests.serialize(),
         sky: this.sky.serialize(),
         opened: [...this.openedChests],

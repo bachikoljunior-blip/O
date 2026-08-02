@@ -604,6 +604,7 @@ export function buildModels(gl) {
 
   // キャラクターのパーツ（白: インスタンス色で着色）
   add('part', (b) => b.roundedBox(1, 1, 1, 0.22, C.white, 3));
+  add('slab', (b) => b.box(1, 1, 1, C.white, 0.04));
   add('partSlim', (b) => b.roundedBox(1, 1, 1, 0.36, C.white, 3));
   add('ball', (b) => b.sphere(0.5, 8, 6, C.white));
   add('spike', (b) => b.cylinder(0.5, 0.0, 1.0, 6, C.white));
