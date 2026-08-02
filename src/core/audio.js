@@ -10,7 +10,59 @@ const SCALES = {
   combat: [-24, -19, -12, -8, -5, -1, 4, 7],
   boss: [-27, -22, -15, -13, -8, -3, 1, 6],
   final: [-29, -24, -17, -16, -10, -5, 2, 7],
+  dungeon: [-31, -24, -19, -17, -12, -7, -5, 0],
 };
+
+/**
+ * 旋法（教会旋法）。主音からの音度を半音で並べたもの。
+ * どの旋法を使うかで土地の性格が変わる。
+ *   エオリアン＝物悲しい / ドリアン＝古風で凛とした / フリギアン＝異国めいた不安
+ *   リディアン＝浮遊感のある明るさ / イオニアン＝素直な明るさ
+ */
+const MODES = {
+  aeolian: [0, 2, 3, 5, 7, 8, 10],
+  dorian: [0, 2, 3, 5, 7, 9, 10],
+  phrygian: [0, 1, 3, 5, 7, 8, 10],
+  lydian: [0, 2, 4, 6, 7, 9, 11],
+  ionian: [0, 2, 4, 5, 7, 9, 11],
+};
+
+/**
+ * 和音進行。数字は旋法上の音度（0 = 主和音）。
+ * 1 小節にひとつ進み、低音とパッドと旋律がこれを共有する。
+ */
+const PROGRESSIONS = {
+  explore: [0, 5, 3, 4],
+  combat: [0, 6, 5, 0, 3, 4, 4, 0],
+  boss: [0, 0, 5, 5, 3, 3, 4, 6],
+  final: [0, 1, 0, 1, 5, 6, 4, 4],
+  dungeon: [0, 0, 6, 0, 3, 3, 1, 0],
+};
+
+/**
+ * 地方ごとの調と旋法。探索中の音楽の色を決める。
+ * root は半音単位の移調量。
+ */
+export const REGION_TONE = {
+  downs: { root: 0, mode: 'dorian', bright: 0.65 },
+  gloomwood: { root: -3, mode: 'aeolian', bright: 0.25 },
+  cinder: { root: -1, mode: 'phrygian', bright: 0.20 },
+  mistfen: { root: -5, mode: 'aeolian', bright: 0.30 },
+  skyspire: { root: 2, mode: 'lydian', bright: 0.80 },
+  goldreach: { root: 5, mode: 'ionian', bright: 0.90 },
+  riftvale: { root: -6, mode: 'phrygian', bright: 0.15 },
+  coast: { root: 3, mode: 'dorian', bright: 0.70 },
+};
+
+/** 旋法と音度から和音（三和音）の構成音を作る */
+function chordOf(mode, degree, root) {
+  const sc = MODES[mode] || MODES.aeolian;
+  const at = (i) => {
+    const oct = Math.floor(i / sc.length) * 12;
+    return sc[((i % sc.length) + sc.length) % sc.length] + oct + root;
+  };
+  return [at(degree), at(degree + 2), at(degree + 4)];
+}
 
 export class AudioEngine {
   constructor() {
@@ -348,6 +400,29 @@ export class AudioEngine {
     const sky = game.sky;
     const p = game.player;
 
+    // ---- 地下：風も波も鳥もいない。反響と、遠くの水滴だけ ----
+    if (game.dungeon) {
+      a.g.gain.setTargetAtTime(0.014 * this.sfxVol, ctx.currentTime, 0.8);
+      a.lp.frequency.setTargetAtTime(180, ctx.currentTime, 0.8);
+      a.wg.gain.setTargetAtTime(0, ctx.currentTime, 0.6);
+      a.drip = (a.drip ?? 3) - dt;
+      if (a.drip <= 0) {
+        a.drip = 2.4 + Math.random() * 6.5;
+        // 水滴：高い音が短く落ちて、長く反響する
+        this.tone({
+          freq: 900 + Math.random() * 900, dur: 0.09, type: 'sine',
+          gain: 0.030, sweep: 0.35, reverb: 1.4,
+        });
+      }
+      a.groan = (a.groan ?? 8) - dt;
+      if (a.groan <= 0) {
+        a.groan = 9 + Math.random() * 16;
+        // 地鳴り
+        this.tone({ freq: 42 + Math.random() * 20, dur: 2.6, type: 'sine', gain: 0.035, attack: 0.9, reverb: 1.2 });
+      }
+      return;
+    }
+
     // 風：天候と標高で強くなる。ゆっくり息づかせる
     a.lfo += dt * 0.23;
     const gust = 0.65 + 0.35 * Math.sin(a.lfo * 1.7) * Math.sin(a.lfo * 0.53 + 1.2);
@@ -399,6 +474,62 @@ export class AudioEngine {
         }
       }
     }
+
+    // ---- 人里の気配：近くに集落があるとき ----
+    this.updateSettlement(dt, game);
+  }
+
+  /**
+   * 集落が近いと聞こえてくる音。
+   * 鍛冶の槌、遠くの話し声、鐘。夜は静まる。
+   */
+  updateSettlement(dt, game) {
+    const a = this.ambience;
+    const p = game.player;
+    let near = 0, hasSmith = false;
+    for (const poi of game.pois) {
+      if (poi.type !== 'village' && poi.type !== 'hermit') continue;
+      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
+      const r = poi.type === 'village' ? 70 : 26;
+      if (d > r) continue;
+      const w = 1 - d / r;
+      if (w > near) { near = w; hasSmith = poi.type === 'village' && (poi.size || 0) >= 6; }
+    }
+    a.town = (a.town ?? 3) - dt;
+    if (near < 0.12 || a.town > 0) return;
+    const night = game.sky.isNight;
+    a.town = (night ? 5.5 : 2.2) + Math.random() * (night ? 8 : 5);
+    const vol = near * (night ? 0.4 : 1);
+
+    const r = Math.random();
+    if (hasSmith && !night && r < 0.40) {
+      // 鍛冶の槌：不揃いな三連打
+      const n = 2 + (Math.random() * 2 | 0);
+      for (let i = 0; i < n; i++) {
+        this.noise({
+          dur: 0.09, gain: 0.045 * vol, freq: 2600 + Math.random() * 900, q: 3.0,
+          sweep: 0.35, delay: i * (0.22 + Math.random() * 0.1), reverb: 0.5,
+        });
+      }
+    } else if (r < 0.72) {
+      // 遠くの話し声：短い有声音を数個
+      const base = 150 + Math.random() * 120;
+      for (let i = 0; i < 2 + (Math.random() * 3 | 0); i++) {
+        this.tone({
+          freq: base * (0.85 + Math.random() * 0.4), dur: 0.11 + Math.random() * 0.1,
+          type: 'sawtooth', gain: 0.012 * vol, sweep: 0.8 + Math.random() * 0.4,
+          delay: i * (0.16 + Math.random() * 0.12), reverb: 0.7,
+        });
+      }
+    } else if (!night && r < 0.86) {
+      // 犬・家畜
+      this.tone({ freq: 420, dur: 0.16, type: 'sawtooth', gain: 0.020 * vol, sweep: 0.55, reverb: 0.6 });
+    } else if (night) {
+      // 夜の鐘（時報）
+      for (const h of [1, 2.02, 3.01]) {
+        this.tone({ freq: 220 * h, dur: 3.4, type: 'sine', gain: 0.030 * vol / h, attack: 0.02, reverb: 1.2 });
+      }
+    }
   }
 
   /* ------------------------------------------------------------ BGM */
@@ -408,55 +539,105 @@ export class AudioEngine {
     this.nextNote = 0;
   }
 
+  /** 今いる土地の調と旋法。探索中だけ土地の色を反映する */
+  toneOf(game) {
+    if (!game) return REGION_TONE.downs;
+    if (game.dungeon) return { root: -4, mode: 'phrygian', bright: 0.1 };
+    const id = game.world?.regionAt(game.player.x, game.player.z)?.id;
+    return REGION_TONE[id] || REGION_TONE.downs;
+  }
+
   update(dt, game) {
     if (!this.ready || this.muted) return;
     const ctx = this.ctx;
-    const wantVol = this.mode === 'none' ? 0 : this.musicVol * (this.mode === 'explore' ? 0.5 : 0.85);
+    const quiet = this.mode === 'explore' || this.mode === 'dungeon';
+    const wantVol = this.mode === 'none' ? 0 : this.musicVol * (quiet ? 0.5 : 0.85);
     this.musicGain.gain.setTargetAtTime(wantVol, ctx.currentTime, 0.8);
     if (this.mode === 'none') return;
 
-    const bpm = this.mode === 'boss' ? 112 : this.mode === 'final' ? 128 : this.mode === 'combat' ? 96 : 54;
+    const bpm = this.mode === 'boss' ? 112 : this.mode === 'final' ? 128
+      : this.mode === 'combat' ? 96 : this.mode === 'dungeon' ? 44 : 54;
     const spb = 60 / bpm;
     this.nextNote -= dt;
     if (this.nextNote > 0) return;
     this.nextNote = spb;
     this.beat++;
 
-    const scale = SCALES[this.mode] || SCALES.explore;
     const t = ctx.currentTime;
     const isBoss = this.mode === 'boss' || this.mode === 'final';
+    const isCalm = this.mode === 'explore' || this.mode === 'dungeon';
 
-    // ベース／ドローン
-    if (this.beat % 4 === 1 || isBoss) {
-      const root = scale[0] + (isBoss && this.beat % 8 === 5 ? 3 : 0);
+    // 土地の調と旋法（戦闘中は固定の緊迫した色にする）
+    const rt = isCalm ? this.toneOf(game) : { root: 0, mode: isBoss ? 'phrygian' : 'aeolian', bright: 0.3 };
+    const scale = SCALES[this.mode] || SCALES.explore;
+    const base = scale[0] + rt.root;
+
+    // 和音を 1 小節（4 拍）ごとに進める
+    const prog = PROGRESSIONS[this.mode] || PROGRESSIONS.explore;
+    const bar = Math.floor((this.beat - 1) / 4);
+    const degree = prog[bar % prog.length];
+    const chord = chordOf(rt.mode, degree, base);
+    const chordChanged = (this.beat - 1) % 4 === 0;
+
+    // ---- 低音：小節頭で和音の根音を置く ----
+    if (chordChanged || (isBoss && this.beat % 2 === 1)) {
       this.tone({
-        freq: note(root), dur: isBoss ? spb * 1.1 : spb * 4.2, type: isBoss ? 'sawtooth' : 'sine',
-        gain: isBoss ? 0.16 : 0.10, attack: isBoss ? 0.01 : 0.6, dest: this.musicGain, reverb: 0.5,
+        freq: note(chord[0]), dur: isBoss ? spb * 1.1 : spb * 4.2,
+        type: isBoss ? 'sawtooth' : 'sine',
+        gain: isBoss ? 0.16 : 0.10, attack: isBoss ? 0.01 : 0.6,
+        dest: this.musicGain, reverb: 0.5,
       });
     }
-    // 打楽器（戦闘時のみ）
+
+    // ---- パッド：和音を長く伸ばして響かせる ----
+    if (chordChanged) {
+      const padGain = isBoss ? 0.028 : this.mode === 'dungeon' ? 0.020 : 0.034;
+      const padDur = spb * (isBoss ? 3.4 : 4.6);
+      chord.forEach((n, i) => {
+        this.tone({
+          freq: note(n + 12), dur: padDur, type: isBoss ? 'triangle' : 'sine',
+          gain: padGain * (i === 0 ? 1 : 0.72), attack: isBoss ? 0.12 : 0.8,
+          detune: (i - 1) * 4, dest: this.musicGain, reverb: 0.9,
+        });
+      });
+    }
+
+    // ---- 打楽器 ----
     if (isBoss) {
       this.noise({ dur: 0.14, gain: 0.10, freq: 120, q: 0.6 });
       if (this.beat % 2 === 0) this.noise({ dur: 0.09, gain: 0.06, freq: 5200, q: 1.2 });
     } else if (this.mode === 'combat' && this.beat % 2 === 1) {
       this.noise({ dur: 0.12, gain: 0.05, freq: 160, q: 0.7 });
+    } else if (this.mode === 'dungeon' && this.beat % 8 === 1) {
+      // 遠くで何かが落ちる音
+      this.noise({ dur: 0.5, gain: 0.030, freq: 180, q: 1.6, sweep: 0.4, reverb: 1.0 });
     }
-    // 旋律
-    const density = isBoss ? 0.85 : this.mode === 'combat' ? 0.5 : 0.34;
+
+    // ---- 旋律：和音の構成音を優先し、たまに経過音を混ぜる ----
+    const density = isBoss ? 0.85 : this.mode === 'combat' ? 0.5
+      : this.mode === 'dungeon' ? 0.18 : 0.34;
     if (Math.random() < density) {
-      const n = scale[1 + ((Math.random() * (scale.length - 1)) | 0)];
+      const useChord = Math.random() < 0.66;
+      const n = useChord
+        ? chord[(Math.random() * 3) | 0] + 12
+        : (MODES[rt.mode][(Math.random() * 7) | 0] + base + 12);
       this.tone({
-        freq: note(n + 12), dur: spb * (isBoss ? 1.2 : 3.0),
+        freq: note(n), dur: spb * (isBoss ? 1.2 : 3.0),
         type: isBoss ? 'triangle' : 'sine',
         gain: isBoss ? 0.07 : 0.05, attack: isBoss ? 0.02 : 0.35,
         dest: this.musicGain, reverb: 0.8,
       });
     }
-    // 高音のきらめき（探索時）
-    if (!isBoss && this.beat % 8 === 3) {
-      const n = scale[(scale.length - 2 + (Math.random() * 2 | 0)) % scale.length];
-      this.tone({ freq: note(n + 24), dur: 2.4, type: 'sine', gain: 0.035, attack: 0.5, dest: this.musicGain, reverb: 0.9 });
+
+    // ---- 高音のきらめき：明るい土地ほどよく鳴る ----
+    if (isCalm && this.beat % 8 === 3 && Math.random() < 0.35 + rt.bright * 0.6) {
+      const n = chord[1 + ((Math.random() * 2) | 0)] + 24;
+      this.tone({
+        freq: note(n), dur: 2.4, type: 'sine',
+        gain: 0.02 + rt.bright * 0.03, attack: 0.5,
+        dest: this.musicGain, reverb: 0.9,
+      });
     }
-    void game;
+    void t;
   }
 }

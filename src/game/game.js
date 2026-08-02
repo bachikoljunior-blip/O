@@ -352,7 +352,7 @@ export class Game {
     if (!this.dungeon) this.updateDiscovery();
     this.updateMusic();
     this.audio.update(dt, this);
-    if (!this.dungeon) this.audio.updateAmbience(dt, this);
+    this.audio.updateAmbience(dt, this);
 
     // バフ
     if (p.spellBuff) {
@@ -1266,7 +1266,9 @@ export class Game {
       if (e.dead || !e.aggro) continue;
       if (Math.hypot(e.x - this.player.x, e.z - this.player.z) < 26) { combat = true; break; }
     }
-    this.audio.setMode(this.player.dead ? 'none' : combat ? 'combat' : 'explore');
+    // 地下では専用の、遅く低く沈んだ曲に切り替える
+    const calm = this.dungeon ? 'dungeon' : 'explore';
+    this.audio.setMode(this.player.dead ? 'none' : combat ? 'combat' : calm);
   }
 
   /* ------------------------------------------------------ コールバック */
