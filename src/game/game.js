@@ -317,6 +317,7 @@ export class Game {
     }
 
     // エンティティ
+    this.updateAggroTokens(dt);
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const e = this.enemies[i];
       const d = Math.hypot(e.x - p.x, e.z - p.z);
@@ -722,6 +723,102 @@ export class Game {
     this.audio.play('boss_phase');
     this.fx.bossPhase(b.x, b.y, b.z, [0.6, 0.7, 1]);
     this.camera.shake(0.6);
+  }
+
+  /* ------------------------------------------------ 群れの間合い管理 */
+  /**
+   * 同時に踏み込める敵の数を絞る。
+   * 全員が一斉に殴りかかると読み合いにならないので、
+   * 「踏み込み権」を近い者から数体に配り、残りは待ちの輪で牽制させる。
+   * 権利は数秒保持したあと手放し、別の個体に回る。
+   */
+  updateAggroTokens(dt) {
+    const p = this.player;
+    const list = this._tokenList || (this._tokenList = []);
+    list.length = 0;
+    for (const e of this.enemies) {
+      if (e.dead || e.boss) { if (e) e.token = !!e.boss; continue; }
+      if (!e.aggro || e.arch?.passive) { e.token = false; e.tokenT = 0; continue; }
+      if (e.arch?.ranged) { e.token = true; continue; }   // 射手は常に自由
+      list.push(e);
+    }
+    if (!list.length) return;
+
+    // ボス戦中は取り巻きを 1 体に絞る
+    const max = this.activeBoss ? 1 : list.length > 5 ? 3 : 2;
+    const contested = list.length > max;
+
+    let held = 0;
+    for (const e of list) {
+      e.tokenCd -= dt;
+      if (!e.token) continue;
+      e.tokenT -= dt;
+      if (e.tokenT <= 0) {
+        // 順番待ちがいなければ持ち続ける（1対1で急に引くのは不自然）
+        if (!contested) { e.tokenT = 2.5; held++; continue; }
+        e.token = false;
+        e.tokenCd = 0.9 + Math.random() * 1.4;
+      } else held++;
+    }
+    if (held >= max) return;
+
+    list.sort((a, b) => (
+      Math.hypot(a.x - p.x, a.z - p.z) - Math.hypot(b.x - p.x, b.z - p.z)
+    ));
+    for (const e of list) {
+      if (held >= max) break;
+      if (e.token || e.tokenCd > 0) continue;
+      e.token = true;
+      e.tokenT = 2.2 + Math.random() * 2.2;
+      held++;
+    }
+  }
+
+  /** 屍術士が死者を起こす */
+  summonMinions(caster, kind, count) {
+    const alive = this.enemies.filter((e) => !e.dead && e.summonedBy === caster).length;
+    if (alive >= 4) return;
+    let spawned = 0;
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * TAU;
+      const r = 2.4 + Math.random() * 3.2;
+      const x = caster.x + Math.sin(a) * r;
+      const z = caster.z + Math.cos(a) * r;
+      if (this.dungeon && !this.dungeon.isOpenAt(x, z)) continue;
+      const e = spawnEnemy(kind, {
+        x, y: this.groundHeight(x, z), z, yaw: Math.atan2(this.player.x - x, this.player.z - z),
+        leash: 200, hpMul: 0.7, echoMul: 0.35,
+      });
+      if (!e) continue;
+      e.summonedBy = caster;
+      e.aggro = true;
+      e.aiState = 'chase';
+      e.spawnFade = 0.6;
+      this.enemies.push(e);
+      this.fx.voidBurst(x, this.groundHeight(x, z) + 0.6, z);
+      spawned++;
+    }
+    if (spawned) {
+      this.audio.play('teleport');
+      this.ui.toast('屍術士が死者を起こした');
+    }
+  }
+
+  /** 群れの長が遠吠えで仲間を鼓舞する */
+  rallyAllies(howler, radius) {
+    let n = 0;
+    for (const e of this.enemies) {
+      if (e.dead || e === howler) continue;
+      if (Math.hypot(e.x - howler.x, e.z - howler.z) > radius) continue;
+      e.rally = 8;
+      if (!e.aggro && !e.arch?.passive) { e.aggro = true; e.aiState = 'chase'; }
+      n++;
+    }
+    howler.rally = 8;
+    this.fx.shockwave(howler.x, howler.y, howler.z, radius * 0.35);
+    this.audio.play('aggro', { pitch: 0.6 });
+    this.camera.shake(0.3);
+    if (n) this.ui.toast('遠吠えに群れが応えた');
   }
 
   /* -------------------------------------------------------- ボス */

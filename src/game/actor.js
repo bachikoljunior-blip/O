@@ -59,6 +59,12 @@ export class Actor {
     this.attackHits = null;
     this.hitFlash = 0;
     this.iframes = 0;
+    /**
+     * 被弾直後の猶予（秒）。
+     * これが無いと、複数の敵に囲まれた瞬間にハメ殺される。
+     * プレイヤーだけに与える。
+     */
+    this.hitGrace = opts.hitGrace || 0;
     this.weaponModel = opts.weapon || null;
     this.weaponTint = opts.weaponTint || [0.8, 0.82, 0.86];
     this.weaponScale = opts.weaponScale || 1;
@@ -232,6 +238,10 @@ export class Actor {
     dmg = Math.max(1, Math.round(dmg));
     this.hp -= dmg;
     this.hitFlash = 1;
+    // 立て続けの被弾に短い猶予を挟む（囲まれてのハメ殺し防止）
+    if (this.hitGrace > 0 && !opts.noFlinch && opts.type !== 'poison' && opts.type !== 'fire') {
+      this.iframes = Math.max(this.iframes, this.hitGrace);
+    }
 
     if (opts.bleed) this.status.bleed = Math.min(100, this.status.bleed + opts.bleed);
     if (opts.frost) this.status.frost = Math.min(100, this.status.frost + opts.frost);

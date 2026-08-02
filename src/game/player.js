@@ -11,7 +11,7 @@ const _tip = v3.new();
 
 export class Player extends Actor {
   constructor(opts = {}) {
-    super({ rig: 'humanoid', team: TEAM.PLAYER, radius: 0.4, height: 1.8, ...opts });
+    super({ rig: 'humanoid', team: TEAM.PLAYER, radius: 0.4, height: 1.8, hitGrace: 0.42, ...opts });
     this.name = opts.name || '灰の落人';
     this.level = 1;
     this.stats = { vit: 12, end: 11, str: 12, dex: 12, arc: 8, fth: 8 };

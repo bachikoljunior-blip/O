@@ -478,6 +478,67 @@ export const ENEMIES = {
     ],
     ai: { aggression: 0.6, circling: 0.2, retreat: 0.1, guard: 0 },
   },
+  /* ---- 読み合いを要求する型 ---- */
+  stalker: {
+    id: 'stalker', name: '影追い', tier: 3, hp: 175, poise: 16, def: 6,
+    speed: 4.2, runSpeed: 6.8, aggro: 26, echo: 200, body: 'humanoid',
+    tint: [0.20, 0.20, 0.26], h: 0.98, weapon: 'w_dagger', group: 2,
+    attacks: [
+      { id: 'jab', windup: 0.24, active: 0.09, recover: 0.26, dmg: 32, range: 2.2, arc: 1.3, poise: 12, motion: 'thrust', chain: 'jab2' },
+      { id: 'jab2', windup: 0.20, active: 0.09, recover: 0.44, dmg: 34, range: 2.2, arc: 1.3, poise: 12, motion: 'slash_l' },
+      { id: 'lunge', windup: 0.46, active: 0.12, recover: 0.62, dmg: 58, range: 6.5, arc: 1.0, poise: 24, motion: 'thrust', dash: 8 },
+      { id: 'slice', windup: 0.60, active: 0.11, recover: 0.70, dmg: 66, range: 2.6, arc: 1.8, poise: 26, motion: 'slash_r', delayable: true },
+    ],
+    // feint: 予備動作を途中で止めて回避を釣る / backstep: 攻撃後に間合いを切る
+    ai: { aggression: 0.7, circling: 0.75, retreat: 0.55, guard: 0, feint: 0.42, backstep: 0.6, punish: 0.85 },
+  },
+  halberdier: {
+    id: 'halberdier', name: '長柄の衛兵', tier: 3, hp: 265, poise: 45, def: 12,
+    speed: 3.0, runSpeed: 5.0, aggro: 24, echo: 230, body: 'humanoid',
+    tint: [0.40, 0.42, 0.46], h: 1.06, weapon: 'w_spear', group: 2, preferDist: 3.6,
+    attacks: [
+      { id: 'poke', windup: 0.46, active: 0.12, recover: 0.60, dmg: 44, range: 4.2, arc: 0.9, poise: 24, motion: 'thrust' },
+      { id: 'poke2', windup: 0.34, active: 0.12, recover: 0.70, dmg: 48, range: 4.4, arc: 0.9, poise: 24, motion: 'thrust' },
+      { id: 'sweep', windup: 0.62, active: 0.20, recover: 0.88, dmg: 58, range: 4.0, arc: 3.2, poise: 40, motion: 'spin', delayable: true },
+      { id: 'butt', windup: 0.34, active: 0.11, recover: 0.66, dmg: 26, range: 2.4, arc: 1.2, poise: 55, motion: 'thrust', guardBreak: true },
+    ],
+    ai: { aggression: 0.55, circling: 0.5, retreat: 0.7, guard: 0.15, spacing: 1, punish: 0.7 },
+  },
+  warden: {
+    id: 'warden', name: '大盾の番人', tier: 4, hp: 460, poise: 95, def: 22,
+    speed: 2.5, runSpeed: 4.0, aggro: 20, echo: 380, body: 'humanoid',
+    tint: [0.46, 0.46, 0.50], h: 1.16, weapon: 'w_sword', shield: true, group: 1,
+    attacks: [
+      { id: 'chop', windup: 0.52, active: 0.14, recover: 0.62, dmg: 66, range: 2.8, arc: 1.6, poise: 40, motion: 'slash_r' },
+      { id: 'shove', windup: 0.40, active: 0.13, recover: 0.78, dmg: 34, range: 2.4, arc: 1.6, poise: 90, motion: 'thrust', guardBreak: true, shock: 3 },
+      { id: 'crush', windup: 0.86, active: 0.18, recover: 1.0, dmg: 104, range: 3.4, arc: 2.0, poise: 70, motion: 'overhead', delayable: true },
+    ],
+    // 正面からの攻撃をよく弾く。回り込むか、盾崩しが要る
+    ai: { aggression: 0.45, circling: 0.2, retreat: 0.1, guard: 0.85, reactiveGuard: 0.9, punish: 0.6 },
+    frontBlock: 0.72,
+  },
+  necromancer: {
+    id: 'necromancer', name: '屍術士', tier: 4, hp: 210, poise: 18, def: 8,
+    speed: 2.9, runSpeed: 4.8, aggro: 34, echo: 420, body: 'humanoid',
+    tint: [0.24, 0.30, 0.28], h: 1.02, weapon: 'w_staff', group: 1, ranged: true, preferDist: 14,
+    attacks: [
+      { id: 'bolt', windup: 0.66, active: 0.05, recover: 0.6, dmg: 48, range: 30, arc: 0.2, poise: 14, motion: 'cast', projectile: 'void', volley: 2 },
+      { id: 'raise', windup: 1.15, active: 0.2, recover: 0.9, dmg: 0, range: 0, arc: 0, poise: 20, motion: 'cast', summon: 'skeleton', summonCount: 2 },
+      { id: 'blink', windup: 0.3, active: 0, recover: 0.35, dmg: 0, range: 0, arc: 0, poise: 0, motion: 'cast', teleport: 10 },
+    ],
+    ai: { aggression: 0.3, circling: 0.6, retreat: 0.95, guard: 0 },
+  },
+  direwolf: {
+    id: 'direwolf', name: '群れの長', tier: 3, hp: 240, poise: 38, def: 6,
+    speed: 5.0, runSpeed: 7.4, aggro: 26, echo: 250, body: 'beast',
+    tint: [0.24, 0.22, 0.24], h: 1.05, weapon: null, group: 1,
+    attacks: [
+      { id: 'bite', windup: 0.30, active: 0.12, recover: 0.46, dmg: 48, range: 2.5, arc: 1.3, poise: 20, motion: 'lunge' },
+      { id: 'pounce', windup: 0.46, active: 0.20, recover: 0.68, dmg: 70, range: 6.5, arc: 1.0, poise: 30, motion: 'pounce', dash: 7.5 },
+      { id: 'howl', windup: 0.8, active: 0.25, recover: 0.9, dmg: 0, range: 0, arc: 0, poise: 30, motion: 'cast', rally: 22 },
+    ],
+    ai: { aggression: 0.8, circling: 0.55, retreat: 0.2, guard: 0, punish: 0.8 },
+  },
   troll: {
     id: 'troll', name: '岩喰いのトロル', tier: 4, hp: 640, poise: 110, def: 14,
     speed: 2.4, runSpeed: 4.6, aggro: 24, echo: 520, body: 'humanoid',
@@ -777,14 +838,14 @@ BOSSES.gnawer = {
 
 /* ==================================================== 地方ごとの湧き表 */
 export const SPAWN_TABLE = {
-  downs: [['deer', 3], ['wolf', 3], ['boar', 2], ['bandit', 2], ['skeleton', 1]],
-  gloomwood: [['wolf', 3], ['deer', 2], ['skeleton', 2], ['bandit', 2], ['wraith', 1], ['troll', 0.4]],
-  cinder: [['imp', 4], ['brute', 2], ['mage', 1.5], ['knight', 1]],
-  mistfen: [['wraith', 3], ['skeleton', 2], ['boar', 1], ['mage', 1]],
-  skyspire: [['wolf', 2], ['knight', 2], ['troll', 1.2], ['archer', 1]],
-  goldreach: [['bandit', 3], ['deer', 2.5], ['archer', 2], ['boar', 2], ['knight', 1]],
-  riftvale: [['imp', 3], ['wraith', 2], ['brute', 1.5], ['troll', 1]],
-  coast: [['bandit', 2], ['deer', 2], ['wolf', 2], ['skeleton', 2], ['archer', 1]],
+  downs: [['deer', 3], ['wolf', 3], ['boar', 2], ['bandit', 2], ['skeleton', 1], ['direwolf', 0.5]],
+  gloomwood: [['wolf', 3], ['deer', 2], ['skeleton', 2], ['bandit', 2], ['wraith', 1], ['troll', 0.4], ['direwolf', 1], ['stalker', 1]],
+  cinder: [['imp', 4], ['brute', 2], ['mage', 1.5], ['knight', 1], ['halberdier', 1.2], ['warden', 0.8]],
+  mistfen: [['wraith', 3], ['skeleton', 2], ['boar', 1], ['mage', 1], ['necromancer', 0.9], ['stalker', 0.8]],
+  skyspire: [['wolf', 2], ['knight', 2], ['troll', 1.2], ['archer', 1], ['warden', 1.2], ['halberdier', 1]],
+  goldreach: [['bandit', 3], ['deer', 2.5], ['archer', 2], ['boar', 2], ['knight', 1], ['halberdier', 1.5]],
+  riftvale: [['imp', 3], ['wraith', 2], ['brute', 1.5], ['troll', 1], ['necromancer', 1.2], ['warden', 1], ['stalker', 1]],
+  coast: [['bandit', 2], ['deer', 2], ['wolf', 2], ['skeleton', 2], ['archer', 1], ['stalker', 0.8]],
 };
 
 /** 敵の落とすもの */
@@ -803,6 +864,11 @@ export const DROPS = {
   troll: [['ore_silver', 0.6, 2], ['shard_ancient', 0.12, 1]],
   crawler: [['beast_bone', 0.5, 1], ['blood_flower', 0.2, 1]],
   gargoyle: [['ore_silver', 0.45, 1], ['shard_ancient', 0.08, 1], ['echo_shard', 0.2, 1]],
+  stalker: [['throwing_knife', 0.5, 3], ['ore_iron', 0.3, 1], ['echo_shard', 0.12, 1]],
+  halberdier: [['ore_iron', 0.5, 2], ['ore_silver', 0.15, 1]],
+  warden: [['ore_silver', 0.5, 1], ['echo_shard', 0.22, 1]],
+  necromancer: [['bone_ash', 0.45, 1], ['crystal', 0.5, 2], ['echo_shard', 0.2, 1]],
+  direwolf: [['beast_bone', 0.9, 3], ['echo_shard', 0.15, 1]],
 };
 
 /** 宝箱の中身（tier ごと） */

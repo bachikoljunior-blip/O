@@ -92,6 +92,48 @@ function buildEnemyExtras(def) {
       }
       ex.push({ joint: 'rump', shape: 'partSlim', offset: [0, 0.06, -0.20], size: [0.22, 0.20, 0.10], tint: [0.86, 0.82, 0.74] });
       break;
+    /* ---------------------------------------------- 読み合いを要求する型 */
+    case 'stalker':
+      // 目だけが光る覆面と、なびく外套
+      ex.push({ joint: 'head', shape: 'partSlim', offset: [0, 0.14, -0.02], size: [0.40, 0.38, 0.42], tint: [0.10, 0.10, 0.14] });
+      ex.push({ joint: 'head', shape: 'ball', offset: [-0.08, 0.08, 0.16], size: [0.07, 0.05, 0.05], tint: [0.9, 0.35, 0.35], emissive: 1.0 });
+      ex.push({ joint: 'head', shape: 'ball', offset: [0.08, 0.08, 0.16], size: [0.07, 0.05, 0.05], tint: [0.9, 0.35, 0.35], emissive: 1.0 });
+      cloth(0, [0.13, 0.13, 0.17], 'chest', 3);
+      cloth(3, [0.11, 0.11, 0.15], 'pelvis', 2);
+      break;
+    case 'halberdier':
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.16, -0.01], size: [0.44, 0.20, 0.50], tint: [t[0] * 1.1, t[1] * 1.1, t[2] * 1.12] });
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.05, 0.02], size: [0.40, 0.30, 0.40], tint: [t[0] * 0.9, t[1] * 0.9, t[2] * 0.94] });
+      for (const s of ['shoulderL', 'shoulderR']) {
+        ex.push({ joint: s, shape: 'part', offset: [0, -0.03, 0], size: [0.28, 0.20, 0.28], tint: [t[0] * 1.15, t[1] * 1.15, t[2] * 1.18] });
+      }
+      cloth(0, [0.22, 0.30, 0.44], 'pelvis', 2);
+      break;
+    case 'warden':
+      // 兜・肩・胸当てを厚くして「硬そう」に見せる
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.14, -0.01], size: [0.46, 0.48, 0.46], tint: [t[0] * 1.12, t[1] * 1.12, t[2] * 1.14] });
+      ex.push({ joint: 'head', shape: 'part', offset: [0, 0.10, 0.21], size: [0.30, 0.07, 0.10], tint: [0.04, 0.04, 0.06] });
+      ex.push({ joint: 'head', shape: 'spike', offset: [0, 0.40, 0], size: [0.10, 0.24, 0.10], tint: [0.66, 0.60, 0.30], emissive: 0.2 });
+      ex.push({ joint: 'chest', shape: 'part', offset: [0, 0.28, 0.04], size: [0.62, 0.62, 0.42], tint: [t[0] * 1.06, t[1] * 1.06, t[2] * 1.08] });
+      for (const s of ['shoulderL', 'shoulderR']) {
+        ex.push({ joint: s, shape: 'part', offset: [0, -0.02, 0], size: [0.38, 0.28, 0.38], tint: [t[0] * 1.16, t[1] * 1.16, t[2] * 1.2] });
+      }
+      cloth(0, [0.20, 0.24, 0.34], 'pelvis', 3);
+      break;
+    case 'necromancer':
+      ex.push({ joint: 'head', shape: 'partSlim', offset: [0, 0.18, -0.05], size: [0.46, 0.46, 0.50], tint: [0.12, 0.16, 0.15] });
+      ex.push({ joint: 'head', shape: 'ball', offset: [0, 0.06, 0.14], size: [0.10, 0.08, 0.06], tint: [0.4, 1.0, 0.65], emissive: 1.0 });
+      ex.push({ joint: 'chest', shape: 'partSlim', offset: [0, 0.30, -0.16], size: [0.30, 0.40, 0.12], tint: [0.70, 0.68, 0.60] });
+      cloth(0, [t[0] * 1.2, t[1] * 1.2, t[2] * 1.25], 'chest', 2);
+      cloth(2, [t[0] * 1.0, t[1] * 1.0, t[2] * 1.05], 'pelvis', 3);
+      break;
+    case 'direwolf':
+      for (const sx of [-1, 1]) {
+        ex.push({ joint: 'withers', shape: 'spike', offset: [sx * 0.12, 0.18, 0.02], size: [0.06, 0.26, 0.06], tint: [0.60, 0.58, 0.56], rot: [-0.3, 0, -sx * 0.3] });
+        ex.push({ joint: 'head', shape: 'ball', offset: [sx * 0.08, 0.05, 0.13], size: [0.07, 0.06, 0.05], tint: [1.0, 0.82, 0.3], emissive: 0.95 });
+      }
+      ex.push({ joint: 'rump', shape: 'spike', offset: [0, 0.14, -0.06], size: [0.07, 0.22, 0.07], tint: [0.55, 0.53, 0.52], rot: [-0.5, 0, 0] });
+      break;
     /* ------------------------------------------------ ダンジョンの主 */
     case 'ossuar':
       // 冠と、肋を思わせる胸甲、引きずる長衣
@@ -170,9 +212,21 @@ export class Enemy extends Actor {
     this.patrolAngle = Math.random() * TAU;
     this.patrolTimer = 0;
     this.ai = def.ai || { aggression: 0.5, circling: 0.4, retreat: 0.3, guard: 0 };
-    this.shieldData = def.shield ? { block: 0.7, stability: 40 } : null;
+    this.shieldData = def.shield
+      ? { block: def.frontBlock || 0.7, stability: def.frontBlock ? 62 : 40 }
+      : null;
+    this.maxStamina = 100;
     this.stamina = 100;
     this.chainNext = null;
+    /* --- 読み合い用の状態 --- */
+    this.token = false;      // 踏み込み権（同時に殴りかかれる数を絞る）
+    this.tokenT = 0;         // 権利の残り保持時間
+    this.tokenCd = 0;        // 手放したあとの再取得までの間
+    this.retreatT = 0;       // 攻撃後に間合いを切っている時間
+    this.rally = 0;          // 遠吠えによる鼓舞の残り
+    this.feintCd = 0;        // フェイントの連発を防ぐ
+    this.summonCd = 0;       // 死者を起こす間隔
+    this.rallyCd = 0;        // 遠吠えの間隔
     this.poi = opts.poi || null;
     this.superArmor = def.h >= 1.6;
     this.spawnFade = 0;
@@ -191,6 +245,15 @@ export class Enemy extends Actor {
     this.attackCd -= dt;
     this.strafeTimer -= dt;
     this.think -= dt;
+    this.retreatT -= dt;
+    this.feintCd -= dt;
+    this.summonCd -= dt;
+    this.rallyCd -= dt;
+    if (this.rally > 0) this.rally -= dt;
+    // スタミナ回復（盾持ちが一度崩されたきりにならないように）
+    if (this.stamina < this.maxStamina) {
+      this.stamina = Math.min(this.maxStamina, this.stamina + (this.blocking ? 9 : 26) * dt);
+    }
 
     const p = game.player;
     const dx = p.x - this.x, dz = p.z - this.z;
@@ -281,41 +344,95 @@ export class Enemy extends Actor {
     return this.speed;
   }
 
+  /**
+   * プレイヤーが「今なら差し込める」状態か。
+   * 攻撃の硬直・回復動作・体勢崩れは、こちらの攻め時。
+   */
+  playerOpening(p) {
+    if (p.dead) return 0;
+    if (p.state === 'stagger') return 1.0;
+    if (p.state === 'drink' || p.state === 'cast') return 0.85;
+    if (p.state === 'attack' && p.attackPhase && p.attackPhase() === 'recover') return 0.7;
+    if (p.stamina !== undefined && p.stamina < 18) return 0.5;
+    return 0;
+  }
+
   /** 戦闘中の意思決定 */
   combat(dt, game, dist, dx, dz) {
     const p = game.player;
     const ai = this.ai;
     const ranged = this.arch.ranged;
-    const preferred = ranged ? this.arch.preferDist : this.bestRange() * 0.85;
+    const preferred = ranged
+      ? this.arch.preferDist
+      : (this.arch.preferDist || this.bestRange() * 0.85);
 
     this.faceTowards(p.x, p.z, dt, ranged ? 4 : 6.5);
 
+    const opening = this.playerOpening(p);
+    // 隙を見せた相手には踏み込み権が無くても寄る。
+    // ただし「もともと間合いにいた者」だけ。でないと群れ全員が一斉に殺到する。
+    const punishable = opening > 0.4 && dist < preferred + 2.4;
+    const pressing = this.token || ranged || this.boss || punishable;
+    const rallyBonus = this.rally > 0 ? 0.25 : 0;
+
+    // 盾：相手が振ってきたら合わせて構える（乱数で構えるより読み合いになる）
+    if (!ranged && dist < 4.6) {
+      const swinging = p.state === 'attack' && p.attackPhase && p.attackPhase() !== 'recover';
+      if (ai.reactiveGuard && swinging && Math.random() < ai.reactiveGuard) this.blocking = true;
+      else if (ai.guard > 0 && Math.random() < ai.guard * dt * 3) this.blocking = true;
+    }
+
     // 攻撃判断
-    if (this.attackCd <= 0 && this.canAct()) {
-      const options = this.attackList().filter((a) => dist <= a.range * 1.05 + this.radius);
+    if (this.attackCd <= 0 && this.canAct() && this.retreatT <= 0 && pressing) {
+      // 実際の当たり判定（range + 相手の半径）に合わせて選ぶ。
+      // ここを甘くすると、届かない間合いから振って空振りし続ける。
+      const options = this.attackList().filter((a) => {
+        if (a.summon) return this.summonCd <= 0 && dist < 22;
+        if (a.rally) return this.rallyCd <= 0 && dist < 24;
+        if (!a.range) return true;
+        if (a.dash) return dist <= a.range && dist > 2.2;   // 突進は離れてこそ
+        return dist <= a.range + p.radius * 0.5;
+      });
       if (options.length) {
-        const roll = Math.random();
-        if (roll < 0.35 + ai.aggression * 0.6) {
-          const a = options[(Math.random() * options.length) | 0];
-          this.beginAttack(a, game);
+        const want = 0.35 + ai.aggression * 0.6 + opening * (ai.punish || 0.4) + rallyBonus;
+        if (Math.random() < want) {
+          // 隙を突くときは差し込みの速い技を、
+          // フェイントを打つときは読ませるために遅い技を選ぶ
+          let a = null;
+          let feint = false;
+          // 召喚・遠吠えは自前の長いクールダウンで守られているので最優先で通す
+          const utility = options.filter((o) => o.summon || o.rally);
+          if (utility.length && Math.random() < 0.6) {
+            a = utility[(Math.random() * utility.length) | 0];
+          } else if (opening > 0.5) {
+            const fast = options.filter((o) => o.windup <= 0.5 && !o.summon && !o.rally);
+            if (fast.length) a = fast[(Math.random() * fast.length) | 0];
+          } else if (ai.feint && this.feintCd <= 0 && Math.random() < ai.feint) {
+            const slow = options.filter((o) => (
+              o.windup >= 0.34 && !o.summon && !o.rally && !o.projectile && !o.teleport
+            ));
+            if (slow.length) { a = slow[(Math.random() * slow.length) | 0]; feint = true; }
+          }
+          if (!a) a = options[(Math.random() * options.length) | 0];
+          this.beginAttack(a, game, feint);
           return 0;
         }
       }
-    }
-
-    // 盾を構える
-    if (ai.guard > 0 && dist < 4.5 && Math.random() < ai.guard * dt * 3) {
-      this.blocking = true;
     }
 
     // 位置取り
     let mx = 0, mz = 0, speed = this.speed;
     const l = Math.hypot(dx, dz) || 1;
     const fx = dx / l, fz = dz / l;
-    if (dist > preferred + 1.2) {
+    // 権利を持たない近接は「待ちの輪」で牽制する
+    const ring = pressing ? preferred : preferred + 3.6;
+    if (this.retreatT > 0) {
+      mx = -fx; mz = -fz;
+      speed = this.speed * 0.9;
+    } else if (dist > ring + 0.5) {
       mx = fx; mz = fz;
       speed = dist > 9 ? this.runSpeed : this.speed;
-    } else if (dist < preferred - 1.4) {
+    } else if (dist < ring - 1.2) {
       mx = -fx; mz = -fz;
       speed = this.speed * (ranged ? 1.0 : 0.75);
     } else {
@@ -323,38 +440,75 @@ export class Enemy extends Actor {
         this.strafeTimer = 1.0 + Math.random() * 1.6;
         if (Math.random() < 0.4) this.strafeDir *= -1;
       }
-      if (Math.random() < ai.circling) {
+      // 待機中は必ず横に流れる（棒立ちを無くす）
+      if (!pressing || Math.random() < ai.circling) {
         mx = -fz * this.strafeDir; mz = fx * this.strafeDir;
-        speed = this.speed * 0.7;
+        speed = this.speed * (pressing ? 0.7 : 0.85);
       }
     }
+    // 仲間との重なりをほどく（団子にならないように）
+    let sx = 0, sz = 0;
+    for (const o of game.enemies) {
+      if (o === this || o.dead) continue;
+      const ox = this.x - o.x, oz = this.z - o.z;
+      const od = Math.hypot(ox, oz);
+      const want = this.radius + o.radius + 0.35;
+      if (od > want || od < 1e-4) continue;
+      const k = (want - od) / want;
+      sx += (ox / od) * k; sz += (oz / od) * k;
+    }
+    if (sx || sz) { mx += sx * 1.6; mz += sz * 1.6; }
+
     if (this.blocking) speed *= 0.5;
+    if (this.rally > 0) speed *= 1.15;
     if (this.frostSlow > 0) { this.frostSlow -= dt; speed *= 0.7; }
-    if (mx || mz) this.moveOnGround(dt, game, mx, mz, speed);
+    if (mx || mz) this.moveOnGround(dt, game, mx, mz, Math.max(speed, this.speed * 0.35));
     else return 0;
     return speed;
   }
 
   attackList() { return this.arch.attacks; }
   attackById(id) { return this.attackList().find((a) => a.id === id); }
+  /**
+   * 詰めるべき間合い。
+   * 突進技（dash）や飛び道具は「そこまで下がって良い理由」にならないので除く。
+   * これを入れないと、飛びかかりを持つ敵が遠巻きに突っ立つ。
+   */
   bestRange() {
-    let r = 2;
-    for (const a of this.attackList()) r = Math.max(r, a.range);
-    return r;
+    let r = 0;
+    for (const a of this.attackList()) {
+      if (a.dash || a.projectile || a.summon || a.rally || a.teleport) continue;
+      if (!a.range) continue;
+      r = Math.max(r, a.range);
+    }
+    return r || 2.4;
   }
 
-  beginAttack(a, game) {
+  beginAttack(a, game, feint = false) {
     this.currentAttack = a;
+    const sm = this.speedMul || 1;
+    // 溜めのゆらぎ：同じ技でもタイミングをずらして「覚えたら勝ち」にしない
+    let windup = a.windup * (0.92 + Math.random() * 0.16);
+    if (a.delayable && Math.random() < 0.45) windup *= 1.2 + Math.random() * 0.55;
+    if (this.rally > 0) windup *= 0.88;
     this.startAttack({
-      windup: a.windup / (this.speedMul || 1), active: a.active,
-      recover: a.recover / (this.speedMul || 1), motion: a.motion, dmg: 1,
+      windup: windup / sm, active: a.active,
+      recover: a.recover / sm, motion: a.motion, dmg: 1,
       range: a.range, arc: a.arc, poise: a.poise,
     }, game);
     this.attack.src = a;
-    this.attackCd = 0.5 + Math.random() * 1.2 + a.recover;
+    // 硬直（recover）は攻撃モーションの中で既に消費している。
+    // 丸ごと上乗せすると間延びするが、0 にすると大技の隙が消えて反撃できない。
+    // 半分だけ乗せて「大きい技ほど大きい隙」を残す。
+    this.attackCd = 0.3 + Math.random() * 0.7 + (a.recover || 0) * 0.55;
+    // フェイント：振りかぶって止める。早めのローリングを釣る
+    this.feinting = feint && a.windup >= 0.34;
+    if (this.feinting) this.feintCd = 2.6 + Math.random() * 2.4;
     if (a.teleport) this.doTeleport(a.teleport, game);
     if (a.dash) this.dashPending = a.dash;
     if (a.volley) this.volleyLeft = a.volley;
+    if (a.summon) this.summonCd = 12 + Math.random() * 6;
+    if (a.rally) this.rallyCd = 14 + Math.random() * 6;
     game.onEnemyAttack?.(this, a);
   }
 
@@ -382,6 +536,25 @@ export class Enemy extends Actor {
     if (phase === 'windup' && !this.arch.ranged) {
       // 予備動作中もわずかに追尾
       this.faceTowards(game.player.x, game.player.z, dt, 2.2);
+      // 届かないなら踏み込む（振りかぶってから一歩出る）
+      if (!this.dashPending && !this.dashV && !src.summon && !src.rally) {
+        const need = (src.range || 2.4) * 0.75;
+        if (dist > need) {
+          const p2 = game.player;
+          this.moveOnGround(dt, game, p2.x - this.x, p2.z - this.z, this.speed * 0.6);
+          moveSpeed = this.speed * 0.6;
+        }
+      }
+      // フェイント：振り切らずに止める
+      if (this.feinting && this.animT > a.windup * 0.66) {
+        this.feinting = false;
+        this.attack = null;
+        this.dashPending = null;
+        this.setState('idle', 0.14);
+        this.attackCd = 0.22 + Math.random() * 0.3;   // すぐ本命が来る
+        game.audio.play('swing', { pitch: 1.45 });
+        return 0;
+      }
     }
 
     if (this.dashPending && this.animT >= a.windup * 0.85) {
@@ -399,7 +572,17 @@ export class Enemy extends Actor {
 
     if (phase === 'active') {
       const p = game.player;
-      if (src.projectile) {
+      if (src.summon) {
+        if (!this.attackApplied) {
+          this.attackApplied = true;
+          game.summonMinions?.(this, src.summon, src.summonCount || 2);
+        }
+      } else if (src.rally) {
+        if (!this.attackApplied) {
+          this.attackApplied = true;
+          game.rallyAllies?.(this, src.rally);
+        }
+      } else if (src.projectile) {
         if (!this.attackApplied) {
           this.attackApplied = true;
           const n = src.volley || 1;
@@ -439,8 +622,14 @@ export class Enemy extends Actor {
         this.chainQueued = true;
         this.chainNext = src.chain;
       }
+      // 連携に繋がないなら、間合いを切って仕切り直す
+      if (this.ai.backstep && !this.chainQueued && !this.backstepQueued) {
+        this.backstepQueued = true;
+        if (Math.random() < this.ai.backstep) this.retreatT = 0.4 + Math.random() * 0.45;
+      }
     } else {
       this.chainQueued = false;
+      this.backstepQueued = false;
     }
     return moveSpeed;
   }
