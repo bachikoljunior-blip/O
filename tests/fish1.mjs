@@ -68,22 +68,31 @@ const leap = await page.evaluate(async () => {
   const s = [...g.fish.schools.values()][0];
   const px = p.x, pz = p.z;
   if (s) { p.x = s.x + 30; p.z = s.z; p.y = g.groundHeight(p.x, p.z); }
-  let jumped = 0, maxAbove = 0;
+  let jumped = 0, maxAbove = 0, perSchool = 0, schools = 0;
   for (let i = 0; i < 60 * 90; i++) {
     g.fish.update(1 / 60, g);
     jumped = Math.max(jumped, g.fish.jumping);
+    schools = Math.max(schools, g.fish.schools.size);
+    // 沸騰しないことの本体は「一つの群れから同時に二匹跳ねない」こと。
+    // 全体の同時数は読み込まれている群れの数で決まるので、そこを上限にしても
+    // 見えている数を測ったことにならない
+    for (const sc of g.fish.schools.values()) {
+      perSchool = Math.max(perSchool, sc.fish.filter((f) => f.jump).length);
+    }
     g.fish.forEach((f, out) => { if (out) maxAbove = Math.max(maxAbove, f.y - g.seaLevel); });
   }
   p.x = px; p.z = pz; p.y = g.groundHeight(px, pz);
   g.audio.play = oPlay; g.fx.splash = oSplash;
-  return { jumped, maxAbove: +maxAbove.toFixed(2), splashes,
+  return { jumped, perSchool, schools, maxAbove: +maxAbove.toFixed(2), splashes,
     sfx: sfx.filter((n) => n === 'splash').length };
 });
-console.log(`90 秒見物: 同時に跳んだ最大 ${leap.jumped} 匹　水面から ${leap.maxAbove}m　飛沫 ${leap.splashes} 回　音 ${leap.sfx} 回`);
+console.log(`90 秒見物: 同時に跳んだ最大 ${leap.jumped} 匹（群れ ${leap.schools} つ・1つの群れから最大 ${leap.perSchool} 匹）　水面から ${leap.maxAbove}m　飛沫 ${leap.splashes} 回　音 ${leap.sfx} 回`);
 ok('魚が跳ねる', leap.maxAbove > 0.3, `${leap.maxAbove}m`);
 ok('跳ねると飛沫が立つ', leap.splashes > 0, `${leap.splashes}回`);
 ok('跳ねると音がする', leap.sfx > 0, `${leap.sfx}回`);
-ok('跳ねすぎない（水面が沸騰しない）', leap.jumped <= 3, `同時 ${leap.jumped}匹`);
+ok('一つの群れから同時に二匹は跳ねない', leap.perSchool <= 1, `同時 ${leap.perSchool}匹`);
+ok('跳ねすぎない（水面が沸騰しない）', leap.jumped <= leap.schools,
+  `同時 ${leap.jumped}匹 / 群れ ${leap.schools}つ`);
 
 /* ---------- 3. 近づくと散って沈む ---------- */
 const spook = await page.evaluate(async () => {
