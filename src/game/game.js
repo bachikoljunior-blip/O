@@ -1353,8 +1353,10 @@ export class Game {
         const loot = CHEST_TABLE[clamp(c.tier, 1, CHEST_TABLE.length - 1)];
         p.echo += loot.echo;
         for (const [item, n] of loot.items) { p.addItem(item, n); this.ui.itemGain(item, n); }
-        this.ui.toast(`宝箱：残響 +${loot.echo}`);
-        this.audio.play('chest');
+        // 主の間の宝は、その階でいちばんの取り分。同じ言い方で流さない
+        this.ui.toast(c.boss ? `あるじの宝：残響 +${loot.echo}` : `宝箱：残響 +${loot.echo}`,
+          c.boss ? 'big gold' : '');
+        this.audio.play(c.boss ? 'levelup' : 'chest');
         this.fx.heal(c.x, 0.6, c.z);
         this.quests.count.dungeonChests = (this.quests.count.dungeonChests || 0) + 1;
         break;

@@ -38,6 +38,22 @@ const THEMES = {
   },
 };
 
+/**
+ * 地下の取り分。
+ *
+ * これまでは脇部屋も主の間も min(5, rank+1) で頭打ちになり、深く潜ると
+ * どの箱も最上等級になっていた。地下ひとつ（3層）で残響 54,880 ——
+ * 地上ぜんぶの 79%、古き欠片は 17 個（極みに要るのは 3 個）。
+ * 最初の地下を踏破した時点で、以後の探索に意味がなくなる。
+ *
+ * 脇部屋の箱は等級4で止め、最上等級は主の間だけに残す。床のあるじを
+ * 倒すことが、その階でいちばんの取り分であるようにする。
+ * 数も減らす（部屋の 55% → 34%）。
+ */
+const SIDE_CHEST_CHANCE = 0.34;
+function sideChestTier(rank) { return Math.max(1, Math.min(4, 1 + (rank / 2 | 0))); }
+function bossChestTier(rank) { return Math.max(2, Math.min(5, 2 + (rank * 0.8 | 0))); }
+
 export class Dungeon {
   /**
    * @param poi   入口となる POI
@@ -290,14 +306,14 @@ export class Dungeon {
         this.bossArena = { x: wx, z: wz, r: Math.max(r.w, r.h) * CELL * 0.55 };
         this.bossChest = {
           x: wx + 1.8, z: wz - (r.h - 1) * CELL * 0.4,
-          tier: Math.min(5, 2 + this.rank), opened: false, id: `dboss`, boss: true,
+          tier: bossChestTier(this.rank), opened: false, id: `dboss`, boss: true,
         };
         this.chests.push(this.bossChest);
         this.stairPoint = { x: wx, z: wz + (r.h - 1) * CELL * 0.36 };
         this.gates = this.findGates(r);
       } else {
-        if (this.rng() < 0.55) {
-          this.chests.push({ x: wx, z: wz, tier: Math.min(5, 1 + this.rank), opened: false, id: `d${i}` });
+        if (this.rng() < SIDE_CHEST_CHANCE) {
+          this.chests.push({ x: wx, z: wz, tier: sideChestTier(this.rank), opened: false, id: `d${i}` });
         }
         this.spawns.push({
           kind: this.theme.enemies[(this.rng() * this.theme.enemies.length) | 0],
