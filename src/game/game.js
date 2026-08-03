@@ -12,6 +12,7 @@ import { generatePOIs } from '../world/pois.js';
 import { Blockers } from '../world/blockers.js';
 import { Wildlife } from '../world/wildlife.js';
 import { Travellers } from '../world/travellers.js';
+import { Fish } from '../world/fish.js';
 import { Sky } from '../world/sky.js';
 import { Dungeon } from '../world/dungeon.js';
 
@@ -128,6 +129,7 @@ export class Game {
     this.npcs = [];
     this.wildlife = new Wildlife();
     this.travellers = new Travellers();
+    this.fish = new Fish();
     this.projectiles = [];
     this.gatherables = new Map();
     this.harvested = new Set();
@@ -392,6 +394,7 @@ export class Game {
     if (!this.dungeon) this.mount.update(dt, this);
     this.wildlife.update(dt, this);
     this.travellers.update(dt, this);
+    this.fish.update(dt, this);
     this.updateProjectiles(dt);
     this.updateSwimming(dt);
     if (this.dungeon) {
@@ -1732,6 +1735,21 @@ export class Game {
           const body = flying ? 1 - f * 0.10 : 1;
           writeInstance(bb.data, o, bird.x, bird.y, bird.z, bird.yaw,
             wing, body, 1, 1, 1, 1, 1, 0, 0, 0, 0.5);
+        });
+      }
+    }
+
+    // 魚。水面下は水越しに見えるので、少し暗く沈ませる
+    {
+      const fb = renderer.batchFor('fish');
+      if (fb) {
+        this.fish.forEach((f, out) => {
+          const o = fb.alloc();
+          const w = Math.sin(f.wag);
+          const k = out ? 1 : 0.55;              // 水中は暗く
+          writeInstance(fb.data, o, f.x, f.y, f.z, f.yaw,
+            1 + w * 0.22, 1 - Math.abs(w) * 0.08, 1,
+            k, k * 1.02, k * 1.1, out ? 1 : 0.72, 0, out ? 0.15 : 0, 0, 0.5);
         });
       }
     }

@@ -420,6 +420,36 @@ function bird(b) {
   b.pop();
 }
 
+/**
+ * 魚。水面から見える一瞬のためのものなので、胴と尾と背びれだけ。
+ * 頭は +Z。X スケールを振ると身をよじって見える。
+ */
+function fish(b) {
+  const body = [0.42, 0.50, 0.58];
+  const belly = [0.78, 0.80, 0.80];
+  b.push().scale(1, 1, 1);
+  b.roundedBox(0.20, 0.24, 0.62, 0.09, body, 3);
+  b.pop();
+  // 腹（下面を明るく）
+  b.push().translate(0, -0.09, 0.02);
+  b.roundedBox(0.16, 0.09, 0.48, 0.05, belly, 2);
+  b.pop();
+  // 尾
+  b.push().translate(0, 0, -0.40);
+  b.box(0.05, 0.30, 0.22, body);
+  b.pop();
+  // 背びれ
+  b.push().translate(0, 0.16, -0.02);
+  b.box(0.04, 0.16, 0.26, body);
+  b.pop();
+  // 目
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 0.10, 0.06, 0.24);
+    b.box(0.04, 0.05, 0.04, [0.06, 0.06, 0.08]);
+    b.pop();
+  }
+}
+
 function grassTuft(b, rng) {
   // 細い草の葉を数枚。頂点の高さに応じて風になびく
   for (let i = 0; i < 5; i++) {
@@ -917,6 +947,8 @@ export function buildModels(gl) {
   add('grass', (b) => grassTuft(b, makeRng(1234)));
   // 鳥。羽ばたきは羽の左右スケールを振って出すので、翼は原点から左右へ伸ばす
   add('bird', bird);
+  // 魚。尾の振りはインスタンスの X スケールで出す
+  add('fish', fish);
   add('crystal', (b) => crystal(b, makeRng(555)));
 
   add('house_a', (b) => house(b, makeRng(11), 6, 5, 3.2));
