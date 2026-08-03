@@ -206,12 +206,17 @@ export class Renderer {
   render(game) {
     const gl = this.gl;
     const cam = game.camera;
+    const P = game._prof;
+    const _t0 = P ? performance.now() : 0;
     this.frustum.fromMatrix(cam.viewProj);
 
     // 収集
     this.begin();
+    if (P) game._span('emit:準備', _t0);
     game.emitInstances(this);
+    const _t1 = P ? performance.now() : 0;
     for (const b of this.batches.values()) b.upload();
+    if (P) game._span('インスタンス転送', _t1);
 
     const inDungeon = !!game.dungeon;
 
@@ -313,7 +318,8 @@ export class Renderer {
       if (!shadowPass && !this.frustum.sphere(c.center[0], c.center[1], c.center[2], c.radius)) continue;
       if (shadowPass) {
         const dx = c.center[0] - game.player.x, dz = c.center[2] - game.player.z;
-        if (Math.hypot(dx, dz) > this.q.shadowRange + CHUNK) continue;
+        const r = this.q.shadowRange + CHUNK;
+        if (dx * dx + dz * dz > r * r) continue;      // 平方のまま比べる
         if (c.lod > 1) continue;
       }
       if (!c.batch) {
@@ -337,11 +343,14 @@ export class Renderer {
     const bands = [[0, 0.42, 1.0], [0.42, 0.72, 0.75], [0.72, 1.0, 0.4]];
     const maxD = this.q.grassDist;
     for (const [lo, hi, alpha] of bands) {
+      // 帯の境も平方で比べる（d/maxD の代わりに d² と (lo*maxD)²）
+      const lo2 = (lo * maxD) * (lo * maxD), hi2 = (hi * maxD) * (hi * maxD);
       gb.reset();
       for (const c of chunks) {
         if (!c.grass || !c.grass.length) continue;
-        const d = Math.hypot(c.center[0] - px, c.center[2] - pz) / maxD;
-        if (d < lo || d >= hi) continue;
+        const dx = c.center[0] - px, dz = c.center[2] - pz;
+        const d = dx * dx + dz * dz;
+        if (d < lo2 || d >= hi2) continue;
         if (!this.frustum.sphere(c.center[0], c.center[1], c.center[2], c.radius)) continue;
         gb.append(c.grass);
       }

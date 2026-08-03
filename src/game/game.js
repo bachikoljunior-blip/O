@@ -97,6 +97,59 @@ export class Game {
     this.exposureMul = 1;
     /** 水面の高さ。アクターの水深判定と描画で共有する */
     this.seaLevel = 0;
+    /**
+     * 1 フレームの内訳計測。既定は null＝オフ。
+     * オフのときに増えるのは「null かどうかの分岐」だけで、関数呼び出しも
+     * performance.now() も起きない（計測フック自体の負担は tests/perf1 で測っている）。
+     */
+    this._prof = null;
+  }
+
+  /* -------------------------------------------------- 内訳計測（既定オフ）*/
+  /**
+   * 内訳の記録を始める／やめる。
+   * @param on false で止める
+   * @returns 記録簿
+   */
+  profile(on = true) {
+    if (!on) { this._prof = null; return null; }
+    this._prof = { acc: Object.create(null), frames: 0, _t: 0 };
+    return this._prof;
+  }
+
+  /** 直前の区切りから今までを name に足し、区切りを進める（連続した区間用）*/
+  _mark(name) {
+    const P = this._prof;
+    const t = performance.now();
+    P.acc[name] = (P.acc[name] || 0) + (t - P._t);
+    P._t = t;
+  }
+
+  /** t0 から今までを name に足す（区切りの連なりから外れた単発の区間用）*/
+  _span(name, t0) {
+    const P = this._prof;
+    P.acc[name] = (P.acc[name] || 0) + (performance.now() - t0);
+  }
+
+  /**
+   * 1 フレームあたりの内訳（µs）。多い順。
+   * @param reset true なら読んだあと記録を空にする
+   */
+  profileReport(reset = true) {
+    const P = this._prof;
+    if (!P || !P.frames) return null;
+    const n = P.frames;
+    const rows = [];
+    let total = 0;
+    for (const k in P.acc) {
+      const us = P.acc[k] / n * 1000;
+      rows.push([k, +us.toFixed(1)]);
+      total += us;
+    }
+    rows.sort((a, b) => b[1] - a[1]);
+    const out = { frames: n, total: +total.toFixed(1), rows };
+    if (reset) { P.acc = Object.create(null); P.frames = 0; }
+    return out;
   }
 
   async init(opts = {}) {
@@ -287,12 +340,17 @@ export class Game {
 
   /** 近い順に点光源を集める（松明・篝火・魔法・炎） */
   collectLights(max) {
+    const _t0 = this._prof ? performance.now() : 0;
     const cam = this.camera.pos;
     const cand = this._lightCand;
     cand.length = 0;
+    // 距離は「届くか」と「近い順」にしか使わないので、平方のまま扱う。
+    // Math.hypot は 1 回 70ns 掛かり、ここは毎フレーム 60〜90 回通る
     const add = (x, y, z, r, cr, cg, cb, phase) => {
-      const d = Math.hypot(x - cam[0], z - cam[2]);
-      if (d > r + 40) return;
+      const dx = x - cam[0], dz = z - cam[2];
+      const d = dx * dx + dz * dz;
+      const reach = r + 40;
+      if (d > reach * reach) return;
       cand.push({ x, y, z, r, cr, cg, cb, phase, d });
     };
     if (this.dungeon) {
@@ -314,7 +372,8 @@ export class Game {
     } else {
       const night = 0.35 + this.sky.night * 0.9;
       for (const poi of this.pois) {
-        if (Math.hypot(poi.x - cam[0], poi.z - cam[2]) > 60) continue;
+        const dx = poi.x - cam[0], dz = poi.z - cam[2];
+        if (dx * dx + dz * dz > 60 * 60) continue;
         if (poi.type === 'shrine') {
           add(poi.x, poi.y + 1.5, poi.z, 13, 1.5 * night, 1.15 * night, 0.55 * night, poi.id);
         } else if (poi.type === 'village' || poi.type === 'camp'
@@ -331,7 +390,8 @@ export class Game {
           if (!n.indoors) continue;
           const h = n.spots?.home;
           if (!h) continue;
-          if (Math.hypot(h.x - cam[0], h.z - cam[2]) > 52) continue;
+          const dx = h.x - cam[0], dz = h.z - cam[2];
+          if (dx * dx + dz * dz > 52 * 52) continue;
           add(h.x, this.groundHeight(h.x, h.z) + 1.7, h.z, 7.5,
             1.15 * k, 0.72 * k, 0.32 * k, n.id * 0.37);
         }
@@ -353,23 +413,29 @@ export class Game {
       this.lightCol[i * 4 + 2] = l.cb; this.lightCol[i * 4 + 3] = l.phase % 10;
     }
     this._lights.count = n;
+    if (this._prof) this._span('光源集め', _t0);
     return this._lights;
   }
 
   /* ============================================================ 更新 */
   update(dt) {
     const p = this.player;
+    const P = this._prof;
+    if (P) { P.frames++; P._t = performance.now(); }
 
     this.sky.update(dt, this);
     if (this.dungeon) this.applyDungeonAtmosphere();
     else this.sky.applyRegion(this.world.params(p.x, p.z));
+    if (P) this._mark('天候');
 
     this.camera.update(dt, this);
     // 聴き手はカメラ。音の距離と向きはここを基準に決まる
     this.audio.setListener(this.camera.pos[0], this.camera.pos[2], this.camera.yaw);
+    if (P) this._mark('カメラ');
     if (this.input.pressed('mount')) this.handleMountButton();
     p.update(dt, this);
     if (p.state === 'cast') p.processSpell(dt, this);
+    if (P) this._mark('自機');
 
     // 地形ストリーミング（ダンジョン内では止める）
     if (this.dungeon) {
@@ -378,41 +444,64 @@ export class Game {
     } else {
       this.terrain.update(p.x, p.z, this.time.now, this.quality.viewChunks > 8 ? 7 : 5);
     }
+    if (P) this._mark('地形ストリーミング');
 
     // エンティティ
     this.updateAggroTokens(dt);
+    if (P) this._mark('踏み込み権');
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const e = this.enemies[i];
-      const d = Math.hypot(e.x - p.x, e.z - p.z);
+      const ex = e.x - p.x, ez = e.z - p.z;
+      const d2 = ex * ex + ez * ez;
       if (e.dead && e.removeAt > 6) { this.enemies.splice(i, 1); continue; }
-      if (!e.boss && d > 190) { this.enemies.splice(i, 1); continue; }
-      if (d < 150) e.update(dt, this);
+      if (!e.boss && d2 > 190 * 190) { this.enemies.splice(i, 1); continue; }
+      if (d2 < 150 * 150) e.update(dt, this);
     }
+    if (P) this._mark('敵');
     for (const n of this.npcs) {
-      if (Math.hypot(n.x - p.x, n.z - p.z) < 70) n.update(dt, this);
+      const nx = n.x - p.x, nz = n.z - p.z;
+      if (nx * nx + nz * nz < 70 * 70) n.update(dt, this);
     }
+    if (P) this._mark('村人');
     if (!this.dungeon) this.mount.update(dt, this);
+    if (P) this._mark('馬');
     this.wildlife.update(dt, this);
+    if (P) this._mark('鳥');
     this.travellers.update(dt, this);
     this.checkRescue();
+    if (P) this._mark('旅人');
     this.fish.update(dt, this);
+    if (P) this._mark('魚');
     this.updateProjectiles(dt);
+    if (P) this._mark('飛翔体');
     this.updateSwimming(dt);
+    if (P) this._mark('水');
     if (this.dungeon) {
       this.updateDungeon(dt);
+      if (P) this._mark('地下');
     } else {
       this.updateSpawning(dt);
+      if (P) this._mark('湧き');
       this.updateGatherables();
+      if (P) this._mark('採取点');
       this.updateBoss(dt);
+      if (P) this._mark('ボス');
       this.updateAmbient(dt);
+      if (P) this._mark('環境演出');
     }
     this.fx.update(dt, this);
+    if (P) this._mark('粒子');
     this.quests.update(this);
+    if (P) this._mark('依頼');
     this.updateInteract();
+    if (P) this._mark('interact');
     if (!this.dungeon) this.updateDiscovery();
+    if (P) this._mark('発見');
     this.updateMusic();
+    if (P) this._mark('曲');
     this.audio.update(dt, this);
     this.audio.updateAmbience(dt, this);
+    if (P) this._mark('音');
 
     // バフ
     if (p.spellBuff) {
@@ -466,8 +555,8 @@ export class Game {
     // POI 常駐の敵
     for (const poi of this.pois) {
       if (!poi.spawns.length || this.clearedPOIs.has(poi.id)) continue;
-      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
-      if (d > 130 || poi.spawned) continue;
+      const dx = poi.x - p.x, dz = poi.z - p.z;
+      if (dx * dx + dz * dz > 130 * 130 || poi.spawned) continue;
       poi.spawned = true;
       for (const s of poi.spawns) {
         for (let i = 0; i < s.count; i++) {
@@ -484,7 +573,9 @@ export class Game {
     }
     // POI から離れたらリセット
     for (const poi of this.pois) {
-      if (poi.spawned && Math.hypot(poi.x - p.x, poi.z - p.z) > 210) poi.spawned = false;
+      if (!poi.spawned) continue;
+      const dx = poi.x - p.x, dz = poi.z - p.z;
+      if (dx * dx + dz * dz > 210 * 210) poi.spawned = false;
     }
 
     // 徘徊する敵
@@ -942,10 +1033,11 @@ export class Game {
     // 上限が無いと、こちらが一度怯んだ瞬間に群れ全員が殺到する。
     // 「今なら差し込める」と判断してよいのは、いちばん近い 1 体だけにする
     for (const e of list) e.punisher = false;
-    let nearest = null, nd = 1e9;
+    let nearest = null, nd = 1e18;
     for (const e of list) {
       if (e.token) continue;
-      const d = Math.hypot(e.x - p.x, e.z - p.z);
+      const dx = e.x - p.x, dz = e.z - p.z;
+      const d = dx * dx + dz * dz;      // 近さの比較だけなので平方のまま
       if (d < nd) { nd = d; nearest = e; }
     }
     if (nearest) nearest.punisher = true;
@@ -968,9 +1060,9 @@ export class Game {
     }
     if (held >= max) return;
 
-    list.sort((a, b) => (
-      Math.hypot(a.x - p.x, a.z - p.z) - Math.hypot(b.x - p.x, b.z - p.z)
-    ));
+    // 近い順。平方のままでも順序は変わらない
+    const d2 = (e) => { const dx = e.x - p.x, dz = e.z - p.z; return dx * dx + dz * dz; };
+    list.sort((a, b) => d2(a) - d2(b));
     for (const e of list) {
       if (held >= max) break;
       if (e.token || e.tokenCd > 0) continue;
@@ -1242,23 +1334,32 @@ export class Game {
   }
 
   /* ------------------------------------------------- インタラクション */
+  /**
+   * 手の届く先を決める。
+   *
+   * 距離は「いちばん近いものを選ぶ」ためにしか使わないので、平方のまま比べる
+   * （順序も閾値も変わらない）。ここは村人・旅人・POI・宝箱・採取点を毎フレーム
+   * なめるので、Math.hypot だと 170 回ぶん（約 12µs）になっていた。
+   */
   updateInteract() {
     const p = this.player;
-    let best = null, bestD = 3.4;
+    const px = p.x, pz = p.z;
+    let best = null, bestD = 3.4 * 3.4;      // 以下 bestD はすべて距離の平方
+    const d2 = (x, z) => { const dx = x - px, dz = z - pz; return dx * dx + dz * dz; };
 
     if (this.dungeon) {
       const ex = this.dungeon.exitPoint;
-      const de = Math.hypot(ex.x - p.x, ex.z - p.z);
-      if (de < 3.4) { bestD = de; best = { type: 'dungeon_exit', obj: ex, label: '地上へ戻る' }; }
+      const de = d2(ex.x, ex.z);
+      if (de < 3.4 * 3.4) { bestD = de; best = { type: 'dungeon_exit', obj: ex, label: '地上へ戻る' }; }
       for (const c of this.dungeon.chests) {
         if (c.opened) continue;
         if (c.boss && !this.dungeon.bossDefeated) continue;
-        const d = Math.hypot(c.x - p.x, c.z - p.z);
+        const d = d2(c.x, c.z);
         if (d < bestD) { bestD = d; best = { type: 'dungeon_chest', obj: c, label: '宝箱を開ける' }; }
       }
       const st = this.dungeon.stairPoint;
       if (st && this.dungeon.bossDefeated && !this.activeBoss) {
-        const d = Math.hypot(st.x - p.x, st.z - p.z);
+        const d = d2(st.x, st.z);
         if (d < bestD) {
           bestD = d;
           best = { type: 'dungeon_descend', obj: st, label: `第${this.dungeon.depth + 1}層へ降りる` };
@@ -1272,11 +1373,11 @@ export class Game {
 
     for (const n of this.npcs) {
       if (n.indoors) continue;              // 家の中で寝ている相手には話しかけられない
-      const d = Math.hypot(n.x - p.x, n.z - p.z);
+      const d = d2(n.x, n.z);
       if (d < bestD) { bestD = d; best = { type: 'npc', obj: n, label: `${n.npcName}（${n.title}）と話す` }; }
     }
     for (const t of this.travellers.everyone()) {
-      const d = Math.hypot(t.x - p.x, t.z - p.z);
+      const d = d2(t.x, t.z);
       if (d >= bestD) continue;
       bestD = d;
       // 隊商の親方とは取引ができる
@@ -1285,33 +1386,36 @@ export class Game {
         : { type: 'traveller', obj: t, label: `${t.npcName}に声をかける` };
     }
     for (const poi of this.pois) {
-      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
-      if (poi.type === 'shrine' && d < 3.2) {
-        if (d < bestD) { bestD = d; best = { type: 'shrine', obj: poi, label: `${poi.name}で休息する` }; }
-      }
-      if ((poi.type === 'grave' || poi.type === 'ruin' || poi.type === 'mine') && d < 4.5) {
-        if (d < bestD) { bestD = d; best = { type: 'dungeon_enter', obj: poi, label: `${poi.name}へ潜る` }; }
-      }
-      if (poi.type === 'tower' && d < 4.5 && !poi.climbed) {
-        if (d < bestD) { bestD = d; best = { type: 'tower', obj: poi, label: '望楼に登る' }; }
+      // 拠点そのものへの用は最大でも 4.5m。遠い拠点は宝箱だけ見る
+      const d = d2(poi.x, poi.z);
+      if (d < 4.5 * 4.5) {
+        if (poi.type === 'shrine' && d < 3.2 * 3.2) {
+          if (d < bestD) { bestD = d; best = { type: 'shrine', obj: poi, label: `${poi.name}で休息する` }; }
+        }
+        if (poi.type === 'grave' || poi.type === 'ruin' || poi.type === 'mine') {
+          if (d < bestD) { bestD = d; best = { type: 'dungeon_enter', obj: poi, label: `${poi.name}へ潜る` }; }
+        }
+        if (poi.type === 'tower' && !poi.climbed) {
+          if (d < bestD) { bestD = d; best = { type: 'tower', obj: poi, label: '望楼に登る' }; }
+        }
       }
       if (poi.chest && !this.openedChests.has(poi.id)) {
-        const cd = Math.hypot(poi.chest.x - p.x, poi.chest.z - p.z);
+        const cd = d2(poi.chest.x, poi.chest.z);
         if (cd < bestD) { bestD = cd; best = { type: 'chest', obj: poi, label: '宝箱を開ける' }; }
       }
     }
     for (const g of this.gatherables.values()) {
       if (!g || this.harvested.has(g.key)) continue;
-      const d = Math.hypot(g.x - p.x, g.z - p.z);
+      const d = d2(g.x, g.z);
       if (d < bestD) { bestD = d; best = { type: 'gather', obj: g, label: `${ITEMS[g.type].name}を採る` }; }
     }
     if (!p.riding && !this.mount.dead) {
-      const d = Math.hypot(this.mount.x - p.x, this.mount.z - p.z);
+      const d = d2(this.mount.x, this.mount.z);
       if (d < bestD) { bestD = d; best = { type: 'mount', obj: this.mount, label: '灰毛に騎乗する' }; }
     }
     if (p.lostEcho) {
-      const d = Math.hypot(p.lostEcho.x - p.x, p.lostEcho.z - p.z);
-      if (d < 2.6) { bestD = d; best = { type: 'echo', obj: p.lostEcho, label: `残響を回収する（${p.lostEcho.echo}）` }; }
+      const d = d2(p.lostEcho.x, p.lostEcho.z);
+      if (d < 2.6 * 2.6) { bestD = d; best = { type: 'echo', obj: p.lostEcho, label: `残響を回収する（${p.lostEcho.echo}）` }; }
     }
 
     this.interact = best;
@@ -1469,9 +1573,9 @@ export class Game {
     this.visited.add(key);
     for (const poi of this.pois) {
       if (poi.reached) continue;
-      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
+      const dx = poi.x - p.x, dz = poi.z - p.z;
       const r = poi.type === 'village' || poi.type === 'boss' ? 70 : 42;
-      if (d < r) this.reachPOI(poi);
+      if (dx * dx + dz * dz < r * r) this.reachPOI(poi);
     }
     // 地方の踏破
     const region = this.world.regionAt(p.x, p.z);
@@ -1514,8 +1618,8 @@ export class Game {
     }
     // 篝火・焚き火の火の粉
     for (const poi of this.pois) {
-      const d = Math.hypot(poi.x - p.x, poi.z - p.z);
-      if (d > 40) continue;
+      const dx = poi.x - p.x, dz = poi.z - p.z;
+      if (dx * dx + dz * dz > 40 * 40) continue;
       if (poi.type === 'shrine') this.fx.shrineGlow(poi.x, poi.y + 1.2, poi.z, dt);
       else if (poi.type === 'village' || poi.type === 'camp'
         || poi.type === 'hermit' || poi.type === 'wreck') {
@@ -1529,9 +1633,11 @@ export class Game {
     // 討伐の余韻の間は曲を触らない。切った静けさを上書きしてしまう
     if (this.victoryT !== null && this.victoryT !== undefined) return;
     let combat = false;
+    const p = this.player;
     for (const e of this.enemies) {
       if (e.dead || !e.aggro) continue;
-      if (Math.hypot(e.x - this.player.x, e.z - this.player.z) < 26) { combat = true; break; }
+      const dx = e.x - p.x, dz = e.z - p.z;
+      if (dx * dx + dz * dz < 26 * 26) { combat = true; break; }
     }
     // 地下では専用の、遅く低く沈んだ曲に切り替える
     const calm = this.dungeon ? 'dungeon' : 'explore';
@@ -1714,6 +1820,8 @@ export class Game {
     const time = this.time.now;
     const px = p.x, pz = p.z;
     const frustum = renderer.frustum;
+    const P = this._prof;
+    if (P) P._t = performance.now();
 
     // ダンジョン内はダンジョンのジオメトリだけを出す
     if (this.dungeon) {
@@ -1759,20 +1867,35 @@ export class Game {
       return;
     }
 
-    // 地形の散布物
-    for (const c of this.terrain.visible) {
+    // 地形の散布物。
+    //
+    // ここが描画準備でいちばん重い（可視 248 チャンク・548 種ぶん）。
+    // Map を毎フレーム分割代入で舐めると 1 件 60ns（配列とイテレータの割り当て）、
+    // さらに batchFor の文字列引きが 1 件 27ns 掛かる。どちらもチャンクごとに
+    // 一度決まれば変わらないので、初めて描くときに [Batch, データ] の平坦な配列に
+    // 焼いて持たせる。チャンクは LOD が変われば作り直されるので古い対応は残らない。
+    const vis = this.terrain.visible;
+    for (let i = 0; i < vis.length; i++) {
+      const c = vis[i];
       if (!c.props) continue;
       if (!frustum.sphere(c.center[0], c.center[1], c.center[2], c.radius + 8)) continue;
-      for (const [model, data] of c.props) {
-        const b = renderer.batchFor(model);
-        if (b) b.append(data);
+      let list = c.emitList;
+      if (!list) {
+        list = c.emitList = [];
+        for (const [model, data] of c.props) {
+          const b = renderer.batchFor(model);
+          if (b) list.push(b, data);
+        }
       }
+      for (let k = 0; k < list.length; k += 2) list[k].append(list[k + 1]);
     }
+    if (P) this._mark('emit:地形散布');
 
     // POI の建造物
     for (const poi of this.pois) {
-      const d = Math.hypot(poi.x - px, poi.z - pz);
-      if (d > 300) continue;
+      const ddx = poi.x - px, ddz = poi.z - pz;
+      const d = ddx * ddx + ddz * ddz;      // 平方のまま比べる
+      if (d > 300 * 300) continue;
       for (const s of poi.structures) {
         if (!frustum.sphere(s.x, s.y + 3, s.z, 12)) continue;
         const b = renderer.batchFor(s.model);
@@ -1782,7 +1905,7 @@ export class Game {
           s.r, s.g, s.b, 1, s.wind, s.emissive, 0, 0.5);
       }
       // 宝箱
-      if (poi.chest && !this.openedChests.has(poi.id) && d < 200) {
+      if (poi.chest && !this.openedChests.has(poi.id) && d < 200 * 200) {
         const b = renderer.batchFor('chest');
         if (b) {
           const o = b.alloc();
@@ -1792,6 +1915,7 @@ export class Game {
         }
       }
     }
+    if (P) this._mark('emit:POI');
 
     // 鳥
     {
@@ -1824,6 +1948,7 @@ export class Game {
         });
       }
     }
+    if (P) this._mark('emit:鳥と魚');
 
     // 採取物
     for (const g of this.gatherables.values()) {
@@ -1837,32 +1962,39 @@ export class Game {
         c[0], c[1], c[2], 1, g.type === 'herb' || g.type === 'blood_flower' ? 0.6 : 0,
         0.35 + Math.sin(time * 1.7 + g.key) * 0.12, 0.55, 0.5);
     }
+    if (P) this._mark('emit:採取物');
 
-    // アクター
+    // アクター。届く範囲かどうかしか見ないので、距離は平方のまま
+    const near2 = (x, z, r) => { const dx = x - px, dz = z - pz; return dx * dx + dz * dz <= r * r; };
     p.emit(renderer, time, this);
-    if (Math.hypot(this.mount.x - px, this.mount.z - pz) < 140) this.mount.emit(renderer, time, this);
+    {
+      const dx = this.mount.x - px, dz = this.mount.z - pz;
+      if (dx * dx + dz * dz < 140 * 140) this.mount.emit(renderer, time, this);
+    }
     for (const e of this.enemies) {
-      if (Math.hypot(e.x - px, e.z - pz) > 140) continue;
+      if (!near2(e.x, e.z, 140)) continue;
       if (!frustum.sphere(e.x, e.y + e.height * 0.5, e.z, e.height)) continue;
       e.emit(renderer, time, this);
     }
+    if (P) this._mark('emit:自機と敵');
     for (const t of this.travellers.everyone()) {
-      if (Math.hypot(t.x - px, t.z - pz) > 200) continue;
+      if (!near2(t.x, t.z, 200)) continue;
       if (!frustum.sphere(t.x, t.y + t.height * 0.5, t.z, t.height)) continue;
       t.emit(renderer, time, this);
     }
     // 隊商の荷車
     for (const c of this.travellers.caravans) {
-      if (Math.hypot(c.cartX - px, c.cartZ - pz) > 220) continue;
+      if (!near2(c.cartX, c.cartZ, 220)) continue;
       const b = renderer.batchFor('cart');
       if (!b) continue;
       const o = b.alloc();
       writeInstance(b.data, o, c.cartX, c.cartY, c.cartZ, c.yaw, 1.15, 1.15, 1.15,
         0.52, 0.40, 0.28, 1, 0, 0, 0, 0.5);
     }
+    if (P) this._mark('emit:旅人');
     for (const n of this.npcs) {
       if (n.indoors) continue;
-      if (Math.hypot(n.x - px, n.z - pz) > 90) continue;
+      if (!near2(n.x, n.z, 90)) continue;
       if (!frustum.sphere(n.x, n.y + n.height * 0.5, n.z, n.height)) continue;
       n.emit(renderer, time, this);
       // 用件のある相手の頭上に印を出す（受注は金、報告は白）
@@ -1880,6 +2012,7 @@ export class Game {
       writeInstance(b.data, o2, n.x, n.y + n.height * 1.24 + bob + 0.30, n.z, time * 1.2,
         0.20, -0.22, 0.20, c[0], c[1], c[2], 1, 0, 1.7, 0, 0);
     }
+    if (P) this._mark('emit:村人');
 
     // 発射物
     for (const b of this.projectiles) {
@@ -1904,6 +2037,7 @@ export class Game {
           1, 0.85, 0.5, 1, 0, 1.5, 0.8);
       }
     }
+    if (P) this._mark('emit:飛翔体と印');
   }
 
   /* ---------------------------------------------------------- セーブ */
