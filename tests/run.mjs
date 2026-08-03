@@ -31,6 +31,9 @@ const WHAT = {
   wx2: '天候の手応え',
   bird1: '鳥',
   fish1: '水の生き物',
+  fishing1: '釣り',
+  touch1: '指の操作',
+  perf1: '毎フレームの負担',
   trav1: '街道の往来',
   caravan1: '隊商',
   ambush1: '街道の襲撃',
@@ -44,7 +47,7 @@ const WHAT = {
 };
 
 /** 上から順に回す。壊れやすいものほど先に置いて、早く気づけるようにする */
-const ORDER = ['render1', 'dist1', 'quest1', 'ui1', 'upg1', 'poi1', 'npc1', 'trav1', 'caravan1', 'ambush1', 'bird1', 'fish1',
+const ORDER = ['render1', 'dist1', 'quest1', 'ui1', 'upg1', 'poi1', 'npc1', 'trav1', 'caravan1', 'ambush1', 'bird1', 'fish1', 'fishing1', 'touch1', 'perf1',
   'audio1', 'spat1', 'weather1', 'wx2', 'ranged2', 'tell3', 'boss1', 'dboss',
   'dun3', 'econ2', 'expl2', 'gang2', 'balance', 'bench'];
 
