@@ -21,7 +21,11 @@ const KEY_MAP = {
  * 受けるのは「動けるときだけ実行される」行動に限る。lock / mount / interact /
  * menu / map は毎フレーム見られていたり呼び口が複数あったりするので入れない。
  */
-const BUFFERED = new Set(['attack', 'heavy', 'dodge', 'block', 'spell', 'art', 'item', 'jump']);
+// 先行入力に入れるもの。
+// 受け（block/パリィ）は入れない。あれは「見てから合わせる」入力で、
+// 早すぎた押しは失敗すべきもの。緩衝すると、外した押しが最大 0.25 秒後に
+// 成功に化けて、第27周で整えた読み合いが消える。
+const BUFFERED = new Set(['attack', 'heavy', 'dodge', 'spell', 'art', 'item', 'jump']);
 
 // 先行入力の寿命。フレーム数と実時間の両方で切る。
 // SwiftShader だと 1 フレームが 0.5 秒あるので、フレーム数だけだと持ちすぎる。
