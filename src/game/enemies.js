@@ -662,7 +662,7 @@ export class Enemy extends Actor {
   }
 
   doTeleport(range, game) {
-    const p = game.player;
+    const p = this.quarry(game);
     const ang = Math.random() * TAU;
     const r = range * (0.5 + Math.random() * 0.5);
     const nx = p.x + Math.sin(ang) * r;
@@ -683,14 +683,17 @@ export class Enemy extends Actor {
     let moveSpeed = 0;
 
     if (phase === 'windup' && !this.arch.ranged) {
-      // 予備動作中もわずかに追尾
-      this.faceTowards(game.player.x, game.player.z, dt, 2.2);
+      // 予備動作中もわずかに追尾。
+      // ここが game.player のままだったので、道の者に斬りかかった賊は
+      // 振りかぶりながら遠くのプレイヤーへ向き直り、判定の瞬間には
+      // 90 度よそを向いていた（命中 4〜6%）
+      const q = this.quarry(game);
+      this.faceTowards(q.x, q.z, dt, 2.2);
       // 届かないなら踏み込む（振りかぶってから一歩出る）
       if (!this.dashPending && !this.dashV && !src.summon && !src.rally) {
         const need = (src.range || 2.4) * 0.75;
         if (dist > need) {
-          const p2 = game.player;
-          this.moveOnGround(dt, game, p2.x - this.x, p2.z - this.z, this.speed * 0.6);
+          this.moveOnGround(dt, game, q.x - this.x, q.z - this.z, this.speed * 0.6);
           moveSpeed = this.speed * 0.6;
         }
       }

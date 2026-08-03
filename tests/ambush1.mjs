@@ -40,11 +40,18 @@ const stage = async (nBandits, watch) => page.evaluate(async ({ nBandits, watch 
 /** 秒数ぶん回す */
 const run = async (sec) => page.evaluate((sec) => {
   const g = window.__game;
+  // 終わったあとの状態だけ見ると、決着済みで「狙っていない・止まっていない」
+  // と出る。経過中に起きたかどうかを拾う
+  const sawFoes = new Set();
+  let sawStopped = false;
   for (let i = 0; i < sec * 60; i++) {
     for (const e of g.enemies) e.update(1 / 60, g);
     g.updateAggroTokens(1 / 60);
     g.travellers.update(1 / 60, g);
     g.checkRescue();
+    const cc = g.travellers.caravans[0];
+    if (cc && cc.stopped > 0) sawStopped = true;
+    for (const e of g.enemies) if (e.foe) sawFoes.add(e.foe.kind);
   }
   const c = g.travellers.caravans[0];
   return {
@@ -52,8 +59,8 @@ const run = async (sec) => page.evaluate((sec) => {
     memberDead: c ? c.members.filter((m) => m.dead).length : 0,
     enemyHp: g.enemies.map((e) => Math.round(e.hp)),
     enemyDead: g.enemies.filter((e) => e.dead).length,
-    raided: !!c?.raided, stopped: !!(c && c.stopped > 0),
-    foes: g.enemies.map((e) => (e.foe ? e.foe.kind : null)),
+    raided: !!c?.raided, stopped: sawStopped,
+    foes: [...sawFoes],
   };
 }, sec);
 
@@ -81,6 +88,62 @@ ok('護衛は一方的に勝たない',
   r2.memberHp.join(','));
 ok('賊も無傷では済まない', r2.enemyHp.some((h) => h < 160) || r2.enemyDead > 0,
   r2.enemyHp.join(','));
+
+/* ---------- 2.5 賭け金：守れなければ失われる ---------- */
+// 護衛の命中率が 32〜44% に対し賊は 1.5〜13% しか当たっていなかった。
+// 賊が振りかぶりながら遠くのプレイヤーへ向き直っていたためで、
+// 直したあとは互角に殴り合う。ここではその釣り合いを見る
+await stage(4, true);      // 前節で双方全滅しているので並べ直す
+const hits = await page.evaluate(async () => {
+  const g = window.__game;
+  let guardHits = 0, banditHits = 0;
+  const undo = [];
+  const c = g.travellers.caravans[0];
+  for (const m of c.members) {
+    const o = m.takeDamage.bind(m); undo.push([m, o]);
+    m.takeDamage = (d, opt, gg) => { banditHits++; return o(d, opt, gg); };
+  }
+  for (const e of g.enemies) {
+    const o = e.takeDamage.bind(e); undo.push([e, o]);
+    e.takeDamage = (d, opt, gg) => { guardHits++; return o(d, opt, gg); };
+  }
+  let guardSwings = 0, banditSwings = 0;
+  for (let i = 0; i < 45 * 60; i++) {
+    for (const e of g.enemies) if (!e.dead) e.update(1 / 60, g);
+    g.updateAggroTokens(1 / 60);
+    g.travellers.update(1 / 60, g);
+    for (const m of c.members) if (m.state === 'attack' && m.animT < 1 / 60 + 1e-6) guardSwings++;
+    for (const e of g.enemies) if (e.state === 'attack' && e.animT < 1 / 60 + 1e-6) banditSwings++;
+  }
+  for (const [a2, o] of undo) a2.takeDamage = o;
+  return { guardSwings, guardHits, banditSwings, banditHits,
+    guardRate: guardSwings ? +(guardHits / guardSwings).toFixed(2) : 0,
+    banditRate: banditSwings ? +(banditHits / banditSwings).toFixed(2) : 0 };
+});
+console.log(`命中率: 護衛 ${hits.guardHits}/${hits.guardSwings}（${hits.guardRate}） / 賊 ${hits.banditHits}/${hits.banditSwings}（${hits.banditRate}）`);
+ok('賊もちゃんと当てる（一方的にならない）',
+  hits.banditRate > 0.25, `${hits.banditRate}`);
+ok('護衛と賊の命中が同じ桁', Math.abs(hits.guardRate - hits.banditRate) < 0.35,
+  `護衛 ${hits.guardRate} / 賊 ${hits.banditRate}`);
+
+// 大勢に襲われれば隊商は失われる
+const overrun = await stage(8, true);
+const r3 = await run(60);
+console.log('賊8 に 60 秒:', JSON.stringify({ dead: r3.memberDead, enemyDead: r3.enemyDead }));
+ok('大勢に襲われれば守り切れない', r3.memberDead >= 2,
+  `倒れた ${r3.memberDead}/${overrun.members} 人`);
+
+// 少数なら荷は通る（親方は生き延びる）
+const small = await stage(3, true);
+const r4 = await run(60);
+const merchantAlive = await page.evaluate(() => {
+  const c = window.__game.travellers.caravans[0];
+  return c ? !c.merchant.dead : null;
+});
+console.log('賊3 に 60 秒:', JSON.stringify({ dead: r4.memberDead, enemyDead: r4.enemyDead, merchantAlive }));
+ok('少数なら賊を退けられる', r4.enemyDead >= 2, `賊 ${r4.enemyDead}/3 が倒れた`);
+ok('ただし無傷では済まない', r4.memberDead >= 1, `倒れた ${r4.memberDead}人`);
+void small;
 
 /* ---------- 3. 加勢すると礼が返る ---------- */
 // 前の節で賊は全滅している。倒す相手がいないと「加勢した」ことにならないので出し直す
