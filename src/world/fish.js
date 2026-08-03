@@ -83,14 +83,58 @@ export class Fish {
       });
     }
     return { cx, cz, x, z, surf, fish, spin: hash2(cx, cz, 503) < 0.5 ? 1 : -1,
-      cd: 1 + hash2(cx, cz, 601) * 5 };
+      cd: 1 + hash2(cx, cz, 601) * 5, startle: 0 };
+  }
+
+  /**
+   * その場所の魚影の濃さ（0〜1）。釣りが「どこで釣れるか」を決めるのに使う。
+   *
+   * はじめ「近くの群れまでの距離」だけで測ったら、実際の岸 10 箇所すべてで 0 に
+   * なった。群れは 150m 格子に 38% しか置かれないので、糸の届く岸から最寄りの
+   * 群れまでは中央値 197m ある。それでは大魚も月光魚も永久に出ない。
+   *
+   * 直しかたは、群れの居場所を探すのをやめて、群れが場所を選ぶときの条件
+   * ——足のつかない深さと、まわりがどれだけ水か——を投げた先で測ること。
+   * 実測で、ふつうの岸は 0.37〜0.79（中央 0.45）、群れの真上は 0.83〜1.00 に
+   * 割れた。群れが本当に近ければ、その分を上乗せする。
+   */
+  richnessAt(game, x, z) {
+    const depth = game.seaLevel - game.world.height(x, z);
+    if (depth <= 0) return 0;
+    let open = 0, tot = 0;
+    for (let a = 0; a < 12; a++) {
+      const ang = a * (TAU / 12), sx = Math.sin(ang), sz = Math.cos(ang);
+      for (let k = 0; k < 3; k++) {
+        const rr = 8 + k * 9;
+        tot++;
+        if (game.world.height(x + sx * rr, z + sz * rr) < game.seaLevel - 0.4) open++;
+      }
+    }
+    const q = clamp01(clamp01((depth - 0.6) / 3.0) * 0.5 + (open / tot) * 0.55);
+    let near = 0;
+    for (const s of this.schools.values()) {
+      const d = Math.hypot(s.x - x, s.z - z);
+      if (d > 45) continue;
+      near = Math.max(near, clamp01(1 - d / 45) * clamp01(s.fish.length / 11));
+    }
+    return clamp01(q + near * 0.35);
+  }
+
+  /** 水面が乱れた。近くの群れが散って、しばらく跳ねなくなる */
+  startle(x, z, r = 20) {
+    for (const s of this.schools.values()) {
+      if (Math.hypot(s.x - x, s.z - z) > r) continue;
+      s.startle = Math.max(s.startle || 0, 1.6);
+      s.cd = Math.max(s.cd, 3);
+    }
   }
 
   stepSchool(s, dt, game, act) {
     const p = game.player;
     const dp = Math.hypot(p.x - s.x, p.z - s.z);
-    // 人が近いと散って深くへ。跳ねもしない
-    const spooked = dp < 12 ? clamp01((12 - dp) / 8) : 0;
+    if (s.startle > 0) s.startle = Math.max(0, s.startle - dt);
+    // 人が近いと散って深くへ。跳ねもしない。水面を乱されたときも同じ
+    const spooked = Math.max(dp < 12 ? clamp01((12 - dp) / 8) : 0, clamp01(s.startle));
 
     s.cd -= dt * act;
     if (s.cd <= 0 && !spooked) {

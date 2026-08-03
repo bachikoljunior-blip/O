@@ -13,6 +13,7 @@ import { Blockers } from '../world/blockers.js';
 import { Wildlife } from '../world/wildlife.js';
 import { Travellers } from '../world/travellers.js';
 import { Fish } from '../world/fish.js';
+import { Fishing } from '../world/fishing.js';
 import { Sky } from '../world/sky.js';
 import { Dungeon } from '../world/dungeon.js';
 
@@ -130,6 +131,7 @@ export class Game {
     this.wildlife = new Wildlife();
     this.travellers = new Travellers();
     this.fish = new Fish();
+    this.fishing = new Fishing();
     this.projectiles = [];
     this.gatherables = new Map();
     this.harvested = new Set();
@@ -398,6 +400,8 @@ export class Game {
     this.fish.update(dt, this);
     this.updateProjectiles(dt);
     this.updateSwimming(dt);
+    // 釣りは地上だけ。地下に入ったら自分で畳むので、分岐の外で回す
+    this.fishing.update(dt, this);
     if (this.dungeon) {
       this.updateDungeon(dt);
     } else {
@@ -1270,6 +1274,13 @@ export class Game {
       return;
     }
 
+    // 釣っているあいだは「調べる」を釣りが握る。他の候補は探さない
+    if (this.fishing.active) {
+      this.interact = null;
+      this.ui.setPrompt(this.fishing.prompt());
+      return;
+    }
+
     for (const n of this.npcs) {
       if (n.indoors) continue;              // 家の中で寝ている相手には話しかけられない
       const d = Math.hypot(n.x - p.x, n.z - p.z);
@@ -1312,6 +1323,20 @@ export class Game {
     if (p.lostEcho) {
       const d = Math.hypot(p.lostEcho.x - p.x, p.lostEcho.z - p.z);
       if (d < 2.6) { bestD = d; best = { type: 'echo', obj: p.lostEcho, label: `残響を回収する（${p.lostEcho.echo}）` }; }
+    }
+    // 水辺。岸はどこでも糸を垂れられるが、他に用があるならそちらが先
+    if (!best && !p.riding && !p.swimming) {
+      const spot = this.fishing.canStart(this);
+      if (spot) {
+        if (this.fishing.hasRod(this)) {
+          best = { type: 'fishing', obj: spot, label: '釣り糸を垂れる' };
+        } else if (!this.fishing.hinted) {
+          // 竿を持たない者にも、一度だけ水面の報せを出す。
+          // ここは毎フレーム通るので、魚影を測り直したりはしない
+          this.fishing.hinted = true;
+          this.ui.toast('水面に魚影が差している —— 釣り竿があれば');
+        }
+      }
     }
 
     this.interact = best;
@@ -1405,6 +1430,9 @@ export class Game {
       }
       case 'mount':
         this.mount.mount(this);
+        break;
+      case 'fishing':
+        this.fishing.start(this, t.obj);
         break;
       case 'dungeon_enter':
         this.enterDungeon(t.obj);
@@ -1822,6 +1850,32 @@ export class Game {
             1 + w * 0.22, 1 - Math.abs(w) * 0.08, 1,
             k, k * 1.02, k * 1.1, out ? 1 : 0.72, 0, out ? 0.15 : 0, 0, 0.5);
         });
+      }
+    }
+
+    // 釣り：糸と浮き
+    // 線分は yaw しか回せないので、糸は小さな玉を並べて見せている
+    if (this.fishing.active) {
+      const b = renderer.batchFor('ball');
+      if (b) {
+        const f = this.fishing;
+        const bob = f.bob;
+        const wave = Math.sin(time * 2.1 + bob.x * 0.3) * 0.05;
+        const by = this.seaLevel + 0.06 + wave - f.dip;
+        const sag = f.state === 'fight' && f.pulling ? 0.06 : 0.34;
+        for (let i = 1; i <= 6; i++) {
+          const u = i / 7;
+          const o = b.alloc();
+          writeInstance(b.data, o,
+            lerp(f.from.x, bob.x, u),
+            lerp(f.from.y, by + 0.1, u) - Math.sin(u * Math.PI) * sag,
+            lerp(f.from.z, bob.z, u), 0,
+            0.035, 0.035, 0.035, 0.95, 0.95, 0.9, 0.8, 0, 0.05, 0, 0.5);
+        }
+        const o = b.alloc();
+        const hot = f.state === 'bite' || (f.state === 'fight' && f.strain > 0.72);
+        writeInstance(b.data, o, bob.x, by, bob.z, 0, 0.13, 0.16, 0.13,
+          1, hot ? 0.34 : 0.58, hot ? 0.28 : 0.46, 1, 0, hot ? 0.95 : 0.30, 0, 0.5);
       }
     }
 
