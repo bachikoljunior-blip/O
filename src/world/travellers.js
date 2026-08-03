@@ -5,7 +5,9 @@
 // 道の上に旅人を置く。行商・巡礼・狩人・傭兵が、拠点から拠点へ向かって
 // 歩いていく。夜は減り、敵を見れば来た道を引き返す。
 
-import { Actor, TEAM, inAttackArc } from '../game/actor.js';
+import { Actor, TEAM } from '../game/actor.js';
+import { Enemy } from '../game/enemies.js';
+import { ENEMIES } from '../game/data.js';
 import { clamp01, TAU } from '../core/math.js';
 
 const KIND = {
@@ -21,9 +23,6 @@ const KIND = {
   sellsword: { name: '傭兵', tint: [0.38, 0.36, 0.40], speed: 1.7, weapon: 'w_sword', hp: 200,
     lines: ['雇い主を探している。金があるなら話は別だが。',
       'north の砦は落ちたと聞いた。行くならひとりでは行くな。'] },
-  guard: { name: '隊商護衛', tint: [0.33, 0.34, 0.38], speed: 1.4, weapon: 'w_spear', hp: 300,
-    lines: ['荷に近づくな。……見るだけならいい。',
-      'この道で三度襲われた。次は無い、と親方は言うがね。'] },
 };
 const KINDS = Object.keys(KIND);
 
@@ -86,27 +85,7 @@ export class Traveller extends Actor {
    * 一歩先を扇状に試して「進めて、かつ次の点に近づく」向きを選ぶ。
    */
   steer(game, dx, dz, probe, tx, tz) {
-    const base = Math.atan2(dx, dz);
-    const sx = this.x, sz = this.z;
-    const test = (off) => {
-      this.x = sx; this.z = sz;
-      const a = base + off;
-      this.tryMove(game, sx + Math.sin(a) * probe, sz + Math.cos(a) * probe);
-      return { moved: Math.hypot(this.x - sx, this.z - sz),
-        d: Math.hypot(this.x - tx, this.z - tz) };
-    };
-    if (test(0).moved > probe * 0.80) { this.x = sx; this.z = sz; this.detour = 0; return 0; }
-    let best = null, bestScore = Infinity;
-    for (const off of [0.5, -0.5, 1.0, -1.0, 1.5, -1.5, 2.0, -2.0, 2.6, -2.6]) {
-      const r = test(off);
-      if (r.moved < probe * 0.55) continue;
-      let score = r.d + Math.abs(off) * 0.25;
-      if (this.detour !== 0 && Math.sign(off) !== Math.sign(this.detour)) score += 1.2;
-      if (score < bestScore) { bestScore = score; best = off; }
-    }
-    this.x = sx; this.z = sz;
-    this.detour = best ?? 0;
-    return this.detour;
+    return steerAround(this, game, dx, dz, probe, tx, tz);
   }
 
   /** 目的地の名前 */
@@ -156,55 +135,7 @@ export class Traveller extends Actor {
       this.updateAnim(dt, 0);
       return;
     }
-    // 護衛はめいめい自分の相手を選ぶ。
-    // 隊商がひとつの脅威しか持たないと、三人が同じ一体に群がり、
-    // 残りの賊が素通りして荷と親方を討っていた
-    if (this.kind === 'guard' && threat) {
-      let mine = null, md = 1e9;
-      for (const e of game.enemies) {
-        if (e.dead || !e.aggro) continue;
-        const d = Math.hypot(e.x - this.caravan.cartX, e.z - this.caravan.cartZ);
-        if (d > 40) continue;
-        // 自分に近く、かつ他の護衛がまだ相手していない者を優先
-        const taken = this.caravan.members.some((m) => m !== this && m.myFoe === e);
-        const score = Math.hypot(e.x - this.x, e.z - this.z) + (taken ? 14 : 0);
-        if (score < md) { md = score; mine = e; }
-      }
-      this.myFoe = mine;
-      if (mine) threat = mine;
-    }
-    if (threat && this.kind === 'guard' && !threat.dead) {
-      // 間合いに入っていれば斬る。斬っているあいだは動かない
-      if (this.fight(dt, game, threat)) {
-        this.faceTowards(threat.x, threat.z, dt, 6);
-        this.updatePhysics(dt, game);
-        if (this.state !== 'attack') this.updateAnim(dt, 0);
-        return;
-      }
-    }
-    let tx = this.tx, tz = this.tz;
-    if (threat && this.kind === 'guard') {
-      const c = this.caravan;
-      const dToFoe = Math.hypot(threat.x - this.x, threat.z - this.z);
-      if (dToFoe < 2.9) {
-        // 間合いの中では動かない。毎フレーム位置を取り直すと、
-        // 賊の振りをことごとくかわしてしまい、一方的な戦いになる
-        tx = this.x; tz = this.z;
-      } else if (dToFoe < 9) {
-        // 手が届くところまで来たら踏み込む。線を守るだけでは斬れない
-        const ax = this.x - threat.x, az = this.z - threat.z;
-        const al = Math.hypot(ax, az) || 1;
-        tx = threat.x + (ax / al) * 2.2;
-        tz = threat.z + (az / al) * 2.2;
-      } else {
-        // 遠いうちは、荷車と敵を結んだ線の荷車寄りに立つ
-        const ax = threat.x - c.cartX, az = threat.z - c.cartZ;
-        const al = Math.hypot(ax, az) || 1;
-        const side = (this.slot.across || 0) * 0.5;
-        tx = c.cartX + (ax / al) * 5.5 - (az / al) * side;
-        tz = c.cartZ + (az / al) * 5.5 + (ax / al) * side;
-      }
-    }
+    const tx = this.tx, tz = this.tz;
     const dx = tx - this.x, dz = tz - this.z;
     const d = Math.hypot(dx, dz);
     let speed = 0;
@@ -235,44 +166,6 @@ export class Traveller extends Actor {
     else this.faceTowards(this.x + Math.sin(this.caravan.yaw), this.z + Math.cos(this.caravan.yaw), dt, 3);
     this.updatePhysics(dt, game);
     this.updateAnim(dt, speed);
-  }
-
-  /**
-   * 護衛の反撃。
-   *
-   * 立ちはだかるだけでは、賊が荷を切り崩すのを眺めることになる。
-   * 一種類だけ、素直な薙ぎを持たせる。強くはない——プレイヤーが
-   * 加勢すれば形勢が変わる、くらいに留める。
-   */
-  fight(dt, game, foe) {
-    this.swingCd = (this.swingCd || 0) - dt;
-    if (this.state === 'attack') {
-      this.animT += dt;
-      const a = this.attackDef;
-      if (this.animT >= a.windup && !this.attackApplied) {
-        this.attackApplied = true;
-        // 敵と同じ条件で当てる。距離だけで当てていたので、
-        // 護衛の命中率 32〜44% に対し賊は 1.5〜13% しか当たっていなかった
-        if (inAttackArc(this, foe, a.range, a.arc)) {
-          foe.takeDamage(a.dmg, { source: this, poise: a.poise }, game);
-          game.fx?.hitSpark?.(foe.x, foe.y + foe.height * 0.6, foe.z);
-          game.audio?.play('hit_flesh', { weight: 0.4, ...this.sfxAt() });
-        }
-      }
-      if (this.animT >= a.windup + a.recover) { this.state = 'idle'; this.attack = null; }
-      return true;
-    }
-    const d = Math.hypot(foe.x - this.x, foe.z - this.z);
-    if (d < 2.6 && this.swingCd <= 0) {
-      this.swingCd = 1.1 + Math.random() * 0.8;
-      this.attackDef = { windup: 0.5, recover: 0.72, dmg: 22, range: 2.6, arc: 1.7, poise: 14 };
-      this.attackApplied = false;
-      this.setState('attack', 1.22, 'slash_r');
-      this.attack = this.attackDef;
-      game.audio?.play('swing', { pitch: 1.0, ...this.sfxAt() });
-      return true;
-    }
-    return false;
   }
 
   update(dt, game) {
@@ -339,6 +232,130 @@ export class Traveller extends Actor {
 }
 
 /**
+ * 進む向きを決める（旅人と護衛で共用）。
+ *
+ * 経路探索は持たないので、一歩先を扇状に試して「進めて、かつ目的地に
+ * 近づく」向きを選ぶ。護衛を作り直したときにこれを落としてしまい、
+ * 道端の岩に引っかかって列が 26m まで伸びた。
+ */
+function steerAround(actor, game, dx, dz, probe, tx, tz) {
+  const base = Math.atan2(dx, dz);
+  const sx = actor.x, sz = actor.z;
+  const test = (off) => {
+    actor.x = sx; actor.z = sz;
+    const a = base + off;
+    actor.tryMove(game, sx + Math.sin(a) * probe, sz + Math.cos(a) * probe);
+    return { moved: Math.hypot(actor.x - sx, actor.z - sz),
+      d: Math.hypot(actor.x - tx, actor.z - tz) };
+  };
+  if (test(0).moved > probe * 0.80) { actor.x = sx; actor.z = sz; actor.detour = 0; return 0; }
+  let best = null, bestScore = Infinity;
+  for (const off of [0.5, -0.5, 1.0, -1.0, 1.5, -1.5, 2.0, -2.0, 2.6, -2.6]) {
+    const r = test(off);
+    if (r.moved < probe * 0.55) continue;
+    let score = r.d + Math.abs(off) * 0.25;
+    if (actor.detour && Math.sign(off) !== Math.sign(actor.detour)) score += 1.2;
+    if (score < bestScore) { bestScore = score; best = off; }
+  }
+  actor.x = sx; actor.z = sz;
+  actor.detour = best ?? 0;
+  return actor.detour;
+}
+
+/**
+ * 隊商の護衛。
+ *
+ * 自作の粗いタイマーで戦わせていたが、20 周かけて調整した敵の型とは
+ * 別物で、間合いも怯みも噛み合っていなかった。Enemy をそのまま中立の
+ * 陣営で使い、戦いは同じ機構に任せる。ここが持つのは
+ * 「誰と戦うか」と「戦っていないときどこに立つか」だけ。
+ */
+export class Guard extends Enemy {
+  constructor(caravan, slot, at) {
+    super(ENEMIES.caravan_guard, {
+      team: TEAM.NEUTRAL, x: at.x, y: at.y, z: at.z, yaw: at.yaw, leash: 1e9,
+    });
+    this.caravan = caravan;
+    this.slot = slot;
+    this.kind = 'guard';
+    this.npcName = ENEMIES.caravan_guard.name;
+    this.title = '隊商の護衛';
+    this.role = 'traveller';
+    this.lines = ['荷に近づくな。……見るだけならいい。',
+      'この道で三度襲われた。次は無い、と親方は言うがね。'];
+    this.talking = false;
+    this.interactLabel = '話す';
+    this.walkSpeed = 1.4;
+    // 踏み込み権はプレイヤーを囲む敵を絞るための仕組み。
+    // 護衛は game.enemies に入らないので配られず、一度も振らなかった
+    this.token = true;
+  }
+
+  /** 荷車のそばに来た敵のうち、他の護衛が手を取っていない一番近い者 */
+  pickFoe(game) {
+    const c = this.caravan;
+    let mine = null, md = 1e9;
+    for (const e of game.enemies) {
+      if (e.dead || !e.aggro || e.team !== TEAM.ENEMY) continue;
+      if (Math.hypot(e.x - c.cartX, e.z - c.cartZ) > 40) continue;
+      const taken = c.members.some((m) => m !== this && m.foe === e);
+      const score = Math.hypot(e.x - this.x, e.z - this.z) + (taken ? 14 : 0);
+      if (score < md) { md = score; mine = e; }
+    }
+    return mine;
+  }
+
+  update(dt, game) {
+    if (this.dead) { super.update(dt, game); return; }
+    if (this.talking) {
+      this.faceTowards(game.player.x, game.player.z, dt, 6);
+      this.updateAnim(dt, 0);
+      this.updatePhysics(dt, game);
+      return;
+    }
+    this.foe = this.pickFoe(game);
+    this.homeX = this.caravan.cartX; this.homeZ = this.caravan.cartZ;
+    if (this.foe) {
+      this.aggro = true;
+      this.token = true;
+      if (this.aiState === 'idle' || this.aiState === 'return') this.aiState = 'chase';
+      super.update(dt, game);
+      return;
+    }
+    // 戦っていないときは持ち場へ。ここは隊列の仕事で、AI の仕事ではない
+    this.aggro = false;
+    this.aiState = 'idle';
+    this.attack = null;
+    const dx = (this.tx ?? this.x) - this.x, dz = (this.tz ?? this.z) - this.z;
+    const d = Math.hypot(dx, dz);
+    let speed = 0;
+    if (d > 14) {
+      this.x = this.tx; this.z = this.tz; this.y = game.world.height(this.x, this.z);
+    } else if (d > 0.55) {
+      speed = Math.min(this.walkSpeed * (1 + Math.min(2.6, d / 4)), d / Math.max(dt, 1e-3));
+      const off = steerAround(this, game, dx, dz, speed * dt, this.tx, this.tz);
+      const a = Math.atan2(dx, dz) + off;
+      const x0 = this.x, z0 = this.z;
+      this.faceTowards(this.x + Math.sin(a), this.z + Math.cos(a), dt, 4);
+      this.moveOnGround(dt, game, Math.sin(a), Math.cos(a), speed);
+      if (Math.hypot(this.x - x0, this.z - z0) < speed * dt * 0.35) this.slotStuck = (this.slotStuck || 0) + dt;
+      else this.slotStuck = 0;
+      if (this.slotStuck > 1.5) {
+        this.x = this.tx; this.z = this.tz; this.y = game.world.height(this.x, this.z);
+        this.slotStuck = 0;
+      }
+    } else {
+      this.faceTowards(this.x + Math.sin(this.caravan.yaw), this.z + Math.cos(this.caravan.yaw), dt, 3);
+    }
+    this.updatePhysics(dt, game);
+    this.updateAnim(dt, speed);
+  }
+
+  /** 護衛は残響を落とさない */
+  sfxAt() { return { x: this.x, z: this.z }; }
+}
+
+/**
  * 隊商ひとつ。
  *
  * 隊列の位置は「先頭が道のどこにいるか」から毎フレーム引き直す。
@@ -357,8 +374,10 @@ export class Caravan {
     this.skips = 0;
     this.members = [];
     for (const role of CARAVAN_ROLES) {
-      const t = new Traveller(role.kind, route, dir, seg,
-        { x: at.x, y: game.world.height(at.x, at.z), z: at.z, yaw: at.yaw });
+      const spot = { x: at.x, y: game.world.height(at.x, at.z), z: at.z, yaw: at.yaw };
+      const t = role.kind === 'guard'
+        ? new Guard(this, role, spot)
+        : new Traveller(role.kind, route, dir, seg, spot);
       t.caravan = this;
       t.slot = role;
       t.lead = !!role.lead;
@@ -432,7 +451,11 @@ export class Caravan {
       }
     }
     this.place(game);
-    for (const m of this.members) m.followCaravan(dt, game, threat);
+    for (const m of this.members) {
+      if (m.dead) { m.update(dt, game); continue; }
+      if (m instanceof Guard) m.update(dt, game);
+      else m.followCaravan(dt, game, threat);
+    }
   }
 }
 

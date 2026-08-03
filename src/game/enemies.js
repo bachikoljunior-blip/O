@@ -197,7 +197,7 @@ export class Enemy extends Actor {
   constructor(def, opts = {}) {
     const rig = RIG_FOR[def.body] || 'humanoid';
     super({
-      rig, team: TEAM.ENEMY, name: def.name,
+      rig, team: opts.team ?? TEAM.ENEMY, name: def.name,
       hp: Math.round(def.hp * (opts.hpMul || 1)),
       poise: def.poise, def: def.def,
       speed: def.speed, runSpeed: def.runSpeed,
@@ -299,7 +299,8 @@ export class Enemy extends Actor {
 
     // ---- 道の者を見つける ----
     // 賊は街道の荷を狙う。近くに旅人や隊商がいれば、そちらを相手にする
-    if (!game.dungeon && this.arch.raider !== false && !this.boss && !this.arch.passive) {
+    if (!game.dungeon && this.team === TEAM.ENEMY && this.arch.raider !== false
+      && !this.boss && !this.arch.passive) {
       this.roadScan = (this.roadScan || 0) - dt;
       if (this.roadScan <= 0) {
         this.roadScan = 0.6 + Math.random() * 0.6;
@@ -445,6 +446,8 @@ export class Enemy extends Actor {
     const f = this.foe;
     if (f && !f.dead && Math.hypot(f.x - this.x, f.z - this.z) < 60) return f;
     if (f) this.foe = null;
+    // 中立（護衛など）はプレイヤーを相手にしない。指された相手だけを見る
+    if (this.team !== TEAM.ENEMY) return null;
     return game.player;
   }
 
@@ -723,7 +726,7 @@ export class Enemy extends Actor {
     }
 
     if (phase === 'active') {
-      const p = game.player;
+      const p = this.quarry(game) || game.player;
       if (src.summon) {
         if (!this.attackApplied) {
           this.attackApplied = true;
@@ -745,7 +748,7 @@ export class Enemy extends Actor {
               x: this.x, y: this.y + this.height * 0.65, z: this.z,
               yaw: this.yaw + spread,
               pitch: Math.atan2((p.y + 1.0) - (this.y + this.height * 0.65), Math.max(1, dist)),
-              speed: src.projectile === 'arrow' ? 40 : 22, team: TEAM.ENEMY,
+              speed: src.projectile === 'arrow' ? 40 : 22, team: this.team,
               frost: src.frost, fire: src.fire, splash: src.splash || 0,
             });
           }
@@ -834,6 +837,12 @@ export class Enemy extends Actor {
 
   onDeath(game, opts) {
     this.removeAt = 0;
+    // 味方が倒れても残響は入らない
+    if (this.team !== TEAM.ENEMY) {
+      game.fx.deathBurst(this.x, this.y + this.height * 0.5, this.z, this.tint);
+      game.audio.play('death', this.sfxAt());
+      return;
+    }
     game.player.echo += Math.round(this.echo * game.player.mods.echoMul);
     game.player.kills++;
     game.ui.echoGain(Math.round(this.echo * game.player.mods.echoMul));

@@ -484,6 +484,24 @@ export const ENEMIES = {
     ],
     ai: { aggression: 0.6, circling: 0.4, retreat: 0.3, guard: 0.25, backstep: 0.30 },
   },
+  /**
+   * 隊商の護衛。中立の陣営で使う。
+   *
+   * 自作の粗いタイマーで戦わせていたが、20 周かけて調整した敵の型とは
+   * 別物で、釣り合いが砂の上だった。同じ表に載せて同じ機構で戦わせる。
+   * 賊より硬く、手数はやや遅い。守るのが仕事で、追い回すのではない。
+   */
+  caravan_guard: {
+    id: 'caravan_guard', mat: 'armor', name: '隊商護衛', tier: 3, hp: 280, poise: 42, def: 12,
+    speed: 3.1, runSpeed: 4.6, aggro: 22, echo: 0, body: 'humanoid',
+    tint: [0.33, 0.34, 0.38], h: 1.0, weapon: 'w_spear', shield: true, group: 3,
+    attacks: [
+      { id: 'thrust', windup: 0.48, active: 0.13, recover: 0.58, dmg: 34, range: 3.0, arc: 1.1, poise: 24, motion: 'thrust' },
+      { id: 'sweep', windup: 0.56, active: 0.16, recover: 0.66, dmg: 30, range: 2.8, arc: 2.4, poise: 30, motion: 'slash_r' },
+      { id: 'butt', windup: 0.34, active: 0.12, recover: 0.60, dmg: 16, range: 2.2, arc: 1.2, poise: 40, motion: 'thrust', guardBreak: true },
+    ],
+    ai: { aggression: 0.5, circling: 0.15, retreat: 0.1, guard: 0.45, backstep: 0.15 },
+  },
   archer: {
     id: 'archer', mat: 'flesh', name: '野盗の射手', tier: 2, hp: 120, poise: 22, def: 4,
     speed: 3.2, runSpeed: 5.2, aggro: 34, echo: 90, body: 'humanoid',
