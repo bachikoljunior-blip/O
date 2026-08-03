@@ -85,16 +85,30 @@ export class Player extends Actor {
     this.shieldTint = shield ? shield.tint : null;
 
     const w = WEAPONS[this.equip.weapon];
+    const wlv = this.upgrades[this.equip.weapon] || 0;
+    const tier = UPGRADE.tier(wlv);
     this.weaponModel = w ? w.model : null;
-    this.weaponTint = w ? w.tint : [0.8, 0.8, 0.85];
-    this.weaponGlow = w?.emissive || 0;
-    this.weaponScale = w?.cls === '大剣' ? 1.05 : 1;
+    this.weaponTier = tier;
+    // 強化した刃は白く冴え、上の段では熱を帯びて光る。
+    // 数字だけの強化では、振っていて強くなった気がしない
+    const bt = w ? w.tint : [0.8, 0.8, 0.85];
+    this.weaponTint = [
+      lerp(bt[0], 1.00, tier.keen * 0.55),
+      lerp(bt[1], 0.97, tier.keen * 0.50),
+      lerp(bt[2], 0.94, tier.keen * 0.42),
+    ];
+    this.weaponGlow = (w?.emissive || 0) + tier.glow;
+    this.weaponScale = (w?.cls === '大剣' ? 1.05 : 1) * (1 + tier.keen * 0.035);
     this.tint = body ? body.tint.slice() : [0.5, 0.45, 0.4];
     this.maxPoise = 18 + (body?.weight || 0) * 0.9 + (head?.weight || 0) * 0.8;
     this.poise = Math.min(this.poise, this.maxPoise);
 
-    this.trailColor = w?.emissive ? [w.tint[0] + 0.3, w.tint[1] + 0.3, w.tint[2] + 0.4]
+    // 軌跡も段階で冴える
+    const tc = w?.emissive ? [w.tint[0] + 0.3, w.tint[1] + 0.3, w.tint[2] + 0.4]
       : [0.88, 0.93, 1.0];
+    this.trailColor = [
+      tc[0] + tier.keen * 0.45, tc[1] + tier.keen * 0.40, tc[2] + tier.keen * 0.30,
+    ];
     this.buildEquipVisuals(head, body, shield);
 
     const load = (w?.weight || 0) + (shield?.weight || 0) + (head?.weight || 0) + (body?.weight || 0);
@@ -499,6 +513,8 @@ export class Player extends Actor {
         // 手応えは武器の重量から。短剣と大剣が同じ止まり方をしないように
         // 短剣 1.5 〜 王剣 16。いちばん軽い得物でも手応えを 0 にはしない
         impactWeight: 0.12 + clamp01(((w?.weight || 5) - 1.5) / 14) * 0.88,
+        // 銘入り以上の刃は、当たった音に澄んだ余韻が乗る
+        keen: this.weaponTier?.ring ? 1 : 0,
       };
       let dmg = power;
       if (w?.magic) dmg += w.magic * (0.6 + scalingFactor(this.stats.arc));

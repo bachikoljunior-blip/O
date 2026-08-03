@@ -326,6 +326,30 @@ export const UPGRADE = {
   },
   /** 強化段階ごとの攻撃力倍率 */
   mul(level) { return 1 + level * 0.14; },
+
+  /**
+   * 段階の呼び名。数字だけでは「どこまで来たか」が実感しにくい。
+   * 見た目もここで決めて、刃の冴えと灯りを段階に合わせる。
+   */
+  tier(level) {
+    if (level >= 10) return { name: '極み', keen: 1.00, glow: 0.42, ring: true };
+    if (level >= 8) return { name: '銘入り', keen: 0.82, glow: 0.26, ring: true };
+    if (level >= 5) return { name: '鍛え上げ', keen: 0.60, glow: 0.10, ring: false };
+    if (level >= 2) return { name: '打ち直し', keen: 0.32, glow: 0, ring: false };
+    return { name: '', keen: 0.10, glow: 0, ring: false };
+  },
+
+  /** そこから最大まで上げるのに要るもの */
+  toMax(level) {
+    let echo = 0;
+    const mats = {};
+    for (let l = level; l < this.maxLevel; l++) {
+      const c = this.cost(l);
+      echo += c.echo;
+      mats[c.mat] = (mats[c.mat] || 0) + c.matCount;
+    }
+    return { echo, mats };
+  },
 };
 
 /* ============================================================ 調合 */

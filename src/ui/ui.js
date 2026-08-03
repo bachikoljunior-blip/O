@@ -680,7 +680,9 @@ export class UI {
 
     if (w) {
       const wp = el('div', 'panel');
-      wp.appendChild(el('h3', '', `${w.name} +${p.upgrades[w.id] || 0}`));
+      const wt = UPGRADE.tier(p.upgrades[w.id] || 0);
+      wp.appendChild(el('h3', '',
+        `${w.name} +${p.upgrades[w.id] || 0}${wt.name ? `　${wt.name}` : ''}`));
       const scaleTxt = Object.entries(w.scale || {})
         .map(([s, g]) => `${STAT_NAMES[s]} ${g}`).join(' / ') || '—';
       const reqTxt = Object.entries(w.req || {})
@@ -759,7 +761,8 @@ export class UI {
           : '';
         const scales = Object.entries(w.scale || {})
           .map(([st, gr]) => `${STAT_NAMES[st]}${gr}`).join(' ');
-        return `<span>${w.name} ${lv ? `+${lv}` : ''}`
+        const tn = UPGRADE.tier(lv).name;
+        return `<span>${w.name} ${lv ? `+${lv}` : ''}${tn ? `　${tn}` : ''}`
           + `<span class="sub">${w.cls}・重量${w.weight}・補正 ${scales || '—'}</span>`
           + `<span class="sub">${w.desc}</span>${warn}</span>`
           + `<span class="v">${Math.round(atk)}${cmp}</span>`;
@@ -1135,9 +1138,11 @@ export class UI {
     const w = WEAPONS[p.equip.weapon];
     const lv = p.upgrades[p.equip.weapon] || 0;
     const panel = el('div', 'panel');
-    panel.appendChild(el('h3', '', `${w.name} +${lv}`));
+    const tier = UPGRADE.tier(lv);
+    panel.appendChild(el('h3', '', `${w.name} +${lv}${tier.name ? `　${tier.name}` : ''}`));
     if (lv >= UPGRADE.maxLevel) {
-      panel.appendChild(el('div', 'row', '<span class="sub">これ以上は強化できない</span>'));
+      panel.appendChild(el('div', 'row',
+        '<span class="sub">これ以上は強化できない。刃はもう限界まで冴えている</span>'));
     } else {
       const c = UPGRADE.cost(lv);
       panel.appendChild(el('div', 'row',
@@ -1149,6 +1154,21 @@ export class UI {
       const b = el('button', 'btn wide', '強化する');
       b.onclick = () => { if (p.upgradeWeapon(game)) this.renderOverlay(); };
       panel.appendChild(b);
+
+      // 次に呼び名が変わる段階と、最大までの見通し
+      const next = [2, 5, 8, 10].find((n) => n > lv);
+      if (next) {
+        const nt = UPGRADE.tier(next);
+        panel.appendChild(el('div', 'row',
+          `<span>次の位<span class="sub">+${next} で「${nt.name}」</span></span>`
+          + `<span class="v">あと ${next - lv}</span>`));
+      }
+      const tm = UPGRADE.toMax(lv);
+      const mats = Object.entries(tm.mats)
+        .map(([id, n]) => `${ITEMS[id].name} ×${n}`).join('・');
+      panel.appendChild(el('div', 'row',
+        `<span>極みまで<span class="sub">${mats}</span></span>`
+        + `<span class="v">${tm.echo.toLocaleString('ja-JP')} 残響</span>`));
     }
     root.appendChild(panel);
 
@@ -1157,7 +1177,11 @@ export class UI {
     for (const id of game.unlocked.weapons) {
       const ww = WEAPONS[id];
       const r = el('div', `row clickable ${p.equip.weapon === id ? 'sel' : ''}`);
-      r.innerHTML = `<span>${ww.name} +${p.upgrades[id] || 0}<span class="sub">${ww.cls}</span></span><span class="v">${Math.round(ww.base * UPGRADE.mul(p.upgrades[id] || 0))}</span>`;
+      const ulv = p.upgrades[id] || 0;
+      const ut = UPGRADE.tier(ulv);
+      r.innerHTML = `<span>${ww.name} +${ulv}<span class="sub">${ww.cls}`
+        + `${ut.name ? `・${ut.name}` : ''}</span></span>`
+        + `<span class="v">${Math.round(ww.base * UPGRADE.mul(ulv))}</span>`;
       r.onclick = () => { p.equip.weapon = id; p.recalc(); this.renderOverlay(); };
       list.appendChild(r);
     }

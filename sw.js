@@ -1,6 +1,6 @@
 // オフライン対応（キャッシュファースト、更新はバックグラウンドで取得）
 
-const CACHE = 'aetheria-v16';
+const CACHE = 'aetheria-v17';
 const ASSETS = [
   './',
   './index.html',

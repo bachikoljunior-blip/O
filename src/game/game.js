@@ -1351,6 +1351,7 @@ export class Game {
     const mat = onMe ? 'armor' : (target.arch?.mat || target.mat || 'flesh');
     const pitch = onMe ? 0.82 : (1.12 - weight * 0.26);
     this.audio.play(`hit_${mat}`, { weight, pitch });
+    if (opts?.keen) this.audio.play('keen', { weight, delay: 0.02, pitch: 1 + weight * 0.12 });
     if (broke) this.audio.play('poise_break', { delay: 0.03 });
     if (killed && !onMe) this.audio.play('kill_blow', { delay: 0.05 });
   }

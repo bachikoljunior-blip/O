@@ -253,6 +253,13 @@ export class AudioEngine {
         this.noise({ dur: 0.26, gain: 0.10, freq: 1500, sweep: 0.5, q: 0.6, delay: d, reverb: 0.5 });
         break;
 
+      case 'keen':
+        // 研ぎ澄まされた刃だけが立てる、当たった直後の澄んだ余韻
+        this.tone({ freq: 2100 * p, dur: 0.26, type: 'sine', gain: 0.09 + w * 0.07,
+          sweep: 1.7, delay: d, reverb: 0.55 });
+        this.tone({ freq: 3150 * p, dur: 0.18, type: 'sine', gain: 0.05 + w * 0.04,
+          sweep: 1.5, delay: d + 0.012, reverb: 0.5 });
+        break;
       case 'poise_break':
         // 体勢を崩したときだけの、下へ抜ける音
         this.tone({ freq: 210, dur: 0.34, type: 'sawtooth', gain: 0.22, sweep: 0.30,
