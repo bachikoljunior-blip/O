@@ -11,7 +11,7 @@ import { Terrain, CHUNK } from '../world/terrain.js';
 import { generatePOIs } from '../world/pois.js';
 import { Blockers } from '../world/blockers.js';
 import { Wildlife } from '../world/wildlife.js';
-import { Travellers } from '../world/travellers.js';
+import { Travellers, CART_SCALE } from '../world/travellers.js';
 import { Fish } from '../world/fish.js';
 import { Fishing } from '../world/fishing.js';
 import { Sky } from '../world/sky.js';
@@ -2037,14 +2037,24 @@ export class Game {
       if (!frustum.sphere(t.x, t.y + t.height * 0.5, t.z, t.height)) continue;
       t.emit(renderer, time, this);
     }
-    // 隊商の荷車
+    // 隊商の荷車と、積荷と、それを牽く駄馬
     for (const c of this.travellers.caravans) {
       if (!near2(c.cartX, c.cartZ, 220)) continue;
+      const s = CART_SCALE;
       const b = renderer.batchFor('cart');
-      if (!b) continue;
-      const o = b.alloc();
-      writeInstance(b.data, o, c.cartX, c.cartY, c.cartZ, c.yaw, 1.15, 1.15, 1.15,
-        0.52, 0.40, 0.28, 1, 0, 0, 0, 0.5);
+      if (b) {
+        const o = b.alloc();
+        writeInstance(b.data, o, c.cartX, c.cartY, c.cartZ, c.yaw, s, s, s,
+          0.52, 0.40, 0.28, 1, 0, 0, 0, 0.5);
+      }
+      // 積荷は荷車と同じ座標に重ねる。村に置かれた空の荷車と分けるため別モデル
+      const lb = renderer.batchFor('cart_load');
+      if (lb) {
+        const o = lb.alloc();
+        writeInstance(lb.data, o, c.cartX, c.cartY, c.cartZ, c.yaw, s, s, s,
+          0.86, 0.82, 0.76, 1, 0, 0, 0, 0.5);
+      }
+      if (c.dray) c.dray.emit(renderer, time, this);
     }
     if (P) this._mark('emit:旅人');
     for (const n of this.npcs) {

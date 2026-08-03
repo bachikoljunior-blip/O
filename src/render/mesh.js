@@ -651,18 +651,86 @@ function well(b) {
   b.push().translate(0, 2.5, 0).rotate(Math.PI / 2, 0, 0).cylinder(0.09, 0.09, 1.7, 6, C.wood).pop();
 }
 
-/** 荷車：木枠と二輪 */
+const CART_W = 1.25;      // 荷台の幅
+const CART_L = 2.4;       // 荷台の長さ
+const CART_DECK = 0.86;   // 荷台の床面（荷を載せる高さ）
+
+/**
+ * 荷車：木枠と二輪、前へ伸びる轅（ながえ）。
+ *
+ * 進行方向は +Z（鳥・魚と同じく、このリポジトリのモデルは +Z が前）。
+ * 第38周まで長手が +X だったので、隊商の進行方向に対して 90 度横を
+ * 向いたまま転がっていた（実測：モデル長手と進行方向の角度 90.0 度）。
+ * 轅の先は駄馬の肩の高さ・幅に合わせてある。ここが合っていないと、
+ * 牽くものを置いても繋がって見えない。
+ */
 function cart(b) {
-  b.push().translate(0, 0.78, 0).box(2.4, 0.16, 1.25, C.wood).pop();
-  for (const sz of [-1, 1]) {
-    b.push().translate(0, 1.05, sz * 0.6).box(2.4, 0.42, 0.1, C.woodDark).pop();
+  // 床板と側板・後ろのあおり
+  b.push().translate(0, 0.78, 0).box(CART_W, 0.16, CART_L, C.wood).pop();
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * (CART_W / 2 - 0.05), 1.05, 0)
+      .box(0.1, 0.42, CART_L, C.woodDark).pop();
   }
-  b.push().translate(-1.2, 1.05, 0).box(0.1, 0.42, 1.25, C.woodDark).pop();
-  for (const sz of [-1, 1]) {
-    b.push().translate(0.35, 0.62, sz * 0.72).rotate(Math.PI / 2, 0, 0)
-      .cylinder(0.62, 0.62, 0.14, 10, C.woodDark).pop();
+  b.push().translate(0, 1.05, -CART_L / 2).box(CART_W, 0.42, 0.1, C.woodDark).pop();
+  // 車軸（やや後ろ寄り）と二輪
+  b.push().translate((CART_W + 0.3) / 2, 0.62, -0.35).rotate(0, 0, Math.PI / 2)
+    .cylinder(0.07, 0.07, CART_W + 0.3, 6, C.woodDark).pop();
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * (CART_W / 2 + 0.14), 0.62, -0.35).rotate(0, 0, sx * Math.PI / 2);
+    b.cylinder(0.62, 0.62, 0.14, 10, C.woodDark, true, C.wood);
+    // 輻（や）。転がっているのが分かる程度に三本渡す
+    b.push().translate(0, 0.07, 0);
+    for (let i = 0; i < 3; i++) {
+      b.push().rotate(0, (i / 3) * Math.PI, 0).box(1.16, 0.05, 0.09, C.wood).pop();
+    }
+    b.pop();
+    b.pop();
   }
-  b.push().translate(1.7, 0.72, 0).rotate(0, 0, 0.22).box(1.4, 0.1, 0.1, C.wood).pop();
+  // 轅：床下から前へ二本。駄馬の胴の脇（±0.42）を通す
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 0.42, 0.80, 2.0).rotate(-0.05, 0, 0)
+      .box(0.11, 0.11, 3.2, C.wood).pop();
+  }
+  // 頸木（先端の横木）。駄馬の首輪がここに掛かる
+  b.push().translate(0, 0.90, 3.50).box(1.02, 0.10, 0.11, C.woodDark).pop();
+}
+
+/**
+ * 荷車の荷（樽・木箱・布をかけた包み）。
+ *
+ * 荷車と同じ位置・向き・倍率で重ねて描く。村に置かれている荷車は
+ * 空のままにしたいので、荷車本体とは別のモデルにした。
+ */
+function cartLoad(b) {
+  const canvas = [0.66, 0.60, 0.47];
+  const crateA = [0.46, 0.33, 0.20];
+  const crateB = [0.38, 0.28, 0.18];
+  const rope = [0.56, 0.47, 0.30];
+  const d = CART_DECK;
+  // 樽ふたつ（後ろ寄り、立てて）
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 0.30, d, -0.72);
+    b.cylinder(0.25, 0.25, 0.60, 8, C.wood);
+    b.push().translate(0, 0.13, 0).cylinder(0.27, 0.27, 0.06, 8, C.metalDark).pop();
+    b.push().translate(0, 0.42, 0).cylinder(0.27, 0.27, 0.06, 8, C.metalDark).pop();
+    b.pop();
+  }
+  // 木箱（中ほどに二つ、その上へ一つ）
+  b.push().translate(-0.26, d + 0.26, 0.02).rotate(0, 0.12, 0)
+    .box(0.52, 0.52, 0.56, crateA).pop();
+  b.push().translate(0.28, d + 0.22, 0.06).rotate(0, -0.18, 0)
+    .box(0.46, 0.44, 0.50, crateB).pop();
+  b.push().translate(-0.08, d + 0.62, -0.02).rotate(0, 0.35, 0)
+    .box(0.42, 0.34, 0.44, crateA).pop();
+  // 布をかけた包み（前寄り）
+  b.push().translate(0, d + 0.24, 0.76).roundedBox(0.96, 0.52, 0.80, 0.18, canvas, 3).pop();
+  b.push().translate(0, d + 0.48, 0.72).rotate(-0.10, 0, 0)
+    .box(1.08, 0.06, 0.88, [canvas[0] * 1.06, canvas[1] * 1.04, canvas[2] * 0.98]).pop();
+  // 縄で締める
+  for (const z of [0.48, 1.02]) {
+    b.push().translate(0, d + 0.30, z).box(1.10, 0.05, 0.05, rope).pop();
+  }
+  b.push().translate(0, d + 0.51, 0.75).box(0.05, 0.05, 0.96, rope).pop();
 }
 
 /** 露店：布屋根の台 */
@@ -967,6 +1035,8 @@ export function buildModels(gl) {
   add('gate', gate);
   add('well', well);
   add('cart', cart);
+  // 荷車の荷。荷車と重ねて描く（村の空の荷車と分けるため別モデル）
+  add('cart_load', cartLoad);
   add('stall', stall);
   add('banner', banner);
   add('palisade', palisade);
