@@ -125,6 +125,11 @@ export class UI {
     game.input.onStickMove = (dx, dy) => {
       $('i', this.stick).style.transform = `translate(${dx}px, ${dy}px)`;
     };
+    // 倒しきった指を追って台座ごと動く
+    game.input.onStickBase = (x, y) => {
+      this.stick.style.left = `${x}px`;
+      this.stick.style.top = `${y}px`;
+    };
     game.input.onStickHide = () => this.stick.classList.add('hidden');
 
     this.applySettings();
@@ -1426,7 +1431,12 @@ export class UI {
   applySettings() {
     const s = this.settings;
     this.game?.audio.setVolumes({ master: s.master, sfx: s.sfx, music: s.music });
-    if (this.game) this.game.input.lookSensitivity = 0.0055 * s.sensitivity;
+    if (this.game) {
+      this.game.input.lookSensitivity = 0.0055 * s.sensitivity;
+      // 左利き配置では操作ボタンが左へ移るので、スティックを掴む側も右へ移す
+      // （移さないと親指ひとつで移動とボタンを兼ねることになる）
+      this.game.input.stickRight = !!s.lefty;
+    }
     // 画面レイアウト（左利き・ボタンの大きさ）は body のクラスで切り替える
     const b = document.body;
     b.classList.toggle('lefty', !!s.lefty);
@@ -1447,10 +1457,12 @@ export class UI {
   renderHowTo(root) {
     const panel = el('div', 'panel');
     panel.appendChild(el('h3', '', 'スマートフォン'));
+    const stickSide = this.settings.lefty ? '右' : '左';
+    const lookSide = this.settings.lefty ? '左' : '右';
     const rows = [
-      ['左半分をドラッグ', '移動（仮想スティック）'],
-      ['右半分をドラッグ', 'カメラ操作'],
-      ['攻', 'タップで軽攻撃 / 長押しで強攻撃'],
+      [`${stickSide}半分をドラッグ`, '移動（仮想スティック・指を追って台座が動く）'],
+      [`${lookSide}半分をドラッグ`, 'カメラ操作（ボタンの隙間でも効く）'],
+      ['攻', 'タップで軽攻撃 / 長押しで軽攻撃→強攻撃'],
       ['避', 'タップで回避（無敵あり）/ 押しっぱなしでダッシュ'],
       ['防', '押しっぱなしでガード / タップでパリィ'],
       ['跳', 'ジャンプ'],
@@ -1459,6 +1471,8 @@ export class UI {
       ['雫', '癒しの雫を飲む'],
       ['戦技', '武器ごとの切り札（FPとスタミナを使う）'],
       ['調べる', '篝火・宝箱・NPC・採取'],
+      ['☰ / ▦', `画面の${this.settings.lefty ? '右' : '左'}上。メニューと地図`],
+      ['硬直中の入力', '0.25 秒ぶん先に受け付ける。少し早く押しても出る'],
     ];
     for (const [k, v] of rows) {
       panel.appendChild(el('div', 'row', `<span>${k}</span><span class="v">${v}</span>`));

@@ -10,6 +10,24 @@ const KEY_MAP = {
   Escape: 'menu', KeyM: 'map', Tab: 'inventory',
 };
 
+/**
+ * 先行入力を受ける行動。
+ *
+ * 弱攻撃を1回振ると再び動けるまで 31〜44 フレーム（0.5〜0.7 秒）掛かる。
+ * 指で遊ぶと、その間に押した2撃目はまるごと消えていた（+2f〜+30f の
+ * どこで押しても出た攻撃は 1 回きり）。押した事実を短いあいだ持っておき、
+ * 動けた最初のフレームで一度だけ出す。
+ *
+ * 受けるのは「動けるときだけ実行される」行動に限る。lock / mount / interact /
+ * menu / map は毎フレーム見られていたり呼び口が複数あったりするので入れない。
+ */
+const BUFFERED = new Set(['attack', 'heavy', 'dodge', 'block', 'spell', 'art', 'item', 'jump']);
+
+// 先行入力の寿命。フレーム数と実時間の両方で切る。
+// SwiftShader だと 1 フレームが 0.5 秒あるので、フレーム数だけだと持ちすぎる。
+const BUF_FRAMES = 15;   // 60fps で 0.25 秒
+const BUF_MS = 250;
+
 export class Input {
   constructor(canvas) {
     this.canvas = canvas;
@@ -26,6 +44,13 @@ export class Input {
     this.pointerLock = false;
     this.holdTimers = new Map();
     this.touchMode = false;
+    // スティックを掴める側。左利き配置では操作ボタンが左に来るので右へ移す
+    this.stickZone = 0.45;
+    this.stickRight = false;
+
+    this.frameNo = 0;
+    this._buf = new Map();      // name -> { f: 期限フレーム, t: 期限時刻 }
+    this._holdArmed = new Map(); // ボタン名 -> { act, fired }
 
     this._bindKeyboard();
     this._bindMouse();
@@ -33,12 +58,31 @@ export class Input {
   }
 
   down(n) { return this.btn.has(n); }
-  pressed(n) { return this.btnPressed.has(n); }
   released(n) { return this.btnReleased.has(n); }
 
+  /**
+   * 押されたか。先行入力を持っていればここで消費する（1回だけ真を返す）。
+   */
+  pressed(n) {
+    const b = this._buf.get(n);
+    if (b) {
+      this._buf.delete(n);
+      if (this.frameNo <= b.f && performance.now() <= b.t) {
+        for (const h of this._holdArmed.values()) if (h.act === n) h.fired = true;
+        return true;
+      }
+    }
+    return this.btnPressed.has(n);
+  }
+
   press(n) {
-    if (!this.btn.has(n)) this.btnPressed.add(n);
+    const fresh = !this.btn.has(n);
     this.btn.add(n);
+    if (!fresh) return;   // ゲームパッドは押しっぱなしでも毎フレーム press() を呼ぶ
+    this.btnPressed.add(n);
+    if (BUFFERED.has(n)) {
+      this._buf.set(n, { f: this.frameNo + BUF_FRAMES, t: performance.now() + BUF_MS });
+    }
   }
   release(n) {
     if (this.btn.has(n)) this.btnReleased.add(n);
@@ -75,6 +119,9 @@ export class Input {
     addEventListener('blur', () => {
       this.keys.clear();
       for (const b of [...this.btn]) this.release(b);
+      // 裏に回っている間の先行入力は捨てる。戻った瞬間に振り始めない
+      this._buf.clear();
+      this._holdArmed.clear();
     });
   }
 
@@ -121,8 +168,12 @@ export class Input {
   _touchStart(e) {
     this.touchMode = true;
     e.preventDefault();
+    const zone = innerWidth * this.stickZone;
     for (const t of e.changedTouches) {
-      if (t.clientX < innerWidth * 0.45 && !this.stick.active) {
+      const onStickSide = this.stickRight
+        ? t.clientX > innerWidth - zone
+        : t.clientX < zone;
+      if (onStickSide && !this.stick.active) {
         this.stick.active = true;
         this.stick.id = t.identifier;
         this.stick.ox = t.clientX;
@@ -148,7 +199,16 @@ export class Input {
         let dy = t.clientY - this.stick.oy;
         const d = Math.hypot(dx, dy);
         const r = this.stick.radius;
-        if (d > r) { dx = (dx / d) * r; dy = (dy / d) * r; }
+        if (d > r) {
+          // 半径を越えたら台座が指に引きずられる。倒しきったまま走っていても、
+          // 少し戻すだけで向きが変わる（追わないと 200px 倒した分を戻すまで
+          // 入力が振り切れたままになる）
+          const k = (d - r) / d;
+          this.stick.ox += dx * k;
+          this.stick.oy += dy * k;
+          dx -= dx * k; dy -= dy * k;
+          this.onStickBase?.(this.stick.ox, this.stick.oy);
+        }
         this.stick.x = dx / r;
         this.stick.y = dy / r;
         this.onStickMove?.(dx, dy);
@@ -191,6 +251,9 @@ export class Input {
         const timer = setTimeout(() => {
           if (this.btn.has(name)) {
             this.press(opts.hold);
+            // 押している間は先行入力として持ち続ける。弱攻撃の硬直（0.73 秒）が
+            // 明けるまで待てないと、長押しの強攻撃は一度も出ない
+            this._holdArmed.set(name, { act: opts.hold, fired: false });
             this.holdFired = this.holdFired || new Set();
             this.holdFired.add(name);
             el.classList.add('hold');
@@ -206,6 +269,8 @@ export class Input {
       if (opts.hold) {
         clearTimeout(this.holdTimers.get(name));
         this.release(opts.hold);
+        this._holdArmed.delete(name);
+        this._buf.delete(opts.hold);
         this.holdFired?.delete(name);
       }
       el.classList.remove('active', 'hold');
@@ -220,6 +285,16 @@ export class Input {
 
   /* ------------------------------------------------------ 毎フレーム */
   update() {
+    this.frameNo++;
+
+    // 長押し中の行動は、離すまで先行入力を生かしておく（出るのは一度だけ）
+    for (const [name, h] of this._holdArmed) {
+      if (!this.btn.has(name)) { this._holdArmed.delete(name); continue; }
+      if (!h.fired) {
+        this._buf.set(h.act, { f: this.frameNo, t: performance.now() + 1e6 });
+      }
+    }
+
     // 移動ベクトル
     if (this.stick.active) {
       this.move.x = this.stick.x;

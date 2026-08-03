@@ -40,8 +40,10 @@ button {
 #hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 #hud > * { pointer-events: none; }
 
+/* 上端は方位帯（中央）と ☰ ▦（左上）が使う。体力はその下に置く。
+   同じ高さに並べると 740px 幅で方位帯と 112x22px 重なっていた */
 .vitals {
-  position: absolute; left: calc(14px + var(--safe-l)); top: calc(12px + var(--safe-t));
+  position: absolute; left: calc(14px + var(--safe-l)); top: calc(62px + var(--safe-t));
   width: min(46vw, 320px);
 }
 .bar {
@@ -92,7 +94,7 @@ button {
 #compass {
   position: absolute; left: 50%; top: calc(8px + var(--safe-t));
   transform: translateX(-50%);
-  width: min(62vw, 400px); height: 26px;
+  width: min(58vw, 400px); height: 26px;
   opacity: .95; filter: drop-shadow(0 1px 3px rgba(0,0,0,.8));
 }
 #compass.hidden { display: none; }
@@ -131,7 +133,7 @@ button {
 .echo .ei { color: var(--gold); font-size: 13px; }
 
 .questtrack {
-  position: absolute; left: calc(14px + var(--safe-l)); top: calc(84px + var(--safe-t));
+  position: absolute; left: calc(14px + var(--safe-l)); top: calc(134px + var(--safe-t));
   max-width: 46vw; text-shadow: 0 1px 3px #000;
 }
 .questtrack .qname { font-size: 11px; color: var(--gold); letter-spacing: .08em; }
@@ -278,7 +280,12 @@ button {
 
 /* ========================= タッチ操作 ========================= */
 #touch { position: absolute; inset: 0; }
-#touch > * { pointer-events: auto; }
+/* 指を受けるのは丸いボタンだけ。まとめている箱が矩形のまま指を吸うと、
+   ボタンの隙間が「押しても何も起きない」死に領域になる（画面の 13.6%、
+   右半分の視点操作は 66.5% しか届いていなかった）。
+   箱を透かすと、下に隠れていた ☰ ▦ にも指が届くようになる */
+#touch > * { pointer-events: none; }
+#touch .tb, #touch button { pointer-events: auto; }
 
 #stick {
   position: absolute; width: 124px; height: 124px; margin: -62px 0 0 -62px;
@@ -303,34 +310,39 @@ button {
 .tb.active { background: rgba(216,184,98,.34); transform: scale(.93); }
 .tb.hold { background: rgba(216,120,60,.45); }
 
+/* ☰ と ▦ は左上の角へ。右側に置くと 360〜430px の高さでは操作ボタンの列に
+   完全に潜り込んでいた（5.5型で両方とも到達率 0%、6.1型で ▦ が 0%）。
+   戦闘中に押すものではないので、親指を伸ばす位置でよい */
 .topbtns {
-  position: absolute; right: calc(12px + var(--safe-r)); top: calc(116px + var(--safe-t));
-  display: flex; flex-direction: column; gap: 8px;
+  position: absolute; left: calc(14px + var(--safe-l)); top: calc(10px + var(--safe-t));
+  display: flex; flex-direction: row; gap: 10px;
 }
-.tb.sm { width: 40px; height: 40px; font-size: 16px; }
+.tb.sm { width: 46px; height: 46px; font-size: 17px; }
 
 .cluster {
   position: absolute; right: calc(14px + var(--safe-r)); bottom: calc(16px + var(--safe-b));
   display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
 }
-.subrow { display: flex; gap: 8px; }
-.tb.sub { width: 44px; height: 44px; font-size: 13px; position: relative; }
+.subrow { display: flex; gap: 10px; }
+.tb.sub { width: 46px; height: 46px; font-size: 13px; position: relative; }
 .tb.sub .cnt {
   position: absolute; right: 2px; bottom: 2px; font-size: 9px; color: var(--gold);
 }
 
-.diamond { position: relative; width: 186px; height: 172px; }
+/* 攻↔避 の縁と縁が 4.6px（0.72mm）しかなく、振ってから転がるときに
+   隣を掠めやすかった。10px 以上（1.6mm）空ける */
+.diamond { position: relative; width: 186px; height: 180px; }
 .tb.main { position: absolute; width: 60px; height: 60px; font-size: 17px; }
 .tb.main.big { width: 78px; height: 78px; font-size: 21px; background: rgba(30,16,14,.6); }
 .tb.main.up { right: 62px; top: 0; }
-.tb.main.left { right: 118px; top: 56px; }
-.tb.main.right { right: 0; top: 48px; }
-.tb.main.down { right: 62px; top: 108px; }
+.tb.main.left { right: 118px; top: 60px; }
+.tb.main.right { right: 0; top: 52px; }
+.tb.main.down { right: 62px; top: 120px; }
 
 #interactbtn {
   position: absolute; left: 50%; bottom: calc(104px + var(--safe-b));
-  transform: translateX(-50%); width: auto; padding: 9px 20px;
-  border-radius: 22px; font-size: 13px;
+  transform: translateX(-50%); width: auto; min-height: 46px; padding: 0 22px;
+  border-radius: 23px; font-size: 13px;
 }
 
 /* 左利き配置：操作ボタン群と情報表示を左右反転する */
@@ -340,7 +352,7 @@ body.lefty .cluster {
 body.lefty .diamond { transform: scaleX(-1); }
 body.lefty .diamond .tb { transform: scaleX(-1); }
 body.lefty .diamond .tb.active { transform: scaleX(-1) scale(.93); }
-body.lefty .topbtns { right: auto; left: calc(12px + var(--safe-l)); }
+body.lefty .topbtns { left: auto; right: calc(14px + var(--safe-r)); }
 body.lefty .topright {
   right: auto; left: calc(12px + var(--safe-l)); align-items: flex-start;
 }
@@ -353,21 +365,24 @@ body.lefty .echo { left: auto; right: calc(16px + var(--safe-r)); }
 /* 操作ボタンの大きさ（指の太さは人によって違う） */
 body.tbig .tb.main { width: 70px; height: 70px; font-size: 19px; }
 body.tbig .tb.main.big { width: 90px; height: 90px; font-size: 24px; }
-body.tbig .diamond { width: 214px; height: 200px; }
+body.tbig .diamond { width: 214px; height: 202px; }
 body.tbig .tb.main.up { right: 72px; top: 0; }
-body.tbig .tb.main.left { right: 138px; top: 64px; }
-body.tbig .tb.main.right { right: 0; top: 55px; }
-body.tbig .tb.main.down { right: 72px; top: 126px; }
-body.tbig .tb.sub { width: 52px; height: 52px; font-size: 15px; }
+body.tbig .tb.main.left { right: 138px; top: 66px; }
+body.tbig .tb.main.right { right: 0; top: 56px; }
+body.tbig .tb.main.down { right: 72px; top: 132px; }
+body.tbig .tb.sub { width: 54px; height: 54px; font-size: 15px; }
+body.tbig .tb.sm { width: 52px; height: 52px; font-size: 19px; }
 
 body.tsmall .tb.main { width: 52px; height: 52px; font-size: 15px; }
 body.tsmall .tb.main.big { width: 66px; height: 66px; font-size: 18px; }
-body.tsmall .diamond { width: 162px; height: 148px; }
+body.tsmall .diamond { width: 162px; height: 154px; }
 body.tsmall .tb.main.up { right: 54px; top: 0; }
-body.tsmall .tb.main.left { right: 102px; top: 48px; }
-body.tsmall .tb.main.right { right: 0; top: 41px; }
-body.tsmall .tb.main.down { right: 54px; top: 94px; }
-body.tsmall .tb.sub { width: 38px; height: 38px; font-size: 12px; }
+body.tsmall .tb.main.left { right: 102px; top: 51px; }
+body.tsmall .tb.main.right { right: 0; top: 44px; }
+body.tsmall .tb.main.down { right: 54px; top: 102px; }
+/* 「小」でも 7mm（44px）は割らない。これを下回ると押し損ねが増える */
+body.tsmall .tb.sub { width: 44px; height: 44px; font-size: 12px; }
+body.tsmall .tb.sm { width: 44px; height: 44px; font-size: 16px; }
 
 /* ========================== オーバーレイ ========================== */
 #overlay {
