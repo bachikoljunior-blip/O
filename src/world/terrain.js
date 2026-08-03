@@ -17,6 +17,10 @@ export class Chunk {
     this.x0 = cx * CHUNK; this.z0 = cz * CHUNK;
     this.geo = null;
     this.props = null;      // Map<modelName, Float32Array>
+    // props を描画側の Batch と組にして焼いたもの [Batch, データ, ...]。
+    // 初めて描かれたときに作られる。LOD が変われば Chunk ごと作り直されるので、
+    // 古い対応が残ることはない
+    this.emitList = null;
     this.grass = null;      // Float32Array
     this.colliders = null;  // Float32Array [x,z,r, ...]
     this.minY = 0; this.maxY = 0;
@@ -30,6 +34,7 @@ export class Chunk {
     if (this.geo) this.geo.dispose();
     this.geo = null;
     this.props = null;
+    this.emitList = null;
     this.grass = null;
   }
 }
@@ -49,8 +54,12 @@ export class Terrain {
 
   key(cx, cz) { return cx * 100003 + cz; }
 
-  lodFor(dist) {
-    for (let i = 0; i < LOD_DIST.length; i++) if (dist < LOD_DIST[i] * this.q.lodScale) return i;
+  /** @param dist2 距離の平方（毎フレーム 289 回通るので平方根を取らない）*/
+  lodFor(dist2) {
+    for (let i = 0; i < LOD_DIST.length; i++) {
+      const r = LOD_DIST[i] * this.q.lodScale;
+      if (dist2 < r * r) return i;
+    }
     return LOD_DIST.length;
   }
 
@@ -62,12 +71,19 @@ export class Terrain {
     this.grassChunks.length = 0;
     this.pending.length = 0;
 
+    // 距離は「見える範囲か」「どの LOD か」「近い順」にしか使わないので、
+    // 平方のまま持ち回る。ここは毎フレーム (2R+1)^2 ＝ 289 回通り、
+    // Math.hypot だとそれだけで 13µs 掛かっていた
+    const cut = R * CHUNK + CHUNK;
+    const cut2 = cut * cut;
+    const grass2 = this.q.grassDist * this.q.grassDist;
     for (let dz = -R; dz <= R; dz++) {
       for (let dx = -R; dx <= R; dx++) {
         const cx = pcx + dx, cz = pcz + dz;
         const ccx = cx * CHUNK + CHUNK / 2, ccz = cz * CHUNK + CHUNK / 2;
-        const dist = Math.hypot(ccx - px, ccz - pz);
-        if (dist > R * CHUNK + CHUNK) continue;
+        const ex = ccx - px, ez = ccz - pz;
+        const dist = ex * ex + ez * ez;
+        if (dist > cut2) continue;
         const lod = this.lodFor(dist);
         const k = this.key(cx, cz);
         let c = this.chunks.get(k);
@@ -81,27 +97,28 @@ export class Terrain {
           this.pending.push({ c, dist });
         } else {
           this.visible.push(c);
-          if (lod === 0 && dist < this.q.grassDist) this.grassChunks.push(c);
+          if (lod === 0 && dist < grass2) this.grassChunks.push(c);
         }
       }
     }
 
-    // 近い順に時間予算いっぱいまで生成
+    // 近い順に時間予算いっぱいまで生成（平方でも順序は同じ）
     this.pending.sort((a, b) => a.dist - b.dist);
     const t0 = performance.now();
     for (const p of this.pending) {
       if (performance.now() - t0 > budgetMs) break;
       this.buildChunk(p.c);
       this.visible.push(p.c);
-      if (p.c.lod === 0 && p.dist < this.q.grassDist) this.grassChunks.push(p.c);
+      if (p.c.lod === 0 && p.dist < grass2) this.grassChunks.push(p.c);
     }
 
     // 遠くなったチャンクを解放
     if ((time * 2 | 0) % 4 === 0) {
       const limit = (R + 2) * CHUNK;
+      const limit2 = limit * limit;
       for (const [k, c] of this.chunks) {
-        const ccx = c.x0 + CHUNK / 2, ccz = c.z0 + CHUNK / 2;
-        if (Math.hypot(ccx - px, ccz - pz) > limit) {
+        const ccx = c.x0 + CHUNK / 2 - px, ccz = c.z0 + CHUNK / 2 - pz;
+        if (ccx * ccx + ccz * ccz > limit2) {
           c.dispose();
           this.chunks.delete(k);
         }
