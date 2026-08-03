@@ -34,6 +34,7 @@ export class UI {
     this.bossbar = $('#bossbar');
     this.bossintro = $('#bossintro');
     this.aimdot = $('#aimdot');
+    this.fishingEl = $('#fishing');
     this._aimW = [0, 0, 0];
     this._aimS = [0, 0, 0];   // x, y, 奥行き（0 以下なら背後）
     this.minimap = $('#minimap');
@@ -161,6 +162,9 @@ export class UI {
 
     // 状態異常
     this.updateStatuses(p);
+
+    // 釣り
+    this.setFishing(game.fishing ? game.fishing.hud() : null);
 
     // 残響・アイテム数
     $('.echo .val', this.hud).textContent = Math.floor(p.echo).toLocaleString('ja-JP');
@@ -456,6 +460,32 @@ export class UI {
     s.style.animation = '';
     clearTimeout(this._regionTimer);
     this._regionTimer = setTimeout(() => s.classList.add('hidden'), 4200);
+  }
+
+  /**
+   * 釣りの手元。糸の張り（切れるまでの余裕）と、寄せた分を出す。
+   * 張りが強いほど帯が赤くなる——数字ではなく色で読ませる。
+   */
+  setFishing(f) {
+    const e = this.fishingEl;
+    if (!e) return;
+    if (!f) {
+      if (!e.classList.contains('hidden')) e.classList.add('hidden');
+      return;
+    }
+    e.classList.remove('hidden');
+    e.classList.toggle('warn', !!f.warn);
+    const fight = f.state === 'fight';
+    e.classList.toggle('fight', fight);
+    $('.ftext', e).textContent = f.text;
+    $('.fline i', e).style.width = `${clamp01(1 - f.dist) * 100}%`;
+    const st = clamp01(f.strain);
+    const bar = $('.ftense i', e);
+    bar.style.width = `${st * 100}%`;
+    bar.style.background = st > 0.78
+      ? 'linear-gradient(90deg,#c8482e,#ff6a3c)'
+      : st > 0.5 ? 'linear-gradient(90deg,#b08a34,#e8c05a)'
+        : 'linear-gradient(90deg,#3d6f8a,#79c0d8)';
   }
 
   setPrompt(text) {
@@ -915,7 +945,9 @@ export class UI {
   /* ------------------------------------------------------ 所持品 */
   renderInventory(root) {
     const p = this.game.player;
-    const groups = { consumable: '消耗品', throw: '投擲', material: '素材', ammo: '弾', tool: '道具', valuable: '貴重品' };
+    // gear（釣り竿など）は持っているだけで効くので、選択も消費もしない
+    const groups = { consumable: '消耗品', throw: '投擲', material: '素材', ammo: '弾',
+      tool: '道具', gear: '装具', valuable: '貴重品' };
     for (const [kind, label] of Object.entries(groups)) {
       const ids = Object.keys(p.inventory).filter((id) => (p.inventory[id] || 0) > 0 && ITEMS[id]?.kind === kind);
       if (!ids.length) continue;

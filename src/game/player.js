@@ -301,7 +301,19 @@ export class Player extends Actor {
     const canAct = this.canAct();
     this.sprinting = false;
 
-    if (canAct) {
+    // 釣っているあいだは竿から手が離せない。
+    // 動く・振る・避ける——どれをしても、そこで糸を上げることになる
+    const fishing = !!game.fishing?.active;
+    if (fishing) {
+      this.blocking = false;
+      if (mag > 0.35 || inp.pressed('attack') || inp.pressed('heavy')
+        || inp.pressed('dodge') || inp.pressed('jump') || inp.pressed('spell')
+        || inp.pressed('art') || inp.pressed('mount')) {
+        game.fishing.stop(game, 'cancel');
+      }
+    }
+
+    if (canAct && !fishing) {
       this.blocking = inp.down('block') && !!this.shieldData && this.stamina > 2;
 
       if (inp.pressed('dodge')) {
@@ -343,7 +355,7 @@ export class Player extends Actor {
         this.tryMove(game, this.x + Math.sin(this.yaw) * ext.lunge * 9 * dt,
           this.z + Math.cos(this.yaw) * ext.lunge * 9 * dt);
       }
-    } else if (canAct && mag > 0.08) {
+    } else if (canAct && !fishing && mag > 0.08) {
       let base = this.sprinting ? this.runSpeed : this.speed * lerp(0.45, 1, mag);
       if (this.blocking) base *= 0.55;
       if (this.frostSlow > 0) base *= 0.75;
@@ -826,6 +838,11 @@ export class Player extends Actor {
     const self = this;
     setTimeout(() => {
       if (it.heal) self.hp = Math.min(self.maxHp, self.hp + it.heal);
+      // 食べ物は息も整える（炙り魚）
+      if (it.stam) {
+        self.stamina = Math.min(self.maxStamina, self.stamina + self.maxStamina * it.stam);
+        self.staminaDelay = 0;
+      }
       if (it.cure === 'poison') self.statusTimers.poison = 0;
       if (it.echo) { self.echo += it.echo; game.ui.toast(`残響 +${it.echo}`); }
       game.fx.heal(self.x, self.y + 1, self.z);

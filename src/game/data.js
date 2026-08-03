@@ -387,7 +387,59 @@ export const ITEMS = {
   blood_flower: { id: 'blood_flower', name: '血赤花', kind: 'material', desc: '湿原に咲く赤い花。', stack: 99 },
   bone_ash: { id: 'bone_ash', name: '骨灰', kind: 'material', desc: '墓所の主から得られる灰。強化の触媒。', stack: 99 },
   echo_shard: { id: 'echo_shard', name: '残響の欠片', kind: 'valuable', echo: 400, desc: '砕くと残響が得られる。', stack: 20 },
+
+  /* ---- 釣り ---- */
+  // 竿は「使う」ものではなく「持っている」もの。消耗も選択もしないので
+  // kind を gear にして、道具欄の選択対象から外してある
+  fishing_rod: {
+    id: 'fishing_rod', name: '葦の釣り竿', kind: 'gear', stack: 1,
+    desc: '持っていると、水辺で糸を垂れられる。',
+  },
+  fish_small: {
+    id: 'fish_small', name: '銀鱗魚', kind: 'material', stack: 99,
+    desc: 'どの水にもいる小魚。炙れば腹の足しになる。',
+  },
+  fish_big: {
+    id: 'fish_big', name: '淵の大魚', kind: 'material', stack: 99,
+    desc: '深い淵に潜む。身も骨も使える。',
+  },
+  fish_moon: {
+    id: 'fish_moon', name: '月光魚', kind: 'material', stack: 99,
+    desc: '夜の水面にだけ差す魚。鱗に魔力が澱んでいる。',
+  },
+  grilled_fish: {
+    id: 'grilled_fish', name: '炙り魚', kind: 'consumable', heal: 110, stam: 0.5,
+    use: 1.0, stack: 20, desc: 'HPが戻り、息も整う。',
+  },
 };
+
+/* ============================================================ 釣果
+ *
+ * 何が掛かるかは「水の濃さ（魚影＝ fish.js の群れの近さ）」と「時刻」で決まる。
+ * rich: この釣果が出はじめる魚影の濃さ。night: 夜だけ／day: 夜は出ない。
+ * pull: 引きの強さ。大きいほど巻きが遅く、走られたときの負荷が高い。
+ */
+// calmPull は「寄せているあいだの張り」。ここを高く取りすぎると、
+// 走りを一度も踏まずに、長い凪をこらえて巻いただけで糸が切れた
+// （読み通り巻いて 8 回中 1〜2 回落ちた）。凪の最長（calmDur×1.3）を
+// 巻き切っても、開始時の張り 0.18 と足して 1 を超えない値にしてある。
+export const FISH_CATCH = [
+  {
+    id: 'fish_small', weight: 100, rich: 0, pull: 1.0,
+    reel: 0.28, calmPull: 0.24, runPull: 1.10, relax: 0.78,
+    calmDur: 2.2, runDur: 1.0,
+  },
+  {
+    id: 'fish_big', weight: 46, rich: 0.42, pull: 1.9,
+    reel: 0.19, calmPull: 0.30, runPull: 1.50, relax: 0.70,
+    calmDur: 1.8, runDur: 1.3,
+  },
+  {
+    id: 'fish_moon', weight: 34, rich: 0.25, night: true, pull: 1.5,
+    reel: 0.22, calmPull: 0.28, runPull: 1.34, relax: 0.74,
+    calmDur: 1.5, runDur: 1.1,
+  },
+];
 
 /* ============================================================ 強化 */
 export const UPGRADE = {
@@ -436,6 +488,14 @@ export const RECIPES = [
   { id: 'antidote', out: 'antidote', count: 2, need: { herb: 1, crystal: 1 }, echo: 30 },
   { id: 'ore_silver', out: 'ore_silver', count: 1, need: { bone_ash: 1, ore_iron: 3 }, echo: 220 },
   { id: 'shard_ancient', out: 'shard_ancient', count: 1, need: { bone_ash: 2, ore_silver: 2 }, echo: 900 },
+  /* ---- 釣り。釣った魚は、そのままでは食えないし強化にも使えない ---- */
+  { id: 'fishing_rod', out: 'fishing_rod', count: 1, need: { beast_bone: 1, ore_iron: 1 }, echo: 80 },
+  { id: 'grilled_fish', out: 'grilled_fish', count: 2, need: { fish_small: 2 }, echo: 10 },
+  { id: 'grilled_fish_big', out: 'grilled_fish', count: 4, need: { fish_big: 1 }, echo: 20 },
+  // 大魚の骨は矢と火炎壺に回る。釣りが既存の消耗品の線に繋がる
+  { id: 'beast_bone_fish', out: 'beast_bone', count: 2, need: { fish_big: 1 }, echo: 20 },
+  // 月光魚の鱗は魔力の結晶になる。夜の水辺が触媒の産地になる
+  { id: 'crystal_fish', out: 'crystal', count: 2, need: { fish_moon: 1 }, echo: 60 },
 ];
 
 /* ============================================================== 敵 */
@@ -1024,6 +1084,7 @@ export const SHOP = [
   { item: 'throwing_knife', price: 55 },
   { item: 'firebomb', price: 220 },
   { item: 'bone', price: 300 },
+  { item: 'fishing_rod', price: 240 },
   { item: 'ore_iron', price: 350 },
   { item: 'ore_silver', price: 1400 },
   { weapon: 'longsword', price: 1600 },

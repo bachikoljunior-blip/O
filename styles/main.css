@@ -221,6 +221,38 @@ button {
   background: rgba(0,0,0,.85); box-shadow: 0 0 0 1px rgba(216,184,98,.35);
 }
 
+/* 釣りの手元。上が「寄せた分」、下が「糸の張り」。
+   数字は出さない——帯の伸びと色だけで読ませる */
+#fishing {
+  position: absolute; left: 50%; bottom: calc(196px + var(--safe-b));
+  transform: translateX(-50%); width: min(52vw, 300px);
+  text-align: center; text-shadow: 0 1px 3px #000;
+  animation: fadein .2s ease;
+}
+#fishing .ftext {
+  font-size: 12px; letter-spacing: .1em; opacity: .9; margin-bottom: 4px;
+}
+#fishing.warn .ftext { color: var(--gold); }
+#fishing .fline, #fishing .ftense {
+  position: relative; height: 5px; margin-top: 3px;
+  background: rgba(0,0,0,.66); border: 1px solid rgba(0,0,0,.85);
+  border-radius: 2px; overflow: hidden;
+}
+#fishing .fline i {
+  position: absolute; inset: 0; width: 0;
+  background: linear-gradient(180deg, #e8dfc8, #a99f84);
+  transition: width .12s linear;
+}
+#fishing .ftense { height: 7px; }
+#fishing .ftense i {
+  position: absolute; inset: 0; width: 0;
+  background: linear-gradient(90deg,#3d6f8a,#79c0d8);
+  transition: width .1s linear;
+}
+/* 糸が張っているあいだは帯そのものが震える */
+@keyframes ftremble { 0%,100% { transform: translateX(0); } 50% { transform: translateX(1.5px); } }
+#fishing.fight.warn .ftense { animation: ftremble .09s linear infinite; }
+
 #prompt {
   position: absolute; left: 50%; bottom: calc(150px + var(--safe-b));
   transform: translateX(-50%);
