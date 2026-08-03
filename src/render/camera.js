@@ -33,18 +33,13 @@ export class Camera {
   shake(amount) { this.trauma = Math.min(1.4, this.trauma + amount); }
 
   /**
-   * ワールド座標を画面上の位置に落とす。
-   * out に [0..1, 0..1] を書き、画面の外／背後なら false を返す。
+   * ワールド座標が画面のどこに来るかを見て、画面内なら true。
+   * 中身は project() ひとつに任せる（同じ計算を二度書かない）。
    */
-  project(x, y, z, out) {
-    const m = this.viewProj;
-    const cx = m[0] * x + m[4] * y + m[8] * z + m[12];
-    const cy = m[1] * x + m[5] * y + m[9] * z + m[13];
-    const cw = m[3] * x + m[7] * y + m[11] * z + m[15];
-    if (cw <= 0.0001) return false;
-    out[0] = (cx / cw) * 0.5 + 0.5;
-    out[1] = 1 - ((cy / cw) * 0.5 + 0.5);
-    return out[0] >= -0.1 && out[0] <= 1.1 && out[1] >= -0.1 && out[1] <= 1.1;
+  onScreen(x, y, z, out) {
+    this.project(x, y, z, out);
+    return out[2] > 0
+      && out[0] >= -0.1 && out[0] <= 1.1 && out[1] >= -0.1 && out[1] <= 1.1;
   }
 
   /** 着地の沈み込み。真下へ一度落として戻す */

@@ -35,7 +35,7 @@ export class UI {
     this.bossintro = $('#bossintro');
     this.aimdot = $('#aimdot');
     this._aimW = [0, 0, 0];
-    this._aimS = [0, 0];
+    this._aimS = [0, 0, 0];   // x, y, 奥行き（0 以下なら背後）
     this.minimap = $('#minimap');
     this.mctx = this.minimap.getContext('2d');
     this.compass = $('#compass');
@@ -252,7 +252,7 @@ export class UI {
       if (!el.classList.contains('hidden')) el.classList.add('hidden');
       return;
     }
-    if (!game.camera.project(this._aimW[0], this._aimW[1], this._aimW[2], this._aimS)) {
+    if (!game.camera.onScreen(this._aimW[0], this._aimW[1], this._aimW[2], this._aimS)) {
       if (!el.classList.contains('hidden')) el.classList.add('hidden');
       return;
     }
