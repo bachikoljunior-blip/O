@@ -153,6 +153,54 @@ button {
   background: linear-gradient(180deg, #e8c86a, #9c6b23); transition: width .12s;
 }
 
+/* ボスの名乗り。入場・形態移行・討伐で使う */
+#bossintro {
+  position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%);
+  text-align: center; pointer-events: none; opacity: 0;
+  transition: opacity .5s ease;
+}
+#bossintro.show { opacity: 1; }
+#bossintro .bi-name {
+  font-size: 30px; letter-spacing: .30em; color: var(--parch);
+  text-shadow: 0 3px 22px #000, 0 0 40px rgba(0,0,0,.9);
+}
+#bossintro .bi-title {
+  font-size: 11px; letter-spacing: .42em; opacity: .62; margin-top: 8px;
+}
+#bossintro .bi-rule {
+  width: 0; height: 1px; margin: 12px auto 0;
+  background: linear-gradient(90deg, transparent, rgba(216,184,98,.85), transparent);
+  transition: width .9s ease;
+}
+#bossintro.show .bi-rule { width: min(58vw, 460px); }
+#bossintro.show .bi-name { animation: bossname 1.1s ease forwards; }
+/* 形態移行は控えめに、討伐は赤金で大きく */
+#bossintro.phase .bi-name { font-size: 20px; letter-spacing: .22em; }
+#bossintro.felled .bi-name { font-size: 34px; color: #f0d9a0; }
+#bossintro.felled .bi-title {
+  font-size: 15px; letter-spacing: .6em; opacity: 1; color: #f2dda8;
+  text-shadow: 0 2px 10px #000, 0 0 24px rgba(0,0,0,.95);
+}
+/* 明るい空を背にしても文字が沈まないよう、後ろを暗く落とす */
+#bossintro::before {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 150%; height: 320%; transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.62) 0%,
+    rgba(0,0,0,.34) 42%, rgba(0,0,0,0) 72%);
+  z-index: -1; pointer-events: none;
+}
+
+@keyframes bossname {
+  0% { opacity: 0; letter-spacing: .62em; filter: blur(6px); }
+  100% { opacity: 1; letter-spacing: .30em; filter: none; }
+}
+
+/* 体力バーに形態の区切りを刻む */
+.bbar u {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: rgba(0,0,0,.85); box-shadow: 0 0 0 1px rgba(216,184,98,.35);
+}
+
 #prompt {
   position: absolute; left: 50%; bottom: calc(150px + var(--safe-b));
   transform: translateX(-50%);

@@ -32,6 +32,7 @@ export class UI {
     this.toasts = $('#toasts');
     this.dmgnums = $('#dmgnums');
     this.bossbar = $('#bossbar');
+    this.bossintro = $('#bossintro');
     this.minimap = $('#minimap');
     this.mctx = this.minimap.getContext('2d');
     this.compass = $('#compass');
@@ -470,13 +471,60 @@ export class UI {
     this.bossbar.classList.remove('hidden');
     $('.bname', this.bossbar).textContent = boss.name;
     $('.btitle', this.bossbar).textContent = boss.title || '';
+    // 形態の境目を刻む。あとどれだけで相手が変わるのかが読める
+    const bar = $('.bbar', this.bossbar);
+    for (const u of [...bar.querySelectorAll('u')]) u.remove();
+    for (const ph of boss.bossDef?.phases || []) {
+      if (!ph.hpAbove || ph.hpAbove <= 0 || ph.hpAbove >= 1) continue;
+      const u = document.createElement('u');
+      u.style.left = `${ph.hpAbove * 100}%`;
+      bar.appendChild(u);
+    }
   }
   hideBoss() {
     this.bossRef = null;
     this.bossbar.classList.add('hidden');
   }
+  /**
+   * ボスの名乗り。入場のときと、形態が変わったときに出す。
+   * phase=true では体力バーを隠さず、上に重ねるだけにする。
+   */
+  bossIntro(name, title, phase = false) {
+    const el0 = this.bossintro;
+    if (!el0) return;
+    $('.bi-name', el0).textContent = name;
+    $('.bi-title', el0).textContent = title || '';
+    el0.classList.remove('hidden', 'phase', 'felled');
+    if (phase) el0.classList.add('phase');
+    // アニメーションを掛け直すため、一度リフローを挟む
+    void el0.offsetWidth;
+    el0.classList.add('show');
+    clearTimeout(this._introT);
+    this._introT = setTimeout(() => {
+      el0.classList.remove('show');
+      el0.classList.add('hidden');
+    }, phase ? 2200 : 3400);
+  }
+
+  /** 討伐の名乗り。曲が切れた静けさの上に置く */
+  bossFelled(name) {
+    const el0 = this.bossintro;
+    if (!el0) { this.toast(`${name} を討伐`, 'big gold'); return; }
+    $('.bi-name', el0).textContent = name;
+    $('.bi-title', el0).textContent = '討 伐';
+    el0.classList.remove('hidden', 'phase');
+    el0.classList.add('felled');
+    void el0.offsetWidth;
+    el0.classList.add('show');
+    clearTimeout(this._introT);
+    this._introT = setTimeout(() => {
+      el0.classList.remove('show');
+      el0.classList.add('hidden');
+    }, 3600);
+  }
+
   bossDefeated(name) {
-    this.toast(`${name} を討伐`, 'big gold');
+    this.bossFelled(name);
     setTimeout(() => this.hideBoss(), 2400);
   }
 

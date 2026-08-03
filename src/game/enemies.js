@@ -765,8 +765,13 @@ export class Boss extends Enemy {
     this.poise = this.maxPoise;
     game.fx.bossPhase(this.x, this.y, this.z, ph.enrage ? [1, 0.5, 0.2] : [0.6, 0.7, 1]);
     game.camera.shake(1.0);
+    game.camera.kick(this.x - game.player.x, this.z - game.player.z, 0.9);
+    game.time.hitstop(0.22);          // 移行の瞬間だけ、間を置く
     game.audio.play('boss_phase');
-    game.ui.toast(ph.enrage ? `${this.name} が本気を出した` : `${this.name} の気配が変わる`);
+    // 曲を一段上げる。形態が変わったことは、音でいちばん伝わる
+    if (game.audio.mode === 'boss') game.audio.setMode('final');
+    game.ui.bossIntro(this.name,
+      ph.enrage ? '——本気を出した' : '——気配が変わる', true);
     if (ph.fire) this.emissive = 0.6;
   }
 

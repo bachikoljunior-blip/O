@@ -478,10 +478,13 @@ export class Renderer {
     const m = Math.max(0.001, Math.max(sc[0], Math.max(sc[1], sc[2])));
     cp.v3('u_rayColor', sc[0] / m, sc[1] / m, sc[2] / m);
     cp.f('u_exposure', game.sky.exposure * (game.exposureMul || 1));
-    cp.f('u_vignette', 0.42);
+    // 討伐の余韻では周辺を締める
+    cp.f('u_vignette', 0.42 + (game.victory || 0) * 0.30);
     cp.f('u_damage', this.damage);
     const hpRatio = game.player.hp / game.player.maxHp;
-    cp.f('u_desat', clamp01((0.30 - hpRatio) * 3.2) * 0.85 + (game.player.dead ? 0.6 : 0));
+    cp.f('u_desat', Math.min(1,
+      clamp01((0.30 - hpRatio) * 3.2) * 0.85 + (game.player.dead ? 0.6 : 0)
+      + (game.victory || 0) * 0.72));
     cp.v3('u_grade', game.sky.grade);
     cp.f('u_time', game.time.now);
     cp.f('u_aberration', this.aberration);

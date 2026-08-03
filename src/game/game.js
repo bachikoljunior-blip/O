@@ -207,6 +207,8 @@ export class Game {
   }
 
   frame(raw) {
+    // 討伐の余韻は実時間で進める（自分で掛けたスローに引きずられないように）
+    this.updateVictory(raw);
     const dt = this.time.step(raw);
     this.input.update();
 
@@ -926,7 +928,7 @@ export class Game {
     const d = Math.hypot(b.x - p.x, b.z - p.z);
     if (b.dead) {
       this.bossDeathT = (this.bossDeathT || 0) + dt;
-      if (this.bossDeathT > 3.2) this.endBoss();
+      if (this.bossDeathT > 4.2) this.endBoss();
     } else if (d > (this.bossPOI.arenaR || 26) + 26 || p.dead) {
       this.endBoss(true);
     }
@@ -947,10 +949,58 @@ export class Game {
     this.bossDeathT = 0;
     this.enemies.push(b);
     this.ui.showBoss(b);
+    this.ui.bossIntro(b.name, b.title || '');
     this.audio.setMode(b.bossDef.music === 'final' ? 'final' : 'boss');
     this.audio.play('boss_phase');
     poi.discovered = true;
     this.player.discovered.add(poi.id);
+  }
+
+  /**
+   * 討伐の余韻。
+   *
+   * これまでは名前が出て終わりだった。倒した瞬間だけは、
+   * 世界がひと呼吸止まって見えるようにする。実時間で進めるので、
+   * 自分で掛けたスローモーションに引きずられない。
+   */
+  startVictory(boss) {
+    this.victoryT = 0;
+    this.victoryName = boss.name;
+    this.victory = 0;
+    this.audio.setMode('none');            // 曲を切る。静けさが効く
+    this.audio.play('kill_blow');
+    this.audio.play('boss_fell', { delay: 0.25 });
+    this.time.hitstop(0.30);
+    this.camera.shake(0.9);
+  }
+
+  updateVictory(rawDt) {
+    if (this.victoryT === null || this.victoryT === undefined) return;
+    const t0 = this.victoryT;
+    this.victoryT += rawDt;
+    const t = this.victoryT;
+
+    // 時間の伸び縮み：沈む → ためる → 戻る
+    let scale = 1;
+    if (t < 0.35) scale = lerp(1, 0.30, t / 0.35);
+    else if (t < 1.9) scale = 0.30;
+    else if (t < 2.8) scale = lerp(0.30, 1, (t - 1.9) / 0.9);
+    this.time.scale = scale;
+
+    // 画面：彩度を落として、周辺を締める
+    this.victory = t < 2.2 ? Math.min(1, t / 0.4) : Math.max(0, 1 - (t - 2.2) / 1.0);
+
+    if (t0 < 0.55 && t >= 0.55) this.ui.bossFelled(this.victoryName);
+    if (t0 < 1.5 && t >= 1.5) this.audio.play('victory');
+    if (t0 < 2.6 && t >= 2.6) this.audio.setMode('explore');
+    if (t >= 3.6) {
+      this.victoryT = null;
+      this.victory = 0;
+      this.time.scale = 1;
+      // 後片付けは演出の終わりに合わせる。別の時計に任せると、
+      // フレームが遅い環境で名乗りだけが残る
+      if (this.activeBoss && this.activeBoss.dead) this.endBoss();
+    }
   }
 
   endBoss(reset = false) {
@@ -967,8 +1017,7 @@ export class Game {
     const poi = this.bossPOI;
     if (poi) { poi.cleared = true; this.clearedPOIs.add(poi.id); }
     this.quests.onBossDefeated(boss.bossDef.id);
-    this.ui.bossDefeated(boss.name);
-    this.audio.setMode('explore');
+    this.startVictory(boss);
     const r = boss.bossDef.reward || {};
     if (r.weapon) this.unlockWeapon(r.weapon);
     if (r.armor) this.unlockArmor(r.armor);
@@ -1283,6 +1332,8 @@ export class Game {
 
   updateMusic() {
     if (this.activeBoss && !this.activeBoss.dead) return;
+    // 討伐の余韻の間は曲を触らない。切った静けさを上書きしてしまう
+    if (this.victoryT !== null && this.victoryT !== undefined) return;
     let combat = false;
     for (const e of this.enemies) {
       if (e.dead || !e.aggro) continue;

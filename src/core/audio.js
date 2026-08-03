@@ -260,6 +260,21 @@ export class AudioEngine {
         this.tone({ freq: 3150 * p, dur: 0.18, type: 'sine', gain: 0.05 + w * 0.04,
           sweep: 1.5, delay: d + 0.012, reverb: 0.5 });
         break;
+      case 'boss_fell':
+        // 討伐の一打。低く長く、下へ抜ける
+        this.tone({ freq: 52, dur: 1.6, type: 'sine', gain: 0.30, sweep: 0.22,
+          delay: d, reverb: 0.85 });
+        this.tone({ freq: 78, dur: 1.1, type: 'triangle', gain: 0.16, sweep: 0.30,
+          delay: d + 0.05, reverb: 0.75 });
+        this.noise({ dur: 0.9, gain: 0.14, freq: 420, sweep: 0.18, delay: d, reverb: 0.7 });
+        break;
+      case 'victory':
+        // 静けさのあとに置く、短い上行の和音
+        for (const [i, f] of [220, 277.2, 329.6, 440].entries()) {
+          this.tone({ freq: f, dur: 2.2 - i * 0.2, type: 'triangle',
+            gain: 0.10 - i * 0.012, sweep: 0.16, delay: d + i * 0.10, reverb: 0.8 });
+        }
+        break;
       case 'poise_break':
         // 体勢を崩したときだけの、下へ抜ける音
         this.tone({ freq: 210, dur: 0.34, type: 'sawtooth', gain: 0.22, sweep: 0.30,
