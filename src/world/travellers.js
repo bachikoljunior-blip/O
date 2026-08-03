@@ -8,7 +8,7 @@
 import { Actor, TEAM } from '../game/actor.js';
 import { Enemy } from '../game/enemies.js';
 import { ENEMIES } from '../game/data.js';
-import { clamp01, TAU } from '../core/math.js';
+import { clamp01, damp, TAU } from '../core/math.js';
 
 const KIND = {
   pedlar: { name: '行商人', tint: [0.45, 0.32, 0.52], speed: 1.5, weapon: null, hp: 90,
@@ -33,16 +33,23 @@ const KINDS = Object.keys(KIND);
  * 無かった。荷車を挟んで隊商が通ると、道が「どこかとどこかを結んでいる」
  * ものに見える。
  *
- * 並び：先頭に商人、その後ろに荷車、左右と後ろに護衛。
+ * 並び：先頭に親方、その後ろに駄馬、駄馬が牽く荷車、左右と後ろに護衛。
  * 位置は進行方向を基準に決めるので、道が曲がれば列も曲がる。
  */
 const CARAVAN_ROLES = [
   { kind: 'pedlar', along: 0, across: 0, lead: true },
+  // 護衛の持ち場は動かさない。駄馬（中心線・幅 0.7m）とは重ならないし、
+  // 20 周かけて釣り合わせた戦いを、見た目の都合で揺らす理由がない
   { kind: 'guard', along: -3.2, across: 2.0 },
   { kind: 'guard', along: -3.2, across: -2.0 },
   { kind: 'guard', along: -9.5, across: 0 },
 ];
-const CART_ALONG = -6.0;
+// 隊列の背骨。荷車の轅の先が駄馬の肩に届くように決めてある：
+// 荷車の原点から轅の先まで 3.5m（モデル）× 1.15（倍率）＝ 4.0m、
+// 荷車 -6.6 + 4.0 ＝ -2.6 で、駄馬（-3.0）の肩のあたりに来る。
+const CART_ALONG = -6.6;
+const DRAY_ALONG = -3.0;
+export const CART_SCALE = 1.15;
 
 const SPAWN_MIN = 110;     // これより近くには湧かせない（湧く瞬間を見せない）
 const SPAWN_MAX = 190;
@@ -262,6 +269,115 @@ function steerAround(actor, game, dx, dz, probe, tx, tz) {
   return actor.detour;
 }
 
+/* ------------------------------------------------------------ 駄馬 */
+
+const DRAY_HIDE = [0.33, 0.25, 0.19];
+const DRAY_MANE = [0.17, 0.13, 0.10];
+const HARNESS = [0.28, 0.19, 0.13];   // 革具
+const COLLAR = [0.44, 0.32, 0.19];    // 首輪
+
+/**
+ * 荷車を牽く駄馬。
+ *
+ * 荷車だけが浮いて動いていたので、牽くものを置く。乗れないし戦わない
+ * ので、mount.js の馬より簡素でよい：獣リグをそのまま使い、位置と向きは
+ * 隊商が決める（自分では歩かない）。自前で経路を追わせると、轅との
+ * あいだが開いて「繋がっていない」のがすぐ分かってしまう。
+ *
+ * 歩調は隊商の実速度から作るので、隊商が止まれば脚も止まる。
+ * 止まっているときは、脅威で止まったなら首を上げて耳を伏せ、そうでなければ
+ * 首を下げて草を食む。
+ */
+export class Dray extends Actor {
+  constructor(caravan, at) {
+    super({
+      rig: 'beast', team: TEAM.NEUTRAL, name: '駄馬',
+      hp: 260, poise: 60, def: 8,
+      // runSpeed は「速さ 1 とみなす基準」。隊商は 1.35m/s で歩くので、
+      // これを 3.0 にしておくと歩きの振り幅が半分ほど出る
+      speed: 1.5, runSpeed: 3.0,
+      tint: DRAY_HIDE, scale: 1.32, radius: 0.62, height: 1.9,
+      x: at.x, y: at.y, z: at.z, yaw: at.yaw,
+    });
+    this.caravan = caravan;
+    this.kind = 'dray';
+    this.role = 'dray';
+    this.rest = 1;     // 0=歩いている 1=止まっている（なめらかに動く）
+    this.graze = 0;    // 首を下げて草を食んでいる量
+    this.alert = 0;    // 脅威を見て顔を上げている量
+    this.restT = 0;    // 止まってからの秒数
+    this.chew = Math.random() * 10;
+    this.speedNow = 0;
+    this.extras = [
+      // 頸木に掛かる首輪。ここが荷車の轅の先と重なる
+      { joint: 'withers', shape: 'partSlim', offset: [0, 0.10, 0.12], size: [0.60, 0.42, 0.22], tint: COLLAR },
+      // 背当てと腹帯
+      { joint: 'body', shape: 'partSlim', offset: [0, 0.23, 0.04], size: [0.56, 0.13, 0.44], tint: HARNESS },
+      { joint: 'body', shape: 'slab', offset: [0, 0.00, 0.08], size: [0.54, 0.50, 0.09], tint: HARNESS },
+      // たてがみと尾毛
+      { joint: 'neck', shape: 'partSlim', offset: [0, 0.15, 0.08], size: [0.10, 0.20, 0.44], tint: DRAY_MANE },
+      { joint: 'head', shape: 'partSlim', offset: [0, 0.09, 0.05], size: [0.08, 0.16, 0.28], tint: DRAY_MANE },
+      // 尻がけの革。歩くと後ろへなびくので、止まっているかどうかが遠目にも出る
+      { joint: 'rump', shape: 'partSlim', offset: [0, 0.08, -0.14], size: [0.42, 0.30, 0.08], tint: HARNESS, cloth: true, seg: 0 },
+    ];
+    // poseActor は毎フレーム姿勢を上書きするので、足すなら解く直前しかない。
+    // Pose.solve を包んで、そこで首と耳と尾を足す
+    const pose = this.pose;
+    const solve = pose.solve.bind(pose);
+    pose.solve = (rootMat) => { this.restPose(pose); solve(rootMat); };
+  }
+
+  /** 止まっているときの首まわり。歩いているときは何も足さない */
+  restPose(pose) {
+    if (this.graze > 0.01) {
+      // 首の付け根から一気に下ろす。中途半端に下げると「うつむいている」
+      // だけになって、止まっているのか歩いているのか分からない。
+      // 獣リグは neck が負で持ち上がり head が正で鼻先が下がる（実測）
+      pose.add('neck', 1.00 * this.graze, 0, 0);
+      pose.add('head', 0.55 * this.graze, 0, 0);
+      pose.add('jaw', 0.24 * this.graze * (0.5 + 0.5 * Math.sin(this.chew * 6)), 0, 0);
+    }
+    if (this.alert > 0.01) {
+      pose.add('neck', -0.30 * this.alert, 0, 0);
+      pose.add('head', -0.30 * this.alert, 0, 0);
+      pose.add('earL', -0.34 * this.alert, 0, 0);
+      pose.add('earR', -0.34 * this.alert, 0, 0);
+      pose.add('tail', 0, Math.sin(this.chew * 7) * 0.5 * this.alert, 0);
+    }
+  }
+
+  update(dt, game, threat) {
+    const c = this.caravan;
+    const x0 = this.x, z0 = this.z;
+    this.x = c.drayX; this.z = c.drayZ; this.y = c.drayY;
+    // 実速度から歩調を作る。引っかかりの復帰で瞬間移動したときに
+    // 駆け出して見えないよう頭を切る
+    const v = Math.min(4, Math.hypot(this.x - x0, this.z - z0) / Math.max(dt, 1e-3));
+    this.speedNow = v;
+    const moving = v > 0.25;
+    this.rest = damp(this.rest, moving ? 0 : 1, 2.4, dt);
+    this.restT = moving ? 0 : this.restT + dt;
+    this.chew += dt * (moving ? 0.5 : 1.6);
+
+    const g0 = this.gait;
+    this.updateAnim(dt, v);
+    // 止まれば脚も止まる。待たせているあいだ足踏みさせない
+    if (!moving) this.gait = g0;
+
+    // 脅威で止まったなら顔を上げ、そうでなければしばらくして草を食む
+    const wantAlert = threat && !threat.dead ? 1 : 0;
+    // 草を食むのは「下げっぱなし＋ときどき顔を上げる」。半分下げ続けると
+    // どちらとも付かない見た目になる
+    const wantGraze = !wantAlert && this.rest > 0.6 && this.restT > 1.2
+      ? clamp01((this.restT - 1.2) * 1.4) * (0.78 + 0.22 * Math.sin(this.chew * 0.5))
+      : 0;
+    this.alert = damp(this.alert, wantAlert, 5, dt);
+    this.graze = damp(this.graze, wantGraze, 3, dt);
+    // 止まっているあいだは体を少し振る。轅から外れない程度に
+    this.yaw = c.yaw + Math.sin(this.chew * 0.7) * 0.07 * this.rest;
+  }
+}
+
 /**
  * 隊商の護衛。
  *
@@ -373,6 +489,7 @@ export class Caravan {
     this.stuck = 0;
     this.skips = 0;
     this.members = [];
+    let guardNo = 0;
     for (const role of CARAVAN_ROLES) {
       const spot = { x: at.x, y: game.world.height(at.x, at.z), z: at.z, yaw: at.yaw };
       const t = role.kind === 'guard'
@@ -381,9 +498,13 @@ export class Caravan {
       t.caravan = this;
       t.slot = role;
       t.lead = !!role.lead;
+      if (role.kind === 'guard') dressGuard(t, guardNo++);
+      else if (role.lead) dressMaster(t);
       this.members.push(t);
     }
     this.merchant = this.members[0];
+    const spot = { x: at.x, y: game.world.height(at.x, at.z), z: at.z, yaw: at.yaw };
+    this.dray = new Dray(this, spot);
   }
 
   get destination() { return this.dir > 0 ? this.route.toName : this.route.fromName; }
@@ -405,6 +526,15 @@ export class Caravan {
     this.cartX = this.x + fx * CART_ALONG;
     this.cartZ = this.z + fz * CART_ALONG;
     this.cartY = game.world.height(this.cartX, this.cartZ);
+    this.drayX = this.x + fx * DRAY_ALONG;
+    this.drayZ = this.z + fz * DRAY_ALONG;
+    this.drayY = game.world.height(this.drayX, this.drayZ);
+  }
+
+  /** 轅の先（頸木）の位置。駄馬と繋がって見えているかを測るための点 */
+  hitchPoint() {
+    const tip = CART_ALONG + 3.5 * CART_SCALE;
+    return { x: this.x + Math.sin(this.yaw) * tip, z: this.z + Math.cos(this.yaw) * tip };
   }
 
   update(dt, game) {
@@ -451,12 +581,72 @@ export class Caravan {
       }
     }
     this.place(game);
+    this.dray.update(dt, game, threat);
     for (const m of this.members) {
       if (m.dead) { m.update(dt, game); continue; }
       if (m instanceof Guard) m.update(dt, game);
       else m.followCaravan(dt, game, threat);
     }
   }
+}
+
+/* ------------------------------------------- 一団に見せるための身なり */
+
+/**
+ * 親方。
+ *
+ * 親方と護衛が同じ体格・同じ色で並んでいると、一団ではなく同じ人が
+ * 四人いるように見える。当たり判定に触れると 20 周ぶん調整してきた
+ * 戦いが揺れるので、倍率と体力はそのままに、色と付け物だけで変える。
+ */
+function dressMaster(m) {
+  m.npcName = '隊商の親方';
+  m.tint = [0.40, 0.24, 0.20];
+  m.extras = [
+    // つば広の帽子
+    { joint: 'head', shape: 'partSlim', offset: [0, 0.16, -0.01], size: [0.40, 0.26, 0.42], tint: [0.26, 0.18, 0.14] },
+    { joint: 'head', shape: 'slab', offset: [0, 0.10, 0.00], size: [0.62, 0.05, 0.62], tint: [0.24, 0.16, 0.13] },
+    // 厚い外套。肩から胴まで一回り大きくして、恰幅よく見せる
+    { joint: 'chest', shape: 'part', offset: [0, 0.26, -0.02], size: [0.62, 0.66, 0.44], tint: [0.34, 0.20, 0.17] },
+    { joint: 'shoulders', shape: 'partSlim', offset: [0, 0.02, 0], size: [0.82, 0.30, 0.40], tint: [0.30, 0.18, 0.15] },
+    // 帯と、腰に下げた鍵束
+    { joint: 'pelvis', shape: 'slab', offset: [0, 0.06, 0], size: [0.48, 0.14, 0.36], tint: [0.52, 0.40, 0.16] },
+    { joint: 'pelvis', shape: 'partSlim', offset: [0.20, -0.06, 0.10], size: [0.08, 0.18, 0.06], tint: [0.72, 0.62, 0.26] },
+    // 裾
+    { joint: 'pelvis', shape: 'partSlim', offset: [0, -0.10, -0.14], size: [0.46, 0.30, 0.10], tint: [0.30, 0.18, 0.15], cloth: true, seg: 0 },
+    { joint: 'pelvis', shape: 'partSlim', offset: [0, -0.32, -0.17], size: [0.40, 0.28, 0.09], tint: [0.28, 0.17, 0.14], cloth: true, seg: 1 },
+  ];
+}
+
+/** 護衛。三人が同じ色・同じ格好だったので、兜と外套で差を付ける */
+function dressGuard(gd, no) {
+  const k = [0.92, 1.0, 1.10][no % 3];
+  const t = gd.tint;
+  gd.tint = [t[0] * k, t[1] * k, t[2] * k];
+  const cloak = [[0.36, 0.16, 0.16], [0.20, 0.26, 0.34], [0.30, 0.28, 0.18]][no % 3];
+  const ex = [];
+  if (no % 3 === 0) {
+    // 鉢金と面頬
+    ex.push({ joint: 'head', shape: 'part', offset: [0, 0.14, -0.01], size: [0.42, 0.40, 0.42], tint: [0.44, 0.46, 0.52] });
+    ex.push({ joint: 'head', shape: 'part', offset: [0, 0.10, 0.19], size: [0.26, 0.08, 0.10], tint: [0.06, 0.06, 0.08] });
+  } else if (no % 3 === 1) {
+    // 頭巾に鉄の額当て
+    ex.push({ joint: 'head', shape: 'partSlim', offset: [0, 0.15, -0.03], size: [0.40, 0.36, 0.44], tint: [0.22, 0.22, 0.26] });
+    ex.push({ joint: 'head', shape: 'slab', offset: [0, 0.16, 0.14], size: [0.32, 0.09, 0.10], tint: [0.52, 0.54, 0.58] });
+  } else {
+    // 兜は無し。代わりに肩当てが厚い
+    ex.push({ joint: 'head', shape: 'partSlim', offset: [0, 0.14, -0.02], size: [0.36, 0.22, 0.38], tint: [0.34, 0.30, 0.24] });
+  }
+  for (const s of ['shoulderL', 'shoulderR']) {
+    const big = no % 3 === 2 ? 0.32 : 0.26;
+    ex.push({ joint: s, shape: 'part', offset: [0, -0.03, 0], size: [big, big * 0.8, big], tint: [0.40, 0.42, 0.47] });
+  }
+  for (let i = 0; i < 2; i++) {
+    ex.push({ joint: 'pelvis', shape: 'partSlim',
+      offset: [0, -0.06 - i * 0.24, -0.14 - i * 0.03], size: [0.42 - i * 0.05, 0.28, 0.09],
+      tint: cloak, cloth: true, seg: i });
+  }
+  gd.extras = ex;
 }
 
 export class Travellers {
@@ -539,6 +729,9 @@ export class Travellers {
     const van = new Caravan(c.r, dir, next, { x: at.x, z: at.z, yaw }, game);
     van.place(game);
     for (const m of van.members) { m.x = m.tx; m.z = m.tz; m.y = game.world.height(m.x, m.z); }
+    // 駄馬も持ち場へ。ここを飛ばすと、湧いた最初の一歩で轅から離れて見える
+    van.dray.x = van.drayX; van.dray.z = van.drayZ; van.dray.y = van.drayY;
+    van.dray.yaw = van.yaw;
     return van;
   }
 
