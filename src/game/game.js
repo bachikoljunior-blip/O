@@ -858,6 +858,32 @@ export class Game {
     }
     if (!list.length) return;
 
+    // ---- 囲みの持ち場を配る ----
+    // これが無いと、待っている者まで全員がプレイヤーの正面に寄り、
+    // 群れが「前に固まった塊」になる。背後を取られる怖さが出ない。
+    // 現在の方位の順に並べてから割り当てるので、無駄な横断が起きない
+    const bear = (e) => Math.atan2(e.x - p.x, e.z - p.z);
+    const ordered = list.slice().sort((a, b) => bear(a) - bear(b));
+    const step = TAU / ordered.length;
+    // 群れ全体の向きを基準にして、毎フレーム持ち場が入れ替わらないようにする
+    let sx = 0, sz = 0;
+    for (const e of ordered) { sx += Math.sin(bear(e)); sz += Math.cos(bear(e)); }
+    const base = Math.atan2(sx, sz) - step * (ordered.length - 1) * 0.5;
+    ordered.forEach((e, i) => { e.slotAngle = base + step * i; });
+
+    // ---- 差し込み権 ----
+    // 隙を見せた相手には権利が無くても寄れるようにしてあるが、
+    // 上限が無いと、こちらが一度怯んだ瞬間に群れ全員が殺到する。
+    // 「今なら差し込める」と判断してよいのは、いちばん近い 1 体だけにする
+    for (const e of list) e.punisher = false;
+    let nearest = null, nd = 1e9;
+    for (const e of list) {
+      if (e.token) continue;
+      const d = Math.hypot(e.x - p.x, e.z - p.z);
+      if (d < nd) { nd = d; nearest = e; }
+    }
+    if (nearest) nearest.punisher = true;
+
     // ボス戦中は取り巻きを 1 体に絞る
     const max = this.activeBoss ? 1 : list.length > 5 ? 3 : 2;
     const contested = list.length > max;

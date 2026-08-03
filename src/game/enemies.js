@@ -317,6 +317,7 @@ export class Enemy extends Actor {
     }
 
     this.updatePhysics(dt, game);
+    this.separate(game, dt);
     this.updateAnim(dt, moveSpeed);
 
     // 連携攻撃
@@ -325,6 +326,33 @@ export class Enemy extends Actor {
       this.chainNext = null;
       if (next) this.beginAttack(next, game);
     }
+  }
+
+  /**
+   * 重なりをほどく。
+   *
+   * 位置取りの中でも離そうとしているが、攻撃中は判断処理を通らないので、
+   * 振り合っている二体が同じ座標に沈み込んでしまう。
+   * こちらは状態に関係なく、毎フレーム押し合う。
+   */
+  separate(game, dt) {
+    let sx = 0, sz = 0, n = 0;
+    for (const o of game.enemies) {
+      if (o === this || o.dead) continue;
+      const dx = this.x - o.x, dz = this.z - o.z;
+      const d2 = dx * dx + dz * dz;
+      const want = this.radius + o.radius + 0.30;
+      if (d2 > want * want || d2 < 1e-8) continue;
+      const d = Math.sqrt(d2);
+      const k = (want - d) / want;
+      sx += (dx / d) * k; sz += (dz / d) * k;
+      n++;
+    }
+    if (!n) return;
+    const push = Math.min(1, Math.hypot(sx, sz));
+    const l = Math.hypot(sx, sz) || 1;
+    this.tryMove(game, this.x + (sx / l) * push * 4.5 * dt,
+      this.z + (sz / l) * push * 4.5 * dt);
   }
 
   idle(dt, game) {
@@ -380,7 +408,8 @@ export class Enemy extends Actor {
     const opening = this.playerOpening(p);
     // 隙を見せた相手には踏み込み権が無くても寄る。
     // ただし「もともと間合いにいた者」だけ。でないと群れ全員が一斉に殺到する。
-    const punishable = opening > 0.4 && dist < preferred + 2.4;
+    // 差し込めるのは、game が選んだ 1 体だけ（群れの殺到を防ぐ）
+    const punishable = this.punisher && opening > 0.4 && dist < preferred + 2.4;
     const pressing = this.token || ranged || this.boss || punishable;
     const rallyBonus = this.rally > 0 ? 0.25 : 0;
 
@@ -455,21 +484,41 @@ export class Enemy extends Actor {
       mx = -fx; mz = -fz;
       speed = this.speed * 0.9;
     } else if (dist > ring + 0.5) {
+      // 寄るときは素直に踏み込む。
+      // 遠回りして持ち場から入らせると、接敵が遅れて群れの圧が落ちた
+      // （回り込ませた版は背後率がむしろ 21% → 6% に下がった）
       mx = fx; mz = fz;
       speed = dist > 9 ? this.runSpeed : this.speed;
     } else if (dist < ring - 1.2) {
       mx = -fx; mz = -fz;
       speed = this.speed * (ranged ? 1.0 : 0.75);
+    } else if (!pressing && this.slotAngle !== undefined) {
+      // 攻め手でない者は、割り当てられた方位へ回り込む。
+      // 全員が正面に並ぶと、群れがただの壁になってしまう
+      const tx = p.x + Math.sin(this.slotAngle) * ring;
+      const tz = p.z + Math.cos(this.slotAngle) * ring;
+      const ax = tx - this.x, az = tz - this.z;
+      const al = Math.hypot(ax, az);
+      if (al > 0.6) {
+        mx = ax / al; mz = az / al;
+        // 持ち場が遠いなら走って回り込む。歩きだと、動く相手には
+        // いつまでも追いつけず、足の遅い者は正面に貼りつくだけになる
+        speed = al > 3.5 ? this.runSpeed * 0.9 : this.speed * 0.9;
+      } else {
+        // 持ち場に着いたら、そこで小さく揺れて隙をうかがう
+        mx = -fz * this.strafeDir; mz = fx * this.strafeDir;
+        speed = this.speed * 0.5;
+      }
     } else {
       if (this.strafeTimer <= 0) {
         this.strafeTimer = 1.0 + Math.random() * 1.6;
         if (Math.random() < 0.4) this.strafeDir *= -1;
       }
-      // 待機中は必ず横に流れる（棒立ちを無くす）。
+      // 攻め手は横に流れる（棒立ちを無くす）。
       // 遠隔は撃ち終わった直後、必ず射線を変える
-      if (!pressing || this.repositionT > 0 || Math.random() < ai.circling) {
+      if (this.repositionT > 0 || Math.random() < ai.circling) {
         mx = -fz * this.strafeDir; mz = fx * this.strafeDir;
-        speed = this.speed * (this.repositionT > 0 ? 1.0 : pressing ? 0.7 : 0.85);
+        speed = this.speed * (this.repositionT > 0 ? 1.0 : 0.7);
       }
     }
     // 仲間との重なりをほどく（団子にならないように）
