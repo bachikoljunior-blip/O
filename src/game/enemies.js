@@ -5,6 +5,16 @@ import { ENEMIES, BOSSES, DROPS } from './data.js';
 import { clamp, clamp01, lerp, angDelta, rotateTowards, TAU, v3 } from '../core/math.js';
 
 const RIG_FOR = { humanoid: 'humanoid', beast: 'beast', imp: 'imp', wraith: 'wraith', dragon: 'dragon' };
+
+/**
+ * 振りかぶりの下限（秒）。
+ *
+ * 人の単純反応は 0.25 秒前後。これを下回る予備動作は難度ではなく、
+ * 「覚えるまで理不尽に殴られる」だけになる。連携の 2 段目以降は
+ * 直前の一撃を見てから入るので、下限を低くしてよい。
+ */
+const TELL_MIN = 0.30;
+const TELL_CHAIN = 0.20;
 const _tip = v3.new();
 
 /** 敵の見た目を種別ごとに味付けする（フード・兜・肩当て・襤褸など） */
@@ -559,6 +569,19 @@ export class Enemy extends Actor {
     return r || 2.4;
   }
 
+  /** その技が連携の途中か。直前の一撃を見てから入るので、短くてよい */
+  isChainTarget(id) {
+    const key = this.phaseIndex ?? 0;
+    if (!this._chainTargets) this._chainTargets = new Map();
+    let s = this._chainTargets.get(key);
+    if (!s) {
+      s = new Set();
+      for (const a of this.attackList()) if (a.chain) s.add(a.chain);
+      this._chainTargets.set(key, s);
+    }
+    return s.has(id);
+  }
+
   beginAttack(a, game, feint = false) {
     this.currentAttack = a;
     const sm = this.speedMul || 1;
@@ -566,8 +589,14 @@ export class Enemy extends Actor {
     let windup = a.windup * (0.92 + Math.random() * 0.16);
     if (a.delayable && Math.random() < 0.45) windup *= 1.2 + Math.random() * 0.55;
     if (this.rally > 0) windup *= 0.88;
+    // 激昂は「手数」と「硬直の短さ」で表す。振りかぶりまで丸ごと詰めると、
+    // 見てから転がる余地が消えて、覚えた手順をなぞるだけの戦いになる。
+    // 硬直（recover）は sm でそのまま詰めるので、圧は落ちない。
+    windup /= Math.pow(sm, 0.45);
+    // 見て動ける下限。人の単純反応は 0.25 秒前後
+    if (a.dmg > 0) windup = Math.max(windup, this.isChainTarget(a.id) ? TELL_CHAIN : TELL_MIN);
     this.startAttack({
-      windup: windup / sm, active: a.active,
+      windup, active: a.active,
       recover: a.recover / sm, motion: a.motion, dmg: 1,
       range: a.range, arc: a.arc, poise: a.poise,
     }, game);
