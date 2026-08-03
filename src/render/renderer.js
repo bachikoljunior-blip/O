@@ -155,6 +155,9 @@ export class Renderer {
     prog.f('u_time', game.time.now);
     prog.f('u_cloudShadow', this.q.cloudShadows ? sky.cloud * 0.62 * (1 - sky.night * 0.7) : 0);
     prog.f('u_cloudTime', game.time.now);
+    // 地下には天候が届かない
+    prog.f('u_wetness', game.dungeon ? 0 : sky.wetness);
+    prog.f('u_snowCover', game.dungeon ? 0 : sky.snowCover);
     this.setLights(prog, game);
   }
 
@@ -362,6 +365,7 @@ export class Renderer {
     wp.f('u_time', game.time.now);
     wp.f('u_seaLevel', 0);
     wp.f('u_waveScale', lerp(0.6, 2.2, clamp01(game.sky.wind / 2)));
+    wp.f('u_rain', game.dungeon ? 0 : (game.sky.rainAmount || 0));
     wp.f('u_planeSize', this.waterSize);
     wp.v3('u_deepColor', 0.02, 0.07, 0.11);
     wp.v3('u_shallowColor', 0.08, 0.20, 0.22);

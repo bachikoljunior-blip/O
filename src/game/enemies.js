@@ -285,7 +285,10 @@ export class Enemy extends Actor {
 
     // ---- 索敵 ----
     if (!this.aggro && !p.dead) {
-      const range = this.arch.aggro * (game.sky.isNight ? 1.25 : 1) * (p.sprinting ? 1.35 : 1);
+      // 霧や吹雪の中では見つかりにくい（音は届くので完全には消えない）
+      const vis = game.dungeon ? 1 : (game.sky.visibility ?? 1);
+      const range = this.arch.aggro * (game.sky.isNight ? 1.25 : 1) * (p.sprinting ? 1.35 : 1)
+        * (0.42 + 0.58 * vis);
       if (dist < range) {
         this.aggro = true;
         this.aiState = 'chase';

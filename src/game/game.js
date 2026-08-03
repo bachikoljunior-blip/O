@@ -628,6 +628,7 @@ export class Game {
     sky.rainAmount = 0;
     sky.snowAmount = 0;
     sky.wind = 0.15;
+    sky.visibility = 1;
     sky.exposure = 1.16;
     sky.grade = [1.03, 0.99, 0.97];
   }
@@ -1234,10 +1235,12 @@ export class Game {
     const p = this.player;
     const params = this.world.params(p.x, p.z);
     if (this.sky.rainAmount > 0.02) {
-      this.fx.rain(cam.pos[0], cam.pos[1], cam.pos[2], dt, this.sky.rainAmount, this.world);
+      this.fx.rain(cam.pos[0], cam.pos[1], cam.pos[2], dt, this.sky.rainAmount, this.world,
+        this.sky.windDir);
     }
     if (this.sky.snowAmount > 0.02 || (params.temp < 0.22 && p.y > 60)) {
-      this.fx.snow(cam.pos[0], cam.pos[1], cam.pos[2], dt, Math.max(this.sky.snowAmount, 0.35));
+      this.fx.snow(cam.pos[0], cam.pos[1], cam.pos[2], dt, Math.max(this.sky.snowAmount, 0.35),
+        this.sky.windDir, this.sky.wind);
     }
     const rid = params.region.id;
     if (rid === 'cinder') this.fx.ambient(p.x, p.y + 1.5, p.z, dt, 'ash', 0.5);

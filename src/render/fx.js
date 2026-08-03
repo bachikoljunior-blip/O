@@ -272,29 +272,59 @@ export class FX {
   }
 
   /* ------------------------------------------------------- 環境演出 */
-  rain(camX, camY, camZ, dt, intensity, world) {
-    const n = Math.floor(intensity * 90 * dt * 60 / 60);
+  rain(camX, camY, camZ, dt, intensity, world, windDir) {
+    const wx = windDir ? windDir[0] : 1, wz = windDir ? windDir[1] : 0.35;
+    const drift = 1.4 + intensity * 2.6;
+    this.rainAcc = (this.rainAcc || 0) + intensity * 90 * dt;
+    const n = Math.floor(this.rainAcc);
+    this.rainAcc -= n;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * 6.28, r = Math.random() * 26;
       const x = camX + Math.cos(a) * r, z = camZ + Math.sin(a) * r;
       this.spawn({
         x, y: camY + 12 + Math.random() * 6, z,
-        vx: 1.2, vy: -26, vz: 0.4,
+        vx: wx * drift, vy: -26, vz: wz * drift,
         life: 0.75, size: 0.035, sizeEnd: 0.035,
         r: 0.62, g: 0.72, b: 0.85, a: 0.5, kind: KIND.SPARK, stretch: 5.5, rot: 0,
         drag: 0, ground: true,
       });
     }
-    void world;
+    // 地面で弾ける飛沫。雨脚が見えるだけでなく、当たっている感じを出す
+    if (world) {
+      this.splashAcc = (this.splashAcc || 0) + intensity * 26 * dt;
+      const m = Math.floor(this.splashAcc);
+      this.splashAcc -= m;
+      for (let i = 0; i < m; i++) {
+        const a = Math.random() * 6.28, r = 1.5 + Math.random() * 14;
+        const x = camX + Math.cos(a) * r, z = camZ + Math.sin(a) * r;
+        const gy = world.height(x, z);
+        if (gy < -0.2) continue;                  // 水面は水しぶきの担当
+        for (let k = 0; k < 2; k++) {
+          const sa = Math.random() * 6.28, ss = 0.35 + Math.random() * 0.5;
+          this.spawn({
+            x, y: gy + 0.03, z,
+            vx: Math.cos(sa) * ss, vy: 0.9 + Math.random() * 0.6, vz: Math.sin(sa) * ss,
+            life: 0.24 + Math.random() * 0.12, size: 0.028, sizeEnd: 0.012,
+            r: 0.78, g: 0.86, b: 0.95, a: 0.55, kind: KIND.SOFT, drag: 0.6, gravity: 7,
+          });
+        }
+      }
+    }
   }
 
-  snow(camX, camY, camZ, dt, intensity) {
-    const n = Math.floor(intensity * 40 * dt * 60 / 60);
+  snow(camX, camY, camZ, dt, intensity, windDir, wind) {
+    const wx = windDir ? windDir[0] : 0, wz = windDir ? windDir[1] : 0;
+    const drift = (wind || 0.7) * 1.15;
+    this.snowAcc = (this.snowAcc || 0) + intensity * 40 * dt;
+    const n = Math.floor(this.snowAcc);
+    this.snowAcc -= n;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * 6.28, r = Math.random() * 24;
       this.spawn({
         x: camX + Math.cos(a) * r, y: camY + 10 + Math.random() * 6, z: camZ + Math.sin(a) * r,
-        vx: (Math.random() - 0.5) * 1.4, vy: -1.4 - Math.random(), vz: (Math.random() - 0.5) * 1.4,
+        vx: wx * drift + (Math.random() - 0.5) * 1.4,
+        vy: -1.4 - Math.random(),
+        vz: wz * drift + (Math.random() - 0.5) * 1.4,
         life: 5, size: 0.06, sizeEnd: 0.05,
         r: 1, g: 1, b: 1, a: 0.75, kind: KIND.HARD, drag: 0.1,
       });

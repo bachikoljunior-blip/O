@@ -21,6 +21,7 @@ export class Sky {
   constructor(seed = 7) {
     this.rng = makeRng(seed);
     this.time = 0.30;          // 0=真夜中, 0.25=夜明け, 0.5=正午, 0.75=日没
+    this.clock = 0;            // 起動からの経過秒（風のうねり用。日をまたいでも切れない）
     this.paused = false;
     this.weather = 'fair';
     this.nextWeather = 'fair';
@@ -28,6 +29,12 @@ export class Sky {
     this.weatherTimer = 120;
     this.lightning = 0;
     this.lightningTimer = 4;
+    // 天候が世界に残す痕跡。降っている量ではなく、蓄積した量
+    this.wetness = 0;      // 地面や物体の濡れ 0..1
+    this.snowCover = 0;    // 積雪 0..1
+    this.visibility = 1;   // 視程 0..1（霧・雨・雪で落ちる）
+    this.gust = 1;         // 突風の倍率
+    this.windDir = [1, 0.35];
 
     this.sunDir = [0, 1, 0];
     this.moonDir = [0, -1, 0];
@@ -93,6 +100,7 @@ export class Sky {
 
   update(dt, game) {
     if (!this.paused) this.time = (this.time + dt / DAY_LENGTH) % 1;
+    this.clock += dt;
 
     // ---- 天候遷移 ----
     if (game) {
@@ -114,10 +122,18 @@ export class Sky {
     const rain = lerp(wA.rain, wB.rain, t);
     const snow = lerp(wA.snow, wB.snow, t);
     const fogMul = lerp(wA.fogMul, wB.fogMul, t);
-    this.wind = lerp(wA.wind, wB.wind, t);
     this.cloud = cloud;
     this.rainAmount = rain;
     this.snowAmount = snow;
+
+    // ---- 風（一定ではなく、うねりと突風を持たせる）----
+    const baseWind = lerp(wA.wind, wB.wind, t);
+    const wt = this.clock;
+    this.gust = 1 + 0.28 * Math.sin(wt * 0.21) + 0.16 * Math.sin(wt * 0.73 + 1.9)
+      + 0.10 * Math.sin(wt * 1.9 + 4.1);
+    this.wind = baseWind * this.gust;
+    const wa = wt * 0.013;
+    this.windDir = [Math.cos(wa), Math.sin(wa)];
 
     // ---- 太陽 ----
     const ang = (this.time - 0.25) * TAU;
@@ -193,6 +209,33 @@ export class Sky {
     this.baseFog = lerp(0.0022, 0.0042, cloud) * fogMul;
     this.fogDensity = this.baseFog;
 
+    // ---- 濡れ・積雪の蓄積 ----
+    // 降り始めてすぐ全面が濡れるわけではなく、止んでもすぐには乾かない。
+    // 乾きは日射と風に比例する（曇りや夜は長く濡れたまま）。
+    if (rain > 0.02) {
+      const soak = 1 - Math.exp(-dt * (0.020 + rain * 0.055));
+      this.wetness += (clamp01(rain * 1.35) - this.wetness) * soak;
+    } else {
+      // 快晴の正午でおよそ 4 分、夜や曇天では 15 分以上かかる
+      const dry = 0.0006 + above * 0.0038 * (1 - cloud * 0.55) + this.wind * 0.0006;
+      this.wetness = Math.max(0, this.wetness - dry * dt);
+    }
+    if (snow > 0.02) {
+      const pile = 1 - Math.exp(-dt * (0.010 + snow * 0.028));
+      this.snowCover += (clamp01(snow * 1.15) - this.snowCover) * pile;
+      // 雪が積もっている面は濡れとして扱わない
+      this.wetness = Math.min(this.wetness, 1 - this.snowCover * 0.8);
+    } else {
+      // 雪は水たまりより長く残る
+      const melt = 0.0004 + above * 0.0022 * (1 - cloud * 0.5);
+      this.snowCover = Math.max(0, this.snowCover - melt * dt);
+    }
+
+    // ---- 視程 ----
+    // 霧が最も効き、次いで雪、雨。索敵距離と遠景の見え方に使う
+    this.visibility = clamp(
+      1 - (fogMul - 0.85) * 0.155 - rain * 0.18 - snow * 0.24, 0.30, 1);
+
     // 露出・グレーディング
     this.exposure = lerp(1.40, 0.80, above) * lerp(1, 0.94, cloud);
     this.grade = [
@@ -230,11 +273,16 @@ export class Sky {
     ];
   }
 
-  serialize() { return { time: this.time, weather: this.weather }; }
+  serialize() {
+    return { time: this.time, weather: this.weather,
+      wetness: +this.wetness.toFixed(3), snowCover: +this.snowCover.toFixed(3) };
+  }
   deserialize(d) {
     if (!d) return;
     this.time = d.time ?? this.time;
     this.setWeather(d.weather || 'fair', true);
+    this.wetness = clamp01(d.wetness ?? 0);
+    this.snowCover = clamp01(d.snowCover ?? 0);
   }
 }
 

@@ -183,6 +183,8 @@ uniform vec3 u_ambGnd;
 uniform float u_fogDensity;
 uniform float u_fogHeight;
 uniform float u_time;
+uniform float u_wetness;    // 蓄積した濡れ 0..1
+uniform float u_snowCover;  // 積雪 0..1
 
 out vec4 outColor;
 
@@ -226,6 +228,30 @@ void main(){
     }
   }
 
+  // ---- 濡れと積雪 ----
+  // 水は上を向いた面と窪みに溜まる。濡れた面は albedo が沈み、代わりに光る
+  float gloss = 0.0;
+  if(u_wetness > 0.003 || u_snowCover > 0.003){
+    float up = clamp(N.y, 0.0, 1.0);
+    float pool = u_wetness * mix(0.22, 1.0, up * up);
+    if(v_detail > 0.75){
+      float pd = vnoise(v_world.xz * 0.21);
+      pool *= 0.50 + 0.80 * smoothstep(0.30, 0.70, pd);
+    }
+    pool = clamp(pool, 0.0, 1.0);
+    albedo *= mix(1.0, 0.44, pool);
+    gloss = pool;
+
+    float sc = u_snowCover * smoothstep(0.40, 0.84, N.y);
+    if(sc > 0.003){
+      float grain = 0.90 + 0.18 * vnoise(v_world.xz * 2.6);
+      albedo = mix(albedo, vec3(0.90, 0.93, 0.99) * grain, sc);
+      N = normalize(mix(N, vec3(0.0, 1.0, 0.0), sc * 0.45));
+      gloss *= 1.0 - sc * 0.75;
+    }
+    ndl = max(dot(N, u_sunDir), 0.0);
+  }
+
   vec3 amb = mix(u_ambGnd, u_ambSky, N.y * 0.5 + 0.5);
   vec3 col = albedo * (amb + u_sunColor * ndl * sh);
   // キャラクター・小物には弱いフィル光を足して日陰でも形が読めるようにする
@@ -235,10 +261,30 @@ void main(){
 
   // 簡易スペキュラ
   vec3 H = normalize(u_sunDir + V);
-  col += u_sunColor * pow(max(dot(N, H), 0.0), 28.0) * 0.09 * sh;
+  float s28 = pow(max(dot(N, H), 0.0), 28.0);
+  col += u_sunColor * s28 * 0.09 * sh;
   // リムライト（シルエットを立たせる）
-  float rim = pow(1.0 - max(dot(N, V), 0.0), 4.0);
+  float ndv = max(dot(N, V), 0.0);
+  float f2 = (1.0 - ndv) * (1.0 - ndv);
+  float rim = f2 * f2;
   col += mix(u_ambSky, u_sunColor, 0.5) * rim * 0.13;
+  // 濡れた面：鋭いハイライトと、浅い角度ほど強い空の映り込み。
+  // pow と skyColor は高くつくので、既存の値の掛け算で近似する
+  if(gloss > 0.003){
+    // 水面の反射は視線が寝ているほど強い（フレネル）。これを掛けないと、
+    // 法線のそろった地表全体が一様に白飛びしてしまう
+    // 三人称の低いカメラでは地表のほぼ全面が斜めに見えるため、(1-N・V)^4 では
+    // 画面全体に映り込みが乗って霞んで見える。^8 まで絞ると、ごく浅い角度の
+    // 帯だけが光り、手前は濡れて沈んだままになる
+    float F = rim * rim;
+    float s2 = s28 * s28;
+    float sharp = s2 * s2;                       // 指数 112 相当
+    float ry = clamp(reflect(-V, N).y, 0.0, 1.0);
+    vec3 refl = mix(u_horizon, u_zenith, ry * ry);
+    // 映り込みは「足す」のではなく「置き換える」。加算だと地平まで白飛びする
+    col = mix(col, refl, clamp(gloss * F * 0.60, 0.0, 0.50));
+    col += u_sunColor * sharp * gloss * (0.06 + 0.94 * F) * 0.75 * sh;
+  }
   // 点光源
   col += albedo * pointLights(v_world, N, u_time);
   // 自己発光
@@ -397,6 +443,7 @@ uniform float u_time;
 uniform sampler2D u_depth;      // パックされた不透明シーンの線形デプス
 uniform vec2 u_resolution;
 uniform vec2 u_nearFar;
+uniform float u_rain;           // 降雨量 0..1
 out vec4 outColor;
 
 float sceneZ(vec2 uv){
@@ -416,6 +463,21 @@ void main(){
   float n1 = vnoise(rp) - 0.5;
   float n2 = vnoise(rp * 2.3 + 11.0) - 0.5;
   N = normalize(N + vec3(n1, 0.0, n2) * 0.22);
+
+  // 雨粒の波紋。細かい同心円が湧いては消える
+  float ripple = 0.0;
+  if(u_rain > 0.02){
+    vec2 cell = v_world.xz * 3.1;
+    vec2 id = floor(cell);
+    vec2 fr = fract(cell) - 0.5;
+    float seed = hash12(id);
+    // セルごとに位相をずらして、同時に弾けないようにする
+    float ph = fract(u_time * 1.35 + seed);
+    float r = length(fr - (vec2(hash12(id + 3.7), hash12(id + 9.1)) - 0.5) * 0.7);
+    float ring = sin((r * 26.0 - ph * 22.0)) * exp(-r * 9.0) * (1.0 - ph);
+    ripple = ring * step(seed, u_rain * 0.85);
+    N = normalize(N + vec3(fr.x, 0.0, fr.y) * ripple * 0.55);
+  }
 
   vec3 V = normalize(u_camPos - v_world);
   float dist = length(u_camPos - v_world);
