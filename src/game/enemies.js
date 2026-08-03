@@ -271,7 +271,7 @@ export class Enemy extends Actor {
       this.stamina = Math.min(this.maxStamina, this.stamina + (this.blocking ? 9 : 26) * dt);
     }
 
-    const p = game.player;
+    const p = this.quarry(game);
     const dx = p.x - this.x, dz = p.z - this.z;
     const dist = Math.hypot(dx, dz);
 
@@ -295,6 +295,35 @@ export class Enemy extends Actor {
       this.updatePhysics(dt, game);
       this.updateAnim(dt, speed);
       return;
+    }
+
+    // ---- 道の者を見つける ----
+    // 賊は街道の荷を狙う。近くに旅人や隊商がいれば、そちらを相手にする
+    if (!game.dungeon && this.arch.raider !== false && !this.boss && !this.arch.passive) {
+      this.roadScan = (this.roadScan || 0) - dt;
+      if (this.roadScan <= 0) {
+        this.roadScan = 0.6 + Math.random() * 0.6;
+        const reach = this.arch.aggro * 1.5;
+        let best = null, bd = reach;
+        for (const t of game.travellers.everyone()) {
+          if (t.dead) continue;
+          const d = Math.hypot(t.x - this.x, t.z - this.z);
+          if (d < bd) { bd = d; best = t; }
+        }
+        // プレイヤーが近ければそちらが優先（横取りされた感じにしない）
+        const dp = Math.hypot(game.player.x - this.x, game.player.z - this.z);
+        if (best && bd < dp * 0.8) {
+          if (this.foe !== best) game.onRoadAmbush?.(this, best);
+          this.foe = best;
+          if (!this.aggro) {
+            this.aggro = true;
+            this.aiState = 'chase';
+            game.audio.play('aggro', { pitch: 0.85 + Math.random() * 0.3, ...this.sfxAt() });
+          }
+        } else if (this.foe && dp <= bd) {
+          this.foe = null;         // プレイヤーが来たら、そちらへ向き直る
+        }
+      }
     }
 
     // ---- 索敵 ----
@@ -404,9 +433,24 @@ export class Enemy extends Actor {
     return 0;
   }
 
+  /**
+   * 今、誰と戦っているか。
+   *
+   * この AI はずっと game.player を唯一の相手として書かれていたので、
+   * 街道で隊商の脇を 120m 通り過ぎてプレイヤーへ向かっていた。
+   * 相手をここ一点で差し替えられるようにして、道の者も襲えるようにする。
+   * 既定はこれまでどおりプレイヤー。
+   */
+  quarry(game) {
+    const f = this.foe;
+    if (f && !f.dead && Math.hypot(f.x - this.x, f.z - this.z) < 60) return f;
+    if (f) this.foe = null;
+    return game.player;
+  }
+
   /** 戦闘中の意思決定 */
   combat(dt, game, dist, dx, dz) {
-    const p = game.player;
+    const p = this.quarry(game);
     const ai = this.ai;
     const ranged = this.arch.ranged;
     const preferred = ranged
@@ -751,11 +795,11 @@ export class Enemy extends Actor {
   }
 
   tryHit(game, src, isTick) {
-    const p = game.player;
-    if (p.dead) return false;
+    const p = this.quarry(game);
+    if (!p || p.dead) return false;
     if (!inAttackArc(this, p, src.range, src.arc)) return false;
 
-    // パリィ判定
+    // パリィ判定（受け流せるのはプレイヤーだけ）
     if (p.parryWindow > 0 && !src.guardBreak && !this.boss && !src.projectile) {
       p.onParrySuccess(this, game);
       this.attackApplied = true;

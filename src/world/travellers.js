@@ -9,19 +9,19 @@ import { Actor, TEAM } from '../game/actor.js';
 import { clamp01, TAU } from '../core/math.js';
 
 const KIND = {
-  pedlar: { name: '行商人', tint: [0.45, 0.32, 0.52], speed: 1.5, weapon: null,
+  pedlar: { name: '行商人', tint: [0.45, 0.32, 0.52], speed: 1.5, weapon: null, hp: 90,
     lines: ['荷が重くてな。……次の村までは、まだ遠い。',
       '道は物騒だ。あんたも気をつけな。'] },
-  pilgrim: { name: '巡礼者', tint: [0.74, 0.72, 0.66], speed: 1.3, weapon: null,
+  pilgrim: { name: '巡礼者', tint: [0.74, 0.72, 0.66], speed: 1.3, weapon: null, hp: 80,
     lines: ['篝火から篝火へ。それだけの旅さ。',
       '残響の音が、日ごとに大きくなっている気がする。'] },
-  hunter: { name: '流れの狩人', tint: [0.36, 0.32, 0.22], speed: 1.9, weapon: 'w_bow',
+  hunter: { name: '流れの狩人', tint: [0.36, 0.32, 0.22], speed: 1.9, weapon: 'w_bow', hp: 130,
     lines: ['この先の茂みに獣の跡があった。',
       '狼は群れで来る。一匹見たら三匹だ。'] },
-  sellsword: { name: '傭兵', tint: [0.38, 0.36, 0.40], speed: 1.7, weapon: 'w_sword',
+  sellsword: { name: '傭兵', tint: [0.38, 0.36, 0.40], speed: 1.7, weapon: 'w_sword', hp: 200,
     lines: ['雇い主を探している。金があるなら話は別だが。',
       'north の砦は落ちたと聞いた。行くならひとりでは行くな。'] },
-  guard: { name: '隊商護衛', tint: [0.33, 0.34, 0.38], speed: 1.4, weapon: 'w_spear',
+  guard: { name: '隊商護衛', tint: [0.33, 0.34, 0.38], speed: 1.4, weapon: 'w_spear', hp: 210,
     lines: ['荷に近づくな。……見るだけならいい。',
       'この道で三度襲われた。次は無い、と親方は言うがね。'] },
 };
@@ -55,7 +55,8 @@ export class Traveller extends Actor {
     const k = KIND[kind];
     super({
       rig: 'humanoid', team: TEAM.NEUTRAL, radius: 0.42, height: 1.8,
-      tint: k.tint, hp: 99999, poise: 99999,
+      // 無敵の置物にしない。守れなければ失われるからこそ、加勢に意味が出る
+      tint: k.tint, hp: k.hp || 100, poise: 30, def: 6,
       x: opts.x, y: opts.y, z: opts.z, yaw: opts.yaw || 0,
     });
     this.kind = kind;
@@ -132,15 +133,33 @@ export class Traveller extends Actor {
       this.updatePhysics(dt, game);
       return;
     }
+    if (threat && this.kind === 'guard' && !threat.dead) {
+      // 間合いに入っていれば斬る。斬っているあいだは動かない
+      if (this.fight(dt, game, threat)) {
+        this.faceTowards(threat.x, threat.z, dt, 6);
+        this.updatePhysics(dt, game);
+        if (this.state !== 'attack') this.updateAnim(dt, 0);
+        return;
+      }
+    }
     let tx = this.tx, tz = this.tz;
     if (threat && this.kind === 'guard') {
-      // 荷車と敵を結んだ線の、荷車寄りに立つ
       const c = this.caravan;
-      const ax = threat.x - c.cartX, az = threat.z - c.cartZ;
-      const al = Math.hypot(ax, az) || 1;
-      const side = (this.slot.across || 0) * 0.5;
-      tx = c.cartX + (ax / al) * 5.5 - (az / al) * side;
-      tz = c.cartZ + (az / al) * 5.5 + (ax / al) * side;
+      const dToFoe = Math.hypot(threat.x - this.x, threat.z - this.z);
+      if (dToFoe < 9) {
+        // 手が届くところまで来たら踏み込む。線を守るだけでは斬れない
+        const ax = this.x - threat.x, az = this.z - threat.z;
+        const al = Math.hypot(ax, az) || 1;
+        tx = threat.x + (ax / al) * 1.9;
+        tz = threat.z + (az / al) * 1.9;
+      } else {
+        // 遠いうちは、荷車と敵を結んだ線の荷車寄りに立つ
+        const ax = threat.x - c.cartX, az = threat.z - c.cartZ;
+        const al = Math.hypot(ax, az) || 1;
+        const side = (this.slot.across || 0) * 0.5;
+        tx = c.cartX + (ax / al) * 5.5 - (az / al) * side;
+        tz = c.cartZ + (az / al) * 5.5 + (ax / al) * side;
+      }
     }
     const dx = tx - this.x, dz = tz - this.z;
     const d = Math.hypot(dx, dz);
@@ -172,6 +191,43 @@ export class Traveller extends Actor {
     else this.faceTowards(this.x + Math.sin(this.caravan.yaw), this.z + Math.cos(this.caravan.yaw), dt, 3);
     this.updatePhysics(dt, game);
     this.updateAnim(dt, speed);
+  }
+
+  /**
+   * 護衛の反撃。
+   *
+   * 立ちはだかるだけでは、賊が荷を切り崩すのを眺めることになる。
+   * 一種類だけ、素直な薙ぎを持たせる。強くはない——プレイヤーが
+   * 加勢すれば形勢が変わる、くらいに留める。
+   */
+  fight(dt, game, foe) {
+    this.swingCd = (this.swingCd || 0) - dt;
+    if (this.state === 'attack') {
+      this.animT += dt;
+      const a = this.attackDef;
+      if (this.animT >= a.windup && !this.attackApplied) {
+        this.attackApplied = true;
+        const d = Math.hypot(foe.x - this.x, foe.z - this.z);
+        if (d < a.range + foe.radius) {
+          foe.takeDamage(a.dmg, { source: this, poise: a.poise }, game);
+          game.fx?.hitSpark?.(foe.x, foe.y + foe.height * 0.6, foe.z);
+          game.audio?.play('hit_flesh', { weight: 0.4, ...this.sfxAt() });
+        }
+      }
+      if (this.animT >= a.windup + a.recover) { this.state = 'idle'; this.attack = null; }
+      return true;
+    }
+    const d = Math.hypot(foe.x - this.x, foe.z - this.z);
+    if (d < 2.6 && this.swingCd <= 0) {
+      this.swingCd = 1.5 + Math.random() * 1.2;
+      this.attackDef = { windup: 0.42, recover: 0.55, dmg: 26, range: 2.6, poise: 22 };
+      this.attackApplied = false;
+      this.setState('attack', 0.97, 'slash_r');
+      this.attack = this.attackDef;
+      game.audio?.play('swing', { pitch: 1.0, ...this.sfxAt() });
+      return true;
+    }
+    return false;
   }
 
   update(dt, game) {
@@ -290,10 +346,13 @@ export class Caravan {
   update(dt, game) {
     // 敵が近ければ止まる。逃げずに、護衛が荷と敵のあいだに立つ
     if (this.stopped > 0) this.stopped -= dt;
-    let threat = null;
+    let threat = null, nd = 1e9;
     for (const e of game.enemies) {
       if (e.dead || !e.aggro) continue;
-      if (Math.hypot(e.x - this.x, e.z - this.z) < 26) { threat = e; break; }
+      const d = Math.hypot(e.x - this.x, e.z - this.z);
+      // こちらを狙っている敵は遠くても脅威。ただの通りすがりは 26m まで
+      const reach = this.members.includes(e.foe) ? 60 : 26;
+      if (d < reach && d < nd) { nd = d; threat = e; }
     }
     if (threat) this.stopped = 2.5;
 

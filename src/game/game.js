@@ -394,6 +394,7 @@ export class Game {
     if (!this.dungeon) this.mount.update(dt, this);
     this.wildlife.update(dt, this);
     this.travellers.update(dt, this);
+    this.checkRescue();
     this.fish.update(dt, this);
     this.updateProjectiles(dt);
     this.updateSwimming(dt);
@@ -1602,8 +1603,63 @@ export class Game {
     if (killed && !onMe) this.audio.play('kill_blow', { delay: 0.05, ...at });
   }
 
-  onActorDeath(actor) {
+  /**
+   * 街道での襲撃。
+   *
+   * 賊が道の者を狙い始めた瞬間に一度だけ知らせる。遠くの喧嘩が
+   * 自分と関係あるものになるかどうかは、気づけるかどうかで決まる。
+   */
+  onRoadAmbush(enemy, victim) {
+    const p = this.player;
+    const d = Math.hypot(enemy.x - p.x, enemy.z - p.z);
+    if (d > 140) return;
+    const van = victim.caravan;
+    if (van) {
+      if (van.raided) return;
+      van.raided = true;
+      van.raidT = 0;
+      this.ui.toast('街道で悲鳴が上がった', 'gold');
+    } else {
+      if (victim.raided) return;
+      victim.raided = true;
+      this.ui.toast(`${victim.npcName}が襲われている`, 'gold');
+    }
+    this.audio.play('aggro', { pitch: 0.7, x: enemy.x, z: enemy.z });
+  }
+
+  /**
+   * 加勢の礼。
+   * 襲われた隊商のそばで賊が絶えたら、親方が礼を寄越す。
+   */
+  checkRescue() {
+    for (const van of this.travellers.caravans) {
+      if (!van.raided || van.rewarded) continue;
+      const hostile = this.enemies.some((e) => !e.dead && e.aggro
+        && Math.hypot(e.x - van.x, e.z - van.z) < 70);
+      if (hostile) continue;
+      // プレイヤーが近くにいて、実際に手を貸したときだけ
+      const near = Math.hypot(this.player.x - van.x, this.player.z - van.z) < 60;
+      van.rewarded = true;
+      if (!near || !van.helped) continue;
+      const echo = 600 + Math.floor(Math.random() * 500);
+      this.player.echo += echo;
+      this.player.addItem('herb', 2);
+      this.ui.itemGain('herb', 2);
+      this.ui.toast(`${van.merchant.npcName}「助かった。……これは礼だ」　残響 +${echo}`, 'big gold');
+      this.audio.play('levelup');
+    }
+  }
+
+  onActorDeath(actor, opts) {
     if (actor instanceof Enemy && !actor.boss) this.quests.onKill(actor.archetype);
+    // 加勢したかどうかは「誰が斬ったか」で決まる。
+    // 護衛が自力で追い払ったのに礼を受け取るのは違う
+    if (actor instanceof Enemy && opts?.source === this.player) {
+      for (const van of this.travellers.caravans) {
+        if (!van.raided) continue;
+        if (Math.hypot(actor.x - van.x, actor.z - van.z) < 70) van.helped = true;
+      }
+    }
   }
 
   onPlayerDeath() {
