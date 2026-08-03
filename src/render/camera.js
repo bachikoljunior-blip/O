@@ -20,6 +20,8 @@ export class Camera {
     this.baseFov = 60 * Math.PI / 180;
     this.trauma = 0;
     this.shakeOffset = v3.new();
+    this.kickV = v3.new();      // 打撃方向の突き（速度）
+    this.kickP = v3.new();      // その積分（位置のずれ）
     this.aspect = 1;
     this.near = 0.15;
     this.far = 1400;
@@ -29,6 +31,17 @@ export class Camera {
   }
 
   shake(amount) { this.trauma = Math.min(1.4, this.trauma + amount); }
+
+  /**
+   * 打撃の向きに合わせてカメラを突く。
+   * 等方的な揺れだけでは「どちらから殴ったか」が絵に出ない。
+   */
+  kick(dx, dz, amount) {
+    const l = Math.hypot(dx, dz) || 1;
+    this.kickV[0] += (dx / l) * amount;
+    this.kickV[2] += (dz / l) * amount;
+    this.kickV[1] -= amount * 0.35;
+  }
 
   update(dt, game) {
     const p = game.player;
@@ -128,7 +141,22 @@ export class Camera {
       v3.set(this.shakeOffset, 0, 0, 0);
     }
 
-    v3.set(this.pos, camX + this.shakeOffset[0], camY + this.shakeOffset[1], camZ + this.shakeOffset[2]);
+    // 突きはばね的に戻す（行って戻る動きにして、ずれっぱなしにしない）
+    // damp は math.js からの import 名なので、ここでは別名にする
+    // 減衰は臨界（2√62 ≒ 15.7）より弱くして、行って少し戻る反動を残す
+    const kStiff = 62, kDamp = 9;
+    for (let i = 0; i < 3; i++) {
+      this.kickV[i] += (-kStiff * this.kickP[i] - kDamp * this.kickV[i]) * dt;
+      this.kickP[i] += this.kickV[i] * dt;
+      if (Math.abs(this.kickP[i]) < 1e-4 && Math.abs(this.kickV[i]) < 1e-3) {
+        this.kickP[i] = 0; this.kickV[i] = 0;
+      }
+    }
+
+    v3.set(this.pos,
+      camX + this.shakeOffset[0] + this.kickP[0],
+      camY + this.shakeOffset[1] + this.kickP[1],
+      camZ + this.shakeOffset[2] + this.kickP[2]);
     v3.set(this.look, pivotX, pivotY + 0.25, pivotZ);
 
     m4.lookAt(this.view, this.pos, this.look, UP);

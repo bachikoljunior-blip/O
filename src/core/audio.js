@@ -202,6 +202,7 @@ export class AudioEngine {
     if (!this.ready || this.muted) return;
     const p = opts.pitch || 1;
     const d = opts.delay || 0;
+    const w = Math.max(0, Math.min(1, opts.weight ?? 0.4));   // 打撃の重さ
     switch (name) {
       case 'splash':
         // 白色ノイズを高域から低域へ落として「ばしゃっ」を作る
@@ -214,6 +215,55 @@ export class AudioEngine {
       case 'hit':
         this.noise({ dur: 0.12, gain: 0.34, freq: 420 * p, sweep: 0.3, q: 0.9, delay: d, reverb: 0.2 });
         this.tone({ freq: 120 * p, dur: 0.10, type: 'square', gain: 0.16, sweep: 0.4, delay: d });
+        break;
+
+      /* ---- 当たった相手の素材で音が変わる。w は打撃の重さ 0..1 ---- */
+      case 'hit_flesh':
+        // 湿った鈍い音。低いほうに寄せる
+        this.noise({ dur: 0.10 + w * 0.10, gain: 0.26 + w * 0.16, freq: 380 * p,
+          sweep: 0.26, q: 0.8, delay: d, reverb: 0.18 });
+        this.tone({ freq: (96 - w * 26) * p, dur: 0.10 + w * 0.10, type: 'sine',
+          gain: 0.14 + w * 0.14, sweep: 0.35, delay: d });
+        break;
+      case 'hit_armor':
+        // 金属の高い立ち上がりと、その下の胴鳴り
+        this.noise({ dur: 0.07, gain: 0.20 + w * 0.14, freq: 3200 * p, sweep: 0.55, q: 3.4, delay: d });
+        this.tone({ freq: 740 * p, dur: 0.16, type: 'triangle', gain: 0.12 + w * 0.10,
+          sweep: 0.9, delay: d, reverb: 0.3 });
+        this.tone({ freq: (150 - w * 30) * p, dur: 0.14, type: 'square',
+          gain: 0.10 + w * 0.12, sweep: 0.5, delay: d + 0.01 });
+        break;
+      case 'hit_bone':
+        // 乾いた木質の割れ
+        this.noise({ dur: 0.055, gain: 0.30 + w * 0.14, freq: 1700 * p, sweep: 0.7, q: 2.2, delay: d });
+        this.noise({ dur: 0.09, gain: 0.16, freq: 620 * p, sweep: 0.45, q: 1.2, delay: d + 0.012 });
+        this.tone({ freq: 300 * p, dur: 0.07, type: 'square', gain: 0.09 + w * 0.08, sweep: 0.8, delay: d });
+        break;
+      case 'hit_stone':
+        // 石を打つ。減衰が長く、粉が飛ぶ
+        this.noise({ dur: 0.05, gain: 0.32 + w * 0.16, freq: 2400 * p, sweep: 0.75, q: 1.8, delay: d });
+        this.tone({ freq: (72 - w * 16) * p, dur: 0.26 + w * 0.14, type: 'sawtooth',
+          gain: 0.14 + w * 0.14, sweep: 0.30, delay: d, reverb: 0.42 });
+        this.noise({ dur: 0.22, gain: 0.08, freq: 900, sweep: 0.3, delay: d + 0.03, reverb: 0.3 });
+        break;
+      case 'hit_spirit':
+        // 実体が無い相手。打撃音というより空気が鳴る
+        this.tone({ freq: 620 * p, dur: 0.30, type: 'sine', gain: 0.14 + w * 0.08,
+          sweep: 1.5, delay: d, reverb: 0.62 });
+        this.noise({ dur: 0.26, gain: 0.10, freq: 1500, sweep: 0.5, q: 0.6, delay: d, reverb: 0.5 });
+        break;
+
+      case 'poise_break':
+        // 体勢を崩したときだけの、下へ抜ける音
+        this.tone({ freq: 210, dur: 0.34, type: 'sawtooth', gain: 0.22, sweep: 0.30,
+          delay: d, reverb: 0.45 });
+        this.noise({ dur: 0.18, gain: 0.24, freq: 1100, sweep: 0.35, q: 1.5, delay: d });
+        break;
+      case 'kill_blow':
+        // とどめ。低い一撃と、残響
+        this.tone({ freq: 68, dur: 0.55, type: 'sine', gain: 0.26, sweep: 0.35,
+          delay: d, reverb: 0.65 });
+        this.noise({ dur: 0.30, gain: 0.18, freq: 700, sweep: 0.25, delay: d + 0.02, reverb: 0.5 });
         break;
       case 'block':
         this.noise({ dur: 0.16, gain: 0.3, freq: 2400, sweep: 0.4, q: 3, delay: d });

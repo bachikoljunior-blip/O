@@ -459,11 +459,10 @@ export class Player extends Actor {
     this.riposteTarget = null;
     target.iframes = 0;
     game.audio.play('critical');
-    game.time.hitstop(0.14);
-    game.camera.shake(0.5);
     setTimeout(() => {
       if (target.dead) return;
-      target.takeDamage(dmg, { source: this, poise: 999, ignoreIFrames: true, type: 'critical' }, game);
+      target.takeDamage(dmg, { source: this, poise: 999, ignoreIFrames: true, type: 'critical',
+        impactWeight: 1 }, game);
       game.fx.blood(target.x, target.y + target.height * 0.6, target.z, 34);
     }, 260);
     game.ui.toast(type === 'riposte' ? '致命の一撃' : '背面攻撃');
@@ -497,6 +496,9 @@ export class Player extends Actor {
       const opts = {
         source: this, poise: a.poise, type: 'physical',
         bleed: w?.bleed, magic: w?.magic, holy: w?.holy,
+        // 手応えは武器の重量から。短剣と大剣が同じ止まり方をしないように
+        // 短剣 1.5 〜 王剣 16。いちばん軽い得物でも手応えを 0 にはしない
+        impactWeight: 0.12 + clamp01(((w?.weight || 5) - 1.5) / 14) * 0.88,
       };
       let dmg = power;
       if (w?.magic) dmg += w.magic * (0.6 + scalingFactor(this.stats.arc));
@@ -504,9 +506,7 @@ export class Player extends Actor {
       e.takeDamage(dmg, opts, game);
       this.weaponTip(_tip);
       game.fx.slash(_tip[0], _tip[1], _tip[2], this.yaw);
-      game.time.hitstop(0.055);
-      game.camera.shake(0.18);
-      game.audio.play('hit');
+      // 止め・揺れ・音は game.impact() が一手に引き受ける
     }
     // 破壊可能オブジェクト
     game.hitProps(this, a);
@@ -529,6 +529,7 @@ export class Player extends Actor {
     game.audio.play('parry');
     game.time.hitstop(0.16);
     game.camera.shake(0.4);
+    game.camera.kick(this.x - attacker.x, this.z - attacker.z, 0.16);
     game.fx.sparks(attacker.x, attacker.y + attacker.height * 0.6, attacker.z, 22, [1, 0.95, 0.7]);
     game.ui.toast('パリィ成功！ 致命の一撃を狙え');
     setTimeout(() => { if (this.riposteTarget === attacker) this.riposteTarget = null; }, 2600);

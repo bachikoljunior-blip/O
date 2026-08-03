@@ -346,7 +346,7 @@ export const RECIPES = [
  */
 export const ENEMIES = {
   wolf: {
-    id: 'wolf', name: '飢えた狼', tier: 1, hp: 110, poise: 22, def: 2,
+    id: 'wolf', mat: 'flesh', name: '飢えた狼', tier: 1, hp: 110, poise: 22, def: 2,
     speed: 4.6, runSpeed: 6.4, aggro: 22, echo: 45, body: 'beast',
     tint: [0.42, 0.38, 0.34], h: 0.8, weapon: null, group: 3,
     attacks: [
@@ -356,7 +356,7 @@ export const ENEMIES = {
     ai: { aggression: 0.75, circling: 0.5, retreat: 0.25, guard: 0 },
   },
   deer: {
-    id: 'deer', name: '林の鹿', tier: 1, hp: 90, poise: 12, def: 0,
+    id: 'deer', mat: 'flesh', name: '林の鹿', tier: 1, hp: 90, poise: 12, def: 0,
     speed: 3.0, runSpeed: 8.4, aggro: 0, echo: 30, body: 'beast',
     tint: [0.52, 0.40, 0.28], h: 0.95, weapon: null, group: 3, passive: true,
     attacks: [
@@ -365,7 +365,7 @@ export const ENEMIES = {
     ai: { aggression: 0.05, circling: 0.2, retreat: 1.0, guard: 0 },
   },
   boar: {
-    id: 'boar', name: '荒れ猪', tier: 1, hp: 165, poise: 40, def: 5,
+    id: 'boar', mat: 'flesh', name: '荒れ猪', tier: 1, hp: 165, poise: 40, def: 5,
     speed: 3.2, runSpeed: 7.0, aggro: 18, echo: 60, body: 'beast',
     tint: [0.32, 0.26, 0.22], h: 0.9, weapon: null, group: 1,
     attacks: [
@@ -375,7 +375,7 @@ export const ENEMIES = {
     ai: { aggression: 0.6, circling: 0.15, retreat: 0.35, guard: 0 },
   },
   bandit: {
-    id: 'bandit', name: '野盗', tier: 2, hp: 160, poise: 30, def: 6,
+    id: 'bandit', mat: 'flesh', name: '野盗', tier: 2, hp: 160, poise: 30, def: 6,
     speed: 3.4, runSpeed: 5.4, aggro: 20, echo: 85, body: 'humanoid',
     tint: [0.42, 0.34, 0.26], h: 1.0, weapon: 'w_sword', shield: false, group: 2,
     attacks: [
@@ -386,7 +386,7 @@ export const ENEMIES = {
     ai: { aggression: 0.6, circling: 0.4, retreat: 0.3, guard: 0.25 },
   },
   archer: {
-    id: 'archer', name: '野盗の射手', tier: 2, hp: 120, poise: 22, def: 4,
+    id: 'archer', mat: 'flesh', name: '野盗の射手', tier: 2, hp: 120, poise: 22, def: 4,
     speed: 3.2, runSpeed: 5.2, aggro: 34, echo: 90, body: 'humanoid',
     tint: [0.36, 0.36, 0.28], h: 0.98, weapon: 'w_bow', group: 1, ranged: true, preferDist: 12,
     attacks: [
@@ -395,7 +395,7 @@ export const ENEMIES = {
     ai: { aggression: 0.35, circling: 0.6, retreat: 0.8, guard: 0 },
   },
   brute: {
-    id: 'brute', name: '大鉈の巨漢', tier: 3, hp: 360, poise: 70, def: 10,
+    id: 'brute', mat: 'flesh', name: '大鉈の巨漢', tier: 3, hp: 360, poise: 70, def: 10,
     speed: 2.7, runSpeed: 4.4, aggro: 20, echo: 190, body: 'humanoid',
     tint: [0.36, 0.30, 0.28], h: 1.35, weapon: 'w_axe', group: 1,
     attacks: [
@@ -406,7 +406,7 @@ export const ENEMIES = {
     ai: { aggression: 0.55, circling: 0.15, retreat: 0.1, guard: 0.1 },
   },
   skeleton: {
-    id: 'skeleton', name: '朽ちた兵', tier: 2, hp: 135, poise: 20, def: 4,
+    id: 'skeleton', mat: 'bone', name: '朽ちた兵', tier: 2, hp: 135, poise: 20, def: 4,
     speed: 3.0, runSpeed: 5.0, aggro: 18, echo: 80, body: 'humanoid',
     tint: [0.78, 0.76, 0.68], h: 0.98, weapon: 'w_sword', group: 3, revive: true,
     attacks: [
@@ -416,7 +416,7 @@ export const ENEMIES = {
     ai: { aggression: 0.65, circling: 0.3, retreat: 0.15, guard: 0.1 },
   },
   wraith: {
-    id: 'wraith', name: '嘆きの亡霊', tier: 3, hp: 200, poise: 18, def: 8,
+    id: 'wraith', mat: 'spirit', name: '嘆きの亡霊', tier: 3, hp: 200, poise: 18, def: 8,
     speed: 3.6, runSpeed: 5.6, aggro: 24, echo: 160, body: 'wraith',
     tint: [0.42, 0.52, 0.7], h: 1.1, weapon: null, group: 2, float: true, emissive: 0.35,
     attacks: [
@@ -426,7 +426,7 @@ export const ENEMIES = {
     ai: { aggression: 0.5, circling: 0.6, retreat: 0.4, guard: 0 },
   },
   knight: {
-    id: 'knight', name: '亡国の騎士', tier: 4, hp: 420, poise: 60, def: 16,
+    id: 'knight', mat: 'armor', name: '亡国の騎士', tier: 4, hp: 420, poise: 60, def: 16,
     speed: 3.2, runSpeed: 5.2, aggro: 22, echo: 320, body: 'humanoid',
     tint: [0.5, 0.52, 0.58], h: 1.08, weapon: 'w_sword', shield: true, group: 1,
     attacks: [
@@ -438,7 +438,7 @@ export const ENEMIES = {
     ai: { aggression: 0.55, circling: 0.45, retreat: 0.25, guard: 0.55 },
   },
   mage: {
-    id: 'mage', name: '灰の術士', tier: 3, hp: 155, poise: 16, def: 6,
+    id: 'mage', mat: 'flesh', name: '灰の術士', tier: 3, hp: 155, poise: 16, def: 6,
     speed: 3.0, runSpeed: 4.8, aggro: 32, echo: 210, body: 'humanoid',
     tint: [0.3, 0.28, 0.42], h: 1.0, weapon: 'w_staff', group: 1, ranged: true, preferDist: 11,
     attacks: [
@@ -448,7 +448,7 @@ export const ENEMIES = {
     ai: { aggression: 0.3, circling: 0.7, retreat: 0.85, guard: 0 },
   },
   imp: {
-    id: 'imp', name: '灰の小鬼', tier: 2, hp: 105, poise: 14, def: 3,
+    id: 'imp', mat: 'flesh', name: '灰の小鬼', tier: 2, hp: 105, poise: 14, def: 3,
     speed: 4.4, runSpeed: 6.2, aggro: 20, echo: 70, body: 'imp',
     tint: [0.5, 0.24, 0.18], h: 0.65, weapon: 'w_dagger', group: 4,
     attacks: [
@@ -458,7 +458,7 @@ export const ENEMIES = {
     ai: { aggression: 0.85, circling: 0.35, retreat: 0.3, guard: 0 },
   },
   crawler: {
-    id: 'crawler', name: '這うもの', tier: 2, hp: 95, poise: 10, def: 2,
+    id: 'crawler', mat: 'flesh', name: '這うもの', tier: 2, hp: 95, poise: 10, def: 2,
     speed: 4.8, runSpeed: 7.2, aggro: 16, echo: 65, body: 'beast',
     tint: [0.30, 0.26, 0.30], h: 0.55, weapon: null, group: 4,
     attacks: [
@@ -468,7 +468,7 @@ export const ENEMIES = {
     ai: { aggression: 0.9, circling: 0.25, retreat: 0.2, guard: 0 },
   },
   gargoyle: {
-    id: 'gargoyle', name: '石像鬼', tier: 4, hp: 330, poise: 90, def: 22,
+    id: 'gargoyle', mat: 'stone', name: '石像鬼', tier: 4, hp: 330, poise: 90, def: 22,
     speed: 2.9, runSpeed: 5.0, aggro: 15, echo: 280, body: 'humanoid',
     tint: [0.40, 0.41, 0.43], h: 1.25, weapon: null, group: 1,
     attacks: [
@@ -480,7 +480,7 @@ export const ENEMIES = {
   },
   /* ---- 読み合いを要求する型 ---- */
   stalker: {
-    id: 'stalker', name: '影追い', tier: 3, hp: 175, poise: 16, def: 6,
+    id: 'stalker', mat: 'flesh', name: '影追い', tier: 3, hp: 175, poise: 16, def: 6,
     speed: 4.2, runSpeed: 6.8, aggro: 26, echo: 200, body: 'humanoid',
     tint: [0.20, 0.20, 0.26], h: 0.98, weapon: 'w_dagger', group: 2,
     attacks: [
@@ -493,7 +493,7 @@ export const ENEMIES = {
     ai: { aggression: 0.7, circling: 0.75, retreat: 0.55, guard: 0, feint: 0.42, backstep: 0.6, punish: 0.85 },
   },
   halberdier: {
-    id: 'halberdier', name: '長柄の衛兵', tier: 3, hp: 265, poise: 45, def: 12,
+    id: 'halberdier', mat: 'armor', name: '長柄の衛兵', tier: 3, hp: 265, poise: 45, def: 12,
     speed: 3.0, runSpeed: 5.0, aggro: 24, echo: 230, body: 'humanoid',
     tint: [0.40, 0.42, 0.46], h: 1.06, weapon: 'w_spear', group: 2, preferDist: 3.6,
     attacks: [
@@ -505,7 +505,7 @@ export const ENEMIES = {
     ai: { aggression: 0.55, circling: 0.5, retreat: 0.7, guard: 0.15, spacing: 1, punish: 0.7 },
   },
   warden: {
-    id: 'warden', name: '大盾の番人', tier: 4, hp: 460, poise: 95, def: 22,
+    id: 'warden', mat: 'armor', name: '大盾の番人', tier: 4, hp: 460, poise: 95, def: 22,
     speed: 2.5, runSpeed: 4.0, aggro: 20, echo: 380, body: 'humanoid',
     tint: [0.46, 0.46, 0.50], h: 1.16, weapon: 'w_sword', shield: true, group: 1,
     attacks: [
@@ -518,7 +518,7 @@ export const ENEMIES = {
     frontBlock: 0.72,
   },
   necromancer: {
-    id: 'necromancer', name: '屍術士', tier: 4, hp: 210, poise: 18, def: 8,
+    id: 'necromancer', mat: 'bone', name: '屍術士', tier: 4, hp: 210, poise: 18, def: 8,
     speed: 2.9, runSpeed: 4.8, aggro: 34, echo: 420, body: 'humanoid',
     tint: [0.24, 0.30, 0.28], h: 1.02, weapon: 'w_staff', group: 1, ranged: true, preferDist: 14,
     attacks: [
@@ -529,7 +529,7 @@ export const ENEMIES = {
     ai: { aggression: 0.3, circling: 0.6, retreat: 0.95, guard: 0 },
   },
   direwolf: {
-    id: 'direwolf', name: '群れの長', tier: 3, hp: 240, poise: 38, def: 6,
+    id: 'direwolf', mat: 'flesh', name: '群れの長', tier: 3, hp: 240, poise: 38, def: 6,
     speed: 5.0, runSpeed: 7.4, aggro: 26, echo: 250, body: 'beast',
     tint: [0.24, 0.22, 0.24], h: 1.05, weapon: null, group: 1,
     attacks: [
@@ -540,7 +540,7 @@ export const ENEMIES = {
     ai: { aggression: 0.8, circling: 0.55, retreat: 0.2, guard: 0, punish: 0.8 },
   },
   troll: {
-    id: 'troll', name: '岩喰いのトロル', tier: 4, hp: 640, poise: 110, def: 14,
+    id: 'troll', mat: 'flesh', name: '岩喰いのトロル', tier: 4, hp: 640, poise: 110, def: 14,
     speed: 2.4, runSpeed: 4.6, aggro: 24, echo: 520, body: 'humanoid',
     tint: [0.34, 0.38, 0.32], h: 1.9, weapon: null, group: 1,
     attacks: [
@@ -555,7 +555,7 @@ export const ENEMIES = {
 /* ============================================================== ボス */
 export const BOSSES = {
   colossus: {
-    id: 'colossus', name: '朽ちた巨兵', title: '草原に眠る番人',
+    id: 'colossus', mat: 'stone', name: '朽ちた巨兵', title: '草原に眠る番人',
     hp: 1100, poise: 130, def: 10, speed: 2.5, runSpeed: 4.6, echo: 1600,
     body: 'humanoid', tint: [0.42, 0.44, 0.40], h: 2.4, weapon: null, scaleWeapon: 2,
     music: 'boss', reward: { weapon: 'axe', item: 'ore_iron', count: 4 },
@@ -580,7 +580,7 @@ export const BOSSES = {
     ],
   },
   orgren: {
-    id: 'orgren', name: '森の主 オルグレン', title: '常闇に潜む牙',
+    id: 'orgren', mat: 'flesh', name: '森の主 オルグレン', title: '常闇に潜む牙',
     hp: 1900, poise: 90, def: 12, speed: 4.4, runSpeed: 7.4, echo: 2600,
     body: 'beast', tint: [0.22, 0.28, 0.20], h: 1.9, weapon: null,
     music: 'boss', reward: { item: 'beast_bone', count: 6, talisman: 'ring_hunter' },
@@ -606,7 +606,7 @@ export const BOSSES = {
     ],
   },
   witch: {
-    id: 'witch', name: '湿原の魔女 セラフィナ', title: '霧を編む者',
+    id: 'witch', mat: 'spirit', name: '湿原の魔女 セラフィナ', title: '霧を編む者',
     hp: 1750, poise: 45, def: 14, speed: 3.6, runSpeed: 6.0, echo: 3000,
     body: 'humanoid', tint: [0.30, 0.36, 0.34], h: 1.15, weapon: 'w_staff', emissive: 0.25,
     music: 'boss', reward: { spell: 'ice_lance', item: 'crystal', count: 5 },
@@ -631,7 +631,7 @@ export const BOSSES = {
     ],
   },
   galvan: {
-    id: 'galvan', name: '灰の騎士 ガルヴァン', title: '燃え残りの誓約',
+    id: 'galvan', mat: 'armor', name: '灰の騎士 ガルヴァン', title: '燃え残りの誓約',
     hp: 2600, poise: 100, def: 20, speed: 3.8, runSpeed: 6.4, echo: 4200,
     body: 'humanoid', tint: [0.44, 0.26, 0.20], h: 1.3, weapon: 'w_greatsword', emissive: 0.3,
     music: 'boss', reward: { weapon: 'greatsword', armor: 'ash_plate' },
@@ -656,7 +656,7 @@ export const BOSSES = {
     ],
   },
   leonhart: {
-    id: 'leonhart', name: '黄金の将 レオンハルト', title: '穂波を守る剣',
+    id: 'leonhart', mat: 'armor', name: '黄金の将 レオンハルト', title: '穂波を守る剣',
     hp: 2300, poise: 85, def: 18, speed: 4.0, runSpeed: 6.8, echo: 3600,
     body: 'humanoid', tint: [0.72, 0.60, 0.28], h: 1.12, weapon: 'w_sword', shield: true, emissive: 0.15,
     music: 'boss', reward: { weapon: 'katana', talisman: 'ring_steel' },
@@ -682,7 +682,7 @@ export const BOSSES = {
     ],
   },
   dragon: {
-    id: 'dragon', name: '蒼天の竜 ヴァルドリス', title: '嶺を統べる翼',
+    id: 'dragon', mat: 'flesh', name: '蒼天の竜 ヴァルドリス', title: '嶺を統べる翼',
     hp: 3800, poise: 150, def: 24, speed: 3.4, runSpeed: 6.0, echo: 7000,
     body: 'dragon', tint: [0.36, 0.46, 0.62], h: 2.8, weapon: null,
     music: 'boss', reward: { spell: 'bolt', item: 'shard_ancient', count: 3 },
@@ -706,7 +706,7 @@ export const BOSSES = {
     ],
   },
   nocturnus: {
-    id: 'nocturnus', name: '深淵の王 ノクトゥルヌス', title: '世界を喰らう影',
+    id: 'nocturnus', mat: 'spirit', name: '深淵の王 ノクトゥルヌス', title: '世界を喰らう影',
     hp: 5400, poise: 140, def: 28, speed: 4.2, runSpeed: 7.2, echo: 12000,
     body: 'humanoid', tint: [0.14, 0.12, 0.22], h: 1.7, weapon: 'w_greatsword', emissive: 0.45,
     music: 'final', final: true, reward: { weapon: 'kings_blade', armor: 'crown' },
@@ -755,7 +755,7 @@ export const DUNGEON_BOSSES = {
 };
 
 BOSSES.ossuar = {
-  id: 'ossuar', name: '骸の主 オスアール', title: '墓所に坐す王', dungeon: true,
+  id: 'ossuar', mat: 'bone', name: '骸の主 オスアール', title: '墓所に坐す王', dungeon: true,
   hp: 1450, poise: 95, def: 16, speed: 3.4, runSpeed: 6.2, echo: 2200,
   body: 'humanoid', tint: [0.74, 0.71, 0.60], h: 1.58, weapon: 'w_scythe', emissive: 0.12,
   music: 'boss', reward: { weapon: 'scythe', item: 'bone_ash', count: 3 },
@@ -783,7 +783,7 @@ BOSSES.ossuar = {
 };
 
 BOSSES.stonewing = {
-  id: 'stonewing', name: '石翼の番人', title: '沈んだ回廊の守り手', dungeon: true,
+  id: 'stonewing', mat: 'stone', name: '石翼の番人', title: '沈んだ回廊の守り手', dungeon: true,
   hp: 1650, poise: 130, def: 24, speed: 3.0, runSpeed: 6.6, echo: 2600,
   body: 'humanoid', tint: [0.42, 0.45, 0.48], h: 1.6, weapon: null,
   music: 'boss', reward: { shield: 'stone_shield', item: 'ore_iron', count: 4 },
@@ -810,7 +810,7 @@ BOSSES.stonewing = {
 };
 
 BOSSES.gnawer = {
-  id: 'gnawer', name: '坑道喰らい', title: '岩を噛み砕くもの', dungeon: true,
+  id: 'gnawer', mat: 'bone', name: '坑道喰らい', title: '岩を噛み砕くもの', dungeon: true,
   hp: 1800, poise: 120, def: 14, speed: 4.0, runSpeed: 7.6, echo: 2800,
   body: 'beast', tint: [0.32, 0.24, 0.20], h: 2.0, weapon: null,
   music: 'boss', reward: { talisman: 'ring_delver', item: 'crystal', count: 4 },

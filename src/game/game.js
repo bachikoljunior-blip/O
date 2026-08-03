@@ -1296,12 +1296,63 @@ export class Game {
   /* ------------------------------------------------------ コールバック */
   onDamage(target, dmg, opts, blocked) {
     this.ui.damageNumber(target, dmg, blocked, opts);
+    this.impact(target, dmg, opts, blocked);
     if (target === this.player) {
       if (this.player.riding && dmg > this.player.maxHp * 0.10) this.mount.dismount(this, true);
       this.damageFlash = Math.min(1, (this.damageFlash || 0) + dmg / this.player.maxHp * 2.4);
-      this.camera.shake(0.3 + Math.min(0.5, dmg / 120));
-      this.audio.play('hit', { pitch: 0.8 });
     }
+  }
+
+  /**
+   * 手応え。打撃ひとつぶんの「止め・揺れ・突き・音」をここだけで決める。
+   *
+   * 短剣で小突くのと大剣を叩きつけるのが同じ手応えでは、武器を持ち替える
+   * 意味が薄い。重さ（武器や技の崩し値）と、その一撃が相手に何を起こしたか
+   * （受けられた／体勢を崩した／仕留めた）で強さを変える。
+   */
+  impact(target, dmg, opts, blocked) {
+    const src = opts?.source;
+    const mine = src === this.player;          // こちらが殴った
+    const onMe = target === this.player;       // こちらが殴られた
+    if (!mine && !onMe) return;                // 見えない所での殴り合いは揺らさない
+    if (opts?.type === 'poison' || opts?.type === 'fire' || opts?.noFlinch) return;
+
+    // ---- 重さ 0..1 ----
+    // 武器の重量、または敵の技の崩し値から取る
+    let weight;
+    if (opts?.impactWeight !== undefined) weight = opts.impactWeight;
+    else if (opts?.poise) weight = clamp01((opts.poise - 8) / 70);
+    else weight = 0.35;
+    weight = clamp01(weight);
+
+    // ---- その一撃が何を起こしたか ----
+    const killed = target.dead || target.hp <= 0;
+    const broke = target.state === 'stagger' && !blocked;
+    const crit = opts?.type === 'critical';
+    // 相手の体力に対してどれだけ削ったか
+    const sev = clamp01(dmg / Math.max(1, target.maxHp * 0.16));
+
+    let stop, shake, kick;
+    if (blocked) { stop = 0.030 + weight * 0.030; shake = 0.10 + weight * 0.12; kick = 0.5 + weight * 0.6; }
+    else if (crit) { stop = 0.16 + weight * 0.06; shake = 0.42; kick = 2.6; }
+    else if (killed) { stop = 0.11 + weight * 0.07; shake = 0.26 + weight * 0.16; kick = 1.5 + weight * 1.2; }
+    else if (broke) { stop = 0.10 + weight * 0.07; shake = 0.28 + weight * 0.18; kick = 1.8 + weight * 1.4; }
+    else { stop = 0.026 + weight * 0.060 + sev * 0.030; shake = 0.09 + weight * 0.16 + sev * 0.10; kick = 0.6 + weight * 1.5 + sev * 0.8; }
+
+    // 殴られた側の視点は、殴った側より大きく揺れる
+    if (onMe) { shake *= 1.5; kick *= 1.5; stop *= 0.8; }
+
+    this.time.hitstop(stop);
+    this.camera.shake(shake);
+    if (src) this.camera.kick(target.x - src.x, target.z - src.z, kick * 0.28);
+
+    // ---- 音 ----
+    if (blocked) return;                        // 受けの音は takeDamage 側で鳴る
+    const mat = onMe ? 'armor' : (target.arch?.mat || target.mat || 'flesh');
+    const pitch = onMe ? 0.82 : (1.12 - weight * 0.26);
+    this.audio.play(`hit_${mat}`, { weight, pitch });
+    if (broke) this.audio.play('poise_break', { delay: 0.03 });
+    if (killed && !onMe) this.audio.play('kill_blow', { delay: 0.05 });
   }
 
   onActorDeath(actor) {
