@@ -49,7 +49,26 @@ const SPREAD = { home: 0, work: 1.5, well: 1.7, fire: 2.3, square: 3.4, field: 3
 export const ACTIVITY_LABEL = {
   sleep: '眠っている', work: '働いている', pray: '祈っている',
   eat: '食べている', talk: '話し込んでいる', idle: '',
+  flee: '逃げ込もうとしている',
 };
+
+/**
+ * 村人の体力。
+ *
+ * これまで 99999 で、事実上の置物だった。村が襲われる余地を作る以上、
+ * 打たれれば倒れる必要がある。ただし死なせない——倒れて伏せるだけで、
+ * 翌朝には起き上がる。鍛冶屋や長老が死ぬと依頼が詰むし、
+ * プレイヤーの攻撃は game.enemies しか拾わないので、
+ * 村人を倒せるのは賊だけになる。
+ */
+const NPC_HP = 110;
+
+/** 行動表の外にいることを表す番号（襲撃中） */
+const RAID_ENTRY = -2;
+
+/** 賊に気づく距離と、その見回しの間隔 */
+const PANIC_R = 34;
+const PANIC_SCAN = 0.5;
 
 export class NPC extends Actor {
   constructor(opts) {
@@ -57,7 +76,7 @@ export class NPC extends Actor {
       rig: 'humanoid', team: TEAM.NEUTRAL, radius: 0.42, height: 1.8,
       tint: ROLE_TINT[opts.role] || ROLE_TINT.villager,
       x: opts.x, y: opts.y, z: opts.z, yaw: opts.yaw || 0,
-      hp: 99999, poise: 99999,
+      hp: NPC_HP, poise: 26, def: 4,
     });
     this.role = opts.role;
     this.npcName = opts.name;
@@ -86,6 +105,56 @@ export class NPC extends Actor {
     this.drift = [0, 0];
     this.stuck = 0;
     this.detour = 0;
+    this.downDay = -1;           // 倒れた日。翌朝に起き上がる
+  }
+
+  /**
+   * 村人は転んでは倒れない。倒れるのは打たれたときだけ。
+   *
+   * 体力を有限にした途端、崖から落ちただけの村人が伏せるようになった
+   * （落下の痛手は maxHp の 9 割まで入る）。日課で歩いているだけの者が
+   * 勝手に倒れていては、襲撃が起きたことが分からない。
+   */
+  takeDamage(amount, opts = {}, game) {
+    if (opts.type === 'fall') return 0;
+    return super.takeDamage(amount, opts, game);
+  }
+
+  /** 賊が見える所まで来たか。毎フレーム数えないよう間引く */
+  threatNear(dt, game) {
+    this.scanT = (this.scanT ?? Math.random() * PANIC_SCAN) - dt;
+    if (this.scanT > 0) return false;
+    this.scanT = PANIC_SCAN;
+    for (const e of game.enemies) {
+      if (e.dead || e.team !== TEAM.ENEMY || e.arch?.passive) continue;
+      if (Math.hypot(e.x - this.x, e.z - this.z) < PANIC_R) return true;
+    }
+    return false;
+  }
+
+  /** 倒れる。死なせはしない */
+  onDeath(game) {
+    this.downDay = game?.sky?.day ?? 0;
+    this.indoors = false;
+    this.talking = false;
+    game?.fx?.blood(this.x, this.y + this.height * 0.5, this.z, 24);
+    game?.ui?.toast(`${this.npcName}が倒れた`);
+  }
+
+  /** 伏せている間。翌朝、日が昇れば起き上がる */
+  updateDown(dt, game) {
+    this.updateAnim(dt, 0);
+    this.updatePhysics(dt, game);
+    const h = game.sky.hour;
+    if (game.sky.day > this.downDay && h >= 6 && h < 20) {
+      this.dead = false;
+      this.deathT = 0;
+      this.hp = this.maxHp;
+      this.poise = this.maxPoise;
+      this.state = 'idle';
+      this.animT = 0;
+      this.entryIdx = -1;         // 行動表を引き直す
+    }
   }
 
   /**
@@ -132,6 +201,36 @@ export class NPC extends Actor {
     return idx;
   }
 
+  /**
+   * 家の戸口。
+   * 戸口は村の中心を向いた側に取る。家は中心を向いて建っているので、
+   * 裏手に回られると隣家との隙間に挟まって帰れなくなる。
+   */
+  doorOf(s, game) {
+    const bk = game?.blockers;
+    const c = this.spots?.center || s;
+    const ang = Math.atan2(c.x - s.x, c.z - s.z);
+    const box = bk && bk.at(s.x, s.z);
+    const reach = box ? Math.max(box.hx, box.hz) + this.radius + 0.7 : 1.0;
+    return { x: s.x + Math.sin(ang) * reach, z: s.z + Math.cos(ang) * reach };
+  }
+
+  /**
+   * 村が襲われている間の持ち場：自分の家の戸口。
+   * 村人は戦わない。逃げ込めた者は助かり、間に合わなかった者が打たれる。
+   */
+  takeCover(game) {
+    this.entryIdx = RAID_ENTRY;
+    this.activity = 'flee';
+    this.spotKey = 'home';
+    const s = (this.spots && this.spots.home) || { x: this.homeX, z: this.homeZ };
+    const d = this.doorOf(s, game);
+    this.target = { x: d.x, z: d.z, fx: s.x, fz: s.z };
+    this.drift = [0, 0];
+    this.stuck = 0;
+    this.arrived = false;
+  }
+
   /** 持ち場を決める。遠くにいる間は歩かせず、直接そこへ置く */
   setEntry(i, game) {
     const [, key, act] = this.table[i];
@@ -145,14 +244,8 @@ export class NPC extends Actor {
     let tx = s.x + Math.cos(this.postAngle) * r;
     let tz = s.z + Math.sin(this.postAngle) * r;
     if (key === 'home') {
-      // 戸口は村の中心を向いた側に取る。家は中心を向いて建っているので、
-      // 裏手に回られると隣家との隙間に挟まって帰れなくなる
-      const c = this.spots?.center || s;
-      const ang = Math.atan2(c.x - s.x, c.z - s.z);
-      const box = bk && bk.at(s.x, s.z);
-      const reach = box ? Math.max(box.hx, box.hz) + this.radius + 0.7 : 1.0;
-      tx = s.x + Math.sin(ang) * reach;
-      tz = s.z + Math.cos(ang) * reach;
+      const d = this.doorOf(s, game);
+      tx = d.x; tz = d.z;
     }
     // 持ち場が建物の中や、建物どうしの隙間に来てしまったら外へ出す。
     // 立てない場所を目指すと、その周りを永久に回り続けることになる
@@ -174,6 +267,7 @@ export class NPC extends Actor {
   }
 
   update(dt, game) {
+    if (this.dead) { this.updateDown(dt, game); return; }
     if (this.talking) {
       this.indoors = false;
       this.faceTowards(game.player.x, game.player.z, dt, 6);
@@ -182,8 +276,15 @@ export class NPC extends Actor {
       return;
     }
 
-    const idx = this.scheduleIndex(game.sky.hour);
-    if (idx !== this.entryIdx) this.setEntry(idx, game);
+    // 村が襲われている間は日課をやめる。行動表より襲撃が優先。
+    // ただし動き出すのは賊が見えてから。襲撃が始まった瞬間に全員が
+    // 走り出すと、賊が村に着く前に戸が閉まって、誰も襲われない
+    if (this.poi?.underRaid && (this.entryIdx === RAID_ENTRY || this.threatNear(dt, game))) {
+      if (this.entryIdx !== RAID_ENTRY) this.takeCover(game);
+    } else {
+      const idx = this.scheduleIndex(game.sky.hour);
+      if (idx !== this.entryIdx) this.setEntry(idx, game);
+    }
 
     const t = this.target;
     const tx = t.x + this.drift[0], tz = t.z + this.drift[1];
@@ -195,8 +296,9 @@ export class NPC extends Actor {
     let speed = 0;
 
     if (dist > arriveR) {
-      // 持ち場が遠いほど急ぐ。寝に帰るときも足が速い
-      const walk = dist > 14 || this.activity === 'sleep' ? 2.0 : 1.4;
+      // 持ち場が遠いほど急ぐ。寝に帰るときも足が速い。逃げるときはもっと速い
+      const walk = this.activity === 'flee' ? 2.8
+        : (dist > 14 || this.activity === 'sleep' ? 2.0 : 1.4);
       const x0 = this.x, z0 = this.z;
       // 探査は実際の歩幅で行う。長い距離で試すと、壁沿いに滑った分を
       // 「進めた」と誤判定して、隅に挟まったまま前を向き続けることになる
@@ -219,13 +321,16 @@ export class NPC extends Actor {
       if (this.driftT <= 0) {
         this.driftT = 5 + Math.random() * 8;
         const a = Math.random() * TAU, r = Math.random() * 1.3;
-        this.drift = this.activity === 'sleep' ? [0, 0] : [Math.cos(a) * r, Math.sin(a) * r];
+        this.drift = this.activity === 'sleep' || this.activity === 'flee'
+          ? [0, 0] : [Math.cos(a) * r, Math.sin(a) * r];
       }
     }
 
     // 眠っている間は家の中。壁の中に立たせたままにせず、描画も会話も止める。
-    // 途中で立ち往生しただけの者を消してしまわないよう、戸口に着いたことを距離で見る
-    this.indoors = this.activity === 'sleep' && dist <= arriveR + 0.6;
+    // 途中で立ち往生しただけの者を消してしまわないよう、戸口に着いたことを距離で見る。
+    // 襲撃中に逃げ込めた者も同じ扱い（戸を閉めた者はもう狙われない）
+    this.indoors = (this.activity === 'sleep' || this.activity === 'flee')
+      && dist <= arriveR + 0.6;
     this.updatePhysics(dt, game);
     this.updateAnim(dt, speed);
   }

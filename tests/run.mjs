@@ -36,8 +36,10 @@ const WHAT = {
   perf1: '毎フレームの負担',
   trav1: '街道の往来',
   caravan1: '隊商',
+  dray1: '荷車と積荷',
   ambush1: '街道の襲撃',
   npc1: '村人の一日',
+  village1: '村の衛兵',
   poi1: 'ランドマーク',
   dist1: '単一ファイル版',
   render1: '描画が止まっていないか',
@@ -47,7 +49,7 @@ const WHAT = {
 };
 
 /** 上から順に回す。壊れやすいものほど先に置いて、早く気づけるようにする */
-const ORDER = ['render1', 'dist1', 'quest1', 'ui1', 'upg1', 'poi1', 'npc1', 'trav1', 'caravan1', 'ambush1', 'bird1', 'fish1', 'fishing1', 'touch1', 'perf1',
+const ORDER = ['render1', 'dist1', 'quest1', 'ui1', 'upg1', 'poi1', 'npc1', 'village1', 'trav1', 'caravan1', 'dray1', 'ambush1', 'bird1', 'fish1', 'fishing1', 'touch1', 'perf1',
   'audio1', 'spat1', 'weather1', 'wx2', 'ranged2', 'tell3', 'boss1', 'dboss',
   'dun3', 'econ2', 'expl2', 'gang2', 'balance', 'bench'];
 

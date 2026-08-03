@@ -272,6 +272,9 @@ export class Enemy extends Actor {
     }
 
     const p = this.quarry(game);
+    // 中立（護衛・衛兵）は相手を指されて初めて動く。指した相手が間合いの外へ
+    // 出た瞬間に quarry() が手を離すので、ここへ何も持たずに来ることがある
+    if (!p) { this.aggro = false; this.aiState = 'idle'; this.updateAnim(dt, 0); this.updatePhysics(dt, game); return; }
     const dx = p.x - this.x, dz = p.z - this.z;
     const dist = Math.hypot(dx, dz);
 
