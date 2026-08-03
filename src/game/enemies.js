@@ -306,7 +306,7 @@ export class Enemy extends Actor {
       if (dist < range) {
         this.aggro = true;
         this.aiState = 'chase';
-        game.audio.play('aggro', { pitch: 0.85 + Math.random() * 0.3 });
+        game.audio.play('aggro', { pitch: 0.85 + Math.random() * 0.3, ...this.sfxAt() });
         game.onAggro?.(this);
       }
     }
@@ -628,7 +628,7 @@ export class Enemy extends Actor {
     this.y = game.groundHeight(nx, nz);
     this.faceTowards(p.x, p.z, 1, 99);
     game.fx.voidBurst(this.x, this.y + this.height * 0.5, this.z);
-    game.audio.play('teleport');
+    game.audio.play('teleport', this.sfxAt());
   }
 
   processAttack(dt, game, dist) {
@@ -657,7 +657,7 @@ export class Enemy extends Actor {
         this.dashPending = null;
         this.setState('idle', 0.14);
         this.attackCd = 0.22 + Math.random() * 0.3;   // すぐ本命が来る
-        game.audio.play('swing', { pitch: 1.45 });
+        game.audio.play('swing', { pitch: 1.45, ...this.sfxAt() });
         return 0;
       }
     }
@@ -702,7 +702,7 @@ export class Enemy extends Actor {
               frost: src.frost, fire: src.fire, splash: src.splash || 0,
             });
           }
-          game.audio.play(src.projectile === 'arrow' ? 'bow' : 'cast');
+          game.audio.play(src.projectile === 'arrow' ? 'bow' : 'cast', this.sfxAt());
         }
       } else if (src.tick) {
         this._tickAcc = (this._tickAcc || 0) + dt;
@@ -719,7 +719,7 @@ export class Enemy extends Actor {
         this.shockDone = true;
         game.fx.shockwave(this.x, this.y, this.z, src.shock);
         game.camera.shake(0.55);
-        game.audio.play('slam');
+        game.audio.play('slam', this.sfxAt());
       }
     } else if (phase === 'recover') {
       this.shockDone = false;
@@ -791,7 +791,7 @@ export class Enemy extends Actor {
     game.player.kills++;
     game.ui.echoGain(Math.round(this.echo * game.player.mods.echoMul));
     game.fx.deathBurst(this.x, this.y + this.height * 0.5, this.z, this.tint);
-    game.audio.play('death');
+    game.audio.play('death', this.sfxAt());
     const table = DROPS[this.archetype];
     if (table) {
       for (const [item, chance, n] of table) {

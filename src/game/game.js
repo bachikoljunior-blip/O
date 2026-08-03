@@ -357,6 +357,8 @@ export class Game {
     else this.sky.applyRegion(this.world.params(p.x, p.z));
 
     this.camera.update(dt, this);
+    // 聴き手はカメラ。音の距離と向きはここを基準に決まる
+    this.audio.setListener(this.camera.pos[0], this.camera.pos[2], this.camera.yaw);
     if (this.input.pressed('mount')) this.handleMountButton();
     p.update(dt, this);
     if (p.state === 'cast') p.processSpell(dt, this);
@@ -813,7 +815,7 @@ export class Game {
   onWaterCross(actor, entering) {
     if (Math.hypot(actor.x - this.player.x, actor.z - this.player.z) > 60) return;
     this.fx.splash(actor.x, this.seaLevel, actor.z, entering ? 22 : 12, actor.radius);
-    this.audio.play('splash', { pitch: 0.85 + Math.random() * 0.35 });
+    this.audio.play('splash', { pitch: 0.85 + Math.random() * 0.35, ...(actor?.sfxAt?.() || {}) });
   }
 
   /**
@@ -1314,7 +1316,7 @@ export class Game {
         p.echo += loot.echo;
         for (const [item, n] of loot.items) { p.addItem(item, n); this.ui.itemGain(item, n); }
         this.ui.toast(`宝箱：残響 +${loot.echo}`);
-        this.audio.play('chest');
+        this.audio.play('chest', { x: poi.chest.x, z: poi.chest.z });
         this.fx.heal(poi.chest.x, this.world.height(poi.chest.x, poi.chest.z) + 0.6, poi.chest.z);
         break;
       }
@@ -1330,7 +1332,7 @@ export class Game {
         const ore = g.type === 'ore_iron' || g.type === 'ore_silver'
           || g.type === 'shard_ancient' || g.type === 'crystal';
         this.audio.play(ore ? 'gather_ore' : 'gather_plant',
-          { pitch: 0.9 + Math.random() * 0.25 });
+          { pitch: 0.9 + Math.random() * 0.25, x: g.x, z: g.z });
         this.fx.dust(g.x, g.y + 0.3, g.z, ore ? 10 : 6);
         if (ore) this.camera.kick(g.x - p.x, g.z - p.z, 0.12);
         break;
@@ -1356,7 +1358,7 @@ export class Game {
         // 主の間の宝は、その階でいちばんの取り分。同じ言い方で流さない
         this.ui.toast(c.boss ? `あるじの宝：残響 +${loot.echo}` : `宝箱：残響 +${loot.echo}`,
           c.boss ? 'big gold' : '');
-        this.audio.play(c.boss ? 'levelup' : 'chest');
+        this.audio.play(c.boss ? 'levelup' : 'chest', { x: c.x, z: c.z });
         this.fx.heal(c.x, 0.6, c.z);
         this.quests.count.dungeonChests = (this.quests.count.dungeonChests || 0) + 1;
         break;
@@ -1527,10 +1529,12 @@ export class Game {
     if (blocked) return;                        // 受けの音は takeDamage 側で鳴る
     const mat = onMe ? 'armor' : (target.arch?.mat || target.mat || 'flesh');
     const pitch = onMe ? 0.82 : (1.12 - weight * 0.26);
-    this.audio.play(`hit_${mat}`, { weight, pitch });
-    if (opts?.keen) this.audio.play('keen', { weight, delay: 0.02, pitch: 1 + weight * 0.12 });
-    if (broke) this.audio.play('poise_break', { delay: 0.03 });
-    if (killed && !onMe) this.audio.play('kill_blow', { delay: 0.05 });
+    // 自分が受けた音は中央で、他者に当てた音はその者の場所から
+    const at = onMe ? {} : { x: target.x, z: target.z };
+    this.audio.play(`hit_${mat}`, { weight, pitch, ...at });
+    if (opts?.keen) this.audio.play('keen', { weight, delay: 0.02, pitch: 1 + weight * 0.12, ...at });
+    if (broke) this.audio.play('poise_break', { delay: 0.03, ...at });
+    if (killed && !onMe) this.audio.play('kill_blow', { delay: 0.05, ...at });
   }
 
   onActorDeath(actor) {

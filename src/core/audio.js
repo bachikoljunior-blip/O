@@ -76,7 +76,14 @@ export class AudioEngine {
     this.beat = 0;
     this.intensity = 0;
     this.muted = false;
+    // 聴き手（カメラ）の位置と向き。yaw 0 は +z を向く
+    this.lx = 0; this.lz = 0; this.lyaw = 0;
+    this._bus = null;      // 位置つきの音を通す一時的な経路
+    this._revMul = 1;      // 残響送りの倍率（遠いほど絞る）
   }
+
+  /** 聴き手を毎フレーム置き直す */
+  setListener(x, z, yaw) { this.lx = x; this.lz = z; this.lyaw = yaw; }
 
   init() {
     if (this.ctx) return;
@@ -159,10 +166,10 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + attack);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + (decay ?? dur));
     osc.connect(g);
-    g.connect(dest || this.sfxGain);
+    g.connect(dest || this._bus || this.sfxGain);
     if (reverb > 0) {
       const rg = ctx.createGain();
-      rg.gain.value = reverb;
+      rg.gain.value = reverb * this._revMul;
       g.connect(rg);
       rg.connect(this.reverb);
     }
@@ -187,19 +194,72 @@ export class AudioEngine {
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + 0.006);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    src.connect(f); f.connect(g); g.connect(this.sfxGain);
+    src.connect(f); f.connect(g); g.connect(this._bus || this.sfxGain);
     if (reverb > 0) {
       const rg = ctx.createGain();
-      rg.gain.value = reverb;
+      rg.gain.value = reverb * this._revMul;
       g.connect(rg); rg.connect(this.reverb);
     }
     src.start(t0);
     src.stop(t0 + dur + 0.05);
   }
 
+  /* ------------------------------------------------------ 音の距離感 */
+
+  /** 聴こえなくなる距離。これより遠い音は作らない（負荷も減る） */
+  static get MAX_DIST() { return 90; }
+
+  /**
+   * 音源の位置から、減衰・定位・空気による高域の減りを求める。
+   * ref までは近接として扱い、そこから距離のべき乗で落とす。
+   */
+  spatial(x, z) {
+    const dx = x - this.lx, dz = z - this.lz;
+    const d = Math.hypot(dx, dz);
+    const MAX = AudioEngine.MAX_DIST, REF = 8;
+    if (d > MAX) return null;
+    let atten = Math.pow(REF / Math.max(REF, d), 1.35);
+    // 端では滑らかに 0 へ落とす。切れ目が聴こえないように
+    atten *= 1 - Math.max(0, (d - MAX * 0.7) / (MAX * 0.3));
+    // 定位：真上（足元）では振らない。真横でも振り切らない
+    // （左右どちらかから一切聴こえないのは、耳では起こらない）
+    const ang = Math.atan2(dx, dz) - this.lyaw;
+    const pan = Math.sin(ang) * Math.min(1, d / 4) * 0.85;
+    // 空気で高いほうから減る
+    const cutoff = Math.max(500, 20000 * Math.pow(0.5, d / 18));
+    // 遠いほど直接音が減り、残響の割合が増して聴こえる
+    const revMul = Math.min(1.6, 0.5 + d / 40);
+    return { d, atten, pan, cutoff, revMul };
+  }
+
   /* ---------------------------------------------------------- 効果音 */
+  /**
+   * 効果音を鳴らす。opts.x / opts.z を渡すと、その場所から聴こえる。
+   * 位置を渡さない音（UI・自分の所作）は今までどおり中央で全音量。
+   */
   play(name, opts = {}) {
     if (!this.ready || this.muted) return;
+    if (opts.x !== undefined && opts.z !== undefined) {
+      const s = this.spatial(opts.x, opts.z);
+      if (!s) return;               // 遠すぎる。作らない
+      const ctx = this.ctx;
+      const g = ctx.createGain();
+      g.gain.value = s.atten;
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = s.cutoff;
+      const pan = ctx.createStereoPanner();
+      pan.pan.value = Math.max(-1, Math.min(1, s.pan));
+      g.connect(lp); lp.connect(pan); pan.connect(this.sfxGain);
+      this._bus = g;
+      this._revMul = s.revMul;
+      try { this._play(name, opts); } finally { this._bus = null; this._revMul = 1; }
+      return;
+    }
+    this._play(name, opts);
+  }
+
+  _play(name, opts = {}) {
     const p = opts.pitch || 1;
     const d = opts.delay || 0;
     const w = Math.max(0, Math.min(1, opts.weight ?? 0.4));   // 打撃の重さ
@@ -424,8 +484,14 @@ export class AudioEngine {
     }
   }
 
-  footstep(surface, vol = 0.35) {
+  /** 足音。at に位置を渡すと、その場所から聴こえる */
+  footstep(surface, vol = 0.35, at = null) {
     if (!this.ready || this.muted) return;
+    let spatial = null;
+    if (at) {
+      spatial = this.spatial(at.x, at.z);
+      if (!spatial) return;
+    }
     const cfg = {
       grass: { f: 1500, q: 0.8, d: 0.10, g: 0.10 },
       dirt: { f: 700, q: 0.7, d: 0.09, g: 0.13 },
@@ -435,7 +501,17 @@ export class AudioEngine {
       marsh: { f: 500, q: 0.6, d: 0.16, g: 0.14 },
       water: { f: 2100, q: 0.35, d: 0.22, g: 0.15 },
     }[surface] || { f: 1000, q: 1, d: 0.1, g: 0.12 };
-    this.noise({ dur: cfg.d, gain: cfg.g * vol * 2.4, freq: cfg.f * (0.85 + Math.random() * 0.3), q: cfg.q, sweep: 0.5 });
+    const emit = () => this.noise({ dur: cfg.d, gain: cfg.g * vol * 2.4,
+      freq: cfg.f * (0.85 + Math.random() * 0.3), q: cfg.q, sweep: 0.5 });
+    if (!spatial) { emit(); return; }
+    const ctx = this.ctx;
+    const g = ctx.createGain(); g.gain.value = spatial.atten;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = spatial.cutoff;
+    const pan = ctx.createStereoPanner();
+    pan.pan.value = Math.max(-1, Math.min(1, spatial.pan));
+    g.connect(lp); lp.connect(pan); pan.connect(this.sfxGain);
+    this._bus = g; this._revMul = spatial.revMul;
+    try { emit(); } finally { this._bus = null; this._revMul = 1; }
   }
 
   /* ---------------------------------------------------------- 環境音 */
@@ -569,14 +645,14 @@ export class AudioEngine {
   updateSettlement(dt, game) {
     const a = this.ambience;
     const p = game.player;
-    let near = 0, hasSmith = false;
+    let near = 0, hasSmith = false, src = null;
     for (const poi of game.pois) {
       if (poi.type !== 'village' && poi.type !== 'hermit') continue;
       const d = Math.hypot(poi.x - p.x, poi.z - p.z);
       const r = poi.type === 'village' ? 70 : 26;
       if (d > r) continue;
       const w = 1 - d / r;
-      if (w > near) { near = w; hasSmith = poi.type === 'village' && (poi.size || 0) >= 6; }
+      if (w > near) { near = w; src = poi; hasSmith = poi.type === 'village' && (poi.size || 0) >= 6; }
     }
     a.town = (a.town ?? 3) - dt;
     if (near < 0.12 || a.town > 0) return;
@@ -584,6 +660,23 @@ export class AudioEngine {
     a.town = (night ? 5.5 : 2.2) + Math.random() * (night ? 8 : 5);
     const vol = near * (night ? 0.4 : 1);
 
+    // 生活音は村のほうから聴こえる。減衰は near で既に効いているので、
+    // ここでは向きだけを与える（音量まで二重に絞ると聴こえなくなる）
+    let panNode = null;
+    if (src) {
+      const sp = this.spatial(src.x, src.z);
+      if (sp) {
+        panNode = this.ctx.createStereoPanner();
+        panNode.pan.value = Math.max(-1, Math.min(1, sp.pan));
+        panNode.connect(this.sfxGain);
+        this._bus = panNode;
+      }
+    }
+    try { this._settlementVoice(hasSmith, night, vol); }
+    finally { this._bus = null; }
+  }
+
+  _settlementVoice(hasSmith, night, vol) {
     const r = Math.random();
     if (hasSmith && !night && r < 0.40) {
       // 鍛冶の槌：不揃いな三連打

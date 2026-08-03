@@ -106,7 +106,8 @@ export class Actor {
     if (!game) return;
     const k = clamp01((impact - 4.0) / 14);
     const s = game.surfaceAt(this.x, this.z);
-    game.audio.footstep(this.wading ? 'water' : s.surface, 0.30 + k * 1.0);
+    game.audio.footstep(this.wading ? 'water' : s.surface, 0.30 + k * 1.0,
+      this.team === TEAM.PLAYER ? null : this);
     // 土煙と揺れは、はっきり落ちたときだけ（1.8m 以上）
     if (impact > 9) {
       game.fx.dust(this.x, this.y + 0.05, this.z, 3 + Math.floor(k * 12));
@@ -292,13 +293,13 @@ export class Actor {
           this.setState('stagger', 1.1);
           this.blocking = false;
           if (game) game.fx.sparks(this.x, this.y + 1.0, this.z, 14, [1, 0.9, 0.6]);
-          if (game) game.audio.play('guardbreak');
+          if (game) game.audio.play('guardbreak', this.sfxAt());
         } else {
           if (this.stamina !== undefined) this.stamina -= staminaCost;
           dmg *= 1 - shield.block;
           if (game) {
             game.fx.sparks(this.x + dx * 0.02, this.y + 1.1, this.z + dz * 0.02, 8, [1, 0.95, 0.7]);
-            game.audio.play('block');
+            game.audio.play('block', this.sfxAt());
           }
         }
       }
@@ -380,6 +381,14 @@ export class Actor {
     game?.onActorDeath?.(this, opts);
   }
 
+  /**
+   * 音を鳴らす位置。
+   *
+   * 自分の所作は中央で鳴らす（自分の剣は自分の耳のすぐ横にある）。
+   * 他者の音は、その者が立っている場所から聴こえるようにする。
+   */
+  sfxAt() { return this.team === TEAM.PLAYER ? {} : { x: this.x, z: this.z }; }
+
   /* ------------------------------------------------------- 攻撃の進行 */
   startAttack(def, game) {
     this.attack = def;
@@ -387,7 +396,7 @@ export class Actor {
     this.attackApplied = false;
     this.setState('attack', def.windup + def.active + def.recover, def.motion);
     this.attackDashDone = false;
-    game?.audio.play('swing', { pitch: 0.9 + Math.random() * 0.2 });
+    game?.audio.play('swing', { pitch: 0.9 + Math.random() * 0.2, ...this.sfxAt() });
   }
 
   attackPhase() {
