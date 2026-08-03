@@ -26,6 +26,7 @@ import { Mount } from './mount.js';
 import { TEAM } from './actor.js';
 import {
   SPAWN_TABLE, CHEST_TABLE, WEAPONS, ARMORS, SHIELDS, TALISMANS, SPELLS, ITEMS,
+  discoverReward,
 } from './data.js';
 
 export const QUALITY_PRESETS = {
@@ -148,7 +149,12 @@ export class Game {
 
     // 開始地点の篝火
     const start = this.pois.find((p) => p.tag === 'start');
-    if (start) { this.player.lastShrine = start; start.discovered = true; this.player.discovered.add(start.id); }
+    // 立っている場所を「発見」とは言わない。報いも出さず、静かに既知にしておく
+    if (start) {
+      this.player.lastShrine = start;
+      start.discovered = true; start.reached = true;
+      this.player.discovered.add(start.id); this.player.reached.add(start.id);
+    }
 
     // 全図をあらかじめ焼いておく（ミニマップが最初から使えるように）
     for (let i = 0; i < 8; i++) {
@@ -1275,10 +1281,7 @@ export class Game {
         break;
       case 'shrine': {
         const poi = t.obj;
-        if (!poi.discovered) {
-          poi.discovered = true;
-          p.discovered.add(poi.id);
-        }
+        this.reachPOI(poi);
         this.audio.play('shrine');
         this.ui.openShrine(poi);
         break;
@@ -1289,13 +1292,18 @@ export class Game {
         this.quests.onTower();
         this.revealAround(t.obj.x, t.obj.z, 380);
         this.audio.play('discover');
-        this.ui.toast(`${t.obj.name}：周辺の地図を得た`);
+        // 望楼から見えるのは地図だけ。報いは自分の足で行った者に出る
+        let known = 0;
         for (const poi of this.pois) {
           if (Math.hypot(poi.x - t.obj.x, poi.z - t.obj.z) < 380) {
+            if (!poi.discovered) known++;
             poi.discovered = true;
             p.discovered.add(poi.id);
           }
         }
+        this.ui.toast(known
+          ? `${t.obj.name}：周辺の地図を得た（未踏の地 ${known}）`
+          : `${t.obj.name}：周辺の地図を得た`);
         break;
       }
       case 'chest': {
@@ -1362,21 +1370,38 @@ export class Game {
     }
   }
 
+  /**
+   * その場に足を運んだときの報い。
+   *
+   * 望楼から地図で知るのと、自分の足でたどり着くのは別のこと。
+   * 残響が入るのは後者だけにしてある（reached）。地図で知った場所へ
+   * 改めて行けば、そのときちゃんと報われる。
+   */
+  reachPOI(poi) {
+    const p = this.player;
+    if (p.reached.has(poi.id)) return 0;
+    p.reached.add(poi.id);
+    poi.reached = true;
+    const first = !poi.discovered;
+    poi.discovered = true;
+    p.discovered.add(poi.id);
+    const echo = discoverReward(poi);
+    p.echo += echo;
+    this.ui.discover(poi, echo, first);
+    this.audio.play('discover');
+    return echo;
+  }
+
   /* ---------------------------------------------------------- 発見 */
   updateDiscovery() {
     const p = this.player;
     const key = `${Math.floor(p.x / 48)},${Math.floor(p.z / 48)}`;
     this.visited.add(key);
     for (const poi of this.pois) {
-      if (poi.discovered) continue;
+      if (poi.reached) continue;
       const d = Math.hypot(poi.x - p.x, poi.z - p.z);
       const r = poi.type === 'village' || poi.type === 'boss' ? 70 : 42;
-      if (d < r) {
-        poi.discovered = true;
-        p.discovered.add(poi.id);
-        this.ui.discover(poi);
-        this.audio.play('discover');
-      }
+      if (d < r) this.reachPOI(poi);
     }
     // 地方の踏破
     const region = this.world.regionAt(p.x, p.z);
@@ -1768,6 +1793,7 @@ export class Game {
       this.visited = new Set(d.visited || []);
       for (const poi of this.pois) {
         if (this.player.discovered.has(poi.id)) poi.discovered = true;
+        if (this.player.reached.has(poi.id)) poi.reached = true;
         if (this.clearedPOIs.has(poi.id)) poi.cleared = true;
       }
       this.player.y = this.world.height(this.player.x, this.player.z);

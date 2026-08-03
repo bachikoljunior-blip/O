@@ -44,7 +44,8 @@ export class Player extends Actor {
     this.playtime = 0;
     this.kills = 0;
     this.deaths = 0;
-    this.discovered = new Set();
+    this.discovered = new Set();   // 地図で知っている
+    this.reached = new Set();      // 自分の足でたどり着いた
     this.flags = {};
 
     this.recalc();
@@ -936,7 +937,7 @@ export class Player extends Actor {
       x: this.x, y: this.y, z: this.z, yaw: this.yaw,
       hp: this.hp, playtime: this.playtime, kills: this.kills, deaths: this.deaths,
       shrine: this.lastShrine ? { x: this.lastShrine.x, z: this.lastShrine.z, id: this.lastShrine.id } : null,
-      discovered: [...this.discovered], flags: this.flags,
+      discovered: [...this.discovered], reached: [...this.reached], flags: this.flags,
     };
   }
   deserialize(d, game) {
@@ -955,6 +956,8 @@ export class Player extends Actor {
     this.kills = d.kills || 0;
     this.deaths = d.deaths || 0;
     this.discovered = new Set(d.discovered || []);
+    // 古い保存には reached が無い。既知の場所は踏破済みとみなす
+    this.reached = new Set(d.reached || d.discovered || []);
     this.flags = d.flags || {};
     this.recalc();
     this.hp = Math.min(this.maxHp, d.hp || this.maxHp);

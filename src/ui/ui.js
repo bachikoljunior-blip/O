@@ -434,7 +434,13 @@ export class UI {
   }
   questUpdate(name, stage) { this.toast(`${name}：${stage}`, 'gold'); }
   questComplete(name) { this.toast(`クエスト達成 — ${name}`, 'big gold'); }
-  discover(poi) { this.toast(`${poi.name} を発見`, 'gold'); }
+  /**
+   * 発見の報せ。地図で先に知っていた場所へ着いたときは「到達」と呼び分ける。
+   */
+  discover(poi, echo = 0, first = true) {
+    const head = first ? `${poi.name} を発見` : `${poi.name} に到達`;
+    this.toast(echo ? `${head}　残響 +${echo}` : head, 'gold');
+  }
   showRegion(region) {
     const s = $('#regionsplash');
     $('.rs-name', s).textContent = region.name;
@@ -959,12 +965,18 @@ export class UI {
     root.appendChild(done);
 
     const disc = el('div', 'panel');
-    disc.appendChild(el('h3', '', `発見した地 — ${game.player.discovered.size} / ${game.pois.length}`));
+    const reached = game.player.reached.size;
+    const known = game.player.discovered.size;
+    disc.appendChild(el('h3', '', `踏破した地 — ${reached} / ${game.pois.length}`
+      + (known > reached ? `（地図で知る ${known}）` : '')));
     for (const R of REGIONS) {
       const list = game.pois.filter((p) => p.region === R.id && p.discovered);
       if (!list.length) continue;
+      // 地図で知っているだけの場所は括弧でくくる
+      const names = list.map((p) => (p.reached ? p.name : `（${p.name}）`)).join('・');
+      const n = list.filter((p) => p.reached).length;
       disc.appendChild(el('div', 'row',
-        `<span>${R.name}<span class="sub">${list.map((p) => p.name).join('・')}</span></span><span class="v">${list.length}</span>`));
+        `<span>${R.name}<span class="sub">${names}</span></span><span class="v">${n} / ${list.length}</span>`));
     }
     root.appendChild(disc);
 

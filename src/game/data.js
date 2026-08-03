@@ -970,6 +970,24 @@ export const DROPS = {
   direwolf: [['beast_bone', 0.9, 3], ['echo_shard', 0.15, 1]],
 };
 
+/**
+ * 発見の報い。
+ *
+ * これまで、遠くまで歩いて何かを見つけても、出るのは名前だけだった。
+ * 見つけたその場で残響が入るようにする。危ない地方ほど、そして
+ * わざわざ行く価値のある場所ほど多い。
+ * 目安：草原の野営地 63、灰燼のボス闘技場 541。
+ */
+const DISCOVER_MUL = {
+  boss: 2.2, village: 1.8, tower: 1.6, shrine: 1.3,
+  ruin: 1.1, mine: 1.0, battlefield: 1.0, wreck: 1.0, stones: 1.0, grave: 1.0,
+  camp: 0.85, farm: 0.85, crystal: 0.85, hermit: 0.85,
+};
+export function discoverReward(poi) {
+  const mul = DISCOVER_MUL[poi.type] ?? 1.0;
+  return Math.round((36 + (poi.danger || 1) * 30) * mul);
+}
+
 /** 宝箱の中身（tier ごと） */
 export const CHEST_TABLE = [
   null,

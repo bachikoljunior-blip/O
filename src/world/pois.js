@@ -228,6 +228,20 @@ function place(p, model, dx, dz, rotY, sx, sy, sz, world, tint = [1, 1, 1], wind
   p.structures.push({ model, x, y, z, rotY, sx, sy, sz, r: tint[0], g: tint[1], b: tint[2], wind, emissive });
 }
 
+/**
+ * 宝箱の等級。
+ *
+ * これまでは地方の危険度だけで決めていたので、同じ地方の宝箱は
+ * どれも中身が同じで、大陸の縁まで足を延ばす理由がなかった。
+ * 大陸の外れほど一段よくなるようにして、最上等級（等級5）に
+ * 手が届くようにする。
+ */
+function chestTier(p, base) {
+  const d = Math.hypot(p.x, p.z);
+  const remote = d > WORLD_RADIUS * 0.88 ? 2 : d > WORLD_RADIUS * 0.62 ? 1 : 0;
+  return Math.max(1, Math.min(5, base + (p.danger / 3 | 0) + remote));
+}
+
 function buildStructures(world, p, rng) {
   const TAU = Math.PI * 2;
   switch (p.type) {
@@ -299,7 +313,7 @@ function buildStructures(world, p, rng) {
         place(p, rng() < 0.5 ? 'barrel' : 'cart', Math.cos(a) * r, Math.sin(a) * r, rng() * TAU, 1, 1, 1, world);
       }
       place(p, 'chest', -3, 4, rng() * TAU, 1, 1, 1, world, [1, 0.95, 0.7]);
-      p.chest = { x: p.x - 3, z: p.z + 4, opened: false, tier: 1 + (p.danger / 3 | 0) };
+      p.chest = { x: p.x - 3, z: p.z + 4, opened: false, tier: chestTier(p, 1) };
       p.spawns = [{ kind: 'bandit', count: 2 + (rng() * 3 | 0), radius: 12 }];
       if (p.danger >= 5) p.spawns.push({ kind: 'brute', count: 1, radius: 8 });
       break;
@@ -313,7 +327,7 @@ function buildStructures(world, p, rng) {
       }
       place(p, 'ruin_arch', 0, -6, rng() * TAU, 1, 1, 1, world);
       place(p, 'chest', 0, 0, rng() * TAU, 1, 1, 1, world, [1, 0.95, 0.7]);
-      p.chest = { x: p.x, z: p.z, opened: false, tier: 2 + (p.danger / 3 | 0) };
+      p.chest = { x: p.x, z: p.z, opened: false, tier: chestTier(p, 2) };
       p.spawns = [{ kind: 'skeleton', count: 2 + (rng() * 2 | 0), radius: 10 }];
       break;
     }
@@ -325,7 +339,7 @@ function buildStructures(world, p, rng) {
         place(p, 'pillar', Math.cos(a) * r, Math.sin(a) * r, rng() * TAU, 0.6, 0.6, 0.6, world, [0.6, 0.6, 0.65]);
       }
       place(p, 'chest', 2, 2, rng() * TAU, 1, 1, 1, world, [1, 0.9, 0.6]);
-      p.chest = { x: p.x + 2, z: p.z + 2, opened: false, tier: 3 + (p.danger / 3 | 0) };
+      p.chest = { x: p.x + 2, z: p.z + 2, opened: false, tier: chestTier(p, 3) };
       p.spawns = [{ kind: 'skeleton', count: 3 + (rng() * 3 | 0), radius: 12 },
       { kind: 'wraith', count: 1 + (rng() * 2 | 0), radius: 10 }];
       break;
@@ -381,7 +395,7 @@ function buildStructures(world, p, rng) {
       }
       place(p, 'altar', 0, 0, rng() * TAU, 1, 1, 1, world, [0.66, 0.64, 0.62]);
       place(p, 'obelisk', 0, -13, rng() * TAU, 0.8, 0.9, 0.8, world, [0.58, 0.58, 0.62]);
-      p.chest = { x: p.x + 1.5, z: p.z + 1.5, opened: false, tier: 2 + (p.danger / 3 | 0) };
+      p.chest = { x: p.x + 1.5, z: p.z + 1.5, opened: false, tier: chestTier(p, 2) };
       place(p, 'chest', 1.5, 1.5, rng() * TAU, 1, 1, 1, world, [1, 0.95, 0.7]);
       p.spawns = [{ kind: 'wraith', count: 1 + (rng() * 2 | 0), radius: 12 }];
       break;
@@ -423,7 +437,7 @@ function buildStructures(world, p, rng) {
       }
       place(p, 'banner', 2, -6, 0, 1, 0.7, 1, world, [0.34, 0.16, 0.14], 0.9);
       place(p, 'obelisk', -5, 6, rng() * TAU, 0.7, 0.8, 0.7, world, [0.50, 0.49, 0.48]);
-      p.chest = { x: p.x - 2, z: p.z - 3, opened: false, tier: 2 + (p.danger / 3 | 0) };
+      p.chest = { x: p.x - 2, z: p.z - 3, opened: false, tier: chestTier(p, 2) };
       place(p, 'chest', -2, -3, rng() * TAU, 1, 1, 1, world, [1, 0.95, 0.7]);
       p.spawns = [
         { kind: 'skeleton', count: 3 + (rng() * 3 | 0), radius: 14 },
@@ -442,7 +456,7 @@ function buildStructures(world, p, rng) {
           0.8 + rng() * 0.6, 0.7, 0.8 + rng() * 0.6, world);
       }
       place(p, 'barrel', -4, 3, rng() * TAU, 1, 1, 1, world);
-      p.chest = { x: p.x + 3, z: p.z - 4, opened: false, tier: 2 + (p.danger / 3 | 0) };
+      p.chest = { x: p.x + 3, z: p.z - 4, opened: false, tier: chestTier(p, 2) };
       place(p, 'chest', 3, -4, rng() * TAU, 1, 1, 1, world, [1, 0.95, 0.7]);
       p.spawns = [{ kind: 'imp', count: 2 + (rng() * 2 | 0), radius: 12 }];
       break;
@@ -456,7 +470,7 @@ function buildStructures(world, p, rng) {
           Math.cos(a) * r, Math.sin(a) * r, rng() * TAU, 1, 1, 1, world);
       }
       place(p, 'campfire', 5, 5, 0, 1, 1, 1, world, [1, 0.78, 0.45], 0, 0.6);
-      p.chest = { x: p.x, z: p.z + 2, opened: false, tier: 3 + (p.danger / 3 | 0) };
+      p.chest = { x: p.x, z: p.z + 2, opened: false, tier: chestTier(p, 3) };
       place(p, 'chest', 0, 2, rng() * TAU, 1, 1, 1, world, [1, 0.95, 0.7]);
       p.spawns = [{ kind: 'bandit', count: 2 + (rng() * 2 | 0), radius: 12 }];
       break;
