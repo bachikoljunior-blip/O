@@ -452,7 +452,7 @@ export const ENEMIES = {
       { id: 'bite', windup: 0.34, active: 0.12, recover: 0.5, dmg: 34, range: 2.2, arc: 1.2, poise: 14, motion: 'lunge' },
       { id: 'pounce', windup: 0.5, active: 0.2, recover: 0.72, dmg: 52, range: 5.0, arc: 1.0, poise: 22, motion: 'pounce', dash: 5.5 },
     ],
-    ai: { aggression: 0.75, circling: 0.5, retreat: 0.25, guard: 0 },
+    ai: { aggression: 0.75, circling: 0.5, retreat: 0.25, guard: 0, backstep: 0.35 },
   },
   deer: {
     id: 'deer', mat: 'flesh', name: '林の鹿', tier: 1, hp: 90, poise: 12, def: 0,
@@ -482,7 +482,7 @@ export const ENEMIES = {
       { id: 'combo', windup: 0.38, active: 0.12, recover: 0.30, dmg: 34, range: 2.6, arc: 1.6, poise: 18, motion: 'slash_l', chain: 'slash' },
       { id: 'kick', windup: 0.34, active: 0.12, recover: 0.62, dmg: 22, range: 2.2, arc: 1.2, poise: 42, motion: 'thrust', guardBreak: true },
     ],
-    ai: { aggression: 0.6, circling: 0.4, retreat: 0.3, guard: 0.25 },
+    ai: { aggression: 0.6, circling: 0.4, retreat: 0.3, guard: 0.25, backstep: 0.30 },
   },
   archer: {
     id: 'archer', mat: 'flesh', name: '野盗の射手', tier: 2, hp: 120, poise: 22, def: 4,
@@ -491,7 +491,7 @@ export const ENEMIES = {
     attacks: [
       { id: 'shoot', windup: 0.75, active: 0.05, recover: 0.55, dmg: 44, range: 40, arc: 0.2, poise: 12, motion: 'shoot', projectile: 'arrow' },
     ],
-    ai: { aggression: 0.35, circling: 0.6, retreat: 0.8, guard: 0 },
+    ai: { aggression: 0.35, circling: 0.6, retreat: 0.8, guard: 0, reposition: 1.15 },
   },
   brute: {
     id: 'brute', mat: 'flesh', name: '大鉈の巨漢', tier: 3, hp: 360, poise: 70, def: 10,
@@ -502,7 +502,7 @@ export const ENEMIES = {
       { id: 'sweep', windup: 0.6, active: 0.22, recover: 0.9, dmg: 74, range: 3.6, arc: 3.2, poise: 55, motion: 'spin' },
       { id: 'slam', windup: 0.9, active: 0.2, recover: 1.1, dmg: 110, range: 4.2, arc: 2.4, poise: 80, motion: 'overhead', shock: 4.5 },
     ],
-    ai: { aggression: 0.55, circling: 0.15, retreat: 0.1, guard: 0.1 },
+    ai: { aggression: 0.55, circling: 0.15, retreat: 0.1, guard: 0.1, backstep: 0.05 },
   },
   skeleton: {
     id: 'skeleton', mat: 'bone', name: '朽ちた兵', tier: 2, hp: 135, poise: 20, def: 4,
@@ -512,7 +512,7 @@ export const ENEMIES = {
       { id: 'slash', windup: 0.4, active: 0.13, recover: 0.5, dmg: 36, range: 2.5, arc: 1.6, poise: 18, motion: 'slash_r' },
       { id: 'thrust', windup: 0.46, active: 0.12, recover: 0.6, dmg: 44, range: 2.9, arc: 1.0, poise: 22, motion: 'thrust' },
     ],
-    ai: { aggression: 0.65, circling: 0.3, retreat: 0.15, guard: 0.1 },
+    ai: { aggression: 0.65, circling: 0.3, retreat: 0.15, guard: 0.1, backstep: 0.12 },
   },
   wraith: {
     id: 'wraith', mat: 'spirit', name: '嘆きの亡霊', tier: 3, hp: 200, poise: 18, def: 8,
@@ -522,7 +522,7 @@ export const ENEMIES = {
       { id: 'claw', windup: 0.42, active: 0.14, recover: 0.55, dmg: 46, range: 2.6, arc: 1.8, poise: 20, motion: 'slash_l' },
       { id: 'wail', windup: 0.8, active: 0.3, recover: 0.9, dmg: 58, range: 6.0, arc: 3.4, poise: 30, motion: 'cast', frost: 20 },
     ],
-    ai: { aggression: 0.5, circling: 0.6, retreat: 0.4, guard: 0 },
+    ai: { aggression: 0.5, circling: 0.6, retreat: 0.4, guard: 0, reposition: 0.80 },
   },
   knight: {
     id: 'knight', mat: 'armor', name: '亡国の騎士', tier: 4, hp: 420, poise: 60, def: 16,
@@ -534,7 +534,7 @@ export const ENEMIES = {
       { id: 'thrust', windup: 0.5, active: 0.12, recover: 0.66, dmg: 70, range: 3.2, arc: 1.0, poise: 30, motion: 'thrust' },
       { id: 'shield_bash', windup: 0.38, active: 0.12, recover: 0.7, dmg: 30, range: 2.2, arc: 1.4, poise: 60, motion: 'thrust', guardBreak: true },
     ],
-    ai: { aggression: 0.55, circling: 0.45, retreat: 0.25, guard: 0.55 },
+    ai: { aggression: 0.55, circling: 0.45, retreat: 0.25, guard: 0.55, backstep: 0.22 },
   },
   mage: {
     id: 'mage', mat: 'flesh', name: '灰の術士', tier: 3, hp: 155, poise: 16, def: 6,
@@ -544,7 +544,7 @@ export const ENEMIES = {
       { id: 'dart', windup: 0.62, active: 0.05, recover: 0.55, dmg: 52, range: 30, arc: 0.2, poise: 14, motion: 'cast', projectile: 'soul' },
       { id: 'nova', windup: 1.0, active: 0.25, recover: 0.9, dmg: 78, range: 5.5, arc: 3.4, poise: 30, motion: 'cast' },
     ],
-    ai: { aggression: 0.3, circling: 0.7, retreat: 0.85, guard: 0 },
+    ai: { aggression: 0.3, circling: 0.7, retreat: 0.85, guard: 0, reposition: 0.95 },
   },
   imp: {
     id: 'imp', mat: 'flesh', name: '灰の小鬼', tier: 2, hp: 105, poise: 14, def: 3,
@@ -554,7 +554,7 @@ export const ENEMIES = {
       { id: 'stab', windup: 0.28, active: 0.1, recover: 0.4, dmg: 26, range: 1.9, arc: 1.4, poise: 10, motion: 'thrust' },
       { id: 'leap', windup: 0.44, active: 0.16, recover: 0.6, dmg: 38, range: 4.5, arc: 1.2, poise: 16, motion: 'pounce', dash: 5 },
     ],
-    ai: { aggression: 0.85, circling: 0.35, retreat: 0.3, guard: 0 },
+    ai: { aggression: 0.85, circling: 0.35, retreat: 0.3, guard: 0, backstep: 0.45 },
   },
   crawler: {
     id: 'crawler', mat: 'flesh', name: '這うもの', tier: 2, hp: 95, poise: 10, def: 2,
@@ -564,7 +564,7 @@ export const ENEMIES = {
       { id: 'bite', windup: 0.26, active: 0.10, recover: 0.38, dmg: 28, range: 1.9, arc: 1.3, poise: 10, motion: 'lunge' },
       { id: 'leap', windup: 0.40, active: 0.16, recover: 0.56, dmg: 40, range: 5.0, arc: 1.0, poise: 16, motion: 'pounce', dash: 6 },
     ],
-    ai: { aggression: 0.9, circling: 0.25, retreat: 0.2, guard: 0 },
+    ai: { aggression: 0.9, circling: 0.25, retreat: 0.2, guard: 0, backstep: 0.40 },
   },
   gargoyle: {
     id: 'gargoyle', mat: 'stone', name: '石像鬼', tier: 4, hp: 330, poise: 90, def: 22,
@@ -575,7 +575,7 @@ export const ENEMIES = {
       { id: 'claw2', windup: 0.34, active: 0.16, recover: 0.75, dmg: 78, range: 3.0, arc: 2.2, poise: 50, motion: 'slash_l' },
       { id: 'slam', windup: 0.82, active: 0.20, recover: 0.95, dmg: 108, range: 3.8, arc: 2.4, poise: 70, motion: 'overhead', shock: 4.5 },
     ],
-    ai: { aggression: 0.6, circling: 0.2, retreat: 0.1, guard: 0 },
+    ai: { aggression: 0.6, circling: 0.2, retreat: 0.1, guard: 0, backstep: 0.18 },
   },
   /* ---- 読み合いを要求する型 ---- */
   stalker: {
@@ -601,7 +601,7 @@ export const ENEMIES = {
       { id: 'sweep', windup: 0.62, active: 0.20, recover: 0.88, dmg: 58, range: 4.0, arc: 3.2, poise: 40, motion: 'spin', delayable: true },
       { id: 'butt', windup: 0.34, active: 0.11, recover: 0.66, dmg: 26, range: 2.4, arc: 1.2, poise: 55, motion: 'thrust', guardBreak: true },
     ],
-    ai: { aggression: 0.55, circling: 0.5, retreat: 0.7, guard: 0.15, spacing: 1, punish: 0.7 },
+    ai: { aggression: 0.55, circling: 0.5, retreat: 0.7, guard: 0.15, spacing: 1, punish: 0.7, backstep: 0.28 },
   },
   warden: {
     id: 'warden', mat: 'armor', name: '大盾の番人', tier: 4, hp: 460, poise: 95, def: 22,
@@ -613,7 +613,7 @@ export const ENEMIES = {
       { id: 'crush', windup: 0.86, active: 0.18, recover: 1.0, dmg: 104, range: 3.4, arc: 2.0, poise: 70, motion: 'overhead', delayable: true },
     ],
     // 正面からの攻撃をよく弾く。回り込むか、盾崩しが要る
-    ai: { aggression: 0.45, circling: 0.2, retreat: 0.1, guard: 0.85, reactiveGuard: 0.9, punish: 0.6 },
+    ai: { aggression: 0.45, circling: 0.2, retreat: 0.1, guard: 0.85, reactiveGuard: 0.9, punish: 0.6, backstep: 0.10 },
     frontBlock: 0.72,
   },
   necromancer: {
@@ -625,7 +625,7 @@ export const ENEMIES = {
       { id: 'raise', windup: 1.15, active: 0.2, recover: 0.9, dmg: 0, range: 0, arc: 0, poise: 20, motion: 'cast', summon: 'skeleton', summonCount: 2 },
       { id: 'blink', windup: 0.3, active: 0, recover: 0.35, dmg: 0, range: 0, arc: 0, poise: 0, motion: 'cast', teleport: 10 },
     ],
-    ai: { aggression: 0.3, circling: 0.6, retreat: 0.95, guard: 0 },
+    ai: { aggression: 0.3, circling: 0.6, retreat: 0.95, guard: 0, reposition: 1.30 },
   },
   direwolf: {
     id: 'direwolf', mat: 'flesh', name: '群れの長', tier: 3, hp: 240, poise: 38, def: 6,
@@ -636,7 +636,7 @@ export const ENEMIES = {
       { id: 'pounce', windup: 0.46, active: 0.20, recover: 0.68, dmg: 70, range: 6.5, arc: 1.0, poise: 30, motion: 'pounce', dash: 7.5 },
       { id: 'howl', windup: 0.8, active: 0.25, recover: 0.9, dmg: 0, range: 0, arc: 0, poise: 30, motion: 'cast', rally: 22 },
     ],
-    ai: { aggression: 0.8, circling: 0.55, retreat: 0.2, guard: 0, punish: 0.8 },
+    ai: { aggression: 0.8, circling: 0.55, retreat: 0.2, guard: 0, punish: 0.8, backstep: 0.40 },
   },
   troll: {
     id: 'troll', mat: 'flesh', name: '岩喰いのトロル', tier: 4, hp: 640, poise: 110, def: 14,
@@ -647,7 +647,7 @@ export const ENEMIES = {
       { id: 'sweep', windup: 0.75, active: 0.26, recover: 1.0, dmg: 104, range: 5.0, arc: 3.6, poise: 80, motion: 'spin' },
       { id: 'stomp', windup: 0.7, active: 0.2, recover: 0.9, dmg: 88, range: 3.4, arc: 6.28, poise: 70, motion: 'overhead', shock: 5 },
     ],
-    ai: { aggression: 0.5, circling: 0.1, retreat: 0.05, guard: 0 },
+    ai: { aggression: 0.5, circling: 0.1, retreat: 0.05, guard: 0, backstep: 0.04 },
   },
 };
 

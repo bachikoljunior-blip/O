@@ -223,6 +223,8 @@ export class Enemy extends Actor {
     this.tokenT = 0;         // 権利の残り保持時間
     this.tokenCd = 0;        // 手放したあとの再取得までの間
     this.retreatT = 0;       // 攻撃後に間合いを切っている時間
+    this.repositionT = 0;    // 遠隔が撃った後、動き直している時間
+    this.guardT = 0;         // 盾を構えている残り時間
     this.rally = 0;          // 遠吠えによる鼓舞の残り
     this.feintCd = 0;        // フェイントの連発を防ぐ
     this.summonCd = 0;       // 死者を起こす間隔
@@ -247,6 +249,8 @@ export class Enemy extends Actor {
     this.strafeTimer -= dt;
     this.think -= dt;
     this.retreatT -= dt;
+    this.repositionT -= dt;
+    this.guardT -= dt;
     this.feintCd -= dt;
     this.summonCd -= dt;
     this.rallyCd -= dt;
@@ -380,15 +384,25 @@ export class Enemy extends Actor {
     const pressing = this.token || ranged || this.boss || punishable;
     const rallyBonus = this.rally > 0 ? 0.25 : 0;
 
-    // 盾：相手が振ってきたら合わせて構える（乱数で構えるより読み合いになる）
+    // 盾：相手が振ってきたら合わせて構える（乱数で構えるより読み合いになる）。
+    // 構えは一瞬ではなく、しばらく保つ。1 フレームだけ立てても、
+    // ちょうどその瞬間に当たらない限り何も防げない
     if (!ranged && dist < 4.6) {
       const swinging = p.state === 'attack' && p.attackPhase && p.attackPhase() !== 'recover';
-      if (ai.reactiveGuard && swinging && Math.random() < ai.reactiveGuard) this.blocking = true;
-      else if (ai.guard > 0 && Math.random() < ai.guard * dt * 3) this.blocking = true;
+      if (this.guardT > 0) {
+        this.blocking = true;
+      } else if (ai.reactiveGuard && swinging && Math.random() < ai.reactiveGuard) {
+        this.blocking = true;
+        this.guardT = 0.30 + Math.random() * 0.30;
+      } else if (ai.guard > 0 && Math.random() < ai.guard * dt * 1.6) {
+        this.blocking = true;
+        this.guardT = 0.45 + Math.random() * 0.75;
+      }
     }
 
     // 攻撃判断
-    if (this.attackCd <= 0 && this.canAct() && this.retreatT <= 0 && pressing) {
+    if (this.attackCd <= 0 && this.canAct() && this.retreatT <= 0
+      && this.repositionT <= 0 && pressing) {
       // 実際の当たり判定（range + 相手の半径）に合わせて選ぶ。
       // ここを甘くすると、届かない間合いから振って空振りし続ける。
       const options = this.attackList().filter((a) => {
@@ -403,6 +417,7 @@ export class Enemy extends Actor {
       });
       if (options.length) {
         const want = 0.35 + ai.aggression * 0.6 + opening * (ai.punish || 0.4) + rallyBonus;
+        // 振るなら盾は下ろす
         if (Math.random() < want) {
           // 隙を突くときは差し込みの速い技を、
           // フェイントを打つときは読ませるために遅い技を選ぶ
@@ -422,6 +437,8 @@ export class Enemy extends Actor {
             if (slow.length) { a = slow[(Math.random() * slow.length) | 0]; feint = true; }
           }
           if (!a) a = options[(Math.random() * options.length) | 0];
+          this.guardT = 0;
+          this.blocking = false;
           this.beginAttack(a, game, feint);
           return 0;
         }
@@ -448,10 +465,11 @@ export class Enemy extends Actor {
         this.strafeTimer = 1.0 + Math.random() * 1.6;
         if (Math.random() < 0.4) this.strafeDir *= -1;
       }
-      // 待機中は必ず横に流れる（棒立ちを無くす）
-      if (!pressing || Math.random() < ai.circling) {
+      // 待機中は必ず横に流れる（棒立ちを無くす）。
+      // 遠隔は撃ち終わった直後、必ず射線を変える
+      if (!pressing || this.repositionT > 0 || Math.random() < ai.circling) {
         mx = -fz * this.strafeDir; mz = fx * this.strafeDir;
-        speed = this.speed * (pressing ? 0.7 : 0.85);
+        speed = this.speed * (this.repositionT > 0 ? 1.0 : pressing ? 0.7 : 0.85);
       }
     }
     // 仲間との重なりをほどく（団子にならないように）
@@ -632,9 +650,20 @@ export class Enemy extends Actor {
         this.chainNext = src.chain;
       }
       // 連携に繋がないなら、間合いを切って仕切り直す
-      if (this.ai.backstep && !this.chainQueued && !this.backstepQueued) {
+      if (!this.chainQueued && !this.backstepQueued) {
         this.backstepQueued = true;
-        if (Math.random() < this.ai.backstep) this.retreatT = 0.4 + Math.random() * 0.45;
+        if (this.ai.backstep && Math.random() < this.ai.backstep) {
+          this.retreatT = 0.4 + Math.random() * 0.45;
+        } else if (this.ai.retreat && Math.random() < this.ai.retreat * 0.5) {
+          // 一手ごとに張り付き続けるのではなく、たまに離れて仕切り直す。
+          // 攻め手が途切れないと、こちらに考える間が生まれない
+          this.retreatT = 0.6 + Math.random() * 0.5;
+        }
+        // 遠隔は撃った場所に留まらない。撃つ → 動く → 撃つ、の周期をつくる。
+        // 攻撃中は combat() を通らないので、動く時間を明示的に確保する
+        if (this.arch.ranged) {
+          this.repositionT = (this.ai.reposition ?? 0.9) * (0.75 + Math.random() * 0.6);
+        }
       }
     } else {
       this.chainQueued = false;
