@@ -21,8 +21,29 @@ const KIND = {
   sellsword: { name: '傭兵', tint: [0.38, 0.36, 0.40], speed: 1.7, weapon: 'w_sword',
     lines: ['雇い主を探している。金があるなら話は別だが。',
       'north の砦は落ちたと聞いた。行くならひとりでは行くな。'] },
+  guard: { name: '隊商護衛', tint: [0.33, 0.34, 0.38], speed: 1.4, weapon: 'w_spear',
+    lines: ['荷に近づくな。……見るだけならいい。',
+      'この道で三度襲われた。次は無い、と親方は言うがね。'] },
 };
 const KINDS = Object.keys(KIND);
+
+/**
+ * 隊商。
+ *
+ * 街道を3分走って会うのは常に単独の一人で、荷も護衛もなく、交易の気配が
+ * 無かった。荷車を挟んで隊商が通ると、道が「どこかとどこかを結んでいる」
+ * ものに見える。
+ *
+ * 並び：先頭に商人、その後ろに荷車、左右と後ろに護衛。
+ * 位置は進行方向を基準に決めるので、道が曲がれば列も曲がる。
+ */
+const CARAVAN_ROLES = [
+  { kind: 'pedlar', along: 0, across: 0, lead: true },
+  { kind: 'guard', along: -3.2, across: 2.0 },
+  { kind: 'guard', along: -3.2, across: -2.0 },
+  { kind: 'guard', along: -9.5, across: 0 },
+];
+const CART_ALONG = -6.0;
 
 const SPAWN_MIN = 110;     // これより近くには湧かせない（湧く瞬間を見せない）
 const SPAWN_MAX = 190;
@@ -99,6 +120,60 @@ export class Traveller extends Actor {
     return p[i];
   }
 
+  /**
+   * 隊商の一員としての歩き。
+   * 自分で経路を追わず、隊列に割り当てられた場所へ寄る。
+   * 敵が出たら、護衛は荷と敵のあいだへ立つ。
+   */
+  followCaravan(dt, game, threat) {
+    if (this.talking) {
+      this.faceTowards(game.player.x, game.player.z, dt, 6);
+      this.updateAnim(dt, 0);
+      this.updatePhysics(dt, game);
+      return;
+    }
+    let tx = this.tx, tz = this.tz;
+    if (threat && this.kind === 'guard') {
+      // 荷車と敵を結んだ線の、荷車寄りに立つ
+      const c = this.caravan;
+      const ax = threat.x - c.cartX, az = threat.z - c.cartZ;
+      const al = Math.hypot(ax, az) || 1;
+      const side = (this.slot.across || 0) * 0.5;
+      tx = c.cartX + (ax / al) * 5.5 - (az / al) * side;
+      tz = c.cartZ + (az / al) * 5.5 + (ax / al) * side;
+    }
+    const dx = tx - this.x, dz = tz - this.z;
+    const d = Math.hypot(dx, dz);
+    let speed = 0;
+    if (d > 22) {
+      // ここまで離れたら、もう列ではない。道端で引っかかった者を置き去りに
+      // するより、持ち場へ戻す（実測で列が 66m まで伸びた）
+      this.x = tx; this.z = tz; this.y = game.world.height(tx, tz);
+      this.stuck = 0;
+    } else if (d > 0.55) {
+      // 離れるほど急ぐ。列の中では歩く
+      const hurry = 1 + Math.min(2.6, d / 4);
+      speed = Math.min(this.walkSpeed * hurry, d / Math.max(dt, 1e-3));
+      const off = this.steer(game, dx, dz, speed * dt, tx, tz);
+      const a = Math.atan2(dx, dz) + off;
+      const x0 = this.x, z0 = this.z;
+      this.moveOnGround(dt, game, Math.sin(a), Math.cos(a), speed);
+      // 進めない場所に挟まったままにしない
+      if (Math.hypot(this.x - x0, this.z - z0) < speed * dt * 0.35) this.stuck += dt;
+      else this.stuck = Math.max(0, this.stuck - dt * 2);
+      if (this.stuck > 1.5) {
+        this.x = tx; this.z = tz; this.y = game.world.height(tx, tz);
+        this.stuck = 0;
+      }
+    }
+    // 向き：敵がいれば敵を、無ければ進む先を見る
+    if (threat) this.faceTowards(threat.x, threat.z, dt, 5);
+    else if (d > 0.55) this.faceTowards(this.x + dx, this.z + dz, dt, 4);
+    else this.faceTowards(this.x + Math.sin(this.caravan.yaw), this.z + Math.cos(this.caravan.yaw), dt, 3);
+    this.updatePhysics(dt, game);
+    this.updateAnim(dt, speed);
+  }
+
   update(dt, game) {
     if (this.talking) {
       this.faceTowards(game.player.x, game.player.z, dt, 6);
@@ -162,10 +237,114 @@ export class Traveller extends Actor {
   }
 }
 
+/**
+ * 隊商ひとつ。
+ *
+ * 隊列の位置は「先頭が道のどこにいるか」から毎フレーム引き直す。
+ * 各人がめいめい経路を追うと、狭い所で列が崩れて団子になる。
+ */
+export class Caravan {
+  constructor(route, dir, seg, at, game) {
+    this.route = route;
+    this.dir = dir;
+    this.seg = seg;
+    this.x = at.x; this.z = at.z;
+    this.yaw = at.yaw;
+    this.stopped = 0;        // 敵を見て足を止めている残り時間
+    this.arrived = false;
+    this.stuck = 0;
+    this.skips = 0;
+    this.members = [];
+    for (const role of CARAVAN_ROLES) {
+      const t = new Traveller(role.kind, route, dir, seg,
+        { x: at.x, y: game.world.height(at.x, at.z), z: at.z, yaw: at.yaw });
+      t.caravan = this;
+      t.slot = role;
+      t.lead = !!role.lead;
+      this.members.push(t);
+    }
+    this.merchant = this.members[0];
+  }
+
+  get destination() { return this.dir > 0 ? this.route.toName : this.route.fromName; }
+  waypoint() {
+    const p = this.route.pts;
+    return p[Math.max(0, Math.min(p.length - 1, this.seg))];
+  }
+
+  /** 隊列の位置を、進行方向を基準に置き直す */
+  place(game) {
+    const fx = Math.sin(this.yaw), fz = Math.cos(this.yaw);
+    const rx = fz, rz = -fx;                 // 右手方向
+    for (const m of this.members) {
+      const s = m.slot;
+      const tx = this.x + fx * s.along + rx * s.across;
+      const tz = this.z + fz * s.along + rz * s.across;
+      m.tx = tx; m.tz = tz;
+    }
+    this.cartX = this.x + fx * CART_ALONG;
+    this.cartZ = this.z + fz * CART_ALONG;
+    this.cartY = game.world.height(this.cartX, this.cartZ);
+  }
+
+  update(dt, game) {
+    // 敵が近ければ止まる。逃げずに、護衛が荷と敵のあいだに立つ
+    if (this.stopped > 0) this.stopped -= dt;
+    let threat = null;
+    for (const e of game.enemies) {
+      if (e.dead || !e.aggro) continue;
+      if (Math.hypot(e.x - this.x, e.z - this.z) < 26) { threat = e; break; }
+    }
+    if (threat) this.stopped = 2.5;
+
+    if (this.stopped <= 0) {
+      const w = this.waypoint();
+      const dx = w.x - this.x, dz = w.z - this.z;
+      const d = Math.hypot(dx, dz);
+      if (d < 3.6) {
+        const next = this.seg + this.dir;
+        if (next < 0 || next >= this.route.pts.length) this.arrived = true;
+        else this.seg = next;
+      }
+      const sp = 1.35;
+      const x0 = this.x, z0 = this.z;
+      if (d > 0.01) {
+        this.x += dx / d * sp * dt;
+        this.z += dz / d * sp * dt;
+        const want = Math.atan2(dx, dz);
+        let diff = want - this.yaw;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        this.yaw += diff * Math.min(1, dt * 2.2);
+      }
+      if (Math.hypot(this.x - x0, this.z - z0) < sp * dt * 0.4) this.stuck += dt;
+      else this.stuck = Math.max(0, this.stuck - dt * 2);
+      if (this.stuck > 3) {
+        this.stuck = 0;
+        if (++this.skips >= 3) { this.arrived = true; return; }
+        const next = this.seg + this.dir;
+        if (next < 0 || next >= this.route.pts.length) this.arrived = true;
+        else this.seg = next;
+      }
+    }
+    this.place(game);
+    for (const m of this.members) m.followCaravan(dt, game, threat);
+  }
+}
+
 export class Travellers {
   constructor() {
     this.list = [];
+    this.caravans = [];
     this.cd = 4;
+    this.caravanCd = 12;
+  }
+
+  /** 声をかけられる相手（単独の旅人と、隊商の面々） */
+  everyone() {
+    const out = this.list.slice();
+    for (const c of this.caravans) out.push(...c.members);
+    return out;
   }
 
   /** 夜は往来が絶える。嵐でも減る */
@@ -176,7 +355,9 @@ export class Travellers {
   }
 
   update(dt, game) {
-    if (game.dungeon) { this.list.length = 0; return; }
+    // 地下では地上の往来をすべて畳む。隊商を消し忘れると、
+    // 見えないまま地中を歩き続ける
+    if (game.dungeon) { this.list.length = 0; this.caravans.length = 0; return; }
     const p = game.player;
     // 遠くへ行った者・着いた者は畳む
     for (let i = this.list.length - 1; i >= 0; i--) {
@@ -185,6 +366,22 @@ export class Travellers {
       if (t.arrived || d > DESPAWN) { this.list.splice(i, 1); continue; }
       t.update(dt, game);
     }
+    // 隊商
+    for (let i = this.caravans.length - 1; i >= 0; i--) {
+      const c = this.caravans[i];
+      const d = Math.hypot(c.x - p.x, c.z - p.z);
+      if (c.arrived || d > DESPAWN + 60) { this.caravans.splice(i, 1); continue; }
+      c.update(dt, game);
+    }
+    this.caravanCd -= dt;
+    if (this.caravanCd <= 0) {
+      this.caravanCd = 40 + Math.random() * 70;
+      if (!this.caravans.length && Math.random() < this.traffic(game) * 0.8) {
+        const c = this.spawnCaravan(game);
+        if (c) this.caravans.push(c);
+      }
+    }
+
     this.cd -= dt;
     if (this.cd > 0) return;
     this.cd = 5 + Math.random() * 9;
@@ -192,6 +389,30 @@ export class Travellers {
     if (Math.random() > this.traffic(game)) return;
     const t = this.spawn(game);
     if (t) this.list.push(t);
+  }
+
+  /** 隊商は長い道にしか出さない。すぐ着いてしまう道では列を組む意味がない */
+  spawnCaravan(game) {
+    const p = game.player;
+    const cand = [];
+    for (const r of game.world.routes) {
+      if (r.pts.length < 8) continue;
+      for (let i = 2; i < r.pts.length - 2; i++) {
+        const d = Math.hypot(r.pts[i].x - p.x, r.pts[i].z - p.z);
+        if (d > SPAWN_MIN && d < SPAWN_MAX) cand.push({ r, i });
+      }
+    }
+    if (!cand.length) return null;
+    const c = cand[(Math.random() * cand.length) | 0];
+    const dir = c.i < c.r.pts.length / 2 ? 1 : -1;
+    const at = c.r.pts[c.i];
+    if (game.world.height(at.x, at.z) < 1) return null;
+    const next = Math.max(0, Math.min(c.r.pts.length - 1, c.i + dir));
+    const yaw = Math.atan2(c.r.pts[next].x - at.x, c.r.pts[next].z - at.z);
+    const van = new Caravan(c.r, dir, next, { x: at.x, z: at.z, yaw }, game);
+    van.place(game);
+    for (const m of van.members) { m.x = m.tx; m.z = m.tz; m.y = game.world.height(m.x, m.z); }
+    return van;
   }
 
   /** 近くの街道の、姿が見えない距離にある点から歩き出させる */
@@ -221,6 +442,11 @@ export class Travellers {
   }
 
   get count() { return this.list.length; }
+  get memberCount() {
+    let n = this.list.length;
+    for (const c of this.caravans) n += c.members.length;
+    return n;
+  }
 }
 
 export { KIND as TRAVELLER_KINDS, TAU };

@@ -1274,9 +1274,14 @@ export class Game {
       const d = Math.hypot(n.x - p.x, n.z - p.z);
       if (d < bestD) { bestD = d; best = { type: 'npc', obj: n, label: `${n.npcName}（${n.title}）と話す` }; }
     }
-    for (const t of this.travellers.list) {
+    for (const t of this.travellers.everyone()) {
       const d = Math.hypot(t.x - p.x, t.z - p.z);
-      if (d < bestD) { bestD = d; best = { type: 'traveller', obj: t, label: `${t.npcName}に声をかける` }; }
+      if (d >= bestD) continue;
+      bestD = d;
+      // 隊商の親方とは取引ができる
+      best = t.caravan && t.lead
+        ? { type: 'pedlar_shop', obj: t, label: `${t.npcName}と取引する` }
+        : { type: 'traveller', obj: t, label: `${t.npcName}に声をかける` };
     }
     for (const poi of this.pois) {
       const d = Math.hypot(poi.x - p.x, poi.z - p.z);
@@ -1319,6 +1324,16 @@ export class Game {
       case 'npc':
         this.ui.openDialogue(t.obj);
         break;
+      case 'pedlar_shop': {
+        const tv = t.obj;
+        tv.talking = true;
+        this.ui.toast(`${tv.npcName}「${tv.destination} まで運ぶ荷だ。要るものがあれば言いな」`, 'gold');
+        this.audio.play('ui_on');
+        this.ui.openShop();
+        clearTimeout(tv._talkT);
+        tv._talkT = setTimeout(() => { tv.talking = false; }, 6000);
+        break;
+      }
       case 'traveller': {
         // 旅の者は用件を持たない。足を止めて一言だけ交わして、また歩き出す
         const tv = t.obj;
@@ -1775,10 +1790,19 @@ export class Game {
       if (!frustum.sphere(e.x, e.y + e.height * 0.5, e.z, e.height)) continue;
       e.emit(renderer, time, this);
     }
-    for (const t of this.travellers.list) {
+    for (const t of this.travellers.everyone()) {
       if (Math.hypot(t.x - px, t.z - pz) > 200) continue;
       if (!frustum.sphere(t.x, t.y + t.height * 0.5, t.z, t.height)) continue;
       t.emit(renderer, time, this);
+    }
+    // 隊商の荷車
+    for (const c of this.travellers.caravans) {
+      if (Math.hypot(c.cartX - px, c.cartZ - pz) > 220) continue;
+      const b = renderer.batchFor('cart');
+      if (!b) continue;
+      const o = b.alloc();
+      writeInstance(b.data, o, c.cartX, c.cartY, c.cartZ, c.yaw, 1.15, 1.15, 1.15,
+        0.52, 0.40, 0.28, 1, 0, 0, 0, 0.5);
     }
     for (const n of this.npcs) {
       if (n.indoors) continue;

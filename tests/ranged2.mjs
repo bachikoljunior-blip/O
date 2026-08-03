@@ -71,17 +71,31 @@ const predict = await page.evaluate(async () => {
     g.projectiles.length = 0;
     g.spawnProjectile({ kind: 'arrow', owner: p, damage: 1,
       x: p.x, y: p.y + 1.35, z: p.z, yaw: 0, pitch, speed: 46, team: TEAM.PLAYER });
-    let last = null;
+    // 予測は「地面を割った点」を返す。実測を最後に記録した点と比べると、
+    // 常に 1 ステップぶん（46m/s × 1/60 ＝ 0.77m、粗い刻みなら倍）ずれる。
+    // 実測側も地面との交点まで詰めて、同じものどうしを比べる
+    let last = null, prev = null;
     for (let i = 0; i < 60 * 8; i++) {
       const b = g.projectiles[0];
-      if (b) last = [b.x, b.y, b.z];
+      if (b) { prev = last; last = [b.x, b.y, b.z]; }
       g.updateProjectiles(1/60);
       if (!g.projectiles.length) break;
     }
+    let land = last;
+    if (last && prev) {
+      // 最後の一歩を、地面を割るところで線形に切る
+      const gh0 = g.groundHeight(prev[0], prev[2]);
+      const gh1 = g.groundHeight(last[0], last[2]);
+      const d0 = prev[1] - gh0, d1 = last[1] - gh1;
+      if (d0 > 0 && d1 !== d0) {
+        const u = Math.min(1.6, Math.max(0, d0 / (d0 - d1)));
+        land = [prev[0] + (last[0] - prev[0]) * u, 0, prev[2] + (last[2] - prev[2]) * u];
+      }
+    }
     out.push({ pitch, kind,
       predicted: [+w[0].toFixed(1), +w[2].toFixed(1)],
-      actual: last ? [+last[0].toFixed(1), +last[2].toFixed(1)] : null,
-      errM: last ? +Math.hypot(w[0] - last[0], w[2] - last[2]).toFixed(2) : null,
+      actual: land ? [+land[0].toFixed(1), +land[2].toFixed(1)] : null,
+      errM: land ? +Math.hypot(w[0] - land[0], w[2] - land[2]).toFixed(2) : null,
       distM: +Math.hypot(w[0] - p.x, w[2] - p.z).toFixed(1) });
   }
   p.equip.weapon = 'longsword'; p.recalc();
@@ -91,9 +105,11 @@ console.log('予測と実測:');
 for (const v of predict) {
   console.log(`  仰角${String(v.pitch).padStart(6)}  予測 ${v.distM}m 先(${v.kind})  ずれ ${v.errM}m`);
 }
+// 残る誤差は刻み（遠くは 1/30 秒）の積分誤差で、距離に比例して伸びる。
+// 190m 先で 0.7〜1.1m ＝ 0.4%。絶対値ではなく飛距離に対する割合で見る
 ok('着弾点の予測が実際とほぼ一致する',
-  predict.every(v => v.errM !== null && v.errM < 1.2),
-  predict.map(v=>`${v.errM}m`).join(' '));
+  predict.every(v => v.errM !== null && v.errM < Math.max(0.5, v.distM * 0.01)),
+  predict.map(v=>`${v.errM}m/${v.distM}m`).join(' '));
 ok('仰角を上げるほど遠くへ落ちる',
   predict.every((v, i) => i === 0 || v.distM >= predict[i-1].distM - 0.1),
   predict.map(v=>`${v.distM}m`).join(' → '));
