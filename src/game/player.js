@@ -567,6 +567,68 @@ export class Player extends Actor {
     setTimeout(() => { if (this.riposteTarget === attacker) this.riposteTarget = null; }, 2600);
   }
 
+  /* -------------------------------------------------------- 遠隔の照準 */
+  /** 今の構えで放ったら、どこへ落ちるか。矢と魔法で弾道が違う */
+  projectileSpec() {
+    const w = this.weapon();
+    if (w?.ranged) return { speed: 46, gravity: 5.5 };
+    const sp = SPELLS[this.equip.spell];
+    if (sp?.projectile && (sp.type !== 'arc' || w?.catalyst)) {
+      return { speed: sp.projectile === 'ice' ? 34 : 26, gravity: 0 };
+    }
+    return null;
+  }
+
+  /**
+   * 着弾点を先に解いておく。
+   *
+   * 弓は 25m を超えると水平では届かない（実測）。落ちる量を目で
+   * 測れという設計にはできるが、手がかりが何も無いのは不親切なので、
+   * 同じ弾道を先に走らせて落ちる場所を出す。
+   */
+  predictImpact(game, out) {
+    const spec = this.projectileSpec();
+    if (!spec) return null;
+    const cp = Math.cos(this.aimPitch || 0);
+    let x = this.x, y = this.y + 1.35, z = this.z;
+    let vx = Math.sin(this.yaw) * cp * spec.speed;
+    let vy = Math.sin(this.aimPitch || 0) * spec.speed;
+    let vz = Math.cos(this.yaw) * cp * spec.speed;
+    // 近くは細かく、遠くは粗く刻む。
+    // 全部を実飛翔と同じ刻みで追うと、上を向いたときに 1 回 700µs 近くかかり、
+    // 毎フレーム走らせるには重すぎた。当たり判定が要るのは手前だけなので、
+    // 敵を調べる範囲を超えたら刻みを 5 倍にする
+    const NEAR2 = 70 * 70;
+    for (let i = 0; i < 200; i++) {
+      const dx0 = x - this.x, dz0 = z - this.z;
+      // 距離で打ち切ると、高い弾道の着弾点が 30m もずれた。
+      // 刻みを粗くするだけで足りる（反復上限 200 が実質の歯止め）
+      const near = dx0 * dx0 + dz0 * dz0 < NEAR2;
+      const dt = near ? 1 / 60 : 1 / 12;
+      vy -= spec.gravity * dt;
+      const nx = x + vx * dt, ny = y + vy * dt, nz = z + vz * dt;
+      if (near) {
+        for (const e of game.enemies) {
+          if (e.dead) continue;
+          const dx = e.x - nx, dz = e.z - nz;
+          const dy = (e.y + e.height * 0.55) - ny;
+          if (dx * dx + dz * dz < (e.radius + 0.35) ** 2 && Math.abs(dy) < e.height * 0.6) {
+            out[0] = nx; out[1] = ny; out[2] = nz;
+            return 'enemy';
+          }
+        }
+      }
+      const gh = game.groundHeight(nx, nz);
+      if (ny <= gh) {
+        out[0] = nx; out[1] = gh + 0.05; out[2] = nz;
+        return 'ground';
+      }
+      x = nx; y = ny; z = nz;
+    }
+    out[0] = x; out[1] = y; out[2] = z;
+    return 'far';
+  }
+
   /* ---------------------------------------------------------- 戦技 */
   /** 今の武器が持つ戦技 */
   artOf() {

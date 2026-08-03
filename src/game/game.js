@@ -552,15 +552,38 @@ export class Game {
         r: col[0], g: col[1], b: col[2], a: 0.9, kind: 0, glow: 1.4, drag: 2,
       });
 
+      // 当たり判定は「今いる点」ではなく「この一歩ぶんの線分」で見る。
+      // 点で見ると、速い矢は細い的をまたいで通り抜ける
+      // （実測で秒速 200 では 6 射すべてすり抜けた）
       let hit = null;
+      let hitT = 1;
       const targets = b.team === TEAM.PLAYER ? this.enemies : [this.player];
+      const sx = nx - b.x, sy = ny - b.y, sz = nz - b.z;
       for (const t of targets) {
         if (t.dead) continue;
-        const dx = t.x - nx, dz = t.z - nz;
-        const dy = (t.y + t.height * 0.55) - ny;
-        if (dx * dx + dz * dz < (t.radius + 0.35) ** 2 && Math.abs(dy) < t.height * 0.6) {
-          hit = t; break;
+        const r = t.radius + 0.35;
+        const cy = t.y + t.height * 0.55;
+        const hh = t.height * 0.6;
+        // 水平面での線分と円の交差
+        const ox = b.x - t.x, oz = b.z - t.z;
+        const a = sx * sx + sz * sz;
+        const bq = 2 * (ox * sx + oz * sz);
+        const c = ox * ox + oz * oz - r * r;
+        let tt = null;
+        if (a < 1e-9) { if (c <= 0) tt = 0; }
+        else {
+          const disc = bq * bq - 4 * a * c;
+          if (disc >= 0) {
+            const sq = Math.sqrt(disc);
+            const t0 = (-bq - sq) / (2 * a), t1 = (-bq + sq) / (2 * a);
+            if (t0 >= 0 && t0 <= 1) tt = t0;
+            else if (t1 >= 0 && t1 <= 1) tt = 0;   // 始点が既に内側
+          }
         }
+        if (tt === null) continue;
+        const yAt = b.y + sy * tt;
+        if (Math.abs(cy - yAt) > hh) continue;
+        if (tt < hitT) { hitT = tt; hit = t; }
       }
       const gh = this.world.height(nx, nz);
       if (!hit && ny <= gh) hit = 'ground';

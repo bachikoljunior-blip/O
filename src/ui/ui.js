@@ -33,6 +33,9 @@ export class UI {
     this.dmgnums = $('#dmgnums');
     this.bossbar = $('#bossbar');
     this.bossintro = $('#bossintro');
+    this.aimdot = $('#aimdot');
+    this._aimW = [0, 0, 0];
+    this._aimS = [0, 0];
     this.minimap = $('#minimap');
     this.mctx = this.minimap.getContext('2d');
     this.compass = $('#compass');
@@ -191,6 +194,10 @@ export class UI {
       this.compass.classList.remove('hidden');
       this.compassTick = (this.compassTick || 0) + dt;
       if (this.compassTick > 0.05) { this.compassTick = 0; this.drawCompass(game); }
+      // 着弾点の計算は上を向くと 340µs 掛かる。毎フレームは要らないので
+      // 20 回/秒に間引く（見た目には追随して見える）
+      this.aimTick = (this.aimTick || 0) + dt;
+      if (this.aimTick > 0.05) { this.aimTick = 0; this.updateAim(game); }
     } else if (this.compass) {
       this.compass.classList.add('hidden');
     }
@@ -234,6 +241,27 @@ export class UI {
    * 向いている方角と、視界前方にある目印を横一列に描く。
    * ミニマップは「自分の周り」を見せるが、方位帯は「どちらへ行けばいいか」を見せる。
    */
+  /** 弓や術を構えている間、着弾点に印を出す */
+  updateAim(game) {
+    const p = game.player;
+    const el = this.aimdot;
+    if (!el) return;
+    const kind = (!p.dead && p.canAct !== undefined && !game.dungeonMenu)
+      ? p.predictImpact(game, this._aimW) : null;
+    if (!kind || p.riding) {
+      if (!el.classList.contains('hidden')) el.classList.add('hidden');
+      return;
+    }
+    if (!game.camera.project(this._aimW[0], this._aimW[1], this._aimW[2], this._aimS)) {
+      if (!el.classList.contains('hidden')) el.classList.add('hidden');
+      return;
+    }
+    el.classList.remove('hidden');
+    el.classList.toggle('on', kind === 'enemy');
+    el.style.left = `${this._aimS[0] * 100}%`;
+    el.style.top = `${this._aimS[1] * 100}%`;
+  }
+
   drawCompass(game) {
     const c = this.cctx;
     const W = this.compass.width, H = this.compass.height;

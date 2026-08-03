@@ -153,6 +153,24 @@ button {
   background: linear-gradient(180deg, #e8c86a, #9c6b23); transition: width .12s;
 }
 
+/* 遠隔の着弾点。弓や術を構えている間だけ出す */
+#aimdot {
+  position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+  pointer-events: none; transition: opacity .12s;
+}
+#aimdot i {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid rgba(232,200,106,.85);
+  box-shadow: 0 0 6px rgba(0,0,0,.9), inset 0 0 4px rgba(0,0,0,.6);
+}
+#aimdot i::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%;
+  background: rgba(255,240,200,.95);
+}
+/* 敵に当たる見込みのときは赤に変わる */
+#aimdot.on i { border-color: rgba(232,96,80,.95); width: 130%; height: 130%; margin: -15% 0 0 -15%; }
+
 /* ボスの名乗り。入場・形態移行・討伐で使う */
 #bossintro {
   position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%);
