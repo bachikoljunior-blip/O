@@ -372,7 +372,19 @@ export class Player extends Actor {
     if (this.state === 'attack') this.processAttack(dt, game);
 
     this.updatePhysics(dt, game);
+    this.updateSlide(dt, game);
     this.updateAnim(dt, speed);
+
+    // 滑り降りている間は擦れる音と土煙
+    if (this.sliding > 0.05) {
+      this._slideT = (this._slideT || 0) + dt;
+      if (this._slideT > 0.12) {
+        this._slideT = 0;
+        const sf = game.surfaceAt(this.x, this.z);
+        game.audio.footstep(sf.surface, 0.18 + this.sliding * 0.35);
+        game.fx.dust(this.x, this.y + 0.05, this.z, 2);
+      }
+    }
 
     // 足音
     if (speed > 0.6 && this.grounded) {

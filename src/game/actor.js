@@ -98,14 +98,61 @@ export class Actor {
   }
 
   /* ------------------------------------------------------------ 物理 */
+  /**
+   * 着地。落ちた勢いに応じて土煙と音を出す。
+   * 高さの実感は、落ちている間ではなく着いた瞬間に出る。
+   */
+  onLand(impact, game) {
+    if (!game) return;
+    const k = clamp01((impact - 4.0) / 14);
+    const s = game.surfaceAt(this.x, this.z);
+    game.audio.footstep(this.wading ? 'water' : s.surface, 0.30 + k * 1.0);
+    // 土煙と揺れは、はっきり落ちたときだけ（1.8m 以上）
+    if (impact > 9) {
+      game.fx.dust(this.x, this.y + 0.05, this.z, 3 + Math.floor(k * 12));
+    }
+    if (this.team === TEAM.PLAYER) {
+      game.camera.drop(0.05 + k * 0.42);
+      if (k > 0.35) game.camera.shake(k * 0.5);
+    }
+  }
+
   moveOnGround(dt, game, dx, dz, speed) {
     const len = Math.hypot(dx, dz);
     if (len > 1e-4) {
       dx /= len; dz /= len;
-      const nx = this.x + dx * speed * dt;
-      const nz = this.z + dz * speed * dt;
-      this.tryMove(game, nx, nz);
+      const step = speed * dt;
+      const nx = this.x + dx * step;
+      const nz = this.z + dz * step;
+      // 坂は登るほど遅く、下るほど少し速い。
+      // 平地と同じ速さで斜面を駆け上がれると、地形の起伏が意味を失う
+      const grade = (game.groundHeight(nx, nz) - game.groundHeight(this.x, this.z))
+        / Math.max(step, 1e-4);
+      const k = grade > 0 ? 1 / (1 + grade * 1.15) : 1 + Math.min(0.20, -grade * 0.22);
+      this.slopeK = k;
+      this.tryMove(game, this.x + dx * step * k, this.z + dz * step * k);
     }
+  }
+
+  /**
+   * 登れない急斜面では踏ん張れず、滑り落ちる。
+   * 壁のように止められるより、落ちたほうが世界が続いて見える。
+   */
+  updateSlide(dt, game) {
+    if (!this.grounded || this.swimming || this.floating || game.dungeon) {
+      this.sliding = 0;
+      return;
+    }
+    const h = game.groundHeight(this.x, this.z);
+    const gx = (game.groundHeight(this.x + 0.6, this.z) - game.groundHeight(this.x - 0.6, this.z)) / 1.2;
+    const gz = (game.groundHeight(this.x, this.z + 0.6) - game.groundHeight(this.x, this.z - 0.6)) / 1.2;
+    const g = Math.hypot(gx, gz);
+    void h;
+    if (g < 1.15) { this.sliding = 0; return; }
+    const k = Math.min(1, (g - 1.15) / 0.85);
+    this.sliding = k;
+    const sp = 2.2 + k * 6.5;
+    this.tryMove(game, this.x - (gx / g) * sp * dt, this.z - (gz / g) * sp * dt);
   }
 
   tryMove(game, nx, nz) {
@@ -167,6 +214,9 @@ export class Actor {
       if (this.y <= target) {
         const impact = -this.vy;
         this.y = target; this.vy = 0; this.grounded = true;
+        // 1.4 m/s は 4cm の段差でも出る。歩いているだけで鳴らないよう、
+        // 36cm ぶん（4.0 m/s）落ちてからにする
+        if (impact > 4.0) this.onLand(impact, game);
         if (impact > 14 && this.team === TEAM.PLAYER) {
           this.takeDamage(Math.min(this.maxHp * 0.9, (impact - 14) * 14), { type: 'fall' }, game);
         }

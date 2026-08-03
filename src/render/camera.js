@@ -32,6 +32,9 @@ export class Camera {
 
   shake(amount) { this.trauma = Math.min(1.4, this.trauma + amount); }
 
+  /** 着地の沈み込み。真下へ一度落として戻す */
+  drop(amount) { this.kickV[1] -= amount; }
+
   /**
    * 打撃の向きに合わせてカメラを突く。
    * 等方的な揺れだけでは「どちらから殴ったか」が絵に出ない。
