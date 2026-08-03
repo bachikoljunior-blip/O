@@ -1167,11 +1167,29 @@ export class Game {
         const s = this.world.sample(x, z);
         if (s.h < 1.4 || s.slope > 0.75) { this.gatherables.set(key, null); continue; }
         const params = this.world.params(x, z);
+        const rid = params.region.id;
         let type = 'herb';
         if (params.moist > 0.85) type = 'blood_flower';
-        else if (s.surface === 'rock' || params.region.id === 'skyspire') type = 'ore_iron';
-        else if (params.region.id === 'cinder' || params.region.id === 'riftvale') type = 'crystal';
+        else if (s.surface === 'rock' || rid === 'skyspire') type = 'ore_iron';
+        else if (rid === 'cinder' || rid === 'riftvale') type = 'crystal';
         else if (hash2(gx, gz, 17) < 0.18) type = 'ore_iron';
+
+        // ---- 鉱脈の階層 ----
+        // 銀鉱石と古き欠片は、これまで世界のどこにも湧かなかった。
+        // 特定の敵と高位の宝箱からしか出ないので、強化の道が細すぎた。
+        // 高いところ・険しいところほど良い鉱脈が出るようにして、
+        // 登る理由と、強化の見通しを繋ぐ
+        // 採取点は傾斜 0.75 までにしか湧かないので、実際に出るのは
+        // 標高 190m あたりまで。閾値はその範囲に合わせてある
+        const rare = hash2(gx, gz, 41);
+        if (type === 'ore_iron' || type === 'crystal') {
+          if (s.h > 105 && rare > 0.58) type = 'shard_ancient';
+          else if (s.h > 48 && rare < 0.34) type = 'ore_silver';
+        }
+        // 骨灰は死者の地に眠る（常闇の森・裂罅の谷・霧の湿原）
+        if (type === 'herb' && (rid === 'gloomwood' || rid === 'riftvale' || rid === 'mistfen')
+          && hash2(gx, gz, 73) < 0.12) type = 'bone_ash';
+
         this.gatherables.set(key, { key, x, y: s.h, z, type });
       }
     }
@@ -1295,11 +1313,18 @@ export class Game {
       case 'gather': {
         const g = t.obj;
         this.harvested.add(g.key);
-        const n = 1 + (Math.random() < 0.35 ? 1 : 0);
+        // 良い鉱脈ほど一度に採れる量は少ない
+        const rich = g.type === 'shard_ancient' ? 0 : g.type === 'ore_silver' ? 0.2 : 0.35;
+        const n = 1 + (Math.random() < rich ? 1 : 0);
         p.addItem(g.type, n);
         this.ui.itemGain(g.type, n);
-        this.audio.play('ui_confirm');
-        this.fx.dust(g.x, g.y + 0.3, g.z, 6);
+        // 草を摘むのと鉱脈を割るのでは音が違う
+        const ore = g.type === 'ore_iron' || g.type === 'ore_silver'
+          || g.type === 'shard_ancient' || g.type === 'crystal';
+        this.audio.play(ore ? 'gather_ore' : 'gather_plant',
+          { pitch: 0.9 + Math.random() * 0.25 });
+        this.fx.dust(g.x, g.y + 0.3, g.z, ore ? 10 : 6);
+        if (ore) this.camera.kick(g.x - p.x, g.z - p.z, 0.12);
         break;
       }
       case 'mount':

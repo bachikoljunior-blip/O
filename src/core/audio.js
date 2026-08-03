@@ -275,6 +275,17 @@ export class AudioEngine {
             gain: 0.10 - i * 0.012, sweep: 0.16, delay: d + i * 0.10, reverb: 0.8 });
         }
         break;
+      case 'gather_plant':
+        // 草を摘む。短い擦れと、茎が切れる小さな音
+        this.noise({ dur: 0.16, gain: 0.16, freq: 2600 * p, sweep: 0.45, q: 0.7, delay: d });
+        this.noise({ dur: 0.07, gain: 0.10, freq: 900 * p, sweep: 0.6, q: 1.6, delay: d + 0.06 });
+        break;
+      case 'gather_ore':
+        // 鉱脈を割る。硬い一打と、砕けた粒が落ちる音
+        this.noise({ dur: 0.06, gain: 0.26, freq: 2200 * p, sweep: 0.7, q: 2.0, delay: d });
+        this.tone({ freq: 150 * p, dur: 0.18, type: 'square', gain: 0.12, sweep: 0.5, delay: d });
+        this.noise({ dur: 0.30, gain: 0.10, freq: 1400, sweep: 0.35, q: 0.8, delay: d + 0.05, reverb: 0.25 });
+        break;
       case 'poise_break':
         // 体勢を崩したときだけの、下へ抜ける音
         this.tone({ freq: 210, dur: 0.34, type: 'sawtooth', gain: 0.22, sweep: 0.30,
