@@ -391,6 +391,35 @@ function rockMesh(b, rng, size) {
   b.pop();
 }
 
+/**
+ * 鳥。遠くで見えるものなので、胴と翼だけ。
+ * 翼は原点から左右へ伸びていて、インスタンスの X スケールを振ると
+ * 羽ばたいて見える。頭は進行方向（+Z）へ向ける。
+ */
+function bird(b) {
+  const body = [0.16, 0.16, 0.18];
+  b.push().scale(1, 1, 1);
+  b.roundedBox(0.16, 0.13, 0.42, 0.05, body, 2);
+  b.pop();
+  // 頭と嘴
+  b.push().translate(0, 0.04, 0.24);
+  b.roundedBox(0.11, 0.10, 0.12, 0.04, body, 2);
+  b.pop();
+  b.push().translate(0, 0.03, 0.33);
+  b.box(0.04, 0.04, 0.10, [0.30, 0.24, 0.14]);
+  b.pop();
+  // 翼（左右）
+  for (const sx of [-1, 1]) {
+    b.push().translate(sx * 0.24, 0.03, -0.02).rotate(0, 0, -sx * 0.12);
+    b.box(0.44, 0.03, 0.26, [0.13, 0.13, 0.15]);
+    b.pop();
+  }
+  // 尾
+  b.push().translate(0, 0.02, -0.30);
+  b.box(0.10, 0.03, 0.20, [0.14, 0.14, 0.16]);
+  b.pop();
+}
+
 function grassTuft(b, rng) {
   // 細い草の葉を数枚。頂点の高さに応じて風になびく
   for (let i = 0; i < 5; i++) {
@@ -886,6 +915,8 @@ export function buildModels(gl) {
     add(`bush_${v}`, (b) => bushMesh(b, makeRng(700 + v * 13)));
   }
   add('grass', (b) => grassTuft(b, makeRng(1234)));
+  // 鳥。羽ばたきは羽の左右スケールを振って出すので、翼は原点から左右へ伸ばす
+  add('bird', bird);
   add('crystal', (b) => crystal(b, makeRng(555)));
 
   add('house_a', (b) => house(b, makeRng(11), 6, 5, 3.2));

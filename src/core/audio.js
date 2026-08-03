@@ -269,6 +269,17 @@ export class AudioEngine {
         this.noise({ dur: 0.34, gain: 0.16, freq: 2600 * p, sweep: 0.12, q: 0.5, delay: d });
         this.noise({ dur: 0.5, gain: 0.07, freq: 700 * p, sweep: 0.4, q: 0.8, delay: d + 0.03 });
         break;
+      case 'flush':
+        // 鳥が一斉に飛び立つ。羽音の連打と、短い鳴き交わし
+        for (let i = 0; i < 7; i++) {
+          this.noise({ dur: 0.05, gain: 0.055, freq: 900 + Math.random() * 700, q: 1.6,
+            sweep: 0.5, delay: d + i * (0.035 + Math.random() * 0.05) });
+        }
+        for (let i = 0; i < 3; i++) {
+          this.tone({ freq: (1700 + Math.random() * 900) * p, dur: 0.07, type: 'triangle',
+            gain: 0.035, sweep: 1.5, delay: d + 0.05 + i * 0.11, reverb: 0.35 });
+        }
+        break;
       case 'swing':
         this.noise({ dur: 0.16, gain: 0.16, freq: 900 * p, sweep: 0.35, q: 1.4, delay: d });
         break;

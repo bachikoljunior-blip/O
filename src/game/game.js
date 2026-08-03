@@ -10,6 +10,7 @@ import { WorldGen, WORLD_RADIUS } from '../world/worldgen.js';
 import { Terrain, CHUNK } from '../world/terrain.js';
 import { generatePOIs } from '../world/pois.js';
 import { Blockers } from '../world/blockers.js';
+import { Wildlife } from '../world/wildlife.js';
 import { Sky } from '../world/sky.js';
 import { Dungeon } from '../world/dungeon.js';
 
@@ -124,6 +125,7 @@ export class Game {
 
     this.enemies = [];
     this.npcs = [];
+    this.wildlife = new Wildlife();
     this.projectiles = [];
     this.gatherables = new Map();
     this.harvested = new Set();
@@ -386,6 +388,7 @@ export class Game {
       if (Math.hypot(n.x - p.x, n.z - p.z) < 70) n.update(dt, this);
     }
     if (!this.dungeon) this.mount.update(dt, this);
+    this.wildlife.update(dt, this);
     this.updateProjectiles(dt);
     this.updateSwimming(dt);
     if (this.dungeon) {
@@ -1694,6 +1697,23 @@ export class Game {
           writeInstance(b.data, o, poi.chest.x, cy, poi.chest.z, 0, 1, 1, 1,
             1, 0.95, 0.7, 1, 0, 0.12 + Math.sin(time * 2) * 0.05, 0, 0.5);
         }
+      }
+    }
+
+    // 鳥
+    {
+      const bb = renderer.batchFor('bird');
+      if (bb) {
+        this.wildlife.forEach((bird, flying) => {
+          const o = bb.alloc();
+          // 羽ばたきは翼（X）を振り、胴（Y）を逆位相で沈ませる。
+          // 地に降りているあいだは翼をたたむ
+          const f = Math.sin(bird.flap);
+          const wing = flying ? 0.55 + f * 0.45 : 0.30;
+          const body = flying ? 1 - f * 0.10 : 1;
+          writeInstance(bb.data, o, bird.x, bird.y, bird.z, bird.yaw,
+            wing, body, 1, 1, 1, 1, 1, 0, 0, 0, 0.5);
+        });
       }
     }
 
