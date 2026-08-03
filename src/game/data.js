@@ -43,9 +43,84 @@ export function scalingFactor(stat) {
 const M = (windup, active, recover, dmg, range, arc, poise, stam, motion, opts = {}) =>
   ({ windup, active, recover, dmg, range, arc, poise, stam, motion, ...opts });
 
+/**
+ * 戦技。武器ごとに一つ持つ「切り札」。
+ *
+ * 通常攻撃の強弱だけでは、どの武器も「速いか重いか」の違いしかない。
+ * 戦技は FP を払って出す、その武器にしかできない一手。
+ *
+ * kind:
+ *   lunge  — 踏み込んで刺す（前進しながら判定）
+ *   sweep  — 周囲をなぎ払う（全方位）
+ *   quake  — 叩きつけて衝撃波（範囲・崩し特化）
+ *   stance — 一定時間、攻撃力と体勢が上がる（自己強化）
+ *   volley — 前方へ複数の飛翔体
+ */
+const ART = (id, name, kind, o = {}) => ({
+  id, name, kind,
+  fp: o.fp ?? 14, stam: o.stam ?? 20,
+  windup: o.windup ?? 0.34, active: o.active ?? 0.16, recover: o.recover ?? 0.5,
+  dmg: o.dmg ?? 1.8, range: o.range ?? 3.4, arc: o.arc ?? 1.4,
+  poise: o.poise ?? 40, motion: o.motion ?? 'thrust',
+  desc: o.desc || '', ...o,
+});
+
+export const ARTS = {
+  /* 直剣：踏み込んで刺す。間合いを一気に詰める */
+  lunge: ART('lunge', '踏み込み突き', 'lunge', {
+    fp: 12, stam: 18, windup: 0.26, active: 0.14, recover: 0.42,
+    dmg: 2.0, range: 3.0, arc: 0.9, poise: 42, motion: 'thrust', dash: 5.2,
+    desc: '間合いを詰めて刺す。読まれれば手痛い。',
+  }),
+  /* 大剣：地面を叩き、衝撃波で薙ぐ */
+  quake: ART('quake', '大地砕き', 'quake', {
+    fp: 22, stam: 32, windup: 0.62, active: 0.22, recover: 0.85,
+    dmg: 2.6, range: 5.0, arc: 6.28, poise: 130, motion: 'overhead', shock: 6.5,
+    desc: '叩きつけて衝撃を走らせる。体勢を崩す力が飛び抜けて高い。',
+  }),
+  /* 斧：全身で回る。囲まれたときの答え */
+  whirl: ART('whirl', '旋風斬り', 'sweep', {
+    fp: 18, stam: 28, windup: 0.34, active: 0.40, recover: 0.62,
+    dmg: 1.7, range: 3.2, arc: 6.28, poise: 70, motion: 'spin',
+    desc: '身を回して周りを薙ぐ。囲まれたときに。',
+  }),
+  /* 槍・長柄：構えて突き込む。間合いの外から */
+  pierce: ART('pierce', '穿ち', 'lunge', {
+    fp: 14, stam: 22, windup: 0.40, active: 0.16, recover: 0.55,
+    dmg: 2.3, range: 4.6, arc: 0.7, poise: 50, motion: 'thrust', dash: 3.0,
+    desc: '間合いの外から穿つ。当たれば深い。',
+  }),
+  /* 大鎌：引き寄せながら薙ぐ */
+  reap: ART('reap', '刈り取り', 'sweep', {
+    fp: 20, stam: 26, windup: 0.44, active: 0.30, recover: 0.66,
+    dmg: 2.1, range: 3.9, arc: 3.6, poise: 78, motion: 'slash_l',
+    desc: '大きく薙ぎ払う。届く範囲が広い。',
+  }),
+  /* 刀：溜めてから一閃。出血を強く乗せる */
+  iai: ART('iai', '居合', 'lunge', {
+    fp: 16, stam: 24, windup: 0.52, active: 0.12, recover: 0.48,
+    dmg: 2.8, range: 3.4, arc: 1.2, poise: 55, motion: 'slash_r', dash: 3.6,
+    bleed: 26,
+    desc: '溜めて放つ一閃。血を強く呼ぶ。',
+  }),
+  /* 弓：矢を三本まとめて放つ */
+  volley: ART('volley', '三矢', 'volley', {
+    fp: 16, stam: 18, windup: 0.34, active: 0.10, recover: 0.52,
+    dmg: 0.9, range: 40, arc: 0.5, poise: 20, motion: 'thrust', shots: 3,
+    desc: '三本まとめて放つ。散るぶん、当てるのは近い方が易しい。',
+  }),
+  /* 杖：術者の構え。しばらく術と刃が冴える */
+  focus: ART('focus', '澄まし', 'stance', {
+    fp: 20, stam: 14, windup: 0.40, active: 0.05, recover: 0.55,
+    dmg: 0, range: 0, arc: 0, poise: 0, motion: 'cast',
+    buffDur: 14, buffAtk: 1.28, buffPoise: 16,
+    desc: '気を澄ませる。しばらく打撃が重くなり、体勢も崩れにくい。',
+  }),
+};
+
 export const WEAPONS = {
   broken_sword: {
-    id: 'broken_sword', name: '欠けた直剣', model: 'w_sword', cls: '直剣',
+    id: 'broken_sword', art: 'lunge', name: '欠けた直剣', model: 'w_sword', cls: '直剣',
     base: 32, scale: { str: 'D', dex: 'D' }, weight: 3.5, req: { str: 8, dex: 8 },
     crit: 1.1, tint: [0.62, 0.62, 0.66], desc: '刃こぼれした剣。それでも武器は武器だ。',
     moveset: {
@@ -59,7 +134,7 @@ export const WEAPONS = {
     },
   },
   longsword: {
-    id: 'longsword', name: '騎士の長剣', model: 'w_sword', cls: '直剣',
+    id: 'longsword', art: 'lunge', name: '騎士の長剣', model: 'w_sword', cls: '直剣',
     base: 44, scale: { str: 'C', dex: 'C' }, weight: 5.0, req: { str: 12, dex: 10 },
     crit: 1.1, tint: [0.78, 0.80, 0.86], desc: '均整の取れた王国騎士の標準装備。',
     moveset: {
@@ -73,7 +148,7 @@ export const WEAPONS = {
     },
   },
   dagger: {
-    id: 'dagger', name: '狩人の短刀', model: 'w_dagger', cls: '短剣',
+    id: 'dagger', art: 'lunge', name: '狩人の短刀', model: 'w_dagger', cls: '短剣',
     base: 30, scale: { dex: 'B' }, weight: 1.5, req: { str: 6, dex: 12 },
     crit: 1.6, tint: [0.85, 0.86, 0.9], desc: '致命の一撃に長ける。速いが間合いは短い。',
     moveset: {
@@ -87,7 +162,7 @@ export const WEAPONS = {
     },
   },
   greatsword: {
-    id: 'greatsword', name: '灰鉄の大剣', model: 'w_greatsword', cls: '大剣',
+    id: 'greatsword', art: 'quake', name: '灰鉄の大剣', model: 'w_greatsword', cls: '大剣',
     base: 72, scale: { str: 'B' }, weight: 12.5, req: { str: 20, dex: 10 },
     crit: 1.0, tint: [0.7, 0.7, 0.74], desc: '重い一撃で敵の体勢を崩す。',
     moveset: {
@@ -101,7 +176,7 @@ export const WEAPONS = {
     },
   },
   axe: {
-    id: 'axe', name: '樵の戦斧', model: 'w_axe', cls: '斧',
+    id: 'axe', art: 'whirl', name: '樵の戦斧', model: 'w_axe', cls: '斧',
     base: 56, scale: { str: 'B', dex: 'E' }, weight: 8.0, req: { str: 16, dex: 8 },
     crit: 1.0, tint: [0.75, 0.72, 0.68], desc: '振り抜きの重さで防御ごと削る。',
     moveset: {
@@ -115,7 +190,7 @@ export const WEAPONS = {
     },
   },
   spear: {
-    id: 'spear', name: '衛兵の長槍', model: 'w_spear', cls: '槍',
+    id: 'spear', art: 'pierce', name: '衛兵の長槍', model: 'w_spear', cls: '槍',
     base: 40, scale: { str: 'D', dex: 'B' }, weight: 6.0, req: { str: 12, dex: 14 },
     crit: 1.15, tint: [0.8, 0.8, 0.84], desc: '長い間合いから刺突する。盾を構えたままでも扱える。',
     moveset: {
@@ -129,7 +204,7 @@ export const WEAPONS = {
     },
   },
   scythe: {
-    id: 'scythe', name: '墓守の大鎌', model: 'w_scythe', cls: '大鎌',
+    id: 'scythe', art: 'reap', name: '墓守の大鎌', model: 'w_scythe', cls: '大鎌',
     base: 58, scale: { str: 'C', dex: 'B' }, weight: 9.0, req: { str: 15, dex: 15 },
     crit: 1.2, tint: [0.66, 0.68, 0.72], bleed: 20,
     desc: '刈り取るための刃。横薙ぎが広く、間合いの外から巻き込む。',
@@ -144,7 +219,7 @@ export const WEAPONS = {
     },
   },
   katana: {
-    id: 'katana', name: '流麗なる打刀', model: 'w_sword', cls: '刺剣',
+    id: 'katana', art: 'iai', name: '流麗なる打刀', model: 'w_sword', cls: '刺剣',
     base: 48, scale: { dex: 'A' }, weight: 5.5, req: { str: 11, dex: 18 },
     crit: 1.25, tint: [0.9, 0.92, 0.95], bleed: 28,
     desc: '出血を誘う鋭い刃。技量に強く反応する。',
@@ -159,7 +234,7 @@ export const WEAPONS = {
     },
   },
   bow: {
-    id: 'bow', name: '狩人の短弓', model: 'w_bow', cls: '弓', ranged: true,
+    id: 'bow', art: 'volley', name: '狩人の短弓', model: 'w_bow', cls: '弓', ranged: true,
     base: 34, scale: { dex: 'B' }, weight: 3.0, req: { str: 9, dex: 14 },
     crit: 1.0, tint: [0.7, 0.55, 0.35], desc: '遠距離から敵を釣り出せる。矢を消費する。',
     moveset: {
@@ -173,7 +248,7 @@ export const WEAPONS = {
     },
   },
   staff: {
-    id: 'staff', name: '穿光の杖', model: 'w_staff', cls: '杖', catalyst: true,
+    id: 'staff', art: 'focus', name: '穿光の杖', model: 'w_staff', cls: '杖', catalyst: true,
     base: 18, scale: { arc: 'A' }, weight: 3.2, req: { str: 7, dex: 8, arc: 12 },
     crit: 1.0, tint: [0.6, 0.75, 1.0], desc: '魔術を励起させる触媒。物理攻撃には向かない。',
     moveset: {
@@ -187,7 +262,7 @@ export const WEAPONS = {
     },
   },
   moonblade: {
-    id: 'moonblade', name: '月喰みの刃', model: 'w_sword', cls: '直剣',
+    id: 'moonblade', art: 'iai', name: '月喰みの刃', model: 'w_sword', cls: '直剣',
     base: 52, scale: { dex: 'C', arc: 'B' }, weight: 6.0, req: { str: 12, dex: 14, arc: 14 },
     crit: 1.15, tint: [0.68, 0.78, 1.0], magic: 24, emissive: 0.5,
     desc: '月光を宿す剣。魔力ダメージを追加で与える。',
@@ -202,7 +277,7 @@ export const WEAPONS = {
     },
   },
   kings_blade: {
-    id: 'kings_blade', name: '簒奪王の大剣', model: 'w_greatsword', cls: '大剣',
+    id: 'kings_blade', art: 'quake', name: '簒奪王の大剣', model: 'w_greatsword', cls: '大剣',
     base: 92, scale: { str: 'A', fth: 'C' }, weight: 16, req: { str: 26, dex: 12 },
     crit: 1.0, tint: [0.85, 0.7, 0.35], emissive: 0.35, holy: 30,
     desc: 'ノクトゥルヌスを討った者に許される王の剣。',

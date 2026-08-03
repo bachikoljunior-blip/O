@@ -1,7 +1,7 @@
 // UI：HUD / メニュー / 会話 / マップ / ショップ / 篝火
 
 import {
-  WEAPONS, SHIELDS, ARMORS, TALISMANS, SPELLS, ITEMS, UPGRADE, RECIPES, SHOP,
+  WEAPONS, SHIELDS, ARMORS, TALISMANS, SPELLS, ITEMS, UPGRADE, RECIPES, SHOP, ARTS,
   STAT_KEYS, STAT_NAMES, STAT_DESC, levelCost, scalingFactor, SCALE,
 } from '../game/data.js';
 import { QUESTS } from '../game/quests.js';
@@ -741,6 +741,13 @@ export class UI {
         r.appendChild(el('span', 'v', String(v)));
         wp.appendChild(r);
       }
+      const art = w.art ? ARTS[w.art] : null;
+      if (art) {
+        const r = el('div', 'row');
+        r.innerHTML = `<span>戦技　${art.name}<span class="sub">${art.desc}</span></span>`
+          + `<span class="v">FP ${art.fp}</span>`;
+        wp.appendChild(r);
+      }
       wp.appendChild(el('div', 'row', `<span class="sub">${w.desc}</span>`));
       root.appendChild(wp);
     }
@@ -810,8 +817,10 @@ export class UI {
         const scales = Object.entries(w.scale || {})
           .map(([st, gr]) => `${STAT_NAMES[st]}${gr}`).join(' ');
         const tn = UPGRADE.tier(lv).name;
+        const wa = w.art ? ARTS[w.art] : null;
         return `<span>${w.name} ${lv ? `+${lv}` : ''}${tn ? `　${tn}` : ''}`
-          + `<span class="sub">${w.cls}・重量${w.weight}・補正 ${scales || '—'}</span>`
+          + `<span class="sub">${w.cls}・重量${w.weight}・補正 ${scales || '—'}`
+          + `${wa ? `・戦技 ${wa.name}` : ''}</span>`
           + `<span class="sub">${w.desc}</span>${warn}</span>`
           + `<span class="v">${Math.round(atk)}${cmp}</span>`;
       });
@@ -1097,8 +1106,7 @@ export class UI {
       r.innerHTML = `<span>${s.name}<span class="sub">${region?.name || ''}</span></span><span class="v">${Math.round(d)} m</span>`;
       r.onclick = () => {
         const p = game.player;
-        p.x = s.x + 1.6; p.z = s.z + 1.6;
-        p.y = game.world.height(p.x, p.z);
+        game.placeSafely(p, s.x + 1.6, s.z + 1.6);
         p.lastShrine = s;
         p.lockTarget = null;
         game.endBoss(true);
@@ -1409,6 +1417,7 @@ export class UI {
       ['◎', '敵をロックオン'],
       ['✦', '装備した魔法を詠唱'],
       ['雫', '癒しの雫を飲む'],
+      ['戦技', '武器ごとの切り札（FPとスタミナを使う）'],
       ['調べる', '篝火・宝箱・NPC・採取'],
     ];
     for (const [k, v] of rows) {

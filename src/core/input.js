@@ -6,6 +6,7 @@ const KEY_MAP = {
   Space: 'dodge', ShiftLeft: 'sprint', ShiftRight: 'sprint',
   KeyJ: 'attack', KeyK: 'heavy', KeyL: 'block', KeyQ: 'lock',
   KeyE: 'interact', KeyR: 'item', KeyF: 'spell', KeyC: 'jump', KeyG: 'mount',
+  KeyV: 'art',
   Escape: 'menu', KeyM: 'map', Tab: 'inventory',
 };
 

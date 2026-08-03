@@ -115,7 +115,8 @@ export class Game {
     await frame();
 
     this.player = new Player({ x: 40, z: 300 });
-    this.player.y = this.world.height(40, 300);
+    // 開始地点が篝火の中にならないようにする（そのままだと一歩目で弾き飛ぶ）
+    this.placeSafely(this.player, 40, 300);
     this.quests = new QuestLog();
 
     this.enemies = [];
@@ -246,6 +247,25 @@ export class Game {
       ? this.blockers.resolve(out[0], out[1], radius, out) : false;
     return hitTerrain || hitBuild;
   }
+  /**
+   * その場に「立てる」位置へ置く。
+   *
+   * 篝火や建物には当たり判定があるので、拠点の座標へそのまま置くと
+   * 物の中に立つことになり、一歩動いた瞬間に押し出されて飛ぶ。
+   * 開始・復活・転送は必ずここを通す。
+   */
+  placeSafely(actor, x, z) {
+    const out = [x, z];
+    if (!this.dungeon && this.blockers) {
+      for (let k = 0; k < 4; k++) {
+        if (!this.blockers.resolve(out[0], out[1], actor.radius + 0.25, out)) break;
+      }
+    }
+    actor.x = out[0]; actor.z = out[1];
+    actor.y = this.groundHeight(actor.x, actor.z);
+    return actor;
+  }
+
   surfaceAt(x, z) {
     if (this.dungeon) return { h: 0, slope: 0, surface: 'rock', road: 0, underwater: false };
     return this.world.sample(x, z);
@@ -379,6 +399,11 @@ export class Game {
       p.spellBuff.t -= dt;
       p.defBuff = p.mods.defMul * p.spellBuff.def;
       if (p.spellBuff.t <= 0) { p.spellBuff = null; p.defBuff = p.mods.defMul; }
+    }
+    // 戦技の自己強化
+    if (p.artBuff) {
+      p.artBuff.t -= dt;
+      if (p.artBuff.t <= 0) { p.artBuff = null; p.recalc(); }
     }
 
     // オートセーブ

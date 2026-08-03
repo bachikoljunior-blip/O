@@ -2,7 +2,7 @@
 
 import { Actor, TEAM, inAttackArc, isBehind } from './actor.js';
 import {
-  WEAPONS, SHIELDS, ARMORS, TALISMANS, SPELLS, ITEMS, UPGRADE, SCALE,
+  WEAPONS, SHIELDS, ARMORS, TALISMANS, SPELLS, ITEMS, UPGRADE, SCALE, ARTS,
   scalingFactor, maxHP, maxStamina, maxFP, equipLoad, levelCost, STAT_KEYS,
 } from './data.js';
 import { clamp, clamp01, lerp, angDelta, rotateTowards, TAU, v3 } from '../core/math.js';
@@ -218,7 +218,9 @@ export class Player extends Actor {
     for (const [stat, req] of Object.entries(w.req || {})) {
       if (this.stats[stat] < req) penalty *= 0.55;
     }
-    return (atk + bonus) * penalty;
+    // 戦技「澄まし」の間は打撃が重くなる
+    const art = (this.artBuff && this.artBuff.t > 0) ? this.artBuff.atk : 1;
+    return (atk + bonus) * penalty * art;
   }
 
   /** 必要能力を満たしていない項目（装備画面の警告用） */
@@ -311,6 +313,7 @@ export class Player extends Actor {
       if (inp.pressed('heavy')) this.doAttack('heavy', game);
       if (inp.pressed('block') && this.shieldData) this.doParry(game);
       if (inp.pressed('spell')) this.castSpell(game);
+      if (inp.pressed('art')) this.useArt(game);
       if (inp.pressed('item')) this.useItem(game);
       if (inp.pressed('jump') && this.grounded && this.stamina > 12) {
         this.vy = 7.2;
@@ -497,6 +500,7 @@ export class Player extends Actor {
   processAttack(dt, game) {
     const a = this.attack;
     if (!a) return;
+    if (a.art) { this.processArt(dt, game); return; }
     const phase = this.attackPhase();
     const w = this.weapon();
 
@@ -561,6 +565,99 @@ export class Player extends Actor {
     game.fx.sparks(attacker.x, attacker.y + attacker.height * 0.6, attacker.z, 22, [1, 0.95, 0.7]);
     game.ui.toast('パリィ成功！ 致命の一撃を狙え');
     setTimeout(() => { if (this.riposteTarget === attacker) this.riposteTarget = null; }, 2600);
+  }
+
+  /* ---------------------------------------------------------- 戦技 */
+  /** 今の武器が持つ戦技 */
+  artOf() {
+    const w = this.weapon();
+    return w?.art ? ARTS[w.art] : null;
+  }
+
+  useArt(game) {
+    const art = this.artOf();
+    if (!art) { game.ui.toast('この武器に戦技は無い'); game.audio.play('fail'); return false; }
+    if (this.fp < art.fp) { game.ui.toast('FPが足りない'); game.audio.play('fail'); return false; }
+    if (this.stamina < art.stam) { game.ui.toast('スタミナが足りない'); game.audio.play('fail'); return false; }
+    if (!this.canAct()) return false;
+    this.fp -= art.fp;
+    this.stamina -= art.stam;
+    this.staminaDelay = 0.6;
+    this.attackHits = new Set();
+    this.artDone = false;
+    this.attack = { ...art, art: true };
+    this.setState('attack', art.windup + art.active + art.recover, art.motion);
+    this.artActive = art;
+    game.audio.play('cast_start', { pitch: 1.25 });
+    game.ui.toast(art.name);
+    return true;
+  }
+
+  /** 戦技の当たり判定と効果。processAttack から呼ばれる */
+  processArt(dt, game) {
+    const a = this.attack;
+    if (!a || !a.art) return false;
+    const phase = this.attackPhase();
+
+    // 踏み込み：予備動作の終わりから前へ出る
+    if (a.dash && phase === 'active') {
+      this.moveOnGround(dt, game, Math.sin(this.yaw), Math.cos(this.yaw), a.dash);
+    }
+    if (phase !== 'active') return true;
+
+    // 自己強化：判定ではなく自分に掛ける
+    if (a.kind === 'stance') {
+      if (!this.artDone) {
+        this.artDone = true;
+        this.artBuff = { t: a.buffDur, atk: a.buffAtk, poise: a.buffPoise };
+        game.fx.heal(this.x, this.y + 1, this.z);
+        game.audio.play('buff');
+      }
+      return true;
+    }
+    // 矢を束ねて放つ
+    if (a.kind === 'volley') {
+      if (this.artDone) return true;
+      this.artDone = true;
+      const n = a.shots || 3;
+      const power = this.weaponAttackPower() * a.dmg;
+      for (let i = 0; i < n; i++) {
+        game.spawnProjectile({
+          kind: 'arrow', owner: this, damage: power,
+          x: this.x, y: this.y + 1.35, z: this.z,
+          yaw: this.yaw + (i - (n - 1) / 2) * 0.11,
+          pitch: this.aimPitch || -0.03, speed: 46, team: TEAM.PLAYER,
+        });
+      }
+      this.inventory.arrow = Math.max(0, (this.inventory.arrow || 0) - n);
+      game.audio.play('bow');
+      return true;
+    }
+
+    // 打撃系
+    const w = this.weapon();
+    const power = this.weaponAttackPower() * a.dmg;
+    for (const e of game.enemies) {
+      if (e.dead || this.attackHits.has(e.id)) continue;
+      if (!inAttackArc(this, e, a.range, a.arc)) continue;
+      this.attackHits.add(e.id);
+      e.takeDamage(power, {
+        source: this, poise: a.poise, type: 'physical',
+        bleed: (w?.bleed || 0) + (a.bleed || 0), magic: w?.magic, holy: w?.holy,
+        impactWeight: 1,
+        keen: this.weaponTier?.ring ? 1 : 0,
+      }, game);
+      this.weaponTip(_tip);
+      game.fx.slash(_tip[0], _tip[1], _tip[2], this.yaw);
+    }
+    // 衝撃波：地面を叩いて周囲へ
+    if (a.shock && !this.artDone) {
+      this.artDone = true;
+      game.fx.shockwave(this.x, this.y + 0.1, this.z, a.shock);
+      game.camera.shake(0.7);
+      game.audio.play('slam');
+    }
+    return true;
   }
 
   /* ---------------------------------------------------------- 魔法 */
@@ -762,9 +859,8 @@ export class Player extends Actor {
     this.statusTimers.poison = 0;
     this.statusTimers.burn = 0;
     for (const k in this.status) this.status[k] = 0;
-    if (s) { this.x = s.x + 1.5; this.z = s.z + 1.5; }
-    else { this.x = 40; this.z = 300; }
-    this.y = game.groundHeight(this.x, this.z);
+    if (s) game.placeSafely(this, s.x + 1.5, s.z + 1.5);
+    else game.placeSafely(this, 40, 300);
     this.lockTarget = null;
     game.respawnWorld();
   }
