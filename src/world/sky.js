@@ -22,6 +22,13 @@ export class Sky {
     this.rng = makeRng(seed);
     this.time = 0.30;          // 0=真夜中, 0.25=夜明け, 0.5=正午, 0.75=日没
     this.clock = 0;            // 起動からの経過秒（風のうねり用。日をまたいでも切れない）
+    this.day = 0;              // 何日目か。月の満ち欠けに使う
+    this.moonPhase = 0.42;     // 0=新月, 0.5=満月
+    // 流れ星。0 = 走っていない、0..1 = 走っている進み具合。
+    // シェーダ内の時刻から導くと、星のまたたきと切り分けて確かめられない
+    this.meteor = 0;
+    this.meteorSeed = 0;
+    this.meteorTimer = 12;
     this.paused = false;
     this.weather = 'fair';
     this.nextWeather = 'fair';
@@ -73,6 +80,21 @@ export class Sky {
   }
   weatherLabel() { return WEATHERS[this.weather].name; }
 
+  /** 月の満ち欠けの呼び名 */
+  moonLabel() {
+    const p = this.moonPhase;
+    if (p < 0.03 || p > 0.97) return '新月';
+    if (p < 0.22) return '三日月';
+    if (p < 0.28) return '上弦';
+    if (p < 0.47) return '十日夜';
+    if (p < 0.53) return '満月';
+    if (p < 0.72) return '寝待月';
+    if (p < 0.78) return '下弦';
+    return '有明月';
+  }
+  /** 照っている割合 0..1 */
+  moonLit() { return 0.5 - 0.5 * Math.cos(this.moonPhase * TAU); }
+
   skipToMorning() {
     this.time = 0.27;
   }
@@ -106,7 +128,11 @@ export class Sky {
   }
 
   update(dt, game) {
-    if (!this.paused) this.time = (this.time + dt / DAY_LENGTH) % 1;
+    if (!this.paused) {
+      const t = this.time + dt / DAY_LENGTH;
+      if (t >= 1) this.day++;
+      this.time = t % 1;
+    }
     this.clock += dt;
 
     // ---- 天候遷移 ----
@@ -149,7 +175,18 @@ export class Sky {
     const sz = Math.cos(ang) * 0.86;
     const l = Math.hypot(sx, sy, sz) || 1;
     this.sunDir = [sx / l, sy / l, sz / l];
-    this.moonDir = [-sx / l, -sy / l, -sz / l];
+
+    // ---- 月は太陽の真裏ではなく、自分の周期で回る ----
+    // 真裏に固定すると毎晩まん丸のままで、日が経った感じが出ない。
+    // 29.5 日周期に倣い、8 日で一巡させる（1 日 = 実時間 20 分）
+    const MOON_CYCLE = 8;
+    this.moonPhase = ((this.day + this.time) / MOON_CYCLE) % 1;
+    const mAng = (this.time - 0.25) * TAU - this.moonPhase * TAU;
+    const my = Math.sin(mAng);
+    const mx = Math.cos(mAng) * 0.42;
+    const mz = Math.cos(mAng) * 0.86;
+    const ml = Math.hypot(mx, my, mz) || 1;
+    this.moonDir = [mx / ml, my / ml, mz / ml];
 
     const above = clamp01(this.sunDir[1]);
     this.night = 1 - smoothstep(-0.14, 0.10, this.sunDir[1]);
@@ -185,12 +222,16 @@ export class Sky {
     const sunStrength = clamp01(above * 1.9) * 1.55 * (1 - cloud * 0.55) * (1 - this.night);
     this.sunColor = [sc[0] * sunStrength, sc[1] * sunStrength, sc[2] * sunStrength];
 
-    // 月光
+    // 月光。新月の夜は暗い
     const moonUp = clamp01(this.moonDir[1]);
-    const moonK = moonUp * this.night * 0.20 * (1 - cloud * 0.5);
+    const lit = 0.5 - 0.5 * Math.cos(this.moonPhase * TAU);
+    const moonK = moonUp * this.night * 0.20 * (1 - cloud * 0.5) * (0.18 + lit * 0.82);
     this.sunColor[0] += 0.55 * moonK;
     this.sunColor[1] += 0.62 * moonK;
     this.sunColor[2] += 0.85 * moonK;
+    // 満ち欠けの計算には本物の太陽の向きが要る。
+    // 夜は主光源を月に差し替えるので、差し替える前に控えておく
+    this.sunDirTrue = [this.sunDir[0], this.sunDir[1], this.sunDir[2]];
     if (this.night > 0.5 && moonUp > 0.05) {
       // 夜は月を主光源として扱う
       this.sunDir = [this.moonDir[0], this.moonDir[1], this.moonDir[2]];
@@ -238,6 +279,21 @@ export class Sky {
       this.snowCover = Math.max(0, this.snowCover - melt * dt);
     }
 
+    // ---- 流れ星（晴れた夜だけ）----
+    if (this.meteor > 0) {
+      this.meteor += dt / 1.4;
+      if (this.meteor >= 1) this.meteor = 0;
+    } else if (this.night > 0.55 && cloud < 0.55) {
+      this.meteorTimer -= dt;
+      if (this.meteorTimer <= 0) {
+        this.meteorTimer = 16 + this.rng() * 44;
+        this.meteor = 0.001;
+        this.meteorSeed = this.rng() * 90;
+      }
+    } else {
+      this.meteorTimer = Math.max(this.meteorTimer, 6);
+    }
+
     // ---- 視程 ----
     // 霧が最も効き、次いで雪、雨。索敵距離と遠景の見え方に使う
     this.visibility = clamp(
@@ -281,12 +337,13 @@ export class Sky {
   }
 
   serialize() {
-    return { time: this.time, weather: this.weather,
+    return { time: this.time, day: this.day, weather: this.weather,
       wetness: +this.wetness.toFixed(3), snowCover: +this.snowCover.toFixed(3) };
   }
   deserialize(d) {
     if (!d) return;
     this.time = d.time ?? this.time;
+    this.day = d.day ?? 0;
     this.setWeather(d.weather || 'fair', true);
     this.wetness = clamp01(d.wetness ?? 0);
     this.snowCover = clamp01(d.snowCover ?? 0);

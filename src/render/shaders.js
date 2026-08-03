@@ -349,6 +349,10 @@ uniform float u_time;
 uniform float u_cloud;      // 雲量 0..1
 uniform float u_quality;    // 0=低 1=高
 uniform vec3 u_moonDir;
+uniform float u_moonPhase;   // 0=新月 0.5=満月
+uniform vec3 u_trueSunDir;   // 夜は u_sunDir が月に差し替わるので、本物を別に受け取る
+uniform float u_meteor;      // 流れ星の進み具合 0=無し
+uniform float u_meteorSeed;
 out vec4 outColor;
 
 void main(){
@@ -358,18 +362,81 @@ void main(){
 
   vec3 col = skyColor(dir);
 
-  // 星（夜のみ）
+  // ---- 夜空 ----
   if(u_night > 0.02 && dir.y > -0.05){
     vec2 sp = dir.xz / max(dir.y + 0.35, 0.08);
-    float st = hash12(floor(sp * 130.0));
+
+    // 天の川。空を横切る一本の帯として、細かい粒を敷き詰める
+    float band = abs(dot(dir, normalize(vec3(0.42, 0.30, -0.86))));
+    float mw = smoothstep(0.34, 0.02, band);
+    if(mw > 0.001){
+      float g = fbm2(sp * 3.1 + 11.0) * 0.65 + fbm2(sp * 9.0 - 4.0) * 0.35;
+      float dust = smoothstep(0.42, 0.78, g);
+      col += vec3(0.30, 0.34, 0.52) * mw * dust * u_night * 0.55;
+      // 帯の中は星の密度も高い
+      float fine = hash12(floor(sp * 420.0));
+      col += vec3(0.8, 0.85, 1.0) * smoothstep(0.9955, 1.0, fine) * mw * u_night * 1.1;
+    }
+
+    // 星。等級に差をつける。粒が均一だと「点をばらまいた」ようにしか見えない
+    vec2 cell = floor(sp * 130.0);
+    float st = hash12(cell);
+    float mag = hash12(cell + 71.3);          // その星の明るさの等級
     float tw = 0.6 + 0.4 * sin(u_time * 2.3 + st * 60.0);
     float star = smoothstep(0.9965, 1.0, st) * tw;
-    col += vec3(0.85, 0.9, 1.0) * star * u_night * 2.2;
+    float bright = 0.35 + mag * mag * mag * 3.2;
+    col += vec3(0.85, 0.9, 1.0) * star * u_night * 2.2 * bright;
+    // ひときわ明るい星は、にじんで見える
+    if(mag > 0.93){
+      float halo = smoothstep(0.994, 1.0, st);
+      col += vec3(0.75, 0.85, 1.0) * halo * u_night * 1.4;
+    }
+
+    // 流れ星。走っているかどうかは CPU 側が決める。
+    // シェーダ内の時刻から導くと、星のまたたきと同じ変数で動くため、
+    // 「流れ星が出たから明るくなった」ことを切り分けて確かめられない
+    if(u_meteor > 0.0){
+      float t = u_meteor;
+      float slot = u_meteorSeed;
+      // sp は天頂へ行くほど 0 に近づく。見上げた画に入るよう、
+      // 天頂まわり（|sp| < 0.6 程度）を横切らせる
+      float a0 = hash12(vec2(slot, 3.1)) * 6.28318;
+      vec2 from = vec2(cos(a0), sin(a0)) * (0.30 + hash12(vec2(slot, 7.7)) * 0.34);
+      vec2 dirv = normalize(vec2(cos(a0 + 2.2), sin(a0 + 2.2)));
+      vec2 to = from + dirv * (0.55 + hash12(vec2(slot, 11.3)) * 0.45);
+      vec2 at = mix(from, to, t);
+      float d = length(sp - at);
+      // 進行方向に尾を引く
+      vec2 tail = normalize(to - from);
+      float along = dot(sp - at, -tail);
+      float across = length((sp - at) - (-tail) * along);
+      float streak = smoothstep(0.26, 0.0, along) * smoothstep(0.035, 0.0, across);
+      col += vec3(0.9, 0.94, 1.0) * (streak + smoothstep(0.02, 0.0, d) * 0.8)
+        * u_night * (1.0 - t) * 4.2;
+    }
   }
-  // 月
+
+  // ---- 月 ----
+  // 太陽との位置関係から満ち欠けを出す。真裏に置くと毎晩まん丸になる
   float md = max(dot(dir, u_moonDir), 0.0);
-  col += vec3(0.75, 0.82, 1.0) * pow(md, 900.0) * 3.0 * u_night;
-  col += vec3(0.35, 0.42, 0.6) * pow(md, 12.0) * 0.16 * u_night;
+  float disc = smoothstep(0.99965, 0.99990, md);
+  if(disc > 0.001){
+    vec3 mr = normalize(cross(u_moonDir, vec3(0.0, 1.0, 0.0)));
+    vec3 mu = cross(mr, u_moonDir);
+    // 円盤内での位置（半径 1 に正規化）
+    float R = 0.0187;                       // 見かけの半径（ラジアン相当）
+    vec2 q = vec2(dot(dir, mr), dot(dir, mu)) / R;
+    float r2 = dot(q, q);
+    vec3 n = mr * q.x + mu * q.y - u_moonDir * sqrt(max(0.0, 1.0 - r2));
+    float lit = smoothstep(-0.06, 0.06, dot(n, u_trueSunDir));
+    // 海（暗い模様）
+    float sea = 0.86 + 0.14 * fbm2(q * 1.7 + 3.0);
+    col += vec3(0.78, 0.82, 0.95) * disc * lit * sea * 2.6;
+    col += vec3(0.10, 0.12, 0.20) * disc * (1.0 - lit) * u_night;
+  }
+  // 月のまわりのにじみ。照っている分だけ広がる
+  float glowLit = 0.5 - 0.5 * cos(u_moonPhase * 6.28318);
+  col += vec3(0.35, 0.42, 0.6) * pow(md, 12.0) * 0.16 * u_night * (0.15 + glowLit * 0.85);
 
   // 雲
   if(u_cloud > 0.01 && dir.y > 0.008){

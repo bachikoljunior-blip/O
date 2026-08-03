@@ -256,6 +256,10 @@ export class Renderer {
     skp.v3('u_sunColor', game.sky.sunColor);
     skp.v3('u_sunDir', game.sky.sunDir);
     skp.v3('u_moonDir', game.sky.moonDir);
+    skp.f('u_moonPhase', game.sky.moonPhase);
+    skp.v3('u_trueSunDir', game.sky.sunDirTrue || game.sky.sunDir);
+    skp.f('u_meteor', game.sky.meteor || 0);
+    skp.f('u_meteorSeed', game.sky.meteorSeed || 0);
     skp.f('u_night', game.sky.night);
     skp.f('u_time', game.time.now);
     skp.f('u_cloud', game.sky.cloud);
