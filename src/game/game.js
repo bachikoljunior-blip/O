@@ -282,6 +282,18 @@ export class Game {
           add(poi.x, poi.y + 1.2, poi.z, 10, 0.5 * night, 0.85 * night, 1.5 * night, poi.id);
         }
       }
+      // 人が帰っている家には灯りが点る。夜の村が無人に見えないように
+      if (this.sky.night > 0.15) {
+        const k = this.sky.night * 1.25;
+        for (const n of this.npcs) {
+          if (!n.indoors) continue;
+          const h = n.spots?.home;
+          if (!h) continue;
+          if (Math.hypot(h.x - cam[0], h.z - cam[2]) > 52) continue;
+          add(h.x, this.groundHeight(h.x, h.z) + 1.7, h.z, 7.5,
+            1.15 * k, 0.72 * k, 0.32 * k, n.id * 0.37);
+        }
+      }
     }
     // 飛翔中の魔法弾も光る
     for (const b of this.projectiles) {
@@ -1069,6 +1081,7 @@ export class Game {
     }
 
     for (const n of this.npcs) {
+      if (n.indoors) continue;              // 家の中で寝ている相手には話しかけられない
       const d = Math.hypot(n.x - p.x, n.z - p.z);
       if (d < bestD) { bestD = d; best = { type: 'npc', obj: n, label: `${n.npcName}（${n.title}）と話す` }; }
     }
@@ -1442,6 +1455,7 @@ export class Game {
       e.emit(renderer, time, this);
     }
     for (const n of this.npcs) {
+      if (n.indoors) continue;
       if (Math.hypot(n.x - px, n.z - pz) > 90) continue;
       if (!frustum.sphere(n.x, n.y + n.height * 0.5, n.z, n.height)) continue;
       n.emit(renderer, time, this);

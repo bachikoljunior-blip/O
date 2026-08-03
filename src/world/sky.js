@@ -77,6 +77,13 @@ export class Sky {
     this.time = 0.27;
   }
 
+  /** 指定した時刻まで進める（篝火で時を待つ） */
+  skipToHour(h) {
+    const t = ((h % 24) + 24) % 24 / 24;
+    // 一日ぶんは必ず進める（同じ時刻を指定したときに止まらないように）
+    this.time = t;
+  }
+
   setWeather(id, instant = false) {
     if (!WEATHERS[id]) return;
     this.nextWeather = id;

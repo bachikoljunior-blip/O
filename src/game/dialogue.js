@@ -15,6 +15,11 @@ export function makeContext(npc, game) {
   return {
     phase,
     night: phase === 'night',
+    // その NPC が今なにをしている最中か（一日の行動表による）
+    activity: npc.activity || 'idle',
+    working: npc.activity === 'work' || npc.activity === 'pray',
+    eating: npc.activity === 'eat',
+    atFire: npc.activity === 'talk',
     rain: sky.rainAmount > 0.25,
     snow: sky.snowAmount > 0.2,
     fog: sky.fogDensity > 0.05,
@@ -121,6 +126,8 @@ const POOLS = {
   /* ------------------------------------------- 役割ごとの挨拶（第一声） */
   greet_elder: [
     { t: '灰の落人よ。まだ火は消えておらぬな。' },
+    { when: (c) => c.atFire, t: '火のそばへ来い。夜は年寄りの骨に応える。' },
+    { when: (c) => c.eating, t: '食っている最中だが、まあ座れ。話は飯より先には減らん。' },
     { when: (c) => c.night, t: '眠らぬ者同士だな。座るがいい。' },
     { when: (c) => c.hurt, t: 'その傷で歩くか。……止めても無駄なのだろうな。' },
     { when: (c) => c.lateGame, t: 'お前が歩くたび、世界がひとつ静かになる。喜ぶべきか、恐れるべきか。' },
@@ -128,6 +135,9 @@ const POOLS = {
   ],
   greet_merchant: [
     { t: '旅の御方、掘り出し物があるよ。残響さえあれば何でも揃う。' },
+    { when: (c) => c.working, t: '今ちょうど荷を開けたところだ。見ていくかい。' },
+    { when: (c) => c.eating, t: '……ん、食事中でね。まあいい、話は聞くよ。' },
+    { when: (c) => c.atFire, t: '店じまいだよ。火にあたりながらでよければ、話くらいはする。' },
     { when: (c) => c.rain, t: 'ひどい雨だ。荷が濡れる前に商談といこうか。' },
     { when: (c) => c.night, t: '夜でも店は開いてる。客が来る限りはね。' },
     { when: (c) => c.rich, t: 'おや、ずいぶん景気が良さそうだ。いい買い物をしていってくれ。' },
@@ -135,24 +145,32 @@ const POOLS = {
   ],
   greet_smith: [
     { t: '火は正直だ。鉄も、人もな。' },
+    { when: (c) => c.working, t: '手は止められん。用件は槌の音に負けんように言え。' },
+    { when: (c) => c.eating, t: '飯くらい黙って食わせろ。……で、何だ。' },
+    { when: (c) => c.atFire, t: '今日はもう炉を落とした。明日の朝に来い。' },
     { when: (c) => c.night, t: 'この時間は炉が一番いい色になる。何の用だ。' },
     { when: (c) => c.veteran, t: 'あんたの得物、よく働いてるな。刃こぼれを見りゃ分かる。' },
     { when: (c) => c.rain, t: '雨の日は鉄が鳴らん。腕が鈍る気がしていかん。' },
   ],
   greet_herbalist: [
     { t: '薬草の匂いは嫌い？ 私は好きよ。生きている匂いだもの。' },
+    { when: (c) => c.working, t: '待って、今この株を摘んでしまうから。……はい、なに？' },
+    { when: (c) => c.eating, t: '一緒に食べる？ ……ううん、いいの。座って。' },
     { when: (c) => c.hurt, t: 'ちょっと、その怪我！ 座って。今すぐ手当てするから。' },
     { when: (c) => c.rain, t: '雨は好き。血赤花は雨の後によく咲くの。' },
     { when: (c) => c.night, t: 'こんな時間まで起きてるの？ 私は薬を煮てるだけ。' },
   ],
   greet_hunter: [
     { t: '足音を殺せ。獣はお前より耳がいい。' },
+    { when: (c) => c.working, t: '静かにしろ。今、風下に一頭いる。' },
+    { when: (c) => c.atFire, t: '今日の分は獲った。火にあたっていけ。'  },
     { when: (c) => c.night, t: '夜の狩りか。悪くない。ただし、狩られる側に回るなよ。' },
     { when: (c) => c.snow, t: '雪は足跡が残る。追うのも追われるのも楽になる。' },
     { when: (c) => c.veteran, t: 'あんたはもう獣より獣だな。悪口じゃない。' },
   ],
   greet_priest: [
     { t: '灰の落人よ。祈りは届いているか。' },
+    { when: (c) => c.working, t: '祈りの最中だ。……構わん、神は待つのに慣れておられる。' },
     { when: (c) => c.clumsy, t: '何度も還ってくるな。……それを憐れむべきか、讃えるべきか、私には分からん。' },
     { when: (c) => c.night, t: '夜は祈りがよく通る。誰に通るのかは知らんがな。' },
     { when: (c) => c.fog, t: '霧の日は死者が近い。手を合わせておきなさい。' },

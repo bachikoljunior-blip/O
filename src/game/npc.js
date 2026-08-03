@@ -18,6 +18,39 @@ const ROLE_TINT = {
   villager: [0.48, 0.44, 0.38], innkeeper: [0.52, 0.38, 0.30],
 };
 
+/**
+ * 一日の行動表。[開始時刻, 持ち場, 動作]。
+ * その時刻を過ぎた「最後の」項目が有効になる。先頭は必ず 0 時から始める。
+ *
+ * 宿の主だけは夜通し起きていて、明け方に寝る。
+ * 誰も彼もが同時に寝てしまうと、夜に村へ着いた者が詰むためでもある。
+ */
+const SCHEDULES = {
+  elder: [[0, 'home', 'sleep'], [7.0, 'well', 'idle'], [8.5, 'square', 'talk'],
+    [12.5, 'fire', 'eat'], [14.0, 'square', 'talk'], [18.5, 'fire', 'talk'], [22.0, 'home', 'sleep']],
+  merchant: [[0, 'home', 'sleep'], [6.5, 'well', 'idle'], [8.0, 'work', 'work'],
+    [12.5, 'fire', 'eat'], [13.5, 'work', 'work'], [19.0, 'fire', 'talk'], [22.0, 'home', 'sleep']],
+  smith: [[0, 'home', 'sleep'], [6.0, 'well', 'idle'], [7.0, 'work', 'work'],
+    [12.5, 'fire', 'eat'], [13.5, 'work', 'work'], [19.5, 'fire', 'talk'], [22.5, 'home', 'sleep']],
+  herbalist: [[0, 'home', 'sleep'], [6.5, 'field', 'work'], [12.5, 'fire', 'eat'],
+    [13.5, 'field', 'work'], [17.5, 'work', 'work'], [21.0, 'home', 'sleep']],
+  hunter: [[0, 'home', 'sleep'], [5.0, 'gate', 'idle'], [6.0, 'field', 'work'],
+    [16.0, 'gate', 'work'], [19.0, 'fire', 'talk'], [22.0, 'home', 'sleep']],
+  priest: [[0, 'home', 'sleep'], [5.5, 'work', 'pray'], [12.5, 'fire', 'eat'],
+    [13.5, 'work', 'pray'], [19.0, 'work', 'pray'], [22.0, 'home', 'sleep']],
+  innkeeper: [[0, 'work', 'work'], [3.5, 'home', 'sleep'], [8.5, 'work', 'work']],
+  villager: [[0, 'home', 'sleep'], [6.5, 'well', 'work'], [9.0, 'field', 'work'],
+    [12.5, 'fire', 'eat'], [13.5, 'field', 'work'], [18.0, 'fire', 'talk'], [21.5, 'home', 'sleep']],
+};
+
+/** 持ち場に着いてからの散らばり方（同じ点に重ならないように） */
+const SPREAD = { home: 0, work: 1.5, well: 1.7, fire: 2.3, square: 3.4, field: 3.0, gate: 2.0 };
+
+export const ACTIVITY_LABEL = {
+  sleep: '眠っている', work: '働いている', pray: '祈っている',
+  eat: '食べている', talk: '話し込んでいる', idle: '',
+};
+
 export class NPC extends Actor {
   constructor(opts) {
     super({
@@ -37,35 +70,105 @@ export class NPC extends Actor {
     this.talking = false;
     this.interactLabel = '話す';
     this.weaponModel = opts.role === 'smith' ? 'w_axe' : null;
+
+    // ---- 一日の行動 ----
+    this.spots = opts.spots || null;
+    // 全員が同時刻に動き出すと行列に見えるので、各自 ±20 分ずらす
+    this.shift = (opts.shift ?? 0);
+    this.postAngle = opts.postAngle ?? Math.random() * TAU;
+    this.entryIdx = -1;
+    this.activity = 'idle';
+    this.spotKey = 'home';
+    this.indoors = false;        // 家の中にいる間は描画も会話もしない
+    this.arrived = false;
+    this.target = null;
+    this.driftT = 0;
+    this.drift = [0, 0];
+  }
+
+  get table() { return SCHEDULES[this.role] || SCHEDULES.villager; }
+
+  /** いま有効な行動表の項目 */
+  scheduleIndex(hour) {
+    const tab = this.table;
+    let idx = 0;
+    for (let i = 0; i < tab.length; i++) {
+      if (hour >= tab[i][0] + (i === 0 ? 0 : this.shift)) idx = i;
+    }
+    return idx;
+  }
+
+  /** 持ち場を決める。遠くにいる間は歩かせず、直接そこへ置く */
+  setEntry(i, game) {
+    const [, key, act] = this.table[i];
+    this.entryIdx = i;
+    this.activity = act;
+    this.spotKey = key;
+    const s = (this.spots && this.spots[key]) || (this.spots && this.spots.home)
+      || { x: this.homeX, z: this.homeZ };
+    const r = SPREAD[key] ?? 1.5;
+    this.target = {
+      x: s.x + Math.cos(this.postAngle) * r,
+      z: s.z + Math.sin(this.postAngle) * r,
+      fx: s.x, fz: s.z,
+    };
+    this.drift = [0, 0];
+    // プレイヤーから遠ければ、村に着いたとき既にその場に居るようにする
+    const p = game?.player;
+    if (p && Math.hypot(this.x - p.x, this.z - p.z) > 55) {
+      this.x = this.target.x; this.z = this.target.z;
+      this.y = game.groundHeight(this.x, this.z);
+      this.arrived = true;
+    } else this.arrived = false;
   }
 
   update(dt, game) {
     if (this.talking) {
+      this.indoors = false;
       this.faceTowards(game.player.x, game.player.z, dt, 6);
       this.updateAnim(dt, 0);
       this.updatePhysics(dt, game);
       return;
     }
-    this.wanderT -= dt;
+
+    const idx = this.scheduleIndex(game.sky.hour);
+    if (idx !== this.entryIdx) this.setEntry(idx, game);
+
+    const t = this.target;
+    const tx = t.x + this.drift[0], tz = t.z + this.drift[1];
+    const dx = tx - this.x, dz = tz - this.z;
+    const dist = Math.hypot(dx, dz);
+    const arriveR = this.activity === 'sleep' ? 0.6 : 0.9;
     let speed = 0;
-    if (this.wanderT <= 0) {
-      this.wanderT = 3 + Math.random() * 6;
-      this.moving = Math.random() < 0.45;
-      this.wanderAngle = Math.random() * TAU;
+
+    if (dist > arriveR) {
+      // 持ち場が遠いほど急ぐ。寝に帰るときも足が速い
+      const walk = dist > 14 || this.activity === 'sleep' ? 2.0 : 1.4;
+      this.faceTowards(tx, tz, dt, 4);
+      this.moveOnGround(dt, game, dx, dz, walk);
+      speed = walk;
+      this.arrived = false;
+    } else {
+      if (!this.arrived) { this.arrived = true; this.driftT = 0; }
+      // 持ち場では中心（かがり火・井戸・仕事場）の方を向いて立つ
+      if (this.activity !== 'sleep') this.faceTowards(t.fx, t.fz, dt, 2);
+      // 立ち尽くさないよう、持ち場のまわりで小さく動く
+      this.driftT -= dt;
+      if (this.driftT <= 0) {
+        this.driftT = 5 + Math.random() * 8;
+        const a = Math.random() * TAU, r = Math.random() * 1.3;
+        this.drift = this.activity === 'sleep' ? [0, 0] : [Math.cos(a) * r, Math.sin(a) * r];
+      }
     }
-    if (this.moving) {
-      const tx = this.homeX + Math.sin(this.wanderAngle) * 5;
-      const tz = this.homeZ + Math.cos(this.wanderAngle) * 5;
-      const dx = tx - this.x, dz = tz - this.z;
-      if (Math.hypot(dx, dz) > 0.8) {
-        this.faceTowards(tx, tz, dt, 3);
-        this.moveOnGround(dt, game, dx, dz, 1.5);
-        speed = 1.5;
-      } else this.moving = false;
-    }
+
+    // 眠っている間は家の中。壁の中に立たせたままにせず、描画も会話も止める
+    this.indoors = this.activity === 'sleep' && this.arrived;
     this.updatePhysics(dt, game);
     this.updateAnim(dt, speed);
   }
+
+  /** いま何をしているか（会話やプロンプトに使う） */
+  activityLabel() { return ACTIVITY_LABEL[this.activity] || ''; }
 
   /** 会話ツリーのルートノードを返す */
   dialogue(game) {
@@ -461,18 +564,72 @@ export class NPC extends Actor {
   smalltalk(game) { return this.say('smalltalk', game, 11); }
 }
 
+/**
+ * その集落の「場所」を、実際に建っている構造物から拾う。
+ * 小さな集落には市も納屋も無いので、順に代わりを探す。
+ */
+function villageSpots(poi, rng) {
+  const st = poi.structures || [];
+  const of = (...models) => st.filter((s) => models.includes(s.model));
+  const one = (arr, fb) => (arr.length ? arr[(rng() * arr.length) | 0] : fb);
+  const center = { x: poi.x, z: poi.z };
+  const xz = (s) => (s ? { x: s.x, z: s.z } : center);
+  return {
+    houses: of('house_a', 'house_b', 'hut', 'tent'),
+    center,
+    well: xz(one(of('well'), null)),
+    fire: xz(one(of('campfire'), null)),
+    square: center,
+    stall: xz(one(of('stall'), one(of('cart'), null))),
+    statue: xz(one(of('statue'), one(of('banner'), one(of('signpost'), null)))),
+    barn: xz(one(of('barn'), one(of('cart'), null))),
+    R: poi.plateauR || 22,
+  };
+}
+
+/** 役割ごとの仕事場 */
+function workSpot(role, sp, home) {
+  switch (role) {
+    case 'merchant': return sp.stall;
+    case 'smith': return sp.barn;
+    case 'priest': return sp.statue;
+    case 'innkeeper': return home || sp.center;
+    case 'herbalist': return sp.well;
+    case 'hunter': return sp.center;
+    case 'elder': return sp.square;
+    default: return sp.well;
+  }
+}
+
 /** 村 POI に NPC を配置 */
 export function populateVillage(poi, world) {
   const rng = makeRng((poi.x * 7919 + poi.z * 104729 + 13) | 0);
+  const sp = villageSpots(poi, rng);
+
+  /** その NPC 用の持ち場一式を組む */
+  const spotsFor = (role, home, bearing) => {
+    const R = sp.R;
+    const out = {
+      home: home || sp.center,
+      well: sp.well, fire: sp.fire, square: sp.square, center: sp.center,
+      work: workSpot(role, sp, home),
+      // 畑仕事・狩りは集落の外。各自ちがう方角へ出る
+      field: { x: poi.x + Math.cos(bearing) * (R + 9), z: poi.z + Math.sin(bearing) * (R + 9) },
+      gate: { x: poi.x + Math.cos(bearing) * (R * 0.85), z: poi.z + Math.sin(bearing) * (R * 0.85) },
+    };
+    return out;
+  };
 
   // 隠者の庵には一人だけ住んでいる
   if (poi.type === 'hermit') {
     const solo = ['herbalist', 'hunter', 'merchant'][(rng() * 3) | 0];
     const a = rng() * TAU, r = 3.5 + rng() * 2;
     const x = poi.x + Math.cos(a) * r, z = poi.z + Math.sin(a) * r;
+    const home = sp.houses.length ? { x: sp.houses[0].x, z: sp.houses[0].z } : sp.center;
     return [new NPC({
       role: solo, name: FIRST[(rng() * FIRST.length) | 0],
       x, y: world.height(x, z), z, yaw: -a + Math.PI, poi,
+      spots: spotsFor(solo, home, a), shift: (rng() - 0.5) * 0.6, postAngle: rng() * TAU,
     })];
   }
 
@@ -489,26 +646,35 @@ export function populateVillage(poi, world) {
     }
   }
   const npcs = [];
-  chosen.forEach((role, i) => {
-    const a = (i / chosen.length) * TAU + rng() * 0.6;
+  // 家は一軒ずつ割り当てる。同じ家で寝る二人が出ないように
+  let houseAt = 0;
+  const nextHome = () => {
+    if (!sp.houses.length) return sp.center;
+    const h = sp.houses[houseAt % sp.houses.length];
+    houseAt++;
+    return { x: h.x, z: h.z };
+  };
+
+  const all = [...chosen];
+  const extra = poi.size >= 9 ? 3 : 1;
+  for (let i = 0; i < extra; i++) all.push('villager');
+
+  all.forEach((role, i) => {
+    const a = (i / all.length) * TAU + rng() * 0.6;
     const r = 6 + rng() * 7;
     const x = poi.x + Math.cos(a) * r;
     const z = poi.z + Math.sin(a) * r;
+    const home = nextHome();
     npcs.push(new NPC({
       role,
-      name: role === 'elder' ? 'エルダ' : FIRST[1 + ((rng() * (FIRST.length - 1)) | 0)],
+      name: role === 'elder' ? 'エルダ'
+        : role === 'villager' ? FIRST[(rng() * FIRST.length) | 0]
+          : FIRST[1 + ((rng() * (FIRST.length - 1)) | 0)],
       x, y: world.height(x, z), z, yaw: -a + Math.PI, poi,
+      spots: spotsFor(role, home, a),
+      shift: (rng() - 0.5) * 0.66,     // ±20 分
+      postAngle: rng() * TAU,
     }));
   });
-  // 一般村人
-  const extra = poi.size >= 9 ? 3 : 1;
-  for (let i = 0; i < extra; i++) {
-    const a = rng() * TAU, r = 4 + rng() * 12;
-    const x = poi.x + Math.cos(a) * r, z = poi.z + Math.sin(a) * r;
-    npcs.push(new NPC({
-      role: 'villager', name: FIRST[(rng() * FIRST.length) | 0],
-      x, y: world.height(x, z), z, yaw: rng() * TAU, poi,
-    }));
-  }
   return npcs;
 }

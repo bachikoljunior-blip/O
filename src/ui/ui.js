@@ -971,6 +971,21 @@ export class UI {
     const tv = el('button', 'btn wide', '別の篝火へ転送する');
     tv.onclick = () => { this.tab = 'travel'; this.renderOverlay(); };
     panel.appendChild(tv);
+
+    // 時を待つ。村人は夜になると家へ入ってしまうので、朝を待てるようにしておく
+    const wait = el('div', 'row');
+    wait.innerHTML = '<span>時を待つ<span class="sub">村の者は夜には家へ入る</span></span>';
+    for (const [label, hour] of [['朝', 6.5], ['昼', 12], ['夜', 21]]) {
+      const b = el('button', 'btn', label);
+      b.onclick = () => {
+        game.sky.skipToHour(hour);
+        game.sky.update(0.016, game);
+        this.toast(`${label}まで待った（${game.sky.timeLabel()}）`);
+        this.closeOverlay();
+      };
+      wait.appendChild(b);
+    }
+    panel.appendChild(wait);
     root.appendChild(panel);
   }
 
