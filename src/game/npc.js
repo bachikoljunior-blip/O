@@ -84,6 +84,40 @@ export class NPC extends Actor {
     this.target = null;
     this.driftT = 0;
     this.drift = [0, 0];
+    this.stuck = 0;
+    this.detour = 0;
+  }
+
+  /**
+   * 進む向きを決める。経路探索は持たないので、一歩先を扇状に試して
+   * 「進めて、かつ目的地に近づく」向きを選ぶ。
+   * 角で左右に振れないよう、一度選んだ側は変えにくくしてある。
+   */
+  steer(game, dx, dz, probe) {
+    const base = Math.atan2(dx, dz);
+    const sx = this.x, sz = this.z;
+    const tx = this.target.x, tz = this.target.z;
+    const test = (off) => {
+      this.x = sx; this.z = sz;
+      const a = base + off;
+      this.tryMove(game, sx + Math.sin(a) * probe, sz + Math.cos(a) * probe);
+      return { moved: Math.hypot(this.x - sx, this.z - sz),
+        d: Math.hypot(this.x - tx, this.z - tz) };
+    };
+    // まっすぐ行けるならそれでいい
+    if (test(0).moved > probe * 0.80) { this.x = sx; this.z = sz; this.detour = 0; return 0; }
+    let best = null, bestScore = Infinity;
+    for (const off of [0.5, -0.5, 1.0, -1.0, 1.5, -1.5, 2.0, -2.0, 2.6, -2.6]) {
+      const r = test(off);
+      if (r.moved < probe * 0.55) continue;              // その向きは塞がれている
+      let score = r.d + Math.abs(off) * 0.25;
+      // 迂回する側を毎フレーム変えると、壁の前で左右に揺れて進まない
+      if (this.detour !== 0 && Math.sign(off) !== Math.sign(this.detour)) score += 1.2;
+      if (score < bestScore) { bestScore = score; best = off; }
+    }
+    this.x = sx; this.z = sz;
+    this.detour = best ?? 0;
+    return this.detour;
   }
 
   get table() { return SCHEDULES[this.role] || SCHEDULES.villager; }
@@ -107,12 +141,29 @@ export class NPC extends Actor {
     const s = (this.spots && this.spots[key]) || (this.spots && this.spots.home)
       || { x: this.homeX, z: this.homeZ };
     const r = SPREAD[key] ?? 1.5;
-    this.target = {
-      x: s.x + Math.cos(this.postAngle) * r,
-      z: s.z + Math.sin(this.postAngle) * r,
-      fx: s.x, fz: s.z,
-    };
+    const bk = game?.blockers;
+    let tx = s.x + Math.cos(this.postAngle) * r;
+    let tz = s.z + Math.sin(this.postAngle) * r;
+    if (key === 'home') {
+      // 戸口は村の中心を向いた側に取る。家は中心を向いて建っているので、
+      // 裏手に回られると隣家との隙間に挟まって帰れなくなる
+      const c = this.spots?.center || s;
+      const ang = Math.atan2(c.x - s.x, c.z - s.z);
+      const box = bk && bk.at(s.x, s.z);
+      const reach = box ? Math.max(box.hx, box.hz) + this.radius + 0.7 : 1.0;
+      tx = s.x + Math.sin(ang) * reach;
+      tz = s.z + Math.cos(ang) * reach;
+    }
+    // 持ち場が建物の中や、建物どうしの隙間に来てしまったら外へ出す。
+    // 立てない場所を目指すと、その周りを永久に回り続けることになる
+    if (bk) {
+      const o = [tx, tz];
+      for (let k = 0; k < 4; k++) if (!bk.resolve(o[0], o[1], this.radius + 0.45, o)) break;
+      tx = o[0]; tz = o[1];
+    }
+    this.target = { x: tx, z: tz, fx: s.x, fz: s.z };
     this.drift = [0, 0];
+    this.stuck = 0;
     // プレイヤーから遠ければ、村に着いたとき既にその場に居るようにする
     const p = game?.player;
     if (p && Math.hypot(this.x - p.x, this.z - p.z) > 55) {
@@ -138,16 +189,27 @@ export class NPC extends Actor {
     const tx = t.x + this.drift[0], tz = t.z + this.drift[1];
     const dx = tx - this.x, dz = tz - this.z;
     const dist = Math.hypot(dx, dz);
-    const arriveR = this.activity === 'sleep' ? 0.6 : 0.9;
+    // 着いた後は少し広めに見る（持ち場での小さな動きで着離を繰り返さないように）
+    const base = this.activity === 'sleep' ? 0.6 : 0.9;
+    const arriveR = this.arrived ? base + 1.4 : base;
     let speed = 0;
 
     if (dist > arriveR) {
       // 持ち場が遠いほど急ぐ。寝に帰るときも足が速い
       const walk = dist > 14 || this.activity === 'sleep' ? 2.0 : 1.4;
-      this.faceTowards(tx, tz, dt, 4);
-      this.moveOnGround(dt, game, dx, dz, walk);
+      const x0 = this.x, z0 = this.z;
+      // 探査は実際の歩幅で行う。長い距離で試すと、壁沿いに滑った分を
+      // 「進めた」と誤判定して、隅に挟まったまま前を向き続けることになる
+      const off = this.steer(game, dx, dz, walk * dt);
+      const a = Math.atan2(dx, dz) + off;
+      const mx = Math.sin(a), mz = Math.cos(a);
+      this.faceTowards(this.x + mx, this.z + mz, dt, 4);
+      this.moveOnGround(dt, game, mx, mz, walk);
       speed = walk;
       this.arrived = false;
+      const moved = Math.hypot(this.x - x0, this.z - z0);
+      if (moved < walk * dt * 0.45) this.stuck += dt;
+      else this.stuck = Math.max(0, this.stuck - dt);
     } else {
       if (!this.arrived) { this.arrived = true; this.driftT = 0; }
       // 持ち場では中心（かがり火・井戸・仕事場）の方を向いて立つ
@@ -161,8 +223,9 @@ export class NPC extends Actor {
       }
     }
 
-    // 眠っている間は家の中。壁の中に立たせたままにせず、描画も会話も止める
-    this.indoors = this.activity === 'sleep' && this.arrived;
+    // 眠っている間は家の中。壁の中に立たせたままにせず、描画も会話も止める。
+    // 途中で立ち往生しただけの者を消してしまわないよう、戸口に着いたことを距離で見る
+    this.indoors = this.activity === 'sleep' && dist <= arriveR + 0.6;
     this.updatePhysics(dt, game);
     this.updateAnim(dt, speed);
   }

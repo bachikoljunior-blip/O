@@ -52,6 +52,21 @@ export class MeshBuilder {
     this.v.push(px, py, pz, ax / l, ay / l, az / l, c[0], c[1], c[2]);
     return this.v.length / VERT_FLOATS - 1;
   }
+  /** XZ の外接矩形と高さ。当たり判定の箱をメッシュ自身から作るために使う */
+  bounds() {
+    const v = this.v;
+    if (!v.length) return { minX: 0, maxX: 0, minZ: 0, maxZ: 0, maxY: 0 };
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity, maxY = -Infinity;
+    for (let i = 0; i < v.length; i += VERT_FLOATS) {
+      if (v[i] < minX) minX = v[i];
+      if (v[i] > maxX) maxX = v[i];
+      if (v[i + 1] > maxY) maxY = v[i + 1];
+      if (v[i + 2] < minZ) minZ = v[i + 2];
+      if (v[i + 2] > maxZ) maxZ = v[i + 2];
+    }
+    return { minX, maxX, minZ, maxZ, maxY };
+  }
+
   tri(a, b, c) { this.i.push(a, b, c); return this; }
   quad(a, b, c, d) { this.i.push(a, b, c, a, c, d); return this; }
 
@@ -838,11 +853,15 @@ function daggerMesh(b) {
 }
 
 /* --------------------------------------------------------------- 生成 */
+/** モデル名 → XZ 外接矩形と高さ。buildModels() で埋まる */
+export const MODEL_BOUNDS = {};
+
 export function buildModels(gl) {
   const models = {};
   const add = (name, fn) => {
     const b = new MeshBuilder();
     fn(b);
+    MODEL_BOUNDS[name] = b.bounds();
     models[name] = b.build(gl);
   };
 

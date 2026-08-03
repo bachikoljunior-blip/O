@@ -9,6 +9,7 @@ import { clamp, clamp01, lerp, v3, TAU } from '../core/math.js';
 import { WorldGen, WORLD_RADIUS } from '../world/worldgen.js';
 import { Terrain, CHUNK } from '../world/terrain.js';
 import { generatePOIs } from '../world/pois.js';
+import { Blockers } from '../world/blockers.js';
 import { Sky } from '../world/sky.js';
 import { Dungeon } from '../world/dungeon.js';
 
@@ -108,6 +109,8 @@ export class Game {
     this.fx = new FX(this.gl);
     this.camera = new Camera();
     this.renderer = new Renderer(this.gl, this.quality);
+    // 建物の当たり判定はメッシュの寸法から作るので、描画側の初期化の後
+    this.blockers = new Blockers().build(this.pois);
     this.ui.progress('世界を描き出しています…', 0.6);
     await frame();
 
@@ -234,9 +237,12 @@ export class Game {
     return this.dungeon ? this.dungeon.groundHeight(x, z) : this.world.height(x, z);
   }
   collide(x, z, radius, out) {
-    return this.dungeon
-      ? this.dungeon.collide(x, z, radius, out)
-      : this.terrain.collide(x, z, radius, out);
+    if (this.dungeon) return this.dungeon.collide(x, z, radius, out);
+    const hitTerrain = this.terrain.collide(x, z, radius, out);
+    // 木や岩を避けた後の位置から、さらに建物を避ける
+    const hitBuild = this.blockers
+      ? this.blockers.resolve(out[0], out[1], radius, out) : false;
+    return hitTerrain || hitBuild;
   }
   surfaceAt(x, z) {
     if (this.dungeon) return { h: 0, slope: 0, surface: 'rock', road: 0, underwater: false };
