@@ -199,6 +199,10 @@ export function generatePOIs(world) {
       if (dist > 900) continue;      // 遠すぎる接続は道にしない
       const steps = Math.max(2, Math.ceil(dist / 26));
       let px = a.x, pz = a.z;
+      // 道そのものの折れ線を残しておく。
+      // これまでは地面を均す線分しか残さず、「どこからどこへ続く道か」を
+      // 捨てていたので、道の上を歩かせる者を置けなかった
+      const pts = [{ x: px, z: pz }];
       for (let s = 1; s <= steps; s++) {
         const t = s / steps;
         // 少し蛇行させる
@@ -207,8 +211,11 @@ export function generatePOIs(world) {
         const qx = a.x + (b.x - a.x) * t + nx * bend;
         const qz = a.z + (b.z - a.z) * t + nz * bend;
         world.addRoad(px, pz, qx, qz, 2.4, 3.5);
+        pts.push({ x: qx, z: qz });
         px = qx; pz = qz;
       }
+      world.routes.push({ from: a.id, to: b.id,
+        fromName: a.name, toName: b.name, length: dist, pts });
     }
   }
 

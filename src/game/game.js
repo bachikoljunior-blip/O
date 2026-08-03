@@ -11,6 +11,7 @@ import { Terrain, CHUNK } from '../world/terrain.js';
 import { generatePOIs } from '../world/pois.js';
 import { Blockers } from '../world/blockers.js';
 import { Wildlife } from '../world/wildlife.js';
+import { Travellers } from '../world/travellers.js';
 import { Sky } from '../world/sky.js';
 import { Dungeon } from '../world/dungeon.js';
 
@@ -126,6 +127,7 @@ export class Game {
     this.enemies = [];
     this.npcs = [];
     this.wildlife = new Wildlife();
+    this.travellers = new Travellers();
     this.projectiles = [];
     this.gatherables = new Map();
     this.harvested = new Set();
@@ -389,6 +391,7 @@ export class Game {
     }
     if (!this.dungeon) this.mount.update(dt, this);
     this.wildlife.update(dt, this);
+    this.travellers.update(dt, this);
     this.updateProjectiles(dt);
     this.updateSwimming(dt);
     if (this.dungeon) {
@@ -1268,6 +1271,10 @@ export class Game {
       const d = Math.hypot(n.x - p.x, n.z - p.z);
       if (d < bestD) { bestD = d; best = { type: 'npc', obj: n, label: `${n.npcName}（${n.title}）と話す` }; }
     }
+    for (const t of this.travellers.list) {
+      const d = Math.hypot(t.x - p.x, t.z - p.z);
+      if (d < bestD) { bestD = d; best = { type: 'traveller', obj: t, label: `${t.npcName}に声をかける` }; }
+    }
     for (const poi of this.pois) {
       const d = Math.hypot(poi.x - p.x, poi.z - p.z);
       if (poi.type === 'shrine' && d < 3.2) {
@@ -1309,6 +1316,18 @@ export class Game {
       case 'npc':
         this.ui.openDialogue(t.obj);
         break;
+      case 'traveller': {
+        // 旅の者は用件を持たない。足を止めて一言だけ交わして、また歩き出す
+        const tv = t.obj;
+        tv.talking = true;
+        const line = tv.lines[(Math.random() * tv.lines.length) | 0];
+        this.ui.toast(`${tv.npcName}「${line}」`, 'gold');
+        this.ui.toast(`${tv.destination} へ向かうという`);
+        this.audio.play('ui_on');
+        clearTimeout(tv._talkT);
+        tv._talkT = setTimeout(() => { tv.talking = false; }, 3200);
+        break;
+      }
       case 'shrine': {
         const poi = t.obj;
         this.reachPOI(poi);
@@ -1737,6 +1756,11 @@ export class Game {
       if (Math.hypot(e.x - px, e.z - pz) > 140) continue;
       if (!frustum.sphere(e.x, e.y + e.height * 0.5, e.z, e.height)) continue;
       e.emit(renderer, time, this);
+    }
+    for (const t of this.travellers.list) {
+      if (Math.hypot(t.x - px, t.z - pz) > 200) continue;
+      if (!frustum.sphere(t.x, t.y + t.height * 0.5, t.z, t.height)) continue;
+      t.emit(renderer, time, this);
     }
     for (const n of this.npcs) {
       if (n.indoors) continue;

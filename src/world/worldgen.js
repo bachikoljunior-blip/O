@@ -113,6 +113,7 @@ export class WorldGen {
     this.flatCell = 96;
     this.flatGrid = new Map();
     this.roads = [];
+    this.routes = [];   // 街道の折れ線（拠点から拠点へ）
 
     this._p = this._makeP();
     this._hp = {
