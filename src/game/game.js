@@ -29,6 +29,8 @@ import {
   discoverReward,
 } from './data.js';
 
+const _wind = [0, 0];
+
 export const QUALITY_PRESETS = {
   low: {
     name: '軽量', renderScale: 0.62, viewChunks: 6, lodScale: 0.7, shadows: true, shadowSize: 1024,
@@ -542,7 +544,25 @@ export class Game {
       kind: o.kind, damage: o.damage, team: o.team, owner: o.owner,
       life: 5, gravity: o.gravity ?? (o.kind === 'arrow' || o.kind === 'arrow_heavy' ? 5.5 : 0),
       splash: o.splash || 0, frost: o.frost, fire: o.fire, poise: 14,
+      // 風を受けるのは矢だけ。術は自分で飛ぶ
+      windK: (o.kind === 'arrow' || o.kind === 'arrow_heavy') ? 1 : 0,
     });
+  }
+
+  /**
+   * 矢を横へ流す風の加速度。
+   *
+   * 天候が絵と音だけで、手元に何も返っていなかった。
+   * 強い横風の日には、遠くを狙うほど風下へ持っていかれる。
+   * 地下では吹かない。
+   */
+  windAccel(out) {
+    if (this.dungeon || !this.sky) { out[0] = 0; out[1] = 0; return out; }
+    const w = this.sky.wind || 0;
+    const d = this.sky.windDir || [1, 0];
+    const a = w * 1.6;
+    out[0] = d[0] * a; out[1] = d[1] * a;
+    return out;
   }
 
   updateProjectiles(dt) {
@@ -551,6 +571,11 @@ export class Game {
       const b = P[i];
       b.life -= dt;
       b.vy -= b.gravity * dt;
+      if (b.windK) {
+        this.windAccel(_wind);
+        b.vx += _wind[0] * b.windK * dt;
+        b.vz += _wind[1] * b.windK * dt;
+      }
       const nx = b.x + b.vx * dt, ny = b.y + b.vy * dt, nz = b.z + b.vz * dt;
 
       // 軌跡

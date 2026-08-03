@@ -572,10 +572,10 @@ export class Player extends Actor {
   /** 今の構えで放ったら、どこへ落ちるか。矢と魔法で弾道が違う */
   projectileSpec() {
     const w = this.weapon();
-    if (w?.ranged) return { speed: 46, gravity: 5.5 };
+    if (w?.ranged) return { speed: 46, gravity: 5.5, windK: 1 };
     const sp = SPELLS[this.equip.spell];
     if (sp?.projectile && (sp.type !== 'arc' || w?.catalyst)) {
-      return { speed: sp.projectile === 'ice' ? 34 : 26, gravity: 0 };
+      return { speed: sp.projectile === 'ice' ? 34 : 26, gravity: 0, windK: 0 };
     }
     return null;
   }
@@ -600,13 +600,18 @@ export class Player extends Actor {
     // 毎フレーム走らせるには重すぎた。当たり判定が要るのは手前だけなので、
     // 敵を調べる範囲を超えたら刻みを 5 倍にする
     const NEAR2 = 70 * 70;
+    // 実際に飛ぶ矢と同じ風を受けさせる。ここで無視すると、
+    // 強風の日に印だけが正直でなくなる
+    const wind = [0, 0];
+    if (spec.windK !== 0) game.windAccel(wind);
     for (let i = 0; i < 200; i++) {
       const dx0 = x - this.x, dz0 = z - this.z;
       // 距離で打ち切ると、高い弾道の着弾点が 30m もずれた。
       // 刻みを粗くするだけで足りる（反復上限 200 が実質の歯止め）
       const near = dx0 * dx0 + dz0 * dz0 < NEAR2;
-      const dt = near ? 1 / 60 : 1 / 12;
+      const dt = near ? 1 / 60 : 1 / 30;
       vy -= spec.gravity * dt;
+      vx += wind[0] * dt; vz += wind[1] * dt;
       const nx = x + vx * dt, ny = y + vy * dt, nz = z + vz * dt;
       if (near) {
         for (const e of game.enemies) {

@@ -14,6 +14,19 @@ const _tip = v3.new();
 
 export const TEAM = { PLAYER: 0, ENEMY: 1, NEUTRAL: 2 };
 
+/**
+ * 足の運び。
+ *
+ * 積もった雪は足を取り、濡れた地面は蹴りが逃げる。
+ * 地下には天候が無いので効かない。踏むのは敵も同じ。
+ */
+export function footing(game) {
+  if (!game || game.dungeon || !game.sky) return 1;
+  const snow = game.sky.snowCover || 0;
+  const wet = game.sky.wetness || 0;
+  return 1 - snow * 0.22 - wet * 0.07;
+}
+
 let nextId = 1;
 
 export class Actor {
@@ -129,8 +142,9 @@ export class Actor {
       // 平地と同じ速さで斜面を駆け上がれると、地形の起伏が意味を失う
       const grade = (game.groundHeight(nx, nz) - game.groundHeight(this.x, this.z))
         / Math.max(step, 1e-4);
-      const k = grade > 0 ? 1 / (1 + grade * 1.15) : 1 + Math.min(0.20, -grade * 0.22);
+      let k = grade > 0 ? 1 / (1 + grade * 1.15) : 1 + Math.min(0.20, -grade * 0.22);
       this.slopeK = k;
+      k *= footing(game);
       this.tryMove(game, this.x + dx * step * k, this.z + dz * step * k);
     }
   }
@@ -149,10 +163,14 @@ export class Actor {
     const gz = (game.groundHeight(this.x, this.z + 0.6) - game.groundHeight(this.x, this.z - 0.6)) / 1.2;
     const g = Math.hypot(gx, gz);
     void h;
-    if (g < 1.15) { this.sliding = 0; return; }
-    const k = Math.min(1, (g - 1.15) / 0.85);
+    // 濡れた斜面・雪の斜面は、乾いていれば踏ん張れる角度でも滑り出す
+    const wet = game.sky ? (game.sky.wetness || 0) : 0;
+    const snow = game.sky ? (game.sky.snowCover || 0) : 0;
+    const hold = 1.15 - wet * 0.16 - snow * 0.22;
+    if (g < hold) { this.sliding = 0; return; }
+    const k = Math.min(1, (g - hold) / 0.85);
     this.sliding = k;
-    const sp = 2.2 + k * 6.5;
+    const sp = (2.2 + k * 6.5) * (1 + wet * 0.22 + snow * 0.30);
     this.tryMove(game, this.x - (gx / g) * sp * dt, this.z - (gz / g) * sp * dt);
   }
 
