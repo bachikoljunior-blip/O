@@ -76,7 +76,9 @@ async function boot() {
   window.__game = game;   // デバッグ用
 }
 
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+// 真偽で見る。'in' で見ると、配布版で navigator.serviceWorker を消しても
+// 判定だけ通ってしまい、undefined.register で毎回落ちる
+if (navigator.serviceWorker && location.protocol.startsWith('http')) {
   addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => { /* オフライン非対応でも動作する */ });
   });

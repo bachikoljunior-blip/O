@@ -1743,7 +1743,7 @@ export class Game {
       const b = renderer.batchFor(model);
       if (!b) continue;
       const o = b.alloc();
-      const c = GATHER_COLOR[g.type];
+      const c = GATHER_COLOR[g.type] || GATHER_FALLBACK;
       writeInstance(b.data, o, g.x, g.y, g.z, g.key % 6, 0.6, 0.7, 0.6,
         c[0], c[1], c[2], 1, g.type === 'herb' || g.type === 'blood_flower' ? 0.6 : 0,
         0.35 + Math.sin(time * 1.7 + g.key) * 0.12, 0.55, 0.5);
@@ -1893,7 +1893,14 @@ const PROJ_COLOR = {
 const GATHER_COLOR = {
   herb: [0.45, 0.85, 0.4], blood_flower: [0.95, 0.25, 0.3],
   ore_iron: [0.75, 0.7, 0.65], crystal: [0.55, 0.75, 1],
+  // 第24回で足した鉱脈。色を書き忘れていて、これらが視界に入るたびに
+  // 描画が例外で中断し、それ以降のアクター・旅人・鳥が出ていなかった
+  ore_silver: [0.86, 0.88, 0.92], shard_ancient: [0.95, 0.82, 0.45],
+  bone_ash: [0.72, 0.70, 0.66],
 };
+
+/** 色を書き忘れても描画を止めない */
+const GATHER_FALLBACK = [0.8, 0.8, 0.8];
 
 function frame() {
   return new Promise((r) => requestAnimationFrame(() => r()));

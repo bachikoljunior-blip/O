@@ -1,0 +1,25 @@
+import { WorldGen } from '../src/world/worldgen.js';
+const w = new WorldGen(20260802);
+// warm cache
+for (let i=0;i<200;i++) for(let j=0;j<200;j++) w.params(i*4-400, j*4-400);
+const N=200000;
+let t=performance.now(), s=0;
+for(let i=0;i<N;i++) s+=w.params(i%400, (i*7)%400).base;
+console.log('params  ', ((performance.now()-t)*1000/N).toFixed(3)+'us');
+t=performance.now();
+for(let i=0;i<N;i++) s+=w.heightBase(i%400, (i*7)%400);
+console.log('heightBase', ((performance.now()-t)*1000/N).toFixed(3)+'us');
+t=performance.now();
+for(let i=0;i<N;i++) s+=w.height(i%400, (i*7)%400);
+console.log('height  ', ((performance.now()-t)*1000/N).toFixed(3)+'us');
+t=performance.now();
+const c=[0,0,0];
+for(let i=0;i<N;i++) w.surfaceColor(i%400,(i*7)%400, 10, 0.2, c);
+console.log('surfCol ', ((performance.now()-t)*1000/N).toFixed(3)+'us');
+t=performance.now();
+for(let i=0;i<N;i++) s+=w.n.fbm(i*0.001,(i*7)*0.001,5);
+console.log('fbm5    ', ((performance.now()-t)*1000/N).toFixed(3)+'us');
+t=performance.now();
+for(let i=0;i<N;i++) s+=w.flatAt(i%400,(i*7)%400)?1:0;
+console.log('flatAt  ', ((performance.now()-t)*1000/N).toFixed(3)+'us');
+console.log(s>0);
