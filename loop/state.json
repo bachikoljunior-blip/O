@@ -1,0 +1,70 @@
+{
+  "_": "周回のあいだ持ち越す状態。書き方は README.md、目指すものは RUBRIC.md。",
+
+  "lock": {
+    "startedAt": null,
+    "by": null,
+    "note": "startedAt が45分以内なら作業中。null なら空き。"
+  },
+
+  "handoff": "この器を作ったところ。rubric はまだ一度も実機で確かめていないので、全項目 unknown から始まる。最初の数周は新機能より、unknown を減らすほうに使ってほしい —— 16,000行ぶんの機能があるのに、どれが実際に効いているかの記録がゼロという状態なので。",
+
+  "rubric": [
+    { "id": "A1", "what": "先行入力が効く", "status": "unknown", "evidence": null },
+    { "id": "A2", "what": "回避の無敵フレームが体感と一致", "status": "unknown", "evidence": null },
+    { "id": "A3", "what": "キャンセル規則が全モーションで一貫", "status": "unknown", "evidence": null },
+    { "id": "A4", "what": "中位のスマホで60fps維持", "status": "unknown", "evidence": null },
+    { "id": "A5", "what": "入力から描画まで1フレーム以内", "status": "unknown", "evidence": null },
+
+    { "id": "B1", "what": "全ての敵に見てから反応できる予備動作", "status": "unknown", "evidence": null },
+    { "id": "B2", "what": "同じ敵が状況で別の行動を選ぶ", "status": "unknown", "evidence": null },
+    { "id": "B3", "what": "画面外からの初撃で死なない", "status": "unknown", "evidence": null },
+    { "id": "B4", "what": "負けたとき何を間違えたか分かる", "status": "unknown", "evidence": null },
+
+    { "id": "C1", "what": "昼夜と天候が挙動に影響する", "status": "unknown", "evidence": null },
+    { "id": "C2", "what": "生き物どうしが反応する", "status": "unknown", "evidence": null },
+    { "id": "C3", "what": "同じ場所に自分がしたことの跡が残る", "status": "unknown", "evidence": null },
+
+    { "id": "D1", "what": "遠くに見えたものに行く価値がある", "status": "unknown", "evidence": null },
+    { "id": "D2", "what": "どの方向に10分歩いても発見が3つ以上", "status": "unknown", "evidence": null },
+    { "id": "D3", "what": "地図なしで地形から方角が分かる", "status": "unknown", "evidence": null },
+
+    { "id": "E1", "what": "30分前との差がstepではなくできることで分かる", "status": "unknown", "evidence": null },
+    { "id": "E2", "what": "強くなる道筋が複数あり見た目に出る", "status": "unknown", "evidence": null },
+
+    { "id": "F1", "what": "依頼に固有の事情がある", "status": "unknown", "evidence": null },
+    { "id": "F2", "what": "断る/別のやり方を選ぶ余地がある", "status": "unknown", "evidence": null },
+
+    { "id": "G1", "what": "片手で遊べる場面がある", "status": "unknown", "evidence": null },
+    { "id": "G2", "what": "3分で切り上げても損しない", "status": "unknown", "evidence": null },
+    { "id": "G3", "what": "10分遊んで持てなくなるほど熱くならない", "status": "unknown", "evidence": null },
+    { "id": "G4", "what": "通信なしで起動して遊べる", "status": "unknown", "evidence": null }
+  ],
+
+  "backlog": [
+    {
+      "what": "実際に動かして確かめる手段を用意する",
+      "why": "rubric の24項目が全て unknown なのは、確かめる術がまだ無いから。ヘッドレスで起動して入力を流し、フレーム時間と状態を吐く仕組みがあれば、A系とB系はコードを読まずに判定できる。これが無いと以後ずっと『たぶん通る』しか書けない",
+      "moves": ["A1", "A2", "A3", "A4", "A5", "B3"]
+    },
+    {
+      "what": "G4（通信なしで起動）を確かめる",
+      "why": "sw.js があるので実装はある。実際にオフラインで起動するかは別。単一ファイル版もあるので、そちらでも確かめる",
+      "moves": ["G4"]
+    },
+    {
+      "what": "D2（10分歩いて発見3つ以上）を実測する",
+      "why": "55か所の見どころがあると README にあるが、それが大陸のどこに散っているかで体感は変わる。生成後の座標を数え、任意の地点から半径いくつに何個あるかを出せば判定できる",
+      "moves": ["D1", "D2"]
+    }
+  ],
+
+  "tried": [],
+
+  "notes": {
+    "branch": "claude/mobile-open-world-action-rpg-0cjnmk",
+    "scale": "29 ES modules / 約16,400行 / WebGL",
+    "build": "npm run build で単一ファイル版",
+    "iteration": "1周およそ15〜25分"
+  }
+}
