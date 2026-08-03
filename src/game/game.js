@@ -11,7 +11,7 @@ import { Terrain, CHUNK } from '../world/terrain.js';
 import { generatePOIs } from '../world/pois.js';
 import { Blockers } from '../world/blockers.js';
 import { Wildlife } from '../world/wildlife.js';
-import { Travellers } from '../world/travellers.js';
+import { Travellers, VillageRaids, postWatch } from '../world/travellers.js';
 import { Fish } from '../world/fish.js';
 import { Sky } from '../world/sky.js';
 import { Dungeon } from '../world/dungeon.js';
@@ -127,8 +127,10 @@ export class Game {
 
     this.enemies = [];
     this.npcs = [];
+    this.watch = [];            // 村の衛兵（中立。game.enemies には入れない）
     this.wildlife = new Wildlife();
     this.travellers = new Travellers();
+    this.raids = new VillageRaids();
     this.fish = new Fish();
     this.projectiles = [];
     this.gatherables = new Map();
@@ -151,6 +153,8 @@ export class Game {
       if (p.type === 'village') this.npcs.push(...populateVillage(p, this.world));
       else if (p.type === 'hermit') this.npcs.push(...populateVillage(p, this.world));
     }
+    // 村に衛兵を立てる（建物の当たり判定ができた後でないと持ち場が家の中に来る）
+    for (const p of this.pois) this.watch.push(...postWatch(p, this));
     // 相棒の馬
     this.mount = new Mount({ x: this.player.x + 5, z: this.player.z + 4 });
     this.mount.y = this.world.height(this.mount.x, this.mount.z);
@@ -380,6 +384,9 @@ export class Game {
     }
 
     // エンティティ
+    // 村の襲撃は踏み込み権の前に。狙う相手と権利をここで決めてから敵を動かす
+    if (!this.dungeon) this.raids.update(dt, this);
+    else if (this.raids.raiding) this.raids.abandon(this);
     this.updateAggroTokens(dt);
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const e = this.enemies[i];
@@ -390,6 +397,13 @@ export class Game {
     }
     for (const n of this.npcs) {
       if (Math.hypot(n.x - p.x, n.z - p.z) < 70) n.update(dt, this);
+    }
+    // 衛兵は地上の村にしかいない。地下にいる間は動かさない
+    // （地下の敵と座標が重なると、見えない所で斬り合いが始まる）
+    if (!this.dungeon) {
+      for (const w of this.watch) {
+        if (Math.hypot(w.x - p.x, w.z - p.z) < 90) w.update(dt, this);
+      }
     }
     if (!this.dungeon) this.mount.update(dt, this);
     this.wildlife.update(dt, this);
@@ -1271,9 +1285,14 @@ export class Game {
     }
 
     for (const n of this.npcs) {
-      if (n.indoors) continue;              // 家の中で寝ている相手には話しかけられない
+      if (n.indoors || n.dead) continue;    // 家の中で寝ている相手・倒れた相手には話しかけられない
       const d = Math.hypot(n.x - p.x, n.z - p.z);
       if (d < bestD) { bestD = d; best = { type: 'npc', obj: n, label: `${n.npcName}（${n.title}）と話す` }; }
+    }
+    for (const w of this.watch) {
+      if (w.dead || w.foe) continue;        // 斬り合っている最中に話しかけられても困る
+      const d = Math.hypot(w.x - p.x, w.z - p.z);
+      if (d < bestD) { bestD = d; best = { type: 'watchman', obj: w, label: `${w.npcName}（${w.title}）に声をかける` }; }
     }
     for (const t of this.travellers.everyone()) {
       const d = Math.hypot(t.x - p.x, t.z - p.z);
@@ -1333,6 +1352,16 @@ export class Game {
         this.ui.openShop();
         clearTimeout(tv._talkT);
         tv._talkT = setTimeout(() => { tv.talking = false; }, 6000);
+        break;
+      }
+      case 'watchman': {
+        // 衛兵は用件を持たない。持ち場のことを一言だけ返す
+        const w = t.obj;
+        w.talking = true;
+        this.ui.toast(`${w.npcName}「${w.lines[(Math.random() * w.lines.length) | 0]}」`, 'gold');
+        this.audio.play('ui_on');
+        clearTimeout(w._talkT);
+        w._talkT = setTimeout(() => { w.talking = false; }, 3200);
         break;
       }
       case 'traveller': {
@@ -1628,6 +1657,19 @@ export class Game {
   }
 
   /**
+   * 衛兵が賊を見つけた。
+   * 同じ喧嘩で何度も叫ばせない。遠くの持ち場での発見は知らせない。
+   */
+  onWatchAlarm(watchman, foe) {
+    if (Math.hypot(watchman.x - this.player.x, watchman.z - this.player.z) > 90) return;
+    if (this.time.now - (this._alarmT ?? -99) < 8) return;
+    this._alarmT = this.time.now;
+    this.ui.toast(`${watchman.npcName}「賊だ！ 備えろ！」`, 'gold');
+    this.audio.play('aggro', { pitch: 0.75, x: watchman.x, z: watchman.z });
+    void foe;
+  }
+
+  /**
    * 加勢の礼。
    * 襲われた隊商のそばで賊が絶えたら、親方が礼を寄越す。
    */
@@ -1659,6 +1701,7 @@ export class Game {
         if (!van.raided) continue;
         if (Math.hypot(actor.x - van.x, actor.z - van.z) < 70) van.helped = true;
       }
+      this.raids?.onKill(actor);
     }
   }
 
@@ -1860,11 +1903,17 @@ export class Game {
       writeInstance(b.data, o, c.cartX, c.cartY, c.cartZ, c.yaw, 1.15, 1.15, 1.15,
         0.52, 0.40, 0.28, 1, 0, 0, 0, 0.5);
     }
+    for (const w of this.watch) {
+      if (Math.hypot(w.x - px, w.z - pz) > 140) continue;
+      if (!frustum.sphere(w.x, w.y + w.height * 0.5, w.z, w.height)) continue;
+      w.emit(renderer, time, this);
+    }
     for (const n of this.npcs) {
       if (n.indoors) continue;
       if (Math.hypot(n.x - px, n.z - pz) > 90) continue;
       if (!frustum.sphere(n.x, n.y + n.height * 0.5, n.z, n.height)) continue;
       n.emit(renderer, time, this);
+      if (n.dead) continue;                 // 倒れた者は印を出さない
       // 用件のある相手の頭上に印を出す（受注は金、報告は白）
       const mark = n.questMark(this);
       if (!mark) continue;

@@ -502,6 +502,26 @@ export const ENEMIES = {
     ],
     ai: { aggression: 0.5, circling: 0.15, retreat: 0.1, guard: 0.45, backstep: 0.15 },
   },
+  /**
+   * 村の衛兵。中立の陣営で使う（隊商護衛と同じ仕組み）。
+   *
+   * 護衛より一段軽い。村は自前の兵を雇えるほど豊かではないし、
+   * 衛兵だけで賊を退けられるなら、加勢する意味が無くなる。
+   * 賊（体力160・一撃40）に対して、一人で二人までが分かれ目になるよう置いた。
+   */
+  village_watch: {
+    id: 'village_watch', mat: 'armor', name: '村の衛兵', tier: 2, hp: 240, poise: 36, def: 10,
+    // 足は賊（3.4／5.4）より速くしてある。遅いと、逃げる村人を追う賊に
+    // 永久に追いつけず、衛兵が「追いかけるだけの者」になる
+    speed: 3.5, runSpeed: 5.8, aggro: 26, echo: 0, body: 'humanoid',
+    tint: [0.30, 0.33, 0.29], h: 1.0, weapon: 'w_spear', shield: true, group: 2,
+    attacks: [
+      { id: 'thrust', windup: 0.46, active: 0.13, recover: 0.56, dmg: 32, range: 3.0, arc: 1.1, poise: 22, motion: 'thrust' },
+      { id: 'sweep', windup: 0.54, active: 0.16, recover: 0.64, dmg: 27, range: 2.8, arc: 2.4, poise: 28, motion: 'slash_r' },
+      { id: 'butt', windup: 0.34, active: 0.12, recover: 0.58, dmg: 15, range: 2.2, arc: 1.2, poise: 38, motion: 'thrust', guardBreak: true },
+    ],
+    ai: { aggression: 0.55, circling: 0.15, retreat: 0.12, guard: 0.4, backstep: 0.15 },
+  },
   archer: {
     id: 'archer', mat: 'flesh', name: '野盗の射手', tier: 2, hp: 120, poise: 22, def: 4,
     speed: 3.2, runSpeed: 5.2, aggro: 34, echo: 90, body: 'humanoid',
