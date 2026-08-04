@@ -3,25 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0b1220">
-<meta name="description" content="アエテリア戦記 — スマートフォンで遊べる、手続き生成のオープンワールドRPG。">
+<meta name="theme-color" content="#0a0d14">
+<meta name="description" content="スマートフォンのブラウザで動く、手続き生成の3Dオープンワールド・アクションRPG。">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>アエテリア戦記 — オープンワールドRPG</title>
+<title>灰と霧と銹 — 3Dオープンワールド</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles/main.css">
+
+<!-- The dependency waterfall, not the connection count, is what costs a cold
+     mobile load: the browser cannot discover a module six levels deep until it
+     has parsed the five above it. Preloading the hot ones flattens that. -->
+<link rel="modulepreload" href="vendor/three.module.js">
+<link rel="modulepreload" href="src/app/boot.js">
+<link rel="modulepreload" href="src/app/loop.js">
+<link rel="modulepreload" href="src/sim/world.js">
+<link rel="modulepreload" href="src/sim/schedule.js">
+<link rel="modulepreload" href="src/sim/store.js">
+<link rel="modulepreload" href="src/sim/systems/combat.js">
+<link rel="modulepreload" href="src/sim/world/heightfield.js">
+<link rel="modulepreload" href="src/gfx/renderer.js">
+<link rel="modulepreload" href="src/gfx/terrain.js">
+<link rel="modulepreload" href="src/gfx/scene.js">
+<link rel="modulepreload" href="src/gfx/actors.js">
+<link rel="modulepreload" href="src/data/attacks.js">
+<link rel="modulepreload" href="src/data/tuning.js">
+<link rel="modulepreload" href="src/core/noise.js">
+<link rel="modulepreload" href="src/core/fixed.js">
 </head>
 <body>
-<canvas id="game" aria-label="ゲーム画面"></canvas>
+<canvas id="game"></canvas>
+<div id="hud"></div>
+
 <div id="boot">
-  <div class="boot-title">アエテリア戦記</div>
-  <div class="boot-sub">読み込み中…</div>
+  <div class="boot-title">灰と霧と銹</div>
+  <div class="boot-sub">大陸を生成しています…</div>
+  <div class="boot-hint">画面左をドラッグで移動 / 右をドラッグで視点</div>
 </div>
-<noscript>
-  <div class="noscript">このゲームを遊ぶには JavaScript を有効にしてください。</div>
-</noscript>
-<script type="module" src="src/main.js"></script>
+
+<noscript><div class="noscript">このゲームを遊ぶには JavaScript を有効にしてください。</div></noscript>
+
+<script type="module">
+  // Only the entry point loads statically. The heavy graph is imported after
+  // first paint, so the title is on screen while the rest streams in.
+  const params = new URLSearchParams(location.search);
+  const seed = parseInt(params.get('seed') || '', 10) || 0;
+
+  requestAnimationFrame(async () => {
+    try {
+      const { boot } = await import('./src/app/boot.js');
+      boot(document.getElementById('game'), document.getElementById('hud'), seed);
+      document.getElementById('boot').classList.add('gone');
+    } catch (err) {
+      console.error(err);
+      const b = document.getElementById('boot');
+      b.querySelector('.boot-sub').textContent = '起動に失敗しました: ' + err.message;
+      b.querySelector('.boot-hint').textContent = String(err.stack || '').split('\n')[1] || '';
+    }
+  });
+</script>
 </body>
 </html>

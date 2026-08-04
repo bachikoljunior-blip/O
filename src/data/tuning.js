@@ -147,10 +147,13 @@ export const LOCOMOTION = {
 };
 
 export const CAMERA = {
-  distance: 5.4,
-  height: 1.75,
-  pitchMin: -0.5,
-  pitchMax: 1.15,
+  // Pulled back and flattened for portrait phones: at 5.4m and 0.35 rad the
+  // horizon sits off the top of a tall screen and the world reads as a
+  // featureless floor.
+  distance: 7.2,
+  height: 1.95,
+  pitchMin: -0.35,
+  pitchMax: 1.05,
   followLag: 9,
   lookahead: 0.9,
   fov: 62,
