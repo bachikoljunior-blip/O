@@ -8,7 +8,7 @@
 import * as THREE from '../../vendor/three.module.js';
 
 import { createWorld, worldHour } from '../sim/world.js';
-import { createTerrain } from '../sim/world/heightfield.js';
+import { createTerrain, installMacroField, buildMacroField } from '../sim/world/heightfield.js';
 import { spawnPlayer, spawnEnemy } from '../sim/archetypes.js';
 import { attachMacro } from '../sim/macro/init.js';
 import { recentChronicle } from '../sim/macro/chronicle.js';
@@ -32,10 +32,17 @@ import { createAudio, unlock, makeAudioFacade, setListener } from '../present/au
 import { createInput, beginFrame, sampleForTick, endFrame, usesTouch } from '../platform/input.js';
 import { createHUD, layoutHUD, updateHUD, showChronicle } from '../ui/hud.js';
 import { createLoopState, startLoop } from './loop.js';
+import { runSliced, bootProgress } from './loading.js';
 import { installPlatformGlue, createHaptics } from './platformGlue.js';
 
-export function boot(canvas, hudRoot, seedParam) {
+export async function boot(canvas, hudRoot, seedParam) {
   const seed = (seedParam >>> 0) || 20260804;
+
+  // ——— world generation ———
+  // Eroding the macro field takes about a second; time-slice it so the loading
+  // screen keeps painting instead of the tab appearing to hang.
+  const field = await runSliced(buildMacroField(seed), bootProgress());
+  installMacroField(field, seed);
 
   // ——— simulation ———
   const world = createWorld(seed);

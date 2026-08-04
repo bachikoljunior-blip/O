@@ -59,9 +59,36 @@ export function updateCamera(rig, gfx, target, dt, terrain, lockTarget) {
   let cz = focusZ - Math.cos(rig.yaw) * cp * dist;
   let cy = target.y + CAMERA.height + Math.sin(rig.pitch) * dist;
 
-  // Terrain collision: pull in rather than clipping through a hillside.
+  // Terrain collision.
+  //
+  // Clamping cy up to ground level is not enough once the world has real
+  // slopes: on a hillside the desired position is INSIDE the hill, so raising
+  // it just buries the camera and you end up staring at the ground. March out
+  // from the player toward the desired spot and stop short of the terrain,
+  // which pulls the camera IN — the behaviour every third-person game uses.
   if (terrain) {
-    const ground = terrain.heightAt(cx, cz) + CAMERA.collisionRadius + 0.35;
+    const eyeY = target.y + CAMERA.height;
+    const STEPS = 8;
+    let hit = 1;
+    for (let i = 1; i <= STEPS; i++) {
+      const k = i / STEPS;
+      const sx = lerp(focusX, cx, k);
+      const sz = lerp(focusZ, cz, k);
+      const sy = lerp(eyeY, cy, k);
+      if (sy < terrain.heightAt(sx, sz) + CAMERA.collisionRadius) {
+        hit = (i - 1) / STEPS;
+        break;
+      }
+    }
+    if (hit < 1) {
+      // Keep a minimum stand-off so the camera never ends up inside the player.
+      const k = Math.max(0.28, hit);
+      cx = lerp(focusX, cx, k);
+      cz = lerp(focusZ, cz, k);
+      cy = lerp(eyeY, cy, k);
+    }
+    // Final safety: never below the ground directly under the camera.
+    const ground = terrain.heightAt(cx, cz) + CAMERA.collisionRadius + 0.3;
     if (cy < ground) cy = ground;
   }
 

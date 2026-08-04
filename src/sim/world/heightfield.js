@@ -1,59 +1,72 @@
-// heightfield.js — the continent's elevation, sampled at any scale.
+// heightfield.js — sample the continent's elevation at any scale.
 // L2.
 //
-// Two layers. The MACRO field is the 2D build's generator, ported to fixed
-// math: three-frequency fbm plus a ridged multifractal gated by a mountain
-// mask, all multiplied by a radial continental mask so the coast is wiggly
-// rather than circular. The DETAIL layer adds per-chunk octaves at mesh-build
-// time, so a coarse macro grid still yields walkable ground.
+// Three layers, in order:
+//   MACRO   — the eroded 768x768 field from macrofield.js (built once per seed)
+//   TERRACE — stratification applied where the ground is steep and high, which
+//             is what actually produces cliffs and mesas
+//   DETAIL  — per-sample octaves at the scales a walking player perceives
 //
-// Nothing here is ever saved. The whole world is a pure function of the seed,
-// which is what lets the delta save stay tiny and the world stay unbounded.
+// This is the ONE function the renderer, the collider and the AI all agree on.
+// If they ever disagree, characters sink into the ground — so nothing may
+// shortcut it.
 
-import { fbm, ridge, valueNoise2 } from '../../core/noise.js';
+import { valueNoise2, fbm } from '../../core/noise.js';
 import { clamp, clamp01, lerp, smoothstep, invLerp } from '../../core/math.js';
-import { flen } from '../../core/fixed.js';
+import { buildMacroField, buildMacroFieldSync, WORLD_TILES, SEA_LEVEL } from './macrofield.js';
+
+export { WORLD_TILES, SEA_LEVEL, buildMacroField };
 
 /** One macro tile is 8 metres. 768 tiles -> a 6.1 km continent. */
 export const TILE = 8;
-export const WORLD_TILES = 768;
 export const WORLD_SIZE = TILE * WORLD_TILES;   // 6144 m
-export const SEA_LEVEL = 0.42;
+/** Normalised height 0..1 maps to this many metres. */
+export const HEIGHT_SCALE = 460;
 
-/** Vertical scale: normalised height 0..1 maps to this many metres. */
-export const HEIGHT_SCALE = 420;
+/** Terracing: how many strata, and where they bite. */
+const TERRACE_STEPS = 26;
+const TERRACE_MIN_SLOPE = 0.020;   // below this the ground stays smooth
+const TERRACE_MAX_SLOPE = 0.075;
 
-const F1 = 1 / 170, F2 = 1 / 260, F3 = 1 / 90;
+/**
+ * The installed macro field. Module-level so `sampleHeight(x, z, seed)` keeps
+ * a signature the renderer can call a hundred thousand times per chunk without
+ * threading a handle through every layer.
+ */
+let FIELD = null;
+let FIELD_SEED = -1;
 
-/** Macro elevation in [0,1] at TILE coordinates (not metres). */
+export function installMacroField(field, seed) {
+  FIELD = field;
+  FIELD_SEED = seed;
+}
+
+/** Lazily build if nobody installed one (tests, tools). */
+function field(seed) {
+  if (FIELD && FIELD_SEED === seed) return FIELD;
+  FIELD = buildMacroFieldSync(seed);
+  FIELD_SEED = seed;
+  return FIELD;
+}
+
+/** Raw macro elevation at integer tile coordinates, clamped at the edges. */
 export function macroHeight(tx, tz, seed) {
-  const base = fbm(tx * F1, tz * F1, seed + 11, 5);
-  const broad = fbm(tx * F2 + 400, tz * F2 - 220, seed + 29, 4);
+  const f = field(seed);
+  const x = tx < 0 ? 0 : tx >= f.w ? f.w - 1 : tx | 0;
+  const z = tz < 0 ? 0 : tz >= f.w ? f.w - 1 : tz | 0;
+  return f.h[z * f.w + x];
+}
 
-  // Ranges only appear where the mask says so, which keeps mountains in
-  // coherent chains instead of scattering peaks everywhere.
-  const maskRaw = fbm(tx * F2 * 0.6, tz * F2 * 0.6, seed + 53, 3);
-  const mountainMask = smoothstep(clamp01(invLerp(0.40, 0.70, maskRaw)));
-  const rid = ridge(tx * F3, tz * F3, seed + 71, 4);
-
-  let land = 0.52 + (base - 0.5) * 0.62 + rid * 0.54 * mountainMask + (broad - 0.5) * 0.10;
-
-  // Continental mask: elliptical, perturbed twice so the coastline is ragged.
-  const nx = (tx / WORLD_TILES) * 2 - 1;
-  const nz = (tz / WORLD_TILES) * 2 - 1;
-  let d = flen(nx * 1.025, nz * 1.086) * 2;
-  d += (fbm(tx * 0.006, tz * 0.006, seed + 97, 3) - 0.5) * 0.55;
-  d += (fbm(tx * 0.018, tz * 0.018, seed + 131, 2) - 0.5) * 0.22;
-  const mask = 1 - smoothstep(clamp01(invLerp(0.74, 1.26, d)));
-
-  return clamp(lerp(0.06, land, mask), 0, 1);
+export function isRiverTile(tx, tz, seed) {
+  const f = field(seed);
+  if (tx < 0 || tz < 0 || tx >= f.w || tz >= f.w) return false;
+  return f.water[(tz | 0) * f.w + (tx | 0)] === 1;
 }
 
 /** Moisture in [0,1]. Drives biome choice and foliage density. */
 export function macroMoisture(tx, tz, seed, elevation) {
   const m = fbm(tx * 0.0075, tz * 0.0075, seed + 211, 4);
   const regional = fbm(tx * 0.0021, tz * 0.0021, seed + 233, 3);
-  // Stretch around the mean so genuinely wet and dry extremes occur.
   let v = 0.5 + (m - 0.5) * 2.35 * 0.5 + (regional - 0.5) * 0.4;
   v -= Math.max(0, elevation - SEA_LEVEL) * 0.30;   // crude rain shadow
   return clamp01(v);
@@ -67,42 +80,61 @@ export function macroTemperature(tx, tz, seed, elevation) {
 }
 
 /**
- * Bilinear macro sample plus detail octaves, in METRES.
- * This is the function the renderer, the collider and the AI all agree on;
- * if they ever disagree, characters sink into the ground.
+ * Elevation in METRES at world coordinates.
+ *
+ * The terracing term is the single highest-value line in this file. Quantising
+ * height into strata WHERE THE SLOPE IS ALREADY STEEP converts a smooth
+ * gradient into a stack of flat benches separated by near-vertical risers —
+ * i.e. cliffs and mesas — for the cost of a round(). Doing it only on steep
+ * ground is what stops the gentle country turning into a wedding cake.
  */
 export function sampleHeight(x, z, seed) {
+  const f = field(seed);
+  const w = f.w;
   const tx = x / TILE, tz = z / TILE;
-  const x0 = Math.floor(tx), z0 = Math.floor(tz);
-  const fx = tx - x0, fz = tz - z0;
 
-  const h00 = macroHeight(x0, z0, seed);
-  const h10 = macroHeight(x0 + 1, z0, seed);
-  const h01 = macroHeight(x0, z0 + 1, seed);
-  const h11 = macroHeight(x0 + 1, z0 + 1, seed);
+  let x0 = Math.floor(tx), z0 = Math.floor(tz);
+  if (x0 < 0) x0 = 0; else if (x0 > w - 2) x0 = w - 2;
+  if (z0 < 0) z0 = 0; else if (z0 > w - 2) z0 = w - 2;
+  const fx = clamp01(tx - x0), fz = clamp01(tz - z0);
+
+  const i00 = z0 * w + x0;
+  const h00 = f.h[i00], h10 = f.h[i00 + 1];
+  const h01 = f.h[i00 + w], h11 = f.h[i00 + w + 1];
 
   const u = smoothstep(fx), v = smoothstep(fz);
   let h = lerp(lerp(h00, h10, u), lerp(h01, h11, u), v);
 
-  // Detail is suppressed under water and on flat lowland so beaches stay
-  // readable and the sea stays flat.
-  //
-  // The frequencies matter more than they look. The macro field was authored
-  // when one tile was 32 metres; at 8 metres its features span well over a
-  // kilometre, which reads as a putting green from eye height. These four
-  // octaves put relief back at the scales a walking player actually perceives:
-  // roughly 220 m, 55 m, 17 m and 5 m.
-  const above = Math.max(0, h - SEA_LEVEL);
-  const amp = Math.min(1, above * 4);
-  if (amp > 0.001) {
+  // Local gradient straight out of the four corners we already fetched.
+  const slope = Math.abs(h10 - h00) + Math.abs(h01 - h00) + Math.abs(h11 - h00);
+
+  const above = h - SEA_LEVEL;
+  if (above > 0.015) {
+    // —— terracing / cliffs ——
+    const steep = smoothstep(clamp01(invLerp(TERRACE_MIN_SLOPE, TERRACE_MAX_SLOPE, slope)));
+    if (steep > 0.001) {
+      // Strata drift with position so the benches are not globally aligned,
+      // which would read as a rendering artefact rather than as geology.
+      const drift = valueNoise2(x * 0.0016, z * 0.0016, seed + 733) * 0.6;
+      const q = (Math.round((h + drift) * TERRACE_STEPS) / TERRACE_STEPS) - drift;
+      h = lerp(h, q, steep * 0.80);
+    }
+
+    // —— detail ——
+    // Roughly 220 m, 55 m, 17 m and 5 m features: the scales a walking player
+    // actually perceives. The macro field cannot supply these — at 8 m per
+    // tile its own features span hundreds of metres.
+    const amp = Math.min(1, above * 4);
     const d0 = fbm(x * 0.0045, z * 0.0045, seed + 397, 3) - 0.5;
     const d1 = valueNoise2(x * 0.018, z * 0.018, seed + 401) - 0.5;
     const d2 = valueNoise2(x * 0.060, z * 0.060, seed + 409) - 0.5;
     const d3 = valueNoise2(x * 0.180, z * 0.180, seed + 419) - 0.5;
-    h += (d0 * 0.100 + d1 * 0.034 + d2 * 0.011 + d3 * 0.0035) * amp;
+    // Detail is suppressed on cliff faces so the strata stay crisp.
+    const smoothFace = 1 - steep * 0.55;
+    h += (d0 * 0.070 + d1 * 0.026 + d2 * 0.009 + d3 * 0.0030) * amp * smoothFace;
   }
 
-  return Math.max(SEA_LEVEL * HEIGHT_SCALE - 12, h * HEIGHT_SCALE);
+  return Math.max(SEA_LEVEL * HEIGHT_SCALE - 14, h * HEIGHT_SCALE);
 }
 
 export const seaLevelMetres = () => SEA_LEVEL * HEIGHT_SCALE;
@@ -122,10 +154,11 @@ export function sampleNormal(x, z, seed, out, eps = 1.5) {
 }
 
 /**
- * The terrain interface the rest of the simulation sees. Installed on the
- * world at boot; everything else calls heightAt() and never knows about noise.
+ * The terrain interface the rest of the simulation sees. Everything else calls
+ * heightAt() and never learns that noise exists.
  */
 export function createTerrain(seed) {
+  field(seed);
   return {
     seed,
     size: WORLD_SIZE,
@@ -133,5 +166,6 @@ export function createTerrain(seed) {
     heightAt: (x, z) => sampleHeight(x, z, seed),
     normalAt: (x, z, out) => sampleNormal(x, z, seed, out),
     isWater: (x, z) => sampleHeight(x, z, seed) <= seaLevelMetres() + 0.05,
+    isRiver: (x, z) => isRiverTile(x / TILE, z / TILE, seed),
   };
 }

@@ -54,7 +54,8 @@
   requestAnimationFrame(async () => {
     try {
       const { boot } = await import('./src/app/boot.js');
-      boot(document.getElementById('game'), document.getElementById('hud'), seed);
+      // Exposed for tooling and screenshots; harmless in production.
+      window.__game = await boot(document.getElementById('game'), document.getElementById('hud'), seed);
       document.getElementById('boot').classList.add('gone');
     } catch (err) {
       console.error(err);
