@@ -54,6 +54,7 @@ export function createStore(n = MAX_ENTITIES) {
     stateT: f(),                  // TICKS in the current state, raw
     comboIdx: new Uint8Array(n),
     hitConfirm: new Uint8Array(n),
+    fired: new Uint8Array(n),      // ranged: projectile already launched
     blockT: f(),
     hitMask: new Uint32Array(n * 16),   // 512 bits: "already hit by this swing"
 
@@ -113,7 +114,7 @@ function resetSlot(s, i) {
   s.gaitPhase[i] = 0; s.riposteT[i] = 0;
   s.stateId[i] = 0; s.attackId[i] = 0;
   s.phaseT[i] = 0; s.stateT[i] = 0;
-  s.comboIdx[i] = 0; s.hitConfirm[i] = 0; s.blockT[i] = 0;
+  s.comboIdx[i] = 0; s.hitConfirm[i] = 0; s.fired[i] = 0; s.blockT[i] = 0;
   s.aiState[i] = 0; s.aiTimer[i] = 0; s.aiTarget[i] = -1; s.aggro[i] = 0;
   s.homeX[i] = 0; s.homeZ[i] = 0; s.cooldown[i] = 0; s.moveIdx[i] = 0;
   s.atk[i] = 1; s.def[i] = 0; s.crit[i] = 0; s.level[i] = 1;

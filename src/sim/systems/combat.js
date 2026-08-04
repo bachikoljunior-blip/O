@@ -11,7 +11,7 @@ import { attackByIndex, ATTACKS } from '../../data/attacks.js';
 import { CANCEL, DODGE, TARGETING } from '../../data/tuning.js';
 import { hasStamina } from '../ops/stamina.js';
 import { bufferTake, bufferHas, bufferClear } from '../ops/buffer.js';
-import { applyHit } from '../ops/damage.js';
+import { applyHit, BLOCKED } from '../ops/damage.js';
 import { startAttack } from '../ops/attack.js';
 import { spawnProjectile } from '../ops/projectile.js';
 import { observePlayer } from '../ops/habits.js';
@@ -22,6 +22,13 @@ import { fsin, fcos, flen, fatan2 } from '../../core/fixed.js';
 import { angleDiff, approachAngle, lerp, clamp01 } from '../../core/math.js';
 import { gridQuery } from '../../core/spatial.js';
 import { deref, makeHandle } from '../../core/handles.js';
+
+/**
+ * Frame-rate-correct damping that RESPECTS hitstop. Applying a raw 0.6 while
+ * motion is frozen does not hold the actor still, it deletes their velocity —
+ * the opposite of what a freeze is for.
+ */
+const damp = (v, k, motion) => v * (1 - (1 - k) * motion);
 
 /**
  * Roll-motion curve, sampled by normalised phase. Front-loaded so the dodge
@@ -104,7 +111,9 @@ function resolveActive(w, e, atk) {
 
     const m = flen(dx, dz) || 1;
     const dealt = applyHit(w, e, target, atk, dx / m, dz / m);
-    if (dealt > 0 || s.iframeT[target] > 0) s.hitConfirm[e] = 1;
+    // CONTACT, not "the swing happened": an i-framed target is a whiff and
+    // must not buy the shortened recovery. A blocked hit is contact.
+    if (dealt > 0 || dealt === BLOCKED) s.hitConfirm[e] = 1;
   }
 }
 
@@ -119,13 +128,13 @@ function applyAttackMotion(w, e, atk, motion) {
     s.vz[e] = fsin(s.yaw[e]) * speed * motion;
     return;
   }
-  if (atk.lunge && s.phaseT[e] < atk.lunge.ticks) {
+  if (atk.lunge && s.phaseT[e] >= 0 && s.phaseT[e] < atk.lunge.ticks) {
     s.vx[e] = fcos(s.yaw[e]) * atk.lunge.speed * motion;
     s.vz[e] = fsin(s.yaw[e]) * atk.lunge.speed * motion;
   } else if (atk.kind === 'melee') {
     // Animation commitment: you do not steer out of a swing.
-    s.vx[e] *= 0.75;
-    s.vz[e] *= 0.75;
+    s.vx[e] = damp(s.vx[e], 0.75, motion);
+    s.vz[e] = damp(s.vz[e], 0.75, motion);
   }
 }
 
@@ -137,10 +146,15 @@ function tryCancel(w, e, atk, thresholds) {
     bufferTake(s, e, ACT.DODGE);
     return startAttack(w, e, 'player_dodge');
   }
-  if (bufferHas(s, e, ACT.ATTACK) && s.phaseT[e] >= thresholds.combo && atk.next.length > 0) {
+  if (bufferHas(s, e, ACT.ATTACK) && s.phaseT[e] >= thresholds.combo) {
+    // A move with no follow-up (notably the dodge) starts a FRESH chain rather
+    // than dropping the input on the floor.
+    const chained = atk.next.length > 0;
+    const nextName = chained
+      ? atk.next[Math.min(s.comboIdx[e], atk.next.length - 1)]
+      : 'player_light_1';
     bufferTake(s, e, ACT.ATTACK);
-    const nextName = atk.next[Math.min(s.comboIdx[e], atk.next.length - 1)];
-    s.comboIdx[e]++;
+    s.comboIdx[e] = chained ? s.comboIdx[e] + 1 : 1;
     return startAttack(w, e, nextName);
   }
   if (bufferHas(s, e, ACT.HEAVY) && s.phaseT[e] >= thresholds.combo) {
@@ -184,7 +198,6 @@ export function combatSystem(w, _dt) {
     s.phaseT[e] += motion;
     if (s.stateT[e] > 0) s.stateT[e] -= 1;
     if (s.cooldown[e] > 0) s.cooldown[e] -= 1;
-    if (s.blockT[e] > 0) s.blockT[e] -= 1;
     if (s.riposteT[e] > 0) s.riposteT[e] -= 1;
 
     const atk = attackByIndex(s.attackId[e]);
@@ -192,7 +205,8 @@ export function combatSystem(w, _dt) {
     switch (state) {
       case S.IDLE: {
         if (s.mask[e] & C.PLAYER) {
-          if (bufferTake(s, e, ACT.DODGE) && hasStamina(s, e, DODGE.stamina)) {
+          if (bufferHas(s, e, ACT.DODGE) && hasStamina(s, e, DODGE.stamina)) {
+            bufferTake(s, e, ACT.DODGE);
             startAttack(w, e, 'player_dodge');
           } else if (bufferTake(s, e, ACT.ATTACK)) {
             if (s.riposteT[e] > 0) {
@@ -209,6 +223,10 @@ export function combatSystem(w, _dt) {
           } else if (bufferTake(s, e, ACT.HEAVY)) {
             applyTouchMagnet(w, e, ATTACKS.player_heavy);
             startAttack(w, e, 'player_heavy');
+          } else if (bufferTake(s, e, ACT.PARRY)) {
+            // Press edge of guard = parry attempt. Holding falls through to
+            // BLOCK when the parry recovers, so one button covers both.
+            startAttack(w, e, 'player_parry');
           } else if (bufferHas(s, e, ACT.BLOCK)) {
             s.stateId[e] = S.BLOCK;
             s.phaseT[e] = 0;
@@ -242,8 +260,8 @@ export function combatSystem(w, _dt) {
       case S.ACTIVE: {
         applyAttackMotion(w, e, atk, motion);
         if (atk.kind === 'ranged') {
-          if (s.hitConfirm[e] === 0) {
-            s.hitConfirm[e] = 1;   // doubles as "already fired"
+          if (s.fired[e] === 0) {
+            s.fired[e] = 1;
             spawnProjectile(w, e, makeHandle(e, s.gen[e]), atk);
           }
         } else {
@@ -274,7 +292,6 @@ export function combatSystem(w, _dt) {
         const total = atk.windup + atk.recovery;
         const ph = s.phaseT[e];
         if (ph < 1 && (s.mask[e] & C.PLAYER)) recordHabit(w, e, ACT.DODGE);
-        s.iframeT[e] = (ph >= atk.iframes[0] && ph <= atk.iframes[1]) ? 2 : s.iframeT[e];
         applyAttackMotion(w, e, atk, motion);
         if (ph >= atk.actionableFrom && (s.mask[e] & C.PLAYER)) {
           if (tryCancel(w, e, atk, { combo: atk.actionableFrom, dodge: atk.actionableFrom })) break;
@@ -288,18 +305,18 @@ export function combatSystem(w, _dt) {
       }
 
       case S.PARRY: {
-        s.vx[e] *= 0.6; s.vz[e] *= 0.6;
+        s.vx[e] = damp(s.vx[e], 0.6, motion); s.vz[e] = damp(s.vz[e], 0.6, motion);
         if (s.phaseT[e] >= atk.recovery) {
-          s.stateId[e] = S.IDLE;
           s.phaseT[e] = 0;
+          s.stateId[e] = bufferHas(s, e, ACT.BLOCK) ? S.BLOCK : S.IDLE;
+          s.blockT[e] = 0;
         }
         break;
       }
 
       case S.BLOCK: {
         if (s.blockT[e] === 0 && (s.mask[e] & C.PLAYER)) recordHabit(w, e, ACT.BLOCK);
-        s.blockT[e] += 1;
-        s.vx[e] *= 0.7; s.vz[e] *= 0.7;
+        s.vx[e] = damp(s.vx[e], 0.7, motion); s.vz[e] = damp(s.vz[e], 0.7, motion);
         if (!bufferHas(s, e, ACT.BLOCK)) {
           s.stateId[e] = S.IDLE;
           s.phaseT[e] = 0;
@@ -309,7 +326,7 @@ export function combatSystem(w, _dt) {
 
       case S.HURT:
       case S.STAGGER: {
-        s.vx[e] *= 0.85; s.vz[e] *= 0.85;
+        s.vx[e] = damp(s.vx[e], 0.85, motion); s.vz[e] = damp(s.vz[e], 0.85, motion);
         if (s.stateT[e] <= 0) {
           s.stateId[e] = S.IDLE;
           s.phaseT[e] = 0;
@@ -319,7 +336,7 @@ export function combatSystem(w, _dt) {
       }
 
       case S.BROKEN: {
-        s.vx[e] *= 0.9; s.vz[e] *= 0.9;
+        s.vx[e] = damp(s.vx[e], 0.9, motion); s.vz[e] = damp(s.vz[e], 0.9, motion);
         bufferClear(s, e);
         if (s.vulnerableT[e] <= 0) {
           s.stateId[e] = S.IDLE;

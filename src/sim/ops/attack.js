@@ -26,6 +26,7 @@ export function startAttack(w, e, atkName) {
   s.attackId[e] = atk.index;
   s.phaseT[e] = 0;
   s.hitConfirm[e] = 0;
+  s.fired[e] = 0;
   clearHitMask(s, e);
 
   if (atk.kind === 'dodge') {

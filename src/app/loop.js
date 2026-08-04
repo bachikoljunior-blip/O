@@ -22,6 +22,10 @@ export function createLoopState(store) {
   return {
     acc: 0,
     prevTime: 0,
+    // Sandbox time control. Untouched by the game.
+    timeScale: 1,
+    paused: false,
+    stepRequested: 0,
     frames: 0,
     fpsAcc: 0,
     fps: 60,
@@ -45,6 +49,12 @@ function snapshotPrev(ls, store) {
  * @param hooks {
  *   beginFrame(), sampleIntent(substep), afterTick(), render(alpha, dt), onFps(fps)
  * }
+ *
+ * Time control (`ls.timeScale`, `ls.paused`, `ls.stepRequested`) exists for the
+ * combat sandbox. It slows or single-steps THIS loop rather than having the
+ * sandbox reimplement one — a second loop would drift from the shipped fixed
+ * step, and then tuning would be done against something the game never runs.
+ * The game itself never touches these fields.
  */
 export function startLoop(world, ls, hooks) {
   ls.prevTime = performance.now();
@@ -57,6 +67,7 @@ export function startLoop(world, ls, hooks) {
     if (real > MAX_FRAME) real = MAX_FRAME;
 
     // 2Hz fps sampling — enough for the quality ladder, cheap enough to ignore.
+    // Sampled on UNSCALED time so slow-motion does not look like a stall.
     ls.fpsAcc += real; ls.frames++;
     if (ls.fpsAcc > 0.5) {
       ls.fps = ls.frames / ls.fpsAcc;
@@ -65,7 +76,13 @@ export function startLoop(world, ls, hooks) {
     }
 
     hooks.beginFrame(real);
-    ls.acc += real;
+
+    if (ls.paused) {
+      // Frame-advance: hand the accumulator exactly one step's worth.
+      if (ls.stepRequested > 0) { ls.acc += DT; ls.stepRequested--; }
+    } else {
+      ls.acc += real * (ls.timeScale ?? 1);
+    }
 
     let steps = 0;
     while (ls.acc >= DT && steps < MAX_SUBSTEPS) {

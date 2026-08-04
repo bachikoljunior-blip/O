@@ -34,9 +34,12 @@ export function tick(w, intent) {
 
   targetingSystem(w, intent);
   intentSystem(w, intent);
-  aiSystem(w, DT);
 
   combatSystem(w, DT);
+  // AI runs AFTER combat, deliberately. combatSystem advances phaseT at the
+  // top of its loop, so an attack started before it in the same tick silently
+  // loses its first frame — every enemy wind-up was `declared - 1`.
+  aiSystem(w, DT);
   projectileSystem(w, DT);
   locomotionSystem(w, DT);
 

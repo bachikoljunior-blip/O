@@ -46,6 +46,7 @@ export const ACT = {
   BLOCK: 3,
   HEAVY: 4,
   INTERACT: 5,
+  PARRY: 6,
 };
 
 export const BUFFER_SLOTS = 4;

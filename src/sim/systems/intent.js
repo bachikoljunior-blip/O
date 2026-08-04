@@ -5,7 +5,7 @@
 // layer. The sim never reads the DOM, which is what lets the whole simulation
 // run under `node --test` with no shims.
 
-import { C, S, ACT, BTN } from '../components.js';
+import { C, S, ACT, BTN, BUFFER_SLOTS } from '../components.js';
 import { bufferPush } from '../ops/buffer.js';
 import { driveActor } from '../ops/motion.js';
 import { deref } from '../../core/handles.js';
@@ -32,12 +32,15 @@ export function intentSystem(w, intent) {
   if (intent.pressed & BTN.DODGE) bufferPush(s, p, ACT.DODGE);
   if (intent.pressed & BTN.INTERACT) bufferPush(s, p, ACT.INTERACT);
 
-  // Block is a HELD state, not a buffered edge — it must be able to end.
+  // Guard is a HELD state, so it must be able to end; the PRESS EDGE of the
+  // same button is the parry. Tap to parry, hold to guard — one button, which
+  // is what the touch layout can afford.
+  if (intent.pressed & BTN.BLOCK) bufferPush(s, p, ACT.PARRY);
   if (intent.held & BTN.BLOCK) {
     bufferPush(s, p, ACT.BLOCK);
   } else {
-    const base = p * 4;
-    for (let k = 0; k < 4; k++) {
+    const base = p * BUFFER_SLOTS;
+    for (let k = 0; k < BUFFER_SLOTS; k++) {
       if (s.bufAct[base + k] === ACT.BLOCK) { s.bufAct[base + k] = ACT.NONE; s.bufTtl[base + k] = 0; }
     }
   }

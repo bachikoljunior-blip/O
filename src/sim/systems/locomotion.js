@@ -38,9 +38,12 @@ export function locomotionSystem(w, _dt) {
       s.vy[e] += s.ky[e];
       s.ky[e] = 0;
     }
-    // Frame-rate-correct decay is a constant here because dt is fixed.
-    s.kx[e] *= 0.86;
-    s.kz[e] *= 0.86;
+    // Decay must respect hitstop. Decaying at the raw rate while the impulse
+    // is withheld meant a heavy hit — which freezes longest — knocked back
+    // LEAST: 12 ticks of parry freeze ate 84% of the impulse.
+    const kd = 1 - 0.14 * motion;
+    s.kx[e] *= kd;
+    s.kz[e] *= kd;
 
     s.px[e] += s.vx[e] * DT * motion;
     s.pz[e] += s.vz[e] * DT * motion;
@@ -82,7 +85,8 @@ export function footstepSystem(w) {
 
     // Longer strides at speed, so a sprint does not sound like a fast walk.
     const stride = STRIDE_METRES * (0.75 + 0.35 * Math.min(1, spd / LOCOMOTION.runSpeed));
-    s.gaitPhase[e] += (spd * DT) / stride;
+    // Motion time: a frozen actor covers no ground and takes no steps.
+    s.gaitPhase[e] += (spd * DT * w.motionScale) / stride;
 
     if (s.gaitPhase[e] >= 1) {
       s.gaitPhase[e] -= 1;

@@ -35,9 +35,20 @@ export function createInput(canvas) {
     look: { id: -1, lastX: 0, lastY: 0, dx: 0, dy: 0 },
     keys: new Set(),
     buttons: new Set(),   // touch button ids currently pressed
+    // Sub-frame taps: a press that begins AND ends between two frames is
+    // invisible to instantaneous sampling, so it gets dropped — and that
+    // happens most when the framerate is already poor, which is exactly when
+    // the player is mashing. These latch a press until one frame has seen it.
+    keysSeen: new Set(),
+    buttonsSeen: new Set(),
     touchZones: [],       // {id, x, y, r} in CSS pixels, refreshed by the HUD
 
     held: 0, pressed: 0, released: 0, prevHeld: 0,
+    // End-to-end latency instrumentation. `rawPressAt` is stamped in the DOM
+    // handler — the true finger-down moment — not at frame assembly, because
+    // the gap between those two is part of what we are trying to measure.
+    rawPressAt: 0,
+    latencyPending: false,
     camYaw: 0, camPitch: 0.20,
     hasTouch: false,
     _padPrev: [],
@@ -58,6 +69,7 @@ export function createInput(canvas) {
 
   const onDown = (e) => {
     inp.hasTouch = inp.hasTouch || e.pointerType === 'touch';
+    inp.rawPressAt = e.timeStamp || performance.now();
     const p = pos(e);
     canvas.setPointerCapture?.(e.pointerId);
 
@@ -67,6 +79,7 @@ export function createInput(canvas) {
     if (btn) {
       inp.pointers.set(e.pointerId, { role: 'btn', id: btn });
       inp.buttons.add(btn);
+      inp.buttonsSeen.add(btn);
     } else if (p.x < canvas.clientWidth * 0.5) {
       inp.pointers.set(e.pointerId, { role: 'stick' });
       inp.stick.active = true;
@@ -131,11 +144,17 @@ export function createInput(canvas) {
   canvas.addEventListener('lostpointercapture', onUp, { passive: false });
 
   window.addEventListener('keydown', (e) => {
-    inp.keys.add(e.key.toLowerCase());
+    const k = e.key.toLowerCase();
+    if (!inp.keys.has(k)) inp.rawPressAt = e.timeStamp || performance.now();
+    inp.keys.add(k);
+    inp.keysSeen.add(k);
     if ([' ', 'tab'].includes(e.key.toLowerCase())) e.preventDefault();
   });
   window.addEventListener('keyup', (e) => inp.keys.delete(e.key.toLowerCase()));
-  window.addEventListener('blur', () => { inp.keys.clear(); inp.buttons.clear(); });
+  window.addEventListener('blur', () => {
+    inp.keys.clear(); inp.buttons.clear();
+    inp.keysSeen.clear(); inp.buttonsSeen.clear();
+  });
 
   return inp;
 }
@@ -147,14 +166,19 @@ export function beginFrame(inp) {
   const pad = pads && pads[0];
 
   for (const [name, b] of Object.entries(BINDINGS)) {
-    let on = inp.buttons.has(name);
-    if (!on) for (const k of b.keys) if (inp.keys.has(k)) { on = true; break; }
+    // Union with the latched sets, so a tap shorter than a frame still counts.
+    let on = inp.buttons.has(name) || inp.buttonsSeen.has(name);
+    if (!on) for (const k of b.keys) if (inp.keys.has(k) || inp.keysSeen.has(k)) { on = true; break; }
     if (!on && pad) for (const i of b.pad) if (pad.buttons[i] && pad.buttons[i].pressed) { on = true; break; }
     if (on) held |= b.bit;
   }
+  // Consumed: the latch lives exactly one frame.
+  inp.keysSeen.clear();
+  inp.buttonsSeen.clear();
 
   inp.pressed = held & ~inp.prevHeld;
   inp.released = ~held & inp.prevHeld;
+  if (inp.pressed !== 0) inp.latencyPending = true;
   inp.held = held;
   inp.prevHeld = held;
 
@@ -200,6 +224,15 @@ export function sampleForTick(inp, intent, substep) {
   intent.released = substep === 0 ? inp.released : 0;
   return intent;
 }
+
+/**
+ * True once any touch input has been seen. Drives the parry-window
+ * accommodation: on touch the window has to be wider, because 60-100ms of
+ * end-to-end latency against a 100ms window is not a reaction test, it is a
+ * coin flip.
+ */
+export const usesTouch = (inp) => inp.hasTouch
+  || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0);
 
 export function endFrame(inp) {
   inp.pressed = 0;

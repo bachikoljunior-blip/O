@@ -90,7 +90,8 @@ export const ATTACKS = {
   player_dodge: {
     kind: 'dodge',
     windup: 2, active: 0, recovery: DODGE.totalTicks - 2,
-    iframes: [DODGE.iframeStart, DODGE.iframeEnd],
+    iframes: [DODGE.iframeStart, DODGE.iframeStart + DODGE.iframeFrames - 1],
+    iframeFrames: DODGE.iframeFrames,
     actionableFrom: DODGE.actionableFrom,
     stamina: DODGE.stamina,
     motion: { curve: 'roll', dist: DODGE.distance },
@@ -301,18 +302,15 @@ export function finalizeAttacks(table = ATTACKS) {
       a.recoveryOnHit = Math.round(a.recovery * CANCEL.hitRecoveryMul);
     }
     // _cancel[0] = whiff thresholds, _cancel[1] = hit thresholds, in ticks.
-    a._cancel = [
-      {
-        combo: a.recovery * a.cancel.combo,
-        dodge: a.recovery * a.cancel.dodge,
-        block: a.recovery * a.cancel.block,
-      },
-      {
-        combo: a.recoveryOnHit * a.cancel.combo,
-        dodge: a.recoveryOnHit * a.cancel.dodge,
-        block: a.recoveryOnHit * a.cancel.block,
-      },
-    ];
+    // Pre-ROUNDED to whole ticks. phaseT is an integer, so comparing it to a
+    // fractional threshold silently ceils and the same 0.45 becomes anywhere
+    // from 46% to 50% depending on the recovery length.
+    const th = (rec) => ({
+      combo: Math.round(rec * a.cancel.combo),
+      dodge: Math.round(rec * a.cancel.dodge),
+      block: Math.round(rec * a.cancel.block),
+    });
+    a._cancel = [th(a.recovery), th(a.recoveryOnHit)];
     byIndex[idx] = a;
   });
   return { ids, byIndex };

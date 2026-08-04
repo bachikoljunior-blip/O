@@ -11,6 +11,7 @@ import { flen, fatan2 } from '../../core/fixed.js';
 import { angleDiff } from '../../core/math.js';
 import { EV } from '../../data/events.js';
 import { S, HIT_FLAG } from '../components.js';
+import { attackByIndex } from '../../data/attacks.js';
 import { markHit, wasHit } from '../store.js';
 import { DAMAGE, STANCE, PARRY, IFRAME, HITSTOP } from '../../data/tuning.js';
 import { drainOnBlock, refundFull } from './stamina.js';
@@ -19,10 +20,37 @@ import { hash3 } from '../../core/noise.js';
 import { streamSeed } from '../../core/rng.js';
 import { S as STREAM } from '../determinism/streams.js';
 
+/** Sentinel: contact was made but no damage got through a guard. */
+export const BLOCKED = -1;
+
+/**
+ * Is this actor currently untouchable?
+ *
+ * The dodge's window is DERIVED FROM STATE rather than stamped into a counter.
+ * A counter written by the dodging entity and read by the attacker only works
+ * if the dodger happens to iterate first — so it silently depended on slot
+ * order, and a respawn into a recycled slot would have shifted the window by a
+ * frame. Deriving it is order-independent and lets the sandbox ask the same
+ * question the damage path asks.
+ */
+export function isInvulnerable(s, e) {
+  if (s.iframeT[e] > 0) return true;
+  if (s.stateId[e] === S.DODGE) {
+    const a = attackByIndex(s.attackId[e]);
+    if (!a.iframeFrames) return false;
+    const ph = s.phaseT[e];
+    return ph >= a.iframes[0] && ph < a.iframes[0] + a.iframeFrames;
+  }
+  return false;
+}
+
 /**
  * Resolve one hit from `src` onto `dst`.
  *
- * Returns the damage actually dealt (0 if blocked, parried or i-framed).
+ * Returns damage dealt, 0 for no contact (dead / already hit / i-framed /
+ * parried), or BLOCKED. Callers need that distinction: a swing stopped by
+ * i-frames is a WHIFF and must not earn the hit-confirm recovery discount,
+ * while a swing stopped by a shield is a connect and should.
  * Every branch that changes what the player sees emits an event; nothing here
  * touches audio, particles or the camera.
  */
@@ -32,8 +60,8 @@ export function applyHit(w, src, dst, atk, nx, nz) {
   if (wasHit(s, src, dst)) return 0;
   markHit(s, src, dst);
 
-  // i-frames: a correct read converts into total invulnerability.
-  if (s.iframeT[dst] > 0) return 0;
+  // A correct read converts into total invulnerability.
+  if (isInvulnerable(s, dst)) return 0;
 
   let flags = 0;
   let dmg = atk.dmg ? atk.dmg.base * (s.atk[src] || 1) : 0;
@@ -90,6 +118,7 @@ export function applyHit(w, src, dst, atk, nx, nz) {
   }
 
   dmg = Math.max((flags & HIT_FLAG.BLOCKED) ? 0 : DAMAGE.minDamage, Math.round(dmg));
+  const wasBlocked = (flags & HIT_FLAG.BLOCKED) !== 0;
 
   // ——— apply ———
   if (dmg > 0) {
@@ -138,7 +167,7 @@ export function applyHit(w, src, dst, atk, nx, nz) {
   const speed = flen(s.vx[src], s.vz[src]);
   emit(w.events, EV.HIT, src, dst,
     dmg, nx, 0.35, nz, atk.weight, speed, atk.index, flags);
-  return dmg;
+  return wasBlocked ? BLOCKED : dmg;
 }
 
 export function breakStance(w, e, by) {
@@ -186,9 +215,18 @@ export function stanceSystem(w, _dt) {
     if (s.stanceMax[e] <= 0) continue;
 
     s.stanceIdleT[e] += 1;
-    if (s.stanceIdleT[e] >= STANCE.idleBeforeRegen && s.stance[e] < s.stanceMax[e]) {
-      s.stance[e] += s.stanceMax[e] * regenPerTick;
-      if (s.stance[e] > s.stanceMax[e]) s.stance[e] = s.stanceMax[e];
+    // `>` would make the wait 179 ticks, not the 180 the table declares.
+    if (s.stanceIdleT[e] >= STANCE.idleBeforeRegen) {
+      if (s.stance[e] < s.stanceMax[e]) {
+        s.stance[e] += s.stanceMax[e] * regenPerTick;
+        if (s.stance[e] > s.stanceMax[e]) s.stance[e] = s.stanceMax[e];
+      }
+      // Poise recovers on the same idle clock. Without this it only ever
+      // decreased, so late in a fight everything staggered from a stiff breeze.
+      if (s.poise[e] < s.poiseMax[e]) {
+        s.poise[e] += s.poiseMax[e] * regenPerTick;
+        if (s.poise[e] > s.poiseMax[e]) s.poise[e] = s.poiseMax[e];
+      }
     }
   }
 }

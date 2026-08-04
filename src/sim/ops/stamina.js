@@ -26,14 +26,22 @@ export function staminaSystem(w, _dt) {
 
 export const hasStamina = (s, e, n) => s.stamina[e] >= n;
 
-/** Deduct and arm the post-spend delay. Returns false if it could not be paid. */
+/**
+ * Deduct and arm the post-spend delay.
+ *
+ * Drains to ZERO rather than refusing. `minStamina` lets a move start on a
+ * sliver — a deliberate affordance — but the old early return meant those
+ * moves cost nothing at all AND left the regen lockout unarmed, so every light
+ * attack in the 6-11 stamina band was free. Overspending must still empty the
+ * pool and still lock out regen, otherwise the affordance is a exploit.
+ */
 export function spend(s, e, n) {
-  if (s.stamina[e] < n) return false;
-  s.stamina[e] -= n;
+  const paidInFull = s.stamina[e] >= n;
+  s.stamina[e] = Math.max(0, s.stamina[e] - n);
   if (s.staRegenDelay[e] < STAMINA.delayAfterSpend) {
     s.staRegenDelay[e] = STAMINA.delayAfterSpend;
   }
-  return true;
+  return paidInFull;
 }
 
 /** Blocked hits carry a longer lockout than voluntary spending. */

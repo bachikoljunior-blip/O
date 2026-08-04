@@ -61,8 +61,13 @@ export const HITSTOP = {
 };
 
 export const IFRAME = {
-  onHit: ms(420),
-  onBlockedHit: ms(150),
+  // Mercy invulnerability after taking a hit. Deliberately SHORT: per-swing
+  // double-hits are already prevented by the hit mask, so this only needs to
+  // stop several simultaneous sources landing on the same frame. At the old
+  // 420ms it outlasted the player's own combo cadence and hit 2 of the
+  // three-hit chain could never connect.
+  onHit: ms(130),
+  onBlockedHit: ms(100),
 };
 
 export const SHAKE = {
@@ -119,8 +124,11 @@ export const CANCEL = {
 
 export const DODGE = {
   totalTicks: 33,          // 550ms
+  // Expressed as START + COUNT. "frames 3..17" was stated as 14 frames in the
+  // spec but is arithmetically 15, and the implementation delivered 16 — three
+  // different numbers for one window. A count cannot be miscounted.
   iframeStart: 3,
-  iframeEnd: 17,           // inclusive -> 14 invulnerable frames
+  iframeFrames: 14,        // covers phaseT 3..16
   actionableFrom: 24,
   stamina: 22,
   distance: 4.2,

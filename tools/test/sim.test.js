@@ -17,6 +17,7 @@ import { S, ACT } from '../../src/sim/components.js';
 import { DODGE, STAMINA, PARRY } from '../../src/data/tuning.js';
 import { clearEvents } from '../../src/core/bus.js';
 import { findNaN, despawn } from '../../src/sim/store.js';
+import { isInvulnerable } from '../../src/sim/ops/damage.js';
 import { bufferPush, bufferHas } from '../../src/sim/ops/buffer.js';
 import { enterHurt } from '../../src/sim/ops/damage.js';
 
@@ -42,7 +43,7 @@ test('world boots and ticks without NaN', () => {
   assert.equal(w.tick, 600);
 });
 
-test('dodge grants i-frames on exactly frames 3..17', () => {
+test('dodge i-frames are exactly the declared count, and contiguous', () => {
   const w = newWorld();
   const ph = spawnPlayer(w, 0, 0);
   const p = deref(w.store, ph);
@@ -52,17 +53,24 @@ test('dodge grants i-frames on exactly frames 3..17', () => {
   tick(w, intent);
   intent.pressed = 0;
 
+  // Sample the way applyHit does, mid-tick semantics included.
   const invulnerable = [];
   for (let f = 0; f < DODGE.totalTicks + 4; f++) {
-    invulnerable.push(w.store.iframeT[p] > 0);
+    invulnerable.push(isInvulnerable(w.store, p));
     tick(w, intent);
     clearEvents(w.events);
   }
-  // The window must be contiguous and 14 frames wide.
   const first = invulnerable.indexOf(true);
   const last = invulnerable.lastIndexOf(true);
+  const count = last - first + 1;
   assert.ok(first >= 0, 'dodge produced no invulnerable frames');
-  assert.equal(last - first + 1 >= 14, true, `window was ${last - first + 1} frames`);
+  // EXACT, not a lower bound. The previous `>= 14` passed against a buggy 16
+  // and would never have caught this drifting again.
+  assert.equal(count, DODGE.iframeFrames,
+    `window was ${count} frames, expected ${DODGE.iframeFrames}`);
+  for (let i = first; i <= last; i++) {
+    assert.equal(invulnerable[i], true, `gap in the i-frame window at ${i}`);
+  }
 });
 
 test('dodge costs exactly its stamina and arms the regen delay', () => {

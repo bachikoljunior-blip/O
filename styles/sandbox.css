@@ -1,0 +1,134 @@
+/* sandbox.css — the combat tuning harness overlay.
+   Dense on purpose: this is an instrument panel, not a game screen. */
+
+body.sandbox { background: #12161c; }
+
+#framedata, #controls {
+  position: absolute; left: 0; right: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  pointer-events: none;
+  z-index: 10;
+}
+#framedata { top: 0; }
+#controls { bottom: 0; }
+
+.fd {
+  margin: max(6px, env(safe-area-inset-top)) 8px 0;
+  padding: 7px 9px;
+  background: rgba(10, 13, 18, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 4px;
+  font-size: 10.5px; line-height: 1.5; color: #cdd4dd;
+}
+
+.fd-row { display: flex; align-items: baseline; gap: 10px; }
+.fd-head { margin-bottom: 5px; }
+.fd-state { font-size: 14px; font-weight: 700; letter-spacing: 0.06em; color: #eaf0f6; }
+.fd-s-windup   { color: #ffc266; }
+.fd-s-active   { color: #ff6a5a; }
+.fd-s-recovery { color: #7fa8d8; }
+.fd-s-dodge    { color: #74e0a8; }
+.fd-s-parry    { color: #ffe8a0; }
+.fd-s-block    { color: #9ec4e8; }
+.fd-s-broken, .fd-s-stagger, .fd-s-hurt { color: #ff5f6d; }
+.fd-tick { opacity: 0.62; }
+.fd-lat { margin-left: auto; font-weight: 600; }
+.fd-lat.ok  { color: #74e0a8; }
+.fd-lat.bad  { color: #ffb04a; }
+.fd-lat.warn { color: #8f9aa6; font-weight: 400; }
+
+/* Attack timeline: wind-up / active / recovery, with cancel marks. */
+.fd-timeline { position: relative; height: 16px; margin: 3px 0 2px; }
+.fd-tl-track {
+  position: absolute; inset: 0; display: flex;
+  border-radius: 2px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+.fd-seg { display: block; height: 100%; }
+.fd-w { background: #6b5a2e; }   /* wind-up: the read */
+.fd-a { background: #9c3a30; }   /* active: the danger */
+.fd-r { background: #2f4a63; }   /* recovery: the punish window */
+.fd-mark {
+  position: absolute; top: -2px; width: 2px; height: 20px;
+  transform: translateX(-1px);
+}
+.fd-mk-c { background: #7fe08a; }   /* combo cancel */
+.fd-mk-d { background: #74c8e0; }   /* dodge cancel / actionable */
+.fd-mk-i { background: #ffe8a0; }   /* i-frame bounds */
+.fd-mk-p { background: #ff9ad2; }   /* parry window */
+.fd-tl-head {
+  position: absolute; top: -3px; width: 2px; height: 22px;
+  background: #fff; box-shadow: 0 0 5px #fff;
+}
+.fd-legend { opacity: 0.66; font-size: 9.5px; margin-bottom: 4px; }
+
+.fd-m {
+  display: flex; align-items: center; gap: 6px;
+  height: 13px; margin-bottom: 2px;
+  position: relative;
+}
+.fd-m b {
+  width: 52px; flex: none; font-size: 9px; opacity: 0.7;
+  font-weight: 600; letter-spacing: 0.05em;
+}
+.fd-track {
+  display: block; height: 8px; width: 150px; flex: none;
+  border-radius: 1px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.07);
+}
+.fd-track s {
+  display: block; height: 100%; text-decoration: none;
+  transition: width 60ms linear;
+}
+.fd-m u { text-decoration: none; font-size: 9.5px; opacity: 0.8; }
+s.hp      { background: #c8494a; }
+s.sta     { background: #cbbf6a; }
+s.sta.locked { background: #6d6142; }   /* regen lockout must be visible */
+s.poise   { background: #9a8fd0; }
+s.stance  { background: #d08f6a; }
+s.iframe  { background: #33404e; }
+s.iframe.on { background: #ffe8a0; }
+s.ripo    { background: #ff9ad2; }
+s.broken  { background: #ff5f6d; }
+
+.fd-buffer { display: flex; align-items: center; gap: 5px; margin-top: 3px; }
+.fd-buffer b { font-size: 9px; opacity: 0.7; letter-spacing: 0.05em; }
+.fd-buf {
+  padding: 1px 5px; border-radius: 2px; font-size: 10px;
+  background: rgba(120, 200, 224, 0.22); border: 1px solid rgba(120, 200, 224, 0.4);
+}
+.fd-buf i { font-style: normal; opacity: 0.6; margin-left: 3px; font-size: 9px; }
+.fd-buf.empty { background: none; border-color: rgba(255, 255, 255, 0.10); opacity: 0.4; }
+
+.fd-enemy {
+  margin-top: 4px; padding-top: 4px; font-size: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08); opacity: 0.8;
+}
+.fd-enemy.windup  { color: #ffc266; opacity: 1; }
+.fd-enemy.delayed { color: #b98cff; opacity: 1; font-weight: 600; }
+
+/* Controls sit at the BOTTOM-LEFT, clear of the thumb cluster on the right. */
+.ctl {
+  margin: 0 8px max(6px, env(safe-area-inset-bottom));
+  padding: 6px 8px;
+  width: fit-content; max-width: 62vw;
+  background: rgba(10, 13, 18, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 4px;
+  pointer-events: auto;
+}
+.ctl-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; flex-wrap: wrap; }
+.ctl-row label { font-size: 9px; opacity: 0.6; width: 26px; flex: none; }
+.ctl button, .ctl select {
+  font: inherit; font-size: 10px;
+  padding: 3px 7px; border-radius: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #dbe2ea; cursor: pointer;
+}
+.ctl button:active { background: rgba(200, 160, 90, 0.4); }
+.ctl-log { font-size: 9px; opacity: 0.55; min-height: 12px; }
+
+/* The sandbox keeps the touch buttons but hides the world-facing HUD chrome. */
+body.sandbox .chronicle, body.sandbox .topright { display: none; }
+body.sandbox .vitals { display: none; }

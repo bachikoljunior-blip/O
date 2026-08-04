@@ -16,6 +16,7 @@ import { createIntent } from '../sim/systems/intent.js';
 import { deref } from '../core/handles.js';
 import { makeRNG } from '../core/rng.js';
 import { regionWeights, dominantRegion, REGION_NAME } from '../data/regions.js';
+import { PARRY } from '../data/tuning.js';
 import { macroMoisture, macroTemperature, macroHeight, TILE } from '../sim/world/heightfield.js';
 
 import { createRenderer, resize, adaptQuality, render, installContextLossHandling } from '../gfx/renderer.js';
@@ -28,7 +29,7 @@ import { createDirector, consumeEvents } from '../present/director.js';
 import { createParticles, updateParticles, renderParticles } from '../present/particles.js';
 import { createAudio, unlock, makeAudioFacade, setListener } from '../present/audio/engine.js';
 
-import { createInput, beginFrame, sampleForTick, endFrame } from '../platform/input.js';
+import { createInput, beginFrame, sampleForTick, endFrame, usesTouch } from '../platform/input.js';
 import { createHUD, layoutHUD, updateHUD, showChronicle } from '../ui/hud.js';
 import { createLoopState, startLoop } from './loop.js';
 import { installPlatformGlue, createHaptics } from './platformGlue.js';
@@ -96,7 +97,12 @@ export function boot(canvas, hudRoot, seedParam) {
   const state = { showDebug: true, regionName: '' };
 
   startLoop(world, ls, {
-    beginFrame: () => beginFrame(input),
+    beginFrame: () => {
+      beginFrame(input);
+      // Widen the parry window on touch. Without this the accommodation in
+      // tuning.js is dead data and a phone player gets the pad-sized window.
+      world.inputProfile.parryWindowBonus = usesTouch(input) ? PARRY.touchBonusTicks : 0;
+    },
     sampleIntent: (substep) => sampleForTick(input, intent, substep),
     afterTick: () => consumeEvents(dir, world.events, ctx),
     onFps: (fps, dt) => adaptQuality(gfx, canvas, dt, fps),

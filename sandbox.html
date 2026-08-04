@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#12161c">
+<title>戦闘調整ハーネス — sandbox</title>
+<link rel="stylesheet" href="styles/main.css">
+<link rel="stylesheet" href="styles/sandbox.css">
+<link rel="modulepreload" href="vendor/three.module.js">
+<link rel="modulepreload" href="src/app/sandbox.js">
+<link rel="modulepreload" href="src/sim/schedule.js">
+<link rel="modulepreload" href="src/sim/systems/combat.js">
+<link rel="modulepreload" href="src/data/attacks.js">
+</head>
+<body class="sandbox">
+<canvas id="game"></canvas>
+<div id="hud"></div>
+<div id="framedata"></div>
+<div id="controls"></div>
+
+<div id="boot">
+  <div class="boot-title">戦闘調整ハーネス</div>
+  <div class="boot-sub">読み込み中…</div>
+  <div class="boot-hint">左ドラッグ=移動 / 右ドラッグ=視点<br>J=攻撃 K=強 Shift=回避 Tab=注視 / <b>L=タップでパリィ、長押しでガード</b></div>
+</div>
+
+<script type="module">
+  requestAnimationFrame(async () => {
+    try {
+      const { bootSandbox } = await import('./src/app/sandbox.js');
+      bootSandbox(
+        document.getElementById('game'),
+        document.getElementById('hud'),
+        document.getElementById('framedata'),
+        document.getElementById('controls'));
+      document.getElementById('boot').classList.add('gone');
+    } catch (err) {
+      console.error(err);
+      const b = document.getElementById('boot');
+      b.querySelector('.boot-sub').textContent = '起動に失敗: ' + err.message;
+      b.querySelector('.boot-hint').textContent = String(err.stack || '').split('\n')[1] || '';
+    }
+  });
+</script>
+</body>
+</html>
