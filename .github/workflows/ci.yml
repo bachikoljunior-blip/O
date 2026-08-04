@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # No install step: the repo has zero dependencies and Node 22 ships the
+      # test runner. The shipped game has no build step at all.
+      - name: Layer lint
+        run: node tools/lint-layers.js
+      - name: Data validation
+        run: node tools/validate-data.js
+      - name: Tests
+        run: node --test tools/test/*.test.js

@@ -1,9 +1,11 @@
 name: Deploy to GitHub Pages
 
 on:
+  # Deploy from main only. A 'claude/**' wildcard combined with the
+  # cancel-in-progress concurrency group below would mean the last push from
+  # ANY branch wins the live site — use workflow_dispatch for previews instead.
   push:
     branches:
-      - claude/mobile-open-world-rpg-qsv02e
       - main
   workflow_dispatch:
 
@@ -17,7 +19,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tools/lint-layers.js
+      - run: node tools/validate-data.js
+      - run: node --test tools/test/*.test.js
+
   deploy:
+    # A failing determinism test must not be able to ship.
+    needs: ci
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,8 +40,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Stage only what the game needs
+        run: |
+          mkdir -p _site
+          cp -r src vendor styles index.html sandbox.html manifest.webmanifest icon.svg .nojekyll _site/ 2>/dev/null || true
+          du -sh _site
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
