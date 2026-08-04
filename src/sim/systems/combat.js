@@ -13,12 +13,15 @@ import { hasStamina } from '../ops/stamina.js';
 import { bufferTake, bufferHas, bufferClear } from '../ops/buffer.js';
 import { applyHit } from '../ops/damage.js';
 import { startAttack } from '../ops/attack.js';
+import { spawnProjectile } from '../ops/projectile.js';
+import { observePlayer } from '../ops/habits.js';
+import { ENEMY_IDS } from '../../data/enemies.js';
 import { emit } from '../../core/bus.js';
 import { EV } from '../../data/events.js';
 import { fsin, fcos, flen, fatan2 } from '../../core/fixed.js';
 import { angleDiff, approachAngle, lerp, clamp01 } from '../../core/math.js';
 import { gridQuery } from '../../core/spatial.js';
-import { deref } from '../../core/handles.js';
+import { deref, makeHandle } from '../../core/handles.js';
 
 /**
  * Roll-motion curve, sampled by normalised phase. Front-loaded so the dodge
@@ -147,6 +150,25 @@ function tryCancel(w, e, atk, thresholds) {
   return false;
 }
 
+/**
+ * Attribute a defensive input to the enemy that provoked it, so the per-
+ * archetype habit model learns from the right opponent.
+ */
+function recordHabit(w, playerIdx, act) {
+  const s = w.store;
+  const q = w.scratch.query;
+  const n = gridQuery(w.grid, s.px[playerIdx], s.pz[playerIdx], 14, q, s);
+  for (let k = 0; k < n; k++) {
+    const t = q[k];
+    if ((s.mask[t] & C.AI) === 0) continue;
+    if (s.stateId[t] !== S.WINDUP && s.stateId[t] !== S.ACTIVE) continue;
+    const atk = attackByIndex(s.attackId[t]);
+    const frac = atk.windup > 0 ? clamp01(s.phaseT[t] / atk.windup) : 1;
+    observePlayer(w, act, ENEMY_IDS[s.kind[t]], frac);
+    return;
+  }
+}
+
 export function combatSystem(w, _dt) {
   const s = w.store;
   const motion = w.motionScale;
@@ -163,6 +185,7 @@ export function combatSystem(w, _dt) {
     if (s.stateT[e] > 0) s.stateT[e] -= 1;
     if (s.cooldown[e] > 0) s.cooldown[e] -= 1;
     if (s.blockT[e] > 0) s.blockT[e] -= 1;
+    if (s.riposteT[e] > 0) s.riposteT[e] -= 1;
 
     const atk = attackByIndex(s.attackId[e]);
 
@@ -172,9 +195,17 @@ export function combatSystem(w, _dt) {
           if (bufferTake(s, e, ACT.DODGE) && hasStamina(s, e, DODGE.stamina)) {
             startAttack(w, e, 'player_dodge');
           } else if (bufferTake(s, e, ACT.ATTACK)) {
-            s.comboIdx[e] = 1;
-            applyTouchMagnet(w, e, ATTACKS.player_light_1);
-            startAttack(w, e, 'player_light_1');
+            if (s.riposteT[e] > 0) {
+              // Cashing the parry. Consuming the window here means one parry
+              // buys exactly one riposte, not a free window of huge damage.
+              s.riposteT[e] = 0;
+              applyTouchMagnet(w, e, ATTACKS.player_riposte);
+              startAttack(w, e, 'player_riposte');
+            } else {
+              s.comboIdx[e] = 1;
+              applyTouchMagnet(w, e, ATTACKS.player_light_1);
+              startAttack(w, e, 'player_light_1');
+            }
           } else if (bufferTake(s, e, ACT.HEAVY)) {
             applyTouchMagnet(w, e, ATTACKS.player_heavy);
             startAttack(w, e, 'player_heavy');
@@ -210,7 +241,14 @@ export function combatSystem(w, _dt) {
 
       case S.ACTIVE: {
         applyAttackMotion(w, e, atk, motion);
-        resolveActive(w, e, atk);
+        if (atk.kind === 'ranged') {
+          if (s.hitConfirm[e] === 0) {
+            s.hitConfirm[e] = 1;   // doubles as "already fired"
+            spawnProjectile(w, e, makeHandle(e, s.gen[e]), atk);
+          }
+        } else {
+          resolveActive(w, e, atk);
+        }
         if (s.phaseT[e] >= atk.active) {
           s.stateId[e] = S.RECOVERY;
           s.phaseT[e] = 0;
@@ -235,6 +273,7 @@ export function combatSystem(w, _dt) {
       case S.DODGE: {
         const total = atk.windup + atk.recovery;
         const ph = s.phaseT[e];
+        if (ph < 1 && (s.mask[e] & C.PLAYER)) recordHabit(w, e, ACT.DODGE);
         s.iframeT[e] = (ph >= atk.iframes[0] && ph <= atk.iframes[1]) ? 2 : s.iframeT[e];
         applyAttackMotion(w, e, atk, motion);
         if (ph >= atk.actionableFrom && (s.mask[e] & C.PLAYER)) {
@@ -258,6 +297,7 @@ export function combatSystem(w, _dt) {
       }
 
       case S.BLOCK: {
+        if (s.blockT[e] === 0 && (s.mask[e] & C.PLAYER)) recordHabit(w, e, ACT.BLOCK);
         s.blockT[e] += 1;
         s.vx[e] *= 0.7; s.vz[e] *= 0.7;
         if (!bufferHas(s, e, ACT.BLOCK)) {

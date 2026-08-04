@@ -42,6 +42,11 @@ export function createStore(n = MAX_ENTITIES) {
     stamina: f(), staminaMax: f(), staRegenDelay: f(),
     iframeT: f(), vulnerableT: f(),
 
+    // gait: distance-driven stride phase, so footsteps track movement not ticks
+    gaitPhase: f(),
+    // riposte: set on a successful parry, counts down on the RAW clock
+    riposteT: f(),
+
     // combat state machine
     stateId: new Uint8Array(n),
     attackId: new Uint16Array(n),
@@ -68,6 +73,10 @@ export function createStore(n = MAX_ENTITIES) {
     // stats
     atk: f(), def: f(), crit: f(),
     level: new Uint16Array(n),
+
+    // projectiles: who fired this, as a HANDLE (never a raw index — the
+    // shooter can die and have their slot recycled mid-flight)
+    owner: new Int32Array(n),
 
     // world binding
     chunkKey: new Int32Array(n),
@@ -101,12 +110,14 @@ function resetSlot(s, i) {
   s.stance[i] = 0; s.stanceMax[i] = 0; s.stanceIdleT[i] = 0;
   s.stamina[i] = 0; s.staminaMax[i] = 0; s.staRegenDelay[i] = 0;
   s.iframeT[i] = 0; s.vulnerableT[i] = 0;
+  s.gaitPhase[i] = 0; s.riposteT[i] = 0;
   s.stateId[i] = 0; s.attackId[i] = 0;
   s.phaseT[i] = 0; s.stateT[i] = 0;
   s.comboIdx[i] = 0; s.hitConfirm[i] = 0; s.blockT[i] = 0;
   s.aiState[i] = 0; s.aiTimer[i] = 0; s.aiTarget[i] = -1; s.aggro[i] = 0;
   s.homeX[i] = 0; s.homeZ[i] = 0; s.cooldown[i] = 0; s.moveIdx[i] = 0;
   s.atk[i] = 1; s.def[i] = 0; s.crit[i] = 0; s.level[i] = 1;
+  s.owner[i] = -1;
   s.chunkKey[i] = 0; s.persistId[i] = 0;
   clearHitMask(s, i);
   const b = i * BUFFER_SLOTS;
@@ -157,6 +168,7 @@ export function findNaN(store) {
     'px', 'py', 'pz', 'yaw', 'vx', 'vy', 'vz', 'kx', 'ky', 'kz',
     'hp', 'hpMax', 'poise', 'stance', 'stamina', 'staRegenDelay',
     'iframeT', 'vulnerableT', 'phaseT', 'stateT', 'aiTimer', 'aggro',
+    'gaitPhase', 'riposteT',
     'cooldown', 'atk', 'def', 'crit', 'blockT', 'stanceIdleT',
   ];
   for (let c = 0; c < cols.length; c++) {

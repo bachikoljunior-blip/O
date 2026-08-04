@@ -5,23 +5,14 @@
 // layer. The sim never reads the DOM, which is what lets the whole simulation
 // run under `node --test` with no shims.
 
-import { C, S, ACT } from '../components.js';
+import { C, S, ACT, BTN } from '../components.js';
 import { bufferPush } from '../ops/buffer.js';
 import { driveActor } from '../ops/motion.js';
 import { deref } from '../../core/handles.js';
 import { LOCOMOTION } from '../../data/tuning.js';
 import { fsin, fcos } from '../../core/fixed.js';
 
-export const BTN = {
-  ATTACK: 1 << 0,
-  HEAVY: 1 << 1,
-  DODGE: 1 << 2,
-  BLOCK: 1 << 3,
-  INTERACT: 1 << 4,
-  JUMP: 1 << 5,
-  LOCK: 1 << 6,
-  SPRINT: 1 << 7,
-};
+export { BTN };
 
 export function createIntent() {
   return { moveX: 0, moveZ: 0, camYaw: 0, camPitch: 0, pressed: 0, held: 0, released: 0 };

@@ -61,18 +61,31 @@ export function locomotionSystem(w, _dt) {
   }
 }
 
-/** Footfall events, so surface-aware audio does not need an animation system. */
+/**
+ * Footfall events, so surface-aware audio needs no animation system.
+ *
+ * Cadence comes from DISTANCE TRAVELLED, not from the tick counter. Driving it
+ * off `(tick * speed) % k` — as this did originally — makes the stride rate
+ * drift with framerate-independent speed changes and desynchronises from the
+ * visual gait, which is exactly the thing footsteps exist to sell.
+ */
+const STRIDE_METRES = 1.65;
+
 export function footstepSystem(w) {
   const s = w.store;
   for (let k = 0; k < s.liveN; k++) {
     const e = s.live[k];
     if ((s.mask[e] & C.GROUNDED) === 0) continue;
+
     const spd = flen(s.vx[e], s.vz[e]);
-    if (spd < 0.6) { s.aiTimer[e] = s.aiTimer[e]; continue; }
-    // Stride cadence scales with speed; stored in the unused stateT slot for
-    // non-combat actors would collide, so we use a derived phase instead.
-    const phase = (w.tick * spd) % 42;
-    if (phase < spd) {
+    if (spd < 0.6) { s.gaitPhase[e] = 0; continue; }
+
+    // Longer strides at speed, so a sprint does not sound like a fast walk.
+    const stride = STRIDE_METRES * (0.75 + 0.35 * Math.min(1, spd / LOCOMOTION.runSpeed));
+    s.gaitPhase[e] += (spd * DT) / stride;
+
+    if (s.gaitPhase[e] >= 1) {
+      s.gaitPhase[e] -= 1;
       emit(w.events, EV.STEP, e, -1, s.px[e], s.py[e], s.pz[e], 0,
         Math.min(1, spd / LOCOMOTION.runSpeed), 0, 0, 0);
     }

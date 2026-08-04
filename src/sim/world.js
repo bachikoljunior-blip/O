@@ -36,6 +36,7 @@ export function createWorld(seed = 1337) {
     player: -1,          // handle
     lockTarget: -1,      // handle
     lockHoldT: 0,
+    lockSwitchT: 0,
 
     /** Stateful RNG streams, keyed by stream id. */
     rng: {},

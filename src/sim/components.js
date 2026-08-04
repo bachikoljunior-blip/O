@@ -50,6 +50,18 @@ export const ACT = {
 
 export const BUFFER_SLOTS = 4;
 
+/** Input button bits. Shared by the platform layer and every consumer of Intent. */
+export const BTN = {
+  ATTACK: 1 << 0,
+  HEAVY: 1 << 1,
+  DODGE: 1 << 2,
+  BLOCK: 1 << 3,
+  INTERACT: 1 << 4,
+  JUMP: 1 << 5,
+  LOCK: 1 << 6,
+  SPRINT: 1 << 7,
+};
+
 /** Damage flags packed into the HIT event's i1 field. */
 export const HIT_FLAG = {
   CRIT: 1 << 0,

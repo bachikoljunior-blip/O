@@ -40,13 +40,17 @@ export function updateCamera(rig, gfx, target, dt, terrain, lockTarget) {
     lerp(rig.pitch, rig.targetPitch, Math.min(1, dt * 12)),
     CAMERA.pitchMin, CAMERA.pitchMax);
 
-  // Lock-on: frame both combatants rather than snapping behind the player.
+  // Lock-on: frame both combatants rather than sitting behind the player.
   let focusX = target.x, focusZ = target.z;
   if (lockTarget) {
     focusX = lerp(target.x, lockTarget.x, 0.30);
     focusZ = lerp(target.z, lockTarget.z, 0.30);
-    const want = Math.atan2(lockTarget.z - target.z, lockTarget.x - target.x);
-    rig.targetYaw = -want - Math.PI / 2;
+    // Put the camera opposite the target. With this rig's convention
+    // (cx = focus - sin(yaw)*d, cz = focus - cos(yaw)*d), placing the camera at
+    // player - dir*d requires sin(yaw)=cos(want) and cos(yaw)=sin(want),
+    // i.e. yaw = PI/2 - want. The previous -want - PI/2 flipped the x sign and
+    // swung the camera to the wrong side of the fight.
+    rig.targetYaw = Math.PI / 2 - Math.atan2(lockTarget.z - target.z, lockTarget.x - target.x);
   }
 
   const cp = Math.cos(rig.pitch);

@@ -11,6 +11,7 @@ import { C, S, ACT } from '../components.js';
 import { ENEMIES, ENEMY_IDS, enemyByIndex } from '../../data/enemies.js';
 import { ATTACKS } from '../../data/attacks.js';
 import { startAttack } from '../ops/attack.js';
+import { createHabitModel, habitBias } from '../ops/habits.js';
 import { driveActor } from '../ops/motion.js';
 import { deref, NULL_HANDLE } from '../../core/handles.js';
 import { flen, fatan2, fsin } from '../../core/fixed.js';
@@ -20,37 +21,6 @@ import { S as STREAM } from '../determinism/streams.js';
 import { angleDiff } from '../../core/math.js';
 
 export const AI = { IDLE: 0, WANDER: 1, CHASE: 2, STRAFE: 3, ATTACK: 4, RETREAT: 5, LEASH: 6 };
-
-/**
- * Per-archetype behaviour model of the PLAYER, accumulated online.
- * Counts are small integers so the whole thing serialises trivially.
- */
-export function createHabitModel() {
-  const m = {};
-  for (const id of ENEMY_IDS) {
-    m[id] = {
-      dodgesEarly: 0,   // player dodged before the active frames
-      dodgesLate: 0,    // player dodged into the active frames
-      punishAfter: 0,   // player attacked immediately after our recovery
-      blocks: 0,
-      samples: 0,
-    };
-  }
-  return m;
-}
-
-/** Bias move selection toward what has been working on this player. */
-function habitBias(model, enemyId, move) {
-  const h = model[enemyId];
-  if (!h || h.samples < 8) return 1;
-  const early = h.dodgesEarly / h.samples;
-  const atk = ATTACKS[move.atk];
-  // A player who dodges early is punished by the delayed variant, and by long
-  // wind-ups generally; a player who blocks is punished by stance damage.
-  if (early > 0.5 && atk.windup > 30) return 1.6;
-  if (h.blocks / h.samples > 0.5 && atk.stance > 25) return 1.5;
-  return 1;
-}
 
 function pickMove(w, e, def, dist) {
   const s = w.store;
@@ -64,7 +34,7 @@ function pickMove(w, e, def, dist) {
     let ok = dist >= mv.range[0] && dist <= mv.range[1];
     if (ok && mv.maxHpFrac !== undefined && hpFrac > mv.maxHpFrac) ok = false;
     if (ok && mv.minHpFrac !== undefined && hpFrac < mv.minHpFrac) ok = false;
-    const wgt = ok ? mv.w * habitBias(w.habits, def.id, mv) : 0;
+    const wgt = ok ? mv.w * habitBias(w.habits, def.id, ATTACKS[mv.atk]) : 0;
     weights[i] = wgt * 1000;
     total += weights[i];
   }
@@ -170,19 +140,3 @@ export function aiSystem(w, _dt) {
   }
 }
 
-/** Observe what the player did, so the habit model has something to learn from. */
-export function observePlayer(w, act, enemyId, phaseFrac) {
-  if (!w.habits || !w.habits[enemyId]) return;
-  const h = w.habits[enemyId];
-  h.samples++;
-  if (act === ACT.DODGE) {
-    if (phaseFrac < 0.6) h.dodgesEarly++; else h.dodgesLate++;
-  } else if (act === ACT.BLOCK) {
-    h.blocks++;
-  }
-  // Bound the counts so old behaviour decays out rather than dominating forever.
-  if (h.samples > 200) {
-    h.samples >>= 1; h.dodgesEarly >>= 1; h.dodgesLate >>= 1;
-    h.punishAfter >>= 1; h.blocks >>= 1;
-  }
-}

@@ -11,6 +11,8 @@ import { bufferSystem } from './ops/buffer.js';
 import { stanceSystem } from './ops/damage.js';
 import { intentSystem } from './systems/intent.js';
 import { aiSystem } from './systems/ai.js';
+import { targetingSystem } from './systems/targeting.js';
+import { projectileSystem } from './systems/projectile.js';
 import { rebuildLive } from './store.js';
 import { clearEvents } from '../core/bus.js';
 import { DT, MACRO_TICKS_PER_HOUR } from '../data/tuning.js';
@@ -30,10 +32,12 @@ export function tick(w, intent) {
   hitstopSystem(w);
   spatialSystem(w);
 
+  targetingSystem(w, intent);
   intentSystem(w, intent);
   aiSystem(w, DT);
 
   combatSystem(w, DT);
+  projectileSystem(w, DT);
   locomotionSystem(w, DT);
 
   // These three run on the RAW clock, so hitstop never stalls them.

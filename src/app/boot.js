@@ -108,7 +108,15 @@ export function boot(canvas, hudRoot, seedParam) {
 
       camRig.targetYaw = input.camYaw;
       camRig.targetPitch = input.camPitch;
-      updateCamera(camRig, gfx, { x: px, y: py, z: pz }, dt, world.terrain, null);
+      // Lock-on: when a target is held, the camera frames both combatants
+      // instead of sitting behind the player.
+      const lock = deref(s, world.lockTarget);
+      const lockPos = lock === -1 ? null
+        : { x: s.px[lock], y: s.py[lock], z: s.pz[lock] };
+      updateCamera(camRig, gfx, { x: px, y: py, z: pz }, dt, world.terrain, lockPos);
+      // Keep the manual orbit in sync while locked, so releasing the lock does
+      // not snap the camera back to wherever the thumb last left it.
+      if (lockPos) input.camYaw = camRig.targetYaw;
 
       updateTerrain(tm, gfx, px, pz);
       updateVegetation(veg, px, pz, 1 - gfx.scaleIdx * 0.2);

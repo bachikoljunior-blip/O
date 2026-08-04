@@ -49,6 +49,8 @@ export function applyHit(w, src, dst, atk, nx, nz) {
       s.stance[src] *= STANCE.parryStanceMul;
       s.stanceIdleT[src] = 0;
       refundFull(s, dst);
+      // Arm the riposte. Consumed by the state machine in IDLE.
+      s.riposteT[dst] = PARRY.riposteWindowTicks;
       w.hitstopT = Math.max(w.hitstopT, PARRY.hitstopTicks);
       w.stats.parries++;
       emit(w.events, EV.PARRY, src, dst,

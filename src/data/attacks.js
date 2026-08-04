@@ -68,6 +68,24 @@ export const ATTACKS = {
     anim: 'overhead', sfxSwing: 'swing_h', sfxHit: 'hit_heavy', vfx: 'trail_heavy',
   },
 
+  // The payoff for a parry. Fast, huge, and only available inside the riposte
+  // window — without it the parry is a damage-prevention button rather than an
+  // offensive read, which is the whole point of the mechanic.
+  player_riposte: {
+    kind: 'melee',
+    windup: 6, active: 5, recovery: 22,
+    stamina: 8, minStamina: 0,
+    next: [],
+    hitbox: { r: 0.65, from: [0.0, 1.30, 0.50], to: [0.0, 0.95, 2.00], arcDeg: 90 },
+    dmg: { base: 3.2, scale: 'atk', type: 'pierce' },
+    poise: 70, stance: 55, hitstop: HITSTOP.heavy,
+    knock: { impulse: 5.0, up: 0.4 },
+    weight: 1.0,
+    lunge: { ticks: 6, speed: 6.0 },
+    turnCap: 0.16,
+    anim: 'riposte', sfxSwing: 'swing_h', sfxHit: 'hit_heavy', vfx: 'trail_heavy',
+  },
+
   // ——————————————————————————————— player: defensive
   player_dodge: {
     kind: 'dodge',

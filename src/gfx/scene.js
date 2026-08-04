@@ -13,6 +13,8 @@ import { hash2 } from '../core/noise.js';
 import { clamp01 } from '../core/math.js';
 
 const _w = new Float32Array(3);
+/** Hoisted: setInstance runs thousands of times per rebuild. */
+const _UP = new THREE.Vector3(0, 1, 0);
 
 export function createActorPool(gfx) {
   return { rigs: new Map(), group: new THREE.Group(), pool: [] , scene: gfx.scene };
@@ -195,7 +197,7 @@ export function updateVegetation(veg, px, pz, quality = 1) {
 
 function setInstance(veg, mesh, idx, x, y, z, scale, rotY) {
   veg._p.set(x, y, z);
-  veg._q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotY);
+  veg._q.setFromAxisAngle(_UP, rotY);
   veg._s.setScalar(scale);
   veg._m.compose(veg._p, veg._q, veg._s);
   mesh.setMatrixAt(idx, veg._m);
