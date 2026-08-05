@@ -56,12 +56,86 @@ export function createSkyState() {
   };
 }
 
-/** Weather presets. Fog density is what sells depth on a small screen. */
+/**
+ * Weather presets. Fog density is what sells depth on a small screen.
+ *
+ *   fogH     reciprocal scale height of the fog slab, in 1/m. Bigger means the
+ *            haze hugs the valleys and the peaks come out of it clean.
+ *   scatter  how much the fog picks up the sun's colour when you look toward
+ *            it. This is the term that makes distance read as distance.
+ *   cover    cloud-noise threshold. LOWER means MORE cloud.
+ *   shadow   how deep the cloud shadows cut into the direct sun on the ground.
+ *   dome     opacity of the cloud layer painted on the sky dome.
+ */
 export const WEATHER = {
-  clear: { fog: 0.00018, fogBoost: [1, 1, 1], particles: 0, wind: 0.4, sunMul: 1.0 },
-  cloud: { fog: 0.00042, fogBoost: [0.94, 0.95, 1.0], particles: 0, wind: 0.7, sunMul: 0.62 },
-  rain:  { fog: 0.00085, fogBoost: [0.78, 0.84, 0.92], particles: 1, wind: 1.1, sunMul: 0.38 },
-  fog:   { fog: 0.00220, fogBoost: [1.02, 1.02, 1.04], particles: 0, wind: 0.25, sunMul: 0.45 },
-  snow:  { fog: 0.00110, fogBoost: [1.05, 1.06, 1.10], particles: 2, wind: 0.8, sunMul: 0.55 },
-  ash:   { fog: 0.00140, fogBoost: [0.92, 0.82, 0.72], particles: 3, wind: 0.6, sunMul: 0.42 },
+  clear: { fog: 0.00018, fogBoost: [1, 1, 1], particles: 0, wind: 0.4, sunMul: 1.0,
+           fogH: 0.0090, scatter: 0.85, cover: 0.62, shadow: 0.30, dome: 0.55 },
+  cloud: { fog: 0.00042, fogBoost: [0.94, 0.95, 1.0], particles: 0, wind: 0.7, sunMul: 0.62,
+           fogH: 0.0075, scatter: 0.55, cover: 0.40, shadow: 0.52, dome: 0.90 },
+  rain:  { fog: 0.00085, fogBoost: [0.78, 0.84, 0.92], particles: 1, wind: 1.1, sunMul: 0.38,
+           fogH: 0.0050, scatter: 0.30, cover: 0.24, shadow: 0.60, dome: 1.00 },
+  fog:   { fog: 0.00220, fogBoost: [1.02, 1.02, 1.04], particles: 0, wind: 0.25, sunMul: 0.45,
+           fogH: 0.0180, scatter: 0.65, cover: 0.34, shadow: 0.34, dome: 0.95 },
+  snow:  { fog: 0.00110, fogBoost: [1.05, 1.06, 1.10], particles: 2, wind: 0.8, sunMul: 0.55,
+           fogH: 0.0110, scatter: 0.45, cover: 0.30, shadow: 0.42, dome: 0.95 },
+  ash:   { fog: 0.00140, fogBoost: [0.92, 0.82, 0.72], particles: 3, wind: 0.6, sunMul: 0.42,
+           fogH: 0.0130, scatter: 0.70, cover: 0.36, shadow: 0.48, dome: 0.92 },
 };
+
+// ————————————————————————————————— colour grade
+
+/**
+ * Time-of-day grade, applied per fragment AFTER the ACES tone map.
+ *
+ * A post-process pass is not available to us (a full-resolution dependent read
+ * is bandwidth murder on a tile GPU), so the grade rides along inside every
+ * forward material instead. It is the cheapest possible version of one:
+ *
+ *   out = pow( c * gain + lift * (1 - c), 1 / gamma )
+ *
+ *   lift   added to the shadows only — this is where the BLUE goes at dawn and
+ *          at night, and it is what stops "dark" from meaning "grey".
+ *   gamma  midtone bend; >1 opens the midtones up.
+ *   gain   multiplies the highlights — where the warmth of a low sun goes.
+ *
+ * The hours line up with SKY above so the two tables are read as one mood.
+ */
+export const GRADE = [
+  { t: 0,    lift: [0.010, 0.019, 0.046], gamma: [0.92, 0.95, 1.07], gain: [0.72, 0.80, 1.02] },
+  { t: 5,    lift: [0.012, 0.021, 0.050], gamma: [0.94, 0.97, 1.09], gain: [0.80, 0.87, 1.07] },
+  { t: 6.5,  lift: [0.004, 0.013, 0.039], gamma: [1.00, 1.00, 1.03], gain: [1.09, 1.01, 0.92] },
+  { t: 9,    lift: [0.002, 0.006, 0.021], gamma: [1.02, 1.01, 1.00], gain: [1.04, 1.01, 0.98] },
+  { t: 13,   lift: [0.000, 0.002, 0.011], gamma: [1.00, 1.00, 1.00], gain: [1.00, 1.00, 1.00] },
+  { t: 17,   lift: [0.006, 0.005, 0.015], gamma: [1.02, 1.00, 0.98], gain: [1.05, 1.00, 0.95] },
+  { t: 19,   lift: [0.017, 0.009, 0.021], gamma: [1.05, 1.00, 0.94], gain: [1.13, 0.99, 0.87] },
+  { t: 20.5, lift: [0.018, 0.014, 0.041], gamma: [1.00, 0.99, 1.03], gain: [0.94, 0.90, 1.00] },
+  { t: 22,   lift: [0.012, 0.019, 0.047], gamma: [0.94, 0.96, 1.06], gain: [0.76, 0.83, 1.03] },
+  { t: 24,   lift: [0.010, 0.019, 0.046], gamma: [0.92, 0.95, 1.07], gain: [0.72, 0.80, 1.02] },
+];
+
+export function createGradeState() {
+  return {
+    lift: new Float32Array(3),
+    invGamma: new Float32Array(3),
+    gain: new Float32Array(3),
+  };
+}
+
+/**
+ * Interpolated grade for an hour. Gamma is returned already RECIPROCATED so
+ * the shader can hand it straight to pow() without a divide per fragment.
+ */
+export function gradeAt(hour, out) {
+  const h = ((hour % 24) + 24) % 24;
+  let a = GRADE[0], b = GRADE[GRADE.length - 1];
+  for (let i = 0; i < GRADE.length - 1; i++) {
+    if (h >= GRADE[i].t && h <= GRADE[i + 1].t) { a = GRADE[i]; b = GRADE[i + 1]; break; }
+  }
+  const s = smoothstep(clamp((h - a.t) / Math.max(0.001, b.t - a.t), 0, 1));
+  for (let i = 0; i < 3; i++) {
+    out.lift[i] = lerp(a.lift[i], b.lift[i], s);
+    out.gain[i] = lerp(a.gain[i], b.gain[i], s);
+    out.invGamma[i] = 1 / Math.max(0.05, lerp(a.gamma[i], b.gamma[i], s));
+  }
+  return out;
+}
