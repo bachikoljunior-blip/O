@@ -88,7 +88,7 @@
     <p class="tap-help">タップするたび +1</p>
 
     <section class="panel goal" aria-label="次の生産物までの進み具合">
-      <div class="goal-row"><span>次に交換できるもの</span><strong id="goalText">小さな衛星まで 15</strong></div>
+      <div class="goal-row"><span>次に交換できるもの</span><strong id="goalText">小さな衛星まで 4</strong></div>
       <div class="bar"><span id="goalBar"></span></div>
     </section>
 
@@ -103,7 +103,15 @@
     const nextCost = (baseCost, owned) => Math.ceil(baseCost * Math.pow(1.15, owned));
 
     const producerTypes = [
-      { name: '小さな衛星', icon: '🛰️', baseCost: 15, perSecond: 0.2 },
+      // baseCost was 15 until 2026-08-10. Two non-author reviewers converged on the
+      // opening independently — round 4 called it fifteen taps with no reward, round 5
+      // named taps 1 through 14 as the weakest stretch — and a run confirmed it: the
+      // rate line reads 毎秒 0 for all fifteen taps, and the purchase costs exactly the
+      // fifteen you have, so the counter returns to zero at the moment of the reward.
+      // At 4 the first producer arrives in four taps and the number starts moving on
+      // its own while the player is still holding the phone. Nothing else changed, so
+      // the next measurement is about this and only this.
+      { name: '小さな衛星', icon: '🛰️', baseCost: 4, perSecond: 0.2 },
       { name: '月面観測所', icon: '🔭', baseCost: 100, perSecond: 1.5 },
       { name: '星間工房', icon: '🚀', baseCost: 800, perSecond: 12 }
     ];
