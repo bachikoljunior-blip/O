@@ -3,6 +3,7 @@
 import { Game } from './game/game.js';
 import { audio } from './core/audio.js';
 import { clamp, lerp, TAU, roundRect } from './core/util.js';
+import { pickWorldSeed } from './core/seed.js';
 import { FONT, COL } from './ui/ui.js';
 
 const canvas = document.getElementById('game');
@@ -127,32 +128,8 @@ function drawLoading() {
 
 let gen = null;
 
-function pickSeed() {
-  // an explicit ?seed= wins so worlds can be shared; otherwise continue the saved world
-  const params = new URLSearchParams(location.search);
-  const s = params.get('seed');
-  if (s != null && s !== '') {
-    const decimal = /^\d+$/.test(s) ? Number(s) : NaN;
-    const parsed = Number.isFinite(decimal) ? decimal : parseInt(s, 36);
-    return (Number.isFinite(parsed) ? parsed : 12345) >>> 0;
-  }
-  try {
-    const last = Number(localStorage.getItem('aetheria_last_seed_v1'));
-    if (Number.isFinite(last) && last >= 0) return last >>> 0;
-  } catch (e) {}
-  for (const key of ['aetheria_save_v1', 'aetheria_save_backup_v1']) {
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-      const d = JSON.parse(raw);
-      if (d && typeof d.seed === 'number' && d.player) return d.seed >>> 0;
-    } catch (e) {}
-  }
-  return (Math.random() * 1e9) >>> 0;
-}
-
 function startGeneration() {
-  try { gen = game.generate(pickSeed()); }
+  try { gen = game.generate(pickWorldSeed(location.search)); }
   catch (e) { showFatal(e); }
 }
 startGeneration();
