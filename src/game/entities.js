@@ -249,6 +249,8 @@ export class Player extends Actor {
 
   damage(g, amount, srcX, srcY, opt = {}) {
     if (!this.alive) return 0;
+    const difficulty = g.difficultyProfile?.() || null;
+    if (difficulty) amount *= difficulty.incoming;
     if (this.iframes > 0) {
       if (this.state === 'roll') this.perfectDodge(g, opt.attacker);
       return 0;
@@ -259,7 +261,7 @@ export class Player extends Actor {
       const a = angleTo(this.x, this.y, srcX, srcY);
       if (Math.abs(angleDiff(this.face, a)) < 1.25) {
         blocked = true;
-        if (this.blockT < 0.22) {         // parry
+        if (this.blockT < (difficulty?.parryWindow ?? 0.22)) {         // parry
           dmg = 0;
           this.parries++;
           this.gainFlow(g, 18);
@@ -373,16 +375,18 @@ export class Player extends Actor {
   }
 
   tryRoll(g) {
-    if (!this.alive || this.state === 'roll' || this.sta < 24) {
-      if (this.sta < 24) audio.sfx('error', { vol: 0.4 });
+    const difficulty = g.difficultyProfile?.() || null;
+    const cost = difficulty?.dodgeCost ?? 24;
+    if (!this.alive || this.state === 'roll' || this.sta < cost) {
+      if (this.sta < cost) audio.sfx('error', { vol: 0.4 });
       return;
     }
     this.state = 'roll';
     this.stateT = 0;
     this.rollPerfect = false;
-    this.sta -= 24;
+    this.sta -= cost;
     this.staDelay = 0.5;
-    this.iframes = 0.30;
+    this.iframes = difficulty?.rollIframes ?? 0.30;
     const mv = g.input.moveVector();
     const a = mv.m > 0.2 ? Math.atan2(mv.y, mv.x) : this.face;
     this.face = a;
@@ -694,6 +698,8 @@ export class Enemy extends Actor {
 
   damage(g, amount, srcX, srcY, opt = {}) {
     if (!this.alive) return 0;
+    const difficulty = g.difficultyProfile?.() || null;
+    if (difficulty) amount *= difficulty.outgoing;
     const vulnerable = this.state === 'stagger';
     if (vulnerable) amount *= 1.25;
     const dmg = Math.max(1, Math.round(amount * (100 / (100 + this.def * 3.0))));

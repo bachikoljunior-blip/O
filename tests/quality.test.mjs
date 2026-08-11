@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { generateWorld, WORLD_W, WORLD_H } from '../src/world/worldgen.js';
 import { QuestLog } from '../src/game/quests.js';
-import { Game } from '../src/game/game.js';
+import { Game, DIFFICULTY_PROFILES } from '../src/game/game.js';
 import { HUD } from '../src/ui/hud.js';
 import { Input } from '../src/core/input.js';
 import { Player, Enemy } from '../src/game/entities.js';
@@ -143,6 +143,7 @@ test('structurally corrupt saves are rejected before they can break loading', ()
   assert.equal(check({ ...valid, quests: { active: {}, done: [] } }), false);
   assert.equal(check({ ...valid, camps: [['broken']] }), false);
   assert.equal(check({ ...valid, achievements: {} }), false);
+  assert.equal(check({ ...valid, waypoint: { x: 'broken', y: 10 } }), false);
 });
 
 test('a corrupt primary save automatically falls back to the valid backup', () => {
@@ -231,18 +232,20 @@ test('a legacy single-slot save migrates into its seed slot', () => {
   }
 });
 
-test('all touch controls remain separated in portrait, landscape and left-handed mode', () => {
+test('all touch controls remain separated at every size in portrait, landscape and left-handed mode', () => {
   const hud = new HUD({});
   for (const [w, h] of [[375, 667], [667, 375], [320, 568]]) {
-    for (const leftHanded of [false, true]) {
-      const layout = hud.layout(w, h, {}, { leftHanded });
-      const controls = [layout.attack, layout.dodge, layout.block, layout.interact, layout.item,
-        ...layout.spells, layout.menu, layout.map];
-      for (let i = 0; i < controls.length; i++) {
-        for (let j = i + 1; j < controls.length; j++) {
-          const a = controls[i], b = controls[j];
-          const gap = Math.hypot(a.x - b.x, a.y - b.y) - a.r - b.r;
-          assert.ok(gap >= -0.001, `${w}x${h} ${leftHanded ? 'left' : 'right'}: controls ${i}/${j} overlap by ${-gap}px`);
+    for (const controlScale of [0.82, 1, 1.18]) {
+      for (const leftHanded of [false, true]) {
+        const layout = hud.layout(w, h, {}, { leftHanded, controlScale });
+        const controls = [layout.attack, layout.dodge, layout.block, layout.interact, layout.item,
+          ...layout.spells, layout.menu, layout.map];
+        for (let i = 0; i < controls.length; i++) {
+          for (let j = i + 1; j < controls.length; j++) {
+            const a = controls[i], b = controls[j];
+            const gap = Math.hypot(a.x - b.x, a.y - b.y) - a.r - b.r;
+            assert.ok(gap >= -0.001, `${w}x${h} scale ${controlScale} ${leftHanded ? 'left' : 'right'}: controls ${i}/${j} overlap by ${-gap}px`);
+          }
         }
       }
     }
@@ -250,6 +253,64 @@ test('all touch controls remain separated in portrait, landscape and left-handed
     const mirrored = hud.layout(w, h, {}, { leftHanded: true });
     assert.equal(Math.round(normal.attack.x + mirrored.attack.x), w);
   }
+});
+
+test('difficulty profiles change damage, dodge timing and rewards coherently', () => {
+  assert.ok(DIFFICULTY_PROFILES.story.incoming < DIFFICULTY_PROFILES.adventure.incoming);
+  assert.ok(DIFFICULTY_PROFILES.legend.incoming > DIFFICULTY_PROFILES.adventure.incoming);
+  assert.ok(DIFFICULTY_PROFILES.story.rollIframes > DIFFICULTY_PROFILES.adventure.rollIframes);
+  assert.ok(DIFFICULTY_PROFILES.legend.reward > DIFFICULTY_PROFILES.adventure.reward);
+
+  const damageTaken = (id) => {
+    const player = new Player(0, 0);
+    player.hp = player.maxHp = 1000;
+    const game = {
+      difficultyProfile: () => DIFFICULTY_PROFILES[id],
+      pt: { text() {}, ring() {}, burst() {} },
+      shake() {}, vibrate() {}, hitStop() {}, onPlayerDeath() {},
+    };
+    return player.damage(game, 100, 10, 0);
+  };
+  assert.ok(damageTaken('story') < damageTaken('adventure'));
+  assert.ok(damageTaken('legend') > damageTaken('adventure'));
+
+  for (const id of Object.keys(DIFFICULTY_PROFILES)) {
+    const player = new Player(0, 0);
+    player.sta = 100;
+    const game = {
+      difficultyProfile: () => DIFFICULTY_PROFILES[id],
+      input: { moveVector: () => ({ x: 1, y: 0, m: 1 }) },
+      pt: { spawn() {}, burst() {} }, vibrate() {},
+    };
+    player.tryRoll(game);
+    assert.equal(player.sta, 100 - DIFFICULTY_PROFILES[id].dodgeCost);
+    assert.equal(player.iframes, DIFFICULTY_PROFILES[id].rollIframes);
+  }
+});
+
+test('a custom map waypoint takes navigation priority and clears safely', () => {
+  const calls = [];
+  const context = {
+    world: {
+      w: 20, h: 20,
+      inBounds: (x, y) => x >= 0 && y >= 0 && x < 20 && y < 20,
+      isSolidTile: () => false,
+      isWaterTile: () => false,
+    },
+    interior: null,
+    waypoint: null,
+    quests: { markers: () => [{ x: 900, y: 900, main: true, tracked: true }] },
+    toast: (message) => calls.push(message),
+    save: () => calls.push('save'),
+  };
+  assert.equal(Game.prototype.setWaypoint.call(context, 160, 224), true);
+  const markers = Game.prototype.navigationMarkers.call(context);
+  assert.equal(markers[0].custom, true);
+  assert.equal(markers[0].tracked, true);
+  assert.equal(markers[0].title, '地図の目印');
+  assert.equal(Game.prototype.clearWaypoint.call(context), true);
+  assert.equal(context.waypoint, null);
+  assert.ok(calls.includes('save'));
 });
 
 test('backgrounding clears every held control before mobile play resumes', () => {
@@ -278,6 +339,19 @@ test('backgrounding clears every held control before mobile play resumes', () =>
     dragX: input.ui.dragX, dragY: input.ui.dragY, id: input.ui.id, moved: input.ui.moved },
   { down: false, pressed: false, released: false, dragX: 0, dragY: 0, id: null, moved: false });
   assert.equal(input.anyPress, false);
+});
+
+test('mobile interruptions pause active play exactly once', () => {
+  const opened = [];
+  const context = {
+    state: 'play', player: { alive: true },
+    menus: { isOpen: false, open: (name) => { opened.push(name); context.menus.isOpen = true; } },
+    input: { setUIMode: (on) => opened.push(on ? 'ui' : 'game') },
+  };
+  assert.equal(Game.prototype.pauseForInterruption.call(context), true);
+  assert.deepEqual(opened, ['pause', 'ui']);
+  assert.equal(Game.prototype.pauseForInterruption.call(context), false);
+  assert.deepEqual(opened, ['pause', 'ui']);
 });
 
 test('perfect dodges build Flow once per roll and reward precise timing', () => {

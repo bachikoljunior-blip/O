@@ -32,6 +32,21 @@ function slotKey(base, seed) {
   return `${base}_${seed >>> 0}`;
 }
 
+export const DIFFICULTY_PROFILES = Object.freeze({
+  story: Object.freeze({
+    id: 'story', name: '物語', incoming: 0.68, outgoing: 1.25, reward: 1,
+    dodgeCost: 18, rollIframes: 0.36, parryWindow: 0.28, deathLoss: 0.05,
+  }),
+  adventure: Object.freeze({
+    id: 'adventure', name: '冒険者', incoming: 1, outgoing: 1, reward: 1,
+    dodgeCost: 24, rollIframes: 0.30, parryWindow: 0.22, deathLoss: 0.15,
+  }),
+  legend: Object.freeze({
+    id: 'legend', name: '伝説', incoming: 1.22, outgoing: 0.9, reward: 1.25,
+    dodgeCost: 26, rollIframes: 0.27, parryWindow: 0.18, deathLoss: 0.20,
+  }),
+});
+
 export class Game {
   constructor(canvas) {
     this.canvas = canvas;
@@ -62,7 +77,8 @@ export class Game {
     this.activeBoss = null;
     this.settings = {
       music: 0.5, sfx: 0.75, vibrate: true, hq: true, aimAssist: true, showFps: false,
-      leftHanded: false, reduceMotion: false,
+      leftHanded: false, reduceMotion: false, difficulty: 'adventure',
+      controlScale: 1, controlOpacity: 0.9,
     };
     this.safeArea = { top: 0, right: 0, bottom: 0, left: 0 };
     this.fps = 60;
@@ -74,6 +90,7 @@ export class Game {
     this.locationBanner = null;
     this.lastBiome = -1;
     this.onboarding = null;
+    this.waypoint = null;
     this.achievements = new Set();
     this.achievementCheckT = 0;
     this.victoryPending = 0;
@@ -191,7 +208,9 @@ export class Game {
     // full reset — the world stays, everything the hero touched does not
     this.player = new Player(this.world.start.x, this.world.start.y);
     this.quests = new QuestLog(this);
+    this.runtime = new WorldRuntime(this.world);
     this.enemies.length = 0;
+    this.npcs.length = 0;
     this.drops.length = 0;
     this.projectiles.length = 0;
     this.objects.length = 0;
@@ -200,18 +219,23 @@ export class Game {
     this.poiObjects.clear();
     this.interior = null;
     this.activeBoss = null;
+    this.waypoint = null;
     this.lastShrine = null;
     this.locationBanner = null;
     this.lastBiome = -1;
     for (const poi of this.world.pois) { poi.discovered = false; poi.activated = false; poi.cleared = false; poi.looted = false; }
     for (const st of this.world.settlements) { st.discovered = false; st.board = null; st.boardDay = -1; }
     this.buildMapCanvas();
+    this.spawnSettlementNPCs();
     this.startingKit();
     this.renderer.cam.x = this.player.x;
     this.renderer.cam.y = this.player.y;
     this.state = 'play';
     this.time = 8 * (DAY_LENGTH / 24);
     this.day = 1;
+    this.spawnTimer = 0;
+    this.autosaveT = 0;
+    this.weather = { rain: 0, snow: 0, fog: 0, wind: 0.4, target: { rain: 0, snow: 0, fog: 0 }, timer: 40 };
     this.clearCurrentSave();
     this.audio.init();
     this.showBanner(MAIN_CHAPTERS[0].title, MAIN_CHAPTERS[0].desc);
@@ -237,6 +261,74 @@ export class Game {
       if (dist(tx, ty, s.x, s.y) < s.size + 3) return s.name + s.label;
     }
     return BIOME_NAME[this.world.biomeAt(tx, ty)] || '荒野';
+  }
+
+  difficultyProfile() {
+    return DIFFICULTY_PROFILES[this.settings.difficulty] || DIFFICULTY_PROFILES.adventure;
+  }
+
+  setDifficulty(id, announce = true) {
+    if (!DIFFICULTY_PROFILES[id]) return false;
+    this.settings.difficulty = id;
+    this.saveSettings();
+    if (announce && this.state === 'play') this.toast(`難易度を「${DIFFICULTY_PROFILES[id].name}」に変更`, '#ffe08a');
+    return true;
+  }
+
+  cycleDifficulty(step = 1) {
+    const ids = Object.keys(DIFFICULTY_PROFILES);
+    const current = Math.max(0, ids.indexOf(this.settings.difficulty));
+    return this.setDifficulty(ids[(current + step + ids.length) % ids.length], false);
+  }
+
+  navigationMarkers() {
+    const markers = this.quests?.markers?.() || [];
+    if (!this.waypoint || this.interior) return markers;
+    return [{
+      x: this.waypoint.x, y: this.waypoint.y, title: '地図の目印',
+      questId: 'waypoint', custom: true, tracked: true, main: false,
+    }, ...markers];
+  }
+
+  setWaypoint(x, y) {
+    if (!this.world || this.interior || !Number.isFinite(x) || !Number.isFinite(y)) return false;
+    let tx = clamp(Math.floor(x / TILE), 0, this.world.w - 1);
+    let ty = clamp(Math.floor(y / TILE), 0, this.world.h - 1);
+    if (this.world.isSolidTile(tx, ty) || this.world.isWaterTile(tx, ty)) {
+      let found = null;
+      for (let r = 1; r <= 8 && !found; r++) {
+        for (let oy = -r; oy <= r && !found; oy++) {
+          for (let ox = -r; ox <= r; ox++) {
+            if (Math.abs(ox) !== r && Math.abs(oy) !== r) continue;
+            const nx = tx + ox, ny = ty + oy;
+            if (!this.world.inBounds(nx, ny) || this.world.isSolidTile(nx, ny) || this.world.isWaterTile(nx, ny)) continue;
+            found = { x: nx, y: ny };
+            break;
+          }
+        }
+      }
+      if (!found) return false;
+      tx = found.x; ty = found.y;
+    }
+    this.waypoint = { x: (tx + 0.5) * TILE, y: (ty + 0.5) * TILE };
+    this.toast('地図に目印を置きました', '#8fd0ff');
+    this.save(true);
+    return true;
+  }
+
+  clearWaypoint(announce = true) {
+    if (!this.waypoint) return false;
+    this.waypoint = null;
+    if (announce) this.toast('地図の目印を消しました', '#8fd0ff');
+    this.save(true);
+    return true;
+  }
+
+  pauseForInterruption() {
+    if (this.state !== 'play' || this.menus.isOpen || !this.player?.alive) return false;
+    this.menus.open('pause');
+    this.input.setUIMode(true);
+    return true;
   }
 
   updateWeather(dt) {
@@ -422,10 +514,11 @@ export class Game {
 
   onEnemyKilled(e, opt) {
     const p = this.player;
+    const reward = this.difficultyProfile().reward;
     p.kills++;
-    p.addXp(Math.round(e.T.xp * (1 + (e.level - 1) * 0.22)), this);
+    p.addXp(Math.round(e.T.xp * (1 + (e.level - 1) * 0.22) * reward), this);
     const rng = makeRNG((e.x * 7919 + e.y * 104729 + this.frame) | 0);
-    const gold = rng.irange(e.T.gold[0], e.T.gold[1]) * (1 + Math.floor(e.level / 4));
+    const gold = Math.round(rng.irange(e.T.gold[0], e.T.gold[1]) * (1 + Math.floor(e.level / 4)) * reward);
     if (gold > 0) this.drops.push(new Drop(e.x, e.y, { gold }));
     for (const l of rollLoot(rng, e.kind, e.level)) this.drops.push(new Drop(e.x, e.y, l));
     this.quests.onKill(e.kind, e.x, e.y);
@@ -463,7 +556,7 @@ export class Game {
   }
 
   onPlayerDeath() {
-    const lost = Math.floor(this.player.gold * 0.15);
+    const lost = Math.floor(this.player.gold * this.difficultyProfile().deathLoss);
     this.player.gold -= lost;
     this.lostGold = lost;
     audio.setMood('night');
@@ -1138,8 +1231,14 @@ export class Game {
 
       // ground quest markers
       this.groundMarkers.length = 0;
-      for (const m of this.quests.markers()) {
+      for (const m of this.navigationMarkers()) {
         if (dist2(m.x, m.y, this.player.x, this.player.y) < 420 * 420) this.groundMarkers.push(m);
+      }
+
+      if (this.waypoint && !this.interior && dist2(this.waypoint.x, this.waypoint.y, this.player.x, this.player.y) < 44 * 44) {
+        this.waypoint = null;
+        this.toast('目印に到着しました', '#8fe8a8');
+        this.save(true);
       }
 
       this.updateOnboarding();
@@ -1277,6 +1376,9 @@ export class Game {
       if (s && typeof s === 'object') {
         if (Number.isFinite(s.music)) this.settings.music = clamp(s.music, 0, 1);
         if (Number.isFinite(s.sfx)) this.settings.sfx = clamp(s.sfx, 0, 1);
+        if (Number.isFinite(s.controlScale)) this.settings.controlScale = clamp(s.controlScale, 0.82, 1.18);
+        if (Number.isFinite(s.controlOpacity)) this.settings.controlOpacity = clamp(s.controlOpacity, 0.45, 1);
+        if (typeof s.difficulty === 'string' && DIFFICULTY_PROFILES[s.difficulty]) this.settings.difficulty = s.difficulty;
         for (const k of ['vibrate', 'hq', 'aimAssist', 'showFps', 'leftHanded', 'reduceMotion']) {
           if (typeof s[k] === 'boolean') this.settings[k] = s[k];
         }
@@ -1300,6 +1402,7 @@ export class Game {
       (d.quests.done != null && !Array.isArray(d.quests.done)))) return false;
     if (d.camps && !d.camps.every((entry) => Array.isArray(entry) && entry.length === 2 &&
       typeof entry[0] === 'string' && entry[1] && typeof entry[1] === 'object')) return false;
+    if (d.waypoint != null && (!d.waypoint || !Number.isFinite(d.waypoint.x) || !Number.isFinite(d.waypoint.y))) return false;
     return true;
   }
 
@@ -1373,6 +1476,7 @@ export class Game {
       camps: [...this.campState.entries()].map(([k, v]) => [k, { cleared: v.cleared, x: v.x, y: v.y }]),
       onboarding: this.onboarding,
       achievements: [...this.achievements],
+      waypoint: this.waypoint,
       fog,
     };
     try {
@@ -1397,6 +1501,47 @@ export class Game {
   }
 
   applySave(data) {
+    // Loading is a clean session boundary. Recreate every transient system so
+    // returning to the title and continuing cannot retain enemies, effects,
+    // dungeon state, NPC schedules, or held combat state from the prior run.
+    this.player = new Player(this.world.start.x, this.world.start.y);
+    this.quests = new QuestLog(this);
+    this.runtime = new WorldRuntime(this.world);
+    this.enemies.length = 0;
+    this.npcs.length = 0;
+    this.drops.length = 0;
+    this.projectiles.length = 0;
+    this.objects.length = 0;
+    this.groundMarkers.length = 0;
+    this.pt.clear();
+    this.poiObjects.clear();
+    this.campState.clear();
+    this.interior = null;
+    this.activeBoss = null;
+    this.victoryPending = 0;
+    this.spawnTimer = 0;
+    this.autosaveT = 0;
+    this.hitStopT = 0;
+    this.flashT = 0;
+    this.fadeT = 1;
+    this.ashFall = 0;
+    this.lastBiome = -1;
+    this.locationBanner = null;
+    this.interactTarget = null;
+    this.interactPrompt = null;
+    this.nearNPC = null;
+    this.achievementCheckT = 0;
+    this.weather = { rain: 0, snow: 0, fog: 0, wind: 0.4, target: { rain: 0, snow: 0, fog: 0 }, timer: 40 };
+    this.input.cancelActive();
+    for (const poi of this.world.pois) { poi.discovered = false; poi.activated = false; poi.cleared = false; poi.looted = false; }
+    for (const st of this.world.settlements) { st.discovered = false; st.board = null; st.boardDay = -1; }
+    this.spawnSettlementNPCs();
+    if (this.fogCtx && this.fogCanvas) {
+      this.fogCtx.globalCompositeOperation = 'source-over';
+      this.fogCtx.fillStyle = 'rgba(8,9,12,1)';
+      this.fogCtx.fillRect(0, 0, this.fogCanvas.width, this.fogCanvas.height);
+      this.fogCtx.globalCompositeOperation = 'destination-out';
+    }
     const p = this.player;
     this.time = Number.isFinite(data.time) ? data.time : 0;
     this.day = Math.max(1, data.day || 1);
@@ -1458,6 +1603,12 @@ export class Game {
       ? { ...data.onboarding, x: data.onboarding.x ?? p.x, y: data.onboarding.y ?? p.y }
       : null;
     this.achievements = new Set((data.achievements || []).filter((id) => ACHIEVEMENTS.some((a) => a.id === id)));
+    this.waypoint = data.waypoint && Number.isFinite(data.waypoint.x) && Number.isFinite(data.waypoint.y)
+      ? {
+        x: clamp(data.waypoint.x, TILE * 0.5, (this.world.w - 0.5) * TILE),
+        y: clamp(data.waypoint.y, TILE * 0.5, (this.world.h - 0.5) * TILE),
+      }
+      : null;
     if (data.fog && this.fogCanvas) {
       const img = new Image();
       img.onload = () => {

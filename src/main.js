@@ -241,13 +241,19 @@ document.addEventListener('visibilitychange', () => {
   else {
     releaseWake();
     game.input.cancelActive();
-    if (game.state === 'play') game.save(true);
+    if (game.state === 'play') {
+      game.pauseForInterruption();
+      game.save(true);
+    }
   }
 });
 addEventListener('pagehide', () => {
   releaseWake();
   game.input.cancelActive();
-  if (game.state === 'play') game.save(true);
+  if (game.state === 'play') {
+    game.pauseForInterruption();
+    game.save(true);
+  }
 });
 document.querySelector('#fatal button')?.addEventListener('click', () => location.reload());
 
