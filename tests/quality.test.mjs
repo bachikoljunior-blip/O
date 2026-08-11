@@ -8,6 +8,7 @@ import { QuestLog } from '../src/game/quests.js';
 import { Game, DIFFICULTY_PROFILES } from '../src/game/game.js';
 import { HUD } from '../src/ui/hud.js';
 import { Input } from '../src/core/input.js';
+import { pickWorldSeed } from '../src/core/seed.js';
 import { Player, Enemy } from '../src/game/entities.js';
 import { ACHIEVEMENTS, achievementProgress } from '../src/game/achievements.js';
 
@@ -45,6 +46,24 @@ test('world generation is deterministic and structurally complete', () => {
   assert.ok(first.pois.length >= 54);
   assert.equal(new Set(first.pois.map((p) => p.id)).size, first.pois.length);
   assert.equal(first.isSolidTile(Math.floor(first.start.x / 32), Math.floor(first.start.y / 32)), false);
+});
+
+test('a first-time player receives a random world instead of accidental seed zero', () => {
+  const emptyStorage = { getItem: () => null };
+  assert.equal(pickWorldSeed('', emptyStorage, () => 0.25), 0x40000000);
+  assert.equal(pickWorldSeed('', emptyStorage, () => 0.75), 0xc0000000);
+});
+
+test('explicit and previously saved world seeds take priority over randomness', () => {
+  const values = new Map([['aetheria_last_seed_v1', '0']]);
+  const storage = { getItem: (key) => values.get(key) ?? null };
+  assert.equal(pickWorldSeed('?seed=12345', storage, () => 0.9), 12345);
+  assert.equal(pickWorldSeed('?seed=abc', storage, () => 0.9), parseInt('abc', 36));
+  assert.equal(pickWorldSeed('', storage, () => 0.9), 0, 'an explicitly saved seed zero remains valid');
+
+  values.delete('aetheria_last_seed_v1');
+  values.set('aetheria_save_v1', JSON.stringify({ seed: 77, player: { x: 1, y: 1 } }));
+  assert.equal(pickWorldSeed('', storage, () => 0.9), 77);
 });
 
 test('several seeds always create a playable start and the critical POIs', () => {

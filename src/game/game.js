@@ -5,6 +5,7 @@ import {
 } from '../core/util.js';
 import { Input } from '../core/input.js';
 import { audio } from '../core/audio.js';
+import { SAVE_KEY, SAVE_BACKUP_KEY, LAST_SEED_KEY } from '../core/seed.js';
 import { generateWorld, TILE, B, WATER, BIOME_NAME, SEA } from '../world/worldgen.js';
 import { WorldRuntime, regionLevel, pickSpawnKind } from '../world/runtime.js';
 import { Dungeon } from '../world/dungeon.js';
@@ -23,9 +24,6 @@ import { UI } from '../ui/ui.js';
 import { HUD } from '../ui/hud.js';
 import { Menus } from '../ui/menus.js';
 
-const SAVE_KEY = 'aetheria_save_v1';
-const SAVE_BACKUP_KEY = 'aetheria_save_backup_v1';
-const LAST_SEED_KEY = 'aetheria_last_seed_v1';
 const SAVE_EXPORT_FORMAT = 'aetheria-chronicle-save';
 const SAVE_EXPORT_VERSION = 1;
 const MAX_SAVE_TEXT_LENGTH = 5 * 1024 * 1024;

@@ -1,4 +1,4 @@
-const CACHE = 'aetheria-v8-portable-saves-20260811';
+const CACHE = 'aetheria-v9-random-first-world-20260811';
 const CORE = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const CORE = [
   './src/main.js',
   './src/core/audio.js',
   './src/core/input.js',
+  './src/core/seed.js',
   './src/core/util.js',
   './src/game/dialogue.js',
   './src/game/achievements.js',
