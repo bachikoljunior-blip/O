@@ -938,7 +938,7 @@ export class Menus {
     const viewY = f.cy + 4;
     const footerH = 66;
     const viewH = Math.max(120, f.y + f.h - footerH - viewY);
-    const contentH = f.cw < 330 ? 790 : 730;
+    const contentH = f.cw < 330 ? 990 : 910;
     const off = ui.beginScroll('settings', f.cx, viewY, f.cw, viewH, contentH);
     let y = viewY + 12 - off;
 
@@ -1011,6 +1011,23 @@ export class Menus {
     ];
     for (const h of help) {
       y += ui.paragraph(h, f.cx, y, f.cw, { size: 11, col: COL.ink2, weight: 500, lh: 16 }) + 2;
+    }
+    y += 12;
+    ui.header('セーブの保護', f.cx, y, f.cw, { size: 16 });
+    y += 28;
+    y += ui.paragraph('機種変更やブラウザデータ消去に備えて、進行をファイルに保存できます。読み込みは同じ世界の進行を上書きします。', f.cx, y, f.cw, {
+      size: 11, col: COL.ink2, weight: 500, lh: 16,
+    }) + 8;
+    if (ui.button(f.cx, y, f.cw, 42, 'セーブを書き出す', { size: 14, disabled: !g.hasSave() })) {
+      g.exportSaveFile();
+    }
+    y += 50;
+    if (ui.button(f.cx, y, f.cw, 42, 'ファイルから復元（上書き）', { size: 14 })) {
+      g.requestSaveImport();
+    }
+    y += 54;
+    if (g.saveTransferStatus) {
+      ui.text(g.saveTransferStatus, f.cx + f.cw / 2, y, { size: 11, align: 'center', col: COL.gold });
     }
     ui.endScroll('settings');
     if (ui.input.ui.released) g.saveSettings();

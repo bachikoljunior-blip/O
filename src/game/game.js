@@ -26,6 +26,9 @@ import { Menus } from '../ui/menus.js';
 const SAVE_KEY = 'aetheria_save_v1';
 const SAVE_BACKUP_KEY = 'aetheria_save_backup_v1';
 const LAST_SEED_KEY = 'aetheria_last_seed_v1';
+const SAVE_EXPORT_FORMAT = 'aetheria-chronicle-save';
+const SAVE_EXPORT_VERSION = 1;
+const MAX_SAVE_TEXT_LENGTH = 5 * 1024 * 1024;
 const DAY_LENGTH = 780;          // seconds per in-game day
 
 function slotKey(base, seed) {
@@ -97,6 +100,7 @@ export class Game {
     this.achievementCheckT = 0;
     this.victoryPending = 0;
     this.saveRecovered = false;
+    this.saveTransferStatus = '';
     this.fogSnapshot = null;
     this.fogSnapshotAt = 0;
     this.fogDirty = true;
@@ -1401,7 +1405,7 @@ export class Game {
   }
 
   validSave(d) {
-    if (!d || !Number.isFinite(d.seed) || !d.player ||
+    if (!d || !Number.isInteger(d.seed) || d.seed < 0 || d.seed > 0xffffffff || !d.player ||
         !Number.isFinite(d.player.x) || !Number.isFinite(d.player.y)) return false;
     const arrays = [d.player.inv, d.player.spellSlots, d.player.knownSpells,
       d.pois, d.settlements, d.camps, d.achievements];
@@ -1415,6 +1419,125 @@ export class Game {
     if (d.camps && !d.camps.every((entry) => Array.isArray(entry) && entry.length === 2 &&
       typeof entry[0] === 'string' && entry[1] && typeof entry[1] === 'object')) return false;
     if (d.waypoint != null && (!d.waypoint || !Number.isFinite(d.waypoint.x) || !Number.isFinite(d.waypoint.y))) return false;
+    return true;
+  }
+
+  exportSaveText() {
+    if (this.state === 'play') this.save(true);
+    const data = this.readSave();
+    if (!data) return null;
+    return JSON.stringify({
+      format: SAVE_EXPORT_FORMAT,
+      version: SAVE_EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      save: data,
+    });
+  }
+
+  async exportSaveFile() {
+    const text = this.exportSaveText();
+    if (!text) {
+      this.saveTransferStatus = '書き出せるセーブがありません';
+      return false;
+    }
+    const stamp = new Date().toISOString().slice(0, 10);
+    const name = `aetheria-${this.seed >>> 0}-${stamp}.json`;
+    const blob = new Blob([text], { type: 'application/json' });
+    try {
+      if (typeof File !== 'undefined' && navigator.share && navigator.canShare) {
+        const file = new File([blob], name, { type: blob.type });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: 'アエテリア戦記 セーブデータ', files: [file] });
+          this.saveTransferStatus = 'セーブを書き出しました';
+          return true;
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      link.hidden = true;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      this.saveTransferStatus = 'セーブを書き出しました';
+      return true;
+    } catch (error) {
+      if (error?.name === 'AbortError') return false;
+      this.saveTransferStatus = '書き出しに失敗しました';
+      return false;
+    }
+  }
+
+  importSaveText(text) {
+    if (typeof text !== 'string' || text.length === 0 || text.length > MAX_SAVE_TEXT_LENGTH) {
+      return { ok: false, reason: 'ファイルのサイズが正しくありません' };
+    }
+    let payload;
+    try { payload = JSON.parse(text); }
+    catch (error) { return { ok: false, reason: 'JSONファイルを読み取れません' }; }
+    if (payload?.format !== SAVE_EXPORT_FORMAT || payload?.version !== SAVE_EXPORT_VERSION) {
+      return { ok: false, reason: 'アエテリア戦記のセーブファイルではありません' };
+    }
+    const data = payload.save;
+    if (!this.validSave(data)) return { ok: false, reason: 'セーブデータが破損しています' };
+    const seed = data.seed >>> 0;
+    const primaryKey = slotKey(SAVE_KEY, seed);
+    const backupKey = slotKey(SAVE_BACKUP_KEY, seed);
+    const raw = JSON.stringify(data);
+    let previous = null;
+    try {
+      previous = localStorage.getItem(primaryKey);
+      if (previous) {
+        try {
+          const parsed = JSON.parse(previous);
+          if (this.validSave(parsed) && (parsed.seed >>> 0) === seed) localStorage.setItem(backupKey, previous);
+        } catch (error) {}
+      }
+      localStorage.setItem(primaryKey, raw);
+      const readBack = JSON.parse(localStorage.getItem(primaryKey) || 'null');
+      if (!this.validSave(readBack) || (readBack.seed >>> 0) !== seed) throw new Error('save read-back failed');
+      localStorage.setItem(LAST_SEED_KEY, String(seed));
+      return { ok: true, seed };
+    } catch (error) {
+      try {
+        if (previous == null) localStorage.removeItem(primaryKey);
+        else localStorage.setItem(primaryKey, previous);
+      } catch (rollbackError) {}
+      return { ok: false, reason: '保存容量が不足しています' };
+    }
+  }
+
+  requestSaveImport() {
+    if (typeof document === 'undefined') return false;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.hidden = true;
+    input.addEventListener('change', async () => {
+      const file = input.files?.[0];
+      if (!file) { input.remove(); return; }
+      if (file.size > MAX_SAVE_TEXT_LENGTH) {
+        this.saveTransferStatus = 'ファイルが大きすぎます';
+        input.remove();
+        return;
+      }
+      try {
+        const result = this.importSaveText(await file.text());
+        this.saveTransferStatus = result.ok ? '復元しました。再読み込みします' : result.reason;
+        const status = document.getElementById('a11y-status');
+        if (status) status.textContent = this.saveTransferStatus;
+        if (result.ok) {
+          setTimeout(() => location.replace(new URL('./', location.href).href), 180);
+        }
+      } catch (error) {
+        this.saveTransferStatus = 'ファイルを読み取れません';
+      }
+      input.remove();
+    }, { once: true });
+    document.body.appendChild(input);
+    input.click();
     return true;
   }
 

@@ -273,6 +273,74 @@ test('a legacy single-slot save migrates into its seed slot', () => {
   }
 });
 
+test('portable save export and import preserve progress with verified read-back', () => {
+  const save = {
+    seed: 44,
+    player: { x: 440, y: 220, inv: [], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] },
+    pois: [], settlements: [], camps: [],
+  };
+  const values = new Map([['aetheria_save_v1_44', JSON.stringify(save)]]);
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  };
+  try {
+    const source = {
+      state: 'title', seed: 44,
+      validSave: Game.prototype.validSave,
+      readSave: Game.prototype.readSave,
+    };
+    const text = Game.prototype.exportSaveText.call(source);
+    const envelope = JSON.parse(text);
+    assert.equal(envelope.format, 'aetheria-chronicle-save');
+    assert.equal(envelope.version, 1);
+    assert.equal(envelope.save.player.x, 440);
+
+    values.set('aetheria_save_v1_44', JSON.stringify({ ...save, player: { ...save.player, x: 999 } }));
+    const target = { validSave: Game.prototype.validSave };
+    const result = Game.prototype.importSaveText.call(target, text);
+    assert.deepEqual(result, { ok: true, seed: 44 });
+    assert.equal(JSON.parse(values.get('aetheria_save_v1_44')).player.x, 440);
+    assert.equal(JSON.parse(values.get('aetheria_save_backup_v1_44')).player.x, 999);
+    assert.equal(values.get('aetheria_last_seed_v1'), '44');
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
+test('portable save import rejects foreign and structurally corrupt files without overwriting progress', () => {
+  const original = {
+    seed: 55,
+    player: { x: 550, y: 220, inv: [], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] },
+    pois: [], settlements: [], camps: [],
+  };
+  const values = new Map([['aetheria_save_v1_55', JSON.stringify(original)]]);
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  };
+  try {
+    const target = { validSave: Game.prototype.validSave };
+    assert.equal(Game.prototype.importSaveText.call(target, '{"format":"foreign"}').ok, false);
+    const corrupt = JSON.stringify({
+      format: 'aetheria-chronicle-save', version: 1,
+      save: { ...original, seed: 1.5 },
+    });
+    assert.equal(Game.prototype.importSaveText.call(target, corrupt).ok, false);
+    assert.deepEqual(JSON.parse(values.get('aetheria_save_v1_55')), original);
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
 test('all touch controls remain separated at every size in portrait, landscape and left-handed mode', () => {
   const hud = new HUD({});
   for (const [w, h] of [[375, 667], [667, 375], [320, 568]]) {
