@@ -13,6 +13,7 @@ export class Input {
     this.buttonPressedIds = new Set();
     this.buttonReleasedIds = new Set();
     this.stick = { x: 0, y: 0, active: false, ox: 0, oy: 0, cx: 0, cy: 0, id: null };
+    this.stickRadius = 62;
     this.stickZone = { x: 0, y: 0, w: 0, h: 0 };
     this.dpr = 1;
     /** UI pointer state for menus */
@@ -160,7 +161,7 @@ export class Input {
   }
 
   _updateStick(rec) {
-    const R = 62;
+    const R = this.stickRadius;
     let dx = rec.x - this.stick.ox, dy = rec.y - this.stick.oy;
     const d = Math.hypot(dx, dy);
     if (d > R) {
@@ -181,6 +182,7 @@ export class Input {
   /** Called by the HUD each frame to declare touch button hit areas. */
   setButtons(list) { this.buttons = list; }
   setStickZone(x, y, w, h) { this.stickZone = { x, y, w, h }; }
+  setStickRadius(radius) { this.stickRadius = clamp(radius, 48, 76); }
   setUIMode(on) { this.uiMode = on; }
 
   down(id) { return this.buttonDownIds.has(id); }

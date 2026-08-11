@@ -236,7 +236,9 @@ export class Renderer {
     // quest markers on the ground
     for (const m of g.groundMarkers) {
       const pulse = 0.5 + Math.sin(g.time * 3) * 0.5;
-      ctx.strokeStyle = `rgba(255,214,110,${0.35 + pulse * 0.35})`;
+      ctx.strokeStyle = m.custom
+        ? `rgba(120,240,208,${0.35 + pulse * 0.35})`
+        : `rgba(255,214,110,${0.35 + pulse * 0.35})`;
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.ellipse(m.x, m.y, 22 + pulse * 5, 11 + pulse * 2.5, 0, 0, TAU);

@@ -19,6 +19,10 @@ export class HUD {
   toast(text, col = COL.ink) {
     this.toasts.push({ text, col, t: 0 });
     if (this.toasts.length > 3) this.toasts.shift();
+    if (typeof document !== 'undefined') {
+      const status = document.getElementById('a11y-status');
+      if (status) status.textContent = text;
+    }
   }
 
   showBanner(title, sub) {
@@ -34,26 +38,32 @@ export class HUD {
     const small = Math.min(w, h) < 420;
     const landscape = w > h * 1.25;
     const leftHanded = !!settings.leftHanded;
-    const R = small ? 38 : 44;
-    const bx = leftHanded ? left + (small ? 66 : 76) : w - (small ? 66 : 76) - right;
-    const by = h - (small ? 76 : 92) - bottom;
-    const spellGap = small ? 54 : 62;
+    const controlScale = clamp(Number(settings.controlScale) || 1, 0.82, 1.18);
+    const spellScale = clamp(controlScale, 0.9, 1.1);
+    const baseR = small ? 38 : 44;
+    const R = baseR * controlScale;
+    const actionEdge = (small ? 66 : 76) * Math.max(1, controlScale * 0.94);
+    const bx = leftHanded ? left + actionEdge : w - actionEdge - right;
+    const by = h - (small ? 76 : 92) * Math.max(1, controlScale * 0.94) - bottom;
+    const spellGap = (small ? 54 : 62) * spellScale;
     const dir = leftHanded ? 1 : -1;
-    const spellEdge = leftHanded ? left + (small ? 26 : 30) : w - right - (small ? 26 : 30);
+    const spellInset = (small ? 26 : 30) * spellScale;
+    const spellEdge = leftHanded ? left + spellInset : w - right - spellInset;
+    const itemInset = (small ? 34 : 40) * Math.max(1, controlScale * 0.94);
     return {
-      w, h, small, landscape, leftHanded, safe, top, right, bottom, left,
+      w, h, small, landscape, leftHanded, controlScale, safe, top, right, bottom, left,
       attack: { x: bx, y: by, r: R },
       dodge: { x: bx + dir * R * 1.62, y: by + R * 0.42, r: R * 0.66 },
       block: { x: bx - dir * R * 0.18, y: by - R * 1.66, r: R * 0.66 },
       interact: { x: bx + dir * R * 1.42, y: by - R * 1.18, r: R * 0.62 },
       item: {
-        x: leftHanded ? w - right - (small ? 34 : 40) : left + (small ? 34 : 40),
-        y: h - bottom - (small ? 34 : 40), r: small ? 30 : 34,
+        x: leftHanded ? w - right - itemInset : left + itemInset,
+        y: h - bottom - itemInset, r: (small ? 30 : 34) * controlScale,
       },
       spells: [0, 1, 2, 3].map((i) => ({
         x: landscape ? spellEdge + dir * i * spellGap : spellEdge,
-        y: landscape ? by - R * 2.85 : by - R * 2.6 - i * spellGap,
-        r: small ? 23 : 26,
+        y: landscape ? by - Math.max(R, baseR * spellScale) * 2.85 : by - R * 2.6 - i * spellGap,
+        r: (small ? 23 : 26) * spellScale,
       })),
       menu: { x: w - right - 24, y: top + 24, r: 22 },
       map: { x: w - right - 24, y: top + 74, r: 22 },
@@ -74,6 +84,7 @@ export class HUD {
       if (g.player.spellSlots[i]) list.push({ id: 'spell' + i, ...L.spells[i] });
     }
     input.setButtons(list);
+    input.setStickRadius(62 * L.controlScale);
     if (L.leftHanded) {
       const x = L.w * 0.44;
       input.setStickZone(x, L.h * 0.22, Math.max(0, L.w - L.right - x), L.h * 0.78 - L.bottom);
@@ -276,7 +287,7 @@ export class HUD {
         if (!poi.discovered) continue;
         mk(poi.x, poi.y, poi.kind === 'shrine' ? '#8fe0ff' : poi.kind === 'dungeon' || poi.kind === 'lair' ? '#c58cff' : '#e8c874', 3);
       }
-      for (const m of g.quests.markers()) mk(m.x, m.y, m.tracked ? '#fff1a8' : m.main ? '#ffd76a' : '#8fd0ff', m.tracked ? 4.4 : 3.4);
+      for (const m of g.navigationMarkers()) mk(m.x, m.y, m.custom ? '#78f0d0' : m.tracked ? '#fff1a8' : m.main ? '#ffd76a' : '#8fd0ff', m.tracked ? 4.4 : 3.4);
     }
     // player arrow
     ctx.save();
@@ -296,14 +307,14 @@ export class HUD {
 
     // off-screen quest arrows around the minimap
     const tx = g.player.x, ty = g.player.y;
-    for (const m of g.quests.markers()) {
+    for (const m of g.navigationMarkers()) {
       const a = angleTo(tx, ty, m.x, m.y);
       const d = Math.hypot(m.x - tx, m.y - ty);
       if (d < 400) continue;
       ctx.save();
       ctx.translate(cx + Math.cos(a) * (R + 9), cy + Math.sin(a) * (R + 9));
       ctx.rotate(a);
-      ctx.fillStyle = m.tracked ? '#fff1a8' : m.main ? '#ffd76a' : '#8fd0ff';
+      ctx.fillStyle = m.custom ? '#78f0d0' : m.tracked ? '#fff1a8' : m.main ? '#ffd76a' : '#8fd0ff';
       ctx.beginPath(); ctx.moveTo(5, 0); ctx.lineTo(-4, -4); ctx.lineTo(-4, 4);
       ctx.closePath(); ctx.fill();
       ctx.restore();
@@ -314,7 +325,7 @@ export class HUD {
 
   drawObjectiveCompass(ctx, g, L) {
     const hint = g.onboardingHint?.();
-    const markers = g.quests.markers();
+    const markers = g.navigationMarkers();
     const marker = markers.find((m) => m.tracked) || markers.find((m) => m.main) || markers[0];
     if (!hint && !marker) return;
     const ui = this.ui;
@@ -326,12 +337,13 @@ export class HUD {
       ctx.save();
       ctx.translate(x + 14, y + 12.5);
       ctx.rotate(a);
-      ctx.fillStyle = marker.main ? COL.gold : '#8fd0ff';
+      ctx.fillStyle = marker.custom ? '#78f0d0' : marker.main ? COL.gold : '#8fd0ff';
       ctx.beginPath(); ctx.moveTo(7, 0); ctx.lineTo(-5, -5); ctx.lineTo(-2, 0); ctx.lineTo(-5, 5);
       ctx.closePath(); ctx.fill();
       ctx.restore();
       const steps = Math.max(1, Math.round(Math.hypot(marker.x - g.player.x, marker.y - g.player.y) / TILE));
-      ui.text(`${marker.main ? 'メイン' : '依頼'}・${steps}歩`, x + 29, y + 13, { size: 11, col: marker.main ? COL.gold : '#8fd0ff', weight: 700 });
+      const label = marker.custom ? '目印' : marker.main ? 'メイン' : '依頼';
+      ui.text(`${label}・${steps}歩`, x + 29, y + 13, { size: 11, col: marker.custom ? '#78f0d0' : marker.main ? COL.gold : '#8fd0ff', weight: 700 });
     } else {
       ui.text(hint, x + 12, y + 13, { size: 11, col: COL.gold, weight: 700 });
     }
@@ -383,37 +395,39 @@ export class HUD {
     const ui = this.ui;
     const input = g.input;
     const p = g.player;
+    const controlOpacity = clamp(Number(g.settings.controlOpacity) || 0.9, 0.45, 1);
+    const stickR = input.stickRadius || 62;
 
     // ——— virtual stick
     if (input.stick.active) {
       const s = input.stick;
       ctx.save();
-      ctx.globalAlpha = 0.5;
-      ctx.beginPath(); ctx.arc(s.ox, s.oy, 62, 0, TAU);
+      ctx.globalAlpha = 0.5 * controlOpacity;
+      ctx.beginPath(); ctx.arc(s.ox, s.oy, stickR, 0, TAU);
       ctx.fillStyle = 'rgba(20,18,16,0.35)';
       ctx.fill();
       ctx.strokeStyle = 'rgba(240,230,210,0.5)';
       ctx.lineWidth = 2;
       ctx.stroke();
-      ctx.beginPath(); ctx.arc(s.ox + s.x * 62, s.oy + s.y * 62, 26, 0, TAU);
+      ctx.beginPath(); ctx.arc(s.ox + s.x * stickR, s.oy + s.y * stickR, 26 * L.controlScale, 0, TAU);
       ctx.fillStyle = 'rgba(240,230,210,0.75)';
       ctx.fill();
       ctx.restore();
     } else if (input.usingTouch) {
       ctx.save();
-      ctx.globalAlpha = 0.16;
+      ctx.globalAlpha = 0.18 * controlOpacity;
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
       const hx = L.leftHanded ? Math.min(L.w - L.right - 48, L.w * 0.83) : Math.max(L.left + 48, L.w * 0.17);
       const hy = L.h - L.bottom - 100;
-      ctx.beginPath(); ctx.arc(hx, hy, 46, 0, TAU); ctx.stroke();
-      ctx.beginPath(); ctx.arc(hx, hy, 18, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.arc(hx, hy, 46 * L.controlScale, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.arc(hx, hy, 18 * L.controlScale, 0, TAU); ctx.stroke();
       ctx.restore();
     }
 
     const btn = (b, drawFn, opt = {}) => {
       const held = input.down(opt.id);
       ctx.save();
-      ctx.globalAlpha = opt.alpha ?? 0.92;
+      ctx.globalAlpha = (opt.alpha ?? 0.92) * controlOpacity;
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, TAU);
       const gr = ctx.createRadialGradient(b.x, b.y - b.r * 0.4, b.r * 0.2, b.x, b.y, b.r);
       gr.addColorStop(0, held ? 'rgba(150,120,70,0.95)' : opt.fill1 || 'rgba(58,50,44,0.85)');
@@ -445,11 +459,12 @@ export class HUD {
     }, { id: 'attack', fill1: 'rgba(120,60,44,0.9)', fill2: 'rgba(60,26,20,0.9)', edge: 'rgba(255,190,150,0.55)' });
 
     // dodge
+    const dodgeCost = g.difficultyProfile?.().dodgeCost ?? 24;
     btn(L.dodge, (c, r) => {
-      c.strokeStyle = p.sta >= 24 ? '#e6ecf2' : '#7a7268';
+      c.strokeStyle = p.sta >= dodgeCost ? '#e6ecf2' : '#7a7268';
       c.lineWidth = 2.6;
       c.beginPath(); c.arc(0, 0, r * 0.42, 0.5, 5.2); c.stroke();
-      c.fillStyle = p.sta >= 24 ? '#e6ecf2' : '#7a7268';
+      c.fillStyle = p.sta >= dodgeCost ? '#e6ecf2' : '#7a7268';
       c.beginPath(); c.moveTo(r * 0.36, -r * 0.34); c.lineTo(r * 0.52, -r * 0.02); c.lineTo(r * 0.18, -r * 0.06);
       c.closePath(); c.fill();
     }, { id: 'dodge' });

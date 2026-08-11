@@ -146,10 +146,11 @@ export class Menus {
       ctx.fill();
     }
     // title
-    const cy = h * 0.24;
+    const ultraShort = h < 380;
+    const cy = h * (ultraShort ? 0.18 : 0.24);
     ctx.save();
     ctx.textAlign = 'center';
-    ctx.font = `800 ${Math.min(58, w * 0.13)}px ${FONT}`;
+    ctx.font = `800 ${Math.min(ultraShort ? 38 : 58, w * 0.13)}px ${FONT}`;
     ctx.lineWidth = 8; ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(0,0,0,0.55)';
     ctx.strokeText('アエテリア戦記', w / 2, cy);
@@ -160,17 +161,17 @@ export class Menus {
     ctx.fillStyle = tg;
     ctx.fillText('アエテリア戦記', w / 2, cy);
     ctx.restore();
-    ui.text('— 決定版・果てなき大陸の物語 —', w / 2, cy + 30, { size: 14, align: 'center', col: 'rgba(230,220,200,0.8)' });
+    ui.text('— 決定版・果てなき大陸の物語 —', w / 2, cy + (ultraShort ? 24 : 30), { size: ultraShort ? 11 : 14, align: 'center', col: 'rgba(230,220,200,0.8)' });
 
     const bw = Math.min(300, w - 60);
     const bx = (w - bw) / 2;
     const hasSave = g.hasSave();
     const short = h < 520;
-    const bh = short ? 42 : 52;
-    const gap = short ? 9 : 11;
-    const count = hasSave ? 3 : 2;
+    const bh = ultraShort ? 36 : short ? 42 : 52;
+    const gap = ultraShort ? 6 : short ? 9 : 11;
+    const count = hasSave ? 4 : 3;
     const totalH = count * bh + (count - 1) * gap;
-    let by = Math.min(h * 0.52, h - 58 - totalH);
+    let by = Math.min(h * (ultraShort ? 0.45 : 0.52), h - (ultraShort ? 34 : 58) - totalH);
     if (hasSave && ui.button(bx, by, bw, bh, 'つづきから', { primary: true, size: short ? 16 : 18, big: true })) {
       g.loadGame();
       this.closeAll();
@@ -182,9 +183,12 @@ export class Menus {
     }
     by += bh + gap;
     if (ui.button(bx, by, bw, bh, '設定', { size: short ? 15 : 16 })) this.open('settings');
-    by += bh + 6;
-    ui.text('タップ/スワイプで移動・戦闘。キーボードにも対応。', w / 2, by + 14, { size: 12, align: 'center', col: 'rgba(220,210,190,0.6)' });
-    ui.text(`seed: ${g.seed}`, w / 2, h - 18, { size: 11, align: 'center', col: 'rgba(200,190,170,0.35)' });
+    by += bh + gap;
+    const difficulty = g.difficultyProfile();
+    if (ui.button(bx, by, bw, bh, `難易度：${difficulty.name}　›`, { size: short ? 14 : 15 })) g.cycleDifficulty(1);
+    by += bh + 4;
+    if (!ultraShort) ui.text('タップ/スワイプで移動・戦闘。キーボードにも対応。', w / 2, by + 14, { size: 12, align: 'center', col: 'rgba(220,210,190,0.6)' });
+    ui.text(`seed: ${g.seed}`, w / 2, h - (ultraShort ? 10 : 18), { size: ultraShort ? 9 : 11, align: 'center', col: 'rgba(200,190,170,0.35)' });
 
     if (this.stack.includes('confirmNew')) {
       // simple confirm overlay
@@ -562,6 +566,22 @@ export class Menus {
       ctx.moveTo(x, y - 9); ctx.lineTo(x + 6, y - 1); ctx.lineTo(x, y + 3); ctx.lineTo(x - 6, y - 1);
       ctx.closePath(); ctx.fill();
     }
+    // player-placed exploration waypoint
+    if (g.waypoint) {
+      const x = ox + (g.waypoint.x / TILE) * scale, y = oy + (g.waypoint.y / TILE) * scale;
+      const pulse = 1 + Math.sin(g.time * 4) * 0.12;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(pulse, pulse);
+      ctx.fillStyle = '#78f0d0';
+      ctx.strokeStyle = 'rgba(8,25,24,0.9)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, -5, 6, 0, TAU);
+      ctx.moveTo(-4, -1); ctx.lineTo(0, 8); ctx.lineTo(4, -1);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
     // player
     ctx.save();
     ctx.translate(ox + px * scale, oy + py * scale);
@@ -576,6 +596,10 @@ export class Menus {
     // pan & zoom
     const inp = ui.input;
     const insideMap = inp.ui.x > mx && inp.ui.x < mx + mw && inp.ui.y > my && inp.ui.y < my + mh;
+    const zoomX = mx + mw - 44;
+    const overZoom = inp.ui.x >= zoomX && inp.ui.x <= zoomX + 34 &&
+      ((inp.ui.y >= my + mh - 88 && inp.ui.y <= my + mh - 54) ||
+       (inp.ui.y >= my + mh - 46 && inp.ui.y <= my + mh - 12));
     if (insideMap && inp.ui.down) {
       this.mapView.x += inp.ui.dragX;
       this.mapView.y += inp.ui.dragY;
@@ -588,7 +612,7 @@ export class Menus {
       this.mapView.zoom = clamp(this.mapView.zoom * (1 - inp.ui.wheel * 0.001), 1, 6);
     }
     // tap to fast travel
-    if (insideMap && inp.ui.released && !inp.ui.moved) {
+    if (insideMap && !overZoom && inp.ui.released && !inp.ui.moved) {
       const wx = (inp.ui.x - ox) / scale, wy = (inp.ui.y - oy) / scale;
       let best = null, bd = 14 / scale;
       for (const poi of g.world.pois) {
@@ -602,11 +626,12 @@ export class Menus {
         if (d < bd) { bd = d; best = { travel: s, name: s.name + s.label, x: (s.x + 0.5) * TILE, y: (s.y + 0.5) * TILE }; }
       }
       if (best) this.travelTarget = best;
+      else g.setWaypoint(wx * TILE, wy * TILE);
     }
 
     // zoom buttons
-    if (ui.button(mx + mw - 44, my + mh - 88, 34, 34, '＋', { r: 8 })) this.mapView.zoom = clamp(this.mapView.zoom * 1.5, 1, 6);
-    if (ui.button(mx + mw - 44, my + mh - 46, 34, 34, '－', { r: 8 })) {
+    if (ui.button(zoomX, my + mh - 88, 34, 34, '＋', { r: 8 })) this.mapView.zoom = clamp(this.mapView.zoom * 1.5, 1, 6);
+    if (ui.button(zoomX, my + mh - 46, 34, 34, '－', { r: 8 })) {
       this.mapView.zoom = clamp(this.mapView.zoom / 1.5, 1, 6);
       if (this.mapView.zoom <= 1.01) { this.mapView.x = 0; this.mapView.y = 0; }
     }
@@ -623,9 +648,10 @@ export class Menus {
       }
       if (ui.button(f.cx + f.cw / 2 + 8, by + 16, f.cw / 2 - 8, 44, 'やめる')) this.travelTarget = null;
     } else {
-      ui.text('祠や街をタップすると転移できます（発見済みのみ）', f.cx, by + 6, { size: 12, col: COL.ink2 });
+      ui.text(g.waypoint ? '地図の空いた場所をタップすると目印を移動' : '空いた場所をタップで目印・祠や街で転移', f.cx, by + 6, { size: f.cw < 340 ? 11 : 12, col: COL.ink2 });
       const b = g.biomeName();
       ui.text(`現在地: ${b}`, f.cx, by + 30, { size: 13, col: COL.ink });
+      if (g.waypoint && ui.button(f.cx + f.cw - 112, by + 16, 112, 38, '目印を消す', { size: 12, r: 9 })) g.clearWaypoint();
     }
   }
 
@@ -909,16 +935,44 @@ export class Menus {
     const ui = this.ui;
     const f = this.frame(ctx, '設定', { w: 480, h: 700 });
     if (f.closed) { this.close(); return; }
-    let y = f.cy + 16;
-    const slider = (label, val, setter) => {
+    const viewY = f.cy + 4;
+    const footerH = 66;
+    const viewH = Math.max(120, f.y + f.h - footerH - viewY);
+    const contentH = f.cw < 330 ? 790 : 730;
+    const off = ui.beginScroll('settings', f.cx, viewY, f.cw, viewH, contentH);
+    let y = viewY + 12 - off;
+
+    ui.header('遊び方', f.cx, y, f.cw, { size: 16 });
+    y += 26;
+    const difficultyIds = ['story', 'adventure', 'legend'];
+    const dw = f.cw / difficultyIds.length;
+    for (let i = 0; i < difficultyIds.length; i++) {
+      const id = difficultyIds[i];
+      const labels = { story: '物語', adventure: '冒険者', legend: '伝説' };
+      if (ui.button(f.cx + i * dw + 2, y, dw - 4, 38, labels[id], {
+        size: 13, selected: g.settings.difficulty === id, primary: g.settings.difficulty === id, r: 9,
+      })) g.setDifficulty(id);
+    }
+    y += 46;
+    const difficultyHelp = {
+      story: '被ダメージを抑え、回避とパリィの猶予を広くします。',
+      adventure: '駆け引きと成長を基準どおり楽しめる標準設定です。',
+      legend: '敵が強くなり、代わりに経験値とゴールドが25%増えます。',
+    };
+    ui.paragraph(difficultyHelp[g.settings.difficulty] || difficultyHelp.adventure, f.cx, y, f.cw, {
+      size: 11, col: COL.ink2, weight: 500, lh: 16,
+    });
+    y += f.cw < 330 ? 42 : 30;
+
+    const slider = (label, val, setter, display = null) => {
       ui.text(label, f.cx, y, { size: 14 });
-      ui.text(Math.round(val * 100) + '%', f.cx + f.cw, y, { size: 13, align: 'right', col: COL.ink2 });
+      ui.text(display ? display() : Math.round(val * 100) + '%', f.cx + f.cw, y, { size: 13, align: 'right', col: COL.ink2 });
       const bx = f.cx, bw = f.cw, byy = y + 22;
       ui.bar(bx, byy, bw, 12, val, COL.gold);
       const inp = ui.input;
-      const inside = inp.ui.x > bx - 10 && inp.ui.x < bx + bw + 10 && inp.ui.y > byy - 16 && inp.ui.y < byy + 28;
+      const visible = byy >= viewY - 12 && byy <= viewY + viewH + 12;
+      const inside = visible && inp.ui.x > bx - 10 && inp.ui.x < bx + bw + 10 && inp.ui.y > byy - 16 && inp.ui.y < byy + 28;
       if (inside && inp.ui.down) setter(clamp((inp.ui.x - bx) / bw, 0, 1));
-      // knob
       ctx.save();
       ctx.beginPath(); ctx.arc(bx + bw * val, byy + 6, 9, 0, TAU);
       ctx.fillStyle = '#f0e4c8'; ctx.fill();
@@ -928,6 +982,11 @@ export class Menus {
     };
     slider('音楽', g.settings.music, (v) => { g.settings.music = v; audio.setMusicVol(v); });
     slider('効果音', g.settings.sfx, (v) => { g.settings.sfx = v; audio.setSfxVol(v); });
+    slider('操作ボタンの大きさ', (g.settings.controlScale - 0.82) / 0.36,
+      (v) => { g.settings.controlScale = 0.82 + v * 0.36; }, () => Math.round(g.settings.controlScale * 100) + '%');
+    slider('操作ボタンの濃さ', (g.settings.controlOpacity - 0.45) / 0.55,
+      (v) => { g.settings.controlOpacity = 0.45 + v * 0.55; }, () => Math.round(g.settings.controlOpacity * 100) + '%');
+
     const toggle = (label, val, setter) => {
       ui.text(label, f.cx, y + 18, { size: 14 });
       if (ui.button(f.cx + f.cw - 96, y, 96, 38, val ? 'ON' : 'OFF', { primary: val, size: 14 })) setter(!val);
@@ -939,8 +998,8 @@ export class Menus {
     toggle('左利き操作', g.settings.leftHanded, (v) => { g.settings.leftHanded = v; });
     toggle('画面の揺れを軽減', g.settings.reduceMotion, (v) => { g.settings.reduceMotion = v; });
     toggle('FPS表示', g.settings.showFps, (v) => { g.settings.showFps = v; });
-    y += 4;
-    ui.header('操作方法', f.cx, y, f.cw);
+    y += 8;
+    ui.header('操作方法', f.cx, y, f.cw, { size: 16 });
     y += 24;
     const moveSide = g.settings.leftHanded ? '右側' : '左側';
     const help = [
@@ -950,7 +1009,10 @@ export class Menus {
       '調べる: ▲ / E　道具: 左下 / Q',
       '魔法: 右側のボタン / 1〜4　メニュー: ≡ / Esc',
     ];
-    for (const h of help) { ui.text(h, f.cx, y, { size: 11, col: COL.ink2, weight: 500 }); y += 18; }
+    for (const h of help) {
+      y += ui.paragraph(h, f.cx, y, f.cw, { size: 11, col: COL.ink2, weight: 500, lh: 16 }) + 2;
+    }
+    ui.endScroll('settings');
     if (ui.input.ui.released) g.saveSettings();
     if (ui.button(f.cx, f.y + f.h - 60, f.cw, 44, '閉じる')) this.close();
   }
