@@ -1,4 +1,4 @@
-const CACHE = 'aetheria-v9-random-first-world-20260811';
+const CACHE = 'aetheria-v10-save-resilience-20260811';
 const CORE = [
   './',
   './index.html',
