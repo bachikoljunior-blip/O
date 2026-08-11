@@ -8,6 +8,7 @@ import { QuestLog } from '../src/game/quests.js';
 import { Game, DIFFICULTY_PROFILES } from '../src/game/game.js';
 import { HUD } from '../src/ui/hud.js';
 import { Input } from '../src/core/input.js';
+import { Audio } from '../src/core/audio.js';
 import { pickWorldSeed } from '../src/core/seed.js';
 import { Player, Enemy } from '../src/game/entities.js';
 import { ACHIEVEMENTS, achievementProgress } from '../src/game/achievements.js';
@@ -64,6 +65,30 @@ test('explicit and previously saved world seeds take priority over randomness', 
   values.delete('aetheria_last_seed_v1');
   values.set('aetheria_save_v1', JSON.stringify({ seed: 77, player: { x: 1, y: 1 } }));
   assert.equal(pickWorldSeed('', storage, () => 0.9), 77);
+});
+
+test('zero music and effects volume also silence their reverb paths', () => {
+  const audio = new Audio();
+  audio.ctx = { currentTime: 12 };
+  const param = () => ({ values: [], setTargetAtTime(value) { this.values.push(value); } });
+  audio.musicGain = { gain: param() };
+  audio.musicSend = { gain: param() };
+  audio.sfxGain = { gain: param() };
+  audio.sfxSend = { gain: param() };
+
+  audio.setMusicVol(0);
+  audio.setSfxVol(0);
+  assert.equal(audio.musicGain.gain.values.at(-1), 0);
+  assert.equal(audio.musicSend.gain.values.at(-1), 0);
+  assert.equal(audio.sfxGain.gain.values.at(-1), 0);
+  assert.equal(audio.sfxSend.gain.values.at(-1), 0);
+
+  audio.setMusicVol(0.4);
+  audio.setSfxVol(0.5);
+  assert.equal(audio.musicGain.gain.values.at(-1), 0.4);
+  assert.equal(audio.musicSend.gain.values.at(-1), 0.2);
+  assert.equal(audio.sfxGain.gain.values.at(-1), 0.5);
+  assert.equal(audio.sfxSend.gain.values.at(-1), 0.11);
 });
 
 test('several seeds always create a playable start and the critical POIs', () => {
