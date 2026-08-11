@@ -126,6 +126,30 @@ test('silent audio stops scheduling work and resumes from the current clock', ()
   assert.equal(tones, 0, 'zero-volume effects should not construct inaudible nodes');
 });
 
+test('audio resumes safely after a mobile interruption without replaying missed beats', async () => {
+  const audio = new Audio();
+  let resumes = 0;
+  audio.ctx = {
+    currentTime: 120,
+    state: 'suspended',
+    resume: async () => { resumes++; audio.ctx.state = 'running'; },
+  };
+  audio.nextTime = 2;
+  audio.init();
+  await Promise.resolve();
+  assert.equal(resumes, 1);
+  assert.equal(audio.nextTime, 120.05, 'resume should discard the hidden-tab gap');
+
+  audio.ready = true;
+  audio.ctx.currentTime = 180;
+  audio.nextTime = 10;
+  const scheduled = [];
+  audio._schedule = (time) => scheduled.push(time);
+  audio.update();
+  assert.equal(scheduled.length, 1, 'only the current beat should be scheduled after a long gap');
+  assert.ok(scheduled[0] >= 180, 'no stale beat may be scheduled in the past');
+});
+
 test('several seeds always create a playable start and the critical POIs', () => {
   for (const seed of [1, 20260811, 0xffffffff]) {
     const world = buildWorld(seed);

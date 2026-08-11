@@ -42,7 +42,13 @@ export class Audio {
 
   init() {
     if (this.ctx) {
-      if (this.ctx.state === 'suspended') this.ctx.resume();
+      if (this.ctx.state === 'suspended') {
+        // Mobile browsers may suspend Web Audio when the app is backgrounded.
+        // Resume on the next interaction and discard the elapsed sequencer gap.
+        this.nextTime = this.ctx.currentTime + 0.05;
+        const resumed = this.ctx.resume();
+        resumed?.catch?.(() => {});
+      }
       return;
     }
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -135,6 +141,9 @@ export class Audio {
     const mood = MOODS[this.mood] || MOODS.explore;
     const spb = 60 / mood.bpm;
     const stepDur = spb / 2;              // eighth notes
+    // requestAnimationFrame stops while a tab is hidden, while the audio clock
+    // can continue. Never synthesize the missed beats in a burst on return.
+    if (this.nextTime < ctx.currentTime - stepDur) this.nextTime = ctx.currentTime + 0.05;
     let guard = 0;
     while (this.nextTime < ctx.currentTime + 0.25 && guard++ < 32) {
       this._schedule(this.nextTime, mood);
