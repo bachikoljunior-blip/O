@@ -228,7 +228,9 @@ export class HUD {
     const R = L.small ? 46 : 56;
     const cx = L.w - L.right - R - 52;
     const cy = L.top + R + 4;
-    if (L.w < 380) {
+    // 375px-wide iPhone SE screens still have room for the compact map. Only
+    // fall back to the compass on genuinely narrower displays.
+    if (L.w < 350) {
       this.drawClock(ctx, g, L, L.w - L.right - 60, L.top + 16);
       this.drawObjectiveCompass(ctx, g, L);
       return;
@@ -364,7 +366,7 @@ export class HUD {
     const q = g.quests.orderedActive().slice(0, 3);
     if (!q.length) return;
     const x = L.left + 6;
-    let y = L.top + (L.w < 380 ? 132 : 116);
+    let y = L.top + (L.w < 350 ? 132 : 116);
     for (const quest of q) {
       const done = quest.state === 'complete';
       const tracked = quest.id === g.quests.trackedId;
