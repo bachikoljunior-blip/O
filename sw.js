@@ -1,4 +1,4 @@
-const CACHE = 'aetheria-v4-mobile-resume-20260811';
+const CACHE = 'aetheria-v5-seed-save-slots-20260811';
 const CORE = [
   './',
   './index.html',

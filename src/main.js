@@ -130,7 +130,15 @@ function pickSeed() {
   // an explicit ?seed= wins so worlds can be shared; otherwise continue the saved world
   const params = new URLSearchParams(location.search);
   const s = params.get('seed');
-  if (s) return (Number(s) || parseInt(s, 36) || 12345) >>> 0;
+  if (s != null && s !== '') {
+    const decimal = /^\d+$/.test(s) ? Number(s) : NaN;
+    const parsed = Number.isFinite(decimal) ? decimal : parseInt(s, 36);
+    return (Number.isFinite(parsed) ? parsed : 12345) >>> 0;
+  }
+  try {
+    const last = Number(localStorage.getItem('aetheria_last_seed_v1'));
+    if (Number.isFinite(last) && last >= 0) return last >>> 0;
+  } catch (e) {}
   for (const key of ['aetheria_save_v1', 'aetheria_save_backup_v1']) {
     try {
       const raw = localStorage.getItem(key);
@@ -214,18 +222,30 @@ const unlock = () => {
 let wakeLock = null;
 async function requestWake() {
   try {
-    if ('wakeLock' in navigator && !wakeLock) wakeLock = await navigator.wakeLock.request('screen');
+    if (!('wakeLock' in navigator) || wakeLock || document.visibilityState !== 'visible') return;
+    const lock = await navigator.wakeLock.request('screen');
+    wakeLock = lock;
+    lock.addEventListener('release', () => {
+      if (wakeLock === lock) wakeLock = null;
+    }, { once: true });
   } catch (e) {}
+}
+async function releaseWake() {
+  const lock = wakeLock;
+  wakeLock = null;
+  try { await lock?.release(); } catch (e) {}
 }
 addEventListener('pointerdown', requestWake, { once: true });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWake();
   else {
+    releaseWake();
     game.input.cancelActive();
     if (game.state === 'play') game.save(true);
   }
 });
 addEventListener('pagehide', () => {
+  releaseWake();
   game.input.cancelActive();
   if (game.state === 'play') game.save(true);
 });

@@ -25,7 +25,12 @@ import { Menus } from '../ui/menus.js';
 
 const SAVE_KEY = 'aetheria_save_v1';
 const SAVE_BACKUP_KEY = 'aetheria_save_backup_v1';
+const LAST_SEED_KEY = 'aetheria_last_seed_v1';
 const DAY_LENGTH = 780;          // seconds per in-game day
+
+function slotKey(base, seed) {
+  return `${base}_${seed >>> 0}`;
+}
 
 export class Game {
   constructor(canvas) {
@@ -207,8 +212,7 @@ export class Game {
     this.state = 'play';
     this.time = 8 * (DAY_LENGTH / 24);
     this.day = 1;
-    localStorage.removeItem(SAVE_KEY);
-    localStorage.removeItem(SAVE_BACKUP_KEY);
+    this.clearCurrentSave();
     this.audio.init();
     this.showBanner(MAIN_CHAPTERS[0].title, MAIN_CHAPTERS[0].desc);
     // The first lessons advance only after the player actually performs them.
@@ -482,6 +486,7 @@ export class Game {
     this.renderer.cam.x = p.x; this.renderer.cam.y = p.y;
     this.fadeT = 1;
     audio.setMood('explore');
+    this.save(true);
   }
 
   // ————————————————————————————————————————————————— inventory
@@ -1299,14 +1304,24 @@ export class Game {
   }
 
   readSave() {
-    for (const key of [SAVE_KEY, SAVE_BACKUP_KEY]) {
+    const primaryKey = slotKey(SAVE_KEY, this.seed);
+    const backupKey = slotKey(SAVE_BACKUP_KEY, this.seed);
+    const candidates = [
+      { key: primaryKey, backup: false, legacy: false },
+      { key: backupKey, backup: true, legacy: false },
+      // Read the old single-slot keys last so existing players migrate without
+      // losing progress. They are accepted only when their seed matches.
+      { key: SAVE_KEY, backup: false, legacy: true },
+      { key: SAVE_BACKUP_KEY, backup: true, legacy: true },
+    ];
+    for (const candidate of candidates) {
       try {
-        const raw = localStorage.getItem(key);
+        const raw = localStorage.getItem(candidate.key);
         if (!raw) continue;
         const data = JSON.parse(raw);
-        if (!this.validSave(data)) continue;
-        if (key === SAVE_BACKUP_KEY) {
-          localStorage.setItem(SAVE_KEY, raw);
+        if (!this.validSave(data) || (data.seed >>> 0) !== (this.seed >>> 0)) continue;
+        if (candidate.backup || candidate.legacy) localStorage.setItem(primaryKey, raw);
+        if (candidate.backup) {
           this.saveRecovered = true;
         }
         return data;
@@ -1316,8 +1331,23 @@ export class Game {
   }
 
   hasSave() {
-    const d = this.readSave();
-    return !!(d && (d.seed >>> 0) === (this.seed >>> 0));
+    return !!this.readSave();
+  }
+
+  clearCurrentSave() {
+    const seed = this.seed >>> 0;
+    try {
+      localStorage.removeItem(slotKey(SAVE_KEY, seed));
+      localStorage.removeItem(slotKey(SAVE_BACKUP_KEY, seed));
+      // Remove matching legacy data only. A shared ?seed= link must never
+      // erase the player's save from another world.
+      for (const key of [SAVE_KEY, SAVE_BACKUP_KEY]) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || 'null');
+          if (data && (data.seed >>> 0) === seed) localStorage.removeItem(key);
+        } catch (e) {}
+      }
+    } catch (e) {}
   }
 
   save(silent = false) {
@@ -1328,7 +1358,7 @@ export class Game {
     let fog = null;
     try { fog = this.fogCanvas ? this.fogCanvas.toDataURL('image/webp', 0.5) : null; } catch (e) {}
     const data = {
-      v: 3, seed: this.seed, time: this.time, day: this.day,
+      v: 4, seed: this.seed, time: this.time, day: this.day,
       player: {
         x: pos.x, y: pos.y, level: p.level, xp: p.xp, gold: p.gold, hp: p.hp, mp: p.mp, sta: p.sta,
         inv: p.inv, equip: Object.fromEntries(Object.entries(p.equip).map(([k, v]) => [k, v ? v.id : null])),
@@ -1346,14 +1376,19 @@ export class Game {
       fog,
     };
     try {
-      const previous = localStorage.getItem(SAVE_KEY);
+      const primaryKey = slotKey(SAVE_KEY, this.seed);
+      const backupKey = slotKey(SAVE_BACKUP_KEY, this.seed);
+      const previous = localStorage.getItem(primaryKey);
       if (previous) {
         try {
           const parsed = JSON.parse(previous);
-          if (this.validSave(parsed)) localStorage.setItem(SAVE_BACKUP_KEY, previous);
+          if (this.validSave(parsed) && (parsed.seed >>> 0) === (this.seed >>> 0)) {
+            localStorage.setItem(backupKey, previous);
+          }
         } catch (e) {}
       }
-      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      localStorage.setItem(primaryKey, JSON.stringify(data));
+      localStorage.setItem(LAST_SEED_KEY, String(this.seed >>> 0));
       if (!silent) this.toast('セーブしました', '#8fd0ff');
     } catch (e) {
       console.warn('save failed', e);
@@ -1397,7 +1432,8 @@ export class Game {
       p.equip[slot] = id ? (p.inv.find((e) => e.item && e.item.id === id) || {}).item || null : null;
     }
     p.recompute();
-    p.hp = clamp(Number.isFinite(d.hp) ? d.hp : p.maxHp, 1, p.maxHp);
+    const wasDefeated = Number.isFinite(d.hp) && d.hp <= 0;
+    p.hp = wasDefeated ? p.maxHp * 0.6 : clamp(Number.isFinite(d.hp) ? d.hp : p.maxHp, 1, p.maxHp);
     p.mp = clamp(Number.isFinite(d.mp) ? d.mp : p.maxMp, 0, p.maxMp);
     p.sta = clamp(Number.isFinite(d.sta) ? d.sta : p.maxSta, 0, p.maxSta);
     this.quests.load(data.quests);
@@ -1410,6 +1446,13 @@ export class Game {
       if (st) st.discovered = s.d;
     }
     this.lastShrine = data.lastShrine || null;
+    if (wasDefeated) {
+      const safe = this.lastShrine || this.world.start;
+      p.x = safe.x;
+      p.y = safe.y;
+      p.state = 'idle';
+      p.alive = true;
+    }
     this.campState = new Map((data.camps || []).map(([k, v]) => [k, { ...v, alive: 0 }]));
     this.onboarding = data.onboarding && Number.isFinite(data.onboarding.stage)
       ? { ...data.onboarding, x: data.onboarding.x ?? p.x, y: data.onboarding.y ?? p.y }

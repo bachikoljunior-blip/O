@@ -972,7 +972,9 @@ export class Menus {
       this.closeAll();
     }
     if (ui.button((w - bw) / 2, h * 0.52 + 64, bw, 44, 'タイトルへ', { size: 15 })) {
-      g.save();
+      // Persist a real respawn instead of a zero-HP save that could reload at
+      // the defeat location with 1 HP.
+      g.respawn();
       this.closeAll();
       this.open('title');
     }
