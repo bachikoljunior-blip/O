@@ -93,7 +93,34 @@ export class Input {
       if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'tab'].includes(k)) e.preventDefault();
     });
     addEventListener('keyup', (e) => this.keys.delete(e.key.toLowerCase()));
-    addEventListener('blur', () => { this.keys.clear(); this.pointers.clear(); this.stick.active = false; this.stick.x = this.stick.y = 0; });
+    // Mobile browsers do not always dispatch pointerup when the app is
+    // backgrounded or the system takes over the gesture. Clear every held
+    // control so movement, guard, and menu presses cannot remain latched on
+    // resume.
+    addEventListener('blur', () => this.cancelActive());
+  }
+
+  cancelActive() {
+    this.keys.clear();
+    this.keysPressed.clear();
+    this.pointers.clear();
+    this.buttonDownIds.clear();
+    this.buttonPressedIds.clear();
+    this.buttonReleasedIds.clear();
+    this.stick.active = false;
+    this.stick.x = 0;
+    this.stick.y = 0;
+    this.stick.id = null;
+    this.ui.down = false;
+    this.ui.pressed = false;
+    this.ui.released = false;
+    this.ui.dragX = 0;
+    this.ui.dragY = 0;
+    this.ui.id = null;
+    this.ui.moved = false;
+    this.anyPress = false;
+    const g = this._gamepad();
+    this._gpPrev = g ? g.buttons.map((button) => button.pressed) : null;
   }
 
   _assign(rec) {
@@ -185,7 +212,7 @@ export class Input {
   }
 
   _gamepad() {
-    if (!navigator.getGamepads) return null;
+    if (typeof navigator === 'undefined' || !navigator.getGamepads) return null;
     const list = navigator.getGamepads();
     for (const g of list) if (g && g.connected) return g;
     return null;
