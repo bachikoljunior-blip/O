@@ -25,7 +25,7 @@ export class HUD {
     this.banner = { title, sub, t: 0 };
   }
 
-  layout(w, h, safeArea = {}) {
+  layout(w, h, safeArea = {}, settings = {}) {
     const safe = 10;
     const top = safe + clamp(safeArea.top || 0, 0, 80);
     const right = safe + clamp(safeArea.right || 0, 0, 80);
@@ -33,19 +33,25 @@ export class HUD {
     const left = safe + clamp(safeArea.left || 0, 0, 80);
     const small = Math.min(w, h) < 420;
     const landscape = w > h * 1.25;
+    const leftHanded = !!settings.leftHanded;
     const R = small ? 38 : 44;
-    const bx = w - (small ? 66 : 76) - right;
+    const bx = leftHanded ? left + (small ? 66 : 76) : w - (small ? 66 : 76) - right;
     const by = h - (small ? 76 : 92) - bottom;
     const spellGap = small ? 54 : 62;
+    const dir = leftHanded ? 1 : -1;
+    const spellEdge = leftHanded ? left + (small ? 26 : 30) : w - right - (small ? 26 : 30);
     return {
-      w, h, small, landscape, safe, top, right, bottom, left,
+      w, h, small, landscape, leftHanded, safe, top, right, bottom, left,
       attack: { x: bx, y: by, r: R },
-      dodge: { x: bx - R * 1.62, y: by + R * 0.42, r: R * 0.66 },
-      block: { x: bx + R * 0.18, y: by - R * 1.66, r: R * 0.66 },
-      interact: { x: bx - R * 1.42, y: by - R * 1.18, r: R * 0.62 },
-      item: { x: left + (small ? 34 : 40), y: h - bottom - (small ? 34 : 40), r: small ? 30 : 34 },
+      dodge: { x: bx + dir * R * 1.62, y: by + R * 0.42, r: R * 0.66 },
+      block: { x: bx - dir * R * 0.18, y: by - R * 1.66, r: R * 0.66 },
+      interact: { x: bx + dir * R * 1.42, y: by - R * 1.18, r: R * 0.62 },
+      item: {
+        x: leftHanded ? w - right - (small ? 34 : 40) : left + (small ? 34 : 40),
+        y: h - bottom - (small ? 34 : 40), r: small ? 30 : 34,
+      },
       spells: [0, 1, 2, 3].map((i) => ({
-        x: landscape ? w - right - (small ? 26 : 30) - i * spellGap : w - right - (small ? 26 : 30),
+        x: landscape ? spellEdge + dir * i * spellGap : spellEdge,
         y: landscape ? by - R * 2.85 : by - R * 2.6 - i * spellGap,
         r: small ? 23 : 26,
       })),
@@ -68,20 +74,25 @@ export class HUD {
       if (g.player.spellSlots[i]) list.push({ id: 'spell' + i, ...L.spells[i] });
     }
     input.setButtons(list);
-    input.setStickZone(L.left, L.h * 0.22, Math.max(0, L.w * 0.56 - L.left), L.h * 0.78 - L.bottom);
+    if (L.leftHanded) {
+      const x = L.w * 0.44;
+      input.setStickZone(x, L.h * 0.22, Math.max(0, L.w - L.right - x), L.h * 0.78 - L.bottom);
+    } else {
+      input.setStickZone(L.left, L.h * 0.22, Math.max(0, L.w * 0.56 - L.left), L.h * 0.78 - L.bottom);
+    }
   }
 
   draw(ctx, g, dt) {
     const ui = this.ui;
     const { w, h } = ui;
-    const L = this.layout(w, h, g.safeArea);
+    const L = this.layout(w, h, g.safeArea, g.settings);
     this.L = L;
     const p = g.player;
 
     // ——— top-left vitals
     const px = L.left + 6, py = L.top + 6;
     const bw = L.small ? 132 : 168;
-    ui.panel(px - 6, py - 6, bw + 46, 62, { r: 12, fill: 'rgba(20,17,15,0.72)' });
+    ui.panel(px - 6, py - 6, bw + 46, 82, { r: 12, fill: 'rgba(20,17,15,0.72)' });
     // level medallion
     ctx.save();
     ctx.beginPath(); ctx.arc(px + 18, py + 24, 20, 0, TAU);
@@ -105,10 +116,17 @@ export class HUD {
     ctx.drawImage(getIcon('gold'), px - 2, py + 44, 24, 24);
     ui.text(String(p.gold), px + 22, py + 56, { size: 13, col: COL.gold, weight: 700 });
 
+    // Aetheria Flow rewards clean, skillful combat and becomes an 8-second surge at 100%.
+    const flowK = p.flowT > 0 ? p.flowT / 8 : p.flow / 100;
+    ui.bar(bx0, py + 51, bw, 7, flowK, p.flowT > 0 ? '#79e4ff' : '#d8b85f', { bg: 'rgba(0,0,0,0.5)' });
+    ui.text(p.flowT > 0 ? `FLOW ${p.flowT.toFixed(1)}s` : `FLOW ${Math.floor(p.flow)}%`, bx0 + bw / 2, py + 55, {
+      size: 8, align: 'center', col: p.flowT > 0 ? '#e6fbff' : '#fff2c0', weight: 800,
+    });
+
     // buffs
-    let buffX = px + 78;
+    let buffX = px + 44;
     if (p.buff.t > 0) {
-      ui.text(`${p.buff.atk ? 'ATK+' + p.buff.atk : 'DEF+' + p.buff.def} ${Math.ceil(p.buff.t)}s`, buffX, py + 56, { size: 11, col: '#ffb46a' });
+      ui.text(`${p.buff.atk ? 'ATK+' + p.buff.atk : 'DEF+' + p.buff.def} ${Math.ceil(p.buff.t)}s`, buffX, py + 70, { size: 10, col: '#ffb46a' });
     }
 
     // ——— minimap
@@ -124,8 +142,20 @@ export class HUD {
       const byy = L.top + 118;
       ctx.save();
       ctx.globalAlpha = this.bossFade;
-      ui.text(boss ? boss.T.name : '', w / 2, byy - 12, { size: 16, align: 'center', col: '#ffd0c0', weight: 800 });
-      ui.bar(bx, byy, bw2, 12, boss ? boss.hp / boss.maxHp : 0, '#c8382e');
+      ui.text(boss ? boss.T.name : '', w / 2, byy - 20, { size: 16, align: 'center', col: '#ffd0c0', weight: 800 });
+      if (boss?.kind === 'dragon') ui.text(boss.enraged ? '第二形態・灰燼の翼' : '第一形態・火口の主', w / 2, byy - 5, { size: 10, align: 'center', col: boss.enraged ? '#ffad72' : COL.ink2, weight: 700 });
+      ui.bar(bx, byy + 4, bw2, 12, boss ? boss.hp / boss.maxHp : 0, '#c8382e');
+      if (boss) ui.bar(bx, byy + 19, bw2, 5, boss.poise / boss.maxPoise, '#d8c176', { bg: 'rgba(0,0,0,0.45)' });
+      ctx.restore();
+    }
+
+    if (p.hitChain >= 2 && p.hitChainT > 0) {
+      const rank = p.hitChain >= 30 ? 'SS' : p.hitChain >= 20 ? 'S' : p.hitChain >= 12 ? 'A' : p.hitChain >= 7 ? 'B' : p.hitChain >= 4 ? 'C' : 'D';
+      const a = clamp(Math.min(p.hitChainT * 2.5, 1), 0, 1);
+      const chainY = boss ? Math.max(L.top + 176, h * 0.26) : h * 0.2;
+      ctx.save(); ctx.globalAlpha = a;
+      ui.text(rank, w / 2, chainY, { size: rank === 'SS' ? 35 : 29, align: 'center', col: rank === 'SS' ? '#ffe08a' : '#bfefff', weight: 900 });
+      ui.text(`${p.hitChain} CHAIN`, w / 2, chainY + 25, { size: 11, align: 'center', col: COL.ink2, weight: 800 });
       ctx.restore();
     }
 
@@ -244,7 +274,7 @@ export class HUD {
         if (!poi.discovered) continue;
         mk(poi.x, poi.y, poi.kind === 'shrine' ? '#8fe0ff' : poi.kind === 'dungeon' || poi.kind === 'lair' ? '#c58cff' : '#e8c874', 3);
       }
-      for (const m of g.quests.markers()) mk(m.x, m.y, m.main ? '#ffd76a' : '#8fd0ff', 3.4);
+      for (const m of g.quests.markers()) mk(m.x, m.y, m.tracked ? '#fff1a8' : m.main ? '#ffd76a' : '#8fd0ff', m.tracked ? 4.4 : 3.4);
     }
     // player arrow
     ctx.save();
@@ -271,7 +301,7 @@ export class HUD {
       ctx.save();
       ctx.translate(cx + Math.cos(a) * (R + 9), cy + Math.sin(a) * (R + 9));
       ctx.rotate(a);
-      ctx.fillStyle = m.main ? '#ffd76a' : '#8fd0ff';
+      ctx.fillStyle = m.tracked ? '#fff1a8' : m.main ? '#ffd76a' : '#8fd0ff';
       ctx.beginPath(); ctx.moveTo(5, 0); ctx.lineTo(-4, -4); ctx.lineTo(-4, 4);
       ctx.closePath(); ctx.fill();
       ctx.restore();
@@ -283,10 +313,10 @@ export class HUD {
   drawObjectiveCompass(ctx, g, L) {
     const hint = g.onboardingHint?.();
     const markers = g.quests.markers();
-    const marker = markers.find((m) => m.main) || markers[0];
+    const marker = markers.find((m) => m.tracked) || markers.find((m) => m.main) || markers[0];
     if (!hint && !marker) return;
     const ui = this.ui;
-    const x = L.left + 6, y = L.top + 76;
+    const x = L.left + 6, y = L.top + 96;
     const w = Math.min(206, L.w - L.left - L.right - 70);
     ui.panel(x, y, w, 25, { r: 12, fill: 'rgba(18,15,13,0.82)', edge: 'rgba(232,200,116,0.32)' });
     if (marker && !hint) {
@@ -331,14 +361,15 @@ export class HUD {
 
   drawQuestTracker(ctx, g, L) {
     const ui = this.ui;
-    const q = g.quests.active.slice(0, 3);
+    const q = g.quests.orderedActive().slice(0, 3);
     if (!q.length) return;
     const x = L.left + 6;
-    let y = L.top + (L.w < 380 ? 112 : 96);
+    let y = L.top + (L.w < 380 ? 132 : 116);
     for (const quest of q) {
       const done = quest.state === 'complete';
-      ui.text((quest.main ? '★ ' : '・') + quest.title, x, y, {
-        size: 12, col: done ? COL.good : quest.main ? COL.gold : COL.ink2, weight: 700,
+      const tracked = quest.id === g.quests.trackedId;
+      ui.text((tracked ? '◆ ' : quest.main ? '★ ' : '・') + quest.title, x, y, {
+        size: 12, col: done ? COL.good : tracked ? '#fff1a8' : quest.main ? COL.gold : COL.ink2, weight: 700,
       });
       const sub = done ? '達成！ 報告しよう' : quest.count > 1 ? `${quest.hint || quest.desc || ''} (${quest.progress}/${quest.count})` : (quest.hint || '');
       if (sub) ui.text(sub, x + 12, y + 15, { size: 11, col: 'rgba(200,192,176,0.8)', weight: 500 });
@@ -370,7 +401,8 @@ export class HUD {
       ctx.save();
       ctx.globalAlpha = 0.16;
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
-      const hx = Math.max(L.left + 48, L.w * 0.17), hy = L.h - L.bottom - 100;
+      const hx = L.leftHanded ? Math.min(L.w - L.right - 48, L.w * 0.83) : Math.max(L.left + 48, L.w * 0.17);
+      const hy = L.h - L.bottom - 100;
       ctx.beginPath(); ctx.arc(hx, hy, 46, 0, TAU); ctx.stroke();
       ctx.beginPath(); ctx.arc(hx, hy, 18, 0, TAU); ctx.stroke();
       ctx.restore();

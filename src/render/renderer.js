@@ -438,6 +438,18 @@ export class Renderer {
     else if (p.state === 'bow') action = { type: 'bow', p: clamp(p.charge / 0.7, 0, 1) };
 
     const rolling = p.state === 'roll';
+    if (p.flowT > 0) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const pulse = 0.75 + Math.sin(g.time * 7) * 0.2;
+      radial(ctx, p.x, p.y - 13, 34 + pulse * 6, `rgba(115,220,255,${0.18 + pulse * 0.08})`, 'rgba(255,220,120,0)');
+      ctx.strokeStyle = `rgba(190,245,255,${0.35 + pulse * 0.18})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 2, 18 + pulse * 3, 8 + pulse, 0, 0, TAU);
+      ctx.stroke();
+      ctx.restore();
+    }
     this.drawActorBody(ctx, p, g, (c) => {
       if (rolling) {
         const k = clamp(p.stateT / 0.36, 0, 1);
@@ -504,6 +516,45 @@ export class Renderer {
     const T = e.T;
     const drawKind = T.draw;
     const telegraph = e.state === 'windup';
+    if (e.state === 'bossBreath') {
+      const k = clamp(e.stateT / 0.76, 0, 1);
+      const spread = e.enraged ? 1.28 : 1.04;
+      const reach = 235;
+      ctx.save();
+      ctx.fillStyle = `rgba(255,70,35,${0.08 + k * 0.18})`;
+      ctx.strokeStyle = `rgba(255,175,95,${0.28 + k * 0.55})`;
+      ctx.lineWidth = 2 + k * 2;
+      ctx.beginPath();
+      ctx.moveTo(e.x, e.y);
+      ctx.arc(e.x, e.y, reach, e.face - spread * 0.5, e.face + spread * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    } else if (e.state === 'bossMeteor') {
+      const k = clamp(e.stateT / 1.04, 0, 1);
+      ctx.save();
+      for (const spot of e.specialTargets || []) {
+        ctx.fillStyle = `rgba(255,65,25,${0.08 + k * 0.2})`;
+        ctx.strokeStyle = `rgba(255,200,100,${0.35 + k * 0.6})`;
+        ctx.lineWidth = 2 + k * 4;
+        ctx.beginPath(); ctx.arc(spot.x, spot.y, 54, 0, TAU); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(spot.x, spot.y, 54 * (1 - k), 0, TAU); ctx.stroke();
+      }
+      ctx.restore();
+    } else if (e.state === 'bossRush') {
+      const k = clamp(e.stateT / 0.48, 0, 1);
+      ctx.save();
+      ctx.strokeStyle = `rgba(255,125,70,${0.25 + k * 0.65})`;
+      ctx.lineWidth = 12 + k * 10;
+      ctx.lineCap = 'round';
+      ctx.setLineDash([18, 14]);
+      ctx.beginPath();
+      ctx.moveTo(e.x, e.y);
+      ctx.lineTo(e.x + Math.cos(e.rushA) * 260, e.y + Math.sin(e.rushA) * 260);
+      ctx.stroke();
+      ctx.restore();
+    }
     this.drawActorBody(ctx, e, g, (c) => {
       if (telegraph) {
         c.save();
@@ -542,6 +593,13 @@ export class Renderer {
       const k = clamp(e.hp / e.maxHp, 0, 1);
       ctx.fillStyle = e.boss ? '#e04a4a' : k > 0.5 ? '#7fd77f' : k > 0.25 ? '#ffd76a' : '#e0524a';
       roundRect(ctx, e.x - w / 2, y, w * k, 3, 1.5); ctx.fill();
+      if (e.poise > 0) {
+        const pk = clamp(e.poise / e.maxPoise, 0, 1);
+        ctx.fillStyle = 'rgba(0,0,0,0.52)';
+        roundRect(ctx, e.x - w / 2, y + 6, w, 3, 1.5); ctx.fill();
+        ctx.fillStyle = pk > 0.78 ? '#ffe08a' : '#9fc7d6';
+        roundRect(ctx, e.x - w / 2, y + 6, w * pk, 3, 1.5); ctx.fill();
+      }
       ctx.restore();
     }
     if (e.aggroT > 0 && e.state === 'chase' && e.stateT < 0.6) {

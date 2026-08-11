@@ -7,6 +7,8 @@ import { generateWorld, WORLD_W, WORLD_H } from '../src/world/worldgen.js';
 import { QuestLog } from '../src/game/quests.js';
 import { Game } from '../src/game/game.js';
 import { HUD } from '../src/ui/hud.js';
+import { Player, Enemy } from '../src/game/entities.js';
+import { ACHIEVEMENTS, achievementProgress } from '../src/game/achievements.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -78,7 +80,7 @@ test('main objectives resolve to the nearest relevant world target', () => {
   };
   const quests = new QuestLog(game);
   assert.deepEqual(quests.markers()[0], {
-    x: 40, y: 20, main: true, title: '第一章・目覚め',
+    x: 40, y: 20, main: true, title: '第一章・目覚め', questId: 'mq0', tracked: true,
   });
 
   quests.active = [{ type: 'clearCamp', title: '野盗', main: true, state: 'active' }];
@@ -102,6 +104,22 @@ test('completed quest details survive a save round-trip', () => {
   assert.equal(restored.done[0].desc, '薬草を集めた。');
 });
 
+test('the selected quest stays first and survives a save round-trip', () => {
+  const game = { toast() {}, audio: { sfx() {} } };
+  const quests = new QuestLog(game);
+  const side = { id: 'sq-track', title: '追跡する依頼', state: 'active', marker: { x: 12, y: 34 } };
+  quests.active.push(side);
+  assert.equal(quests.track(side.id), true);
+  assert.equal(quests.orderedActive()[0], side);
+  assert.equal(quests.markers()[0].tracked, true);
+  assert.equal(quests.markers()[0].questId, side.id);
+
+  const restored = new QuestLog(game);
+  restored.load(quests.save());
+  assert.equal(restored.trackedId, side.id);
+  assert.equal(restored.orderedActive()[0].id, side.id);
+});
+
 test('legacy saves cannot get stuck between main chapters', () => {
   const game = { toast() {}, audio: { sfx() {} } };
   const quests = new QuestLog(game);
@@ -123,6 +141,7 @@ test('structurally corrupt saves are rejected before they can break loading', ()
   assert.equal(check({ ...valid, player: { ...valid.player, inv: [null] } }), false);
   assert.equal(check({ ...valid, quests: { active: {}, done: [] } }), false);
   assert.equal(check({ ...valid, camps: [['broken']] }), false);
+  assert.equal(check({ ...valid, achievements: {} }), false);
 });
 
 test('a corrupt primary save automatically falls back to the valid backup', () => {
@@ -153,19 +172,90 @@ test('a corrupt primary save automatically falls back to the valid backup', () =
   }
 });
 
-test('all touch controls remain separated in portrait and landscape', () => {
+test('all touch controls remain separated in portrait, landscape and left-handed mode', () => {
   const hud = new HUD({});
   for (const [w, h] of [[375, 667], [667, 375], [320, 568]]) {
-    const layout = hud.layout(w, h, {});
-    const controls = [layout.attack, layout.dodge, layout.block, layout.interact, layout.item,
-      ...layout.spells, layout.menu, layout.map];
-    for (let i = 0; i < controls.length; i++) {
-      for (let j = i + 1; j < controls.length; j++) {
-        const a = controls[i], b = controls[j];
-        const gap = Math.hypot(a.x - b.x, a.y - b.y) - a.r - b.r;
-        assert.ok(gap >= -0.001, `${w}x${h}: controls ${i}/${j} overlap by ${-gap}px`);
+    for (const leftHanded of [false, true]) {
+      const layout = hud.layout(w, h, {}, { leftHanded });
+      const controls = [layout.attack, layout.dodge, layout.block, layout.interact, layout.item,
+        ...layout.spells, layout.menu, layout.map];
+      for (let i = 0; i < controls.length; i++) {
+        for (let j = i + 1; j < controls.length; j++) {
+          const a = controls[i], b = controls[j];
+          const gap = Math.hypot(a.x - b.x, a.y - b.y) - a.r - b.r;
+          assert.ok(gap >= -0.001, `${w}x${h} ${leftHanded ? 'left' : 'right'}: controls ${i}/${j} overlap by ${-gap}px`);
+        }
       }
     }
+    const normal = hud.layout(w, h, {}, { leftHanded: false });
+    const mirrored = hud.layout(w, h, {}, { leftHanded: true });
+    assert.equal(Math.round(normal.attack.x + mirrored.attack.x), w);
+  }
+});
+
+test('perfect dodges build Flow once per roll and reward precise timing', () => {
+  const player = new Player(0, 0);
+  let staggered = 0;
+  const game = {
+    toast() {}, shake() {}, hitStop() {}, vibrate() {},
+    pt: { text() {}, ring() {}, burst() {} },
+  };
+  const attacker = { boss: false, stagger: (t) => { staggered = t; } };
+  player.state = 'roll';
+  player.iframes = 0.2;
+  player.sta = 10;
+  assert.equal(player.damage(game, 50, 10, 0, { attacker }), 0);
+  assert.equal(player.perfectDodges, 1);
+  assert.ok(player.flow >= 22);
+  assert.ok(player.sta > 10);
+  assert.ok(staggered >= 0.7);
+  player.damage(game, 50, 10, 0, { attacker });
+  assert.equal(player.perfectDodges, 1, 'one roll cannot score twice');
+
+  player.flow = 99;
+  player.gainFlow(game, 2);
+  assert.equal(player.flowT, 8);
+  assert.equal(player.flow, 0);
+});
+
+test('repeated pressure breaks enemy poise without killing it', () => {
+  const enemy = new Enemy('bandit', 20, 0, 1);
+  const game = {
+    player: { gainFlow() {} },
+    pt: { text() {}, ring() {}, burst() {} },
+    hitStop() {}, onEnemyKilled() {},
+  };
+  enemy.damage(game, 20, 0, 0, { src: 'player' });
+  enemy.damage(game, 20, 0, 0, { src: 'player' });
+  enemy.damage(game, 20, 0, 0, { src: 'player' });
+  assert.equal(enemy.alive, true);
+  assert.equal(enemy.state, 'stagger');
+  assert.ok(enemy.stun >= 1.35);
+});
+
+test('dragon specials have readable normal and enraged patterns', () => {
+  const dragon = new Enemy('dragon', 0, 0, 1);
+  const game = { player: { x: 100, y: 20, face: 0 } };
+  dragon.specialIndex = 1;
+  dragon.beginDragonSpecial(game, 0);
+  assert.equal(dragon.state, 'bossMeteor');
+  assert.equal(dragon.specialTargets.length, 2);
+  dragon.enraged = true;
+  dragon.specialIndex = 1;
+  dragon.beginDragonSpecial(game, 0);
+  assert.equal(dragon.specialTargets.length, 3);
+});
+
+test('achievement progress is derived from durable gameplay statistics', () => {
+  const game = {
+    onboarding: null,
+    player: { kills: 100, highestChain: 15, perfectDodges: 5, parries: 5, inv: [] },
+    world: { settlements: [], pois: [] },
+    quests: { chapter: 6, counters: { dungeonBoss: 1 } },
+  };
+  for (const id of ['journey', 'hunter', 'flow_master', 'untouchable', 'parry_master', 'delver', 'legend']) {
+    const def = ACHIEVEMENTS.find((a) => a.id === id);
+    assert.equal(achievementProgress(def, game).complete, true, id);
   }
 });
 

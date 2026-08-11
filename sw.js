@@ -1,4 +1,4 @@
-const CACHE = 'aetheria-v2-20260811';
+const CACHE = 'aetheria-v3-definitive-20260811';
 const CORE = [
   './',
   './index.html',
@@ -13,6 +13,7 @@ const CORE = [
   './src/core/input.js',
   './src/core/util.js',
   './src/game/dialogue.js',
+  './src/game/achievements.js',
   './src/game/entities.js',
   './src/game/game.js',
   './src/game/items.js',
