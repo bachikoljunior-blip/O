@@ -1421,8 +1421,10 @@ export class Game {
   }
 
   exportSaveText() {
-    if (this.state === 'play') this.save(true);
-    const data = this.readSave();
+    // Export the live snapshot directly while playing. If localStorage is full,
+    // reading it after a failed save would silently export stale progress—the
+    // exact moment when a portable backup is most valuable.
+    const data = this.state === 'play' ? this.createSaveData(false) : this.readSave();
     if (!data) return null;
     return JSON.stringify({
       format: SAVE_EXPORT_FORMAT,
@@ -1586,8 +1588,7 @@ export class Game {
     } catch (e) {}
   }
 
-  save(silent = false) {
-    if (this.state !== 'play') return;
+  createSaveData(silent = false) {
     const p = this.player;
     // if we're underground, remember the cave mouth rather than the dungeon coords
     const pos = this.interior && this.outsidePos ? this.outsidePos : { x: p.x, y: p.y };
@@ -1606,7 +1607,7 @@ export class Game {
       } catch (e) {}
     }
     const fog = this.fogSnapshot;
-    const data = {
+    return {
       v: 4, seed: this.seed, time: this.time, day: this.day,
       player: {
         x: pos.x, y: pos.y, level: p.level, xp: p.xp, gold: p.gold, hp: p.hp, mp: p.mp, sta: p.sta,
@@ -1625,6 +1626,11 @@ export class Game {
       waypoint: this.waypoint,
       fog,
     };
+  }
+
+  save(silent = false) {
+    if (this.state !== 'play') return;
+    const data = this.createSaveData(silent);
     const primaryKey = slotKey(SAVE_KEY, this.seed);
     const backupKey = slotKey(SAVE_BACKUP_KEY, this.seed);
     const raw = JSON.stringify(data);

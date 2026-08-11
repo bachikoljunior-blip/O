@@ -272,7 +272,7 @@ test('autosaves throttle fog image encoding without delaying gameplay saves', ()
     campState: new Map(), onboarding: null, achievements: new Set(), waypoint: null, lastShrine: null,
     fogCanvas: { toDataURL: () => { encodes++; return 'data:image/webp;base64,fog'; } },
     fogSnapshot: null, fogSnapshotAt: 0, fogDirty: true,
-    validSave: Game.prototype.validSave,
+    validSave: Game.prototype.validSave, createSaveData: Game.prototype.createSaveData,
     toast() {},
   };
   try {
@@ -322,7 +322,7 @@ test('a full backup slot cannot block an otherwise valid autosave', () => {
     world: { pois: [], settlements: [] }, quests: { save: () => ({ active: [], done: [] }) },
     campState: new Map(), onboarding: null, achievements: new Set(), waypoint: null, lastShrine: null,
     fogCanvas: null, fogSnapshot: null, fogSnapshotAt: 0, fogDirty: false,
-    validSave: Game.prototype.validSave, toast() {},
+    validSave: Game.prototype.validSave, createSaveData: Game.prototype.createSaveData, toast() {},
   };
   try {
     assert.equal(Game.prototype.save.call(context, true), true);
@@ -359,7 +359,7 @@ test('silent autosave failures warn once and clear the warning after recovery', 
     world: { pois: [], settlements: [] }, quests: { save: () => ({ active: [], done: [] }) },
     campState: new Map(), onboarding: null, achievements: new Set(), waypoint: null, lastShrine: null,
     fogCanvas: null, fogSnapshot: null, fogSnapshotAt: 0, fogDirty: false,
-    validSave: Game.prototype.validSave,
+    validSave: Game.prototype.validSave, createSaveData: Game.prototype.createSaveData,
     toast: (message) => notices.push(message),
   };
   try {
@@ -468,6 +468,42 @@ test('portable save export and import preserve progress with verified read-back'
     assert.equal(JSON.parse(values.get('aetheria_save_v1_44')).player.x, 440);
     assert.equal(JSON.parse(values.get('aetheria_save_backup_v1_44')).player.x, 999);
     assert.equal(values.get('aetheria_last_seed_v1'), '44');
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
+test('portable export captures live progress even when device storage is full', () => {
+  const stale = {
+    seed: 45,
+    player: { x: 100, y: 200, inv: [], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] }, pois: [], settlements: [], camps: [],
+  };
+  const values = new Map([['aetheria_save_v1_45', JSON.stringify(stale)]]);
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: () => { throw new DOMException('full', 'QuotaExceededError'); },
+  };
+  const context = {
+    state: 'play', seed: 45, time: 10, day: 2, interior: null,
+    player: {
+      x: 900, y: 800, level: 3, xp: 20, gold: 50, hp: 80, mp: 30, sta: 70,
+      inv: [], equip: {}, spellSlots: ['fire'], knownSpells: ['fire'], kills: 4, playtime: 120,
+      flow: 0, flowT: 0, hitChain: 0, hitChainT: 0, highestChain: 2, perfectDodges: 1, parries: 1,
+    },
+    world: { pois: [], settlements: [] }, quests: { save: () => ({ active: [], done: [] }) },
+    campState: new Map(), onboarding: null, achievements: new Set(), waypoint: null, lastShrine: null,
+    fogCanvas: null, fogSnapshot: null, fogSnapshotAt: 0, fogDirty: false,
+    createSaveData: Game.prototype.createSaveData,
+  };
+  try {
+    const exported = JSON.parse(Game.prototype.exportSaveText.call(context));
+    assert.equal(exported.save.player.x, 900, 'the current position must replace the stale stored position');
+    assert.equal(exported.save.player.playtime, 120);
+    assert.equal(JSON.parse(values.get('aetheria_save_v1_45')).player.x, 100,
+      'export must not depend on writing to full device storage');
   } finally {
     if (previousStorage === undefined) delete globalThis.localStorage;
     else globalThis.localStorage = previousStorage;
