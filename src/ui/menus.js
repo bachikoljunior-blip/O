@@ -878,21 +878,21 @@ export class Menus {
     };
     toggle('振動', g.settings.vibrate, (v) => { g.settings.vibrate = v; });
     toggle('高画質', g.settings.hq, (v) => { g.settings.hq = v; g.applyQuality(); });
+    toggle('照準アシスト', g.settings.aimAssist, (v) => { g.settings.aimAssist = v; });
     toggle('FPS表示', g.settings.showFps, (v) => { g.settings.showFps = v; });
-    y += 10;
+    y += 4;
     ui.header('操作方法', f.cx, y, f.cw);
-    y += 28;
+    y += 24;
     const help = [
       '移動: 画面左側をドラッグ / WASD',
       '攻撃: 剣ボタン / J・クリック',
-      '回避: 円矢印ボタン / Shift',
-      '防御: 盾ボタン / K（構えた瞬間はパリィ）',
-      '調べる: ▲ボタン / E',
+      '回避: 円矢印 / Shift　防御: 盾 / K',
+      '調べる: ▲ / E　道具: 左下 / Q',
       '魔法: 右側の魔法ボタン / 1〜4',
-      '道具: 左下のボタン / Q',
       'メニュー: ≡ / Esc,  地図: M',
     ];
-    for (const h of help) { ui.text(h, f.cx, y, { size: 12, col: COL.ink2, weight: 500 }); y += 22; }
+    for (const h of help) { ui.text(h, f.cx, y, { size: 12, col: COL.ink2, weight: 500 }); y += 20; }
+    if (ui.input.ui.released) g.saveSettings();
     if (ui.button(f.cx, f.y + f.h - 60, f.cw, 44, '閉じる')) this.close();
   }
 

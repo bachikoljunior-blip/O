@@ -25,26 +25,32 @@ export class HUD {
     this.banner = { title, sub, t: 0 };
   }
 
-  layout(w, h) {
+  layout(w, h, safeArea = {}) {
     const safe = 10;
+    const top = safe + clamp(safeArea.top || 0, 0, 80);
+    const right = safe + clamp(safeArea.right || 0, 0, 80);
+    const bottom = safe + clamp(safeArea.bottom || 0, 0, 80);
+    const left = safe + clamp(safeArea.left || 0, 0, 80);
     const small = Math.min(w, h) < 420;
+    const landscape = w > h * 1.25;
     const R = small ? 38 : 44;
-    const bx = w - (small ? 66 : 76) - safe;
-    const by = h - (small ? 76 : 92) - safe;
+    const bx = w - (small ? 66 : 76) - right;
+    const by = h - (small ? 76 : 92) - bottom;
+    const spellGap = small ? 54 : 62;
     return {
-      w, h, small, safe,
+      w, h, small, landscape, safe, top, right, bottom, left,
       attack: { x: bx, y: by, r: R },
-      dodge: { x: bx - R * 1.55, y: by + R * 0.42, r: R * 0.66 },
-      block: { x: bx + R * 0.18, y: by - R * 1.62, r: R * 0.66 },
+      dodge: { x: bx - R * 1.62, y: by + R * 0.42, r: R * 0.66 },
+      block: { x: bx + R * 0.18, y: by - R * 1.66, r: R * 0.66 },
       interact: { x: bx - R * 1.42, y: by - R * 1.18, r: R * 0.62 },
-      item: { x: safe + (small ? 34 : 40), y: h - safe - (small ? 34 : 40), r: small ? 30 : 34 },
+      item: { x: left + (small ? 34 : 40), y: h - bottom - (small ? 34 : 40), r: small ? 30 : 34 },
       spells: [0, 1, 2, 3].map((i) => ({
-        x: w - safe - (small ? 26 : 30),
-        y: by - R * 2.6 - i * (small ? 54 : 62),
+        x: landscape ? w - right - (small ? 26 : 30) - i * spellGap : w - right - (small ? 26 : 30),
+        y: landscape ? by - R * 2.85 : by - R * 2.6 - i * spellGap,
         r: small ? 23 : 26,
       })),
-      menu: { x: w - safe - 24, y: safe + 24, r: 22 },
-      map: { x: w - safe - 24, y: safe + 74, r: 22 },
+      menu: { x: w - right - 24, y: top + 24, r: 22 },
+      map: { x: w - right - 24, y: top + 74, r: 22 },
     };
   }
 
@@ -62,18 +68,18 @@ export class HUD {
       if (g.player.spellSlots[i]) list.push({ id: 'spell' + i, ...L.spells[i] });
     }
     input.setButtons(list);
-    input.setStickZone(0, L.h * 0.22, L.w * 0.56, L.h * 0.78);
+    input.setStickZone(L.left, L.h * 0.22, Math.max(0, L.w * 0.56 - L.left), L.h * 0.78 - L.bottom);
   }
 
   draw(ctx, g, dt) {
     const ui = this.ui;
     const { w, h } = ui;
-    const L = this.layout(w, h);
+    const L = this.layout(w, h, g.safeArea);
     this.L = L;
     const p = g.player;
 
     // ——— top-left vitals
-    const px = L.safe + 6, py = L.safe + 6;
+    const px = L.left + 6, py = L.top + 6;
     const bw = L.small ? 132 : 168;
     ui.panel(px - 6, py - 6, bw + 46, 62, { r: 12, fill: 'rgba(20,17,15,0.72)' });
     // level medallion
@@ -115,7 +121,7 @@ export class HUD {
     if (this.bossFade > 0.01) {
       const bw2 = Math.min(w - 40, 400);
       const bx = (w - bw2) / 2;
-      const byy = L.safe + 118;
+      const byy = L.top + 118;
       ctx.save();
       ctx.globalAlpha = this.bossFade;
       ui.text(boss ? boss.T.name : '', w / 2, byy - 12, { size: 16, align: 'center', col: '#ffd0c0', weight: 800 });
@@ -129,14 +135,14 @@ export class HUD {
     // ——— interaction prompt
     if (g.interactPrompt) {
       const t = g.interactPrompt;
-      const y = h - (L.small ? 190 : 218);
+      const y = h - L.bottom - (L.small ? 180 : 208);
       const tw = ui.measure(t, 15, 700) + 32;
       ui.panel(w / 2 - tw / 2, y - 17, tw, 34, { r: 17, fill: 'rgba(20,17,15,0.86)' });
       ui.text(t, w / 2, y, { size: 15, align: 'center', col: COL.ink });
     }
 
     // ——— toasts
-    let ty = h - Math.max(150, h * 0.22);
+    let ty = h - L.bottom - Math.max(140, h * 0.22);
     for (let i = this.toasts.length - 1; i >= 0; i--) {
       const t = this.toasts[i];
       t.t += dt;
@@ -180,7 +186,7 @@ export class HUD {
       const a = clamp(Math.min(lb.t * 3, (3 - lb.t) * 1.6), 0, 1);
       ctx.save();
       ctx.globalAlpha = a;
-      const ly = Math.max(96, h * 0.17);
+      const ly = Math.max(L.top + 86, h * 0.17);
       ui.text(lb.name, w / 2, ly, { size: 22, align: 'center', col: COL.ink, weight: 800 });
       if (lb.sub) ui.text(lb.sub, w / 2, ly + 24, { size: 13, align: 'center', col: COL.ink2 });
       ctx.restore();
@@ -190,9 +196,13 @@ export class HUD {
   drawMinimap(ctx, g, L) {
     const ui = this.ui;
     const R = L.small ? 46 : 56;
-    const cx = L.w - L.safe - R - 52;
-    const cy = L.safe + R + 4;
-    if (L.w < 380) return this.drawClock(ctx, g, L, L.w - L.safe - 60, L.safe + 16);
+    const cx = L.w - L.right - R - 52;
+    const cy = L.top + R + 4;
+    if (L.w < 380) {
+      this.drawClock(ctx, g, L, L.w - L.right - 60, L.top + 16);
+      this.drawObjectiveCompass(ctx, g, L);
+      return;
+    }
 
     ctx.save();
     ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU);
@@ -270,6 +280,31 @@ export class HUD {
     this.drawClock(ctx, g, L, cx, cy + R + 14);
   }
 
+  drawObjectiveCompass(ctx, g, L) {
+    const hint = g.onboardingHint?.();
+    const markers = g.quests.markers();
+    const marker = markers.find((m) => m.main) || markers[0];
+    if (!hint && !marker) return;
+    const ui = this.ui;
+    const x = L.left + 6, y = L.top + 76;
+    const w = Math.min(206, L.w - L.left - L.right - 70);
+    ui.panel(x, y, w, 25, { r: 12, fill: 'rgba(18,15,13,0.82)', edge: 'rgba(232,200,116,0.32)' });
+    if (marker && !hint) {
+      const a = angleTo(g.player.x, g.player.y, marker.x, marker.y);
+      ctx.save();
+      ctx.translate(x + 14, y + 12.5);
+      ctx.rotate(a);
+      ctx.fillStyle = marker.main ? COL.gold : '#8fd0ff';
+      ctx.beginPath(); ctx.moveTo(7, 0); ctx.lineTo(-5, -5); ctx.lineTo(-2, 0); ctx.lineTo(-5, 5);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+      const steps = Math.max(1, Math.round(Math.hypot(marker.x - g.player.x, marker.y - g.player.y) / TILE));
+      ui.text(`${marker.main ? 'メイン' : '依頼'}・${steps}歩`, x + 29, y + 13, { size: 11, col: marker.main ? COL.gold : '#8fd0ff', weight: 700 });
+    } else {
+      ui.text(hint, x + 12, y + 13, { size: 11, col: COL.gold, weight: 700 });
+    }
+  }
+
   drawClock(ctx, g, L, x, y) {
     const ui = this.ui;
     const hour = g.hour();
@@ -298,8 +333,8 @@ export class HUD {
     const ui = this.ui;
     const q = g.quests.active.slice(0, 3);
     if (!q.length) return;
-    const x = L.safe + 6;
-    let y = L.safe + 96;
+    const x = L.left + 6;
+    let y = L.top + (L.w < 380 ? 112 : 96);
     for (const quest of q) {
       const done = quest.state === 'complete';
       ui.text((quest.main ? '★ ' : '・') + quest.title, x, y, {
@@ -335,7 +370,7 @@ export class HUD {
       ctx.save();
       ctx.globalAlpha = 0.16;
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
-      const hx = L.w * 0.17, hy = L.h - 110;
+      const hx = Math.max(L.left + 48, L.w * 0.17), hy = L.h - L.bottom - 100;
       ctx.beginPath(); ctx.arc(hx, hy, 46, 0, TAU); ctx.stroke();
       ctx.beginPath(); ctx.arc(hx, hy, 18, 0, TAU); ctx.stroke();
       ctx.restore();

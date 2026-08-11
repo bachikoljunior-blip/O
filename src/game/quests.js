@@ -229,38 +229,75 @@ export class QuestLog {
     if (q.main) {
       const next = this.chapter + 1;
       if (next < MAIN_CHAPTERS.length) {
+        // Advance and persist immediately; only the presentation is delayed.
+        this.startChapter(next);
+        g.save(true);
         setTimeout(() => {
-          this.startChapter(next);
           g.toast('新章: ' + MAIN_CHAPTERS[next].title, '#c58cff');
           g.showBanner(MAIN_CHAPTERS[next].title, MAIN_CHAPTERS[next].desc);
         }, 1400);
       } else {
         this.chapter = MAIN_CHAPTERS.length;
         g.showBanner('伝説の終わり', '大陸に朝が還った。旅は続く。');
+        g.save(true);
       }
+    } else {
+      g.save(true);
     }
   }
 
-  /** Nearest active marker for the compass. */
+  markerFor(q) {
+    if (q.marker) return { ...q.marker, main: !!q.main, title: q.title };
+    const g = this.g;
+    if (!g || !g.player || !g.world) return null;
+    let candidates = [];
+    if (q.type === 'talk') {
+      candidates = (g.npcs || []).filter((n) => n.role === q.targetRole);
+    } else if (q.type === 'clearCamp') {
+      candidates = g.world.pois.filter((p) => p.kind === 'camp' &&
+        !p.cleared && !g.campState?.get(p.id)?.cleared);
+    } else if (q.type === 'shrines') {
+      candidates = g.world.pois.filter((p) => p.kind === 'shrine' && !p.activated);
+    } else if (q.type === 'dungeonBoss' || (q.type === 'collect' && q.item === 'relic')) {
+      candidates = g.world.pois.filter((p) => p.kind === 'dungeon' && !p.cleared);
+    } else if (q.type === 'killBoss' && q.boss === 'dragon') {
+      candidates = g.world.pois.filter((p) => p.kind === 'lair' && !p.cleared);
+    }
+    let best = null, bestD = Infinity;
+    for (const c of candidates) {
+      const d = dist(g.player.x, g.player.y, c.x, c.y);
+      if (d < bestD) { best = c; bestD = d; }
+    }
+    return best ? { x: best.x, y: best.y, main: !!q.main, title: q.title } : null;
+  }
+
+  /** Resolved active objectives used by the HUD, minimap and full map. */
   markers() {
     const out = [];
     for (const q of this.active) {
-      if (q.marker) out.push({ x: q.marker.x, y: q.marker.y, main: !!q.main, title: q.title });
+      if (q.state === 'complete') continue;
+      const marker = this.markerFor(q);
+      if (marker) out.push(marker);
     }
     return out;
   }
 
   save() {
     return {
-      active: this.active, done: this.done.map((q) => q.id), chapter: this.chapter, counters: this.counters,
+      active: this.active, done: this.done, chapter: this.chapter, counters: this.counters,
     };
   }
   load(d) {
     if (!d) return;
     this.active = d.active || [];
-    this.done = (d.done || []).map((id) => ({ id, state: 'done' }));
+    this.done = (d.done || []).map((q) => typeof q === 'string' ? { id: q, state: 'done' } : q);
     this.chapter = d.chapter || 0;
     this.counters = d.counters || { camps: 0, shrines: 0, dungeonBoss: 0 };
     this.mainQuest = this.active.find((q) => q.main) || null;
+    if (!this.mainQuest && this.chapter < MAIN_CHAPTERS.length) {
+      let next = this.chapter;
+      while (next < MAIN_CHAPTERS.length && this.done.some((q) => q.id === MAIN_CHAPTERS[next].id)) next++;
+      this.startChapter(next);
+    }
   }
 }
