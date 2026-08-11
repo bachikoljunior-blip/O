@@ -23,6 +23,7 @@ import { HUD } from '../ui/hud.js';
 import { Menus } from '../ui/menus.js';
 
 const SAVE_KEY = 'aetheria_save_v1';
+const SAVE_BACKUP_KEY = 'aetheria_save_backup_v1';
 const DAY_LENGTH = 780;          // seconds per in-game day
 
 export class Game {
@@ -53,7 +54,8 @@ export class Game {
     this.fadeT = 0;
     this.interior = null;
     this.activeBoss = null;
-    this.settings = { music: 0.5, sfx: 0.75, vibrate: true, hq: true, showFps: false };
+    this.settings = { music: 0.5, sfx: 0.75, vibrate: true, hq: true, aimAssist: true, showFps: false };
+    this.safeArea = { top: 0, right: 0, bottom: 0, left: 0 };
     this.fps = 60;
     this.spawnTimer = 0;
     this.autosaveT = 0;
@@ -62,6 +64,8 @@ export class Game {
     this.lastShrine = null;
     this.locationBanner = null;
     this.lastBiome = -1;
+    this.onboarding = null;
+    this.saveRecovered = false;
     this.loadSettings();
   }
 
@@ -197,17 +201,15 @@ export class Game {
     this.time = 8 * (DAY_LENGTH / 24);
     this.day = 1;
     localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(SAVE_BACKUP_KEY);
     this.audio.init();
     this.showBanner(MAIN_CHAPTERS[0].title, MAIN_CHAPTERS[0].desc);
-    // gentle onboarding for the first minute
-    this.tips = [
-      [6, '画面左側をドラッグして移動', '#cfd6dd'],
-      [11, '剣ボタンで攻撃・連打で連続攻撃', '#ffd0a0'],
-      [16, '▲ボタンで人と話す・調べる', '#8fd0ff'],
-      [22, '祠に祈ると回復し、地図から転移できる', '#8fe0ff'],
-    ];
+    // The first lessons advance only after the player actually performs them.
+    this.onboarding = { stage: 0, x: this.player.x, y: this.player.y };
     const cap = this.world.settlements[0];
     if (cap) { cap.discovered = true; this.locationBanner = { name: cap.name + cap.label, sub: '旅の始まり', t: 0 }; }
+    // A first-session kill on mobile must not erase the new character.
+    this.save(true);
   }
 
   // ————————————————————————————————————————————————— time & weather
@@ -350,6 +352,22 @@ export class Game {
     return best;
   }
 
+  /** Soft target selection for one-thumb combat; it never locks the camera. */
+  aimTarget(x, y, face, maxD, cone = 1.1) {
+    if (!this.settings.aimAssist) return null;
+    let best = null, bestScore = Infinity;
+    for (const e of this.enemies) {
+      if (!e.alive) continue;
+      const d = dist(x, y, e.x, e.y);
+      if (d > maxD + e.r) continue;
+      const delta = Math.abs(angleDiff(face, angleTo(x, y, e.x, e.y)));
+      if (delta > cone) continue;
+      const score = d + delta * maxD * 0.42;
+      if (score < bestScore) { best = e; bestScore = score; }
+    }
+    return best;
+  }
+
   hitProps(x, y, ang, reach, arc) {
     const strike = (p) => {
       if (!p.harvest) return;
@@ -401,12 +419,15 @@ export class Game {
       this.shake(12, 0.8);
       this.flashT = 0.7;
       if (e.kind === 'dragon') {
+        if (this.dungeonPoi) this.dungeonPoi.cleared = true;
         this.quests.onBossKill('dragon');
         this.showBanner('灰燼竜、堕つ', '大陸に朝が還った。');
       } else {
+        if (this.dungeonPoi) this.dungeonPoi.cleared = true;
         this.quests.onDungeonBoss();
         this.drops.push(new Drop(e.x, e.y, { id: 'relic', n: 1 }));
       }
+      this.save(true);
       audio.setMood(this.interior ? 'dungeon' : 'explore');
     }
     if (e.campId) {
@@ -420,6 +441,7 @@ export class Game {
           this.quests.onCampCleared();
           this.toast('野営地を制圧した！', '#ffd76a');
           this.spawnChest(st.x, st.y, regionLevel(this.world, st.x, st.y) + 2);
+          this.save(true);
         }
       }
     }
@@ -754,6 +776,7 @@ export class Game {
     this.renderer.cam.x = x; this.renderer.cam.y = y;
     audio.sfx('warp');
     this.locationBanner = { name, sub: '転移した', t: 0 };
+    this.save(true);
   }
 
   enterDungeon(poi) {
@@ -782,6 +805,8 @@ export class Game {
     const rng = makeRNG((poi.seed ^ (this.dungeonFloor * 977)) >>> 0);
     for (const s of d.spawns) {
       if (s.boss && d.boss) {
+        // Cleared bosses stay defeated; each relic must come from a new delve.
+        if (poi.cleared) continue;
         const kind = poi.boss ? 'dragon' : 'troll';
         const e = new Enemy(kind, s.x, s.y, d.level + 2);
         e.boss = true;
@@ -1088,14 +1113,10 @@ export class Game {
         if (dist2(m.x, m.y, this.player.x, this.player.y) < 420 * 420) this.groundMarkers.push(m);
       }
 
-      // onboarding tips
-      if (this.tips && this.tips.length) {
-        const el = this.tips[0];
-        if (this.player.playtime > el[0]) { this.toast(el[1], el[2]); this.tips.shift(); }
-      }
+      this.updateOnboarding();
 
       this.autosaveT += dt;
-      if (this.autosaveT > 60) { this.autosaveT = 0; this.save(true); }
+      if (this.autosaveT > 20) { this.autosaveT = 0; this.save(true); }
     }
 
     // camera
@@ -1104,6 +1125,31 @@ export class Game {
     cam.follow(this.player.x + Math.cos(this.player.face) * lead, this.player.y + Math.sin(this.player.face) * lead - 8, dt);
     cam.update(dt);
     audio.update();
+  }
+
+  updateOnboarding() {
+    const o = this.onboarding;
+    if (!o) return;
+    if (o.stage === 0 && dist(this.player.x, this.player.y, o.x, o.y) > 44) {
+      o.stage = 1;
+      this.toast('いい動きだ。次は剣ボタンで攻撃！', '#ffd0a0');
+      this.save(true);
+    } else if (o.stage === 1 && (this.player.state === 'attack' || this.player.state === 'bow')) {
+      o.stage = 2;
+      this.toast('★の方角へ進み、ギルド長に話しかけよう', '#8fd0ff');
+      this.save(true);
+    } else if (o.stage === 2 && this.quests.chapter > 0) {
+      this.onboarding = null;
+      this.toast('冒険の基本を習得した！', '#8fe8a8');
+      this.save(true);
+    }
+  }
+
+  onboardingHint() {
+    if (!this.onboarding) return null;
+    if (this.onboarding.stage === 0) return '左側をドラッグして移動';
+    if (this.onboarding.stage === 1) return '右下の剣ボタンで攻撃';
+    return '★の方角へ進み、ギルド長と話す';
   }
 
   inSettlement() {
@@ -1157,7 +1203,7 @@ export class Game {
     this.ui.begin(ctx, this.input, r.w, r.h);
     if (this.state === 'play' && !this.menus.isOpen) {
       this.hud.draw(ctx, this, dt);
-      this.hud.registerButtons(this.input, this, this.hud.layout(r.w, r.h));
+      this.hud.registerButtons(this.input, this, this.hud.layout(r.w, r.h, this.safeArea));
     } else {
       this.input.setButtons([]);
     }
@@ -1182,19 +1228,43 @@ export class Game {
   loadSettings() {
     try {
       const s = JSON.parse(localStorage.getItem('aetheria_settings') || 'null');
-      if (s) Object.assign(this.settings, s);
+      if (s && typeof s === 'object') {
+        if (Number.isFinite(s.music)) this.settings.music = clamp(s.music, 0, 1);
+        if (Number.isFinite(s.sfx)) this.settings.sfx = clamp(s.sfx, 0, 1);
+        for (const k of ['vibrate', 'hq', 'aimAssist', 'showFps']) {
+          if (typeof s[k] === 'boolean') this.settings[k] = s[k];
+        }
+      }
     } catch (e) {}
     audio.setMusicVol(this.settings.music);
     audio.setSfxVol(this.settings.sfx);
   }
 
+  validSave(d) {
+    return !!(d && Number.isFinite(d.seed) && d.player &&
+      Number.isFinite(d.player.x) && Number.isFinite(d.player.y));
+  }
+
+  readSave() {
+    for (const key of [SAVE_KEY, SAVE_BACKUP_KEY]) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const data = JSON.parse(raw);
+        if (!this.validSave(data)) continue;
+        if (key === SAVE_BACKUP_KEY) {
+          localStorage.setItem(SAVE_KEY, raw);
+          this.saveRecovered = true;
+        }
+        return data;
+      } catch (e) {}
+    }
+    return null;
+  }
+
   hasSave() {
-    try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) return false;
-      const d = JSON.parse(raw);
-      return d && (d.seed >>> 0) === (this.seed >>> 0);
-    } catch (e) { return false; }
+    const d = this.readSave();
+    return !!(d && (d.seed >>> 0) === (this.seed >>> 0));
   }
 
   save(silent = false) {
@@ -1202,10 +1272,12 @@ export class Game {
     const p = this.player;
     // if we're underground, remember the cave mouth rather than the dungeon coords
     const pos = this.interior && this.outsidePos ? this.outsidePos : { x: p.x, y: p.y };
+    let fog = null;
+    try { fog = this.fogCanvas ? this.fogCanvas.toDataURL('image/webp', 0.5) : null; } catch (e) {}
     const data = {
-      v: 1, seed: this.seed, time: this.time, day: this.day,
+      v: 2, seed: this.seed, time: this.time, day: this.day,
       player: {
-        x: pos.x, y: pos.y, level: p.level, xp: p.xp, gold: p.gold, hp: p.hp, mp: p.mp,
+        x: pos.x, y: pos.y, level: p.level, xp: p.xp, gold: p.gold, hp: p.hp, mp: p.mp, sta: p.sta,
         inv: p.inv, equip: Object.fromEntries(Object.entries(p.equip).map(([k, v]) => [k, v ? v.id : null])),
         spellSlots: p.spellSlots, knownSpells: p.knownSpells, kills: p.kills, playtime: p.playtime,
       },
@@ -1214,23 +1286,35 @@ export class Game {
       settlements: this.world.settlements.map((s) => ({ id: s.id, d: s.discovered })),
       lastShrine: this.lastShrine,
       camps: [...this.campState.entries()].map(([k, v]) => [k, { cleared: v.cleared, x: v.x, y: v.y }]),
-      fog: this.fogCanvas ? this.fogCanvas.toDataURL('image/webp', 0.5) : null,
+      onboarding: this.onboarding,
+      fog,
     };
     try {
+      const previous = localStorage.getItem(SAVE_KEY);
+      if (previous) {
+        try {
+          const parsed = JSON.parse(previous);
+          if (this.validSave(parsed)) localStorage.setItem(SAVE_BACKUP_KEY, previous);
+        } catch (e) {}
+      }
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
       if (!silent) this.toast('セーブしました', '#8fd0ff');
     } catch (e) {
       console.warn('save failed', e);
+      if (!silent) this.toast('セーブ容量が不足しています', '#e0524a');
     }
   }
 
   applySave(data) {
     const p = this.player;
-    this.time = data.time || 0;
-    this.day = data.day || 1;
-    const d = data.player;
-    p.x = d.x; p.y = d.y;
-    p.level = d.level; p.xp = d.xp; p.gold = d.gold;
+    this.time = Number.isFinite(data.time) ? data.time : 0;
+    this.day = Math.max(1, data.day || 1);
+    const d = data.player || {};
+    p.x = Number.isFinite(d.x) ? d.x : this.world.start.x;
+    p.y = Number.isFinite(d.y) ? d.y : this.world.start.y;
+    p.level = Math.max(1, d.level || 1);
+    p.xp = Math.max(0, d.xp || 0);
+    p.gold = Math.max(0, d.gold || 0);
     p.kills = d.kills || 0; p.playtime = d.playtime || 0;
     p.inv = (d.inv || []).map((e) => (e.item ? { item: e.item, n: 1 } : { id: e.id, n: e.n }));
     let maxUid = 0;
@@ -1240,15 +1324,19 @@ export class Game {
       if (n > maxUid) maxUid = n;
     }
     setUid(maxUid + 1);
-    p.knownSpells = d.knownSpells || ['fire'];
-    p.spellSlots = d.spellSlots || ['fire', 'heal', null, null];
+    p.knownSpells = Array.isArray(d.knownSpells) ? d.knownSpells : ['fire'];
+    p.spellSlots = Array.isArray(d.spellSlots) ? d.spellSlots.slice(0, 4) : ['fire', null, null, null];
+    while (p.spellSlots.length < 4) p.spellSlots.push(null);
+    p.spellSlots = p.spellSlots.map((id) => id && p.knownSpells.includes(id) ? id : null);
+    const equipped = d.equip || {};
     for (const slot in p.equip) {
-      const id = d.equip[slot];
+      const id = equipped[slot];
       p.equip[slot] = id ? (p.inv.find((e) => e.item && e.item.id === id) || {}).item || null : null;
     }
     p.recompute();
-    p.hp = clamp(d.hp, 1, p.maxHp);
-    p.mp = clamp(d.mp, 0, p.maxMp);
+    p.hp = clamp(Number.isFinite(d.hp) ? d.hp : p.maxHp, 1, p.maxHp);
+    p.mp = clamp(Number.isFinite(d.mp) ? d.mp : p.maxMp, 0, p.maxMp);
+    p.sta = clamp(Number.isFinite(d.sta) ? d.sta : p.maxSta, 0, p.maxSta);
     this.quests.load(data.quests);
     for (const s of data.pois || []) {
       const poi = this.world.pois.find((q) => q.id === s.id);
@@ -1260,6 +1348,9 @@ export class Game {
     }
     this.lastShrine = data.lastShrine || null;
     this.campState = new Map((data.camps || []).map(([k, v]) => [k, { ...v, alive: 0 }]));
+    this.onboarding = data.onboarding && Number.isFinite(data.onboarding.stage)
+      ? { ...data.onboarding, x: data.onboarding.x ?? p.x, y: data.onboarding.y ?? p.y }
+      : null;
     if (data.fog && this.fogCanvas) {
       const img = new Image();
       img.onload = () => {
@@ -1276,9 +1367,9 @@ export class Game {
 
   loadGame() {
     try {
-      const data = JSON.parse(localStorage.getItem(SAVE_KEY));
+      const data = this.readSave();
       if (!data) return false;
-      if (data.seed !== this.seed) {
+      if ((data.seed >>> 0) !== (this.seed >>> 0)) {
         // regenerate the world for the saved seed — handled by main.js
         this.pendingLoad = data;
         return 'reseed';
@@ -1286,6 +1377,11 @@ export class Game {
       this.applySave(data);
       this.state = 'play';
       this.audio.init();
+      if (this.saveRecovered) {
+        this.toast('バックアップからセーブを復旧しました', '#8fe8a8');
+        this.saveRecovered = false;
+      }
+      this.save(true); // upgrade legacy saves to the current schema
       return true;
     } catch (e) {
       console.warn(e);

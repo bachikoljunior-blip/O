@@ -92,7 +92,7 @@ export class Player extends Actor {
     this.comboT = 0;
     this.hitSet = new Set();
     this.iframes = 0;
-    this.spellSlots = ['fire', 'heal', null, null];
+    this.spellSlots = ['fire', null, null, null];
     this.knownSpells = ['fire'];
     this.spellCool = {};
     this.buff = { atk: 0, def: 0, t: 0 };
@@ -263,6 +263,12 @@ export class Player extends Actor {
   }
 
   startSwing(g) {
+    const target = g.aimTarget(this.x, this.y, this.face, this.weaponReach + 22,
+      g.input.usingTouch ? 1.35 : 0.9);
+    if (target) {
+      this.face = angleTo(this.x, this.y, target.x, target.y);
+      this.dir = dir4(Math.cos(this.face), Math.sin(this.face));
+    }
     const sp = this.atkSpeed;
     this.combo = this.comboT > 0 ? (this.combo + 1) % 3 : 0;
     this.comboT = 0.55;
@@ -288,7 +294,10 @@ export class Player extends Actor {
     if (this.state !== 'bow') return;
     const power = clamp(this.charge / 0.7, 0.25, 1);
     const dmg = (this.stats.atk * (0.6 + power * 1.1));
-    const a = this.face;
+    const target = g.aimTarget(this.x, this.y, this.face, 390, g.input.usingTouch ? 1.0 : 0.65);
+    const a = target ? angleTo(this.x, this.y, target.x, target.y) : this.face;
+    this.face = a;
+    this.dir = dir4(Math.cos(a), Math.sin(a));
     g.spawnProjectile({
       x: this.x + Math.cos(a) * 12, y: this.y - 14 + Math.sin(a) * 12,
       vx: Math.cos(a) * (320 + power * 340), vy: Math.sin(a) * (320 + power * 340),
@@ -342,7 +351,11 @@ export class Player extends Actor {
   finishCast(g) {
     const id = this.castId;
     const sp = SPELLS[id];
-    const a = this.face;
+    const target = id === 'heal' ? null : g.aimTarget(this.x, this.y, this.face, 320,
+      g.input.usingTouch ? 1.05 : 0.7);
+    const a = target ? angleTo(this.x, this.y, target.x, target.y) : this.face;
+    this.face = a;
+    this.dir = dir4(Math.cos(a), Math.sin(a));
     const mag = this.stats.mag;
     switch (id) {
       case 'fire':
@@ -490,7 +503,7 @@ export class Player extends Actor {
     const sp = this.speed * mv.m * mult * (g.isWater(this.x, this.y) ? 0.55 : 1) * (g.isRoad(this.x, this.y) ? 1.12 : 1);
     this.vx = mv.x * sp; this.vy = mv.y * sp;
     this.moveWithCollision(g, dt, this.vx, this.vy);
-    if (this.state !== 'block' || true) {
+    if (this.state !== 'block') {
       this.face = Math.atan2(mv.y, mv.x);
       this.dir = dir4(mv.x, mv.y);
     }

@@ -8,6 +8,24 @@ import { FONT, COL } from './ui/ui.js';
 const canvas = document.getElementById('game');
 const game = new Game(canvas);
 window.__game = game;
+let fatal = false;
+
+function showFatal(error) {
+  if (fatal) return;
+  fatal = true;
+  console.error(error);
+  const splash = document.getElementById('boot');
+  const panel = document.getElementById('fatal');
+  if (splash) splash.hidden = true;
+  if (panel) {
+    panel.hidden = false;
+    const detail = panel.querySelector('[data-error]');
+    if (detail) detail.textContent = '通信状態を確認して「再読み込み」を押してください。';
+  }
+}
+
+addEventListener('error', (e) => { if (game.state === 'loading') showFatal(e.error || e.message); });
+addEventListener('unhandledrejection', (e) => { if (game.state === 'loading') showFatal(e.reason); });
 
 // ————————————————————————————————————————————————— sizing
 
@@ -18,6 +36,12 @@ let viewW = 0, viewH = 0;
 function resize() {
   viewW = Math.max(320, window.innerWidth);
   viewH = Math.max(320, window.innerHeight);
+  const style = getComputedStyle(document.documentElement);
+  const cssPx = (name) => Math.max(0, parseFloat(style.getPropertyValue(name)) || 0);
+  game.safeArea = {
+    top: cssPx('--safe-top'), right: cssPx('--safe-right'),
+    bottom: cssPx('--safe-bottom'), left: cssPx('--safe-left'),
+  };
   const area = viewW * viewH;
   // keep the backing store sane on huge screens / low-end phones
   const maxDpr = area > 1_300_000 ? 1.5 : 2;
@@ -104,28 +128,34 @@ function pickSeed() {
   const params = new URLSearchParams(location.search);
   const s = params.get('seed');
   if (s) return (Number(s) || parseInt(s, 36) || 12345) >>> 0;
-  try {
-    const raw = localStorage.getItem('aetheria_save_v1');
-    if (raw) {
+  for (const key of ['aetheria_save_v1', 'aetheria_save_backup_v1']) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
       const d = JSON.parse(raw);
-      if (d && typeof d.seed === 'number') return d.seed >>> 0;
-    }
-  } catch (e) {}
+      if (d && typeof d.seed === 'number' && d.player) return d.seed >>> 0;
+    } catch (e) {}
+  }
   return (Math.random() * 1e9) >>> 0;
 }
 
 function startGeneration() {
-  gen = game.generate(pickSeed());
+  try { gen = game.generate(pickSeed()); }
+  catch (e) { showFatal(e); }
 }
 startGeneration();
 
 function stepGeneration(budgetMs = 22) {
   const t0 = performance.now();
   while (performance.now() - t0 < budgetMs) {
-    const r = gen.next();
+    let r;
+    try { r = gen.next(); }
+    catch (e) { showFatal(e); gen = null; return true; }
     if (r.done) {
       game.state = 'title';
       game.menus.open('title');
+      const status = document.getElementById('a11y-status');
+      if (status) status.textContent = 'ゲームの準備ができました。';
       return true;
     }
     if (r.value) {
@@ -143,6 +173,7 @@ let acc = 0, frames = 0;
 
 function frame(now) {
   requestAnimationFrame(frame);
+  if (fatal) return;
   let dt = (now - last) / 1000;
   last = now;
   if (dt > 0.1) dt = 0.1;
@@ -188,6 +219,16 @@ document.addEventListener('visibilitychange', () => {
   else if (game.state === 'play') game.save(true);
 });
 addEventListener('pagehide', () => { if (game.state === 'play') game.save(true); });
+document.querySelector('#fatal button')?.addEventListener('click', () => location.reload());
+
+// Installable and offline after the first successful visit.
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then((registration) => registration.update())
+      .catch(() => {});
+  }, { once: true });
+}
 
 // block browser gestures that fight with the controls
 document.addEventListener('gesturestart', (e) => e.preventDefault());
