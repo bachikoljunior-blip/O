@@ -1,4 +1,4 @@
-const CACHE = 'aetheria-v13-live-export-20260811';
+const CACHE = 'aetheria-v14-audio-resume-20260811';
 const CORE = [
   './',
   './index.html',

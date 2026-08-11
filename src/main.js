@@ -187,14 +187,11 @@ requestAnimationFrame(frame);
 
 // ————————————————————————————————————————————————— platform glue
 
-// unlock audio on the first interaction
-const unlock = () => {
-  audio.init();
-  audio.setMusicVol(game.settings.music);
-  audio.setSfxVol(game.settings.sfx);
-};
+// Unlock on interaction, and keep the listeners so a browser-suspended audio
+// context can be resumed after returning from the background.
+const unlock = () => audio.init();
 ['pointerdown', 'keydown', 'touchstart'].forEach((ev) =>
-  addEventListener(ev, unlock, { once: true, passive: true }));
+  addEventListener(ev, unlock, { passive: true }));
 
 // keep the screen awake on mobile where supported
 let wakeLock = null;
@@ -215,7 +212,12 @@ async function releaseWake() {
 }
 addEventListener('pointerdown', requestWake, { once: true });
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') requestWake();
+  if (document.visibilityState === 'visible') {
+    requestWake();
+    // This succeeds without a gesture where allowed; otherwise the retained
+    // interaction listeners above retry on the player's next touch.
+    if (audio.ctx) audio.init();
+  }
   else {
     releaseWake();
     game.input.cancelActive();
