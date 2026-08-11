@@ -96,13 +96,19 @@ export class Audio {
   }
 
   setMuted(m) {
-    this.muted = m;
-    if (this.master) this.master.gain.setTargetAtTime(m ? 0 : 0.9, this.ctx.currentTime, 0.05);
+    const wasMuted = this.muted;
+    this.muted = !!m;
+    if (this.master) this.master.gain.setTargetAtTime(this.muted ? 0 : 0.9, this.ctx.currentTime, 0.05);
+    // Do not catch up every beat that elapsed while muted. Resuming from the
+    // current audio clock avoids a burst of stale scheduling and CPU work.
+    if (wasMuted && !this.muted && this.ctx) this.nextTime = this.ctx.currentTime + 0.05;
   }
   setMusicVol(v) {
+    const wasSilent = this.musicVol <= 0.0001;
     this.musicVol = clamp(Number(v) || 0, 0, 1);
     if (this.musicGain) this.musicGain.gain.setTargetAtTime(this.musicVol, this.ctx.currentTime, 0.1);
     if (this.musicSend) this.musicSend.gain.setTargetAtTime(MUSIC_REVERB_SEND * this.musicVol, this.ctx.currentTime, 0.1);
+    if (wasSilent && this.musicVol > 0.0001 && this.ctx) this.nextTime = this.ctx.currentTime + 0.05;
   }
   setSfxVol(v) {
     this.sfxVol = clamp(Number(v) || 0, 0, 1);
@@ -120,6 +126,12 @@ export class Audio {
     if (!this.ready || this.muted) return;
     const ctx = this.ctx;
     if (ctx.state === 'suspended') return;
+    if (this.musicVol <= 0.0001) {
+      // Keep the sequencer clock current without constructing inaudible Web
+      // Audio nodes every beat. This matters for battery and thermals on phones.
+      this.nextTime = ctx.currentTime + 0.1;
+      return;
+    }
     const mood = MOODS[this.mood] || MOODS.explore;
     const spb = 60 / mood.bpm;
     const stepDur = spb / 2;              // eighth notes
@@ -233,7 +245,7 @@ export class Audio {
   // ————————————————————————————————————————— SFX
 
   sfx(name, opt = {}) {
-    if (!this.ready || this.muted) return;
+    if (!this.ready || this.muted || this.sfxVol <= 0.0001) return;
     const ctx = this.ctx;
     const t = ctx.currentTime + 0.001;
     const out = this.sfxGain;
