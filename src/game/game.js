@@ -1558,7 +1558,14 @@ export class Game {
         if (!raw) continue;
         const data = JSON.parse(raw);
         if (!this.validSave(data) || (data.seed >>> 0) !== (this.seed >>> 0)) continue;
-        if (candidate.backup || candidate.legacy) localStorage.setItem(primaryKey, raw);
+        if (candidate.backup || candidate.legacy) {
+          // A valid fallback is still usable when a full or read-only storage
+          // area rejects the repair copy. Loading must not depend on being able
+          // to overwrite the corrupt primary at the exact moment recovery is
+          // needed most; the normal post-load save can retry the repair later.
+          try { localStorage.setItem(primaryKey, raw); }
+          catch (repairError) { console.warn('save repair write failed', repairError); }
+        }
         if (candidate.backup) {
           this.saveRecovered = true;
         }
