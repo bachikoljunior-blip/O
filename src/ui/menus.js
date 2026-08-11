@@ -219,7 +219,7 @@ export class Menus {
       ['クエスト', () => this.open('quests')],
       ['地図', () => this.open('map')],
       ['設定', () => this.open('settings')],
-      ['セーブして終了', () => { g.save(); this.closeAll(); this.open('title'); }],
+      ['セーブして終了', () => g.saveAndReturnToTitle()],
     ];
     let y = f.cy + 4;
     const rowH = Math.min(58, (f.y + f.h - 42 - y) / items.length);

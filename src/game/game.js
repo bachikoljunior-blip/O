@@ -1579,6 +1579,20 @@ export class Game {
     return this.state === 'play' || this.hasSave();
   }
 
+  saveAndReturnToTitle() {
+    // "Save and quit" must never imply success after storage rejected the
+    // write. Keep the live session in memory so the player can open Settings
+    // and rescue the current snapshot with the portable export.
+    if (!this.save()) {
+      this.saveTransferStatus = '端末保存に失敗しました。最新進行をファイルへ書き出してください';
+      this.toast('終了を取り消しました。設定からセーブを書き出せます', '#e0524a');
+      return false;
+    }
+    this.menus.closeAll();
+    this.menus.open('title');
+    return true;
+  }
+
   clearCurrentSave() {
     const seed = this.seed >>> 0;
     try {
