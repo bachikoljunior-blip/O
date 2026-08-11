@@ -10,6 +10,7 @@ import { SPELLS } from '../game/entities.js';
 import { TILE, BIOME_NAME } from '../world/worldgen.js';
 import { greeting, options as dlgOptions, rumor } from '../game/dialogue.js';
 import { audio } from '../core/audio.js';
+import { ACHIEVEMENTS, achievementProgress } from '../game/achievements.js';
 
 const STAT_LABEL = {
   atk: '攻撃', def: '防御', hp: '最大HP', mp: '最大MP', mag: '魔力', spd: '素早さ',
@@ -60,6 +61,7 @@ export class Menus {
       case 'pause': this.drawPause(ctx, g); break;
       case 'inventory': this.drawInventory(ctx, g); break;
       case 'status': this.drawStatus(ctx, g); break;
+      case 'chronicle': this.drawChronicle(ctx, g); break;
       case 'map': this.drawMap(ctx, g, dt); break;
       case 'quests': this.drawQuests(ctx, g); break;
       case 'dialogue': this.drawDialogue(ctx, g); break;
@@ -69,6 +71,7 @@ export class Menus {
       case 'board': this.drawBoard(ctx, g); break;
       case 'settings': this.drawSettings(ctx, g); break;
       case 'death': this.drawDeath(ctx, g); break;
+      case 'victory': this.drawVictory(ctx, g); break;
       case 'spellbook': this.drawSpellbook(ctx, g); break;
     }
   }
@@ -157,7 +160,7 @@ export class Menus {
     ctx.fillStyle = tg;
     ctx.fillText('アエテリア戦記', w / 2, cy);
     ctx.restore();
-    ui.text('— 果てなき大陸の物語 —', w / 2, cy + 30, { size: 14, align: 'center', col: 'rgba(230,220,200,0.8)' });
+    ui.text('— 決定版・果てなき大陸の物語 —', w / 2, cy + 30, { size: 14, align: 'center', col: 'rgba(230,220,200,0.8)' });
 
     const bw = Math.min(300, w - 60);
     const bx = (w - bw) / 2;
@@ -207,16 +210,18 @@ export class Menus {
     const items = [
       ['持ち物・装備', () => this.open('inventory')],
       ['ステータス', () => this.open('status')],
+      ['冒険の記録', () => this.open('chronicle')],
       ['魔法', () => this.open('spellbook')],
       ['クエスト', () => this.open('quests')],
       ['地図', () => this.open('map')],
       ['設定', () => this.open('settings')],
       ['セーブして終了', () => { g.save(); this.closeAll(); this.open('title'); }],
     ];
-    let y = f.cy + 6;
+    let y = f.cy + 4;
+    const rowH = Math.min(58, (f.y + f.h - 42 - y) / items.length);
     for (const [label, fn] of items) {
-      if (ui.button(f.cx, y, f.cw, 50, label, { size: 16, align: 'left' })) fn();
-      y += 58;
+      if (ui.button(f.cx, y, f.cw, Math.max(40, rowH - 7), label, { size: 15, align: 'left' })) fn();
+      y += rowH;
     }
     ui.text(`プレイ時間 ${Math.floor(g.player.playtime / 60)}分 ・ 討伐 ${g.player.kills}`, f.cx, f.y + f.h - 26, { size: 12, col: COL.dim });
   }
@@ -414,6 +419,48 @@ export class Menus {
     }
   }
 
+  drawChronicle(ctx, g) {
+    const ui = this.ui;
+    const f = this.frame(ctx, '冒険の記録', { w: 560, h: 720 });
+    if (f.closed) { this.close(); return; }
+    const unlocked = ACHIEVEMENTS.filter((a) => g.achievements.has(a.id)).length;
+    let y = f.cy + 4;
+    ui.panel(f.cx, y, f.cw, 68, { r: 12, fill: 'rgba(44,37,29,0.92)', edge: 'rgba(232,200,116,0.45)' });
+    ui.text('アエテリア踏破録', f.cx + 14, y + 22, { size: 17, col: COL.gold, weight: 800 });
+    ui.text(`${unlocked} / ${ACHIEVEMENTS.length} 達成`, f.cx + f.cw - 14, y + 22, { size: 13, align: 'right', col: COL.ink2, weight: 700 });
+    ui.bar(f.cx + 14, y + 44, f.cw - 28, 9, unlocked / ACHIEVEMENTS.length, COL.gold);
+    y += 80;
+
+    const rowH = 82;
+    const listH = f.y + f.h - y - 18;
+    const off = ui.beginScroll('chronicle', f.cx, y, f.cw, listH, ACHIEVEMENTS.length * rowH + 6);
+    let ry = y - off + 3;
+    for (const def of ACHIEVEMENTS) {
+      if (ry > y - rowH && ry < y + listH) {
+        const done = g.achievements.has(def.id);
+        const progress = achievementProgress(def, g);
+        ui.panel(f.cx, ry, f.cw, rowH - 8, {
+          r: 10, fill: done ? 'rgba(55,47,34,0.94)' : 'rgba(31,28,26,0.82)',
+          edge: done ? 'rgba(255,220,130,0.48)' : COL.edge2,
+        });
+        ctx.save();
+        ctx.beginPath(); ctx.arc(f.cx + 30, ry + 33, 20, 0, TAU);
+        ctx.fillStyle = done ? 'rgba(151,111,48,0.9)' : 'rgba(62,58,54,0.9)'; ctx.fill();
+        ctx.strokeStyle = done ? COL.gold : COL.edge2; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.restore();
+        ui.text(done ? def.icon : '？', f.cx + 30, ry + 33, { size: 15, align: 'center', col: done ? '#fff2bd' : COL.dim, weight: 800 });
+        ui.text(def.name, f.cx + 60, ry + 20, { size: 15, col: done ? COL.gold : COL.ink, weight: 800 });
+        ui.text(def.desc, f.cx + 60, ry + 41, { size: 11, col: COL.ink2, weight: 500 });
+        ui.bar(f.cx + 60, ry + 56, f.cw - 136, 6, progress.ratio, done ? COL.gold : '#7194a4');
+        ui.text(done ? '達成' : `${Math.min(progress.value, progress.target)} / ${progress.target}`, f.cx + f.cw - 12, ry + 58, {
+          size: 10, align: 'right', col: done ? COL.good : COL.dim, weight: 700,
+        });
+      }
+      ry += rowH;
+    }
+    ui.endScroll('chronicle');
+  }
+
   drawSpellbook(ctx, g) {
     const ui = this.ui;
     const p = g.player;
@@ -605,6 +652,16 @@ export class Menus {
         if (q.state === 'complete') ui.text('達成', f.cx + f.cw - 14, ry + 46, { size: 12, align: 'right', col: COL.good });
         if (q.reward) {
           ui.text(`報酬 ${q.reward.gold || 0}G / ${q.reward.xp || 0}EXP`, f.cx + 12, ry + r.h - 22, { size: 11, col: COL.gold });
+        }
+        if (this.tab === 0 && q.state !== 'complete') {
+          const tracked = q.id === g.quests.trackedId;
+          if (ui.button(f.cx + f.cw - 92, ry + r.h - 40, 80, 28, tracked ? '追跡中' : '追跡', {
+            size: 11, primary: tracked, selected: tracked, r: 8,
+          }) && !tracked) {
+            g.quests.track(q.id);
+            g.toast(`追跡: ${q.title}`, '#fff1a8');
+            g.save(true);
+          }
         }
       }
       ry += r.h;
@@ -850,7 +907,7 @@ export class Menus {
 
   drawSettings(ctx, g) {
     const ui = this.ui;
-    const f = this.frame(ctx, '設定', { w: 480, h: 620 });
+    const f = this.frame(ctx, '設定', { w: 480, h: 700 });
     if (f.closed) { this.close(); return; }
     let y = f.cy + 16;
     const slider = (label, val, setter) => {
@@ -867,31 +924,33 @@ export class Menus {
       ctx.fillStyle = '#f0e4c8'; ctx.fill();
       ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1.2; ctx.stroke();
       ctx.restore();
-      y += 60;
+      y += 52;
     };
     slider('音楽', g.settings.music, (v) => { g.settings.music = v; audio.setMusicVol(v); });
     slider('効果音', g.settings.sfx, (v) => { g.settings.sfx = v; audio.setSfxVol(v); });
     const toggle = (label, val, setter) => {
       ui.text(label, f.cx, y + 18, { size: 14 });
       if (ui.button(f.cx + f.cw - 96, y, 96, 38, val ? 'ON' : 'OFF', { primary: val, size: 14 })) setter(!val);
-      y += 50;
+      y += 42;
     };
     toggle('振動', g.settings.vibrate, (v) => { g.settings.vibrate = v; });
     toggle('高画質', g.settings.hq, (v) => { g.settings.hq = v; g.applyQuality(); });
     toggle('照準アシスト', g.settings.aimAssist, (v) => { g.settings.aimAssist = v; });
+    toggle('左利き操作', g.settings.leftHanded, (v) => { g.settings.leftHanded = v; });
+    toggle('画面の揺れを軽減', g.settings.reduceMotion, (v) => { g.settings.reduceMotion = v; });
     toggle('FPS表示', g.settings.showFps, (v) => { g.settings.showFps = v; });
     y += 4;
     ui.header('操作方法', f.cx, y, f.cw);
     y += 24;
+    const moveSide = g.settings.leftHanded ? '右側' : '左側';
     const help = [
-      '移動: 画面左側をドラッグ / WASD',
+      `移動: 画面${moveSide}をドラッグ / WASD`,
       '攻撃: 剣ボタン / J・クリック',
       '回避: 円矢印 / Shift　防御: 盾 / K',
       '調べる: ▲ / E　道具: 左下 / Q',
-      '魔法: 右側の魔法ボタン / 1〜4',
-      'メニュー: ≡ / Esc,  地図: M',
+      '魔法: 右側のボタン / 1〜4　メニュー: ≡ / Esc',
     ];
-    for (const h of help) { ui.text(h, f.cx, y, { size: 12, col: COL.ink2, weight: 500 }); y += 20; }
+    for (const h of help) { ui.text(h, f.cx, y, { size: 11, col: COL.ink2, weight: 500 }); y += 18; }
     if (ui.input.ui.released) g.saveSettings();
     if (ui.button(f.cx, f.y + f.h - 60, f.cw, 44, '閉じる')) this.close();
   }
@@ -914,6 +973,58 @@ export class Menus {
     }
     if (ui.button((w - bw) / 2, h * 0.52 + 64, bw, 44, 'タイトルへ', { size: 15 })) {
       g.save();
+      this.closeAll();
+      this.open('title');
+    }
+  }
+
+  drawVictory(ctx, g) {
+    const ui = this.ui;
+    const w = ui.w, h = ui.h;
+    ctx.save();
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, 'rgba(16,28,48,0.95)');
+    bg.addColorStop(0.55, 'rgba(68,47,47,0.94)');
+    bg.addColorStop(1, 'rgba(12,10,18,0.98)');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'lighter';
+    radial(ctx, w / 2, h * 0.29, Math.min(w, h) * 0.48, 'rgba(255,210,125,0.28)', 'rgba(255,170,90,0)');
+    ctx.restore();
+
+    const compact = h < 500;
+    const top = compact ? 28 : Math.max(54, h * 0.12);
+    ui.text('LEGEND COMPLETE', w / 2, top, { size: 12, align: 'center', col: '#ffe7a8', weight: 800 });
+    ui.text('アエテリアに朝が還った', w / 2, top + (compact ? 30 : 42), { size: Math.min(compact ? 23 : 28, w * 0.072), align: 'center', col: COL.gold, weight: 900 });
+    ui.text('灰燼竜ヴォルガを討ち、大陸の物語を完結した。', w / 2, top + (compact ? 55 : 76), { size: compact ? 10 : 12, align: 'center', col: COL.ink2, weight: 600 });
+
+    const pw = Math.min(340, w - 42), ph = compact ? 116 : 150;
+    const px = (w - pw) / 2, py = compact ? 94 : Math.min(top + 110, h * 0.36);
+    ui.panel(px, py, pw, ph, { r: 16, fill: 'rgba(24,21,22,0.82)', edge: 'rgba(255,221,140,0.5)' });
+    const discovered = g.world.pois.filter((p) => p.discovered).length;
+    const rows = [
+      ['到達レベル', `Lv ${g.player.level}`],
+      ['討伐数', `${g.player.kills}`],
+      ['探索', `${discovered} / ${g.world.pois.length}`],
+      ['実績', `${g.achievements.size} / ${ACHIEVEMENTS.length}`],
+      ['プレイ時間', `${Math.floor(g.player.playtime / 3600)}時間 ${Math.floor(g.player.playtime / 60) % 60}分`],
+    ];
+    let y = py + (compact ? 15 : 23);
+    for (const [label, value] of rows) {
+      ui.text(label, px + 16, y, { size: 12, col: COL.ink2 });
+      ui.text(value, px + pw - 16, y, { size: 12, align: 'right', col: COL.ink, weight: 800 });
+      y += compact ? 20 : 25;
+    }
+
+    const bw = Math.min(300, w - 60);
+    const bx = (w - bw) / 2;
+    const by = compact ? py + ph + 10 : Math.min(h - 126, py + ph + 28);
+    const primaryH = compact ? 40 : 50;
+    if (ui.button(bx, by, bw, primaryH, 'この世界を旅し続ける', { primary: true, size: compact ? 14 : 16, big: true })) {
+      this.closeAll();
+      g.save(true);
+    }
+    if (ui.button(bx, by + (compact ? 48 : 62), bw, compact ? 36 : 44, 'タイトルへ', { size: compact ? 13 : 14 })) {
+      g.save(true);
       this.closeAll();
       this.open('title');
     }

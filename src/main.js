@@ -12,6 +12,9 @@ let fatal = false;
 
 function showFatal(error) {
   if (fatal) return;
+  if (game.state === 'play') {
+    try { game.save(true); } catch (e) {}
+  }
   fatal = true;
   console.error(error);
   const splash = document.getElementById('boot');
@@ -24,8 +27,8 @@ function showFatal(error) {
   }
 }
 
-addEventListener('error', (e) => { if (game.state === 'loading') showFatal(e.error || e.message); });
-addEventListener('unhandledrejection', (e) => { if (game.state === 'loading') showFatal(e.reason); });
+addEventListener('error', (e) => showFatal(e.error || e.message));
+addEventListener('unhandledrejection', (e) => showFatal(e.reason));
 
 // ————————————————————————————————————————————————— sizing
 
@@ -170,6 +173,7 @@ function stepGeneration(budgetMs = 22) {
 
 let last = performance.now();
 let acc = 0, frames = 0;
+addEventListener('pageshow', () => { last = performance.now(); resize(); });
 
 function frame(now) {
   requestAnimationFrame(frame);
@@ -225,7 +229,17 @@ document.querySelector('#fatal button')?.addEventListener('click', () => locatio
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js', { scope: './' })
-      .then((registration) => registration.update())
+      .then((registration) => {
+        registration.update().catch(() => {});
+        registration.addEventListener('updatefound', () => {
+          const worker = registration.installing;
+          worker?.addEventListener('statechange', () => {
+            if (worker.state === 'installed' && navigator.serviceWorker.controller && game.state === 'play') {
+              game.toast('更新を取得しました。次の起動で反映します', '#8fd0ff');
+            }
+          });
+        });
+      })
       .catch(() => {});
   }, { once: true });
 }

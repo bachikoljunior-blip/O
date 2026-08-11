@@ -113,6 +113,7 @@ export class QuestLog {
     this.done = [];
     this.chapter = 0;
     this.mainQuest = null;
+    this.trackedId = null;
     this.counters = { camps: 0, shrines: 0, dungeonBoss: 0 };
     this.startChapter(0);
   }
@@ -125,12 +126,33 @@ export class QuestLog {
       ...c, main: true, progress: 0, count: c.count || 1, state: 'active', id: c.id,
     };
     this.active.unshift(this.mainQuest);
+    this.trackedId = this.mainQuest.id;
   }
 
   addSide(quest) {
     quest.state = 'active';
     this.active.push(quest);
+    if (!this.trackedId) this.trackedId = quest.id;
     this.g.toast('クエストを受注: ' + quest.title, '#8fd0ff');
+  }
+
+  track(id) {
+    const quest = this.active.find((q) => q.id === id && q.state !== 'complete');
+    if (!quest) return false;
+    this.trackedId = quest.id;
+    return true;
+  }
+
+  trackedQuest() {
+    return this.active.find((q) => q.id === this.trackedId && q.state !== 'complete') ||
+      this.active.find((q) => q.main && q.state !== 'complete') ||
+      this.active.find((q) => q.state !== 'complete') || null;
+  }
+
+  orderedActive() {
+    const tracked = this.trackedQuest();
+    if (!tracked) return [...this.active];
+    return [tracked, ...this.active.filter((q) => q !== tracked)];
   }
 
   /** Build the quest board for a settlement. */
@@ -208,6 +230,7 @@ export class QuestLog {
       this.g.toast('クエスト達成: ' + q.title, '#ffd76a');
       this.g.audio.sfx('quest');
       if (q.main) this.turnIn(q);        // main chapters auto-complete
+      else if (this.trackedId === q.id) this.trackedId = this.mainQuest?.id || null;
     }
   }
 
@@ -238,16 +261,19 @@ export class QuestLog {
         }, 1400);
       } else {
         this.chapter = MAIN_CHAPTERS.length;
+        this.trackedId = null;
         g.showBanner('伝説の終わり', '大陸に朝が還った。旅は続く。');
+        g.victoryPending = 2.6;
         g.save(true);
       }
     } else {
+      if (this.trackedId === q.id) this.trackedId = this.mainQuest?.id || this.active[0]?.id || null;
       g.save(true);
     }
   }
 
   markerFor(q) {
-    if (q.marker) return { ...q.marker, main: !!q.main, title: q.title };
+    if (q.marker) return { ...q.marker, main: !!q.main, title: q.title, questId: q.id };
     const g = this.g;
     if (!g || !g.player || !g.world) return null;
     let candidates = [];
@@ -268,16 +294,16 @@ export class QuestLog {
       const d = dist(g.player.x, g.player.y, c.x, c.y);
       if (d < bestD) { best = c; bestD = d; }
     }
-    return best ? { x: best.x, y: best.y, main: !!q.main, title: q.title } : null;
+    return best ? { x: best.x, y: best.y, main: !!q.main, title: q.title, questId: q.id } : null;
   }
 
   /** Resolved active objectives used by the HUD, minimap and full map. */
   markers() {
     const out = [];
-    for (const q of this.active) {
+    for (const q of this.orderedActive()) {
       if (q.state === 'complete') continue;
       const marker = this.markerFor(q);
-      if (marker) out.push(marker);
+      if (marker) out.push({ ...marker, tracked: q.id === this.trackedId });
     }
     return out;
   }
@@ -285,6 +311,7 @@ export class QuestLog {
   save() {
     return {
       active: this.active, done: this.done, chapter: this.chapter, counters: this.counters,
+      trackedId: this.trackedId,
     };
   }
   load(d) {
@@ -294,10 +321,14 @@ export class QuestLog {
     this.chapter = d.chapter || 0;
     this.counters = d.counters || { camps: 0, shrines: 0, dungeonBoss: 0 };
     this.mainQuest = this.active.find((q) => q.main) || null;
+    this.trackedId = typeof d.trackedId === 'string' ? d.trackedId : this.mainQuest?.id || null;
     if (!this.mainQuest && this.chapter < MAIN_CHAPTERS.length) {
       let next = this.chapter;
       while (next < MAIN_CHAPTERS.length && this.done.some((q) => q.id === MAIN_CHAPTERS[next].id)) next++;
       this.startChapter(next);
+    }
+    if (!this.active.some((q) => q.id === this.trackedId && q.state !== 'complete')) {
+      this.trackedId = this.mainQuest?.id || this.active.find((q) => q.state !== 'complete')?.id || null;
     }
   }
 }

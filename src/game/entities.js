@@ -90,6 +90,14 @@ export class Player extends Actor {
     this.stateT = 0;
     this.combo = 0;
     this.comboT = 0;
+    this.flow = 0;
+    this.flowT = 0;
+    this.hitChain = 0;
+    this.hitChainT = 0;
+    this.highestChain = 0;
+    this.perfectDodges = 0;
+    this.parries = 0;
+    this.rollPerfect = false;
     this.hitSet = new Set();
     this.iframes = 0;
     this.spellSlots = ['fire', null, null, null];
@@ -156,6 +164,7 @@ export class Player extends Actor {
     if (this.state === 'block') s *= 0.42;
     if (this.state === 'cast') s *= 0.4;
     if (this.mount) s *= 1.9;
+    if (this.flowT > 0) s *= 1.1;
     return s;
   }
 
@@ -168,6 +177,49 @@ export class Player extends Actor {
     return (w ? w.atkSpeed : 1.0) * (1 + (this.stats.spd || 0) * 0.0016);
   }
   get isRanged() { return !!(this.equip.weapon && this.equip.weapon.ranged); }
+
+  get combatMultiplier() { return this.flowT > 0 ? 1.28 : 1; }
+
+  gainFlow(g, amount) {
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    if (this.flowT > 0) {
+      this.flowT = Math.min(10, this.flowT + amount * 0.012);
+      return;
+    }
+    this.flow = Math.min(100, this.flow + amount);
+    if (this.flow < 100) return;
+    this.flow = 0;
+    this.flowT = 8;
+    this.mp = Math.min(this.maxMp, this.mp + this.maxMp * 0.25);
+    g.toast('アエテリア・フロウ発動！', '#ffe08a');
+    g.pt.ring(this.x, this.y, { r0: 10, r1: 100, life: 0.7, col: 'rgba(120,225,255,0.9)', w: 6, squash: 0.55 });
+    g.pt.burst(this.x, this.y - 8, 28, { speed: 150, life: 0.8, r: 3.5, col: '#bff5ff', col2: '#ffe08a', glow: 1, vz: 80, g: 70 });
+    audio.sfx('levelup', { vol: 0.75 });
+    g.shake(6, 0.32);
+    g.vibrate([18, 28, 18]);
+  }
+
+  recordHit(g, dealt, crit = false) {
+    if (!(dealt > 0)) return;
+    this.hitChain++;
+    this.hitChainT = 2.2;
+    this.highestChain = Math.max(this.highestChain, this.hitChain);
+    this.gainFlow(g, 3 + (crit ? 3 : 0) + Math.min(3, dealt / 35));
+  }
+
+  perfectDodge(g, attacker) {
+    if (this.rollPerfect) return;
+    this.rollPerfect = true;
+    this.perfectDodges++;
+    this.sta = Math.min(this.maxSta, this.sta + 18);
+    this.gainFlow(g, 22);
+    g.pt.text(this.x, this.y - 34, 'PERFECT', { col: '#bff5ff', size: 21, life: 1.15 });
+    g.pt.ring(this.x, this.y, { r0: 5, r1: 58, life: 0.32, col: 'rgba(180,245,255,0.9)', w: 4, squash: 0.7 });
+    if (attacker?.stagger) attacker.stagger(attacker.boss ? 0.35 : 0.7);
+    audio.sfx('parry', { vol: 0.7 });
+    g.hitStop(0.1);
+    g.vibrate([10, 18, 10]);
+  }
 
   addXp(n, g) {
     this.xp += n;
@@ -196,7 +248,11 @@ export class Player extends Actor {
   }
 
   damage(g, amount, srcX, srcY, opt = {}) {
-    if (!this.alive || this.iframes > 0) return 0;
+    if (!this.alive) return 0;
+    if (this.iframes > 0) {
+      if (this.state === 'roll') this.perfectDodge(g, opt.attacker);
+      return 0;
+    }
     let dmg = amount;
     let blocked = false;
     if (this.state === 'block') {
@@ -205,6 +261,9 @@ export class Player extends Actor {
         blocked = true;
         if (this.blockT < 0.22) {         // parry
           dmg = 0;
+          this.parries++;
+          this.gainFlow(g, 18);
+          this.sta = Math.min(this.maxSta, this.sta + 12);
           audio.sfx('parry');
           g.pt.ring(this.x, this.y - 16, { r0: 6, r1: 60, life: 0.35, col: 'rgba(255,240,180,0.9)', w: 4, squash: 0.8 });
           g.pt.text(this.x, this.y - 30, 'パリィ！', { col: '#ffe8a0', size: 20 });
@@ -221,6 +280,9 @@ export class Player extends Actor {
     }
     dmg = Math.max(blocked ? 0 : 1, Math.round(dmg * (100 / (100 + this.stats.def * 3.2))));
     if (dmg <= 0) return 0;
+    this.flow = Math.max(0, this.flow - 20);
+    this.hitChain = 0;
+    this.hitChainT = 0;
     this.hp -= dmg;
     this.flash = 0.18;
     this.hurtT = 0.3;
@@ -293,7 +355,7 @@ export class Player extends Actor {
   releaseBow(g) {
     if (this.state !== 'bow') return;
     const power = clamp(this.charge / 0.7, 0.25, 1);
-    const dmg = (this.stats.atk * (0.6 + power * 1.1));
+    const dmg = (this.stats.atk * (0.6 + power * 1.1)) * this.combatMultiplier;
     const target = g.aimTarget(this.x, this.y, this.face, 390, g.input.usingTouch ? 1.0 : 0.65);
     const a = target ? angleTo(this.x, this.y, target.x, target.y) : this.face;
     this.face = a;
@@ -317,6 +379,7 @@ export class Player extends Actor {
     }
     this.state = 'roll';
     this.stateT = 0;
+    this.rollPerfect = false;
     this.sta -= 24;
     this.staDelay = 0.5;
     this.iframes = 0.30;
@@ -357,12 +420,13 @@ export class Player extends Actor {
     this.face = a;
     this.dir = dir4(Math.cos(a), Math.sin(a));
     const mag = this.stats.mag;
+    const power = this.combatMultiplier;
     switch (id) {
       case 'fire':
         g.spawnProjectile({
           x: this.x + Math.cos(a) * 14, y: this.y - 16 + Math.sin(a) * 14,
           vx: Math.cos(a) * 300, vy: Math.sin(a) * 300,
-          dmg: mag * 1.9 + this.stats.atk * 0.3, owner: 'player', kind: 'fireball', life: 1.6, aoe: 46,
+          dmg: (mag * 1.9 + this.stats.atk * 0.3) * power, owner: 'player', kind: 'fireball', life: 1.6, aoe: 46,
         });
         audio.sfx('fire');
         break;
@@ -372,7 +436,7 @@ export class Player extends Actor {
           g.spawnProjectile({
             x: this.x + Math.cos(aa) * 12, y: this.y - 16 + Math.sin(aa) * 12,
             vx: Math.cos(aa) * 380, vy: Math.sin(aa) * 380,
-            dmg: mag * 0.95, owner: 'player', kind: 'ice', life: 1.1, slow: 2.2,
+            dmg: mag * 0.95 * power, owner: 'player', kind: 'ice', life: 1.1, slow: 2.2,
           });
         }
         audio.sfx('ice');
@@ -384,20 +448,21 @@ export class Player extends Actor {
         g.pt.beam(tx, ty - 300, tx, ty, { col: '#ffe14a', w: 7, life: 0.24, jag: 16 });
         g.pt.ring(tx, ty, { r0: 6, r1: 78, life: 0.4, col: 'rgba(255,240,140,0.85)', w: 5 });
         g.pt.burst(tx, ty, 20, { speed: 130, life: 0.5, r: 3, col: '#ffe14a', glow: 1, g: 120, vz: 60, z: 4 });
-        g.areaDamage(tx, ty, 74, mag * 2.3, { stun: 1.1, src: 'player', color: '#ffe14a' });
+        g.areaDamage(tx, ty, 74, mag * 2.3 * power, { stun: 1.1, src: 'player', color: '#ffe14a' });
         audio.sfx('bolt');
         g.shake(7, 0.3);
         break;
       }
       case 'heal':
-        this.heal(g, mag * 3.2 + this.maxHp * 0.12);
+        this.heal(g, (mag * 3.2 + this.maxHp * 0.12) * (this.flowT > 0 ? 1.18 : 1));
         audio.sfx('heal');
         break;
       case 'gust': {
         g.pt.ring(this.x + Math.cos(a) * 40, this.y + Math.sin(a) * 40, { r0: 10, r1: 80, life: 0.35, col: 'rgba(200,255,230,0.7)', w: 5 });
         g.pt.burst(this.x + Math.cos(a) * 30, this.y - 14 + Math.sin(a) * 30, 22, { dir: a, spread: 1.0, speed: 260, life: 0.4, r: 3, col: '#bff0d8', glow: 1, g: 0 });
         g.coneEffect(this.x, this.y, a, 110, 1.0, (e) => {
-          e.damage(g, mag * 1.1, this.x, this.y, { knock: 340, src: 'player' });
+          const dealt = e.damage(g, mag * 1.1 * power, this.x, this.y, { knock: 340, src: 'player' });
+          this.recordHit(g, dealt);
         });
         audio.sfx('bolt', { vol: 0.5 });
         break;
@@ -413,6 +478,11 @@ export class Player extends Actor {
     this.flash = Math.max(0, this.flash - dt);
     this.hurtT = Math.max(0, this.hurtT - dt);
     this.comboT = Math.max(0, this.comboT - dt);
+    this.hitChainT = Math.max(0, this.hitChainT - dt);
+    if (this.hitChainT <= 0) this.hitChain = 0;
+    const wasFlowing = this.flowT > 0;
+    this.flowT = Math.max(0, this.flowT - dt);
+    if (wasFlowing && this.flowT <= 0) g.toast('アエテリア・フロウ終了', '#a8c8d8');
     this.slow = Math.max(0, this.slow - dt);
     for (const k in this.spellCool) this.spellCool[k] = Math.max(0, this.spellCool[k] - dt);
     if (this.buff.t > 0) {
@@ -436,7 +506,7 @@ export class Player extends Actor {
     } else if (this.state === 'block') {
       this.sta = Math.min(this.maxSta, this.sta + 8 * dt);
     }
-    this.mp = Math.min(this.maxMp, this.mp + 1.6 * dt);
+    this.mp = Math.min(this.maxMp, this.mp + (this.flowT > 0 ? 5.2 : 1.6) * dt);
 
     const input = g.input;
     const mv = input.moveVector();
@@ -522,9 +592,10 @@ export class Player extends Actor {
       if (Math.abs(angleDiff(this.face, a)) > arc) continue;
       this.hitSet.add(e);
       const crit = Math.random() < this.stats.crit;
-      let dmg = this.stats.atk * mult * (0.92 + Math.random() * 0.16);
+      let dmg = this.stats.atk * mult * this.combatMultiplier * (0.92 + Math.random() * 0.16);
       if (crit) dmg *= 1.85;
       const dealt = e.damage(g, dmg, this.x, this.y, { crit, knock: this.combo === 2 ? 260 : 130, src: 'player' });
+      this.recordHit(g, dealt, crit);
       if (this.stats.leech > 0 && dealt > 0) this.heal(g, dealt * this.stats.leech);
       hitAny = true;
     }
@@ -587,9 +658,14 @@ export class Enemy extends Actor {
     this.fly = !!T.fly;
     this.undead = !!T.undead;
     this.boss = !!T.boss;
+    this.maxPoise = this.boss ? 180 : T.heavy ? 92 : 48;
+    this.poise = 0;
+    this.poiseT = 0;
     this.aggroT = 0;
     this.tint = T.tint;
     this.hitOnce = false;
+    this.enraged = false;
+    this.specialIndex = Math.floor(Math.random() * 3);
     if (T.humanoid) {
       const rng = makeRNG((x * 7919 + y * 104729) | 0);
       const sets = {
@@ -611,12 +687,15 @@ export class Enemy extends Actor {
 
   stagger(t) {
     this.stun = Math.max(this.stun, t);
+    this.poise = 0;
     this.state = 'stagger';
     this.stateT = 0;
   }
 
   damage(g, amount, srcX, srcY, opt = {}) {
     if (!this.alive) return 0;
+    const vulnerable = this.state === 'stagger';
+    if (vulnerable) amount *= 1.25;
     const dmg = Math.max(1, Math.round(amount * (100 / (100 + this.def * 3.0))));
     this.hp -= dmg;
     this.flash = 0.14;
@@ -627,6 +706,19 @@ export class Enemy extends Actor {
     if (!this.T.heavy || opt.crit) this.knock(this.x - srcX, this.y - srcY, (opt.knock || 120) * (this.T.heavy ? 0.35 : 1));
     if (opt.stun) this.stagger(opt.stun);
     if (opt.slow) this.slow = Math.max(this.slow, opt.slow);
+    if (!opt.stun && !vulnerable && this.hp > 0) {
+      this.poiseT = 2.6;
+      const impact = Math.min(this.maxPoise * 0.42, Math.max(5, amount * (opt.crit ? 1.7 : 1)));
+      this.poise = Math.min(this.maxPoise, this.poise + impact);
+      if (this.poise >= this.maxPoise) {
+        this.stagger(this.boss ? 0.85 : 1.35);
+        g.pt.text(this.x, this.y - this.r - 34, 'BREAK', { col: '#ffe08a', size: this.boss ? 25 : 21, life: 1.1 });
+        g.pt.ring(this.x, this.y, { r0: 5, r1: this.r * 4.5, life: 0.38, col: 'rgba(255,225,140,0.9)', w: 4, squash: 0.55 });
+        g.player?.gainFlow(g, this.boss ? 18 : 10);
+        g.hitStop(this.boss ? 0.14 : 0.1);
+        audio.sfx('parry', { vol: 0.65 });
+      }
+    }
     g.pt.text(this.x + (Math.random() - 0.5) * 10, this.y - this.r - 18, String(dmg), {
       col: opt.crit ? '#ffd76a' : opt.color || '#ffffff', size: opt.crit ? 25 : 18, crit: opt.crit,
     });
@@ -651,6 +743,8 @@ export class Enemy extends Actor {
     this.flash = Math.max(0, this.flash - dt);
     this.stun = Math.max(0, this.stun - dt);
     this.slow = Math.max(0, this.slow - dt);
+    this.poiseT = Math.max(0, this.poiseT - dt);
+    if (this.poiseT <= 0 && this.poise > 0) this.poise = Math.max(0, this.poise - this.maxPoise * 0.18 * dt);
     this.cool = Math.max(0, this.cool - dt);
     this.stateT += dt;
     this.aggroT = Math.max(0, this.aggroT - dt);
@@ -659,6 +753,19 @@ export class Enemy extends Actor {
     const d = p.alive ? dist(this.x, this.y, p.x, p.y) : 1e9;
     const T = this.T;
     const canSee = p.alive && (d < T.aggro * (g.isNight() && T.night ? 1.4 : 1) || this.aggroT > 0);
+
+    if (this.kind === 'dragon' && !this.enraged && this.hp <= this.maxHp * 0.5) {
+      this.enraged = true;
+      this.atk *= 1.12;
+      this.speed *= 1.15;
+      this.cool = 0;
+      this.stagger(0.7);
+      g.showBanner('第二形態・灰燼の翼', 'ヴォルガの炎が夜を焼く。');
+      g.pt.ring(this.x, this.y, { r0: 20, r1: 180, life: 0.9, col: 'rgba(255,90,40,0.9)', w: 8, squash: 0.55 });
+      g.pt.burst(this.x, this.y - 18, 48, { speed: 220, life: 1, r: 5, col: '#ffb04a', col2: '#a82018', glow: 1, vz: 120, g: 110 });
+      g.shake(12, 0.8);
+      audio.sfx('fire');
+    }
 
     if (this.stun > 0) { this.state = 'stagger'; }
 
@@ -689,6 +796,10 @@ export class Enemy extends Actor {
         const a = angleTo(this.x, this.y, p.x, p.y);
         this.face = a;
         this.dir = dir4(Math.cos(a), Math.sin(a));
+        if (this.kind === 'dragon' && this.cool <= 0 && d < 380) {
+          this.beginDragonSpecial(g, a);
+          break;
+        }
         const wantDist = T.behav === 'ranged' ? Math.min(T.range * 0.6, 150) : T.range * 0.7;
         let sp = this.speed * (this.slow > 0 ? 0.5 : 1);
         if (T.behav === 'hop') {
@@ -753,6 +864,62 @@ export class Enemy extends Actor {
         if (this.stun <= 0 && this.stateT > 0.25) this.state = 'chase';
         break;
       }
+      case 'bossBreath': {
+        this.moving = false;
+        if (this.stateT < 0.55) {
+          this.face = angleTo(this.x, this.y, p.x, p.y);
+          this.dir = dir4(Math.cos(this.face), Math.sin(this.face));
+        }
+        if (!this.specialFired && this.stateT >= 0.76) {
+          this.specialFired = true;
+          const shots = this.enraged ? 9 : 7;
+          for (let i = 0; i < shots; i++) {
+            const spread = this.enraged ? 1.28 : 1.04;
+            const a = this.face + (i / Math.max(1, shots - 1) - 0.5) * spread;
+            g.spawnProjectile({
+              x: this.x + Math.cos(a) * 28, y: this.y - 24 + Math.sin(a) * 28,
+              vx: Math.cos(a) * 290, vy: Math.sin(a) * 290,
+              dmg: this.atk * 0.62, owner: 'enemy', kind: 'fire', life: 2,
+              aoe: 30, attacker: this,
+            });
+          }
+          audio.sfx('fire');
+          g.shake(7, 0.35);
+        }
+        if (this.stateT > 1.38) this.finishDragonSpecial();
+        break;
+      }
+      case 'bossMeteor': {
+        this.moving = false;
+        if (!this.specialFired && this.stateT >= 1.04) {
+          this.specialFired = true;
+          for (const spot of this.specialTargets || []) {
+            g.pt.beam(spot.x, spot.y - 360, spot.x, spot.y, { col: '#ffb04a', w: 12, life: 0.28, jag: 9 });
+            g.pt.ring(spot.x, spot.y, { r0: 8, r1: 82, life: 0.45, col: 'rgba(255,110,45,0.95)', w: 7, squash: 0.55 });
+            g.pt.burst(spot.x, spot.y, 34, { speed: 190, life: 0.72, r: 4.5, col: '#ffc06a', col2: '#9a241c', glow: 1, vz: 110, g: 150 });
+            g.areaDamage(spot.x, spot.y, 54, this.atk * 0.86, { src: 'enemy', attacker: this, color: '#ff7a38' });
+          }
+          audio.sfx('fire');
+          g.shake(11, 0.5);
+        }
+        if (this.stateT > 1.48) this.finishDragonSpecial();
+        break;
+      }
+      case 'bossRush': {
+        this.moving = this.stateT >= 0.48;
+        if (this.stateT >= 0.48 && this.stateT < 1.02) {
+          const sp = this.speed * (this.enraged ? 4.5 : 3.8);
+          this.moveWithCollision(g, dt, Math.cos(this.rushA) * sp, Math.sin(this.rushA) * sp);
+          if (!this.hitOnce && dist(this.x, this.y, p.x, p.y) < this.r + p.r + 18) {
+            this.hitOnce = true;
+            p.damage(g, this.atk * 1.35, this.x, this.y, { attacker: this });
+            p.knock(p.x - this.x, p.y - this.y, 360);
+          }
+          if (Math.random() < 0.45) g.pt.spawn({ x: this.x, y: this.y, life: 0.35, r: 6, r2: 1, col: '#ff8a42', glow: 1 });
+        }
+        if (this.stateT > 1.1) this.finishDragonSpecial();
+        break;
+      }
     }
 
     // flying bob
@@ -775,6 +942,39 @@ export class Enemy extends Actor {
     }
   }
 
+  beginDragonSpecial(g, face) {
+    const moves = ['bossBreath', 'bossMeteor', 'bossRush'];
+    this.state = moves[this.specialIndex++ % moves.length];
+    this.stateT = 0;
+    this.face = face;
+    this.dir = dir4(Math.cos(face), Math.sin(face));
+    this.specialFired = false;
+    this.hitOnce = false;
+    this.rushA = face;
+    if (this.state === 'bossMeteor') {
+      const p = g.player;
+      const n = this.enraged ? 3 : 2;
+      this.specialTargets = [];
+      for (let i = 0; i < n; i++) {
+        const side = i === 0 ? 0 : (i % 2 ? 1 : -1) * (42 + i * 18);
+        const ahead = i * 26;
+        this.specialTargets.push({
+          x: p.x + Math.cos(p.face) * ahead - Math.sin(p.face) * side,
+          y: p.y + Math.sin(p.face) * ahead + Math.cos(p.face) * side,
+        });
+      }
+    } else this.specialTargets = null;
+  }
+
+  finishDragonSpecial() {
+    this.state = 'chase';
+    this.stateT = 0;
+    this.cool = this.enraged ? 0.75 : 1.15;
+    this.specialTargets = null;
+    this.specialFired = false;
+    this.hitOnce = false;
+  }
+
   doAttack(g) {
     const p = g.player;
     const T = this.T;
@@ -786,9 +986,17 @@ export class Enemy extends Actor {
         x: this.x + Math.cos(a) * 12, y: this.y - this.r + Math.sin(a) * 12,
         vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
         dmg: this.atk * 0.9, owner: 'enemy', kind, life: 2.2,
-        aoe: kind === 'fire' ? 34 : 0, slow: kind === 'web' ? 2.5 : 0,
+        aoe: kind === 'fire' ? 34 : 0, slow: kind === 'web' ? 2.5 : 0, attacker: this,
       });
       audio.sfx(kind === 'fire' ? 'fire' : 'arrow', { vol: 0.5 });
+      return;
+    }
+    if (this.kind === 'troll') {
+      g.pt.ring(this.x, this.y, { r0: 12, r1: 112, life: 0.5, col: 'rgba(255,170,90,0.88)', w: 7, squash: 0.5 });
+      g.pt.burst(this.x, this.y, 28, { speed: 170, life: 0.65, r: 4, col: '#d8b078', col2: '#6a5140', g: 180, vz: 90 });
+      g.areaDamage(this.x, this.y, 78, this.atk, { src: 'enemy', attacker: this });
+      g.shake(9, 0.45);
+      audio.sfx('crit', { vol: 0.55 });
       return;
     }
     // melee arc
@@ -935,16 +1143,17 @@ export class Projectile {
     if (this.aoe) {
       g.pt.ring(this.x, this.y, { r0: 4, r1: this.aoe * 1.6, life: 0.35, col: 'rgba(255,170,80,0.8)', w: 5 });
       g.pt.burst(this.x, this.y, 22, { speed: 160, life: 0.5, r: 4, col: '#ff9a3a', col2: '#6a3a2a', glow: 1, g: 90, vz: 60, z: 4 });
-      g.areaDamage(this.x, this.y, this.aoe, this.dmg, { src: this.owner, color: col });
+      g.areaDamage(this.x, this.y, this.aoe, this.dmg, { src: this.owner, attacker: this.attacker, color: col });
       audio.sfx('fire', { vol: 0.6 });
       g.shake(4, 0.2);
     } else {
       g.pt.burst(this.x, this.y, 8, { speed: 90, life: 0.3, r: 2.6, col, glow: this.kind !== 'arrow' ? 1 : 0, g: 120 });
       if (target) {
         const crit = this.crit ? Math.random() < this.crit : false;
-        target.damage(g, this.dmg * (crit ? 1.85 : 1), this.x - this.vx * 0.05, this.y - this.vy * 0.05, {
+        const dealt = target.damage(g, this.dmg * (crit ? 1.85 : 1), this.x - this.vx * 0.05, this.y - this.vy * 0.05, {
           crit, knock: 110, slow: this.slow, src: this.owner, attacker: this.attacker, color: col,
         });
+        if (this.owner === 'player' && target.type === 'enemy') g.player.recordHit(g, dealt, crit);
       }
     }
   }

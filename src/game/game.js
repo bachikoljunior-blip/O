@@ -17,6 +17,7 @@ import {
   ITEMS, RECIPES, rollEquip, rollLoot, shopStock, upgradeCost, effStats, displayName, setUid, nextUid,
 } from './items.js';
 import { QuestLog, MAIN_CHAPTERS } from './quests.js';
+import { ACHIEVEMENTS, achievementProgress } from './achievements.js';
 import { greeting, options as dlgOptions, rumor } from '../game/dialogue.js';
 import { UI } from '../ui/ui.js';
 import { HUD } from '../ui/hud.js';
@@ -54,7 +55,10 @@ export class Game {
     this.fadeT = 0;
     this.interior = null;
     this.activeBoss = null;
-    this.settings = { music: 0.5, sfx: 0.75, vibrate: true, hq: true, aimAssist: true, showFps: false };
+    this.settings = {
+      music: 0.5, sfx: 0.75, vibrate: true, hq: true, aimAssist: true, showFps: false,
+      leftHanded: false, reduceMotion: false,
+    };
     this.safeArea = { top: 0, right: 0, bottom: 0, left: 0 };
     this.fps = 60;
     this.spawnTimer = 0;
@@ -65,6 +69,9 @@ export class Game {
     this.locationBanner = null;
     this.lastBiome = -1;
     this.onboarding = null;
+    this.achievements = new Set();
+    this.achievementCheckT = 0;
+    this.victoryPending = 0;
     this.saveRecovered = false;
     this.loadSettings();
   }
@@ -206,6 +213,9 @@ export class Game {
     this.showBanner(MAIN_CHAPTERS[0].title, MAIN_CHAPTERS[0].desc);
     // The first lessons advance only after the player actually performs them.
     this.onboarding = { stage: 0, x: this.player.x, y: this.player.y };
+    this.achievements.clear();
+    this.achievementCheckT = 0;
+    this.victoryPending = 0;
     const cap = this.world.settlements[0];
     if (cap) { cap.discovered = true; this.locationBanner = { name: cap.name + cap.label, sub: '旅の始まり', t: 0 }; }
     // A first-session kill on mobile must not erase the new character.
@@ -323,12 +333,13 @@ export class Game {
         const d = dist(x, y, e.x, e.y);
         if (d > r + e.r) continue;
         const falloff = clamp(1 - (d / (r + e.r)) * 0.5, 0.4, 1);
-        e.damage(this, dmg * falloff, x, y, { ...opt, knock: 180 });
+        const dealt = e.damage(this, dmg * falloff, x, y, { ...opt, knock: 180 });
+        if (opt.src === 'player' || !opt.src) this.player.recordHit(this, dealt, !!opt.crit);
       }
     }
     if (opt.src === 'enemy') {
       const p = this.player;
-      if (p.alive && dist(x, y, p.x, p.y) < r + p.r) p.damage(this, dmg, x, y, {});
+      if (p.alive && dist(x, y, p.x, p.y) < r + p.r) p.damage(this, dmg, x, y, opt);
     }
   }
 
@@ -966,9 +977,22 @@ export class Game {
 
   toast(text, col) { this.hud.toast(text, col); }
   showBanner(title, sub) { this.hud.showBanner(title, sub); }
-  shake(power, time) { this.renderer.cam.shake(power, time); }
-  hitStop(t) { this.hitStopT = Math.max(this.hitStopT, t); }
-  vibrate(ms) { if (this.settings.vibrate && navigator.vibrate) navigator.vibrate(ms); }
+  shake(power, time) { if (!this.settings.reduceMotion) this.renderer.cam.shake(power, time); }
+  hitStop(t) { this.hitStopT = Math.max(this.hitStopT, this.settings.reduceMotion ? Math.min(t, 0.035) : t); }
+  vibrate(ms) { if (this.settings.vibrate && typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(ms); }
+
+  checkAchievements() {
+    let changed = false;
+    for (const def of ACHIEVEMENTS) {
+      if (this.achievements.has(def.id) || !achievementProgress(def, this).complete) continue;
+      this.achievements.add(def.id);
+      changed = true;
+      this.toast(`実績解除「${def.name}」`, '#ffe08a');
+      this.pt.ring(this.player.x, this.player.y, { r0: 8, r1: 72, life: 0.55, col: 'rgba(255,225,130,0.9)', w: 5, squash: 0.55 });
+      audio.sfx('quest', { vol: 0.7 });
+    }
+    if (changed) this.save(true);
+  }
 
   collectLights(add, view) {
     if (this.interior) { this.interior.collectLights(add, view, this); return; }
@@ -1115,8 +1139,19 @@ export class Game {
 
       this.updateOnboarding();
 
+      this.achievementCheckT += dt;
+      if (this.achievementCheckT >= 0.75) {
+        this.achievementCheckT = 0;
+        this.checkAchievements();
+      }
+
       this.autosaveT += dt;
       if (this.autosaveT > 20) { this.autosaveT = 0; this.save(true); }
+    }
+
+    if (!menusOpen && this.victoryPending > 0) {
+      this.victoryPending -= dt;
+      if (this.victoryPending <= 0) this.menus.open('victory');
     }
 
     // camera
@@ -1136,9 +1171,14 @@ export class Game {
       this.save(true);
     } else if (o.stage === 1 && (this.player.state === 'attack' || this.player.state === 'bow')) {
       o.stage = 2;
-      this.toast('★の方角へ進み、ギルド長に話しかけよう', '#8fd0ff');
+      this.toast('次は回転矢印で回避。敵の赤い予告にも有効！', '#bff5ff');
       this.save(true);
-    } else if (o.stage === 2 && this.quests.chapter > 0) {
+    } else if (o.stage === 2 && this.player.state === 'roll') {
+      o.stage = 3;
+      this.toast('攻撃・完璧回避・パリィでFLOWがたまる', '#ffe08a');
+      setTimeout(() => this.toast('★の方角へ進み、ギルド長に話しかけよう', '#8fd0ff'), 1000);
+      this.save(true);
+    } else if (o.stage === 3 && this.quests.chapter > 0) {
       this.onboarding = null;
       this.toast('冒険の基本を習得した！', '#8fe8a8');
       this.save(true);
@@ -1147,8 +1187,9 @@ export class Game {
 
   onboardingHint() {
     if (!this.onboarding) return null;
-    if (this.onboarding.stage === 0) return '左側をドラッグして移動';
-    if (this.onboarding.stage === 1) return '右下の剣ボタンで攻撃';
+    if (this.onboarding.stage === 0) return `${this.settings.leftHanded ? '右' : '左'}側をドラッグして移動`;
+    if (this.onboarding.stage === 1) return `${this.settings.leftHanded ? '左下' : '右下'}の剣ボタンで攻撃`;
+    if (this.onboarding.stage === 2) return '回転矢印ボタンで回避';
     return '★の方角へ進み、ギルド長と話す';
   }
 
@@ -1203,7 +1244,7 @@ export class Game {
     this.ui.begin(ctx, this.input, r.w, r.h);
     if (this.state === 'play' && !this.menus.isOpen) {
       this.hud.draw(ctx, this, dt);
-      this.hud.registerButtons(this.input, this, this.hud.layout(r.w, r.h, this.safeArea));
+      this.hud.registerButtons(this.input, this, this.hud.layout(r.w, r.h, this.safeArea, this.settings));
     } else {
       this.input.setButtons([]);
     }
@@ -1231,7 +1272,7 @@ export class Game {
       if (s && typeof s === 'object') {
         if (Number.isFinite(s.music)) this.settings.music = clamp(s.music, 0, 1);
         if (Number.isFinite(s.sfx)) this.settings.sfx = clamp(s.sfx, 0, 1);
-        for (const k of ['vibrate', 'hq', 'aimAssist', 'showFps']) {
+        for (const k of ['vibrate', 'hq', 'aimAssist', 'showFps', 'leftHanded', 'reduceMotion']) {
           if (typeof s[k] === 'boolean') this.settings[k] = s[k];
         }
       }
@@ -1244,7 +1285,7 @@ export class Game {
     if (!d || !Number.isFinite(d.seed) || !d.player ||
         !Number.isFinite(d.player.x) || !Number.isFinite(d.player.y)) return false;
     const arrays = [d.player.inv, d.player.spellSlots, d.player.knownSpells,
-      d.pois, d.settlements, d.camps];
+      d.pois, d.settlements, d.camps, d.achievements];
     if (arrays.some((value) => value != null && !Array.isArray(value))) return false;
     if (d.player.inv && !d.player.inv.every((entry) => entry && typeof entry === 'object' &&
       ((entry.item && typeof entry.item === 'object' && typeof entry.item.id === 'string') ||
@@ -1287,11 +1328,13 @@ export class Game {
     let fog = null;
     try { fog = this.fogCanvas ? this.fogCanvas.toDataURL('image/webp', 0.5) : null; } catch (e) {}
     const data = {
-      v: 2, seed: this.seed, time: this.time, day: this.day,
+      v: 3, seed: this.seed, time: this.time, day: this.day,
       player: {
         x: pos.x, y: pos.y, level: p.level, xp: p.xp, gold: p.gold, hp: p.hp, mp: p.mp, sta: p.sta,
         inv: p.inv, equip: Object.fromEntries(Object.entries(p.equip).map(([k, v]) => [k, v ? v.id : null])),
         spellSlots: p.spellSlots, knownSpells: p.knownSpells, kills: p.kills, playtime: p.playtime,
+        flow: p.flow, flowT: p.flowT, hitChain: p.hitChain, hitChainT: p.hitChainT,
+        highestChain: p.highestChain, perfectDodges: p.perfectDodges, parries: p.parries,
       },
       quests: this.quests.save(),
       pois: this.world.pois.map((q) => ({ id: q.id, d: q.discovered, a: !!q.activated, c: !!q.cleared, l: !!q.looted })),
@@ -1299,6 +1342,7 @@ export class Game {
       lastShrine: this.lastShrine,
       camps: [...this.campState.entries()].map(([k, v]) => [k, { cleared: v.cleared, x: v.x, y: v.y }]),
       onboarding: this.onboarding,
+      achievements: [...this.achievements],
       fog,
     };
     try {
@@ -1328,6 +1372,13 @@ export class Game {
     p.xp = Math.max(0, d.xp || 0);
     p.gold = Math.max(0, d.gold || 0);
     p.kills = d.kills || 0; p.playtime = d.playtime || 0;
+    p.flow = clamp(Number.isFinite(d.flow) ? d.flow : 0, 0, 100);
+    p.flowT = clamp(Number.isFinite(d.flowT) ? d.flowT : 0, 0, 10);
+    p.hitChain = Math.max(0, d.hitChain || 0);
+    p.hitChainT = clamp(Number.isFinite(d.hitChainT) ? d.hitChainT : 0, 0, 2.2);
+    p.highestChain = Math.max(p.hitChain, d.highestChain || 0);
+    p.perfectDodges = Math.max(0, d.perfectDodges || 0);
+    p.parries = Math.max(0, d.parries || 0);
     p.inv = (d.inv || []).map((e) => (e.item ? { item: e.item, n: 1 } : { id: e.id, n: e.n }));
     let maxUid = 0;
     for (const e of p.inv) {
@@ -1363,6 +1414,7 @@ export class Game {
     this.onboarding = data.onboarding && Number.isFinite(data.onboarding.stage)
       ? { ...data.onboarding, x: data.onboarding.x ?? p.x, y: data.onboarding.y ?? p.y }
       : null;
+    this.achievements = new Set((data.achievements || []).filter((id) => ACHIEVEMENTS.some((a) => a.id === id)));
     if (data.fog && this.fogCanvas) {
       const img = new Image();
       img.onload = () => {
