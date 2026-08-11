@@ -220,9 +220,15 @@ async function requestWake() {
 addEventListener('pointerdown', requestWake, { once: true });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWake();
-  else if (game.state === 'play') game.save(true);
+  else {
+    game.input.cancelActive();
+    if (game.state === 'play') game.save(true);
+  }
 });
-addEventListener('pagehide', () => { if (game.state === 'play') game.save(true); });
+addEventListener('pagehide', () => {
+  game.input.cancelActive();
+  if (game.state === 'play') game.save(true);
+});
 document.querySelector('#fatal button')?.addEventListener('click', () => location.reload());
 
 // Installable and offline after the first successful visit.

@@ -7,6 +7,7 @@ import { generateWorld, WORLD_W, WORLD_H } from '../src/world/worldgen.js';
 import { QuestLog } from '../src/game/quests.js';
 import { Game } from '../src/game/game.js';
 import { HUD } from '../src/ui/hud.js';
+import { Input } from '../src/core/input.js';
 import { Player, Enemy } from '../src/game/entities.js';
 import { ACHIEVEMENTS, achievementProgress } from '../src/game/achievements.js';
 
@@ -191,6 +192,34 @@ test('all touch controls remain separated in portrait, landscape and left-handed
     const mirrored = hud.layout(w, h, {}, { leftHanded: true });
     assert.equal(Math.round(normal.attack.x + mirrored.attack.x), w);
   }
+});
+
+test('backgrounding clears every held control before mobile play resumes', () => {
+  const input = Object.create(Input.prototype);
+  input.keys = new Set(['w']);
+  input.keysPressed = new Set(['w']);
+  input.pointers = new Map([[1, { role: 'stick' }]]);
+  input.buttonDownIds = new Set(['block']);
+  input.buttonPressedIds = new Set(['attack']);
+  input.buttonReleasedIds = new Set(['menu']);
+  input.stick = { active: true, x: 0.8, y: -0.3, id: 1 };
+  input.ui = { down: true, pressed: true, released: true, dragX: 10, dragY: -12, id: 2, moved: true };
+  input.anyPress = true;
+
+  input.cancelActive();
+
+  assert.equal(input.keys.size, 0);
+  assert.equal(input.keysPressed.size, 0);
+  assert.equal(input.pointers.size, 0);
+  assert.equal(input.buttonDownIds.size, 0);
+  assert.equal(input.buttonPressedIds.size, 0);
+  assert.equal(input.buttonReleasedIds.size, 0);
+  assert.deepEqual({ active: input.stick.active, x: input.stick.x, y: input.stick.y, id: input.stick.id },
+    { active: false, x: 0, y: 0, id: null });
+  assert.deepEqual({ down: input.ui.down, pressed: input.ui.pressed, released: input.ui.released,
+    dragX: input.ui.dragX, dragY: input.ui.dragY, id: input.ui.id, moved: input.ui.moved },
+  { down: false, pressed: false, released: false, dragX: 0, dragY: 0, id: null, moved: false });
+  assert.equal(input.anyPress, false);
 });
 
 test('perfect dodges build Flow once per roll and reward precise timing', () => {
