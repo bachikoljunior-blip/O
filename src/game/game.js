@@ -1241,8 +1241,20 @@ export class Game {
   }
 
   validSave(d) {
-    return !!(d && Number.isFinite(d.seed) && d.player &&
-      Number.isFinite(d.player.x) && Number.isFinite(d.player.y));
+    if (!d || !Number.isFinite(d.seed) || !d.player ||
+        !Number.isFinite(d.player.x) || !Number.isFinite(d.player.y)) return false;
+    const arrays = [d.player.inv, d.player.spellSlots, d.player.knownSpells,
+      d.pois, d.settlements, d.camps];
+    if (arrays.some((value) => value != null && !Array.isArray(value))) return false;
+    if (d.player.inv && !d.player.inv.every((entry) => entry && typeof entry === 'object' &&
+      ((entry.item && typeof entry.item === 'object' && typeof entry.item.id === 'string') ||
+       (typeof entry.id === 'string' && Number.isFinite(entry.n))))) return false;
+    if (d.quests && (typeof d.quests !== 'object' ||
+      (d.quests.active != null && !Array.isArray(d.quests.active)) ||
+      (d.quests.done != null && !Array.isArray(d.quests.done)))) return false;
+    if (d.camps && !d.camps.every((entry) => Array.isArray(entry) && entry.length === 2 &&
+      typeof entry[0] === 'string' && entry[1] && typeof entry[1] === 'object')) return false;
+    return true;
   }
 
   readSave() {

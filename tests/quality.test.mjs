@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { generateWorld, WORLD_W, WORLD_H } from '../src/world/worldgen.js';
 import { QuestLog } from '../src/game/quests.js';
+import { Game } from '../src/game/game.js';
 import { HUD } from '../src/ui/hud.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -107,6 +108,49 @@ test('legacy saves cannot get stuck between main chapters', () => {
   quests.load({ active: [], done: ['mq0'], chapter: 0, counters: {} });
   assert.equal(quests.mainQuest?.id, 'mq1');
   assert.equal(quests.chapter, 1);
+});
+
+test('structurally corrupt saves are rejected before they can break loading', () => {
+  const valid = {
+    seed: 42,
+    player: { x: 10, y: 20, inv: [{ id: 'bread', n: 2 }], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] },
+    pois: [], settlements: [], camps: [],
+  };
+  const check = (save) => Game.prototype.validSave.call({}, save);
+  assert.equal(check(valid), true);
+  assert.equal(check({ ...valid, player: { ...valid.player, inv: {} } }), false);
+  assert.equal(check({ ...valid, player: { ...valid.player, inv: [null] } }), false);
+  assert.equal(check({ ...valid, quests: { active: {}, done: [] } }), false);
+  assert.equal(check({ ...valid, camps: [['broken']] }), false);
+});
+
+test('a corrupt primary save automatically falls back to the valid backup', () => {
+  const backup = {
+    seed: 77,
+    player: { x: 30, y: 40, inv: [], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] },
+    pois: [], settlements: [], camps: [],
+  };
+  const values = new Map([
+    ['aetheria_save_v1', JSON.stringify({ seed: 77, player: { x: 30, y: 40, inv: {} } })],
+    ['aetheria_save_backup_v1', JSON.stringify(backup)],
+  ]);
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+  };
+  try {
+    const context = { validSave: Game.prototype.validSave, saveRecovered: false };
+    const restored = Game.prototype.readSave.call(context);
+    assert.deepEqual(restored, backup);
+    assert.equal(context.saveRecovered, true);
+    assert.deepEqual(JSON.parse(values.get('aetheria_save_v1')), backup);
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
 });
 
 test('all touch controls remain separated in portrait and landscape', () => {
