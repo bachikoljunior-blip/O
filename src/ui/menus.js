@@ -1018,7 +1018,7 @@ export class Menus {
     y += ui.paragraph('機種変更やブラウザデータ消去に備えて、進行をファイルに保存できます。読み込みは同じ世界の進行を上書きします。', f.cx, y, f.cw, {
       size: 11, col: COL.ink2, weight: 500, lh: 16,
     }) + 8;
-    if (ui.button(f.cx, y, f.cw, 42, 'セーブを書き出す', { size: 14, disabled: !g.hasSave() })) {
+    if (ui.button(f.cx, y, f.cw, 42, 'セーブを書き出す', { size: 14, disabled: !g.canExportSave() })) {
       g.exportSaveFile();
     }
     y += 50;
