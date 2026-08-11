@@ -277,6 +277,40 @@ test('a corrupt primary save automatically falls back to the valid backup', () =
   }
 });
 
+test('a valid backup remains loadable when full storage rejects the repair copy', () => {
+  const backup = {
+    seed: 18,
+    player: { x: 180, y: 90, inv: [], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] },
+    pois: [], settlements: [], camps: [],
+  };
+  const values = new Map([
+    ['aetheria_save_v1_18', '{broken-json'],
+    ['aetheria_save_backup_v1_18', JSON.stringify(backup)],
+  ]);
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: () => { throw new DOMException('full', 'QuotaExceededError'); },
+  };
+  const previousWarn = console.warn;
+  const warnings = [];
+  console.warn = (...args) => warnings.push(args);
+  try {
+    const context = { seed: 18, validSave: Game.prototype.validSave, saveRecovered: false };
+    const loaded = Game.prototype.readSave.call(context);
+    assert.equal(loaded.player.x, 180, 'the verified backup must load without a successful repair write');
+    assert.equal(context.saveRecovered, true);
+    assert.equal(values.get('aetheria_save_v1_18'), '{broken-json',
+      'failed repair must leave the original primary untouched');
+    assert.equal(warnings.length, 1);
+  } finally {
+    console.warn = previousWarn;
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
 test('autosaves throttle fog image encoding without delaying gameplay saves', () => {
   const values = new Map();
   let encodes = 0;
