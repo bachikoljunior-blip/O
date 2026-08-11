@@ -1,4 +1,5 @@
-const CACHE = 'aetheria-v15-emergency-export-20260811';
+const CACHE = 'aetheria-v16-bounded-network-20260811';
+const NETWORK_TIMEOUT_MS = 3500;
 const CORE = [
   './',
   './index.html',
@@ -46,6 +47,21 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+function fetchWithTimeout(request, timeoutMs = NETWORK_TIMEOUT_MS) {
+  const controller = new AbortController();
+  let timer;
+  const timeout = new Promise((resolve, reject) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new Error('network timeout'));
+    }, timeoutMs);
+  });
+  // The explicit race matters on WebKit builds where aborting a service-worker
+  // fetch does not always settle the fetch promise until the server responds.
+  return Promise.race([fetch(request, { signal: controller.signal }), timeout])
+    .finally(() => clearTimeout(timer));
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -59,14 +75,28 @@ self.addEventListener('fetch', (event) => {
     ? new URL('./index.html', self.registration.scope).href
     : request;
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(cacheKey, copy));
+    caches.match(cacheKey)
+      .then(async (cached) => {
+        // CORE is populated atomically under a versioned cache during install,
+        // so a cached module belongs to the same release as every dependency.
+        // Return it immediately instead of stacking a timeout at each level of
+        // the ES-module graph. Navigations still make a bounded freshness check.
+        if (cached && request.mode !== 'navigate') return cached;
+        try {
+          const response = await (cached ? fetchWithTimeout(request) : fetch(request));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(cacheKey, copy));
+          }
+          return response;
+        } catch (error) {
+          // Never put a deadline on an uncached first visit. On later launches,
+          // however, weak mobile data must not leave a fully cached game hanging
+          // indefinitely. Fall back after a short bound and keep the app playable.
+          return cached || (request.mode === 'navigate'
+            ? caches.match('./index.html')
+            : Response.error());
         }
-        return response;
-      })
-      .catch(async () => (await caches.match(cacheKey)) || caches.match('./index.html')),
+      }),
   );
 });

@@ -766,6 +766,14 @@ test('the install manifest and every offline core asset are present', () => {
   for (const icon of manifest.icons) accessSync(resolve(root, icon.src));
 
   const worker = readFileSync(resolve(root, 'sw.js'), 'utf8');
+  assert.match(worker, /const NETWORK_TIMEOUT_MS = 3500;/,
+    'cached launches need a bounded network wait on weak mobile data');
+  assert.match(worker, /cached && request\.mode !== 'navigate'/,
+    'cached modules must not stack network waits across the dependency graph');
+  assert.match(worker, /cached \? fetchWithTimeout\(request\) : fetch\(request\)/,
+    'the first uncached visit must keep its unrestricted network request');
+  assert.match(worker, /request\.mode === 'navigate'[\s\S]*Response\.error\(\)/,
+    'only navigations may fall back to HTML when an asset is absent');
   const coreBlock = worker.match(/const CORE = \[([\s\S]*?)\];/)?.[1] || '';
   const assets = [...coreBlock.matchAll(/'\.\/(.*?)'/g)].map((match) => match[1] || 'index.html');
   assert.ok(assets.length > 20);
