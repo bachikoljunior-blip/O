@@ -153,8 +153,8 @@ test('a corrupt primary save automatically falls back to the valid backup', () =
     pois: [], settlements: [], camps: [],
   };
   const values = new Map([
-    ['aetheria_save_v1', JSON.stringify({ seed: 77, player: { x: 30, y: 40, inv: {} } })],
-    ['aetheria_save_backup_v1', JSON.stringify(backup)],
+    ['aetheria_save_v1_77', JSON.stringify({ seed: 77, player: { x: 30, y: 40, inv: {} } })],
+    ['aetheria_save_backup_v1_77', JSON.stringify(backup)],
   ]);
   const previousStorage = globalThis.localStorage;
   globalThis.localStorage = {
@@ -162,11 +162,69 @@ test('a corrupt primary save automatically falls back to the valid backup', () =
     setItem: (key, value) => values.set(key, value),
   };
   try {
-    const context = { validSave: Game.prototype.validSave, saveRecovered: false };
+    const context = { seed: 77, validSave: Game.prototype.validSave, saveRecovered: false };
     const restored = Game.prototype.readSave.call(context);
     assert.deepEqual(restored, backup);
     assert.equal(context.saveRecovered, true);
-    assert.deepEqual(JSON.parse(values.get('aetheria_save_v1')), backup);
+    assert.deepEqual(JSON.parse(values.get('aetheria_save_v1_77')), backup);
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
+test('shared seed worlds keep independent saves and cannot erase one another', () => {
+  const save = (seed, x) => ({
+    seed,
+    player: { x, y: 20, inv: [], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] },
+    pois: [], settlements: [], camps: [],
+  });
+  const values = new Map([
+    ['aetheria_save_v1_11', JSON.stringify(save(11, 110))],
+    ['aetheria_save_backup_v1_11', JSON.stringify(save(11, 100))],
+    ['aetheria_save_v1_22', JSON.stringify(save(22, 220))],
+  ]);
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  };
+  try {
+    const context = { seed: 11, validSave: Game.prototype.validSave, saveRecovered: false };
+    assert.equal(Game.prototype.readSave.call(context).player.x, 110);
+    context.seed = 22;
+    assert.equal(Game.prototype.readSave.call(context).player.x, 220);
+
+    Game.prototype.clearCurrentSave.call(context);
+    assert.equal(values.has('aetheria_save_v1_22'), false);
+    assert.equal(values.has('aetheria_save_v1_11'), true);
+    assert.equal(values.has('aetheria_save_backup_v1_11'), true);
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
+test('a legacy single-slot save migrates into its seed slot', () => {
+  const legacy = {
+    seed: 33,
+    player: { x: 330, y: 20, inv: [], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] },
+    pois: [], settlements: [], camps: [],
+  };
+  const values = new Map([['aetheria_save_v1', JSON.stringify(legacy)]]);
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  };
+  try {
+    const context = { seed: 33, validSave: Game.prototype.validSave, saveRecovered: false };
+    assert.equal(Game.prototype.readSave.call(context).player.x, 330);
+    assert.deepEqual(JSON.parse(values.get('aetheria_save_v1_33')), legacy);
   } finally {
     if (previousStorage === undefined) delete globalThis.localStorage;
     else globalThis.localStorage = previousStorage;
