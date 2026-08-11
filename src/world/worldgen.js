@@ -30,6 +30,52 @@ export const WATER = new Set([B.DEEP, B.OCEAN, B.SHALLOW, B.RIVER]);
 const NAMES_A = ['アル', 'ヴェル', 'エル', 'ソル', 'ミル', 'カル', 'ノル', 'リン', 'ゼフ', 'グラン', 'テル', 'オル', 'ファル', 'ヘイム', 'イス'];
 const NAMES_B = ['ハイム', 'ガルド', 'ドール', 'ヴィア', 'モント', 'ブルク', 'テア', 'リア', 'ネス', 'ハーレ', 'フェン', 'スト', 'ダール'];
 
+// The road generator used to scan its entire A* frontier for every visited
+// node. That is simple but becomes quadratic on long routes and made first
+// launch noticeably slower on small phones. This stable binary heap preserves
+// insertion order for equal priorities, keeping generation deterministic while
+// reducing frontier operations to O(log n).
+class StableMinHeap {
+  constructor() {
+    this.items = [];
+    this.sequence = 0;
+  }
+  get length() { return this.items.length; }
+  push(value) {
+    value.order = this.sequence++;
+    const a = this.items;
+    a.push(value);
+    let i = a.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (!this.before(a[i], a[p])) break;
+      [a[i], a[p]] = [a[p], a[i]];
+      i = p;
+    }
+  }
+  pop() {
+    const a = this.items;
+    if (!a.length) return null;
+    const first = a[0];
+    const last = a.pop();
+    if (a.length) {
+      a[0] = last;
+      let i = 0;
+      for (;;) {
+        const left = i * 2 + 1;
+        if (left >= a.length) break;
+        const right = left + 1;
+        const child = right < a.length && this.before(a[right], a[left]) ? right : left;
+        if (!this.before(a[child], a[i])) break;
+        [a[i], a[child]] = [a[child], a[i]];
+        i = child;
+      }
+    }
+    return first;
+  }
+  before(a, b) { return a.f < b.f || (a.f === b.f && a.order < b.order); }
+}
+
 export class WorldData {
   constructor(seed) {
     this.seed = seed >>> 0;
@@ -540,16 +586,15 @@ function carveRoad(world, a, b) {
     return 2.4;
   };
   const H = (x, y) => (Math.abs(x - gx) + Math.abs(y - gy)) * 2.4;
-  const open = [{ x: sx, y: sy, g: 0, f: H(sx, sy) }];
+  const open = new StableMinHeap();
+  open.push({ x: sx, y: sy, g: 0, f: H(sx, sy) });
   const gScore = new Map();
   const came = new Map();
   const key = (x, y) => y * gw + x;
   gScore.set(key(sx, sy), 0);
   let found = false, guard = 0;
   while (open.length && guard++ < 200000) {
-    let bi2 = 0;
-    for (let i = 1; i < open.length; i++) if (open[i].f < open[bi2].f) bi2 = i;
-    const cur = open.splice(bi2, 1)[0];
+    const cur = open.pop();
     if (cur.x === gx && cur.y === gy) { found = true; break; }
     for (let oy = -1; oy <= 1; oy++) {
       for (let ox = -1; ox <= 1; ox++) {
