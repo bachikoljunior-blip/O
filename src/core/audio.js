@@ -3,6 +3,8 @@
 import { makeRNG, clamp, lerp } from './util.js';
 
 const NOTE = (n) => 440 * Math.pow(2, (n - 69) / 12);
+const MUSIC_REVERB_SEND = 0.5;
+const SFX_REVERB_SEND = 0.22;
 
 // scale degrees (semitones) for the modes we use
 const MODES = {
@@ -71,14 +73,16 @@ export class Audio {
     this.musicGain.gain.value = this.musicVol;
     this.musicGain.connect(this.master);
     this.musicSend = ctx.createGain();
-    this.musicSend.gain.value = 0.5;
+    // Reverb sends bypass the dry category gains, so scale them by the same
+    // user setting. Otherwise a 0% slider still leaves an audible wet signal.
+    this.musicSend.gain.value = MUSIC_REVERB_SEND * this.musicVol;
     this.musicSend.connect(this.reverb);
 
     this.sfxGain = ctx.createGain();
     this.sfxGain.gain.value = this.sfxVol;
     this.sfxGain.connect(this.master);
     this.sfxSend = ctx.createGain();
-    this.sfxSend.gain.value = 0.22;
+    this.sfxSend.gain.value = SFX_REVERB_SEND * this.sfxVol;
     this.sfxSend.connect(this.reverb);
 
     // noise buffer for percussive sfx
@@ -96,12 +100,14 @@ export class Audio {
     if (this.master) this.master.gain.setTargetAtTime(m ? 0 : 0.9, this.ctx.currentTime, 0.05);
   }
   setMusicVol(v) {
-    this.musicVol = v;
-    if (this.musicGain) this.musicGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.1);
+    this.musicVol = clamp(Number(v) || 0, 0, 1);
+    if (this.musicGain) this.musicGain.gain.setTargetAtTime(this.musicVol, this.ctx.currentTime, 0.1);
+    if (this.musicSend) this.musicSend.gain.setTargetAtTime(MUSIC_REVERB_SEND * this.musicVol, this.ctx.currentTime, 0.1);
   }
   setSfxVol(v) {
-    this.sfxVol = v;
-    if (this.sfxGain) this.sfxGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.05);
+    this.sfxVol = clamp(Number(v) || 0, 0, 1);
+    if (this.sfxGain) this.sfxGain.gain.setTargetAtTime(this.sfxVol, this.ctx.currentTime, 0.05);
+    if (this.sfxSend) this.sfxSend.gain.setTargetAtTime(SFX_REVERB_SEND * this.sfxVol, this.ctx.currentTime, 0.05);
   }
 
   setMood(m) {
