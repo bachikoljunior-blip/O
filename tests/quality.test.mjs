@@ -91,6 +91,41 @@ test('zero music and effects volume also silence their reverb paths', () => {
   assert.equal(audio.sfxSend.gain.values.at(-1), 0.11);
 });
 
+test('silent audio stops scheduling work and resumes from the current clock', () => {
+  const audio = new Audio();
+  audio.ready = true;
+  audio.ctx = { currentTime: 20, state: 'running' };
+  const param = () => ({ setTargetAtTime() {} });
+  audio.musicGain = { gain: param() };
+  audio.musicSend = { gain: param() };
+  audio.sfxGain = { gain: param() };
+  audio.sfxSend = { gain: param() };
+  let scheduled = 0;
+  audio._schedule = () => { scheduled++; };
+  audio.nextTime = 0;
+  audio.musicVol = 0;
+
+  audio.update();
+  assert.equal(scheduled, 0);
+  assert.equal(audio.nextTime, 20.1);
+
+  audio.setMusicVol(0.5);
+  assert.equal(audio.nextTime, 20.05, 'unmuting music should discard stale beats');
+  audio.update();
+  assert.equal(scheduled, 1, 'resume should schedule only the next beat, not a backlog');
+
+  audio.muted = true;
+  audio.nextTime = 0;
+  audio.setMuted(false);
+  assert.equal(audio.nextTime, 20.05, 'master unmute should resume at the current clock');
+
+  let tones = 0;
+  audio._tone = () => { tones++; };
+  audio.sfxVol = 0;
+  audio.sfx('ui');
+  assert.equal(tones, 0, 'zero-volume effects should not construct inaudible nodes');
+});
+
 test('several seeds always create a playable start and the critical POIs', () => {
   for (const seed of [1, 20260811, 0xffffffff]) {
     const world = buildWorld(seed);

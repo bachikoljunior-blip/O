@@ -1,4 +1,4 @@
-const CACHE = 'aetheria-v11-audio-volume-20260811';
+const CACHE = 'aetheria-v12-silent-audio-20260811';
 const CORE = [
   './',
   './index.html',
