@@ -77,7 +77,9 @@ export class Game {
     this.activeBoss = null;
     this.settings = {
       music: 0.5, sfx: 0.75, vibrate: true, hq: true, aimAssist: true, showFps: false,
-      leftHanded: false, reduceMotion: false, difficulty: 'adventure',
+      leftHanded: false,
+      reduceMotion: typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches,
+      difficulty: 'adventure',
       controlScale: 1, controlOpacity: 0.9,
     };
     this.safeArea = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -95,6 +97,9 @@ export class Game {
     this.achievementCheckT = 0;
     this.victoryPending = 0;
     this.saveRecovered = false;
+    this.fogSnapshot = null;
+    this.fogSnapshotAt = 0;
+    this.fogDirty = true;
     this.loadSettings();
   }
 
@@ -150,6 +155,7 @@ export class Game {
     this.fogCtx.beginPath();
     this.fogCtx.arc(tx, ty, r, 0, TAU);
     this.fogCtx.fill();
+    this.fogDirty = true;
   }
 
   startingKit() {
@@ -226,6 +232,9 @@ export class Game {
     for (const poi of this.world.pois) { poi.discovered = false; poi.activated = false; poi.cleared = false; poi.looted = false; }
     for (const st of this.world.settlements) { st.discovered = false; st.board = null; st.boardDay = -1; }
     this.buildMapCanvas();
+    this.fogSnapshot = null;
+    this.fogSnapshotAt = 0;
+    this.fogDirty = true;
     this.spawnSettlementNPCs();
     this.startingKit();
     this.renderer.cam.x = this.player.x;
@@ -1363,6 +1372,9 @@ export class Game {
     this.renderer.lightScale = this.settings.hq ? 0.5 : 0.34;
     this.renderer.resize(this.renderer.w, this.renderer.h, this.renderer.dpr);
     this.saveSettings();
+    if (typeof dispatchEvent !== 'undefined' && typeof Event !== 'undefined') {
+      dispatchEvent(new Event('aetheria-qualitychange'));
+    }
   }
 
   // ————————————————————————————————————————————————— persistence
@@ -1458,8 +1470,21 @@ export class Game {
     const p = this.player;
     // if we're underground, remember the cave mouth rather than the dungeon coords
     const pos = this.interior && this.outsidePos ? this.outsidePos : { x: p.x, y: p.y };
-    let fog = null;
-    try { fog = this.fogCanvas ? this.fogCanvas.toDataURL('image/webp', 0.5) : null; } catch (e) {}
+    // Canvas encoding is synchronous and used to cause a visible hitch on
+    // iPhone-class devices every 20-second autosave. Keep saving gameplay at
+    // that cadence, but refresh the exploration-mask image at most once per
+    // minute (manual saves always capture it immediately).
+    const now = Date.now();
+    const refreshFog = this.fogCanvas && this.fogDirty &&
+      (!this.fogSnapshot || !silent || now - this.fogSnapshotAt >= 60_000);
+    if (refreshFog) {
+      try {
+        this.fogSnapshot = this.fogCanvas.toDataURL('image/webp', 0.5);
+        this.fogSnapshotAt = now;
+        this.fogDirty = false;
+      } catch (e) {}
+    }
+    const fog = this.fogSnapshot;
     const data = {
       v: 4, seed: this.seed, time: this.time, day: this.day,
       player: {
@@ -1610,6 +1635,9 @@ export class Game {
       }
       : null;
     if (data.fog && this.fogCanvas) {
+      this.fogSnapshot = data.fog;
+      this.fogSnapshotAt = Date.now();
+      this.fogDirty = false;
       const img = new Image();
       img.onload = () => {
         this.fogCtx.globalCompositeOperation = 'source-over';
@@ -1618,6 +1646,10 @@ export class Game {
         this.fogCtx.globalCompositeOperation = 'destination-out';
       };
       img.src = data.fog;
+    } else {
+      this.fogSnapshot = null;
+      this.fogSnapshotAt = 0;
+      this.fogDirty = true;
     }
     this.renderer.cam.x = p.x;
     this.renderer.cam.y = p.y;

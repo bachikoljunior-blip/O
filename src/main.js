@@ -70,6 +70,7 @@ function adaptQuality(dt) {
 }
 addEventListener('resize', resize);
 addEventListener('orientationchange', () => setTimeout(resize, 250));
+addEventListener('aetheria-qualitychange', resize);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
 resize();
 

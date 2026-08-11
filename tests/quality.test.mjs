@@ -174,6 +174,47 @@ test('a corrupt primary save automatically falls back to the valid backup', () =
   }
 });
 
+test('autosaves throttle fog image encoding without delaying gameplay saves', () => {
+  const values = new Map();
+  let encodes = 0;
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+  };
+  const context = {
+    state: 'play', seed: 9, interior: null,
+    player: {
+      x: 10, y: 20, level: 1, xp: 0, gold: 0, hp: 10, mp: 5, sta: 5,
+      inv: [], equip: {}, spellSlots: ['fire'], knownSpells: ['fire'], kills: 0, playtime: 0,
+      flow: 0, flowT: 0, hitChain: 0, hitChainT: 0, highestChain: 0, perfectDodges: 0, parries: 0,
+    },
+    world: { pois: [], settlements: [] }, quests: { save: () => ({ active: [], done: [] }) },
+    campState: new Map(), onboarding: null, achievements: new Set(), waypoint: null, lastShrine: null,
+    fogCanvas: { toDataURL: () => { encodes++; return 'data:image/webp;base64,fog'; } },
+    fogSnapshot: null, fogSnapshotAt: 0, fogDirty: true,
+    validSave: Game.prototype.validSave,
+    toast() {},
+  };
+  try {
+    Game.prototype.save.call(context, true);
+    assert.equal(encodes, 1);
+    assert.ok(values.has('aetheria_save_v1_9'));
+
+    context.player.x = 30;
+    context.fogDirty = true;
+    Game.prototype.save.call(context, true);
+    assert.equal(encodes, 1, 'a second autosave should reuse the recent fog snapshot');
+    assert.equal(JSON.parse(values.get('aetheria_save_v1_9')).player.x, 30);
+
+    Game.prototype.save.call(context, false);
+    assert.equal(encodes, 2, 'a manual save should capture the newest exploration mask');
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
 test('shared seed worlds keep independent saves and cannot erase one another', () => {
   const save = (seed, x) => ({
     seed,
