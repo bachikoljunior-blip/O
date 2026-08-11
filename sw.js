@@ -1,4 +1,4 @@
-const CACHE = 'aetheria-v16-bounded-network-20260811';
+const CACHE = 'aetheria-v17-safe-save-exit-20260811';
 const NETWORK_TIMEOUT_MS = 3500;
 const CORE = [
   './',

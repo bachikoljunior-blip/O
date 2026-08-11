@@ -541,6 +541,34 @@ test('live progress remains exportable before device storage has ever succeeded'
   assert.equal(Game.prototype.canExportSave.call({ state: 'title', hasSave: () => true }), true);
 });
 
+test('save and quit keeps the live session open when device storage rejects the write', () => {
+  const menuCalls = [];
+  const failed = {
+    save: () => false,
+    toast: (text) => menuCalls.push(['toast', text]),
+    menus: {
+      closeAll: () => menuCalls.push(['close']),
+      open: (name) => menuCalls.push(['open', name]),
+    },
+    saveTransferStatus: '',
+  };
+  assert.equal(Game.prototype.saveAndReturnToTitle.call(failed), false);
+  assert.equal(failed.saveTransferStatus.includes('ファイルへ書き出して'), true);
+  assert.equal(menuCalls.some(([action]) => action === 'close'), false,
+    'a failed save must not leave the live game');
+
+  const succeeded = {
+    save: () => true,
+    toast() {},
+    menus: {
+      closeAll: () => menuCalls.push(['close']),
+      open: (name) => menuCalls.push(['open', name]),
+    },
+  };
+  assert.equal(Game.prototype.saveAndReturnToTitle.call(succeeded), true);
+  assert.deepEqual(menuCalls.slice(-2), [['close'], ['open', 'title']]);
+});
+
 test('portable save import rejects foreign and structurally corrupt files without overwriting progress', () => {
   const original = {
     seed: 55,
