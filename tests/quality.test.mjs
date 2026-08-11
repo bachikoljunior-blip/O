@@ -534,6 +534,13 @@ test('portable export captures live progress even when device storage is full', 
   }
 });
 
+test('live progress remains exportable before device storage has ever succeeded', () => {
+  assert.equal(Game.prototype.canExportSave.call({ state: 'play', hasSave: () => false }), true,
+    'a live game must expose its emergency export even without a stored save');
+  assert.equal(Game.prototype.canExportSave.call({ state: 'title', hasSave: () => false }), false);
+  assert.equal(Game.prototype.canExportSave.call({ state: 'title', hasSave: () => true }), true);
+});
+
 test('portable save import rejects foreign and structurally corrupt files without overwriting progress', () => {
   const original = {
     seed: 55,

@@ -1572,6 +1572,13 @@ export class Game {
     return !!this.readSave();
   }
 
+  canExportSave() {
+    // A live game can always be snapshotted directly, even when localStorage
+    // has never accepted a save. Keep the title-screen action gated on an
+    // existing durable save because no live player state exists there.
+    return this.state === 'play' || this.hasSave();
+  }
+
   clearCurrentSave() {
     const seed = this.seed >>> 0;
     try {
