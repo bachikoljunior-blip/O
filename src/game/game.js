@@ -1625,24 +1625,46 @@ export class Game {
       waypoint: this.waypoint,
       fog,
     };
+    const primaryKey = slotKey(SAVE_KEY, this.seed);
+    const backupKey = slotKey(SAVE_BACKUP_KEY, this.seed);
+    const raw = JSON.stringify(data);
     try {
-      const primaryKey = slotKey(SAVE_KEY, this.seed);
-      const backupKey = slotKey(SAVE_BACKUP_KEY, this.seed);
       const previous = localStorage.getItem(primaryKey);
       if (previous) {
         try {
           const parsed = JSON.parse(previous);
           if (this.validSave(parsed) && (parsed.seed >>> 0) === (this.seed >>> 0)) {
-            localStorage.setItem(backupKey, previous);
+            // A full storage area can reject a growing backup even though an
+            // in-place primary overwrite still fits. Backup rotation is best
+            // effort: never let it prevent the newest progress being saved.
+            try { localStorage.setItem(backupKey, previous); }
+            catch (backupError) { console.warn('save backup rotation failed', backupError); }
           }
         } catch (e) {}
       }
-      localStorage.setItem(primaryKey, JSON.stringify(data));
-      localStorage.setItem(LAST_SEED_KEY, String(this.seed >>> 0));
+      localStorage.setItem(primaryKey, raw);
+      const readBack = JSON.parse(localStorage.getItem(primaryKey) || 'null');
+      if (!this.validSave(readBack) || (readBack.seed >>> 0) !== (this.seed >>> 0)) {
+        throw new Error('save read-back failed');
+      }
+      // The world selector is recoverable from the primary slot, so failure to
+      // update this small convenience key must not turn a verified save into a
+      // reported failure.
+      try { localStorage.setItem(LAST_SEED_KEY, String(this.seed >>> 0)); }
+      catch (seedError) { console.warn('last seed update failed', seedError); }
+      this.saveFailureNotified = false;
       if (!silent) this.toast('セーブしました', '#8fd0ff');
+      return true;
     } catch (e) {
       console.warn('save failed', e);
-      if (!silent) this.toast('セーブ容量が不足しています', '#e0524a');
+      // Autosaves used to fail only in the console, leaving mobile players to
+      // discover the lost progress after a restart. Warn once without spamming
+      // the 20-second autosave loop; manual saves always report the failure.
+      if (!silent || !this.saveFailureNotified) {
+        this.toast('セーブできません。端末の空き容量を確認してください', '#e0524a');
+      }
+      this.saveFailureNotified = true;
+      return false;
     }
   }
 

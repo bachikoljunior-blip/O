@@ -234,6 +234,89 @@ test('autosaves throttle fog image encoding without delaying gameplay saves', ()
   }
 });
 
+test('a full backup slot cannot block an otherwise valid autosave', () => {
+  const oldSave = {
+    seed: 19,
+    player: { x: 10, y: 20, inv: [], knownSpells: ['fire'], spellSlots: ['fire'] },
+    quests: { active: [], done: [] }, pois: [], settlements: [], camps: [],
+  };
+  const values = new Map([['aetheria_save_v1_19', JSON.stringify(oldSave)]]);
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => {
+      if (key === 'aetheria_save_backup_v1_19') throw new DOMException('full', 'QuotaExceededError');
+      values.set(key, value);
+    },
+  };
+  const warnings = [];
+  const previousWarn = console.warn;
+  console.warn = (...args) => warnings.push(args);
+  const context = {
+    state: 'play', seed: 19, interior: null,
+    player: {
+      x: 90, y: 20, level: 1, xp: 0, gold: 0, hp: 10, mp: 5, sta: 5,
+      inv: [], equip: {}, spellSlots: ['fire'], knownSpells: ['fire'], kills: 0, playtime: 0,
+      flow: 0, flowT: 0, hitChain: 0, hitChainT: 0, highestChain: 0, perfectDodges: 0, parries: 0,
+    },
+    world: { pois: [], settlements: [] }, quests: { save: () => ({ active: [], done: [] }) },
+    campState: new Map(), onboarding: null, achievements: new Set(), waypoint: null, lastShrine: null,
+    fogCanvas: null, fogSnapshot: null, fogSnapshotAt: 0, fogDirty: false,
+    validSave: Game.prototype.validSave, toast() {},
+  };
+  try {
+    assert.equal(Game.prototype.save.call(context, true), true);
+    assert.equal(JSON.parse(values.get('aetheria_save_v1_19')).player.x, 90);
+    assert.equal(warnings.length, 1, 'the degraded backup is recorded for diagnostics');
+  } finally {
+    console.warn = previousWarn;
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
+test('silent autosave failures warn once and clear the warning after recovery', () => {
+  const values = new Map();
+  let primaryBlocked = true;
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => {
+      if (primaryBlocked && key === 'aetheria_save_v1_20') throw new DOMException('full', 'QuotaExceededError');
+      values.set(key, value);
+    },
+  };
+  const notices = [];
+  const previousWarn = console.warn;
+  console.warn = () => {};
+  const context = {
+    state: 'play', seed: 20, interior: null,
+    player: {
+      x: 20, y: 20, level: 1, xp: 0, gold: 0, hp: 10, mp: 5, sta: 5,
+      inv: [], equip: {}, spellSlots: ['fire'], knownSpells: ['fire'], kills: 0, playtime: 0,
+      flow: 0, flowT: 0, hitChain: 0, hitChainT: 0, highestChain: 0, perfectDodges: 0, parries: 0,
+    },
+    world: { pois: [], settlements: [] }, quests: { save: () => ({ active: [], done: [] }) },
+    campState: new Map(), onboarding: null, achievements: new Set(), waypoint: null, lastShrine: null,
+    fogCanvas: null, fogSnapshot: null, fogSnapshotAt: 0, fogDirty: false,
+    validSave: Game.prototype.validSave,
+    toast: (message) => notices.push(message),
+  };
+  try {
+    assert.equal(Game.prototype.save.call(context, true), false);
+    assert.equal(Game.prototype.save.call(context, true), false);
+    assert.equal(notices.length, 1, 'repeating autosaves should not spam the player');
+    primaryBlocked = false;
+    assert.equal(Game.prototype.save.call(context, true), true);
+    assert.equal(context.saveFailureNotified, false);
+    assert.equal(JSON.parse(values.get('aetheria_save_v1_20')).player.x, 20);
+  } finally {
+    console.warn = previousWarn;
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
+
 test('shared seed worlds keep independent saves and cannot erase one another', () => {
   const save = (seed, x) => ({
     seed,
