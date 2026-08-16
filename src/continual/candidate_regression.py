@@ -10,6 +10,12 @@ from typing import Any, Mapping, Sequence
 
 from agi.regression import RegressionPolicy, compare_snapshots
 
+from .trial_ledger import (
+    DEFAULT_MAX_TRIAL_ATTEMPTS,
+    complete_trial_candidate,
+    reserve_trial_candidate,
+)
+
 _SAFE_ID = re.compile(r"^[A-Za-z0-9._-]+$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _MUTABLE_CANDIDATE_FIELDS = {
@@ -209,13 +215,16 @@ def record_candidate_regression(
     candidate_path: Path,
     target_task_ids: Sequence[str],
     policy: RegressionPolicy | None = None,
+    max_trial_attempts: int = DEFAULT_MAX_TRIAL_ATTEMPTS,
 ) -> dict[str, Any]:
-    """Recompute protected-baseline evidence and persist a scoped Candidate decision.
+    """Recompute protected-baseline evidence and persist a bounded scoped Candidate decision.
 
     Promotion is performed from explicit measurement files using the deterministic AGI regression
     gate. Approval is bound to the immutable Candidate semantic body and its executable artifacts.
-    Editing a prompt, learned program, scope, dependency, or other behavior requires a new trial.
-    Failed decisions remain in history even if a later trial succeeds.
+    Every distinct exact-scope regression input consumes one persistent trial reservation; exact
+    replay reuses the original reservation across process restarts. Editing behavior or supplying
+    different measurements therefore requires another bounded trial. Failed decisions remain in
+    history even if a later trial succeeds.
     """
 
     if not isinstance(candidate_id, str) or not _SAFE_ID.fullmatch(candidate_id):
@@ -239,6 +248,24 @@ def record_candidate_regression(
     baseline_measurements = _measurement_array(baseline_path)
     candidate_measurements = _measurement_array(candidate_path)
     selected_policy = policy or RegressionPolicy()
+    normalized_targets = sorted(set(targets))
+    policy_value = asdict(selected_policy)
+    trial_input = {
+        "kind": "deterministic_candidate_regression",
+        "target_task_ids": normalized_targets,
+        "baseline_measurements": baseline_measurements,
+        "candidate_measurements": candidate_measurements,
+        "policy": policy_value,
+    }
+    reservation = reserve_trial_candidate(
+        root,
+        candidate_id=candidate_id,
+        scope=scope,
+        candidate_integrity_sha256=integrity_digest,
+        trial_input=trial_input,
+        max_attempts=max_trial_attempts,
+    )
+
     decision = compare_snapshots(
         baseline_measurements,
         candidate_measurements,
@@ -249,6 +276,11 @@ def record_candidate_regression(
     )
 
     digest = str(decision["regression_evidence_sha256"])
+    trial_binding = {
+        "trial_key": reservation.trial_key,
+        "attempt": reservation.attempt,
+        "max_attempts": reservation.max_attempts,
+    }
     record = {
         "schema_version": 3,
         "candidate_id": candidate_id,
@@ -257,10 +289,11 @@ def record_candidate_regression(
         "candidate_spec": candidate_spec_payload(candidate_state),
         "candidate_artifacts": candidate_artifact_manifest(root, candidate_state),
         "scope": scope,
-        "target_task_ids": sorted(set(targets)),
+        "target_task_ids": normalized_targets,
         "baseline_measurements": baseline_measurements,
         "candidate_measurements": candidate_measurements,
-        "policy": asdict(selected_policy),
+        "policy": policy_value,
+        "trial": trial_binding,
         "decision": decision,
         "recorded_at": datetime.now(UTC).isoformat(),
     }
@@ -279,6 +312,7 @@ def record_candidate_regression(
             or existing.get("decision") != decision
             or existing.get("candidate_spec_sha256") != spec_digest
             or existing.get("candidate_integrity_sha256") != integrity_digest
+            or existing.get("trial") != trial_binding
         ):
             raise ValueError("existing regression evidence record conflicts with recomputed decision")
     else:
@@ -294,6 +328,7 @@ def record_candidate_regression(
         "candidate_integrity_sha256": integrity_digest,
         "regression_evidence_sha256": digest,
         "decision_ref": decision_rel.as_posix(),
+        **trial_binding,
     }
     if decision["adopt_candidate"]:
         scope_states[scope] = "VERIFIED_FOR_SCOPE"
@@ -334,6 +369,20 @@ def record_candidate_regression(
     candidate_state["verified_scope_states"] = verified_scope_states
     candidate_state["regression_decision_refs"] = history
     _atomic_json(candidate_json, candidate_state)
+
+    completion = complete_trial_candidate(
+        root,
+        candidate_id=candidate_id,
+        scope=scope,
+        trial_key=reservation.trial_key,
+        outcome={
+            "kind": "deterministic_candidate_regression",
+            "decision_ref": decision_rel.as_posix(),
+            "regression_evidence_sha256": digest,
+            "adopt_candidate": bool(decision["adopt_candidate"]),
+            "candidate_status": candidate_state.get("status"),
+        },
+    )
     return {
         "candidate_id": candidate_id,
         "candidate_spec_sha256": spec_digest,
@@ -343,4 +392,10 @@ def record_candidate_regression(
         "decision": decision,
         "candidate_status": candidate_state.get("status"),
         "verified_scope_states": verified_scope_states,
+        "trial": {
+            **trial_binding,
+            "replayed": reservation.replayed,
+            "state": completion.get("state"),
+            "outcome_sha256": completion.get("outcome_sha256"),
+        },
     }
