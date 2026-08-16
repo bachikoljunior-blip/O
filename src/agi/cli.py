@@ -2,12 +2,21 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 from .benchmark import ReferenceAgent, core_suite, run_suite, validate_suite
 from .campaign import run_campaign
 from .evaluation import EvaluationPolicy, evaluate_evidence
+from .heldout import (
+    EvaluationIdentity,
+    ReferenceHeldOutAgent,
+    generate_heldout_suite,
+    run_heldout_suite,
+    seed_commitment,
+    validate_heldout_suite,
+)
 from .openai_agent import OpenAIBenchmarkAgent, OpenAIWorkspaceAgent
 from .workspace import (
     ReferenceWorkspaceAgent,
@@ -35,6 +44,14 @@ def _add_model_argument(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--model", help="OpenAI API model; defaults to OPENAI_MODEL or gpt-5.")
 
 
+def _heldout_identities(executor_name: str) -> tuple[EvaluationIdentity, EvaluationIdentity, EvaluationIdentity]:
+    return (
+        EvaluationIdentity("generator:sealed-v1", "generator"),
+        EvaluationIdentity(f"executor:{executor_name}", "executor"),
+        EvaluationIdentity("scorer:deterministic-v1", "scorer"),
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="agi-benchmark")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -44,6 +61,11 @@ def build_parser() -> argparse.ArgumentParser:
         "validate-workspace-suite",
         help="Validate the multi-step tool-mediated workspace suite.",
     )
+    heldout_validate = sub.add_parser(
+        "validate-heldout-suite",
+        help="Validate runtime-generated sealed task coverage with a public CI seed.",
+    )
+    heldout_validate.add_argument("--nonce", default="heldout-v1")
 
     reference = sub.add_parser("run-reference", help="Run the one-turn harness reference agent.")
     reference.add_argument("--output", type=Path)
@@ -53,6 +75,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run the task-specific workspace harness reference agent.",
     )
     workspace_reference.add_argument("--output", type=Path)
+
+    heldout_reference = sub.add_parser(
+        "run-heldout-reference",
+        help="Run the algorithmic reference over generated tasks without exposing sealed answers.",
+    )
+    heldout_reference.add_argument("--output", type=Path)
+    heldout_reference.add_argument("--nonce", default="heldout-v1")
 
     live = sub.add_parser("run-openai", help="Run the one-turn development suite against OpenAI.")
     _add_model_argument(live)
@@ -64,6 +93,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_model_argument(workspace_live)
     workspace_live.add_argument("--output", type=Path, required=True)
+
+    heldout_live = sub.add_parser(
+        "run-heldout-openai",
+        help="Run a secret-seeded held-out suite against OpenAI. Seed comes only from AGI_HELDOUT_SEED.",
+    )
+    _add_model_argument(heldout_live)
+    heldout_live.add_argument("--output", type=Path, required=True)
+    heldout_live.add_argument("--nonce", default="heldout-v1")
 
     campaign_reference = sub.add_parser(
         "run-campaign-reference",
@@ -101,6 +138,15 @@ def main() -> None:
         _dump(result)
         if not result["valid"]:
             raise SystemExit(1)
+    elif args.cmd == "validate-heldout-suite":
+        seed = "public-ci-validation-seed"
+        tasks = generate_heldout_suite(seed, nonce=args.nonce)
+        result = validate_heldout_suite(tasks)
+        result["seed_commitment"] = seed_commitment(seed, args.nonce)
+        result["warning"] = "The CI seed is public and validates the generator only; it is not held-out AGI evidence."
+        _dump(result)
+        if not result["valid"]:
+            raise SystemExit(1)
     elif args.cmd == "run-reference":
         report = run_suite(ReferenceAgent())
         payload = report.to_dict()
@@ -119,6 +165,23 @@ def main() -> None:
         _dump(payload, args.output)
         if not report.passed:
             raise SystemExit(1)
+    elif args.cmd == "run-heldout-reference":
+        seed = "public-heldout-reference-seed"
+        agent = ReferenceHeldOutAgent()
+        generator, executor, scorer = _heldout_identities(agent.name)
+        report = run_heldout_suite(
+            agent,
+            generate_heldout_suite(seed, nonce=args.nonce, generator=generator),
+            seed_commit=seed_commitment(seed, args.nonce),
+            generator=generator,
+            executor=executor,
+            scorer=scorer,
+        )
+        payload = report.to_dict()
+        payload["warning"] = "Public-seed reference validates sealing and scoring only; it is not AGI evidence."
+        _dump(payload, args.output)
+        if not report.passed:
+            raise SystemExit(1)
     elif args.cmd == "run-openai":
         report = run_suite(OpenAIBenchmarkAgent(model=args.model))
         payload = report.to_dict()
@@ -132,6 +195,28 @@ def main() -> None:
         payload = report.to_dict()
         payload["evidence_tier"] = "development"
         payload["warning"] = "A passing workspace development suite does not establish AGI."
+        _dump(payload, args.output)
+        if not report.passed:
+            raise SystemExit(1)
+    elif args.cmd == "run-heldout-openai":
+        seed = os.environ.get("AGI_HELDOUT_SEED")
+        if not seed:
+            raise SystemExit("AGI_HELDOUT_SEED is required and must come from a secret evaluation source")
+        agent = OpenAIBenchmarkAgent(model=args.model)
+        generator, executor, scorer = _heldout_identities(agent.name)
+        report = run_heldout_suite(
+            agent,
+            generate_heldout_suite(seed, nonce=args.nonce, generator=generator),
+            seed_commit=seed_commitment(seed, args.nonce),
+            generator=generator,
+            executor=executor,
+            scorer=scorer,
+        )
+        payload = report.to_dict()
+        payload["evidence_tier"] = "development-heldout"
+        payload["warning"] = (
+            "The seed and expected values are not persisted, but one held-out run is still insufficient for an AGI claim."
+        )
         _dump(payload, args.output)
         if not report.passed:
             raise SystemExit(1)
