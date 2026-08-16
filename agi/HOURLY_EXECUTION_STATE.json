@@ -11,12 +11,12 @@
   "model": "GPT-5.6 Pro",
   "model_role": "primary_reasoning_and_implementation_agent",
   "started_at": "2026-08-16T19:16:35+09:00",
-  "last_progress_at": "2026-08-16T19:41:58+09:00",
-  "finished_at": "2026-08-16T19:41:58+09:00",
+  "last_progress_at": "2026-08-16T19:50:20+09:00",
+  "finished_at": "2026-08-16T19:50:20+09:00",
   "active_run_id": null,
   "current_work_unit": null,
   "last_result": {
-    "status": "completed",
+    "status": "checkpointed_unmerged_work",
     "work_units": [
       {
         "pull_request": 55,
@@ -37,10 +37,28 @@
           "pull_request_run": 31942229814,
           "conclusion": "success"
         }
+      },
+      {
+        "pull_request": 57,
+        "branch": "agi/trial-candidate-ledger-20260816-1948",
+        "head_sha": "cd67328e600d3e13ebc480da160da2e3523b4324",
+        "summary": "Implemented an idempotent bounded per-scope Candidate trial ledger with exact replay, bounded exhaustion, idempotent completion, and conflict detection plus focused tests.",
+        "validation": {
+          "conclusion": "pending",
+          "observed_at": "2026-08-16T19:50:05+09:00",
+          "detail": "No workflow run was yet visible for the exact PR head; the change was intentionally left unmerged."
+        }
       }
     ],
-    "next_action": "Implement an idempotent bounded TRIAL_CANDIDATE ledger with replay and per-scope exhaustion tests.",
-    "claim_boundary": "Both work units are internal development capability/integrity progress, not independent production AGI evidence."
+    "unfinished_work": "PR 57 is open and unmerged pending exact-head CI. The ledger is not yet wired into record_candidate_regression, so a successful standalone ledger test is necessary but not sufficient for the persisted TRIAL_CANDIDATE milestone.",
+    "evidence": [
+      "main before this checkpoint was bb2f53cd48779dc9fd15fce6477b4ed2efb8202a",
+      "PR 57 head is cd67328e600d3e13ebc480da160da2e3523b4324",
+      "PR 57 changes only src/continual/trial_ledger.py and tests/test_trial_ledger.py",
+      "PR 57 was not merged because exact-head CI had not appeared by the soft-stop boundary"
+    ],
+    "next_action": "At the next run, first inspect exact-head CI for PR 57. If any check fails, fix it on the same branch and revalidate. If all checks pass, wire reserve_trial_candidate and complete_trial_candidate into record_candidate_regression so every distinct exact-scope Candidate regression attempt consumes bounded budget while exact replay does not; add integration tests proving replay and exhaustion through record_candidate_regression; then run full CI and merge only on success.",
+    "claim_boundary": "PR 57 is unvalidated/unmerged continual-learning integrity work. No AGI claim is supported; verified AGI remains unproven."
   },
   "previous_session": null,
   "rule": "At most one hourly standalone session may modify the repository. The fresh session's highest-performance ChatGPT model performs the reasoning and implementation; repository state supplies durable memory and the unfinished objective. Finish or safely checkpoint before the next hourly boundary."
