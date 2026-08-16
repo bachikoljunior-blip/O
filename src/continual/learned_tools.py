@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -206,7 +206,11 @@ def learned_tool_candidate_payload(
         "contradictory_evidence": [],
         "regression_decision_refs": [],
         "learned_tool": {
-            **asdict(spec),
-            "candidate_id": None,
+            "tool_id": spec.tool_id,
+            "scope": spec.scope,
+            "domain": spec.domain,
+            "expanded_primitives": list(spec.expanded_primitives),
+            "support_sha256": spec.support_sha256,
+            "description": spec.description,
         },
     }
