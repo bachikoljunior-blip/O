@@ -19,11 +19,11 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser(
         "validate-protocol",
-        help="Validate the deterministic repeated long-horizon protocol definition.",
+        help="Validate the deterministic semantically varied long-horizon protocol definition.",
     )
     reference = sub.add_parser(
         "run-reference",
-        help="Run the persisted-checkpoint reference protocol. Reference output is not AGI evidence.",
+        help="Run the varied persisted-checkpoint reference protocol. Reference output is not AGI evidence.",
     )
     reference.add_argument("--output-dir", type=Path, required=True)
     reference.add_argument("--instances", type=int, default=3)
@@ -61,9 +61,11 @@ def main() -> None:
             {
                 "passed": report.passed,
                 "instance_count": report.instance_count,
+                "varied_task_count": report.varied_task_count,
                 "verified_checkpoints": report.verified_checkpoints,
                 "retention_passes": report.retention_passes,
                 "protected_regression_passes": report.protected_regression_passes,
+                "task_commitments": [item.task_commitment for item in report.instances],
                 "protocol_digest": report.protocol_digest,
                 "report": report_path.as_posix(),
                 "warning": "The task-specific reference validates the protocol only and is not AGI evidence.",
