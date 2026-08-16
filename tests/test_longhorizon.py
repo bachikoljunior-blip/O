@@ -118,3 +118,23 @@ def test_longhorizon_multi_run_campaign(tmp_path):
     assert campaign["passed_count"] == 5
     assert campaign["passed_fraction"] == 1.0
     assert campaign["total_injected_failures"] == 5
+
+
+def test_longhorizon_campaign_persists_summary(tmp_path):
+    """Ensure aggregated campaign summaries can be persisted atomically for audit."""
+    from agi.longhorizon import run_long_horizon_campaign, write_campaign_summary
+
+    def factory():
+        return ReferenceLongHorizonAgent()
+
+    campaign = run_long_horizon_campaign(factory, runs=3, checkpoint_dir=tmp_path)
+    outdir = tmp_path / "campaign-artifacts"
+    write_campaign_summary(campaign, outdir, campaign_id="test-longhorizon")
+    target = outdir / "test-longhorizon.json"
+    assert target.exists()
+    import json
+
+    data = json.loads(target.read_text(encoding="utf-8"))
+    assert data["total_runs"] == 3
+    assert "details" in data
+    assert data["passed_fraction"] == 1.0

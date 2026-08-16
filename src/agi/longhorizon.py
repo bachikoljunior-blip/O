@@ -318,6 +318,18 @@ def write_report(report: LongHorizonResult, path: Path) -> None:
     path.write_text(json.dumps(report.to_dict(), ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def write_campaign_summary(summary: dict, output_dir: Path, campaign_id: str = "longhorizon-campaign") -> None:
+    """Persist an aggregated long-horizon campaign summary atomically for audit.
+
+    The function writes a single JSON file named <campaign_id>.json into output_dir using
+    the module's atomic writer to avoid partial files that could confuse verifiers.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    target = output_dir / f"{campaign_id}.json"
+    # _atomic_write_json is defined earlier in this module and performs an atomic replace.
+    _atomic_write_json(target, summary)
+
+
 def run_long_horizon_campaign(
     agent_factory: Callable[[], LongHorizonAgent], *, runs: int = 10, checkpoint_dir: Path | None = None
 ) -> dict[str, Any]:
