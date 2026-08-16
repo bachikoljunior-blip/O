@@ -9,7 +9,7 @@ from typing import Any, Mapping
 from agi.compositional import Primitive, default_primitives
 from agi.typed_composition import TypedPrimitive, default_typed_primitives
 
-from .candidate_regression import candidate_spec_sha256
+from .candidate_regression import CandidateIntegrityError, candidate_verified_for_scope
 
 _SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -118,12 +118,12 @@ class LearnedToolSpec:
 class LearnedToolRegistry:
     """Expose only deterministically verified declarative learned tools for one exact scope.
 
-    The registry has no independent activation bit. Its source of truth is the Candidate regression
-    record persisted in candidate.json: a tool is callable only when the exact scope is
-    VERIFIED_FOR_SCOPE in both scope state views and the current semantic Candidate body matches the
-    hash that was actually regression-tested. Legacy tools compose a fixed same-domain primitive set.
-    Typed tools compose a separately fixed safe primitive set whose input/output domains are checked
-    both statically and at every invocation. Arbitrary source code and shell commands are never loaded.
+    A tool is callable only when its exact Candidate semantic body and referenced artifacts match a
+    persisted deterministic regression record that adopted the exact scope. Candidate state fields
+    alone are insufficient, preventing model-authored self-promotion. Legacy tools compose a fixed
+    same-domain primitive set. Typed tools compose a separately fixed safe primitive set whose
+    input/output domains are checked statically and at every invocation. Arbitrary source code and
+    shell commands are never loaded.
     """
 
     def __init__(
@@ -168,34 +168,11 @@ class LearnedToolRegistry:
                 values.append(raw)
         return tuple(values)
 
-    @staticmethod
-    def _verified_for_scope(candidate: Mapping[str, Any], scope: str) -> bool:
-        scope_states = candidate.get("scope_states")
-        verified = candidate.get("verified_scope_states")
-        if not isinstance(scope_states, Mapping) or not isinstance(verified, Mapping):
-            return False
-        record = verified.get(scope)
-        base_verified = (
-            candidate.get("status") == "active-for-scope"
-            and scope_states.get(scope) == "VERIFIED_FOR_SCOPE"
-            and isinstance(record, Mapping)
-            and record.get("state") == "VERIFIED_FOR_SCOPE"
-            and isinstance(record.get("regression_evidence_sha256"), str)
-            and bool(_SHA256.fullmatch(str(record.get("regression_evidence_sha256"))))
-        )
-        if not base_verified:
-            return False
-        bound_spec = str(record.get("candidate_spec_sha256", ""))
-        if not _SHA256.fullmatch(bound_spec):
-            raise LearnedToolError(
-                "verified learned tool is missing a candidate semantic-body binding"
-            )
-        current_spec = candidate_spec_sha256(candidate)
-        if current_spec != bound_spec:
-            raise LearnedToolError(
-                "learned tool candidate changed after regression verification"
-            )
-        return True
+    def _verified_for_scope(self, candidate: Mapping[str, Any], scope: str) -> bool:
+        try:
+            return candidate_verified_for_scope(self.root, candidate, scope)
+        except CandidateIntegrityError as exc:
+            raise LearnedToolError(str(exc)) from exc
 
     def _validate_program(self, spec: LearnedToolSpec) -> None:
         if spec.program_kind == "legacy_same_domain":
@@ -260,9 +237,7 @@ class LearnedToolRegistry:
             return current
 
         if not _matches_domain(spec.input_domain, value):
-            raise LearnedToolError(
-                f"typed learned tool expected {spec.input_domain} input"
-            )
+            raise LearnedToolError(f"typed learned tool expected {spec.input_domain} input")
         current_domain = spec.input_domain
         current = value
         for primitive_name in spec.expanded_primitives:
@@ -272,9 +247,7 @@ class LearnedToolRegistry:
             try:
                 current = primitive.function(current)
             except (TypeError, ValueError, OverflowError) as exc:
-                raise LearnedToolError(
-                    f"typed learned tool input failed {primitive_name}"
-                ) from exc
+                raise LearnedToolError(f"typed learned tool input failed {primitive_name}") from exc
             current_domain = primitive.output_domain
             if not _matches_domain(current_domain, current):
                 raise LearnedToolError(
@@ -369,11 +342,7 @@ def typed_learned_tool_candidate_payload(
     support_sha256: str,
     description: str,
 ) -> dict[str, Any]:
-    """Build an inactive well-typed Candidate payload without granting activation.
-
-    Activation remains exclusively owned by record_candidate_regression. The declarative program is
-    validated against the fixed typed primitive graph again when catalogued and on every invocation.
-    """
+    """Build an inactive well-typed Candidate payload without granting activation."""
 
     return _candidate_payload(
         candidate_id=candidate_id,
