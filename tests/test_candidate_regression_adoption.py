@@ -3,7 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from continual.candidate_regression import record_candidate_regression
+from continual.candidate_regression import (
+    candidate_spec_sha256,
+    record_candidate_regression,
+)
 
 
 def _write(path: Path, value) -> None:
@@ -32,6 +35,8 @@ def _candidate_root(tmp_path: Path) -> Path:
         {
             "candidate_id": "candidate-a",
             "target_component": "execute",
+            "expected_scope": "symbolic-transfer",
+            "what_it_changes": "a deterministic symbolic execution strategy",
             "status": "candidate",
             "scope_states": {},
             "supporting_evidence": [],
@@ -78,10 +83,17 @@ def test_passing_regression_promotes_only_the_measured_scope(tmp_path: Path) -> 
     assert state["status"] == "active-for-scope"
     assert state["scope_states"] == {"symbolic-transfer": "VERIFIED_FOR_SCOPE"}
     assert set(state["verified_scope_states"]) == {"symbolic-transfer"}
-    assert state["verified_scope_states"]["symbolic-transfer"]["decision_ref"] == report["decision_ref"]
+    verified = state["verified_scope_states"]["symbolic-transfer"]
+    assert verified["decision_ref"] == report["decision_ref"]
+    assert verified["candidate_spec_sha256"] == report["candidate_spec_sha256"]
+    assert verified["candidate_spec_sha256"] == candidate_spec_sha256(state)
+
     decision_path = root / report["decision_ref"]
     assert decision_path.is_file()
     persisted = json.loads(decision_path.read_text())
+    assert persisted["schema_version"] == 2
+    assert persisted["candidate_spec_sha256"] == report["candidate_spec_sha256"]
+    assert persisted["candidate_spec_sha256"] == candidate_spec_sha256(persisted["candidate_spec"])
     assert persisted["decision"]["regression_evidence_sha256"] == report["decision"][
         "regression_evidence_sha256"
     ]
@@ -125,6 +137,9 @@ def test_failed_regression_remains_candidate_and_negative_evidence_survives_late
     assert after_failure["status"] == "candidate"
     assert after_failure["scope_states"]["symbolic-transfer"] == "REMAIN_CANDIDATE"
     assert len(after_failure["contradictory_evidence"]) == 1
+    assert after_failure["contradictory_evidence"][0]["candidate_spec_sha256"] == first[
+        "candidate_spec_sha256"
+    ]
     failed_ref = first["decision_ref"]
 
     _write(
@@ -144,6 +159,7 @@ def test_failed_regression_remains_candidate_and_negative_evidence_survives_late
         target_task_ids=["target"],
     )
     assert second["decision"]["adopt_candidate"] is True
+    assert second["candidate_spec_sha256"] == first["candidate_spec_sha256"]
 
     final = json.loads(state_path.read_text())
     assert final["status"] == "active-for-scope"
