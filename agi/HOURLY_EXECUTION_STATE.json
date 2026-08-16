@@ -12,7 +12,7 @@
   "execution_id": "o-agi-20260817T0800JST-080221",
   "session_id": "same-task-chat-20260817T0800JST-080221",
   "active_run_id": "run-hourly-agi-20260817-0800",
-  "current_work_unit": "validate PR 74 exact head 02eafabffad4fdae714b0d2355aa66fc97a8d292 after JSON-canonical acquired-program Candidate normalization; merge only on exact-head success",
+  "current_work_unit": "connect generated acquired programs to evaluator-committed unseen continual-runtime work units across separate durable Engine runs; measure before/after transfer, fail-closed rollback, and protected prior-capability retention",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -25,33 +25,33 @@
   "platform_context_exclusion_verified": false,
   "platform_context_exclusion_verification_source": null,
   "started_at": "2026-08-17T08:02:21+09:00",
-  "last_progress_at": "2026-08-17T08:08:36+09:00",
+  "last_progress_at": "2026-08-17T08:10:08+09:00",
   "finished_at": null,
   "last_result": {
-    "status": "running_validation",
-    "base_main_sha": "d6ac4642e024af42d1b54f708db1b9c0b3cab1eb",
-    "reconciled_unmerged_pr": 74,
+    "status": "work_unit_completed_continue",
+    "merged_pull_request": 74,
+    "merged_head_sha": "02eafabffad4fdae714b0d2355aa66fc97a8d292",
+    "merged_main_sha": "4f2b01fb96e14fd3cb850e12179493a3aaa5ea1d",
+    "successful_ci_run": 31978282953,
     "retained_failed_heads": [
       {
         "head_sha": "7b663d969d7978c61b51f8bb29ecbcbad4b029fc",
-        "ci_run": 31976954779
+        "ci_run": 31976954779,
+        "failure": "1 failed, 166 passed: repeated protected-prior acquisition conflicted with the already persisted Candidate"
       },
       {
         "head_sha": "2fa9a1a759fb66fe44f7b2a259fb466b605f5ae3",
         "ci_run": 31978140114,
-        "failure": "2 failed, 166 passed: persisted JSON converted tuple-valued program fields to lists, so direct candidate_spec_payload equality falsely classified exact replay as a semantic conflict."
+        "failure": "2 failed, 166 passed: in-memory tuple versus persisted JSON list representation caused false semantic Candidate conflict"
       }
     ],
-    "corrected_head_sha": "02eafabffad4fdae714b0d2355aa66fc97a8d292",
-    "corrected_ci_run": 31978282953,
-    "corrected_ci_status": "in_progress",
     "completed_work": [
-      "Inspected exact failed GitHub Actions pytest logs for PR 74 head 2fa9a1a759fb66fe44f7b2a259fb466b605f5ae3.",
-      "Identified a persistence-boundary representation bug: an in-memory tuple became a JSON list although its canonical semantic hash was unchanged.",
-      "Normalized acquired-program descriptors to their JSON-canonical representation at Candidate construction so exact replay remains idempotent while semantic tampering remains detectable.",
-      "Pushed corrective PR 74 head 02eafabffad4fdae714b0d2355aa66fc97a8d292 and started exact-head CI 31978282953."
+      "Sequential cross-domain acquisition now accumulates at least three distinct seed-generated capabilities and fresh-engine retests all capabilities after each promotion.",
+      "Exact replay of an already verified protected-prior acquired program reuses persisted evidence and does not consume new Candidate trial budget.",
+      "Acquired-program Candidate descriptors are canonicalized through JSON before persistence, eliminating tuple/list false conflicts while retaining semantic tamper rejection.",
+      "Exact PR 74 head passed pytest, compileall, all benchmark-suite validators, long-horizon protocol validation, and reference campaigns before merge."
     ],
-    "claim_boundary": "Strict independent external production evidence gate has not passed; verified AGI remains unproven."
+    "claim_boundary": "Internal continual-learning and capability-retention evidence only; strict independent external production evidence gate has not passed and verified AGI remains unproven."
   },
   "rule": "The model actually running in the reused task chat executes the unfinished AGI architecture. Prior chat is not work state; latest main is the only continuation source. At most one hourly execution may modify the repository."
 }
