@@ -24,5 +24,4 @@ def _public_record_candidate_regression(*args, **kwargs):
 
 _candidate_regression.record_candidate_regression = _public_record_candidate_regression
 
-del _bounded_record_candidate_regression
 del _install_trial_integration
