@@ -471,3 +471,30 @@ class ReferenceHeldOutAgent:
         else:
             answer = None
         return AgentAnswer(answer=answer, evidence=["Algorithmic reference solved only visible task data."])
+
+
+def _atomic_write_json(path, payload):
+    """Atomically write JSON to path by writing to a temporary file and replacing.
+
+    Matches longhorizon atomic writer semantics so persisted artifacts are audit-friendly.
+    """
+    from pathlib import Path
+    import json
+
+    p = Path(path)
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    p.parent.mkdir(parents=True, exist_ok=True)
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+    tmp.replace(p)
+
+
+def write_heldout_report(report: HeldOutReport, path):
+    """Persist a HeldOutReport atomically for external audit.
+
+    The persisted report intentionally mirrors report.to_dict() which omits sealed expected
+    values and does not include any secret seed. The on-disk artifact is safe for auditors.
+    """
+    payload = report.to_dict()
+    # Ensure persisted value explicitly marks that sealed expected values were NOT persisted.
+    payload["sealed_values_persisted"] = False
+    _atomic_write_json(path, payload)

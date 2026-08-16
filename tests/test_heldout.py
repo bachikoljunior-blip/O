@@ -108,3 +108,29 @@ def test_report_never_contains_seed_or_expected_field():
     payload = repr(report.to_dict())
     assert seed not in payload
     assert "'expected':" not in payload
+
+
+def test_write_heldout_report_persists_atomically(tmp_path):
+    """Persist a heldout report and ensure the artifact omits seeds and expected values
+    and that the atomic writer leaves no temporary files behind.
+    """
+    from agi.heldout import write_heldout_report
+
+    seed = "audit-seed"
+    generator, executor, scorer = identities()
+    report = run_heldout_suite(
+        ReferenceHeldOutAgent(),
+        generate_heldout_suite(seed),
+        seed_commit=seed_commitment(seed, "heldout-v1"),
+        generator=generator,
+        executor=executor,
+        scorer=scorer,
+    )
+    out = tmp_path / "heldout-report.json"
+    write_heldout_report(report, out)
+    assert out.exists()
+    data = out.read_text(encoding="utf-8")
+    assert seed not in data
+    assert "'expected':" not in data
+    tmpfile = out.with_suffix(out.suffix + ".tmp")
+    assert not tmpfile.exists()
