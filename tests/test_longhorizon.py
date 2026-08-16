@@ -5,6 +5,7 @@ import json
 
 from agi.longhorizon import (
     LongHorizonAction,
+    LongHorizonTask,
     ReferenceLongHorizonAgent,
     run_long_horizon,
 )
@@ -28,6 +29,55 @@ def test_reference_long_horizon_requires_restart_rollback_and_retention():
     assert creations >= 2
     assert "retain" in report.completed_phases
     assert "regression" in report.completed_phases
+
+
+def test_custom_task_varies_memory_output_and_protected_state_without_reexposing_recall_answer(tmp_path):
+    task = LongHorizonTask(
+        task_id="custom-retention",
+        memory_key="policy-omega",
+        memory_value="OMEGA-37",
+        protected_path="baseline-omega.txt",
+        protected_value="OMEGA-BASELINE",
+        corrupted_value="OMEGA-CORRUPTED",
+        result_path="result-omega.txt",
+        result_content="OMEGA-COMPLETE",
+    )
+    report = run_long_horizon(
+        ReferenceLongHorizonAgent,
+        checkpoint_path=tmp_path / "custom-checkpoint.json",
+        task=task,
+    )
+    assert report.passed is True
+    retain_observations = [
+        entry["observation"]
+        for entry in report.trace
+        if entry["observation"]["phase"] == "retain" and not entry["observation"]["failure"]
+    ]
+    assert len(retain_observations) == 1
+    retain = retain_observations[0]
+    assert retain["task_instruction"] == {"recall_key": task.memory_key}
+    assert task.memory_value not in json.dumps(retain["task_instruction"], sort_keys=True)
+    assert retain["durable_memory"][task.memory_key] == task.memory_value
+
+
+def test_custom_task_rejects_wrong_delayed_recall(tmp_path):
+    task = LongHorizonTask(task_id="wrong-recall", memory_key="policy-x", memory_value="EXPECTED-X")
+
+    class WrongRecall(ReferenceLongHorizonAgent):
+        def act(self, observation):
+            if not observation.failure and observation.phase == "retain":
+                return LongHorizonAction("recall", {"key": task.memory_key, "value": "WRONG-X"})
+            return super().act(observation)
+
+    report = run_long_horizon(
+        WrongRecall,
+        checkpoint_path=tmp_path / "wrong-recall.json",
+        task=task,
+        max_turns=14,
+    )
+    assert report.passed is False
+    assert report.rollback_verified is True
+    assert report.retention_verified is False
 
 
 def test_checkpoint_persisted_and_reloaded(tmp_path):
