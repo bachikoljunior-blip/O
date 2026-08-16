@@ -24,7 +24,9 @@ jobs:
       - run: agi-benchmark validate-suite
       - run: agi-benchmark validate-workspace-suite
       - run: agi-benchmark validate-heldout-suite
+      - run: agi-longhorizon validate-protocol
       - run: agi-benchmark run-reference --output /tmp/core-reference.json
       - run: agi-benchmark run-workspace-reference --output /tmp/workspace-reference.json
       - run: agi-benchmark run-heldout-reference --output /tmp/heldout-reference.json
+      - run: agi-longhorizon run-reference --output-dir /tmp/longhorizon-reference
       - run: agi-benchmark run-campaign-reference --runs 2 --output-dir /tmp/reference-campaign
