@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "blocked",
+  "status": "blocked_on_required_model",
   "execution_mode": "hourly_standalone_fresh_session",
   "worker": "fresh_session_highest_performance_chatgpt_model",
   "required_model": "GPT-5.6 Pro",
@@ -12,11 +12,15 @@
   "execution_policy_path": "agi/STANDALONE_HOURLY_AUTOMATION.md",
   "lease_path": "agi/HOURLY_EXECUTION_STATE.json",
   "active_run_id": null,
-  "run_status": "04:00 automation again identified actual runtime as GPT-5.6 Sol rather than required GPT-5.6 Pro; capability development remained blocked and the recurring automation should stay disabled until the required model is available",
-  "last_scheduled_start": "2026-08-17T04:00:00+09:00",
+  "run_status": "06:00 scheduled standalone blocked before capability work because the actual runtime is GPT-5.6 Sol, not required GPT-5.6 Pro.",
+  "last_scheduled_start": "2026-08-17T06:00:00+09:00",
   "next_scheduled_start": null,
-  "last_session_id": "gpt-5.6-sol-20260817T0400JST-automation",
+  "last_session_id": "gpt-5.6-sol-20260817T0600JST-automation",
+  "last_model": "GPT-5.6 Sol",
+  "model_requirement_satisfied": false,
   "last_completed_capability_sha": "391f1bd5f8ac6b6ad196fdf5eea3b1fb2cafba50",
-  "next_executable_action": "Run a fresh zero-context session with actual GPT-5.6 Pro, verify the model before acquiring the lease, then resume sequential accumulation of at least three seed-generated cross-domain CEGIS capabilities with fresh-engine no-forgetting and replay-safe persistent trial accounting.",
-  "rule": "Each fresh hourly session's highest-performance model thinks and implements. Repository state supplies the unfinished system and durable memory, and must be verified rather than trusted as self-report."
+  "next_executable_action": "Require a fresh zero-context standalone session positively identified as exact GPT-5.6 Pro before lease acquisition; then resume sequential accumulation of at least three seed-generated cross-domain CEGIS capabilities with fresh-engine no-forgetting and replay-safe persistent trial accounting.",
+  "automation_control_status": "disable_requested_but_runtime_did_not_expose_task_identifier",
+  "automation_control_missing": "recurring automation task/jawbone identifier",
+  "rule": "Each fresh hourly session must satisfy the required-model gate before central AGI reasoning or implementation. Repository state supplies durable memory and must be verified rather than trusted as self-report."
 }
