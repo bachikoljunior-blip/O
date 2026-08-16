@@ -45,14 +45,30 @@ def test_shifted_threshold_requires_counterexample_refinement_without_new_operat
     assert second.apply(3) != 3
 
     second_counterexample = ProgramExample(3, 3)
-    refined = synthesize_program(
+    third = synthesize_program(
         input_domain="numeric",
         output_domain="numeric",
         examples=[*demonstrations, first_counterexample, second_counterexample],
         max_nodes=7,
         allow_conditionals=True,
     )
-    heldout = [(-100, 2), (-1, 2), (5, 5), (15, 15), (100, 100)]
+    assert third.apply(2.5) == 2
+    assert third.apply(2.5) != 2.5
+
+    third_counterexample = ProgramExample(2.5, 2.5)
+    refined = synthesize_program(
+        input_domain="numeric",
+        output_domain="numeric",
+        examples=[
+            *demonstrations,
+            first_counterexample,
+            second_counterexample,
+            third_counterexample,
+        ],
+        max_nodes=7,
+        allow_conditionals=True,
+    )
+    heldout = [(-100, 2), (-1, 2), (2.25, 2.25), (5, 5), (15, 15), (100, 100)]
     assert [refined.apply(value) for value, _ in heldout] == [expected for _, expected in heldout]
     assert refined.expression == {
         "op": "if_nonnegative",
