@@ -404,7 +404,9 @@ def synthesize_program(
     The search is over a bounded typed expression grammar rather than a catalogue of named task
     families. Behavioral deduplication keeps one minimal expression per observed behavior. Numeric
     sequence folds and data-dependent conditionals are generic bounded kernels admitted only after
-    evaluator-hidden tasks falsify the grammar that excludes them. The resulting program remains
+    evaluator-hidden tasks falsify the grammar that excludes them. Intermediate typed expressions
+    remain available even when their domain differs from the requested final output, allowing already
+    admitted kernels to compose without a new privilege or operator. The resulting program remains
     inactive until the continual Candidate regression gate verifies its exact scope on held-out
     measurements.
     """
@@ -468,7 +470,6 @@ def synthesize_program(
     if (
         allow_sequence_folds
         and input_domain == "sequence"
-        and output_domain == "numeric"
         and max_nodes >= 2
     ):
         for reducer, initial in _FOLD_IDENTITIES.items():
