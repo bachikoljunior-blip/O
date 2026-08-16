@@ -52,6 +52,7 @@ class _State:
     durable_memory: dict[str, Any] = field(default_factory=dict)
     checkpoint: dict[str, Any] | None = None
     checkpoint_digest: str | None = None
+    trusted_checkpoint_digest: str | None = None
     completed_phases: list[str] = field(default_factory=list)
     restarts: int = 0
     injected_failures: int = 0
@@ -75,18 +76,55 @@ def _checkpoint(state: _State) -> None:
         "completed_phases": list(state.completed_phases),
     }
     state.checkpoint_digest = _digest(state.checkpoint)
+    # This commitment is evaluator-owned state, not part of the mutable checkpoint envelope.
+    # A fresh agent context can see the durable checkpoint, but cannot redefine what digest
+    # the evaluator committed to before risky work began.
+    state.trusted_checkpoint_digest = state.checkpoint_digest
+
+
+def _persist_checkpoint(state: _State, path: Path) -> None:
+    if state.checkpoint is None or state.checkpoint_digest is None:
+        raise RuntimeError("cannot persist an empty checkpoint")
+    payload = {"checkpoint": state.checkpoint, "digest": state.checkpoint_digest}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+    temporary.replace(path)
+
+
+def _reload_checkpoint(state: _State, path: Path) -> str | None:
+    """Reload only a checkpoint that still matches the pre-failure evaluator commitment."""
+    trusted_digest = state.trusted_checkpoint_digest
+    if trusted_digest is None:
+        return "trusted checkpoint commitment is missing"
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return "durable checkpoint reload failed"
+    if not isinstance(raw, dict):
+        return "durable checkpoint envelope is invalid"
+    checkpoint = raw.get("checkpoint")
+    stored_digest = raw.get("digest")
+    if not isinstance(checkpoint, dict) or not isinstance(stored_digest, str):
+        return "durable checkpoint envelope is invalid"
+    computed_digest = _digest(checkpoint)
+    if stored_digest != trusted_digest or computed_digest != trusted_digest:
+        return "durable checkpoint does not match trusted commitment"
+    state.checkpoint = checkpoint
+    state.checkpoint_digest = stored_digest
+    return None
 
 
 def _rollback(state: _State) -> None:
     if state.checkpoint is None:
         raise RuntimeError("rollback requested without checkpoint")
-    expected_digest = state.checkpoint_digest
+    expected_digest = state.trusted_checkpoint_digest or state.checkpoint_digest
     restored = json.loads(json.dumps(state.checkpoint))
     state.phase = restored["phase"]
     state.workspace = dict(restored["workspace"])
     state.durable_memory = restored["durable_memory"]
     state.completed_phases = list(restored["completed_phases"])
-    state.rollback_verified = _digest(restored) == expected_digest
+    state.rollback_verified = expected_digest is not None and _digest(restored) == expected_digest
 
 
 def _observation(state: _State, *, failure: str | None = None) -> LongHorizonObservation:
@@ -95,7 +133,7 @@ def _observation(state: _State, *, failure: str | None = None) -> LongHorizonObs
         phase=state.phase,
         workspace=dict(state.workspace),
         durable_memory=json.loads(json.dumps(state.durable_memory)),
-        checkpoint_digest=state.checkpoint_digest,
+        checkpoint_digest=state.checkpoint_digest or state.trusted_checkpoint_digest,
         failure=failure,
     )
 
@@ -178,12 +216,17 @@ def run_long_horizon(
     *,
     max_turns: int = 24,
     checkpoint_path: Path | None = None,
+    before_checkpoint_reload: Callable[[Path], None] | None = None,
 ) -> LongHorizonResult:
     """Evaluate durable planning across fresh contexts, failure, rollback, and delayed retention.
 
-    A fresh agent instance is created after the injected failure. Only the durable observation is
-    carried across that boundary; private in-process model context is not. Reference agents validate
-    the harness only and are not claim-grade AGI evidence.
+    The checkpoint is persisted atomically when the agent explicitly checkpoints, before risky work
+    begins. Its digest is committed in evaluator-owned state. After the injected failure a fresh
+    agent instance is created, the in-memory checkpoint is discarded, and only a disk checkpoint
+    matching that earlier commitment may be reloaded. `before_checkpoint_reload` exists for
+    deterministic evaluator fault injection; it is not exposed to the evaluated agent.
+
+    Reference agents validate the harness only and are not claim-grade AGI evidence.
     """
     if max_turns < 8:
         raise ValueError("max_turns must be at least 8")
@@ -191,6 +234,7 @@ def run_long_horizon(
     agent = agent_factory()
     trace: list[dict[str, Any]] = []
     failure: str | None = None
+    reload_fault_injected = False
 
     for _ in range(max_turns):
         obs = _observation(state, failure=failure)
@@ -204,40 +248,39 @@ def run_long_horizon(
             if action.kind != "rollback":
                 failure = "fresh context failed to choose rollback"
                 continue
-            # Before performing rollback, ensure durable checkpoint is reloaded from disk
-            # to simulate a fresh process that lost in-memory private state but can access
-            # durable checkpoints persisted externally.
-            if checkpoint_path is not None and state.checkpoint is None and checkpoint_path.exists():
-                try:
-                    raw = json.loads(checkpoint_path.read_text(encoding="utf-8"))
-                    state.checkpoint = raw.get("checkpoint")
-                    state.checkpoint_digest = raw.get("digest")
-                except Exception:
-                    # If load fails, leave checkpoint as None and let _rollback raise
-                    pass
+            if checkpoint_path is not None and state.checkpoint is None:
+                if before_checkpoint_reload is not None and not reload_fault_injected:
+                    before_checkpoint_reload(checkpoint_path)
+                    reload_fault_injected = True
+                reload_error = _reload_checkpoint(state, checkpoint_path)
+                if reload_error:
+                    failure = reload_error
+                    agent = agent_factory()
+                    continue
+            if state.checkpoint is None:
+                failure = "rollback requested without durable checkpoint"
+                agent = agent_factory()
+                continue
             state.phase = "recover"
             failure = _apply(state, action)
-            # After recovery, create a fresh agent context for continued work
+            # After recovery, create a fresh agent context for continued work.
             agent = agent_factory()
             continue
 
+        previous_phase = state.phase
         error = _apply(state, action)
+        if error is None and previous_phase == "checkpoint" and checkpoint_path is not None:
+            # Durability is established before the risky intervention phase starts.
+            _persist_checkpoint(state, checkpoint_path)
+
         if error:
             failure = error
-            # When the injected transient failure occurs we simulate a process boundary:
-            # drop any in-process private checkpoint so the fresh context must rely on
-            # the persisted durable checkpoint (if provided).
+            # At the injected failure boundary, discard only in-memory checkpoint material. The
+            # evaluator's pre-failure commitment remains trusted and must match the durable reload.
             if state.phase == "intervene" and state.injected_failures == 1:
-                # Persist checkpoint to disk if requested
-                if checkpoint_path is not None and state.checkpoint is not None:
-                    payload = {"checkpoint": state.checkpoint, "digest": state.checkpoint_digest}
-                    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
-                    checkpoint_path.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
-                    # Simulate loss of private in-memory checkpoint when creating fresh agent
-                    # (only when an external durable checkpoint was written)
+                if checkpoint_path is not None:
                     state.checkpoint = None
                     state.checkpoint_digest = None
-                # Create a fresh agent context for continued work (fresh process semantics)
                 agent = agent_factory()
             continue
 
