@@ -1,63 +1,68 @@
-# Continual ChatGPT
+# O — Evidence-driven continual agent and AGI research runtime
 
-ChatGPT / OpenAI Responses API を実行主体にした、最小の継続学習・自己改善ランタイムです。
+O is a persistent agent runtime that closes one task through:
 
-## 目的
+`ENTRY → Root → Execute → Task Evaluate → Experience Fragments → Task Episode → Post-task Learn → Candidate`
 
-1件の依頼を `実行 → 評価 → Experience Fragment → Task Episode → Learn → Candidate` まで閉じ、Candidate は**その候補が実際に影響する execution unit の直前だけ**評価します。Candidate の採用は scope 単位です。
+It is designed to improve procedures from experience without silently replacing active behavior, replaying side effects after interruption, or calling a narrow success “AGI”.
 
-各意味的コンポーネント（ENTRY / Runner選択 / Root / Execute / Task Evaluate / Consolidate Episode / Learn / Candidate Evaluate / Context方式 / Episode方式 / モデル選択等）は Candidate 化できます。固定コードは atomic write、event append、ID、revision、外部副作用状態、選択済みversionの機械的起動などに限定します。
+## What changed in v0.2
 
-## 重要な学習規則
+- Active component pointers are now actually loaded from `.continual/system/active-components.json`.
+- Candidate Preflight receives only Candidates relevant to the exact upcoming component, plus dependencies.
+- Every model invocation has a deterministic journal. Completed output is reused after restart instead of invoking the model/tool loop again.
+- Model outputs are contract-validated, with one explicit repair attempt.
+- Step exhaustion produces a resumable checkpoint instead of converting time limits into task failure.
+- Candidate proposals with an existing ID merge evidence and source references rather than disappearing.
+- Candidate prompts default to scoped overlays, so a learned instruction cannot accidentally replace the base component contract.
+- Model-run commands receive a secret-stripped environment; network/publish commands and direct edits to active control files are blocked.
+- The `agi` package is installed correctly and supplies a conservative evidence ledger plus a cross-criterion development benchmark.
 
-- Rootを含む改善対象は、**実行前Preflight**を通してから起動する。
-- 各意味的実行は本処理終了後、同じContextが残っている間に `Local Learn` を行い、その後 Experience Fragment を保存する。
-- Learn 自身は再帰 Local Learn を呼ばない。
-- Task終了後の `Post-Task Learn` は残し、今回・最近・類似・長期Episodeを必要範囲だけ読む。
-- `Experience Fragment -> Consolidate Episode -> Task Episode`。Consolidateは失われたContextを推測しない。
-- Candidateは新規依頼時に一括評価せず、影響箇所の直前だけ評価する。
-- Candidate Evaluate は pre-application / post-result の2段階。
-- active-for-scope も永久確定ではなく、反証で降格可能。
-- rejected理由、Candidate競合/依存、重複、コスト、環境差、ユーザーフィードバック、証拠の出所を保存できる。
-- Learn の正常結果として `NO_CHANGE` を認める。
-
-## セットアップ
+## Installation
 
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-pip install -e .
+pip install -e '.[test]'
 export OPENAI_API_KEY='...'
-export OPENAI_MODEL='gpt-5.6'   # 任意。未指定時もこの初期値
+export OPENAI_MODEL='gpt-5.6'
 ```
 
-OpenAI APIキーはリポジトリへ保存しないでください。
+Never commit API keys.
 
-## 実行
+## Persistent task execution
 
 ```bash
-continual start "ユーザー依頼"
+continual start "ユーザー依頼" --max-steps 64
+continual status <run_id>
+continual resume <run_id> --max-steps 64
+continual resume-all --max-steps 16
+continual feedback <episode_id> "結果へのユーザーフィードバック"
 ```
 
-中断後:
+The source of truth is under `.continual/`, not the chat transcript.
+
+## AGI evidence commands
 
 ```bash
-continual resume <run_id>
+agi-benchmark validate-suite
+agi-benchmark run-reference --output .continual/evidence/reference-report.json
+agi-benchmark run-openai --model gpt-5.6 --output .continual/evidence/openai-development-report.json
+agi-benchmark evaluate evidence.json
 ```
 
-ユーザーフィードバックを過去Episodeへ関連付ける:
+`run-reference` validates the harness with a task-specific reference adapter. It is deliberately **not** AGI evidence. `run-openai` produces development evidence by default. The claim evaluator requires repeated, independent, production-tier evidence across breadth, transfer, autonomy, continual learning without regression, tested self-improvement, and robustness.
 
-```bash
-continual feedback <episode_id> "使いにくかった。理由は..."
-```
+A development benchmark may pass while `agi_claim_supported` remains false. That separation is intentional: progress must not be converted into a false completion claim.
 
-## ディレクトリ
+## Repository map
 
-- `prompts/` 意味的判断を行う各コンポーネントの指示。Candidateで差し替え可能。
-- `src/continual/` 薄い実行・永続化ランタイム。
-- `.continual/runs/` runの正本。会話履歴は正本ではない。
-- `.continual/episodes/` Consolidated Task Episode。
-- `.continual/candidates/` Candidate、scope証拠、reject履歴。
-- `.continual/system/` active component pointer と schema/version。
+- `src/continual/`: persistent orchestration, contracts, safe model tools, state store.
+- `prompts/`: active semantic components; changes should normally enter as Candidates.
+- `.continual/runs/`: snapshots, invocation journals, fragments, artifacts, trials, events.
+- `.continual/episodes/`: consolidated task episodes and later relations/feedback.
+- `.continual/candidates/`: Candidate metadata, scoped evidence, and optional Candidate prompts.
+- `src/agi/`: AGI criteria, evidence policy, benchmark protocol, OpenAI adapter, and CLI.
+- `agi/README.md`: current AGI research status and next falsifiable milestones.
 
-詳細な制御フローは `SYSTEM_DESIGN.md` を参照してください。
+See `SYSTEM_DESIGN.md` for restart and Candidate semantics.

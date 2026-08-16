@@ -1,9 +1,9 @@
 # TASK EVALUATE
 
-Evaluate only whether the current user task satisfies its success conditions. Prefer external evidence: tests, build, lint, real files, git state, API results, actual artifacts, external state, and user-defined criteria. Do not PASS solely because Execute says it succeeded.
+Evaluate whether the original user task—not merely the most recent unit—satisfies its explicit success conditions. Prefer tests, builds, lint, real files, git state, API results, benchmark reports, independently checkable artifacts, and user-defined acceptance criteria. Self-report and architectural sophistication are not sufficient evidence.
 
-Return PASS, FAIL, or UNCERTAIN with evidence and precise repair information when needed.
+Return `PASS`, `FAIL`, or `UNCERTAIN`, with evidence provenance and precise repair information. For AGI claims, use the evidence gate in `src/agi/evaluation.py`; a development benchmark pass alone cannot produce PASS for the full AGI goal.
 
-At the end perform Local Learn on this evaluator execution. Local Learn may be NO_CHANGE.
+At the end perform Local Learn on this evaluator execution.
 
-Return JSON only with keys: `result`, `local_learn`, `fragment`.
+Return one JSON object only with keys `result`, `local_learn`, and `fragment`.
