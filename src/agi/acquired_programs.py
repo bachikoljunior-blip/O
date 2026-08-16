@@ -145,6 +145,44 @@ def _infer_expression(
         if actual != "sequence":
             raise AcquiredProgramError(f"fold_numeric expects sequence, got {actual}")
         return "numeric", nodes + 1, max(depth, child_depth)
+    if op == "if_nonnegative":
+        if set(expression) != {"op", "condition", "then", "else"}:
+            raise AcquiredProgramError(
+                "if_nonnegative node fields must be exactly op,condition,then,else"
+            )
+        condition = expression.get("condition")
+        then_branch = expression.get("then")
+        else_branch = expression.get("else")
+        if not all(isinstance(value, Mapping) for value in (condition, then_branch, else_branch)):
+            raise AcquiredProgramError("if_nonnegative requires object condition/then/else nodes")
+        condition_domain, condition_nodes, condition_depth = _infer_expression(
+            condition,
+            input_domain=input_domain,
+            depth=depth + 1,
+        )
+        if condition_domain != "numeric":
+            raise AcquiredProgramError(
+                f"if_nonnegative condition expects numeric, got {condition_domain}"
+            )
+        then_domain, then_nodes, then_depth = _infer_expression(
+            then_branch,
+            input_domain=input_domain,
+            depth=depth + 1,
+        )
+        else_domain, else_nodes, else_depth = _infer_expression(
+            else_branch,
+            input_domain=input_domain,
+            depth=depth + 1,
+        )
+        if then_domain != else_domain:
+            raise AcquiredProgramError(
+                f"if_nonnegative branches must share a domain; got {then_domain},{else_domain}"
+            )
+        return (
+            then_domain,
+            condition_nodes + then_nodes + else_nodes + 1,
+            max(depth, condition_depth, then_depth, else_depth),
+        )
     if op in _UNARY_SIGNATURES:
         if set(expression) != {"op", "arg"} or not isinstance(expression.get("arg"), Mapping):
             raise AcquiredProgramError(f"{op} node requires exactly one arg")
@@ -268,12 +306,19 @@ def execute_program(descriptor: Mapping[str, Any], value: Any) -> Any:
                     accumulator = accumulator + item
                 elif reducer == "mul":
                     accumulator = accumulator * item
-                else:  # pragma: no cover - validation makes this unreachable.
+                else:
                     raise AcquiredProgramError(reducer)
                 accumulator = _check_runtime_value(
                     accumulator, "numeric", max_output_length
                 )
             return accumulator, "numeric"
+        if op == "if_nonnegative":
+            condition, condition_domain = run(node["condition"])
+            if condition_domain != "numeric":
+                raise AcquiredProgramError("program type changed after validation")
+            selected = node["then"] if condition >= 0 else node["else"]
+            result, result_domain = run(selected)
+            return _check_runtime_value(result, result_domain, max_output_length), result_domain
         if op in _UNARY_SIGNATURES:
             arg, domain = run(node["arg"])
             required, output_domain = _UNARY_SIGNATURES[op]
@@ -298,7 +343,7 @@ def execute_program(descriptor: Mapping[str, Any], value: Any) -> Any:
                     result = str(arg)
             elif op == "chars":
                 result = list(arg)
-            else:  # pragma: no cover - validation makes this unreachable.
+            else:
                 raise AcquiredProgramError(op)
             return _check_runtime_value(result, output_domain, max_output_length), output_domain
         left, left_domain = run(node["left"])
@@ -316,7 +361,7 @@ def execute_program(descriptor: Mapping[str, Any], value: Any) -> Any:
             result = left + right
         elif op == "concat_sequence":
             result = list(left) + list(right)
-        else:  # pragma: no cover - validation makes this unreachable.
+        else:
             raise AcquiredProgramError(op)
         return _check_runtime_value(result, output_domain, max_output_length), output_domain
 
@@ -352,15 +397,16 @@ def synthesize_program(
     examples: Sequence[ProgramExample],
     max_nodes: int = 7,
     allow_sequence_folds: bool = True,
+    allow_conditionals: bool = True,
 ) -> AcquiredProgram:
     """Deterministically synthesize a pure typed expression from demonstrations.
 
     The search is over a bounded typed expression grammar rather than a catalogue of named task
     families. Behavioral deduplication keeps one minimal expression per observed behavior. Numeric
-    sequence folds are a generic bounded aggregation kernel added only after hidden tasks established
-    that the earlier length-only sequence grammar could not represent value-dependent aggregation.
-    The resulting program is still inactive until the continual Candidate regression gate verifies
-    its exact scope on held-out measurements.
+    sequence folds and data-dependent conditionals are generic bounded kernels admitted only after
+    evaluator-hidden tasks falsify the grammar that excludes them. The resulting program remains
+    inactive until the continual Candidate regression gate verifies its exact scope on held-out
+    measurements.
     """
 
     if input_domain not in _ALLOWED_DOMAINS or output_domain not in _ALLOWED_DOMAINS:
@@ -369,6 +415,8 @@ def synthesize_program(
         raise AcquiredProgramError("max_nodes must be an integer from 1 through 9")
     if not isinstance(allow_sequence_folds, bool):
         raise AcquiredProgramError("allow_sequence_folds must be boolean")
+    if not isinstance(allow_conditionals, bool):
+        raise AcquiredProgramError("allow_conditionals must be boolean")
     if len(examples) < 3:
         raise AcquiredProgramError("at least three demonstrations are required")
     for item in examples:
@@ -459,6 +507,31 @@ def synthesize_program(
                         )
                         if match:
                             return match
+        if allow_conditionals and cost >= 4:
+            for condition_cost in range(1, cost - 2):
+                for then_cost in range(1, cost - condition_cost - 1):
+                    else_cost = cost - 1 - condition_cost - then_cost
+                    if else_cost < 1:
+                        continue
+                    conditions = list(by_cost[condition_cost]["numeric"])[:64]
+                    for branch_domain in _ALLOWED_DOMAINS:
+                        then_values = list(by_cost[then_cost][branch_domain])[:64]
+                        else_values = list(by_cost[else_cost][branch_domain])[:64]
+                        for condition in conditions:
+                            for then_branch in then_values:
+                                for else_branch in else_values:
+                                    match = add(
+                                        cost,
+                                        branch_domain,
+                                        {
+                                            "op": "if_nonnegative",
+                                            "condition": condition,
+                                            "then": then_branch,
+                                            "else": else_branch,
+                                        },
+                                    )
+                                    if match:
+                                        return match
         for domain in _ALLOWED_DOMAINS:
             if len(by_cost[cost][domain]) > 256:
                 by_cost[cost][domain] = by_cost[cost][domain][:256]
