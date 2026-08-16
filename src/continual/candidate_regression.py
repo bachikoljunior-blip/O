@@ -11,6 +11,15 @@ from typing import Any, Mapping, Sequence
 from agi.regression import RegressionPolicy, compare_snapshots
 
 _SAFE_ID = re.compile(r"^[A-Za-z0-9._-]+$")
+_MUTABLE_CANDIDATE_FIELDS = {
+    "status",
+    "scope_states",
+    "verified_scope_states",
+    "regression_decision_refs",
+    "supporting_evidence",
+    "contradictory_evidence",
+    "rejected_reasons",
+}
 
 
 def _read_json(path: Path) -> Any:
@@ -51,6 +60,32 @@ def _scope_key(scope: str) -> str:
     return hashlib.sha256(scope.encode("utf-8")).hexdigest()[:16]
 
 
+def candidate_spec_payload(candidate: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the immutable semantic Candidate body covered by regression approval.
+
+    Evidence/history/state fields change as a Candidate is evaluated and therefore are excluded. The
+    identity, target, expected scope, prompt/tool body, dependencies, applicability, and any other
+    semantic fields remain covered. A changed implementation must be measured and promoted again.
+    """
+
+    return {
+        str(key): value
+        for key, value in candidate.items()
+        if str(key) not in _MUTABLE_CANDIDATE_FIELDS
+    }
+
+
+def candidate_spec_sha256(candidate: Mapping[str, Any]) -> str:
+    encoded = json.dumps(
+        candidate_spec_payload(candidate),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def record_candidate_regression(
     root: Path,
     *,
@@ -65,8 +100,10 @@ def record_candidate_regression(
 
     The semantic Candidate Evaluator may recommend that a trial looks promising, but it does not
     get to promote itself. Promotion is performed here from explicit measurement files using the
-    deterministic AGI regression gate. Failed decisions remain in history even if a later trial
-    succeeds, so negative evidence cannot be overwritten by a model's later self-report.
+    deterministic AGI regression gate. Approval is bound to the immutable Candidate semantic body;
+    editing a prompt, learned program, scope, dependency, or other behavior invalidates the approval.
+    Failed decisions remain in history even if a later trial succeeds, so negative evidence cannot be
+    overwritten by a model's later self-report.
     """
 
     if not isinstance(candidate_id, str) or not _SAFE_ID.fullmatch(candidate_id):
@@ -84,6 +121,7 @@ def record_candidate_regression(
     candidate_state = _read_json(candidate_json)
     if not isinstance(candidate_state, dict) or candidate_state.get("candidate_id") != candidate_id:
         raise ValueError("candidate.json identity does not match candidate_id")
+    spec_digest = candidate_spec_sha256(candidate_state)
 
     baseline_measurements = _measurement_array(baseline_path)
     candidate_measurements = _measurement_array(candidate_path)
@@ -99,8 +137,10 @@ def record_candidate_regression(
 
     digest = str(decision["regression_evidence_sha256"])
     record = {
-        "schema_version": 1,
+        "schema_version": 2,
         "candidate_id": candidate_id,
+        "candidate_spec_sha256": spec_digest,
+        "candidate_spec": candidate_spec_payload(candidate_state),
         "scope": scope,
         "target_task_ids": sorted(set(targets)),
         "baseline_measurements": baseline_measurements,
@@ -114,12 +154,16 @@ def record_candidate_regression(
         / "candidates"
         / candidate_id
         / "regression"
-        / f"{_scope_key(scope)}-{digest}.json"
+        / f"{_scope_key(scope)}-{spec_digest[:16]}-{digest}.json"
     )
     decision_path = root / decision_rel
     if decision_path.exists():
         existing = _read_json(decision_path)
-        if not isinstance(existing, Mapping) or existing.get("decision") != decision:
+        if (
+            not isinstance(existing, Mapping)
+            or existing.get("decision") != decision
+            or existing.get("candidate_spec_sha256") != spec_digest
+        ):
             raise ValueError("existing regression evidence record conflicts with recomputed decision")
     else:
         _atomic_json(decision_path, record)
@@ -133,6 +177,7 @@ def record_candidate_regression(
         scope_states[scope] = "VERIFIED_FOR_SCOPE"
         verified_scope_states[scope] = {
             "state": "VERIFIED_FOR_SCOPE",
+            "candidate_spec_sha256": spec_digest,
             "regression_evidence_sha256": digest,
             "decision_ref": decision_rel.as_posix(),
         }
@@ -143,6 +188,7 @@ def record_candidate_regression(
             {
                 "type": "deterministic_regression_gate",
                 "scope": scope,
+                "candidate_spec_sha256": spec_digest,
                 "regression_evidence_sha256": digest,
                 "decision_ref": decision_rel.as_posix(),
             },
@@ -159,6 +205,7 @@ def record_candidate_regression(
             {
                 "type": "deterministic_regression_gate_failure",
                 "scope": scope,
+                "candidate_spec_sha256": spec_digest,
                 "regression_evidence_sha256": digest,
                 "decision_ref": decision_rel.as_posix(),
                 "negative_evidence": decision.get("negative_evidence", []),
@@ -173,6 +220,7 @@ def record_candidate_regression(
     _atomic_json(candidate_json, candidate_state)
     return {
         "candidate_id": candidate_id,
+        "candidate_spec_sha256": spec_digest,
         "scope": scope,
         "decision_ref": decision_rel.as_posix(),
         "decision": decision,
