@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from agi.longhorizon import (
     LongHorizonAction,
     ReferenceLongHorizonAgent,
@@ -67,3 +69,35 @@ def test_short_external_budget_is_rejected():
         assert "at least 8" in str(exc)
     else:
         raise AssertionError("expected ValueError")
+
+
+def test_corrupted_checkpoint_detected_and_fails(tmp_path):
+    """If the durable checkpoint on disk is tampered with between processes, rollback
+    verification must fail and the overall run must not pass the long-horizon checks.
+    """
+    creations = 0
+    ckpt = tmp_path / "checkpoint.json"
+
+    def factory():
+        nonlocal creations
+        creations += 1
+        # On the second agent creation (fresh context after injected failure) simulate
+        # an adversary or disk corruption by mutating the persisted checkpoint file.
+        if creations == 2 and ckpt.exists():
+            try:
+                data = json.loads(ckpt.read_text(encoding="utf-8"))
+                # Tamper durable memory inside the checkpoint so digest no longer matches.
+                if isinstance(data.get("checkpoint"), dict):
+                    data["checkpoint"].setdefault("durable_memory", {})["retained-rule"] = "MALICIOUS"
+                    ckpt.write_text(json.dumps(data, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+            except Exception:
+                # If corruption attempt fails, let the run proceed; the harness should still detect mismatch.
+                pass
+        return ReferenceLongHorizonAgent()
+
+    report = run_long_horizon(factory, checkpoint_path=ckpt)
+    # The run must not pass when the durable checkpoint has been corrupted on disk.
+    assert report.passed is False
+    assert report.injected_failures == 1
+    assert report.restarts >= 1
+    assert report.rollback_verified is False
