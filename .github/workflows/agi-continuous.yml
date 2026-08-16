@@ -1,200 +1,21 @@
-name: agi-continuous
+name: stop-agi-copilot-automation
 
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
-  copilot-requests: write
+  contents: read
 
 concurrency:
   group: agi-continuous
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  continue-agi:
+  stop:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
-    env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ vars.AGI_AUTONOMY_MODEL || 'gpt-5' }}
-      GITHUB_TOKEN: ${{ github.token }}
-      AUTONOMY_BRANCH: autonomy/agi-continuous
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-          cache: pip
-      - name: Restore autonomous branch and merge latest main
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "agi-continuity-bot"
-          git config user.email "agi-continuity-bot@users.noreply.github.com"
-          if git ls-remote --exit-code --heads origin "$AUTONOMY_BRANCH" >/dev/null 2>&1; then
-            git fetch origin "$AUTONOMY_BRANCH"
-            git checkout -B "$AUTONOMY_BRANCH" FETCH_HEAD
-            if ! git merge --no-edit origin/main; then
-              git merge --abort
-              git checkout -B "$AUTONOMY_BRANCH" origin/main
-            fi
-          else
-            git checkout -B "$AUTONOMY_BRANCH" origin/main
-          fi
-      - name: Install runtime
-        run: python -m pip install -e '.[test]'
-      - name: Continue through continual Engine when OpenAI is configured
-        if: env.OPENAI_API_KEY != ''
-        run: agi-autonomy --cycles 6 --max-steps 24
-      - name: Install Copilot CLI fallback
-        if: env.OPENAI_API_KEY == ''
-        run: npm install -g @github/copilot
-      - name: Use remaining run window for repeated bounded AGI cycles
-        if: env.OPENAI_API_KEY == ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          STARTED=$SECONDS
-          SOFT_DEADLINE=$((STARTED + 2700))
-
-          validate_repo() {
-            pytest -q && \
-            python -m compileall -q src && \
-            agi-benchmark validate-suite >/dev/null && \
-            agi-benchmark validate-workspace-suite >/dev/null && \
-            agi-benchmark validate-heldout-suite >/dev/null
-          }
-
-          reject_outside_surface() {
-            local bad=0
-            while IFS= read -r path; do
-              [[ -z "$path" ]] && continue
-              case "$path" in
-                src/agi/*|agi/*|tests/*|.continual/candidates/*) ;;
-                *) echo "Disallowed autonomous path: $path" >&2; bad=1 ;;
-              esac
-            done < <(git diff --name-only HEAD)
-            return "$bad"
-          }
-
-          copilot_pass() {
-            local prompt="$1"
-            timeout 720s copilot -s --no-ask-user \
-              --available-tools='view,grep,glob,edit,create,apply_patch' \
-              --allow-tool='write' \
-              --deny-tool='shell,web_fetch,task' \
-              -p "$prompt"
-          }
-
-          for cycle in 1 2 3 4 5 6; do
-            if (( SECONDS >= SOFT_DEADLINE )); then
-              echo "Soft runtime deadline reached after $((SECONDS-STARTED)) seconds."
-              break
-            fi
-
-            PROMPT=$(cat <<EOF
-          You are bounded execution cycle $cycle for the unfinished AGI program in this repository.
-          Read agi/CONTINUATION.json, agi/AUTONOMY_STATE.json if present, agi/README.md, and relevant src/agi code/tests.
-          Continue exactly one highest-value falsifiable missing AGI capability or evaluation milestone now.
-
-          Rules:
-          - Do real repository work; do not merely describe a plan.
-          - You may edit only src/agi/**, agi/**, tests/**, and .continual/candidates/**.
-          - Do not edit workflows, prompts, AGENTS.md, SYSTEM_DESIGN.md, src/continual/**, secrets, or git metadata.
-          - Do not weaken any AGI evidence gate or convert self-report/reference results into claim-grade evidence.
-          - Preserve safety and externally checkable evaluation.
-          - Prefer a small complete vertical improvement with tests over broad unfinished scaffolding.
-          - Update agi/CONTINUATION.json with the exact new state and next executable milestone before finishing.
-          - Do not claim AGI is complete unless the repository's conservative externally verified evidence gate actually passes.
-          EOF
-            )
-
-            if ! copilot_pass "$PROMPT"; then
-              echo "Copilot cycle $cycle did not complete; preserving prior validated cycles."
-              git reset --hard HEAD
-              break
-            fi
-            reject_outside_surface
-
-            if git diff --quiet; then
-              echo "Cycle $cycle produced no repository change; ending this run without idle repetition."
-              break
-            fi
-
-            set +e
-            validate_repo > /tmp/agi-validation.log 2>&1
-            code=$?
-            set -e
-            cat /tmp/agi-validation.log
-
-            if [[ $code -ne 0 ]]; then
-              FAILURES=$(tail -c 12000 /tmp/agi-validation.log)
-              REPAIR_PROMPT=$(cat <<EOF
-          The unfinished-AGI change in cycle $cycle failed repository validation. Fix the implementation now.
-          You may edit only src/agi/**, agi/**, tests/**, and .continual/candidates/**.
-          Do not edit workflows, prompts, AGENTS.md, SYSTEM_DESIGN.md, src/continual/**, secrets, or git metadata.
-          Do not weaken tests or the AGI evidence gate merely to pass.
-
-          Validation output:
-          $FAILURES
-          EOF
-              )
-              if ! copilot_pass "$REPAIR_PROMPT"; then
-                git reset --hard HEAD
-                break
-              fi
-              reject_outside_surface
-              if ! validate_repo; then
-                echo "Repair did not validate; discarding only the current cycle."
-                git reset --hard HEAD
-                break
-              fi
-            fi
-
-            git add src/agi agi tests .continual/candidates
-            if git diff --cached --quiet; then
-              echo "No validated changes to persist in cycle $cycle."
-              break
-            fi
-            git commit -m "Continue AGI autonomy cycle ${cycle} (${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT})"
-            echo "Validated cycle $cycle committed; immediately continuing to the next milestone."
-          done
-      - name: Validate accumulated autonomous work
-        shell: bash
-        run: |
-          set -euo pipefail
-          pytest -q
-          python -m compileall -q src
-          agi-benchmark validate-suite >/dev/null
-          agi-benchmark validate-workspace-suite >/dev/null
-          agi-benchmark validate-heldout-suite >/dev/null
-      - name: Persist exact continuation to autonomous branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git rev-list --count origin/main..HEAD | grep -qx '0'; then
-            echo "No persistent autonomous commit this run."
-            exit 0
-          fi
-          git push origin "HEAD:$AUTONOMY_BRANCH"
-      - name: Keep an integration PR open
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! gh pr list --head "$AUTONOMY_BRANCH" --base main --state open --json number --jq '.[0].number' | grep -q '[0-9]'; then
-            gh pr create \
-              --base main \
-              --head "$AUTONOMY_BRANCH" \
-              --title "Continuous AGI development" \
-              --body "Persisted work produced by the constrained unfinished-AGI continuity loop. Merge only after normal CI and review; reference or self-reported results do not establish AGI." || true
-          fi
+      - name: Confirm Copilot automation shutdown
+        run: echo "Copilot-based AGI automation is disabled."
