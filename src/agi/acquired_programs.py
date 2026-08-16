@@ -25,6 +25,7 @@ _BINARY_SIGNATURES = {
     "concat_string": ("string", "string", "string"),
     "concat_sequence": ("sequence", "sequence", "sequence"),
 }
+_FOLD_IDENTITIES = {"add": 0, "mul": 1}
 
 
 class AcquiredProgramError(ValueError):
@@ -123,6 +124,27 @@ def _infer_expression(
             raise AcquiredProgramError("const node has invalid domain")
         _validate_constant(expression.get("value"), str(domain))
         return str(domain), 1, depth
+    if op == "fold_numeric":
+        if set(expression) != {"op", "arg", "reducer", "initial"}:
+            raise AcquiredProgramError(
+                "fold_numeric node fields must be exactly op,arg,reducer,initial"
+            )
+        arg = expression.get("arg")
+        reducer = expression.get("reducer")
+        initial = expression.get("initial")
+        if not isinstance(arg, Mapping):
+            raise AcquiredProgramError("fold_numeric requires an object arg")
+        if reducer not in _FOLD_IDENTITIES:
+            raise AcquiredProgramError("fold_numeric reducer must be add or mul")
+        _validate_constant(initial, "numeric")
+        actual, nodes, child_depth = _infer_expression(
+            arg,
+            input_domain=input_domain,
+            depth=depth + 1,
+        )
+        if actual != "sequence":
+            raise AcquiredProgramError(f"fold_numeric expects sequence, got {actual}")
+        return "numeric", nodes + 1, max(depth, child_depth)
     if op in _UNARY_SIGNATURES:
         if set(expression) != {"op", "arg"} or not isinstance(expression.get("arg"), Mapping):
             raise AcquiredProgramError(f"{op} node requires exactly one arg")
@@ -229,6 +251,29 @@ def execute_program(descriptor: Mapping[str, Any], value: Any) -> Any:
         if op == "const":
             domain = str(node["domain"])
             return _check_runtime_value(node["value"], domain, max_output_length), domain
+        if op == "fold_numeric":
+            sequence, domain = run(node["arg"])
+            if domain != "sequence":
+                raise AcquiredProgramError("program type changed after validation")
+            reducer = str(node["reducer"])
+            accumulator = _check_runtime_value(
+                node["initial"], "numeric", max_output_length
+            )
+            for item in sequence:
+                remaining -= 1
+                if remaining < 0:
+                    raise AcquiredProgramError("program exceeded deterministic step budget")
+                item = _check_runtime_value(item, "numeric", max_output_length)
+                if reducer == "add":
+                    accumulator = accumulator + item
+                elif reducer == "mul":
+                    accumulator = accumulator * item
+                else:  # pragma: no cover - validation makes this unreachable.
+                    raise AcquiredProgramError(reducer)
+                accumulator = _check_runtime_value(
+                    accumulator, "numeric", max_output_length
+                )
+            return accumulator, "numeric"
         if op in _UNARY_SIGNATURES:
             arg, domain = run(node["arg"])
             required, output_domain = _UNARY_SIGNATURES[op]
@@ -306,19 +351,24 @@ def synthesize_program(
     output_domain: str,
     examples: Sequence[ProgramExample],
     max_nodes: int = 7,
+    allow_sequence_folds: bool = True,
 ) -> AcquiredProgram:
     """Deterministically synthesize a pure typed expression from demonstrations.
 
     The search is over a bounded typed expression grammar rather than a catalogue of named task
-    families. Behavioral deduplication keeps one minimal expression per observed behavior. The
-    resulting program is still inactive until the continual Candidate regression gate verifies its
-    exact scope on held-out measurements.
+    families. Behavioral deduplication keeps one minimal expression per observed behavior. Numeric
+    sequence folds are a generic bounded aggregation kernel added only after hidden tasks established
+    that the earlier length-only sequence grammar could not represent value-dependent aggregation.
+    The resulting program is still inactive until the continual Candidate regression gate verifies
+    its exact scope on held-out measurements.
     """
 
     if input_domain not in _ALLOWED_DOMAINS or output_domain not in _ALLOWED_DOMAINS:
         raise AcquiredProgramError("unsupported synthesis domain")
     if not isinstance(max_nodes, int) or isinstance(max_nodes, bool) or not 1 <= max_nodes <= 9:
         raise AcquiredProgramError("max_nodes must be an integer from 1 through 9")
+    if not isinstance(allow_sequence_folds, bool):
+        raise AcquiredProgramError("allow_sequence_folds must be boolean")
     if len(examples) < 3:
         raise AcquiredProgramError("at least three demonstrations are required")
     for item in examples:
@@ -366,6 +416,26 @@ def synthesize_program(
         match = add(1, domain, {"op": "const", "domain": domain, "value": constant})
         if match:
             return match
+
+    if (
+        allow_sequence_folds
+        and input_domain == "sequence"
+        and output_domain == "numeric"
+        and max_nodes >= 2
+    ):
+        for reducer, initial in _FOLD_IDENTITIES.items():
+            match = add(
+                2,
+                "numeric",
+                {
+                    "op": "fold_numeric",
+                    "arg": {"op": "input"},
+                    "reducer": reducer,
+                    "initial": initial,
+                },
+            )
+            if match:
+                return match
 
     for cost in range(2, max_nodes + 1):
         for op, (required, output) in _UNARY_SIGNATURES.items():
