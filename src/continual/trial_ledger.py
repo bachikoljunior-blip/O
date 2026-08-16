@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 _SAFE_ID = re.compile(r"^[A-Za-z0-9._-]+$")
+DEFAULT_MAX_TRIAL_ATTEMPTS = 8
 
 
 class TrialLedgerError(ValueError):
