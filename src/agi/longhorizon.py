@@ -4,7 +4,7 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 
 @dataclass(frozen=True)
@@ -80,12 +80,13 @@ def _checkpoint(state: _State) -> None:
 def _rollback(state: _State) -> None:
     if state.checkpoint is None:
         raise RuntimeError("rollback requested without checkpoint")
-    before = state.checkpoint_digest
-    state.phase = state.checkpoint["phase"]
-    state.workspace = dict(state.checkpoint["workspace"])
-    state.durable_memory = json.loads(json.dumps(state.checkpoint["durable_memory"]))
-    state.completed_phases = list(state.checkpoint["completed_phases"])
-    state.rollback_verified = _digest(state.checkpoint) == before
+    expected_digest = state.checkpoint_digest
+    restored = json.loads(json.dumps(state.checkpoint))
+    state.phase = restored["phase"]
+    state.workspace = dict(restored["workspace"])
+    state.durable_memory = restored["durable_memory"]
+    state.completed_phases = list(restored["completed_phases"])
+    state.rollback_verified = _digest(restored) == expected_digest
 
 
 def _observation(state: _State, *, failure: str | None = None) -> LongHorizonObservation:
@@ -100,7 +101,8 @@ def _observation(state: _State, *, failure: str | None = None) -> LongHorizonObs
 
 
 def _advance(state: _State) -> None:
-    order = ["learn", "checkpoint", "intervene", "recover", "retain", "regression", "finish"]
+    # Recovery is exceptional: successful risky work proceeds directly to delayed retention.
+    order = ["learn", "checkpoint", "intervene", "retain", "regression", "finish"]
     index = order.index(state.phase)
     if state.phase not in state.completed_phases:
         state.completed_phases.append(state.phase)
@@ -172,7 +174,7 @@ def _apply(state: _State, action: LongHorizonAction) -> str | None:
 
 
 def run_long_horizon(
-    agent_factory: callable,
+    agent_factory: Callable[[], LongHorizonAgent],
     *,
     max_turns: int = 24,
 ) -> LongHorizonResult:
@@ -202,8 +204,7 @@ def run_long_horizon(
                 failure = "fresh context failed to choose rollback"
                 continue
             state.phase = "recover"
-            error = _apply(state, action)
-            failure = error
+            failure = _apply(state, action)
             agent = agent_factory()
             continue
 
