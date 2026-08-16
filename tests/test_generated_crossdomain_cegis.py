@@ -30,7 +30,7 @@ def test_seeded_crossdomain_generator_varies_domains_and_compositions() -> None:
     families = set()
     domain_pairs = set()
     longest = 0
-    for index in range(40):
+    for index in range(100):
         descriptor, metadata, initial, diagnostic, final = generated_crossdomain_target(
             f"cross-family-{index}"
         )
@@ -52,7 +52,10 @@ def test_seeded_crossdomain_generator_varies_domains_and_compositions() -> None:
         ("string", "numeric"),
         ("sequence", "string"),
     }
-    assert len(set(descriptors)) >= 20
+    # The four schemas have 24 distinct parameterized programs in total:
+    # two case variants each for the two text transforms and ten affine variants each for
+    # string-length and sequence-fold compositions. A broad deterministic seed sweep must reach all.
+    assert len(set(descriptors)) == 24
     assert longest >= 7
 
 
