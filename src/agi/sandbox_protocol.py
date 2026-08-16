@@ -3,11 +3,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-from .longhorizon import LongHorizonAgent, LongHorizonResult, run_long_horizon
+from .longhorizon import LongHorizonAgent, LongHorizonResult, LongHorizonTask, run_long_horizon
 
 
 _INSTANCE_ID = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
@@ -18,9 +18,16 @@ _REQUIRED_CHECKPOINT_KEYS = {"phase", "workspace", "durable_memory", "completed_
 class SandboxProtocolInstance:
     instance_id: str
     max_turns: int = 24
+    task: LongHorizonTask = field(default_factory=LongHorizonTask)
 
     def commitment(self) -> str:
-        return _digest({"instance_id": self.instance_id, "max_turns": self.max_turns})
+        return _digest(
+            {
+                "instance_id": self.instance_id,
+                "max_turns": self.max_turns,
+                "task_commitment": self.task.commitment(),
+            }
+        )
 
 
 @dataclass(frozen=True)
@@ -36,6 +43,8 @@ class CheckpointVerification:
 @dataclass(frozen=True)
 class SandboxInstanceResult:
     instance_id: str
+    task_id: str
+    task_commitment: str
     instance_commitment: str
     checkpoint_path: str
     checkpoint_verified: bool
@@ -54,6 +63,7 @@ class SandboxInstanceResult:
 class SandboxProtocolReport:
     passed: bool
     instance_count: int
+    varied_task_count: int
     passed_instances: int
     verified_checkpoints: int
     rollback_passes: int
@@ -72,36 +82,78 @@ def _digest(value: Any) -> str:
     ).hexdigest()
 
 
+def _task_for_index(index: int) -> LongHorizonTask:
+    return LongHorizonTask(
+        task_id=f"retention-variant-{index:02d}",
+        memory_key=f"retained-rule-{index:02d}",
+        memory_value=f"RULE-{index:02d}-VALUE-{index * 17:03d}",
+        protected_path=f"protected-{index:02d}.txt",
+        protected_value=f"BASELINE-PROTECTED-{index:02d}",
+        corrupted_value=f"CORRUPTED-{index:02d}",
+        result_path=f"result-{index:02d}.txt",
+        result_content=f"completed-after-recovery-{index:02d}",
+    )
+
+
 def deterministic_sandbox_instances(count: int = 3) -> tuple[SandboxProtocolInstance, ...]:
-    """Return a deterministic repeated long-horizon protocol for CI and reference validation."""
+    """Return deterministic but semantically varied long-horizon task instances."""
     if count < 3:
         raise ValueError("sandbox protocol requires at least three repeated instances")
-    return tuple(SandboxProtocolInstance(instance_id=f"longhorizon-{index:02d}") for index in range(1, count + 1))
+    return tuple(
+        SandboxProtocolInstance(
+            instance_id=f"longhorizon-{index:02d}",
+            task=_task_for_index(index),
+        )
+        for index in range(1, count + 1)
+    )
 
 
 def validate_sandbox_instances(instances: Iterable[SandboxProtocolInstance]) -> dict[str, Any]:
     items = tuple(instances)
     reasons: list[str] = []
     ids = [item.instance_id for item in items]
+    task_ids = [item.task.task_id for item in items]
+    task_commitments = [item.task.commitment() for item in items]
+    memory_keys = [item.task.memory_key for item in items]
     if len(items) < 3:
         reasons.append("at least three repeated instances are required")
     if len(ids) != len(set(ids)):
         reasons.append("instance ids must be unique")
+    if len(task_ids) != len(set(task_ids)):
+        reasons.append("task ids must be unique")
+    if len(task_commitments) != len(set(task_commitments)):
+        reasons.append("task variants must be distinct")
+    if len(memory_keys) != len(set(memory_keys)):
+        reasons.append("retained memory keys must vary across instances")
     for item in items:
         if not _INSTANCE_ID.fullmatch(item.instance_id):
             reasons.append(f"invalid instance id: {item.instance_id}")
         if item.max_turns < 8:
             reasons.append(f"{item.instance_id} max_turns must be at least 8")
+        task = item.task
+        if not task.task_id or not task.memory_key or not task.protected_path or not task.result_path:
+            reasons.append(f"{item.instance_id} task fields must be non-empty")
+        if task.protected_path == task.result_path:
+            reasons.append(f"{item.instance_id} protected and result paths must differ")
+        if task.protected_value == task.corrupted_value:
+            reasons.append(f"{item.instance_id} corruption must differ from protected baseline")
     return {
         "valid": not reasons,
         "instance_count": len(items),
+        "varied_task_count": len(set(task_commitments)),
         "instance_commitments": [item.commitment() for item in items],
+        "task_commitments": task_commitments,
         "reasons": reasons,
     }
 
 
-def verify_persisted_checkpoint(path: Path) -> CheckpointVerification:
-    """Verify a long-horizon checkpoint envelope without trusting its stored digest."""
+def verify_persisted_checkpoint(
+    path: Path,
+    *,
+    task: LongHorizonTask | None = None,
+) -> CheckpointVerification:
+    """Verify checkpoint integrity plus task-specific retained/protected preconditions."""
+    active_task = task or LongHorizonTask()
     if not path.exists():
         return CheckpointVerification(False, None, "checkpoint file is missing")
     try:
@@ -126,8 +178,10 @@ def verify_persisted_checkpoint(path: Path) -> CheckpointVerification:
     completed = checkpoint.get("completed_phases")
     if not isinstance(workspace, dict) or not isinstance(durable_memory, dict) or not isinstance(completed, list):
         return CheckpointVerification(False, None, "checkpoint payload has invalid field types")
-    if workspace.get("protected.txt") != "BASELINE-PROTECTED":
-        return CheckpointVerification(False, None, "protected baseline is missing from checkpoint")
+    if workspace.get(active_task.protected_path) != active_task.protected_value:
+        return CheckpointVerification(False, None, "task-specific protected baseline is missing from checkpoint")
+    if durable_memory.get(active_task.memory_key) != active_task.memory_value:
+        return CheckpointVerification(False, None, "task-specific retained memory is missing from checkpoint")
     computed = _digest(checkpoint)
     if computed != stored_digest:
         return CheckpointVerification(False, computed, "checkpoint digest mismatch")
@@ -143,6 +197,8 @@ def _instance_result(
     passed = bool(result.passed and verification.valid)
     return SandboxInstanceResult(
         instance_id=instance.instance_id,
+        task_id=instance.task.task_id,
+        task_commitment=instance.task.commitment(),
         instance_commitment=instance.commitment(),
         checkpoint_path=checkpoint_path.as_posix(),
         checkpoint_verified=verification.valid,
@@ -161,12 +217,12 @@ def run_sandbox_protocol(
     sandbox_root: Path,
     instances: Iterable[SandboxProtocolInstance] | None = None,
 ) -> SandboxProtocolReport:
-    """Run repeated isolated long-horizon instances with durable checkpoint verification.
+    """Run repeated isolated, varied long-horizon tasks with durable checkpoint verification.
 
-    Each instance receives its own checkpoint path. The long-horizon harness replaces the agent
-    context after its injected failure and must reload that checkpoint to recover. The wrapper then
-    independently re-hashes the persisted checkpoint and requires rollback, delayed retention, and
-    protected-regression checks on every repeated instance. This is harness/reference evidence only.
+    Every instance varies the retained key/value, protected state, and required post-recovery output.
+    The delayed-recall answer is not repeated in its retain-phase instruction. The wrapper requires
+    durable rollback, retained-memory recovery, and protected-regression success on every variant.
+    This remains harness/reference evidence only.
     """
     protocol = tuple(instances) if instances is not None else deterministic_sandbox_instances()
     validation = validate_sandbox_instances(protocol)
@@ -184,8 +240,9 @@ def run_sandbox_protocol(
             lambda instance=instance: agent_factory(instance),
             max_turns=instance.max_turns,
             checkpoint_path=checkpoint_path,
+            task=instance.task,
         )
-        verification = verify_persisted_checkpoint(checkpoint_path)
+        verification = verify_persisted_checkpoint(checkpoint_path, task=instance.task)
         results.append(_instance_result(instance, checkpoint_path, result, verification))
 
     passed_instances = sum(item.passed for item in results)
@@ -194,9 +251,11 @@ def run_sandbox_protocol(
     retention_passes = sum(item.retention_verified for item in results)
     protected_regression_passes = sum(item.protected_regression_verified for item in results)
     instance_count = len(results)
+    varied_task_count = len({item.task_commitment for item in results})
     digest_payload = [
         {
             "instance_commitment": item.instance_commitment,
+            "task_commitment": item.task_commitment,
             "checkpoint_digest": item.checkpoint_digest,
             "final_digest": item.final_digest,
             "passed": item.passed,
@@ -205,6 +264,7 @@ def run_sandbox_protocol(
     ]
     passed = bool(
         instance_count >= 3
+        and varied_task_count == instance_count
         and passed_instances == instance_count
         and verified_checkpoints == instance_count
         and rollback_passes == instance_count
@@ -214,6 +274,7 @@ def run_sandbox_protocol(
     return SandboxProtocolReport(
         passed=passed,
         instance_count=instance_count,
+        varied_task_count=varied_task_count,
         passed_instances=passed_instances,
         verified_checkpoints=verified_checkpoints,
         rollback_passes=rollback_passes,
