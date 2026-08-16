@@ -27,6 +27,26 @@ def test_reference_long_horizon_requires_restart_rollback_and_retention():
     assert "regression" in report.completed_phases
 
 
+def test_checkpoint_persisted_and_reloaded(tmp_path):
+    # persist checkpoint to disk and ensure recovery uses the durable checkpoint
+    creations = 0
+
+    def factory():
+        nonlocal creations
+        creations += 1
+        return ReferenceLongHorizonAgent()
+
+    ckpt = tmp_path / "checkpoint.json"
+    report = run_long_horizon(factory, checkpoint_path=ckpt)
+    assert report.passed is True
+    # checkpoint file should exist and contain digest and checkpoint
+    assert ckpt.exists()
+    data = ckpt.read_text(encoding="utf-8")
+    assert "digest" in data and "checkpoint" in data
+    # verify that at least two agent creations occurred (fresh context semantics)
+    assert creations >= 2
+
+
 def test_agent_that_refuses_rollback_cannot_pass():
     class RefuseRollback(ReferenceLongHorizonAgent):
         def act(self, observation):
