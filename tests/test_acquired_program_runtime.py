@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 import continual.engine as engine_module
 from agi.acquired_program_runtime import run_acquired_program_runtime_campaign
 
@@ -79,3 +81,55 @@ def test_hidden_campaign_measures_persistent_before_after_gain_and_retains_negat
     assert "expected" not in persisted["runtime_results"][0]
     assert "query_sha256" in persisted["runtime_results"][0]
     assert "internally produced" in persisted["claim_boundary"]
+
+
+def test_verified_campaign_replay_is_trial_idempotent_and_still_rejects_semantic_conflicts(
+    runtime_repo: Path,
+    monkeypatch,
+) -> None:
+    seed = "secret-heldout-runtime-replay-seed-912"
+    NeverExecuteModelClient.calls = []
+    monkeypatch.setattr(engine_module, "ModelClient", NeverExecuteModelClient)
+
+    first = run_acquired_program_runtime_campaign(runtime_repo, seed)
+    candidate_path = (
+        runtime_repo
+        / ".continual"
+        / "candidates"
+        / first["candidate_id"]
+        / "candidate.json"
+    )
+    evidence_path = (
+        runtime_repo
+        / ".continual"
+        / "evidence"
+        / "acquired-program-runtime"
+        / f"{first['campaign_id']}.json"
+    )
+    candidate_before = candidate_path.read_text(encoding="utf-8")
+    evidence_before = evidence_path.read_text(encoding="utf-8")
+    trials_before = {
+        path.name: path.read_text(encoding="utf-8")
+        for path in sorted((candidate_path.parent / "trials").glob("*.json"))
+    }
+
+    replay = run_acquired_program_runtime_campaign(runtime_repo, seed)
+
+    assert replay["passed"] is True
+    assert replay["digest"] == first["digest"]
+    assert candidate_path.read_text(encoding="utf-8") == candidate_before
+    assert evidence_path.read_text(encoding="utf-8") == evidence_before
+    assert {
+        path.name: path.read_text(encoding="utf-8")
+        for path in sorted((candidate_path.parent / "trials").glob("*.json"))
+    } == trials_before
+    assert NeverExecuteModelClient.calls == []
+
+    conflicting = json.loads(candidate_before)
+    conflicting["acquired_program"]["description"] = "tampered semantic description"
+    candidate_path.write_text(
+        json.dumps(conflicting, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="conflicts with campaign"):
+        run_acquired_program_runtime_campaign(runtime_repo, seed)
