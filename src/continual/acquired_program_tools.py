@@ -164,12 +164,17 @@ def acquired_program_candidate_payload(
 ) -> dict[str, Any]:
     """Build an inactive acquired-program Candidate; activation still requires regression."""
 
+    canonical_program = json.loads(
+        json.dumps(dict(program), ensure_ascii=False, sort_keys=True, allow_nan=False)
+    )
+    if not isinstance(canonical_program, dict):
+        raise AcquiredProgramToolError("acquired program descriptor must serialize to an object")
     spec = AcquiredProgramToolSpec(
         tool_id=tool_id,
         candidate_id=candidate_id,
         scope=scope,
         description=description,
-        program=dict(program),
+        program=canonical_program,
     )
     spec.validate()
     return {
@@ -186,6 +191,6 @@ def acquired_program_candidate_payload(
             "tool_id": tool_id,
             "scope": scope,
             "description": description,
-            "program": dict(program),
+            "program": canonical_program,
         },
     }

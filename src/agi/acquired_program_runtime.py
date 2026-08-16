@@ -10,7 +10,11 @@ from continual.acquired_program_tools import (
     AcquiredProgramToolError,
     acquired_program_candidate_payload,
 )
-from continual.candidate_regression import record_candidate_regression
+from continual.candidate_regression import (
+    candidate_spec_payload,
+    candidate_verified_for_scope,
+    record_candidate_regression,
+)
 from continual.learned_tools import LearnedToolError
 from continual.learning_engine import LearningEnabledEngine
 
@@ -130,18 +134,12 @@ def _measurement(task_id: str, repeat: int, score: float, artifact: Any) -> dict
     }
 
 
-def _stable_candidate(value: Mapping[str, Any]) -> dict[str, Any]:
-    stable = dict(value)
-    for key in (
-        "status",
-        "scope_states",
-        "verified_scope_states",
-        "regression_decision_refs",
-        "supporting_evidence",
-        "contradictory_evidence",
-    ):
-        stable.pop(key, None)
-    return stable
+def _candidate_trial_snapshot(root: Path, candidate_id: str) -> dict[str, str]:
+    trial_dir = root / ".continual" / "candidates" / candidate_id / "trials"
+    return {
+        path.name: _digest(json.loads(path.read_text(encoding="utf-8")))
+        for path in sorted(trial_dir.glob("*.json"))
+    }
 
 
 def _new_runtime_run(engine: LearningEnabledEngine) -> str:
@@ -188,6 +186,7 @@ def run_acquired_program_runtime_campaign(
     receives demonstrations only. An intentionally adverse protected-task trial must fail before the
     exact same Candidate may later pass with intact protected measurements. After promotion, a fresh
     Engine instance executes the same held-out inputs mechanically and reuses identical invocations.
+    A later exact replay reuses an already verified semantic Candidate instead of spending new trials.
     """
 
     if not isinstance(seed, str) or not seed:
@@ -246,8 +245,51 @@ def run_acquired_program_runtime_campaign(
     ]
     if candidate_path.exists():
         existing = json.loads(candidate_path.read_text(encoding="utf-8"))
-        if not isinstance(existing, Mapping) or _stable_candidate(existing) != _stable_candidate(candidate):
+        if (
+            not isinstance(existing, Mapping)
+            or candidate_spec_payload(existing) != candidate_spec_payload(candidate)
+        ):
             raise ValueError("existing acquired-program runtime Candidate conflicts with campaign")
+        if candidate_verified_for_scope(root, existing, ACQUIRED_RUNTIME_SCOPE):
+            evidence_path = (
+                root
+                / ".continual"
+                / "evidence"
+                / "acquired-program-runtime"
+                / f"acquired-runtime-{token}.json"
+            )
+            if not evidence_path.is_file():
+                raise RuntimeError("verified acquired-program Candidate is missing its campaign evidence")
+            persisted = json.loads(evidence_path.read_text(encoding="utf-8"))
+            if not isinstance(persisted, Mapping):
+                raise RuntimeError("persisted acquired-program campaign evidence must be an object")
+            persisted_report = dict(persisted)
+            persisted_digest = persisted_report.get("digest")
+            recomputed_digest = _digest(
+                {key: value for key, value in persisted_report.items() if key != "digest"}
+            )
+            if persisted_digest != recomputed_digest:
+                raise RuntimeError("persisted acquired-program campaign evidence digest is invalid")
+            if not (
+                persisted_report.get("passed") is True
+                and persisted_report.get("candidate_id") == candidate_id
+                and persisted_report.get("tool_id") == tool_id
+                and persisted_report.get("scope") == ACQUIRED_RUNTIME_SCOPE
+                and persisted_report.get("evaluator_commitment") == evaluator_commitment
+            ):
+                raise RuntimeError("persisted acquired-program campaign evidence conflicts with replay")
+
+            trial_snapshot_before = _candidate_trial_snapshot(root, candidate_id)
+            replay_engine = engine_factory(root)
+            replay_run_id = _new_runtime_run(replay_engine)
+            for query, expected in zip(heldout_inputs, heldout_expected, strict=True):
+                output = _runtime_call(replay_engine, replay_run_id, tool_id=tool_id, value=query)
+                if output["result"]["output"] != expected:
+                    raise RuntimeError("verified acquired-program Candidate failed exact replay")
+            trial_snapshot_after = _candidate_trial_snapshot(root, candidate_id)
+            if trial_snapshot_before != trial_snapshot_after:
+                raise RuntimeError("verified acquired-program replay consumed Candidate trial budget")
+            return persisted_report
     else:
         _atomic_json(candidate_path, candidate)
 
