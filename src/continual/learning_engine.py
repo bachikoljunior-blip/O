@@ -2,10 +2,16 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
+from pathlib import Path
 from typing import Any, Mapping
 
 from .acquired_program_tools import AcquiredProgramRegistry, AcquiredProgramToolError
 from .candidate_regression import candidate_verified_for_scope
+from .contracted_external_tools import (
+    ContractedExternalToolError,
+    ContractedExternalToolRegistry,
+    ExternalToolAdapter,
+)
 from .contracts import validate_component_output
 from .engine import Engine
 from .learned_tools import LearnedToolError, LearnedToolRegistry
@@ -17,9 +23,21 @@ class LearningEnabledEngine(Engine):
     A semantic Candidate evaluator may select an unverified Candidate for one explicit trial, but it
     cannot promote that Candidate. Continued USE_CANDIDATE/ACTIVE_FOR_SCOPE selection requires a
     matching deterministic regression record bound to the current Candidate body and prompt artifact.
-    Verified learned-tool and acquired-program calls are executed mechanically and journaled for
-    idempotent retry.
+    Verified learned-tool, acquired-program, and host-bound contracted external-tool calls are executed
+    mechanically and journaled for idempotent retry.
     """
+
+    def __init__(
+        self,
+        root: Path,
+        *,
+        external_tool_adapters: Mapping[str, ExternalToolAdapter] | None = None,
+    ) -> None:
+        super().__init__(root)
+        self._external_tool_registry = ContractedExternalToolRegistry(
+            self.root,
+            external_tool_adapters or {},
+        )
 
     def _learned_tool_registry(self) -> LearnedToolRegistry:
         return LearnedToolRegistry(self.root)
@@ -27,14 +45,19 @@ class LearningEnabledEngine(Engine):
     def _acquired_program_registry(self) -> AcquiredProgramRegistry:
         return AcquiredProgramRegistry(self.root)
 
+    def _contracted_external_tool_registry(self) -> ContractedExternalToolRegistry:
+        return self._external_tool_registry
+
     def _verified_tool_catalog(self) -> tuple[dict[str, Any], ...]:
         learned = self._learned_tool_registry()
         acquired = self._acquired_program_registry()
+        external = self._contracted_external_tool_registry()
         candidates_dir = self.root / ".continual" / "candidates"
         if not candidates_dir.exists():
             return ()
         learned_scopes: set[str] = set()
         acquired_scopes: set[str] = set()
+        external_scopes: set[str] = set()
         for path in sorted(candidates_dir.glob("*/candidate.json")):
             raw = json.loads(path.read_text(encoding="utf-8"))
             if not isinstance(raw, Mapping):
@@ -46,6 +69,8 @@ class LearningEnabledEngine(Engine):
                 learned_scopes.add(scope)
             elif raw.get("target_component") == "acquired_program":
                 acquired_scopes.add(scope)
+            elif raw.get("target_component") == "contracted_external_tool":
+                external_scopes.add(scope)
         catalog: dict[tuple[str, str], dict[str, Any]] = {}
         for scope in sorted(learned_scopes):
             for descriptor in learned.descriptors(scope):
@@ -61,6 +86,14 @@ class LearningEnabledEngine(Engine):
                         f"duplicate verified tool identity {scope}:{key[1]}"
                     )
                 catalog[key] = descriptor
+        for scope in sorted(external_scopes):
+            for descriptor in external.descriptors(scope):
+                key = (scope, str(descriptor["tool_id"]))
+                if key in catalog:
+                    raise ContractedExternalToolError(
+                        f"duplicate verified tool identity {scope}:{key[1]}"
+                    )
+                catalog[key] = descriptor
         return tuple(catalog[key] for key in sorted(catalog))
 
     def _scope_tool_descriptors(self, scope: str) -> dict[str, dict[str, Any]]:
@@ -71,6 +104,13 @@ class LearningEnabledEngine(Engine):
             tool_id = str(descriptor["tool_id"])
             if tool_id in selected:
                 raise AcquiredProgramToolError(
+                    f"duplicate verified tool identity {scope}:{tool_id}"
+                )
+            selected[tool_id] = descriptor
+        for descriptor in self._contracted_external_tool_registry().descriptors(scope):
+            tool_id = str(descriptor["tool_id"])
+            if tool_id in selected:
+                raise ContractedExternalToolError(
                     f"duplicate verified tool identity {scope}:{tool_id}"
                 )
             selected[tool_id] = descriptor
@@ -183,8 +223,15 @@ class LearningEnabledEngine(Engine):
             )
             return output
 
-        if descriptor.get("program_kind") == "acquired_program":
+        program_kind = descriptor.get("program_kind")
+        if program_kind == "acquired_program":
             answer = self._acquired_program_registry().apply(
+                scope=scope,
+                tool_id=tool_id,
+                value=call["input"],
+            )
+        elif program_kind == "contracted_external_tool":
+            answer = self._contracted_external_tool_registry().apply(
                 scope=scope,
                 tool_id=tool_id,
                 value=call["input"],
@@ -195,24 +242,25 @@ class LearningEnabledEngine(Engine):
                 tool_id=tool_id,
                 value=call["input"],
             )
+        support_sha256 = descriptor.get("support_sha256") or descriptor.get("adapter_sha256")
         output = {
             "result": {
                 "status": "implemented",
                 "execution_kind": "verified_learned_tool",
-                "program_kind": descriptor.get("program_kind"),
+                "program_kind": program_kind,
                 "tool_id": tool_id,
                 "scope": scope,
                 "output": answer,
                 "candidate_id": descriptor["candidate_id"],
-                "support_sha256": descriptor["support_sha256"],
+                "support_sha256": support_sha256,
             },
             "local_learn": {"decision": "NO_CHANGE", "candidates": []},
             "fragment": {
                 "component": "execute",
                 "purpose": "mechanical execution of an exact-scope regression-verified learned capability",
                 "observations": [
-                    "The learned capability and its regression record were re-verified before execution.",
-                    "Acquired programs run only in the pure bounded expression interpreter; no shell, network, file, or model-generated source code is executed by the capability.",
+                    "The learned capability and its deterministic regression record were re-verified before execution.",
+                    "Acquired programs remain in the pure bounded interpreter; contracted external tools require a host-bound adapter identity and enforce zero effects plus typed call/byte resource limits.",
                 ],
                 "evidence_refs": [
                     f".continual/candidates/{descriptor['candidate_id']}/candidate.json"
@@ -228,7 +276,7 @@ class LearningEnabledEngine(Engine):
                 "invocation_id": invocation_id,
                 "component": "execute",
                 "execution_kind": "verified_learned_tool",
-                "program_kind": descriptor.get("program_kind"),
+                "program_kind": program_kind,
                 "payload_digest": self.store.stable_digest(invocation_payload),
                 "status": "complete",
                 "attempt": 1,
@@ -245,7 +293,7 @@ class LearningEnabledEngine(Engine):
                 "tool_id": tool_id,
                 "scope": scope,
                 "candidate_id": descriptor["candidate_id"],
-                "program_kind": descriptor.get("program_kind"),
+                "program_kind": program_kind,
             },
         )
         return output
