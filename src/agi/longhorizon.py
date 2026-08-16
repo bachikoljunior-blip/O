@@ -177,6 +177,7 @@ def run_long_horizon(
     agent_factory: Callable[[], LongHorizonAgent],
     *,
     max_turns: int = 24,
+    checkpoint_path: Path | None = None,
 ) -> LongHorizonResult:
     """Evaluate durable planning across fresh contexts, failure, rollback, and delayed retention.
 
@@ -203,15 +204,40 @@ def run_long_horizon(
             if action.kind != "rollback":
                 failure = "fresh context failed to choose rollback"
                 continue
+            # Before performing rollback, ensure durable checkpoint is reloaded from disk
+            # to simulate a fresh process that lost in-memory private state but can access
+            # durable checkpoints persisted externally.
+            if checkpoint_path is not None and state.checkpoint is None and checkpoint_path.exists():
+                try:
+                    raw = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+                    state.checkpoint = raw.get("checkpoint")
+                    state.checkpoint_digest = raw.get("digest")
+                except Exception:
+                    # If load fails, leave checkpoint as None and let _rollback raise
+                    pass
             state.phase = "recover"
             failure = _apply(state, action)
+            # After recovery, create a fresh agent context for continued work
             agent = agent_factory()
             continue
 
         error = _apply(state, action)
         if error:
             failure = error
+            # When the injected transient failure occurs we simulate a process boundary:
+            # drop any in-process private checkpoint so the fresh context must rely on
+            # the persisted durable checkpoint (if provided).
             if state.phase == "intervene" and state.injected_failures == 1:
+                # Persist checkpoint to disk if requested
+                if checkpoint_path is not None and state.checkpoint is not None:
+                    payload = {"checkpoint": state.checkpoint, "digest": state.checkpoint_digest}
+                    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+                    checkpoint_path.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+                    # Simulate loss of private in-memory checkpoint when creating fresh agent
+                    # (only when an external durable checkpoint was written)
+                    state.checkpoint = None
+                    state.checkpoint_digest = None
+                # Create a fresh agent context for continued work (fresh process semantics)
                 agent = agent_factory()
             continue
 
