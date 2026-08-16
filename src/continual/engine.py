@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import json
 import platform
+import re
 import subprocess
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .contracts import ContractError, validate_component_output
 from .openai_client import ModelClient
 from .store import Store
 
@@ -18,6 +21,31 @@ SEMANTIC_COMPONENTS = {
     "task_evaluate": "task_evaluate",
     "consolidate_episode": "consolidate_episode",
     "learn": "learn",
+}
+TERMINAL_STATUSES = {"finished", "blocked", "cancelled"}
+_ACTIVE_DEFAULTS = {
+    "preflight_evaluator": "prompts/candidate_evaluate.md",
+    "entry": "prompts/entry.md",
+    "root": "prompts/root.md",
+    "execute": "prompts/execute.md",
+    "task_evaluate": "prompts/task_evaluate.md",
+    "consolidate_episode": "prompts/consolidate_episode.md",
+    "learn": "prompts/learn.md",
+    "runner": "python-engine-v2",
+}
+_CANDIDATE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$")
+_LIST_FIELDS = {
+    "supporting_evidence",
+    "contradictory_evidence",
+    "rejected_reasons",
+    "depends_on",
+    "conflicts_with",
+    "tested_with",
+    "incompatible_with",
+    "supersedes",
+    "source_refs",
+    "applicability",
+    "non_applicability",
 }
 
 
@@ -34,167 +62,507 @@ class Engine:
     def candidate_index_path(self) -> Path:
         return self.root / ".continual" / "candidates" / "index.json"
 
+    @property
+    def active_components_path(self) -> Path:
+        return self.root / ".continual" / "system" / "active-components.json"
+
+    def _active_components(self) -> dict[str, Any]:
+        value = self.store.read_json(self.active_components_path, {})
+        if not isinstance(value, dict):
+            value = {}
+        merged = dict(_ACTIVE_DEFAULTS)
+        merged.update(value)
+        return merged
+
+    def _component_prompt_path(self, component: str) -> str:
+        active = self._active_components()
+        key = "preflight_evaluator" if component == "candidate_evaluate" else component
+        raw = active.get(key) or _ACTIVE_DEFAULTS[key]
+        if not isinstance(raw, str) or not raw:
+            raise ValueError(f"active component path for {component} must be a string")
+        path = (self.root / raw).resolve()
+        if path != self.root and self.root not in path.parents:
+            raise ValueError(f"active component path escapes repository: {raw}")
+        if not path.is_file():
+            raise FileNotFoundError(raw)
+        return path.relative_to(self.root).as_posix()
+
     def environment(self) -> dict[str, Any]:
         try:
-            commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=self.root, text=True).strip()
+            commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=self.root,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
         except Exception:
             commit = None
+        active = self._active_components()
         return {
-            "model": self.model.model,
+            "model": getattr(self.model, "model", None),
             "python": platform.python_version(),
             "os": platform.platform(),
             "repository_commit": commit,
-            "runner": "python-engine-v1",
+            "runner": active.get("runner", "python-engine-v2"),
+            "active_components_digest": self.store.stable_digest(active),
         }
 
-    def start(self, request: str) -> str:
+    def start(self, request: str, *, max_steps: int = 64) -> str:
+        if not isinstance(request, str) or not request.strip():
+            raise ValueError("request must be a non-empty string")
         run_id = self.store.new_id("run")
         rd = self.store.run_dir(run_id)
-        rd.mkdir(parents=True, exist_ok=True)
-        (rd / "request.md").write_text(request, encoding="utf-8")
-        self.store.atomic_json(rd / "snapshot.json", {
-            "run_id": run_id,
-            "status": "continue",
-            "phase": "entry_pending",
-            "revision": 0,
-            "environment": self.environment(),
-        })
-        self.store.append_event(run_id, {"type": "run_started", "run_id": run_id})
-        # Runner selection is recorded at the run boundary. The running Python
-        # process itself is never hot-swapped mid-run.
-        runner_eval = self._preflight(run_id, "runner", {"component": "runner", "scope": "new-run"})
+        rd.mkdir(parents=True, exist_ok=False)
+        self.store.atomic_text(rd / "request.md", request)
+        self.store.atomic_json(
+            rd / "snapshot.json",
+            {
+                "run_id": run_id,
+                "status": "continue",
+                "phase": "entry_pending",
+                "revision": 0,
+                "created_at": self.store.utc_now(),
+                "environment": self.environment(),
+                "continuation_stack": [],
+                "error_count": 0,
+            },
+        )
+        self.store.append_event(run_id, {"type": "run_started"})
+        runner_eval = self._preflight(
+            run_id,
+            "runner",
+            {"component": "runner", "scope": "new-run", "request_digest": self.store.stable_digest(request)},
+        )
         self.store.atomic_json(rd / "preflight" / "runner.json", runner_eval)
-        self.resume(run_id)
+        self.resume(run_id, max_steps=max_steps)
         return run_id
 
     def _index(self) -> dict[str, Any]:
-        return self.store.read_json(self.candidate_index_path, {"schema_version": 1, "candidates": []})
+        value = self.store.read_json(
+            self.candidate_index_path,
+            {"schema_version": 1, "candidates": []},
+        )
+        if not isinstance(value, dict):
+            raise ValueError("candidate index must be an object")
+        if not isinstance(value.get("candidates"), list):
+            value["candidates"] = []
+        return value
 
     def _write_index(self, index: dict[str, Any]) -> None:
-        self.store.atomic_json(self.candidate_index_path, index)
+        value = deepcopy(index)
+        value.setdefault("schema_version", 1)
+        candidates = [item for item in value.get("candidates", []) if isinstance(item, dict)]
+        candidates.sort(key=lambda item: str(item.get("candidate_id", "")))
+        value["candidates"] = candidates
+        self.store.atomic_json(self.candidate_index_path, value)
 
-    def _register_candidates(self, source: Any, source_ref: str) -> None:
+    def _candidate_path(self, candidate_id: str) -> Path:
+        return self.root / ".continual" / "candidates" / candidate_id / "candidate.json"
+
+    def _candidate_by_id(self, candidate_id: str) -> dict[str, Any] | None:
+        if not _CANDIDATE_ID.fullmatch(candidate_id):
+            return None
+        path = self._candidate_path(candidate_id)
+        value = self.store.read_json(path) if path.exists() else None
+        return value if isinstance(value, dict) else None
+
+    @staticmethod
+    def _dedupe_list(values: list[Any]) -> list[Any]:
+        seen: set[str] = set()
+        result: list[Any] = []
+        for value in values:
+            key = json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append(value)
+        return result
+
+    def _candidate_id_for(self, proposal: dict[str, Any], source_ref: str) -> str:
+        requested = proposal.get("candidate_id")
+        if isinstance(requested, str) and _CANDIDATE_ID.fullmatch(requested):
+            return requested
+        digest = self.store.stable_digest(
+            {
+                "target": proposal.get("target_component"),
+                "scope": proposal.get("expected_scope"),
+                "change": proposal.get("what_it_changes"),
+                "prompt": proposal.get("prompt_content"),
+                "source": source_ref,
+            },
+            length=20,
+        )
+        return f"candidate-{digest}"
+
+    def _sync_index_candidate(self, index: dict[str, Any], candidate: dict[str, Any]) -> None:
+        candidate_id = candidate["candidate_id"]
+        item = None
+        for existing in index.setdefault("candidates", []):
+            if isinstance(existing, dict) and existing.get("candidate_id") == candidate_id:
+                item = existing
+                break
+        if item is None:
+            item = {"candidate_id": candidate_id}
+            index["candidates"].append(item)
+        for key in (
+            "target_component",
+            "expected_scope",
+            "status",
+            "prompt_path",
+            "prompt_mode",
+            "depends_on",
+            "conflicts_with",
+            "scope_states",
+        ):
+            if key in candidate:
+                item[key] = deepcopy(candidate[key])
+
+    def _register_candidates(self, source: Any, source_ref: str) -> list[str]:
         if not isinstance(source, dict):
-            return
+            return []
         proposals = source.get("candidates") or source.get("candidate_proposals") or []
         if isinstance(proposals, dict):
             proposals = [proposals]
         if not isinstance(proposals, list):
-            return
+            return []
+
         index = self._index()
-        known = {c.get("candidate_id") for c in index.get("candidates", [])}
+        registered: list[str] = []
         changed = False
-        for proposal in proposals:
-            if not isinstance(proposal, dict):
+        for raw in proposals:
+            if not isinstance(raw, dict):
                 continue
-            cid = proposal.get("candidate_id") or self.store.new_id("candidate")
-            if cid in known:
+            proposal = deepcopy(raw)
+            target = proposal.get("target_component")
+            if not isinstance(target, str) or not target:
                 continue
-            proposal["candidate_id"] = cid
-            proposal.setdefault("status", "candidate")
-            proposal.setdefault("scope_states", {})
-            proposal.setdefault("supporting_evidence", [])
-            proposal.setdefault("contradictory_evidence", [])
-            proposal.setdefault("rejected_reasons", [])
-            proposal.setdefault("depends_on", [])
-            proposal.setdefault("conflicts_with", [])
-            proposal.setdefault("tested_with", [])
-            proposal.setdefault("incompatible_with", [])
-            proposal.setdefault("source_refs", []).append(source_ref)
-            cdir = self.root / ".continual" / "candidates" / cid
-            self.store.atomic_json(cdir / "candidate.json", proposal)
+            candidate_id = self._candidate_id_for(proposal, source_ref)
+            proposal["candidate_id"] = candidate_id
+            existing = self._candidate_by_id(candidate_id)
+            if existing is None:
+                candidate = proposal
+                candidate.setdefault("status", "candidate")
+                candidate.setdefault("prompt_mode", "overlay")
+                candidate.setdefault("scope_states", {})
+                for key in _LIST_FIELDS:
+                    candidate.setdefault(key, [])
+            else:
+                candidate = deepcopy(existing)
+                for key, value in proposal.items():
+                    if key in _LIST_FIELDS:
+                        incoming = value if isinstance(value, list) else [value]
+                        current = candidate.get(key, [])
+                        if not isinstance(current, list):
+                            current = [current]
+                        candidate[key] = self._dedupe_list([*current, *incoming])
+                    elif key == "scope_states" and isinstance(value, dict):
+                        current_states = candidate.setdefault("scope_states", {})
+                        for scope, state in value.items():
+                            current_states.setdefault(scope, state)
+                    elif key == "prompt_content":
+                        continue
+                    elif key not in candidate or candidate[key] in (None, "", [], {}):
+                        candidate[key] = value
+
+            refs = candidate.setdefault("source_refs", [])
+            if source_ref not in refs:
+                refs.append(source_ref)
+
+            cdir = self.root / ".continual" / "candidates" / candidate_id
             prompt_content = proposal.get("prompt_content")
             if isinstance(prompt_content, str) and prompt_content.strip():
-                (cdir / "prompt.md").write_text(prompt_content, encoding="utf-8")
-                proposal["prompt_path"] = str((cdir / "prompt.md").relative_to(self.root))
-                self.store.atomic_json(cdir / "candidate.json", proposal)
-            index.setdefault("candidates", []).append({
-                "candidate_id": cid,
-                "target_component": proposal.get("target_component"),
-                "expected_scope": proposal.get("expected_scope"),
-                "status": proposal.get("status", "candidate"),
-                "prompt_path": proposal.get("prompt_path"),
-                "depends_on": proposal.get("depends_on", []),
-                "conflicts_with": proposal.get("conflicts_with", []),
-            })
-            known.add(cid)
+                prompt_path = cdir / "prompt.md"
+                if not prompt_path.exists():
+                    self.store.atomic_text(prompt_path, prompt_content.rstrip() + "\n")
+                    candidate["prompt_path"] = prompt_path.relative_to(self.root).as_posix()
+                else:
+                    current_prompt = prompt_path.read_text(encoding="utf-8")
+                    if current_prompt.strip() != prompt_content.strip():
+                        alternatives = candidate.setdefault("alternative_prompt_hashes", [])
+                        prompt_hash = self.store.stable_digest(prompt_content)
+                        if prompt_hash not in alternatives:
+                            alternatives.append(prompt_hash)
+
+            self.store.atomic_json(cdir / "candidate.json", candidate)
+            self._sync_index_candidate(index, candidate)
+            registered.append(candidate_id)
             changed = True
+
         if changed:
             self._write_index(index)
+        return registered
 
-    def _save_component_output(self, run_id: str, component: str, output: dict[str, Any]) -> str:
+    def _candidate_index_for(self, target: str) -> dict[str, Any]:
+        full = self._index()
+        items = [item for item in full.get("candidates", []) if isinstance(item, dict)]
+        by_id = {item.get("candidate_id"): item for item in items if isinstance(item.get("candidate_id"), str)}
+        selected: dict[str, dict[str, Any]] = {}
+        pending: list[str] = []
+        for item in items:
+            if item.get("target_component") in {target, "*"}:
+                candidate_id = item.get("candidate_id")
+                if isinstance(candidate_id, str):
+                    selected[candidate_id] = item
+                    pending.extend(x for x in item.get("depends_on", []) if isinstance(x, str))
+        while pending:
+            dependency = pending.pop()
+            if dependency in selected:
+                continue
+            item = by_id.get(dependency)
+            if item is None:
+                continue
+            selected[dependency] = item
+            pending.extend(x for x in item.get("depends_on", []) if isinstance(x, str))
+        return {
+            "schema_version": full.get("schema_version", 1),
+            "candidates": [deepcopy(selected[key]) for key in sorted(selected)],
+        }
+
+    def _invocation_path(self, run_id: str, invocation_id: str) -> Path:
+        return self.store.run_dir(run_id) / "invocations" / f"{invocation_id}.json"
+
+    def _call_component_direct(
+        self,
+        run_id: str,
+        component: str,
+        payload: dict[str, Any],
+        *,
+        prompt_path: str,
+        evaluator_mode: str | None = None,
+    ) -> tuple[dict[str, Any], str]:
+        invocation_id = f"invoke-{self.store.stable_digest({'component': component, 'prompt': prompt_path, 'payload': payload})}"
+        path = self._invocation_path(run_id, invocation_id)
+        journal = self.store.read_json(path, {})
+        if isinstance(journal, dict) and journal.get("status") == "complete":
+            output = journal.get("output")
+            validate_component_output(component, output, evaluator_mode=evaluator_mode)
+            self.store.append_event(
+                run_id,
+                {"type": "invocation_reused", "component": component, "invocation_id": invocation_id},
+            )
+            return output, invocation_id
+
+        output = journal.get("output") if isinstance(journal, dict) and journal.get("status") == "output_ready" else None
+        attempt = int(journal.get("attempt", 0)) + 1 if isinstance(journal, dict) else 1
+        if output is None:
+            self.store.atomic_json(
+                path,
+                {
+                    "invocation_id": invocation_id,
+                    "component": component,
+                    "prompt_path": prompt_path,
+                    "payload_digest": self.store.stable_digest(payload),
+                    "status": "started",
+                    "attempt": attempt,
+                    "started_at": self.store.utc_now(),
+                },
+            )
+            try:
+                output = self.model.call(component, payload, prompt_path=prompt_path)
+                validate_component_output(component, output, evaluator_mode=evaluator_mode)
+            except ContractError as first_error:
+                repair_payload = dict(payload)
+                repair_payload["contract_repair"] = {
+                    "errors": list(first_error.errors),
+                    "previous_output": output,
+                    "instruction": "Return a corrected complete JSON object only; do not omit successful content.",
+                }
+                try:
+                    output = self.model.call(component, repair_payload, prompt_path=prompt_path)
+                    validate_component_output(component, output, evaluator_mode=evaluator_mode)
+                except Exception as exc:
+                    self.store.atomic_json(
+                        path,
+                        {
+                            "invocation_id": invocation_id,
+                            "component": component,
+                            "prompt_path": prompt_path,
+                            "payload_digest": self.store.stable_digest(payload),
+                            "status": "failed",
+                            "attempt": attempt,
+                            "error": {"type": type(exc).__name__, "message": str(exc)},
+                            "failed_at": self.store.utc_now(),
+                        },
+                    )
+                    raise
+            except Exception as exc:
+                self.store.atomic_json(
+                    path,
+                    {
+                        "invocation_id": invocation_id,
+                        "component": component,
+                        "prompt_path": prompt_path,
+                        "payload_digest": self.store.stable_digest(payload),
+                        "status": "failed",
+                        "attempt": attempt,
+                        "error": {"type": type(exc).__name__, "message": str(exc)},
+                        "failed_at": self.store.utc_now(),
+                    },
+                )
+                raise
+            self.store.atomic_json(
+                path,
+                {
+                    "invocation_id": invocation_id,
+                    "component": component,
+                    "prompt_path": prompt_path,
+                    "payload_digest": self.store.stable_digest(payload),
+                    "status": "output_ready",
+                    "attempt": attempt,
+                    "output": output,
+                    "output_at": self.store.utc_now(),
+                },
+            )
+
+        validate_component_output(component, output, evaluator_mode=evaluator_mode)
+        fragment_ref = self._save_component_output(run_id, component, output, invocation_id)
+        self.store.atomic_json(
+            path,
+            {
+                "invocation_id": invocation_id,
+                "component": component,
+                "prompt_path": prompt_path,
+                "payload_digest": self.store.stable_digest(payload),
+                "status": "complete",
+                "attempt": attempt,
+                "output": output,
+                "fragment_ref": fragment_ref,
+                "completed_at": self.store.utc_now(),
+            },
+        )
+        self.store.append_event(
+            run_id,
+            {"type": "invocation_completed", "component": component, "invocation_id": invocation_id},
+        )
+        return output, invocation_id
+
+    def _save_component_output(
+        self,
+        run_id: str,
+        component: str,
+        output: dict[str, Any],
+        invocation_id: str,
+    ) -> str:
         rd = self.store.run_dir(run_id)
-        idx = len(list((rd / "fragments").glob("*.json"))) if (rd / "fragments").exists() else 0
-        fragment = output.get("fragment") or {"component": component, "missing": True}
+        fragment = deepcopy(output.get("fragment") or {"component": component, "missing": True})
+        fragment.setdefault("component", component)
         fragment.setdefault("environment", self.environment())
-        fpath = rd / "fragments" / f"{idx:04d}-{component}.json"
+        fragment.setdefault("invocation_id", invocation_id)
+        fpath = rd / "fragments" / f"{invocation_id}-{component}.json"
         self.store.atomic_json(fpath, fragment)
-        if "local_learn" in output:
-            lpath = rd / "local-learn" / f"{idx:04d}-{component}.json"
+        source_ref = fpath.relative_to(self.root).as_posix()
+        if component != "learn" and "local_learn" in output:
+            lpath = rd / "local-learn" / f"{invocation_id}-{component}.json"
             self.store.atomic_json(lpath, output["local_learn"])
-            self._register_candidates(output["local_learn"], str(lpath.relative_to(self.root)))
-        self._register_candidates(output.get("result"), str(fpath.relative_to(self.root)))
-        return str(fpath.relative_to(self.root))
-
-    def _candidate_by_id(self, candidate_id: str) -> dict[str, Any] | None:
-        path = self.root / ".continual" / "candidates" / candidate_id / "candidate.json"
-        return self.store.read_json(path) if path.exists() else None
+            self._register_candidates(output["local_learn"], lpath.relative_to(self.root).as_posix())
+        self._register_candidates(output.get("result"), source_ref)
+        return source_ref
 
     def _preflight(self, run_id: str, target: str, unit: dict[str, Any]) -> dict[str, Any]:
         rd = self.store.run_dir(run_id)
+        relevant = self._candidate_index_for(target)
         payload = {
             "mode": "pre-application",
             "run_id": run_id,
             "target_component": target,
             "execution_unit": unit,
-            "candidate_index": self._index(),
+            "candidate_index": relevant,
             "environment": self.environment(),
             "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
         }
-        # Bootstrap exception: current evaluator is invoked directly to avoid
-        # infinite evaluator-before-evaluator recursion.
-        out = self.model.call("candidate_evaluate", payload)
-        pid = self.store.new_id("preflight")
-        self.store.atomic_json(rd / "preflight" / f"{pid}.json", out)
-        self._save_component_output(run_id, "candidate_evaluate", out)
-        return out
+        preflight_id = f"preflight-{target}-{self.store.stable_digest(payload)}"
+        path = rd / "preflight" / f"{preflight_id}.json"
+        existing = self.store.read_json(path, {})
+        if isinstance(existing, dict) and existing.get("result"):
+            return existing
 
-    def _selected_candidate(self, selection: dict[str, Any]) -> dict[str, Any] | None:
+        if not relevant["candidates"]:
+            output = {
+                "result": {
+                    "decision": "USE_ACTIVE",
+                    "scope": unit.get("scope") or target,
+                    "reason": "No candidate targets this component.",
+                },
+                "local_learn": {"decision": "NO_CHANGE", "candidates": []},
+                "fragment": {
+                    "component": "candidate_evaluate",
+                    "purpose": "mechanical no-candidate preflight",
+                    "observations": ["No relevant candidates were indexed."],
+                },
+            }
+        else:
+            output, _ = self._call_component_direct(
+                run_id,
+                "candidate_evaluate",
+                payload,
+                prompt_path=self._component_prompt_path("candidate_evaluate"),
+                evaluator_mode="pre-application",
+            )
+        self.store.atomic_json(path, output)
+        return output
+
+    def _selected_candidate(self, selection: dict[str, Any], target: str) -> dict[str, Any] | None:
         result = selection.get("result", selection)
         if not isinstance(result, dict):
             return None
         decision = result.get("decision")
         if decision not in {"TRIAL_CANDIDATE", "USE_CANDIDATE", "ACTIVE_FOR_SCOPE"}:
             return None
-        cid = result.get("candidate_id") or result.get("selected_candidate_id")
-        return self._candidate_by_id(cid) if isinstance(cid, str) else None
+        candidate_id = result.get("candidate_id") or result.get("selected_candidate_id")
+        if not isinstance(candidate_id, str):
+            return None
+        candidate = self._candidate_by_id(candidate_id)
+        if not candidate or candidate.get("target_component") not in {target, "*"}:
+            return None
+        prompt_path = candidate.get("prompt_path")
+        if not isinstance(prompt_path, str):
+            return None
+        resolved = (self.root / prompt_path).resolve()
+        if resolved != self.root and self.root not in resolved.parents:
+            return None
+        if not resolved.is_file():
+            return None
+        return candidate
 
     def _apply_scope_update(self, post: dict[str, Any]) -> None:
         result = post.get("result", post)
         if not isinstance(result, dict):
             return
-        cid = result.get("candidate_id")
+        candidate_id = result.get("candidate_id")
         scope = result.get("scope")
         state = result.get("scope_state") or result.get("decision")
-        if not all(isinstance(x, str) and x for x in (cid, scope, state)):
+        if not all(isinstance(value, str) and value for value in (candidate_id, scope, state)):
             return
-        candidate = self._candidate_by_id(cid)
+        candidate = self._candidate_by_id(candidate_id)
         if not candidate:
             return
         candidate.setdefault("scope_states", {})[scope] = state
+        if state in {"ACTIVE_FOR_SCOPE", "VERIFIED_FOR_SCOPE"}:
+            candidate["status"] = "active-for-scope"
         evidence = result.get("evidence")
         if evidence:
-            bucket = "contradictory_evidence" if state in {"REJECTED_FOR_SCOPE", "candidate", "REMAIN_CANDIDATE"} else "supporting_evidence"
-            candidate.setdefault(bucket, []).append({"scope": scope, "evidence": evidence})
-        self.store.atomic_json(self.root / ".continual" / "candidates" / cid / "candidate.json", candidate)
+            bucket = (
+                "contradictory_evidence"
+                if state in {"REJECTED_FOR_SCOPE", "REMAIN_CANDIDATE", "UNCERTAIN"}
+                else "supporting_evidence"
+            )
+            values = candidate.setdefault(bucket, [])
+            values.append({"scope": scope, "evidence": evidence, "at": self.store.utc_now()})
+            candidate[bucket] = self._dedupe_list(values)
+        self.store.atomic_json(self._candidate_path(candidate_id), candidate)
         index = self._index()
-        for item in index.get("candidates", []):
-            if item.get("candidate_id") == cid:
-                item.setdefault("scope_states", {})[scope] = state
+        self._sync_index_candidate(index, candidate)
         self._write_index(index)
 
-    def _postflight(self, run_id: str, target: str, unit: dict[str, Any], selection: dict[str, Any], result: dict[str, Any]) -> dict[str, Any] | None:
-        selected = self._selected_candidate(selection)
+    def _postflight(
+        self,
+        run_id: str,
+        target: str,
+        unit: dict[str, Any],
+        selection: dict[str, Any],
+        actual_result: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        selected = self._selected_candidate(selection, target)
         if not selected:
             return None
         payload = {
@@ -204,111 +572,390 @@ class Engine:
             "execution_unit": unit,
             "pre_application": selection.get("result", selection),
             "candidate": selected,
-            "actual_result": result,
+            "actual_result": actual_result,
             "environment": self.environment(),
         }
-        out = self.model.call("candidate_evaluate", payload)
-        pid = self.store.new_id("postresult")
-        self.store.atomic_json(self.store.run_dir(run_id) / "candidate-trials" / f"{pid}.json", out)
-        self._save_component_output(run_id, "candidate_evaluate", out)
-        self._apply_scope_update(out)
-        return out
+        output, invocation_id = self._call_component_direct(
+            run_id,
+            "candidate_evaluate",
+            payload,
+            prompt_path=self._component_prompt_path("candidate_evaluate"),
+            evaluator_mode="post-result",
+        )
+        path = self.store.run_dir(run_id) / "candidate-trials" / f"{invocation_id}.json"
+        self.store.atomic_json(path, output)
+        self._apply_scope_update(output)
+        return output
 
-    def _invoke(self, run_id: str, component: str, payload: dict[str, Any], preflight: bool = True) -> dict[str, Any]:
-        selection = self._preflight(run_id, component, payload) if preflight else {"result": {"decision": "USE_ACTIVE"}}
-        selected = self._selected_candidate(selection)
-        prompt_path = selected.get("prompt_path") if selected else None
-        call_payload = dict(payload)
+    def _effective_prompt_path(
+        self,
+        run_id: str,
+        component: str,
+        candidate: dict[str, Any] | None,
+    ) -> str:
+        active_path = self._component_prompt_path(component)
+        if candidate is None:
+            return active_path
+        candidate_path = str(candidate["prompt_path"])
+        mode = candidate.get("prompt_mode", "overlay")
+        if mode == "replace":
+            return candidate_path
+        if mode != "overlay":
+            raise ValueError(f"unsupported candidate prompt_mode: {mode}")
+        active_text = (self.root / active_path).read_text(encoding="utf-8").rstrip()
+        candidate_text = (self.root / candidate_path).read_text(encoding="utf-8").strip()
+        merged = (
+            active_text
+            + "\n\n# Scoped Candidate overlay\n\n"
+            + f"Candidate ID: {candidate['candidate_id']}\n\n"
+            + candidate_text
+            + "\n"
+        )
+        digest = self.store.stable_digest(
+            {"active": active_path, "candidate": candidate_path, "content": merged}
+        )
+        path = (
+            self.store.run_dir(run_id)
+            / "effective-prompts"
+            / f"{component}-{candidate['candidate_id']}-{digest}.md"
+        )
+        self.store.atomic_text(path, merged)
+        return path.relative_to(self.root).as_posix()
+
+    def _invoke(self, run_id: str, component: str, payload: dict[str, Any]) -> dict[str, Any]:
+        if component not in SEMANTIC_COMPONENTS:
+            raise ValueError(f"unknown semantic component: {component}")
+        selection = self._preflight(run_id, component, payload)
+        selected = self._selected_candidate(selection, component)
+        prompt_path = self._effective_prompt_path(run_id, component, selected)
+        call_payload = deepcopy(payload)
         call_payload["preflight_selection"] = selection.get("result", selection)
-        out = self.model.call(SEMANTIC_COMPONENTS[component], call_payload, prompt_path=prompt_path)
-        self._save_component_output(run_id, component, out)
-        self._postflight(run_id, component, payload, selection, out.get("result", {}))
-        return out
+        call_payload["active_component_path"] = self._component_prompt_path(component)
+        if selected is not None:
+            call_payload["candidate"] = {
+                "candidate_id": selected["candidate_id"],
+                "prompt_mode": selected.get("prompt_mode", "overlay"),
+                "expected_scope": selected.get("expected_scope"),
+            }
+        output, _ = self._call_component_direct(
+            run_id,
+            SEMANTIC_COMPONENTS[component],
+            call_payload,
+            prompt_path=prompt_path,
+        )
+        self._postflight(run_id, component, payload, selection, output.get("result", {}))
+        return output
 
-    def resume(self, run_id: str, max_steps: int = 64) -> None:
+    def _advance(self, run_id: str, snapshot: dict[str, Any], **changes: Any) -> dict[str, Any]:
+        new_value = deepcopy(snapshot)
+        new_value.update(changes)
+        new_value["expected_revision"] = snapshot.get("revision", 0)
+        new_value.pop("last_error", None)
+        return self.store.write_snapshot(run_id, new_value)
+
+    def _episode_catalog(self, limit: int = 50) -> list[dict[str, Any]]:
+        base = self.root / ".continual" / "episodes"
+        if not base.exists():
+            return []
+        catalog: list[dict[str, Any]] = []
+        for path in sorted(base.glob("*/episode.json"), reverse=True)[:limit]:
+            episode = self.store.read_json(path, {})
+            if not isinstance(episode, dict):
+                continue
+            catalog.append(
+                {
+                    "episode_id": path.parent.name,
+                    "task": episode.get("task") or episode.get("objective"),
+                    "outcome": episode.get("outcome") or episode.get("verdict"),
+                    "tags": episode.get("tags", []),
+                    "path": path.relative_to(self.root).as_posix(),
+                }
+            )
+        return catalog
+
+    def _schedule_unit(
+        self,
+        run_id: str,
+        snapshot: dict[str, Any],
+        unit: dict[str, Any],
+        *,
+        parent: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        component = unit.get("component", "execute")
+        if component not in SEMANTIC_COMPONENTS:
+            component = "execute"
+        goal = unit.get("goal")
+        if not isinstance(goal, str) or not goal.strip():
+            raise ValueError("execution unit requires a non-empty goal")
+        unit = deepcopy(unit)
+        unit["component"] = component
+        unit_id = unit.get("unit_id")
+        if not isinstance(unit_id, str) or not unit_id:
+            unit_id = f"unit-{self.store.stable_digest({'revision': snapshot.get('revision'), 'unit': unit})}"
+        unit["unit_id"] = unit_id
+        self.store.atomic_json(
+            self.store.run_dir(run_id) / "execution-units" / f"{unit_id}.json",
+            unit,
+        )
+        stack = list(snapshot.get("continuation_stack", []))
+        if parent is not None:
+            stack.append(parent)
+        return self._advance(
+            run_id,
+            snapshot,
+            phase="unit_pending",
+            current_unit=unit_id,
+            current_component=component,
+            continuation_stack=stack,
+        )
+
+    def resume(self, run_id: str, max_steps: int = 64) -> dict[str, Any]:
+        if max_steps < 1:
+            raise ValueError("max_steps must be at least 1")
+        if not self.store.run_dir(run_id).is_dir():
+            raise FileNotFoundError(run_id)
+
         for _ in range(max_steps):
-            snap = self.store.snapshot(run_id)
-            if snap.get("status") in {"finished", "blocked"}:
-                return
-            phase = snap.get("phase")
+            snapshot = self.store.snapshot(run_id)
+            if snapshot.get("status") in TERMINAL_STATUSES:
+                return snapshot
+            phase = snapshot.get("phase")
             rd = self.store.run_dir(run_id)
+            try:
+                if phase == "entry_pending":
+                    request = (rd / "request.md").read_text(encoding="utf-8")
+                    output = self._invoke(run_id, "entry", {"request": request})
+                    self.store.atomic_json(rd / "artifacts" / "entry.json", output.get("result", {}))
+                    self._advance(
+                        run_id,
+                        snapshot,
+                        phase="root_pending",
+                        entry_ref="artifacts/entry.json",
+                    )
+                    continue
 
-            if phase == "entry_pending":
-                request = (rd / "request.md").read_text(encoding="utf-8")
-                out = self._invoke(run_id, "entry", {"request": request})
-                self.store.atomic_json(rd / "artifacts" / "entry.json", out.get("result", {}))
-                snap.update({"phase": "root_pending", "entry_ref": "artifacts/entry.json", "expected_revision": snap["revision"]})
-                self.store.write_snapshot(run_id, snap)
-                continue
+                if phase == "root_pending":
+                    output = self._invoke(
+                        run_id,
+                        "root",
+                        {
+                            "snapshot": snapshot,
+                            "entry": self.store.read_json(rd / "artifacts" / "entry.json", {}),
+                            "last_result": (
+                                self.store.read_json(rd / snapshot["last_result_ref"], {})
+                                if snapshot.get("last_result_ref")
+                                else None
+                            ),
+                            "last_evaluation": snapshot.get("last_evaluation"),
+                            "continuation_stack": snapshot.get("continuation_stack", []),
+                        },
+                    )
+                    self._schedule_unit(run_id, snapshot, output.get("result", {}))
+                    continue
 
-            if phase == "root_pending":
-                out = self._invoke(run_id, "root", {
-                    "snapshot": snap,
-                    "entry": self.store.read_json(rd / "artifacts" / "entry.json", {}),
-                    "last_result": self.store.read_json(rd / snap.get("last_result_ref", "missing"), {}) if snap.get("last_result_ref") else None,
-                })
-                unit = out.get("result", {})
-                unit_id = self.store.new_id("unit")
-                unit["unit_id"] = unit_id
-                self.store.atomic_json(rd / "execution-units" / f"{unit_id}.json", unit)
-                next_component = unit.get("component", "execute")
-                snap.update({"phase": "unit_pending", "current_unit": unit_id, "current_component": next_component, "expected_revision": snap["revision"]})
-                self.store.write_snapshot(run_id, snap)
-                continue
+                if phase == "unit_pending":
+                    unit_id = snapshot["current_unit"]
+                    unit = self.store.read_json(rd / "execution-units" / f"{unit_id}.json", {})
+                    component = snapshot.get("current_component", "execute")
+                    if component not in SEMANTIC_COMPONENTS:
+                        component = "execute"
+                    output = self._invoke(
+                        run_id,
+                        component,
+                        {"snapshot": snapshot, "execution_unit": unit},
+                    )
+                    result = output.get("result", {})
+                    artifact_ref = f"artifacts/{unit_id}-result.json"
+                    self.store.atomic_json(rd / artifact_ref, result)
 
-            if phase == "unit_pending":
-                unit_id = snap["current_unit"]
-                unit = self.store.read_json(rd / "execution-units" / f"{unit_id}.json", {})
-                component = snap.get("current_component", "execute")
-                if component not in SEMANTIC_COMPONENTS:
-                    component = "execute"
-                out = self._invoke(run_id, component, {"snapshot": snap, "execution_unit": unit})
-                self.store.atomic_json(rd / "artifacts" / f"{unit_id}-result.json", out.get("result", {}))
-                result = out.get("result", {})
-                if component == "task_evaluate":
-                    verdict = result.get("verdict") or result.get("status")
-                    if verdict == "PASS":
-                        snap.update({"phase": "consolidate_pending", "expected_revision": snap["revision"]})
+                    if component == "task_evaluate":
+                        verdict = result.get("verdict") or result.get("status")
+                        if verdict == "PASS":
+                            self._advance(
+                                run_id,
+                                snapshot,
+                                phase="consolidate_pending",
+                                last_evaluation=result,
+                                last_result_ref=artifact_ref,
+                            )
+                        else:
+                            self._advance(
+                                run_id,
+                                snapshot,
+                                phase="root_pending",
+                                last_evaluation=result,
+                                last_result_ref=artifact_ref,
+                            )
+                        continue
+
+                    next_unit = result.get("next_execution_unit") or result.get("child_execution_unit")
+                    if isinstance(next_unit, dict):
+                        parent = {
+                            "parent_unit_id": unit_id,
+                            "continuation": result.get("continuation"),
+                            "result_ref": artifact_ref,
+                        }
+                        self._schedule_unit(run_id, snapshot, next_unit, parent=parent)
                     else:
-                        snap.update({"phase": "root_pending", "last_evaluation": result, "expected_revision": snap["revision"]})
-                else:
-                    snap.update({"phase": "root_pending", "last_result_ref": f"artifacts/{unit_id}-result.json", "expected_revision": snap["revision"]})
-                self.store.write_snapshot(run_id, snap)
+                        self._advance(
+                            run_id,
+                            snapshot,
+                            phase="root_pending",
+                            last_result_ref=artifact_ref,
+                        )
+                    continue
+
+                if phase == "consolidate_pending":
+                    fragments = [
+                        json.loads(path.read_text(encoding="utf-8"))
+                        for path in sorted((rd / "fragments").glob("*.json"))
+                    ]
+                    output = self._invoke(
+                        run_id,
+                        "consolidate_episode",
+                        {
+                            "snapshot": snapshot,
+                            "fragments": fragments,
+                            "artifact_refs": [
+                                path.relative_to(self.root).as_posix()
+                                for path in sorted((rd / "artifacts").glob("*.json"))
+                            ],
+                            "preflight_refs": [
+                                path.relative_to(self.root).as_posix()
+                                for path in sorted((rd / "preflight").glob("*.json"))
+                            ],
+                            "candidate_trial_refs": [
+                                path.relative_to(self.root).as_posix()
+                                for path in sorted((rd / "candidate-trials").glob("*.json"))
+                            ],
+                        },
+                    )
+                    episode_id = f"episode-{run_id.removeprefix('run-')}"
+                    episode_dir = self.root / ".continual" / "episodes" / episode_id
+                    self.store.atomic_json(episode_dir / "episode.json", output.get("result", {}))
+                    relations = episode_dir / "relations.jsonl"
+                    relations.parent.mkdir(parents=True, exist_ok=True)
+                    relations.touch(exist_ok=True)
+                    self._advance(
+                        run_id,
+                        snapshot,
+                        phase="post_task_learn_pending",
+                        episode_id=episode_id,
+                    )
+                    continue
+
+                if phase == "post_task_learn_pending":
+                    episode_id = str(snapshot.get("episode_id"))
+                    episode_path = self.root / ".continual" / "episodes" / episode_id / "episode.json"
+                    episode = self.store.read_json(episode_path, {})
+                    output = self._invoke(
+                        run_id,
+                        "learn",
+                        {
+                            "mode": "post-task",
+                            "episode_id": episode_id,
+                            "current_episode": episode,
+                            "episode_catalog": self._episode_catalog(),
+                            "candidate_index": self._index(),
+                        },
+                    )
+                    artifact_path = rd / "artifacts" / "post-task-learn.json"
+                    result = output.get("result", {})
+                    self.store.atomic_json(artifact_path, result)
+                    produced = self._register_candidates(
+                        result,
+                        artifact_path.relative_to(self.root).as_posix(),
+                    )
+                    relations = self.root / ".continual" / "episodes" / episode_id / "relations.jsonl"
+                    for candidate_id in produced:
+                        self.store.append_jsonl(
+                            relations,
+                            {
+                                "type": "produced_candidate",
+                                "candidate_id": candidate_id,
+                                "at": self.store.utc_now(),
+                            },
+                        )
+                    finished = self._advance(
+                        run_id,
+                        snapshot,
+                        status="finished",
+                        phase="finished",
+                        produced_candidates=produced,
+                    )
+                    self.store.append_event(run_id, {"type": "run_finished", "episode_id": episode_id})
+                    return finished
+
+                raise RuntimeError(f"unknown phase: {phase}")
+
+            except Exception as exc:
+                self.store.append_event(
+                    run_id,
+                    {
+                        "type": "phase_error",
+                        "phase": phase,
+                        "error": {"type": type(exc).__name__, "message": str(exc)},
+                    },
+                )
+                current = self.store.snapshot(run_id)
+                if current.get("revision") == snapshot.get("revision"):
+                    failed = deepcopy(current)
+                    failed["status"] = "continue"
+                    failed["last_error"] = {
+                        "phase": phase,
+                        "type": type(exc).__name__,
+                        "message": str(exc),
+                        "at": self.store.utc_now(),
+                    }
+                    failed["error_count"] = int(failed.get("error_count", 0)) + 1
+                    failed["expected_revision"] = current.get("revision", 0)
+                    self.store.write_snapshot(run_id, failed)
+                raise
+
+        snapshot = self.store.snapshot(run_id)
+        checkpoint = deepcopy(snapshot)
+        checkpoint["status"] = "continue"
+        checkpoint["checkpoint_reason"] = "step_budget_exhausted"
+        checkpoint["expected_revision"] = snapshot.get("revision", 0)
+        checkpoint = self.store.write_snapshot(run_id, checkpoint)
+        self.store.append_event(
+            run_id,
+            {"type": "step_budget_exhausted", "max_steps": max_steps, "phase": checkpoint.get("phase")},
+        )
+        return checkpoint
+
+    def resume_all(self, max_steps: int = 16) -> dict[str, Any]:
+        runs_dir = self.root / ".continual" / "runs"
+        results: list[dict[str, Any]] = []
+        if not runs_dir.exists():
+            return {"resumed": [], "errors": []}
+        errors: list[dict[str, str]] = []
+        for run_dir in sorted(path for path in runs_dir.iterdir() if path.is_dir()):
+            snapshot = self.store.read_json(run_dir / "snapshot.json", {})
+            if not isinstance(snapshot, dict) or snapshot.get("status") in TERMINAL_STATUSES:
                 continue
-
-            if phase == "consolidate_pending":
-                fragments = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((rd / "fragments").glob("*.json"))]
-                out = self._invoke(run_id, "consolidate_episode", {"snapshot": snap, "fragments": fragments})
-                episode_id = self.store.new_id("episode")
-                ep = self.root / ".continual" / "episodes" / episode_id
-                self.store.atomic_json(ep / "episode.json", out.get("result", {}))
-                (ep / "relations.jsonl").touch()
-                snap.update({"phase": "post_task_learn_pending", "episode_id": episode_id, "expected_revision": snap["revision"]})
-                self.store.write_snapshot(run_id, snap)
-                continue
-
-            if phase == "post_task_learn_pending":
-                episode_id = snap.get("episode_id")
-                episode = self.store.read_json(self.root / ".continual" / "episodes" / str(episode_id) / "episode.json", {})
-                out = self._invoke(run_id, "learn", {"mode": "post-task", "episode_id": episode_id, "current_episode": episode})
-                apath = rd / "artifacts" / "post-task-learn.json"
-                self.store.atomic_json(apath, out.get("result", {}))
-                self._register_candidates(out.get("result"), str(apath.relative_to(self.root)))
-                ep_rel = self.root / ".continual" / "episodes" / str(episode_id) / "relations.jsonl"
-                with ep_rel.open("a", encoding="utf-8") as f:
-                    for c in (out.get("result", {}) or {}).get("candidates", []):
-                        if isinstance(c, dict) and c.get("candidate_id"):
-                            f.write(json.dumps({"type": "produced_candidate", "candidate_id": c["candidate_id"]}, ensure_ascii=False) + "\n")
-                snap.update({"status": "finished", "phase": "finished", "expected_revision": snap["revision"]})
-                self.store.write_snapshot(run_id, snap)
-                return
-
-            raise RuntimeError(f"unknown phase: {phase}")
-        raise RuntimeError(f"max_steps exceeded for {run_id}")
+            try:
+                result = self.resume(run_dir.name, max_steps=max_steps)
+                results.append(
+                    {
+                        "run_id": run_dir.name,
+                        "status": result.get("status"),
+                        "phase": result.get("phase"),
+                    }
+                )
+            except Exception as exc:
+                errors.append(
+                    {"run_id": run_dir.name, "type": type(exc).__name__, "message": str(exc)}
+                )
+        return {"resumed": results, "errors": errors}
 
     def feedback(self, episode_id: str, text: str) -> None:
-        ep = self.root / ".continual" / "episodes" / episode_id
-        if not (ep / "episode.json").exists():
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError("feedback text must be non-empty")
+        episode_dir = self.root / ".continual" / "episodes" / episode_id
+        if not (episode_dir / "episode.json").exists():
             raise FileNotFoundError(episode_id)
-        with (ep / "relations.jsonl").open("a", encoding="utf-8") as f:
-            f.write(json.dumps({"type": "user_feedback", "text": text}, ensure_ascii=False) + "\n")
+        self.store.append_jsonl(
+            episode_dir / "relations.jsonl",
+            {"type": "user_feedback", "text": text, "at": self.store.utc_now()},
+        )

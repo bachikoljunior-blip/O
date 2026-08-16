@@ -1,75 +1,66 @@
-# System Design
+# System design v0.2
 
-## 固定される最小核
+## 1. Minimal fixed kernel
 
-改善対象から外すのは、意味判断をしない以下だけです。
+Only non-semantic mechanics are fixed in Python:
 
-- atomic JSON write
-- append-only event追記
-- UUID生成
-- revision競合検出
-- 選択済みcomponent versionのロード
-- side-effect stateの保存
-- `continue / finished / blocked` の機械的ループ
-- 現在のPreflight Evaluatorを起動する最小bootstrap
+- atomic text/JSON replacement and append-only JSONL;
+- IDs, stable digests, timestamps, and optimistic snapshot revision checks;
+- safe repository path enforcement and secret/environment filtering;
+- deterministic invocation journals and completed-output reuse;
+- loading the already selected component version;
+- the mechanical `continue / finished / blocked / cancelled` loop;
+- the bootstrap needed to run the current Candidate Evaluator.
 
-現在実行中のPreflight Evaluatorは自分自身を途中交換しません。Evaluator Candidateは次回以降のinvocationでtrialします。現在実行中Runnerも途中交換せず、新版は次runからです。
+Meaningful choices—task interpretation, next work, execution procedure, evaluation, learning, context selection, Candidate applicability, and benchmark design—remain prompt/Candidate controlled.
 
-## ファイルと実行順
+## 2. Active component pointers
 
-### 1. `continual start`
-読む: `prompts/entry.md`, `.continual/system/active-components.json`。
-作る: `.continual/runs/<run_id>/request.md`, `events.jsonl`, `snapshot.json`。
-ENTRY実行前に `prompts/candidate_evaluate.md` のpre-applicationを通し、ENTRY versionを選びます。ENTRY本処理後、同じmodel callの終了フェーズでLocal Learnを行い、`local-learn/` と `fragments/` を保存します。
+`.continual/system/active-components.json` is read for every semantic invocation. A selected Candidate may override the prompt only for the exact target component and trial scope. The running evaluator and runner are never hot-swapped mid-call or mid-process.
 
-### 2. Runner選択
-Runnerは薄いPythonループです。ただしRunner方式自体のCandidateは次run開始前Preflightで選べます。現在run途中では交換しません。
+Direct model tool writes to active prompts, `AGENTS.md`, `SYSTEM_DESIGN.md`, workflow files, and active system pointers are blocked. An improvement must be returned as a Candidate and evaluated before use.
 
-### 3. Root前Preflight
-読む: `snapshot.json`, `active-components.json`, Candidate indexのうちRoot関連metadata。
-実行: `candidate_evaluate` pre-application。
-保存: `preflight/root-<n>.json`。
-その後 `prompts/root.md` またはCandidate versionをfresh API callで実行します。
+## 3. Restart-safe invocation protocol
 
-### 4. Root
-Rootは1ステップだけ判断し `execution-units/<id>.json` を作ります。全Episode/全Skill/巨大ログを読みません。本処理後、同一応答内の `local_learn` フィールドでLocal Learnを返し、fragment保存後にcontextを終了します。
+Before a model call, the runner writes:
 
-### 5. execution unit直前Preflight
-Execute、子Skill、親再開、Task Evaluate、Consolidate Episode、Post-Task Learnなど、意味的componentの**実行直前**にだけ関連Candidateを評価します。
+`.continual/runs/<run_id>/invocations/<deterministic_id>.json`
 
-pre-applicationは以下を決めます: applicability、active/candidate version、trial scope、Candidate競合/依存、baseline要否、必要証拠、rollback、コスト観点。
+States are `started → output_ready → complete` or `failed`.
 
-### 6. Execute
-`prompts/execute.md` をfresh call。専門Skillがなければ一般推論で処理します。終了直前にLocal Learnし、Experience Fragmentを保存します。子Skillが必要なら親継続状態を永続化して終了し、子を別execution unitとしてfresh実行します。
+The ID is a digest of component, selected prompt path, and payload. If `complete` exists on resume, its output is reused. If `output_ready` exists, fragment/Candidate persistence is completed without calling the model again. Repository writes are atomic, network/publish commands are blocked inside the model tool adapter, and external side effects require a separate persisted adapter.
 
-### 7. Candidate post-result
-局所証拠で十分ならunit直後。Task全体の証拠が必要ならTask Evaluate後まで保留します。`active-for-scope` になっても支持・反証証拠を継続追記し、将来降格可能です。
+## 4. Execution order
 
-### 8. Task Evaluate
-`prompts/task_evaluate.md`。自己申告より、test/build/lint/git/API/成果物/ユーザー成功条件などの外部証拠を優先。FAILならfresh Rootが修正unitを作ります。終了直前Local Learnあり。
+1. `continual start` persists request/snapshot and evaluates runner Candidates at the new-run boundary.
+2. ENTRY runs after component-specific Preflight and persists normalized success conditions.
+3. A fresh Root chooses exactly one execution unit.
+4. Immediately before that unit, only Candidates targeting its component (plus dependencies) are evaluated.
+5. Execute creates artifacts/evidence or schedules one child unit with a persisted parent continuation.
+6. Task Evaluate returns `PASS`, `FAIL`, or `UNCERTAIN` from objective evidence.
+7. Failed/uncertain tasks return to a fresh Root for repair or a new experiment.
+8. PASS triggers Episode consolidation.
+9. Post-task Learn reviews the current episode plus a compact episode catalog and Candidate index.
+10. The run finishes only after the task episode and post-task learning are persisted.
 
-### 9. Consolidate Episode
-`prompts/consolidate_episode.md`。
+When a caller step budget expires, the snapshot stays `continue` with `checkpoint_reason=step_budget_exhausted`. This is a resumable checkpoint, not a semantic failure.
 
-`Experience Fragment群 -> Consolidate Episode -> Task Episode`
+## 5. Local Learn and episodes
 
-順序、重複、成功条件と結果、Evaluator、Candidate trial、証拠、環境、未解決事項を統合します。欠損Contextを推測しません。終了直前Local Learnあり。
+Every semantic component except Learn itself returns `local_learn` before its context is discarded. It may be `NO_CHANGE`, evidence, a hypothesis, or a Candidate proposal. Learn never recursively learns at its own end.
 
-### 10. Post-Task Learn
-`prompts/learn.md`。今回・最近・類似・長期Episodeから必要範囲を自分で選びます。Local Learnは再帰呼出ししません。`NO_CHANGE` は正常です。新SkillだけでなくRoot/Evaluator/Learner/Episode/Context/Runner/構成/モデル選択等もCandidate化できます。
+Fragments save purpose, actions, observations, evidence references, failures, unresolved items, environment, and invocation ID—not hidden chain-of-thought. Consolidation must preserve provenance and must not infer missing context.
 
-## Candidateの追加重要仕様
+## 6. Candidate lifecycle
 
-Candidateは `depends_on`, `conflicts_with`, `tested_with`, `incompatible_with`, `supersedes` を持てます。既存Skill/Candidate/rejected案との重複をLearnが必要範囲で確認します。
+Candidate states are scoped and reversible. Pre-application decisions include applicability, dependency/conflict handling, baseline need, evidence, regressions, rollback, cost, and risk. Post-result decisions can verify, activate for scope, reject for scope, retain, request evidence, or remain uncertain.
 
-評価では必要に応じて quality, latency, token/context cost, tool calls, external cost, failure risk を比較します。重みは固定しません。
+Repeated proposals with the same Candidate ID merge evidence and source references. Active-for-scope remains subject to contradictory evidence and downgrade.
 
-`active-for-scope` は supporting/contradictory evidenceを蓄積し、`candidate` や `rejected-for-scope` へ戻せます。
+## 7. AGI evidence boundary
 
-環境差による誤因果を減らすため、fragment/episodeには model、runner version、Python、OS、repository commit、active component versions を記録できます。
+`src/agi/evaluation.py` separates development progress from claim-grade evidence. A positive AGI claim requires all six criteria and, by default, repeated production-tier successes across multiple tasks, runs, and domains with independent verification and no unresolved production failures.
 
-ユーザーがTask完了後に否定/肯定feedbackを返した場合、`relations.jsonl`へappendし、将来LearnとCandidate Evaluateが参照できます。
+`src/agi/benchmark.py` is a development harness covering all criteria. Its task-specific reference agent validates harness correctness only. Passing it cannot establish AGI.
 
-システム中枢Candidateでは、必要とEvaluatorが判断した時だけ少数の代表Episode/Taskを回帰確認に選べます。全過去Task総当たりは禁止しませんが初期既定にはしません。
-
-CandidateをNOT_APPLICABLEにした後で失敗やuser feedbackから適用すべきだったと分かった場合、`misclassified_applicability` 証拠としてEvaluator自身の改善材料にします。
+This boundary lets the project continue making falsifiable capability advances without fabricating completion.
