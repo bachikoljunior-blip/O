@@ -50,7 +50,9 @@ agiを作って。
 
 一つの実装・検証・統合・学習単位が完了するたび、必ず現在時刻を改めて取得し、leaseのlast_progress_atと継続地点を更新すること。soft_stopより前で、次の作業を検証・保存まで完了できる合理的な時間が残っているなら、完了報告で終了せず、直ちに次の最重要な実行可能作業へ進むこと。この判定を作業単位の完了ごとに毎回繰り返すこと。外部要因で一つが実行不能なら、待機せず別の実行可能な高価値作業へ切り替えること。
 
-soft_stop到達後は新しい大きな作業を開始しない。実行中の変更を検証し、失敗していれば安全に戻し、通過した変更だけを保存・統合すること。正確な証拠、失敗、未知、未完了作業、次の実行可能作業をリポジトリに残し、leaseを完了状態にしてhard_stopまでに必ず終了すること。次回毎時00分のGPT-5.6 Pro新規セッションがゼロコンテキストから即再開できる状態を作ること。
+soft_stop到達後は新しい大きな作業を開始しない。実行中の変更を検証し、失敗していれば安全に戻し、通過した変更だけを保存・統合すること。最終化では、以後のリポジトリ変更を止め、最新mainと最終CI・PR状態を改めて確認し、正確な証拠、失敗、未知、未完了作業、次の実行可能作業をリポジトリに残し、leaseをcompletedまたはinterruptedにしてhard_stopまでに解放すること。lease解放後や最終報告後にcommit、merge、PR更新その他のリポジトリ変更を行ってはならない。遅れて完了したCIやPRは次回の新規セッションが整合させる未完了事項として残すこと。
+
+最後に、この新規スタンドアロンチャットの最終メッセージとして、今回何をしたかを必ずユーザーへ報告すること。変更が無かった回、重複回避で終了した回、失敗・権限不足・中断の回でも報告を省略しないこと。報告には、今回の基準開始・実開始・終了・次回開始時刻、実際のモデル、完了した変更、PR番号とmerge/head SHA、成功した検証、保持した失敗、未マージまたはblockedの作業、正確な次の実行作業、AGI主張の境界を含めること。隠れたchain-of-thoughtは出さず、行動、判断、証拠、失敗、未知だけを要約すること。次回毎時00分のGPT-5.6 Pro新規セッションがゼロコンテキストから即再開できる状態と、ユーザーがそのチャットだけで実行内容を把握できる状態の両方を作ること。
 ```
 
 ## Single-execution lease
@@ -71,10 +73,37 @@ Overlap handling:
 - If the file says `running` and its `hard_stop` is still in the future, a second session must not modify the repository.
 - Prefer scheduler-side queuing until the lease holder finishes.
 - If queuing is unavailable, the later session exits without competing work; the next hourly run remains fresh.
+- An overlap/no-work session must still post a short final message in its own chat explaining that it did not modify the repository and identifying the active lease it respected.
 - If the recorded `hard_stop` has passed, mark the prior session `interrupted`, preserve its identifiers, inspect durable artifacts, and recover idempotently before acquiring a new lease.
 
 At every completed work unit, update `last_progress_at`, evidence, and the exact next action. At finalization, mark `status: completed` or `status: interrupted`, record `finished_at`, and clear the active work unit.
 
+## Finalization transaction
+
+Finalization is ordered and one-way:
+
+1. Stop starting new work and safely finish, revert, or leave unmerged every in-flight change.
+2. Reacquire the current time and inspect the latest main, PR state, and exact-head validation state.
+3. Persist all completed work, retained failures, unfinished work, and the next executable action.
+4. Mark the lease `completed` or `interrupted`, set `finished_at`, and clear active work.
+5. Send the mandatory user-visible final report in the standalone chat.
+6. Perform no repository mutation after step 4 and no work after step 5. Late CI or PR results belong to the next zero-context session.
+
+This ordering prevents a result from being merged after the saved continuation and chat report have already declared the run complete.
+
+## Mandatory user-visible report
+
+Every hourly standalone chat must end with a factual report containing:
+
+- scheduled window, actual start and finish, next scheduled start, and actual model;
+- completed work units and the user-relevant capability or integrity change;
+- every created, merged, unmerged, or closed PR and relevant head/merge SHA;
+- successful checks and retained failed checks or counterexamples;
+- unfinished, blocked, or pending work and the exact next executable action;
+- an explicit statement of what remains before verified AGI and whether the strict external evidence gate passed.
+
+The report is required for successful, no-change, overlap, failed, blocked, and interrupted runs. It must not include hidden chain-of-thought and must not treat an internal benchmark, CI run, reference solver, architecture, or self-report as verified AGI evidence.
+
 ## Completion rule
 
-A session may finish before `soft_stop` only when no safe, executable, AGI-relevant work remains within available permissions. Before finishing, it must persist exact evidence, failures, unknowns, unfinished work, and the next executable action. It must not invent work merely to remain active and must not weaken the AGI evidence gate to produce a completion claim.
+A session may finish before `soft_stop` only when no safe, executable, AGI-relevant work remains within available permissions. Before finishing, it must persist exact evidence, failures, unknowns, unfinished work, and the next executable action. It must not invent work merely to remain active and must not weaken the AGI evidence gate to produce a completion claim. The final chat report is mandatory but is not completion of the user-level AGI objective.
