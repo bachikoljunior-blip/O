@@ -104,3 +104,17 @@ def test_corrupted_checkpoint_detected_and_fails(tmp_path):
     assert report.injected_failures == 1
     assert report.restarts >= 1
     assert report.rollback_verified is False
+
+
+def test_longhorizon_multi_run_campaign(tmp_path):
+    """Run a small multi-run campaign and assert aggregated retention/protection metrics."""
+    from agi.longhorizon import run_long_horizon_campaign
+
+    def factory():
+        return ReferenceLongHorizonAgent()
+
+    campaign = run_long_horizon_campaign(factory, runs=5, checkpoint_dir=tmp_path)
+    assert campaign["total_runs"] == 5
+    assert campaign["passed_count"] == 5
+    assert campaign["passed_fraction"] == 1.0
+    assert campaign["total_injected_failures"] == 5

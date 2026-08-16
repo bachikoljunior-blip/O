@@ -316,3 +316,32 @@ class ReferenceLongHorizonAgent:
 def write_report(report: LongHorizonResult, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report.to_dict(), ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def run_long_horizon_campaign(
+    agent_factory: Callable[[], LongHorizonAgent], *, runs: int = 10, checkpoint_dir: Path | None = None
+) -> dict[str, Any]:
+    """Run multiple long-horizon instances and aggregate measurable outcomes.
+
+    This helper supports falsifiable evaluation across several independent fresh-context
+    episodes, measuring delayed retention and protected-regression stability.
+    """
+    if runs < 1:
+        raise ValueError("runs must be >= 1")
+    summaries: list[LongHorizonResult] = []
+    for i in range(runs):
+        ckpt = None
+        if checkpoint_dir is not None:
+            checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            ckpt = checkpoint_dir / f"checkpoint-{i}.json"
+        report = run_long_horizon(agent_factory, checkpoint_path=ckpt)
+        summaries.append(report)
+    passed_count = sum(1 for r in summaries if r.passed)
+    return {
+        "total_runs": runs,
+        "passed_count": passed_count,
+        "passed_fraction": passed_count / runs,
+        "avg_restarts": sum(r.restarts for r in summaries) / runs,
+        "total_injected_failures": sum(r.injected_failures for r in summaries),
+        "details": [r.to_dict() for r in summaries],
+    }
