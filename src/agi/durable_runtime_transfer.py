@@ -9,7 +9,12 @@ from continual.candidate_regression import record_candidate_regression
 from continual.learned_tools import LearnedToolError
 from continual.learning_engine import LearningEnabledEngine
 
-from .acquired_program_runtime import _atomic_json, _digest, _hidden_descriptor, _inputs, _new_runtime_run
+from .acquired_program_runtime import (
+    _atomic_json,
+    _digest,
+    _new_runtime_run,
+    run_acquired_program_runtime_campaign,
+)
 from .acquired_programs import execute_program
 from .generated_crossdomain_cegis import (
     _prior_retest,
@@ -100,12 +105,13 @@ def run_durable_runtime_transfer_campaign(
         raise RuntimeError("learned capability did not transfer across durable executions")
 
     prior_seed = "generated-crossdomain-protected-prior-v1"
-    hidden_prior = _hidden_descriptor(prior_seed)
-    _, prior_holdout = _inputs(str(hidden_prior["input_domain"]))
-    prior_report = {
-        "candidate_id": acquisition["protected_prior_candidate_id"],
-        "tool_id": acquisition["protected_prior_tool_id"],
-    }
+    prior_report = run_acquired_program_runtime_campaign(
+        root,
+        prior_seed,
+        engine_factory=engine_factory,
+    )
+    if not prior_report["passed"]:
+        raise RuntimeError("protected prior replay did not pass")
     protected_before = _prior_retest(root, prior_seed, prior_report, engine_factory=engine_factory)
     if protected_before["score"] != 1.0:
         raise RuntimeError("protected prior was not intact before rollback trial")
