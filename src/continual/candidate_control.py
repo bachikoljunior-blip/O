@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .candidate_regression import (
+    CandidateIntegrityError,
     _atomic_json,
     _read_json,
     candidate_verified_for_scope,
@@ -58,6 +59,13 @@ def _has_other_verified_scope(candidate: Mapping[str, Any], suspended_scope: str
     )
 
 
+def _verified(root: Path, candidate: Mapping[str, Any], scope: str, *, message: str) -> bool:
+    try:
+        return candidate_verified_for_scope(root.resolve(), candidate, scope)
+    except CandidateIntegrityError as exc:
+        raise CandidateScopeControlError(message) from exc
+
+
 def suspend_verified_candidate_scope(
     root: Path,
     *,
@@ -87,7 +95,12 @@ def suspend_verified_candidate_scope(
         probe_states[scope] = "VERIFIED_FOR_SCOPE"
         probe["scope_states"] = probe_states
         probe["status"] = "active-for-scope"
-        if not candidate_verified_for_scope(root.resolve(), probe, scope):
+        if not _verified(
+            root,
+            probe,
+            scope,
+            message="suspended Candidate no longer has a valid verified binding",
+        ):
             raise CandidateScopeControlError("suspended Candidate no longer has a valid verified binding")
         return {
             "candidate_id": candidate_id,
@@ -96,7 +109,12 @@ def suspend_verified_candidate_scope(
             "replayed": True,
         }
 
-    if not candidate_verified_for_scope(root.resolve(), candidate, scope):
+    if not _verified(
+        root,
+        candidate,
+        scope,
+        message="Candidate is not currently verified for scope",
+    ):
         raise CandidateScopeControlError("Candidate is not currently verified for scope")
 
     binding = verified_states[scope]
@@ -138,7 +156,12 @@ def resume_verified_candidate_scope(
     scope_states = dict(candidate.get("scope_states", {}))
 
     if scope_states.get(scope) == "VERIFIED_FOR_SCOPE":
-        if not candidate_verified_for_scope(root.resolve(), candidate, scope):
+        if not _verified(
+            root,
+            candidate,
+            scope,
+            message="Candidate claims verified state without a valid binding",
+        ):
             raise CandidateScopeControlError("Candidate claims verified state without a valid binding")
         return {
             "candidate_id": candidate_id,
@@ -158,7 +181,12 @@ def resume_verified_candidate_scope(
     probe_states[scope] = "VERIFIED_FOR_SCOPE"
     probe["scope_states"] = probe_states
     probe["status"] = "active-for-scope"
-    if not candidate_verified_for_scope(root.resolve(), probe, scope):
+    if not _verified(
+        root,
+        probe,
+        scope,
+        message="Candidate regression binding failed re-verification",
+    ):
         raise CandidateScopeControlError("Candidate regression binding failed re-verification")
 
     binding = verified_states[scope]
