@@ -2,17 +2,29 @@
   "schema_version": 1,
   "user_goal": "Build and externally verify AGI without weakening the evidence gate.",
   "status": "in_progress",
-  "completed_through": "v0.4 sealed held-out evaluation merged as ae6145836e43a681f21da1961d5126cbcc152f35",
-  "current_branch": "agent/agi-longhorizon-v5",
-  "current_milestone": "long-horizon tasks: durable checkpoint persistence and fresh-context recovery added",
-  "next_actions": [
-    "add deterministic sandbox task protocol wrapper using persisted checkpoints",
-    "validate rollback uses only durable checkpoint (add more adversarial tests)",
-    "measure delayed recall and protected-regression retention across additional task instances",
-    "add reference validation and CI for long-horizon persistence tests",
-    "open PR and merge only after checks pass",
-    "continue to independent evaluation or real-model evidence if execution time remains"
+  "completed_through": "live-model long-horizon development path merged as 8a18aece86c5be1077b6462730f03c0edcf7a981 after deterministic protocol 8dd56f25c4f853248585ba1b3ad47e4378942c32, trusted durable rollback 9c0c2c012c8b2ef9a29f51046b230c1ff94969aa, and varied delayed-retention tasks 506847cd39e9545f34291fafbb13f65c402dcc3c",
+  "current_branch": "main",
+  "current_milestone": "The long-horizon evaluator now persists checkpoints before risky work, binds recovery to an evaluator-owned pre-failure commitment, fails closed on checkpoint deletion/tampering, repeats semantically varied memory/protected-state/output tasks, withholds delayed-recall answers from retain-phase instructions, validates rollback/retention/regression in CI, and exposes a strict stateless OpenAI Responses API development runner.",
+  "evidence": [
+    "PR 34 and both branch/PR CI passed the full repository test and reference suite before squash merge 8dd56f25c4f853248585ba1b3ad47e4378942c32.",
+    "PR 35 branch and PR CI passed adversarial deletion plus payload-and-self-digest checkpoint rewrite tests before squash merge 9c0c2c012c8b2ef9a29f51046b230c1ff94969aa.",
+    "PR 36 branch and PR CI passed three distinct long-horizon task variants with durable rollback, delayed retention, and protected-regression checks before squash merge 506847cd39e9545f34291fafbb13f65c402dcc3c.",
+    "PR 38 branch and PR CI passed strict OpenAI long-horizon adapter contract tests plus the full benchmark/reference suite before squash merge 8a18aece86c5be1077b6462730f03c0edcf7a981.",
+    "No live OpenAI model result or independent production-tier AGI evidence was produced by these reference/CI checks."
   ],
-  "claim_boundary": "No intermediate architecture or reference harness result counts as verified AGI.",
-  "updated_utc": "2026-08-16T08:55:44Z"
+  "unfinished_work": [
+    "Execute agi-longhorizon run-openai over the varied protocol when a runtime with OPENAI_API_KEY is available, retain the complete report, and keep its tier development.",
+    "Port only compatible parts of draft PR 33's public-key/fresh-challenge evidence provenance and Candidate regression gate onto the current stricter evidence model; PR 33 currently fails CI because its provenance module expects an incompatible EvidenceRecord/CRITERIA_BY_KEY interface and must not replace the current stronger gate.",
+    "Obtain independently produced, cryptographically verifiable production-tier trials across all six criteria, multiple tasks, runs, and domains, preserving failures and contamination history.",
+    "Use independently auditable regression measurements before broader Candidate adoption and retain scoped candidates when global evidence is insufficient."
+  ],
+  "next_actions": [
+    "create a clean branch from latest main and integrate a public-key independent-evidence provenance layer with the current evidence policy without weakening HMAC/trust requirements or allowing self-attested independence",
+    "add fail-closed tests for verifier identity, signature tampering, challenge replay, result/artifact substitution, held-out disclosure contamination, and duplicate independent-evidence inflation",
+    "integrate a scoped continual-learning Candidate regression gate whose adoption decision preserves all negative evidence and requires protected-baseline non-regression",
+    "run the live varied long-horizon development campaign when credentials are actually present; do not infer or fabricate a run when they are absent",
+    "connect independent production evaluation artifacts to the six-criterion claim gate and continue falsifiable capability/evidence work until the strict policy passes or contradictory evidence blocks the claim"
+  ],
+  "claim_boundary": "No intermediate architecture, reference harness result, CI pass, development-model run, unsigned/self-produced result, or unverified independence assertion counts as verified AGI.",
+  "updated_utc": "2026-08-16T09:16:00Z"
 }
