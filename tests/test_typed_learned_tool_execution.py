@@ -65,6 +65,16 @@ def _new_run(engine: LearningEnabledEngine) -> str:
     return run_id
 
 
+def _candidate_path(runtime_repo: Path, candidate_id: str) -> Path:
+    return (
+        runtime_repo
+        / ".continual"
+        / "candidates"
+        / candidate_id
+        / "candidate.json"
+    )
+
+
 def test_typed_tool_is_learned_promoted_and_executed_cross_domain(runtime_repo: Path) -> None:
     report = run_typed_learned_tool_execution_campaign(runtime_repo, "typed-execution-seed")
 
@@ -73,6 +83,7 @@ def test_typed_tool_is_learned_promoted_and_executed_cross_domain(runtime_repo: 
     assert report["inactive_before_regression"] is True
     assert report["expanded_depth"] == 5
     assert report["promotion"]["decision"]["adopt_candidate"] is True
+    assert len(report["promotion"]["candidate_spec_sha256"]) == 64
     assert report["rejected_wrong_type"] is True
     assert all(item["success"] for item in report["runtime_results"])
     assert all(item["output_is_numeric"] for item in report["runtime_results"])
@@ -131,13 +142,7 @@ def test_typed_registry_fails_closed_on_wrong_input_and_ill_typed_tampering(
             value=["not", "a", "string"],
         )
 
-    candidate_path = (
-        runtime_repo
-        / ".continual"
-        / "candidates"
-        / report["candidate_id"]
-        / "candidate.json"
-    )
+    candidate_path = _candidate_path(runtime_repo, report["candidate_id"])
     candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
     candidate["learned_tool"]["expanded_primitives"] = [
         "string.reverse",
@@ -149,4 +154,24 @@ def test_typed_registry_fails_closed_on_wrong_input_and_ill_typed_tampering(
     )
 
     with pytest.raises(LearnedToolError, match="ill-typed primitive chain"):
+        LearnedToolRegistry(runtime_repo).available(TYPED_EXECUTION_SCOPE)
+
+
+def test_well_typed_tool_substitution_invalidates_prior_regression(
+    runtime_repo: Path,
+) -> None:
+    report = run_typed_learned_tool_execution_campaign(runtime_repo, "typed-substitution-seed")
+    candidate_path = _candidate_path(runtime_repo, report["candidate_id"])
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+
+    # This remains a well-typed string -> numeric program, but it is not the program that earned
+    # the persisted regression approval. Type checks alone must therefore be insufficient.
+    candidate["learned_tool"]["expanded_primitives"] = ["string.length"]
+    candidate["learned_tool"]["description"] = "Substituted after approval."
+    candidate_path.write_text(
+        json.dumps(candidate, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(LearnedToolError, match="changed after regression verification"):
         LearnedToolRegistry(runtime_repo).available(TYPED_EXECUTION_SCOPE)
