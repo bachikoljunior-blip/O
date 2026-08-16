@@ -9,6 +9,8 @@ from typing import Any, Mapping
 from agi.compositional import Primitive, default_primitives
 from agi.typed_composition import TypedPrimitive, default_typed_primitives
 
+from .candidate_regression import candidate_spec_sha256
+
 _SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _PROGRAM_KINDS = {"legacy_same_domain", "typed"}
@@ -118,10 +120,10 @@ class LearnedToolRegistry:
 
     The registry has no independent activation bit. Its source of truth is the Candidate regression
     record persisted in candidate.json: a tool is callable only when the exact scope is
-    VERIFIED_FOR_SCOPE in both scope state views. Legacy tools compose a fixed same-domain primitive
-    set. Typed tools compose a separately fixed safe primitive set whose input/output domains are
-    checked both statically and at every invocation. Arbitrary source code and shell commands are
-    never loaded.
+    VERIFIED_FOR_SCOPE in both scope state views and the current semantic Candidate body matches the
+    hash that was actually regression-tested. Legacy tools compose a fixed same-domain primitive set.
+    Typed tools compose a separately fixed safe primitive set whose input/output domains are checked
+    both statically and at every invocation. Arbitrary source code and shell commands are never loaded.
     """
 
     def __init__(
@@ -173,7 +175,7 @@ class LearnedToolRegistry:
         if not isinstance(scope_states, Mapping) or not isinstance(verified, Mapping):
             return False
         record = verified.get(scope)
-        return (
+        base_verified = (
             candidate.get("status") == "active-for-scope"
             and scope_states.get(scope) == "VERIFIED_FOR_SCOPE"
             and isinstance(record, Mapping)
@@ -181,6 +183,19 @@ class LearnedToolRegistry:
             and isinstance(record.get("regression_evidence_sha256"), str)
             and bool(_SHA256.fullmatch(str(record.get("regression_evidence_sha256"))))
         )
+        if not base_verified:
+            return False
+        bound_spec = str(record.get("candidate_spec_sha256", ""))
+        if not _SHA256.fullmatch(bound_spec):
+            raise LearnedToolError(
+                "verified learned tool is missing a candidate semantic-body binding"
+            )
+        current_spec = candidate_spec_sha256(candidate)
+        if current_spec != bound_spec:
+            raise LearnedToolError(
+                "learned tool candidate changed after regression verification"
+            )
+        return True
 
     def _validate_program(self, spec: LearnedToolSpec) -> None:
         if spec.program_kind == "legacy_same_domain":
