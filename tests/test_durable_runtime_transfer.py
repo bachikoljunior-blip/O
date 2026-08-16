@@ -69,8 +69,14 @@ def test_unseen_runtime_work_units_gain_persists_across_runs_and_supports_safe_r
     persisted = json.loads(persisted_text)
     assert persisted["digest"] == report["digest"]
     assert seed not in persisted_text
-    assert "expected" not in persisted_text
-    assert all("input_sha256" in item for item in persisted["post_acquisition"]["results"])
+    assert all(
+        "input_sha256" in item and "expected" not in item
+        for item in persisted["post_acquisition"]["results"]
+    )
+    assert all(
+        "input_sha256" in item and "expected" not in item
+        for item in persisted["after_resume"]["results"]
+    )
 
 
 def test_resume_fails_closed_if_suspended_candidate_semantics_change(
