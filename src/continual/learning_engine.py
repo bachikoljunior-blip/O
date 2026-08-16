@@ -4,19 +4,19 @@ import json
 from copy import deepcopy
 from typing import Any, Mapping
 
+from .candidate_regression import candidate_verified_for_scope
 from .contracts import validate_component_output
 from .engine import Engine
 from .learned_tools import LearnedToolError, LearnedToolRegistry
 
 
 class LearningEnabledEngine(Engine):
-    """Continual Engine that can execute exact-scope, regression-verified learned tools.
+    """Continual Engine with verified learned tools and fail-closed Candidate activation.
 
-    Verified tool descriptors are supplied to Root and Execute as persistent capability metadata.
-    Root may schedule an execute unit containing ``learned_tool_call``. The actual call bypasses the
-    language model and is performed mechanically by LearnedToolRegistry, which re-checks exact scope
-    and deterministic regression verification before every invocation. Calls are journaled using the
-    Engine's normal invocation directory so retries reuse the same completed pure result.
+    A semantic Candidate evaluator may select an unverified Candidate for one explicit trial, but it
+    cannot promote that Candidate. Continued USE_CANDIDATE/ACTIVE_FOR_SCOPE selection requires a
+    matching deterministic regression record bound to the current Candidate body and prompt artifact.
+    Verified learned-tool calls are executed mechanically and journaled for idempotent retry.
     """
 
     def _learned_tool_registry(self) -> LearnedToolRegistry:
@@ -40,6 +40,63 @@ class LearningEnabledEngine(Engine):
             for descriptor in registry.descriptors(scope):
                 catalog[(scope, str(descriptor["tool_id"]))] = descriptor
         return tuple(catalog[key] for key in sorted(catalog))
+
+    def _selected_candidate(self, selection: dict[str, Any], target: str) -> dict[str, Any] | None:
+        candidate = super()._selected_candidate(selection, target)
+        if candidate is None:
+            return None
+        result = selection.get("result", selection)
+        if not isinstance(result, Mapping):
+            return None
+        decision = result.get("decision")
+        if decision == "TRIAL_CANDIDATE":
+            return candidate
+        scope = result.get("scope")
+        if not isinstance(scope, str) or not scope.strip():
+            return None
+        if not candidate_verified_for_scope(self.root, candidate, scope):
+            return None
+        return candidate
+
+    def _apply_scope_update(self, post: dict[str, Any]) -> None:
+        """Persist semantic observations without allowing semantic self-promotion.
+
+        ACTIVE_FOR_SCOPE and VERIFIED_FOR_SCOPE from a model are recommendations, not state-machine
+        authority. They are retained as supporting evidence, while only record_candidate_regression
+        may write VERIFIED_FOR_SCOPE. Conservative negative outcomes still deactivate the exact scope.
+        """
+
+        result = post.get("result", post)
+        if not isinstance(result, Mapping):
+            return
+        state = result.get("scope_state") or result.get("decision")
+        if state not in {"ACTIVE_FOR_SCOPE", "VERIFIED_FOR_SCOPE", "USE_CANDIDATE"}:
+            super()._apply_scope_update(post)
+            return
+
+        candidate_id = result.get("candidate_id")
+        scope = result.get("scope")
+        if not all(isinstance(value, str) and value for value in (candidate_id, scope)):
+            return
+        candidate = self._candidate_by_id(candidate_id)
+        if not candidate:
+            return
+        supporting = list(candidate.get("supporting_evidence", []))
+        supporting.append(
+            {
+                "type": "semantic_candidate_recommendation",
+                "scope": scope,
+                "recommended_state": state,
+                "evidence": result.get("evidence", []),
+                "at": self.store.utc_now(),
+                "note": "Recommendation only; deterministic regression is required for activation.",
+            }
+        )
+        candidate["supporting_evidence"] = self._dedupe_list(supporting)
+        self.store.atomic_json(self._candidate_path(candidate_id), candidate)
+        index = self._index()
+        self._sync_index_candidate(index, candidate)
+        self._write_index(index)
 
     def _mechanical_learned_tool_call(
         self,
@@ -107,7 +164,7 @@ class LearningEnabledEngine(Engine):
                 "component": "execute",
                 "purpose": "mechanical execution of an exact-scope regression-verified learned tool",
                 "observations": [
-                    "The learned tool was re-verified against persisted Candidate scope state before execution.",
+                    "The learned tool and its regression record were re-verified before execution.",
                     "No language-model-generated code or shell command was executed for this learned tool call.",
                 ],
                 "evidence_refs": [
