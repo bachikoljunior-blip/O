@@ -144,15 +144,15 @@ class ContractedExternalToolRegistry:
 
     The repository persists no executable adapter source. A host must explicitly supply an adapter
     whose immutable identity matches the Candidate contract. Only effect-free adapters are currently
-    executable, and every registry instance enforces exact scope, typed I/O, call count, and JSON byte
-    limits. Shell, network, filesystem, subprocess, and arbitrary generated-code effects therefore do
-    not become available merely because a Candidate requests them.
+    executable, and every call enforces exact scope, typed I/O, a per-budget-key call count, and JSON
+    byte limits. Shell, network, filesystem, subprocess, and arbitrary generated-code effects
+    therefore do not become available merely because a Candidate requests them.
     """
 
     def __init__(self, root: Path, adapters: Mapping[str, ExternalToolAdapter]) -> None:
         self.root = root.resolve()
         self.adapters = dict(adapters)
-        self._calls: dict[tuple[str, str], int] = {}
+        self._calls: dict[tuple[str, str, str], int] = {}
         for key, adapter in self.adapters.items():
             if not isinstance(key, str) or not _SAFE_ID.fullmatch(key):
                 raise ContractedExternalToolError("adapter map contains invalid tool_id")
@@ -172,16 +172,12 @@ class ContractedExternalToolRegistry:
                 values.append(raw)
         return tuple(values)
 
-    def available(self, scope: str) -> tuple[ExternalToolContract, ...]:
-        if not isinstance(scope, str) or not scope.strip():
-            raise ContractedExternalToolError("scope must be a non-empty string")
-        selected: dict[str, ExternalToolContract] = {}
+    def catalog(self) -> tuple[ExternalToolContract, ...]:
+        selected: dict[tuple[str, str], ExternalToolContract] = {}
         for candidate in self._candidate_values():
             contract = ExternalToolContract.from_candidate(candidate)
-            if contract.scope != scope:
-                continue
             try:
-                verified = candidate_verified_for_scope(self.root, candidate, scope)
+                verified = candidate_verified_for_scope(self.root, candidate, contract.scope)
             except CandidateIntegrityError as exc:
                 raise ContractedExternalToolError(str(exc)) from exc
             if not verified:
@@ -191,15 +187,30 @@ class ContractedExternalToolRegistry:
                 continue
             if adapter.adapter_sha256 != contract.adapter_sha256:
                 raise ContractedExternalToolError("host adapter identity does not match verified contract")
-            if contract.tool_id in selected:
-                raise ContractedExternalToolError("duplicate verified external tool_id")
-            selected[contract.tool_id] = contract
+            key = (contract.scope, contract.tool_id)
+            if key in selected:
+                raise ContractedExternalToolError("duplicate verified external tool identity")
+            selected[key] = contract
         return tuple(selected[key] for key in sorted(selected))
+
+    def available(self, scope: str) -> tuple[ExternalToolContract, ...]:
+        if not isinstance(scope, str) or not scope.strip():
+            raise ContractedExternalToolError("scope must be a non-empty string")
+        return tuple(item for item in self.catalog() if item.scope == scope)
 
     def descriptors(self, scope: str) -> tuple[dict[str, Any], ...]:
         return tuple(item.descriptor() for item in self.available(scope))
 
-    def apply(self, *, scope: str, tool_id: str, value: Any) -> Any:
+    def apply(
+        self,
+        *,
+        scope: str,
+        tool_id: str,
+        value: Any,
+        budget_key: str = "registry",
+    ) -> Any:
+        if not isinstance(budget_key, str) or not budget_key:
+            raise ContractedExternalToolError("external tool budget_key must be non-empty")
         contract = {item.tool_id: item for item in self.available(scope)}.get(tool_id)
         if contract is None:
             raise ContractedExternalToolError(
@@ -211,7 +222,7 @@ class ContractedExternalToolRegistry:
             )
         if _json_size(value) > contract.max_input_bytes:
             raise ContractedExternalToolError("external tool input exceeds contract byte limit")
-        key = (scope, tool_id)
+        key = (budget_key, scope, tool_id)
         used = self._calls.get(key, 0)
         if used >= contract.max_calls:
             raise ContractedExternalToolError("external tool call budget exhausted")
