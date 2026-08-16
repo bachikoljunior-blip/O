@@ -41,6 +41,7 @@ class EvidenceRecord:
     producer: str = ""
     attestor_id: str = ""
     attestation: str = ""
+    provenance_ref: str = ""
 
     def validate(self) -> list[str]:
         errors: list[str] = []
@@ -81,6 +82,7 @@ class EvidenceRecord:
             producer=str(value.get("producer", "")),
             attestor_id=str(value.get("attestor_id", "")),
             attestation=str(value.get("attestation", "")),
+            provenance_ref=str(value.get("provenance_ref", "")),
         )
 
 
@@ -130,6 +132,11 @@ def _attestation_payload(record: EvidenceRecord) -> bytes:
         "attestor_id": record.attestor_id,
         "timestamp": record.timestamp,
     }
+    # Backward-compatible extension: legacy records with an empty provenance_ref retain the exact
+    # pre-extension HMAC payload. Externally verified records opt in and bind the provenance chain
+    # into the bridge attestation so it cannot be swapped after verification.
+    if record.provenance_ref:
+        value["provenance_ref"] = record.provenance_ref
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
