@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "running",
+  "status": "checkpointed",
   "execution_mode": "hourly_repository_only_same_task_chat",
   "worker": "current_automation_task_chat_model",
   "required_model": "GPT-5.6 Pro",
@@ -16,14 +16,18 @@
   "continuation_path": "agi/CONTINUATION.json",
   "execution_policy_path": "agi/STANDALONE_HOURLY_AUTOMATION.md",
   "lease_path": "agi/HOURLY_EXECUTION_STATE.json",
-  "active_run_id": "run-hourly-agi-20260817-0700",
-  "run_status": "07:00 repository-only-context execution is active in the reused task chat. PR 72 removed the obsolete model-mismatch stop condition; stale standalone and reporting state is being reconciled before capability work continues.",
+  "active_run_id": null,
+  "run_status": "07:00 execution reached soft stop after PR 74 exact-head CI failed; failed head was not merged and is preserved for next-run reconciliation.",
   "last_scheduled_start": "2026-08-17T07:00:00+09:00",
   "next_scheduled_start": "2026-08-17T08:00:00+09:00",
   "last_session_id": "same-task-chat-20260817T0700JST-072948",
   "last_completed_capability_sha": "391f1bd5f8ac6b6ad196fdf5eea3b1fb2cafba50",
   "last_policy_sha": "08e86eb9d3b0e96743a53a9c81cb694693308c61",
-  "next_executable_action": "Sequentially acquire at least three seed-generated cross-domain CEGIS capabilities in fresh engines; after each promotion retest every accumulated capability on sealed evaluator probes and prove runtime retesting consumes no additional persistent Candidate trial budget.",
+  "unmerged_pr": 74,
+  "unmerged_head_sha": "7b663d969d7978c61b51f8bb29ecbcbad4b029fc",
+  "failed_ci_run": 31976954779,
+  "failed_validation": "pytest: 1 failed, 166 passed; repeated protected-prior acquired-program setup conflicts with its existing Candidate during the sequential multi-capability campaign.",
+  "next_executable_action": "Reconcile PR 74, make repeated protected-prior acquisition/reuse idempotent without weakening stable Candidate conflict detection, add exact replay/reuse regression coverage, and rerun focused plus full exact-head CI before merge.",
   "automation_control_status": "enabled_hourly_same_task_chat_requested; repository state is not scheduler control-plane proof",
-  "rule": "Every run logically resets prior chat context and reconstructs work state from latest main only. Model mismatch alone is non-blocking, model identity is recorded truthfully, and verified AGI remains gated on independent production evidence."
+  "rule": "Every run logically resets prior chat context and reconstructs work state from latest main only. After every completed work unit reacquire current time; continue before soft stop only when another unit can be safely validated and persisted, and release before hard stop. Verified AGI remains gated on independent production evidence."
 }
