@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  models: read
 
 concurrency:
   group: agi-continuous
@@ -22,6 +23,8 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ vars.AGI_AUTONOMY_MODEL || 'gpt-5' }}
+      GITHUB_TOKEN: ${{ github.token }}
+      GITHUB_MODELS_MODEL: ${{ vars.AGI_GITHUB_MODELS_MODEL || 'openai/gpt-4.1' }}
       AUTONOMY_BRANCH: autonomy/agi-continuous
     steps:
       - uses: actions/checkout@v5
@@ -31,18 +34,15 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-      - name: Skip safely without model credentials
-        id: key
+      - name: Select available model provider
         shell: bash
         run: |
-          if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "OPENAI_API_KEY is not configured; continuity falls back to the ChatGPT automation."
+          if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+            echo "Using explicitly configured OpenAI provider."
           else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "OPENAI_API_KEY is absent; using GitHub Models with the ephemeral workflow token."
           fi
       - name: Restore autonomous branch and merge latest main
-        if: steps.key.outputs.configured == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -59,13 +59,10 @@ jobs:
             git checkout -B "$AUTONOMY_BRANCH" origin/main
           fi
       - name: Install runtime
-        if: steps.key.outputs.configured == 'true'
         run: python -m pip install -e '.[test]'
       - name: Let unfinished AGI continue its own persisted run
-        if: steps.key.outputs.configured == 'true'
         run: agi-autonomy --cycles 6 --max-steps 24
       - name: Reject autonomous edits outside the constrained surface
-        if: steps.key.outputs.configured == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -78,7 +75,6 @@ jobs:
           done < <(git diff --name-only origin/main...HEAD; git diff --name-only)
           exit "$bad"
       - name: Validate before persistence
-        if: steps.key.outputs.configured == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -88,7 +84,6 @@ jobs:
           agi-benchmark validate-workspace-suite >/dev/null
           agi-benchmark validate-heldout-suite >/dev/null
       - name: Persist exact continuation to autonomous branch
-        if: steps.key.outputs.configured == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -100,7 +95,6 @@ jobs:
           git commit -m "Continue AGI autonomy ${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
           git push origin "HEAD:$AUTONOMY_BRANCH"
       - name: Keep an integration PR open
-        if: steps.key.outputs.configured == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
