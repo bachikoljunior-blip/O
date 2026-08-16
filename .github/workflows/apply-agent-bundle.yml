@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   apply:
-    if: contains(github.event.head_commit.message, 'Stage AGI runtime bundle workflow')
+    if: contains(github.event.head_commit.message, 'Retry validated AGI runtime bundle')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -28,7 +28,7 @@ jobs:
           tar -xzf /tmp/agent-bundle.tar.gz
           rm -f agi/evaluation.py tests/test_agi_e2e.py
           rm -rf .agent-bundle
-          rm -f .github/workflows/apply-agent-bundle.yml
+          git checkout HEAD -- .github/workflows/test.yml .github/workflows/apply-agent-bundle.yml
       - name: Validate implementation
         run: |
           set -euo pipefail
@@ -37,6 +37,7 @@ jobs:
           python -m compileall -q src
           agi-benchmark validate-suite
           agi-benchmark run-reference --output /tmp/reference-report.json
+          rm -rf src/continual_chatgpt.egg-info
       - name: Commit validated implementation
         run: |
           set -euo pipefail
