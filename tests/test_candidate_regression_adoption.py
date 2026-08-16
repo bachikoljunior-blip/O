@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 
 from continual.candidate_regression import (
+    candidate_integrity_sha256,
     candidate_spec_sha256,
+    candidate_verified_for_scope,
     record_candidate_regression,
 )
 
@@ -86,14 +88,19 @@ def test_passing_regression_promotes_only_the_measured_scope(tmp_path: Path) -> 
     verified = state["verified_scope_states"]["symbolic-transfer"]
     assert verified["decision_ref"] == report["decision_ref"]
     assert verified["candidate_spec_sha256"] == report["candidate_spec_sha256"]
+    assert verified["candidate_integrity_sha256"] == report["candidate_integrity_sha256"]
     assert verified["candidate_spec_sha256"] == candidate_spec_sha256(state)
+    assert verified["candidate_integrity_sha256"] == candidate_integrity_sha256(root, state)
+    assert candidate_verified_for_scope(root, state, "symbolic-transfer") is True
 
     decision_path = root / report["decision_ref"]
     assert decision_path.is_file()
     persisted = json.loads(decision_path.read_text())
-    assert persisted["schema_version"] == 2
+    assert persisted["schema_version"] == 3
     assert persisted["candidate_spec_sha256"] == report["candidate_spec_sha256"]
+    assert persisted["candidate_integrity_sha256"] == report["candidate_integrity_sha256"]
     assert persisted["candidate_spec_sha256"] == candidate_spec_sha256(persisted["candidate_spec"])
+    assert persisted["candidate_artifacts"] == {}
     assert persisted["decision"]["regression_evidence_sha256"] == report["decision"][
         "regression_evidence_sha256"
     ]
@@ -140,6 +147,9 @@ def test_failed_regression_remains_candidate_and_negative_evidence_survives_late
     assert after_failure["contradictory_evidence"][0]["candidate_spec_sha256"] == first[
         "candidate_spec_sha256"
     ]
+    assert after_failure["contradictory_evidence"][0]["candidate_integrity_sha256"] == first[
+        "candidate_integrity_sha256"
+    ]
     failed_ref = first["decision_ref"]
 
     _write(
@@ -160,6 +170,7 @@ def test_failed_regression_remains_candidate_and_negative_evidence_survives_late
     )
     assert second["decision"]["adopt_candidate"] is True
     assert second["candidate_spec_sha256"] == first["candidate_spec_sha256"]
+    assert second["candidate_integrity_sha256"] == first["candidate_integrity_sha256"]
 
     final = json.loads(state_path.read_text())
     assert final["status"] == "active-for-scope"
