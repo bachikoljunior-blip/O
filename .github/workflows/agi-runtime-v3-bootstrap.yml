@@ -1,0 +1,88 @@
+name: Bootstrap autonomous research control plane
+
+on:
+  push:
+    branches:
+      - agent/agi-runtime-v3-20260816
+    paths:
+      - .agent-runtime-v3/trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: agi-runtime-bootstrap-v3
+  cancel-in-progress: false
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/agi-runtime-v3-20260816
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Start from latest main
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -R .agent-runtime-v3 /tmp/agent-runtime-v3
+          git fetch origin main
+          git checkout -B agent/agi-runtime-v3-20260816 origin/main
+          rm -rf .agent-runtime-v3 .github/workflows/agi-runtime-v3-bootstrap.yml
+          cp -R /tmp/agent-runtime-v3 .agent-runtime-v3
+          test -f src/agi/experiments.py
+          test -f src/agi/workspace.py
+
+      - name: Apply v3 implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .agent-runtime-v3/01_research_control.py
+          python .agent-runtime-v3/02_skill_adoption.py
+          python .agent-runtime-v3/03_cli_tests_docs.py
+
+      - name: Validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+          pytest -q
+          python -m compileall -q src tests
+          python -m agi.research_cli --root . sync > /tmp/research-sync.json
+          python -m agi.research_cli --root . status > /tmp/research-status.json
+          python -m agi.cli --root . advance > /tmp/campaign-v3.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          research = json.loads(Path('/tmp/research-status.json').read_text(encoding='utf-8'))
+          campaign = json.loads(Path('/tmp/campaign-v3.json').read_text(encoding='utf-8'))
+          assert research['status'] == 'continue'
+          assert research['items']
+          assert campaign['report']['agi_claim_supported'] is False
+          assert campaign['next_milestones']
+          PY
+
+      - name: Publish clean commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .agent-runtime-v3 .github/workflows/agi-runtime-v3-bootstrap.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m 'Add autonomous AGI research control plane'
+          git push --force-with-lease origin HEAD:agent/agi-runtime-v3-20260816
+          git push origin HEAD:main
+
+      - name: Remove temporary branch
+        if: success()
+        shell: bash
+        run: git push origin --delete agent/agi-runtime-v3-20260816 || true
