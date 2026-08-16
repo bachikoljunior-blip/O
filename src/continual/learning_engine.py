@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 from typing import Any, Mapping
 
+from .acquired_program_tools import AcquiredProgramRegistry, AcquiredProgramToolError
 from .candidate_regression import candidate_verified_for_scope
 from .contracts import validate_component_output
 from .engine import Engine
@@ -16,30 +17,64 @@ class LearningEnabledEngine(Engine):
     A semantic Candidate evaluator may select an unverified Candidate for one explicit trial, but it
     cannot promote that Candidate. Continued USE_CANDIDATE/ACTIVE_FOR_SCOPE selection requires a
     matching deterministic regression record bound to the current Candidate body and prompt artifact.
-    Verified learned-tool calls are executed mechanically and journaled for idempotent retry.
+    Verified learned-tool and acquired-program calls are executed mechanically and journaled for
+    idempotent retry.
     """
 
     def _learned_tool_registry(self) -> LearnedToolRegistry:
         return LearnedToolRegistry(self.root)
 
+    def _acquired_program_registry(self) -> AcquiredProgramRegistry:
+        return AcquiredProgramRegistry(self.root)
+
     def _verified_tool_catalog(self) -> tuple[dict[str, Any], ...]:
-        registry = self._learned_tool_registry()
+        learned = self._learned_tool_registry()
+        acquired = self._acquired_program_registry()
         candidates_dir = self.root / ".continual" / "candidates"
         if not candidates_dir.exists():
             return ()
-        scopes: set[str] = set()
+        learned_scopes: set[str] = set()
+        acquired_scopes: set[str] = set()
         for path in sorted(candidates_dir.glob("*/candidate.json")):
             raw = json.loads(path.read_text(encoding="utf-8"))
-            if not isinstance(raw, Mapping) or raw.get("target_component") != "learned_tool":
+            if not isinstance(raw, Mapping):
                 continue
             scope = raw.get("expected_scope")
-            if isinstance(scope, str) and scope.strip():
-                scopes.add(scope)
+            if not isinstance(scope, str) or not scope.strip():
+                continue
+            if raw.get("target_component") == "learned_tool":
+                learned_scopes.add(scope)
+            elif raw.get("target_component") == "acquired_program":
+                acquired_scopes.add(scope)
         catalog: dict[tuple[str, str], dict[str, Any]] = {}
-        for scope in sorted(scopes):
-            for descriptor in registry.descriptors(scope):
-                catalog[(scope, str(descriptor["tool_id"]))] = descriptor
+        for scope in sorted(learned_scopes):
+            for descriptor in learned.descriptors(scope):
+                key = (scope, str(descriptor["tool_id"]))
+                if key in catalog:
+                    raise LearnedToolError(f"duplicate verified tool identity {scope}:{key[1]}")
+                catalog[key] = descriptor
+        for scope in sorted(acquired_scopes):
+            for descriptor in acquired.descriptors(scope):
+                key = (scope, str(descriptor["tool_id"]))
+                if key in catalog:
+                    raise AcquiredProgramToolError(
+                        f"duplicate verified tool identity {scope}:{key[1]}"
+                    )
+                catalog[key] = descriptor
         return tuple(catalog[key] for key in sorted(catalog))
+
+    def _scope_tool_descriptors(self, scope: str) -> dict[str, dict[str, Any]]:
+        selected: dict[str, dict[str, Any]] = {}
+        for descriptor in self._learned_tool_registry().descriptors(scope):
+            selected[str(descriptor["tool_id"])] = descriptor
+        for descriptor in self._acquired_program_registry().descriptors(scope):
+            tool_id = str(descriptor["tool_id"])
+            if tool_id in selected:
+                raise AcquiredProgramToolError(
+                    f"duplicate verified tool identity {scope}:{tool_id}"
+                )
+            selected[tool_id] = descriptor
+        return selected
 
     def _selected_candidate(self, selection: dict[str, Any], target: str) -> dict[str, Any] | None:
         candidate = super()._selected_candidate(selection, target)
@@ -119,8 +154,7 @@ class LearningEnabledEngine(Engine):
         if "input" not in call:
             raise LearnedToolError("learned tool call requires input")
 
-        registry = self._learned_tool_registry()
-        descriptors = {str(item["tool_id"]): item for item in registry.descriptors(scope)}
+        descriptors = self._scope_tool_descriptors(scope)
         descriptor = descriptors.get(tool_id)
         if descriptor is None:
             raise LearnedToolError(f"learned tool is not verified for scope: {scope}:{tool_id}")
@@ -144,15 +178,28 @@ class LearningEnabledEngine(Engine):
                     "invocation_id": invocation_id,
                     "tool_id": tool_id,
                     "scope": scope,
+                    "program_kind": descriptor.get("program_kind"),
                 },
             )
             return output
 
-        answer = registry.apply(scope=scope, tool_id=tool_id, value=call["input"])
+        if descriptor.get("program_kind") == "acquired_program":
+            answer = self._acquired_program_registry().apply(
+                scope=scope,
+                tool_id=tool_id,
+                value=call["input"],
+            )
+        else:
+            answer = self._learned_tool_registry().apply(
+                scope=scope,
+                tool_id=tool_id,
+                value=call["input"],
+            )
         output = {
             "result": {
                 "status": "implemented",
                 "execution_kind": "verified_learned_tool",
+                "program_kind": descriptor.get("program_kind"),
                 "tool_id": tool_id,
                 "scope": scope,
                 "output": answer,
@@ -162,10 +209,10 @@ class LearningEnabledEngine(Engine):
             "local_learn": {"decision": "NO_CHANGE", "candidates": []},
             "fragment": {
                 "component": "execute",
-                "purpose": "mechanical execution of an exact-scope regression-verified learned tool",
+                "purpose": "mechanical execution of an exact-scope regression-verified learned capability",
                 "observations": [
-                    "The learned tool and its regression record were re-verified before execution.",
-                    "No language-model-generated code or shell command was executed for this learned tool call.",
+                    "The learned capability and its regression record were re-verified before execution.",
+                    "Acquired programs run only in the pure bounded expression interpreter; no shell, network, file, or model-generated source code is executed by the capability.",
                 ],
                 "evidence_refs": [
                     f".continual/candidates/{descriptor['candidate_id']}/candidate.json"
@@ -181,6 +228,7 @@ class LearningEnabledEngine(Engine):
                 "invocation_id": invocation_id,
                 "component": "execute",
                 "execution_kind": "verified_learned_tool",
+                "program_kind": descriptor.get("program_kind"),
                 "payload_digest": self.store.stable_digest(invocation_payload),
                 "status": "complete",
                 "attempt": 1,
@@ -197,6 +245,7 @@ class LearningEnabledEngine(Engine):
                 "tool_id": tool_id,
                 "scope": scope,
                 "candidate_id": descriptor["candidate_id"],
+                "program_kind": descriptor.get("program_kind"),
             },
         )
         return output
@@ -210,7 +259,7 @@ class LearningEnabledEngine(Engine):
             scope = unit.get("scope") if isinstance(unit, Mapping) else None
             if isinstance(scope, str) and scope.strip():
                 enriched["verified_learned_tools"] = list(
-                    self._learned_tool_registry().descriptors(scope)
+                    self._scope_tool_descriptors(scope).values()
                 )
             call = unit.get("learned_tool_call") if isinstance(unit, Mapping) else None
             if call is not None:
