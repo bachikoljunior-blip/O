@@ -6,7 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
-from continual.engine import Engine, TERMINAL_STATUSES
+from continual.engine import TERMINAL_STATUSES
+from continual.learning_engine import LearningEnabledEngine
 
 
 DEFAULT_REQUEST = """Continue building and externally verifying AGI from the repository's persisted state.
@@ -113,13 +114,14 @@ def drive_autonomy(
 
     The caller controls the hard execution budget through ``cycles``/``max_steps``. Within that budget,
     every terminal run immediately spawns the next run. This means only the external process boundary,
-    not a model's subtask-level PASS, creates an execution gap.
+    not a model's subtask-level PASS, creates an execution gap. The default continual runtime exposes
+    only deterministic-regression-verified learned tools and re-checks exact scope on every tool call.
     """
 
     if cycles < 1 or max_steps < 1:
         raise ValueError("cycles and max_steps must be positive")
     root = root.resolve()
-    selected = engine or Engine(root)
+    selected = engine or LearningEnabledEngine(root)
     run_id = find_resumable_run(root)
     restarts = 0
     completed = 0
