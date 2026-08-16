@@ -1,0 +1,72 @@
+name: AGI held-out protocol
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/agi/heldout.py'
+      - 'tests/test_agi_heldout.py'
+      - 'agi/HELDOUT.md'
+      - '.github/workflows/agi-heldout.yml'
+  pull_request:
+    paths:
+      - 'src/agi/heldout.py'
+      - 'tests/test_agi_heldout.py'
+      - 'agi/HELDOUT.md'
+      - '.github/workflows/agi-heldout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agi-heldout-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e . pytest
+      - run: pytest -q tests/test_agi_heldout.py
+      - name: Prepare, lock, reveal, and independently recompute
+        shell: bash
+        run: |
+          set -euo pipefail
+          nonce="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+          python -m agi.heldout prepare \
+            --suite-id ci-development-heldout \
+            --suite-version 1.0 \
+            --challenge-nonce "$nonce" \
+            --difficulty 2 \
+            --secret-output heldout-secret.json \
+            --commitment-output heldout-commitment.json \
+            >/dev/null
+          python -m agi.heldout run \
+            --secret heldout-secret.json \
+            --commitment heldout-commitment.json \
+            --output heldout-report.json \
+            >/dev/null
+          python -m agi.heldout verify heldout-report.json >/dev/null
+          python - <<'PY'
+          import json
+          report = json.load(open('heldout-report.json', encoding='utf-8'))
+          assert report['all_tasks_passed'] is True
+          assert report['agi_evaluation']['agi_claim_supported'] is False
+          assert all(r['source_kind'] == 'internal_test' for r in report['evidence_records'])
+          PY
+          rm -f heldout-secret.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: heldout-development-report-${{ github.run_id }}
+          path: |
+            heldout-commitment.json
+            heldout-report.json
+          if-no-files-found: error
+          retention-days: 30
