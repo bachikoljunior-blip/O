@@ -11,54 +11,38 @@
   "model": "GPT-5.6 Pro",
   "model_role": "primary_reasoning_and_implementation_agent",
   "started_at": "2026-08-16T19:16:35+09:00",
-  "last_progress_at": "2026-08-16T19:50:20+09:00",
-  "finished_at": "2026-08-16T19:50:20+09:00",
+  "last_progress_at": "2026-08-16T19:58:55+09:00",
+  "finished_at": "2026-08-16T19:58:55+09:00",
   "active_run_id": null,
   "current_work_unit": null,
   "last_result": {
-    "status": "checkpointed_unmerged_work",
+    "status": "completed_with_continuation",
     "work_units": [
       {
         "pull_request": 55,
         "merged_sha": "e3c07c84c501a61a122fc5be6018557532163209",
-        "summary": "Regression-verified typed string-to-sequence-to-numeric learned skills now execute mechanically through the real continual runtime, with exact Candidate semantic-body binding and runtime type checks.",
-        "validation": {
-          "branch_run": 31941780589,
-          "pull_request_run": 31941782999,
-          "conclusion": "success"
-        }
+        "summary": "Regression-verified typed string-to-sequence-to-numeric learned skills execute mechanically through the real continual runtime, with exact Candidate semantic-body binding and runtime type checks."
       },
       {
         "pull_request": 56,
         "merged_sha": "6b6f8bc79064c974427ea4a05d418021a0c50ee2",
-        "summary": "Continual Candidate use now requires the exact Candidate body, prompt artifact digest, and real deterministic decision record; semantic evaluators cannot self-promote Candidates.",
-        "validation": {
-          "branch_run": 31942168610,
-          "pull_request_run": 31942229814,
-          "conclusion": "success"
-        }
+        "summary": "Continual Candidate use requires the exact Candidate body, prompt artifact digest, and real deterministic decision record; semantic evaluators cannot self-promote Candidates."
       },
       {
         "pull_request": 57,
-        "branch": "agi/trial-candidate-ledger-20260816-1948",
         "head_sha": "cd67328e600d3e13ebc480da160da2e3523b4324",
-        "summary": "Implemented an idempotent bounded per-scope Candidate trial ledger with exact replay, bounded exhaustion, idempotent completion, and conflict detection plus focused tests.",
+        "merged_sha": "ad537482b99984fc97de26efd0c28dc18175c554",
+        "summary": "Merged the validated idempotent bounded per-scope Candidate trial ledger after exact-head CI succeeded.",
         "validation": {
-          "conclusion": "pending",
-          "observed_at": "2026-08-16T19:50:05+09:00",
-          "detail": "No workflow run was yet visible for the exact PR head; the change was intentionally left unmerged."
+          "workflow_run": 31942700351,
+          "conclusion": "success"
         }
       }
     ],
-    "unfinished_work": "PR 57 is open and unmerged pending exact-head CI. The ledger is not yet wired into record_candidate_regression, so a successful standalone ledger test is necessary but not sufficient for the persisted TRIAL_CANDIDATE milestone.",
-    "evidence": [
-      "main before this checkpoint was bb2f53cd48779dc9fd15fce6477b4ed2efb8202a",
-      "PR 57 head is cd67328e600d3e13ebc480da160da2e3523b4324",
-      "PR 57 changes only src/continual/trial_ledger.py and tests/test_trial_ledger.py",
-      "PR 57 was not merged because exact-head CI had not appeared by the soft-stop boundary"
-    ],
-    "next_action": "At the next run, first inspect exact-head CI for PR 57. If any check fails, fix it on the same branch and revalidate. If all checks pass, wire reserve_trial_candidate and complete_trial_candidate into record_candidate_regression so every distinct exact-scope Candidate regression attempt consumes bounded budget while exact replay does not; add integration tests proving replay and exhaustion through record_candidate_regression; then run full CI and merge only on success.",
-    "claim_boundary": "PR 57 is unvalidated/unmerged continual-learning integrity work. No AGI claim is supported; verified AGI remains unproven."
+    "continuation_commit": "e1acf956c90c896a951106e49faa7ee1f862f968",
+    "unfinished_work": "The trial ledger is merged but is not yet wired into record_candidate_regression or the actual TRIAL_CANDIDATE path.",
+    "next_action": "Integrate reserve_trial_candidate and complete_trial_candidate into the real Candidate regression/trial path and add replay, exhaustion, restart-idempotency, and deterministic-promotion integration tests; run focused tests and full CI, then merge only if exact-head checks pass.",
+    "claim_boundary": "This is internal continual-learning integrity progress only. Verified AGI remains unproven."
   },
   "previous_session": null,
   "rule": "At most one hourly standalone session may modify the repository. The fresh session's highest-performance ChatGPT model performs the reasoning and implementation; repository state supplies durable memory and the unfinished objective. Finish or safely checkpoint before the next hourly boundary."
