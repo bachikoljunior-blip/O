@@ -4,6 +4,7 @@ import hashlib
 import json
 import random
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Iterable
 
 from .benchmark import AgentAnswer, AgentState, BenchmarkAgent, BenchmarkTask
@@ -498,3 +499,31 @@ def write_heldout_report(report: HeldOutReport, path):
     # Ensure persisted value explicitly marks that sealed expected values were NOT persisted.
     payload["sealed_values_persisted"] = False
     _atomic_write_json(path, payload)
+
+
+def write_heldout_campaign_summary(reports, output_dir, campaign_id: str = "heldout-campaign"):
+    """Persist an aggregated held-out campaign summary atomically for audit.
+
+    Accepts either a pre-constructed summary mapping or an iterable of HeldOutReport
+    objects. The function writes a single JSON file named <campaign_id>.json into
+    output_dir using the module's atomic writer to avoid partial files that could
+    confuse verifiers.
+    """
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    target = output_path / f"{campaign_id}.json"
+
+    # If a list/tuple of HeldOutReport instances was supplied, build a simple summary.
+    if isinstance(reports, (list, tuple)):
+        total = len(reports)
+        passed_count = sum(1 for r in reports if getattr(r, "passed", False))
+        summary = {
+            "total_runs": total,
+            "passed_count": passed_count,
+            "passed_fraction": passed_count / total if total > 0 else 0.0,
+            "details": [r.to_dict() for r in reports],
+        }
+    else:
+        summary = reports
+
+    _atomic_write_json(target, summary)

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from agi.benchmark import AgentAnswer
 from agi.heldout import (
     EvaluationIdentity,
@@ -134,3 +136,32 @@ def test_write_heldout_report_persists_atomically(tmp_path):
     assert "'expected':" not in data
     tmpfile = out.with_suffix(out.suffix + ".tmp")
     assert not tmpfile.exists()
+
+
+def test_heldout_campaign_persists_summary(tmp_path):
+    """Ensure aggregated held-out campaign summaries can be persisted atomically for audit."""
+    from agi.heldout import run_heldout_suite, write_heldout_campaign_summary, generate_heldout_suite, seed_commitment, ReferenceHeldOutAgent
+
+    reports = []
+    generator, executor, scorer = identities()
+    for i in range(3):
+        seed = f"campaign-seed-{i}"
+        tasks = generate_heldout_suite(seed)
+        report = run_heldout_suite(
+            ReferenceHeldOutAgent(),
+            tasks,
+            seed_commit=seed_commitment(seed, "heldout-v1"),
+            generator=generator,
+            executor=executor,
+            scorer=scorer,
+        )
+        reports.append(report)
+
+    outdir = tmp_path / "heldout-campaign-artifacts"
+    write_heldout_campaign_summary(reports, outdir, campaign_id="test-heldout")
+    target = outdir / "test-heldout.json"
+    assert target.exists()
+    data = json.loads(target.read_text(encoding="utf-8"))
+    assert data["total_runs"] == 3
+    assert "details" in data
+    assert data["passed_fraction"] == 1.0
