@@ -4,8 +4,12 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-from continual.acquired_program_tools import acquired_program_candidate_payload
+from continual.acquired_program_tools import (
+    AcquiredProgramToolError,
+    acquired_program_candidate_payload,
+)
 from continual.candidate_regression import record_candidate_regression
+from continual.learned_tools import LearnedToolError
 from continual.learning_engine import LearningEnabledEngine
 
 from .acquired_program_runtime import (
@@ -204,7 +208,10 @@ def run_acquired_program_cegis_campaign(
         raise RuntimeError("counterexample-guided campaign produced no failed hypothesis")
     if current.expression != target_descriptor["expression"]:
         raise RuntimeError("counterexample did not refine to the hidden target program")
-    if not all(current.apply(query) == expected for query, expected in zip(diagnostic_inputs, diagnostic_expected, strict=True)):
+    if not all(
+        current.apply(query) == expected
+        for query, expected in zip(diagnostic_inputs, diagnostic_expected, strict=True)
+    ):
         raise RuntimeError("refined program does not satisfy diagnostic pool")
 
     candidate_dir = root / ".continual" / "candidates" / candidate_id
@@ -268,7 +275,7 @@ def run_acquired_program_cegis_campaign(
                 value=query,
             )
             pre_solved = True
-        except Exception:
+        except (LearnedToolError, AcquiredProgramToolError):
             pre_solved = False
         artifact = {
             "query_sha256": _digest(query),
@@ -364,7 +371,14 @@ def run_acquired_program_cegis_campaign(
         isinstance(item, Mapping) and item.get("type") == "cegis_failed_hypothesis"
         for item in state.get("contradictory_evidence", [])
     )
-    final_answers_leaked = any(str(value) in json.dumps(hypothesis_history) for value in final_expected)
+    learner_pairs = {
+        (_digest(item.input), _digest(item.output))
+        for item in [*initial_examples, *counterexamples]
+    }
+    final_answers_leaked = any(
+        (_digest(query), _digest(expected)) in learner_pairs
+        for query, expected in zip(final_inputs, final_expected, strict=True)
+    )
     report = {
         "schema_version": 1,
         "campaign_id": f"acquired-cegis-{token}",
@@ -387,14 +401,23 @@ def run_acquired_program_cegis_campaign(
             if not item["diagnostic_passed"]
         ],
         "final_answers_exposed_to_learner": final_answers_leaked,
-        "baseline_score": sum(item["score"] for item in baseline if item["task_id"] == target_task) / len(final_inputs),
-        "candidate_score": sum(item["score"] for item in trial if item["task_id"] == target_task) / len(final_inputs),
+        "baseline_score": sum(
+            item["score"] for item in baseline if item["task_id"] == target_task
+        )
+        / len(final_inputs),
+        "candidate_score": sum(
+            item["score"] for item in trial if item["task_id"] == target_task
+        )
+        / len(final_inputs),
         "promotion": {
             "adopt_candidate": promotion["decision"]["adopt_candidate"],
             "decision_ref": promotion["decision_ref"],
             "trial": promotion.get("trial"),
         },
-        "post_restart_runtime_score": sum(1.0 if item["success"] else 0.0 for item in runtime_results) / len(runtime_results),
+        "post_restart_runtime_score": sum(
+            1.0 if item["success"] else 0.0 for item in runtime_results
+        )
+        / len(runtime_results),
         "runtime_results": runtime_results,
         "prior_capability_score_before_promotion": prior_retained["score"],
         "prior_capability_score_after_promotion": prior_after["score"],
@@ -421,7 +444,11 @@ def run_acquired_program_cegis_campaign(
     )
     report["digest"] = _digest(report)
     _atomic_json(
-        root / ".continual" / "evidence" / "acquired-program-cegis" / f"{report['campaign_id']}.json",
+        root
+        / ".continual"
+        / "evidence"
+        / "acquired-program-cegis"
+        / f"{report['campaign_id']}.json",
         report,
     )
     return report
