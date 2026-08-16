@@ -1,0 +1,113 @@
+name: agi-continuous
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: agi-continuous
+  cancel-in-progress: false
+
+jobs:
+  continue-agi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.AGI_AUTONOMY_MODEL || 'gpt-5' }}
+      AUTONOMY_BRANCH: autonomy/agi-continuous
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Skip safely without model credentials
+        id: key
+        shell: bash
+        run: |
+          if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "OPENAI_API_KEY is not configured; continuity falls back to the ChatGPT automation."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Restore autonomous branch and merge latest main
+        if: steps.key.outputs.configured == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "agi-continuity-bot"
+          git config user.email "agi-continuity-bot@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin "$AUTONOMY_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$AUTONOMY_BRANCH"
+            git checkout -B "$AUTONOMY_BRANCH" FETCH_HEAD
+            if ! git merge --no-edit origin/main; then
+              git merge --abort
+              git checkout -B "$AUTONOMY_BRANCH" origin/main
+            fi
+          else
+            git checkout -B "$AUTONOMY_BRANCH" origin/main
+          fi
+      - name: Install runtime
+        if: steps.key.outputs.configured == 'true'
+        run: python -m pip install -e '.[test]'
+      - name: Let unfinished AGI continue its own persisted run
+        if: steps.key.outputs.configured == 'true'
+        run: agi-autonomy --cycles 6 --max-steps 24
+      - name: Reject autonomous edits outside the constrained surface
+        if: steps.key.outputs.configured == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=0
+          while IFS= read -r path; do
+            case "$path" in
+              src/agi/*|src/continual/*|agi/*|.continual/candidates/*|.continual/episodes/*|.continual/runs/*) ;;
+              *) echo "Disallowed autonomous path: $path" >&2; bad=1 ;;
+            esac
+          done < <(git diff --name-only origin/main...HEAD; git diff --name-only)
+          exit "$bad"
+      - name: Validate before persistence
+        if: steps.key.outputs.configured == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          pytest -q
+          python -m compileall -q src
+          agi-benchmark validate-suite >/dev/null
+          agi-benchmark validate-workspace-suite >/dev/null
+          agi-benchmark validate-heldout-suite >/dev/null
+      - name: Persist exact continuation to autonomous branch
+        if: steps.key.outputs.configured == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add src/agi src/continual agi .continual/candidates .continual/episodes .continual/runs
+          if git diff --cached --quiet; then
+            echo "No persistent change this cycle."
+            exit 0
+          fi
+          git commit -m "Continue AGI autonomy ${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
+          git push origin "HEAD:$AUTONOMY_BRANCH"
+      - name: Keep an integration PR open
+        if: steps.key.outputs.configured == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh pr list --head "$AUTONOMY_BRANCH" --base main --state open --json number --jq '.[0].number' | grep -q '[0-9]'; then
+            gh pr create \
+              --base main \
+              --head "$AUTONOMY_BRANCH" \
+              --title "Continuous AGI development" \
+              --body "Persisted work produced by the constrained unfinished-AGI continuity loop. Merge only after normal CI and review; reference or self-reported results do not establish AGI." || true
+          fi
