@@ -42,3 +42,18 @@ def test_candidate_selection_requires_candidate_id():
             output({"decision": "TRIAL_CANDIDATE"}),
             evaluator_mode="pre-application",
         )
+
+
+def test_post_result_can_propose_but_cannot_self_promote_candidate():
+    validate_component_output(
+        "candidate_evaluate",
+        output({"decision": "PROPOSE_ACTIVATION", "candidate_id": "candidate-a"}),
+        evaluator_mode="post-result",
+    )
+    for forbidden in ("ACTIVE_FOR_SCOPE", "VERIFIED_FOR_SCOPE"):
+        with pytest.raises(ContractError):
+            validate_component_output(
+                "candidate_evaluate",
+                output({"decision": forbidden, "candidate_id": "candidate-a"}),
+                evaluator_mode="post-result",
+            )

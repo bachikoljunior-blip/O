@@ -15,8 +15,7 @@ PRE_APPLICATION_DECISIONS = {
     "BLOCKED",
 }
 POST_RESULT_DECISIONS = {
-    "VERIFIED_FOR_SCOPE",
-    "ACTIVE_FOR_SCOPE",
+    "PROPOSE_ACTIVATION",
     "REJECTED_FOR_SCOPE",
     "REMAIN_CANDIDATE",
     "NEED_MORE_EVIDENCE",
@@ -86,7 +85,12 @@ def validate_component_output(
         allowed = PRE_APPLICATION_DECISIONS if mode == "pre-application" else POST_RESULT_DECISIONS
         if decision not in allowed:
             errors.append(f"candidate_evaluate decision for {mode} must be one of {sorted(allowed)}")
-        if decision in {"TRIAL_CANDIDATE", "USE_CANDIDATE", "ACTIVE_FOR_SCOPE"}:
+        if decision in {
+            "TRIAL_CANDIDATE",
+            "USE_CANDIDATE",
+            "ACTIVE_FOR_SCOPE",
+            "PROPOSE_ACTIVATION",
+        }:
             candidate_id = result.get("candidate_id") or result.get("selected_candidate_id")
             if not isinstance(candidate_id, str) or not candidate_id:
                 errors.append("candidate selection requires candidate_id")
