@@ -1,0 +1,92 @@
+name: Bootstrap evidence-driven AGI campaign
+
+on:
+  push:
+    branches:
+      - agent/agi-evidence-campaign-20260816-final3
+    paths:
+      - .agent-bundle/trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: agi-evidence-bootstrap-v3
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/agi-evidence-campaign-20260816-final3
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Rebase bootstrap onto latest main
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -R .agent-bundle /tmp/agent-bundle
+          git fetch origin main
+          git checkout -B agent/agi-evidence-campaign-20260816-final3 origin/main
+          rm -rf .agent-bundle .github/workflows/agi-bootstrap-v3.yml
+          cp -R /tmp/agent-bundle .agent-bundle
+
+      - name: Apply implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .agent-bundle/01_core.py
+          python .agent-bundle/02_campaign.py
+          python .agent-bundle/03_harden.py
+          python .agent-bundle/04_tests.py
+
+      - name: Install and initialize campaign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+          python -m agi.cli --root . init
+          python -m agi.cli --root . advance
+
+      - name: Validate implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          pytest -q
+          python -m compileall -q src tests
+          python -m agi.cli --root . status > /tmp/agi-campaign-status.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          state = json.loads(Path('/tmp/agi-campaign-status.json').read_text(encoding='utf-8'))
+          assert state['status'] in {'continue', 'verified'}
+          report = state['report']
+          assert set(report['criteria']) == {
+              'breadth', 'transfer', 'autonomy', 'continual_learning',
+              'self_improvement', 'robustness'
+          }
+          assert report['agi_claim_supported'] is False, (
+              'An empty evidence ledger must never support an AGI claim.'
+          )
+          PY
+
+      - name: Publish one clean commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .agent-bundle .github/workflows/agi-bootstrap-v3.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m 'Build evidence-driven AGI campaign'
+          git push --force-with-lease origin HEAD:agent/agi-evidence-campaign-20260816-final3
+          git push origin HEAD:main
