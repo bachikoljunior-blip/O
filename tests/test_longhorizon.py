@@ -43,8 +43,11 @@ def test_checkpoint_persisted_and_reloaded(tmp_path):
     assert report.passed is True
     # checkpoint file should exist and contain digest and checkpoint
     assert ckpt.exists()
-    data = ckpt.read_text(encoding="utf-8")
+    data = json.loads(ckpt.read_text(encoding="utf-8"))
     assert "digest" in data and "checkpoint" in data
+    # ensure atomic writer removed temporary files
+    tmpfile = ckpt.with_suffix(ckpt.suffix + ".tmp")
+    assert not tmpfile.exists()
     # verify that at least two agent creations occurred (fresh context semantics)
     assert creations >= 2
 

@@ -100,6 +100,19 @@ def _observation(state: _State, *, failure: str | None = None) -> LongHorizonObs
     )
 
 
+def _atomic_write_json(path: Path, payload: Any) -> None:
+    """Write JSON to path atomically by writing to a temporary file and replacing.
+
+    This minimizes the chance of leaving a partially written checkpoint file on disk
+    (important for deterministic sandbox task persistence and adversarial robustness).
+    """
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+    # atomic replace
+    tmp.replace(path)
+
+
 def _advance(state: _State) -> None:
     # Recovery is exceptional: successful risky work proceeds directly to delayed retention.
     order = ["learn", "checkpoint", "intervene", "retain", "regression", "finish"]
@@ -231,8 +244,8 @@ def run_long_horizon(
                 # Persist checkpoint to disk if requested
                 if checkpoint_path is not None and state.checkpoint is not None:
                     payload = {"checkpoint": state.checkpoint, "digest": state.checkpoint_digest}
-                    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
-                    checkpoint_path.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+                    # write durable checkpoint atomically to avoid leaving partial files
+                    _atomic_write_json(checkpoint_path, payload)
                     # Simulate loss of private in-memory checkpoint when creating fresh agent
                     # (only when an external durable checkpoint was written)
                     state.checkpoint = None
