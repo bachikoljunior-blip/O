@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +12,10 @@ from continual.trial_ledger import (
     complete_trial_candidate,
     reserve_trial_candidate,
 )
+
+
+def _scope_key(scope: str) -> str:
+    return hashlib.sha256(scope.encode("utf-8")).hexdigest()[:16]
 
 
 def test_exact_replay_is_idempotent_and_does_not_consume_budget(tmp_path: Path) -> None:
@@ -45,7 +50,7 @@ def test_exact_replay_is_idempotent_and_does_not_consume_budget(tmp_path: Path) 
             / "candidates"
             / "candidate-a"
             / "trials"
-            / "ed8fe5e2d7b42070.json"
+            / f"{_scope_key('symbolic-transfer')}.json"
         ).read_text()
     )
     assert len(ledger["attempts"]) == 1
