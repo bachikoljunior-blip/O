@@ -68,6 +68,18 @@ TOOLS = [
     },
 ]
 
+CHAT_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": tool["name"],
+            "description": tool["description"],
+            "parameters": tool["parameters"],
+        },
+    }
+    for tool in TOOLS
+]
+
 
 _SECRET_NAME = re.compile(r"(?:^|[_-])(token|secret|password|passwd|api[_-]?key|private[_-]?key)(?:$|[_-])", re.I)
 _SENSITIVE_PARTS = {
@@ -107,8 +119,21 @@ class ModelClient:
         self.root = root.resolve()
         if OpenAI is None:
             raise RuntimeError("openai package is required for live model execution")
-        self.client = OpenAI()
-        self.model = os.environ.get("OPENAI_MODEL", "gpt-5.6")
+
+        openai_key = os.environ.get("OPENAI_API_KEY")
+        github_token = os.environ.get("GITHUB_TOKEN")
+        if openai_key:
+            self.provider = "openai"
+            self.client = OpenAI(api_key=openai_key)
+            self.model = os.environ.get("OPENAI_MODEL", "gpt-5.6")
+        elif github_token:
+            # GitHub Actions can grant `models: read` to its ephemeral GITHUB_TOKEN.
+            # GitHub Models exposes an OpenAI-compatible chat-completions endpoint.
+            self.provider = "github-models"
+            self.client = OpenAI(api_key=github_token, base_url="https://models.github.ai/inference")
+            self.model = os.environ.get("GITHUB_MODELS_MODEL", "openai/gpt-4.1")
+        else:
+            raise RuntimeError("OPENAI_API_KEY or GITHUB_TOKEN is required for live model execution")
 
     def _safe_path(self, relative: str) -> Path:
         if not isinstance(relative, str) or not relative.strip():
@@ -265,8 +290,7 @@ class ModelClient:
             raise RuntimeError("model JSON output must be an object")
         return value
 
-    def call(self, component: str, payload: dict[str, Any], prompt_path: str | None = None) -> dict[str, Any]:
-        instructions = self.prompt(component, prompt_path)
+    def _call_responses(self, instructions: str, payload: dict[str, Any]) -> dict[str, Any]:
         response = self.client.responses.create(
             model=self.model,
             instructions=instructions,
@@ -282,14 +306,9 @@ class ModelClient:
                 try:
                     args = json.loads(call.arguments)
                     result = self._tool(call.name, args)
-                except Exception as exc:  # Tool failures are observations for the model, not hidden crashes.
-                    result = json.dumps(
-                        {"error": type(exc).__name__, "message": str(exc)},
-                        ensure_ascii=False,
-                    )
-                outputs.append(
-                    {"type": "function_call_output", "call_id": call.call_id, "output": result}
-                )
+                except Exception as exc:
+                    result = json.dumps({"error": type(exc).__name__, "message": str(exc)}, ensure_ascii=False)
+                outputs.append({"type": "function_call_output", "call_id": call.call_id, "output": result})
             response = self.client.responses.create(
                 model=self.model,
                 instructions=instructions,
@@ -297,4 +316,51 @@ class ModelClient:
                 input=outputs,
                 tools=TOOLS,
             )
-        raise RuntimeError(f"tool loop exceeded for {component}")
+        raise RuntimeError("tool loop exceeded for responses provider")
+
+    def _call_chat(self, instructions: str, payload: dict[str, Any]) -> dict[str, Any]:
+        messages: list[dict[str, Any]] = [
+            {"role": "system", "content": instructions},
+            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+        ]
+        for _ in range(32):
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=CHAT_TOOLS,
+            )
+            message = response.choices[0].message
+            tool_calls = list(message.tool_calls or [])
+            if not tool_calls:
+                return self._json_text(message.content or "")
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": message.content,
+                    "tool_calls": [
+                        {
+                            "id": call.id,
+                            "type": "function",
+                            "function": {
+                                "name": call.function.name,
+                                "arguments": call.function.arguments,
+                            },
+                        }
+                        for call in tool_calls
+                    ],
+                }
+            )
+            for call in tool_calls:
+                try:
+                    args = json.loads(call.function.arguments)
+                    result = self._tool(call.function.name, args)
+                except Exception as exc:
+                    result = json.dumps({"error": type(exc).__name__, "message": str(exc)}, ensure_ascii=False)
+                messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
+        raise RuntimeError("tool loop exceeded for chat-completions provider")
+
+    def call(self, component: str, payload: dict[str, Any], prompt_path: str | None = None) -> dict[str, Any]:
+        instructions = self.prompt(component, prompt_path)
+        if self.provider == "github-models":
+            return self._call_chat(instructions, payload)
+        return self._call_responses(instructions, payload)
