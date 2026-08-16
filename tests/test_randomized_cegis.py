@@ -24,8 +24,8 @@ class NeverModelClient:
 @pytest.mark.parametrize(
     ("seed", "expected_variant"),
     [
-        ("random-cegis-c", 0),
-        ("random-cegis-b", 1),
+        ("random-cegis-d", 0),
+        ("random-cegis-c", 1),
         ("random-cegis-a", 2),
     ],
 )
