@@ -1,4 +1,4 @@
-# System design v0.2
+# System design v0.3
 
 ## 1. Minimal fixed kernel
 
@@ -10,6 +10,7 @@ Only non-semantic mechanics are fixed in Python:
 - deterministic invocation journals and completed-output reuse;
 - loading the already selected component version;
 - the mechanical `continue / finished / blocked / cancelled` loop;
+- deterministic benchmark tools and externally checkable scoring;
 - the bootstrap needed to run the current Candidate Evaluator.
 
 Meaningful choices—task interpretation, next work, execution procedure, evaluation, learning, context selection, Candidate applicability, and benchmark design—remain prompt/Candidate controlled.
@@ -35,7 +36,7 @@ The ID is a digest of component, selected prompt path, and payload. If `complete
 1. `continual start` persists request/snapshot and evaluates runner Candidates at the new-run boundary.
 2. ENTRY runs after component-specific Preflight and persists normalized success conditions.
 3. A fresh Root chooses exactly one execution unit.
-4. Immediately before that unit, only Candidates targeting its component (plus dependencies) are evaluated.
+4. Immediately before that unit, only Candidates targeting its component, plus dependencies, are evaluated.
 5. Execute creates artifacts/evidence or schedules one child unit with a persisted parent continuation.
 6. Task Evaluate returns `PASS`, `FAIL`, or `UNCERTAIN` from objective evidence.
 7. Failed/uncertain tasks return to a fresh Root for repair or a new experiment.
@@ -55,12 +56,26 @@ Fragments save purpose, actions, observations, evidence references, failures, un
 
 Candidate states are scoped and reversible. Pre-application decisions include applicability, dependency/conflict handling, baseline need, evidence, regressions, rollback, cost, and risk. Post-result decisions can verify, activate for scope, reject for scope, retain, request evidence, or remain uncertain.
 
-Repeated proposals with the same Candidate ID merge evidence and source references. Active-for-scope remains subject to contradictory evidence and downgrade.
+Repeated proposals with the same Candidate ID merge evidence and source references. Active-for-scope remains subject to contradictory evidence and downgrade. Candidate prompt text defaults to an overlay on the active component contract; it does not replace the contract unless an explicit replacement mode is approved.
 
 ## 7. AGI evidence boundary
 
 `src/agi/evaluation.py` separates development progress from claim-grade evidence. A positive AGI claim requires all six criteria and, by default, repeated production-tier successes across multiple tasks, runs, and domains with independent verification and no unresolved production failures.
 
-`src/agi/benchmark.py` is a development harness covering all criteria. Its task-specific reference agent validates harness correctness only. Passing it cannot establish AGI.
+`src/agi/benchmark.py` is a one-turn development harness. `src/agi/workspace.py` is a second, multi-turn harness. Their task-specific reference agents validate harness correctness only. Passing either reference cannot establish AGI.
+
+## 8. Tool-mediated workspace protocol
+
+Each workspace task starts with visible files, a goal, a step budget, persistent memory/procedure state, and a fixed tool contract. Hidden expected outputs and task IDs are not sent to a live model adapter.
+
+The harness records every tool event, including arguments, result/error, success, step, and policy-violation status. Scoring checks final artifacts, required memory/procedure state, required observed events, absence of adapter errors, step budget, and absence of forbidden access. A correct final file cannot erase a secret-access attempt or skipped recovery step.
+
+File contents and tool results are untrusted data. A hidden forbidden path is never included in the visible snapshot or report. Memory and adopted procedures persist across tasks in a suite so retention and reuse are behaviorally tested.
+
+## 9. Campaign protocol
+
+A campaign repeats both development suites with fresh agent adapters per run, writes each report, combines evidence records, and evaluates the resulting ledger. CLI-created model campaigns use `tier=development` and `independent=false`; passing every task therefore does not satisfy the AGI claim gate.
+
+Live model execution uses the OpenAI Responses API through an adapter. The default model alias is `gpt-5`, overridable through `OPENAI_MODEL` or `--model`. CI uses only reference adapters and never consumes paid model API calls. A manually dispatched workflow can run a bounded live campaign when `OPENAI_API_KEY` is configured as a repository secret.
 
 This boundary lets the project continue making falsifiable capability advances without fabricating completion.

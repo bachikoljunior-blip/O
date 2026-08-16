@@ -22,4 +22,7 @@ jobs:
       - run: pytest -q
       - run: python -m compileall -q src
       - run: agi-benchmark validate-suite
-      - run: agi-benchmark run-reference --output /tmp/reference-report.json
+      - run: agi-benchmark validate-workspace-suite
+      - run: agi-benchmark run-reference --output /tmp/core-reference.json
+      - run: agi-benchmark run-workspace-reference --output /tmp/workspace-reference.json
+      - run: agi-benchmark run-campaign-reference --runs 2 --output-dir /tmp/reference-campaign
