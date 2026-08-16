@@ -57,14 +57,52 @@ jobs:
       - name: Install Copilot CLI fallback
         if: env.OPENAI_API_KEY == ''
         run: npm install -g @github/copilot
-      - name: Continue unfinished AGI with constrained Copilot CLI
+      - name: Use remaining run window for repeated bounded AGI cycles
         if: env.OPENAI_API_KEY == ''
         shell: bash
         run: |
           set -euo pipefail
-          PROMPT=$(cat <<'EOF'
-          You are the bounded execution backend for the unfinished AGI program in this repository.
-          Read agi/CONTINUATION.json, agi/AUTONOMY_STATE.json if present, agi/README.md, and the relevant src/agi code/tests.
+          STARTED=$SECONDS
+          SOFT_DEADLINE=$((STARTED + 2700))
+
+          validate_repo() {
+            pytest -q && \
+            python -m compileall -q src && \
+            agi-benchmark validate-suite >/dev/null && \
+            agi-benchmark validate-workspace-suite >/dev/null && \
+            agi-benchmark validate-heldout-suite >/dev/null
+          }
+
+          reject_outside_surface() {
+            local bad=0
+            while IFS= read -r path; do
+              [[ -z "$path" ]] && continue
+              case "$path" in
+                src/agi/*|agi/*|tests/*|.continual/candidates/*) ;;
+                *) echo "Disallowed autonomous path: $path" >&2; bad=1 ;;
+              esac
+            done < <(git diff --name-only HEAD)
+            return "$bad"
+          }
+
+          copilot_pass() {
+            local prompt="$1"
+            timeout 720s copilot -s --no-ask-user \
+              --available-tools='view,grep,glob,edit,create,apply_patch' \
+              --allow-tool='write' \
+              --deny-tool='shell,web_fetch,task' \
+              -p "$prompt"
+          }
+
+          for cycle in 1 2 3 4 5 6; do
+            if (( SECONDS >= SOFT_DEADLINE )); then
+              echo "Soft runtime deadline reached after $((SECONDS-STARTED)) seconds."
+              break
+            fi
+
+            PROMPT=$(cat <<EOF
+          You are bounded execution cycle $cycle for the unfinished AGI program in this repository.
+          Read agi/CONTINUATION.json, agi/AUTONOMY_STATE.json if present, agi/README.md, and relevant src/agi code/tests.
           Continue exactly one highest-value falsifiable missing AGI capability or evaluation milestone now.
 
           Rules:
@@ -77,49 +115,30 @@ jobs:
           - Update agi/CONTINUATION.json with the exact new state and next executable milestone before finishing.
           - Do not claim AGI is complete unless the repository's conservative externally verified evidence gate actually passes.
           EOF
-          )
-          copilot -s --no-ask-user \
-            --available-tools='view,grep,glob,edit,create,apply_patch' \
-            --allow-tool='write' \
-            --deny-tool='shell,web_fetch,task' \
-            -p "$PROMPT"
-      - name: Reject autonomous edits outside the constrained surface
-        shell: bash
-        run: |
-          set -euo pipefail
-          bad=0
-          while IFS= read -r path; do
-            [[ -z "$path" ]] && continue
-            case "$path" in
-              src/agi/*|agi/*|tests/*|.continual/candidates/*|.continual/episodes/*|.continual/runs/*) ;;
-              *) echo "Disallowed autonomous path: $path" >&2; bad=1 ;;
-            esac
-          done < <(git diff --name-only origin/main...HEAD; git diff --name-only)
-          exit "$bad"
-      - name: First validation
-        id: validate1
-        shell: bash
-        run: |
-          set +e
-          {
-            pytest -q && \
-            python -m compileall -q src && \
-            agi-benchmark validate-suite >/dev/null && \
-            agi-benchmark validate-workspace-suite >/dev/null && \
-            agi-benchmark validate-heldout-suite >/dev/null
-          } > /tmp/agi-validation.log 2>&1
-          code=$?
-          cat /tmp/agi-validation.log
-          if [[ $code -eq 0 ]]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; fi
-          exit 0
-      - name: One bounded repair pass
-        if: steps.validate1.outputs.ok == 'false' && env.OPENAI_API_KEY == ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          FAILURES=$(tail -c 12000 /tmp/agi-validation.log)
-          PROMPT=$(cat <<EOF
-          The bounded unfinished-AGI change from this run failed repository validation. Fix the implementation now.
+            )
+
+            if ! copilot_pass "$PROMPT"; then
+              echo "Copilot cycle $cycle did not complete; preserving prior validated cycles."
+              git reset --hard HEAD
+              break
+            fi
+            reject_outside_surface
+
+            if git diff --quiet; then
+              echo "Cycle $cycle produced no repository change; ending this run without idle repetition."
+              break
+            fi
+
+            set +e
+            validate_repo > /tmp/agi-validation.log 2>&1
+            code=$?
+            set -e
+            cat /tmp/agi-validation.log
+
+            if [[ $code -ne 0 ]]; then
+              FAILURES=$(tail -c 12000 /tmp/agi-validation.log)
+              REPAIR_PROMPT=$(cat <<EOF
+          The unfinished-AGI change in cycle $cycle failed repository validation. Fix the implementation now.
           You may edit only src/agi/**, agi/**, tests/**, and .continual/candidates/**.
           Do not edit workflows, prompts, AGENTS.md, SYSTEM_DESIGN.md, src/continual/**, secrets, or git metadata.
           Do not weaken tests or the AGI evidence gate merely to pass.
@@ -127,13 +146,28 @@ jobs:
           Validation output:
           $FAILURES
           EOF
-          )
-          copilot -s --no-ask-user \
-            --available-tools='view,grep,glob,edit,create,apply_patch' \
-            --allow-tool='write' \
-            --deny-tool='shell,web_fetch,task' \
-            -p "$PROMPT"
-      - name: Final validation before persistence
+              )
+              if ! copilot_pass "$REPAIR_PROMPT"; then
+                git reset --hard HEAD
+                break
+              fi
+              reject_outside_surface
+              if ! validate_repo; then
+                echo "Repair did not validate; discarding only the current cycle."
+                git reset --hard HEAD
+                break
+              fi
+            fi
+
+            git add src/agi agi tests .continual/candidates
+            if git diff --cached --quiet; then
+              echo "No validated changes to persist in cycle $cycle."
+              break
+            fi
+            git commit -m "Continue AGI autonomy cycle ${cycle} (${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT})"
+            echo "Validated cycle $cycle committed; immediately continuing to the next milestone."
+          done
+      - name: Validate accumulated autonomous work
         shell: bash
         run: |
           set -euo pipefail
@@ -146,12 +180,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add src/agi agi tests .continual/candidates .continual/episodes .continual/runs
-          if git diff --cached --quiet; then
-            echo "No persistent change this cycle."
+          if git rev-list --count origin/main..HEAD | grep -qx '0'; then
+            echo "No persistent autonomous commit this run."
             exit 0
           fi
-          git commit -m "Continue AGI autonomy ${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
           git push origin "HEAD:$AUTONOMY_BRANCH"
       - name: Keep an integration PR open
         env:
