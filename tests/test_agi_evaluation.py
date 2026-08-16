@@ -123,3 +123,43 @@ def test_development_evidence_is_progress_not_claim_grade():
     ]
     result = evaluate_evidence(records, EvaluationPolicy(min_successes_per_criterion=1))
     assert result["agi_claim_supported"] is False
+
+
+def test_sign_evidence_requires_secret():
+    """Signing evidence must reject empty attestor id or secret to avoid creating invalid attestations."""
+    record = EvidenceRecord(
+        criterion=CRITERIA[0].key,
+        task_id="t1",
+        domain="d",
+        success=True,
+        run_id="r",
+        artifact_ref="a",
+        evaluator="e",
+        tier="production",
+        independent=True,
+        producer="producer",
+    )
+    try:
+        sign_evidence(record, attestor_id="attestor", secret="")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Empty secret must raise ValueError")
+
+
+def test_independent_producer_must_differ_from_evaluator():
+    """Independent evidence must not have the same producer and evaluator identities."""
+    rec = EvidenceRecord(
+        criterion=CRITERIA[0].key,
+        task_id="t2",
+        domain="d",
+        success=True,
+        run_id="r2",
+        artifact_ref="a2",
+        evaluator="same",
+        tier="production",
+        independent=True,
+        producer="same",
+    )
+    errors = rec.validate()
+    assert any("producer and evaluator must differ" in e for e in errors)
