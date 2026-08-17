@@ -238,6 +238,21 @@ def _infer_expression(
         if actual != "object":
             raise AcquiredProgramError(f"object_has_key expects object, got {actual}")
         return "boolean", nodes + 1, max(depth, child_depth)
+    if op == "object_pair":
+        if set(expression) != {"op", "key", "value"}:
+            raise AcquiredProgramError(
+                "object_pair node fields must be exactly op,key,value"
+            )
+        _validate_object_key(expression.get("key"))
+        child = expression.get("value")
+        if not isinstance(child, Mapping):
+            raise AcquiredProgramError("object_pair requires an object value node")
+        _, nodes, child_depth = _infer_expression(
+            child,
+            input_domain=input_domain,
+            depth=depth + 1,
+        )
+        return "object", nodes + 1, max(depth, child_depth)
     if op == "fold_numeric":
         if set(expression) != {"op", "arg", "reducer", "initial"}:
             raise AcquiredProgramError(
@@ -455,6 +470,13 @@ def execute_program(descriptor: Mapping[str, Any], value: Any) -> Any:
             if domain != "object":
                 raise AcquiredProgramError("program type changed after validation")
             return bool(str(node["key"]) in source), "boolean"
+        if op == "object_pair":
+            child_value, _ = run(node["value"])
+            result = {str(node["key"]): child_value}
+            return (
+                _check_runtime_value(result, "object", max_output_length),
+                "object",
+            )
         if op == "fold_numeric":
             sequence, domain = run(node["arg"])
             if domain != "sequence":
@@ -651,18 +673,21 @@ def synthesize_program(
     allow_structured_ops: bool = True,
     allow_scalar_equality: bool = True,
     allow_observed_constants: bool = True,
+    allow_object_construction: bool = True,
 ) -> AcquiredProgram:
     """Deterministically synthesize a pure typed expression from demonstrations.
 
     The search is over a bounded typed expression grammar rather than a catalogue of named task
     families. Behavioral deduplication keeps one minimal expression per observed behavior. Numeric
     sequence folds, finite object projection/presence, value-sensitive scalar equality for structured
-    object inputs, bounded observed constants, boolean predicates, and data-dependent conditionals
-    are generic bounded kernels admitted only through the same exact-scope Candidate regression gate.
-    Intermediate typed expressions remain available even when their domain differs from the requested
-    final output, allowing already admitted kernels to compose without arbitrary host code. The
-    resulting program remains inactive until continual regression verifies its exact scope on repeated
-    held-out measurements.
+    object inputs, bounded observed constants, one-field finite object construction, boolean
+    predicates, and data-dependent conditionals are generic bounded kernels admitted only through the
+    same exact-scope Candidate regression gate. New construction search is restricted to object-output
+    tasks so unrelated protected synthesis frontiers remain byte-for-byte unchanged. Intermediate
+    typed expressions remain available even when their domain differs from the requested final output,
+    allowing already admitted kernels to compose without arbitrary host code. The resulting program
+    remains inactive until continual regression verifies its exact scope on repeated held-out
+    measurements.
     """
 
     if input_domain not in _ALLOWED_DOMAINS or output_domain not in _ALLOWED_DOMAINS:
@@ -683,6 +708,8 @@ def synthesize_program(
         raise AcquiredProgramError("allow_scalar_equality must be boolean")
     if not isinstance(allow_observed_constants, bool):
         raise AcquiredProgramError("allow_observed_constants must be boolean")
+    if not isinstance(allow_object_construction, bool):
+        raise AcquiredProgramError("allow_object_construction must be boolean")
     if len(examples) < 3:
         raise AcquiredProgramError("at least three demonstrations are required")
     for item in examples:
@@ -790,6 +817,16 @@ def synthesize_program(
             _collect_object_keys(item.input, discovered)
         object_keys = tuple(sorted(discovered)[:16])
 
+    construction_keys: tuple[str, ...] = ()
+    if allow_object_construction and output_domain == "object":
+        discovered_outputs: set[str] = set()
+        for item in examples:
+            if isinstance(item.output, dict):
+                for key in item.output:
+                    if isinstance(key, str) and key and len(key) <= _OBJECT_KEY_LIMIT:
+                        discovered_outputs.add(key)
+        construction_keys = tuple(sorted(discovered_outputs)[:16])
+
     if (
         allow_sequence_folds
         and input_domain == "sequence"
@@ -837,6 +874,17 @@ def synthesize_program(
                     return match
 
     for cost in range(2, max_nodes + 1):
+        if construction_keys:
+            for child_domain in _ALLOWED_DOMAINS:
+                for child in list(by_cost[cost - 1][child_domain])[:128]:
+                    for key in construction_keys:
+                        match = add(
+                            cost,
+                            "object",
+                            {"op": "object_pair", "key": key, "value": child},
+                        )
+                        if match:
+                            return match
         for op, (required, output) in _UNARY_SIGNATURES.items():
             for arg in list(by_cost[cost - 1][required]):
                 match = add(cost, output, {"op": op, "arg": arg})
