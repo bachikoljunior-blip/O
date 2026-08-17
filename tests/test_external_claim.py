@@ -8,6 +8,7 @@ from agi.external_claim import (
     DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
     evaluate_external_ledger_claim,
 )
+from agi.external_evaluation_request import build_external_evaluation_request
 from agi.external_provenance import (
     ExternalAttestation,
     ExternalChallenge,
@@ -35,7 +36,14 @@ def _sign(seed: bytes, message: bytes) -> tuple[str, str]:
     return public_key.hex(), (encoded_r + s.to_bytes(32, "little")).hex()
 
 
-def _fixtures(*, failed_criterion: str | None = None):
+def _fixtures(
+    *,
+    failed_criterion: str | None = None,
+    request_producer: str = "candidate-system",
+    attestation_producer: str = "candidate-system",
+    request_artifact: str = "33" * 32,
+    attestation_artifact: str = "33" * 32,
+):
     seed = b"E" * 32
     challenge = ExternalChallenge(
         nonce="11" * 32,
@@ -43,6 +51,12 @@ def _fixtures(*, failed_criterion: str | None = None):
         suite_sha256="22" * 32,
         issued_at="2026-08-16T09:00:00+00:00",
         expires_at="2026-08-16T10:00:00+00:00",
+    )
+    request = build_external_evaluation_request(
+        repository="example/system",
+        commit_sha="ab" * 20,
+        artifact_sha256=request_artifact,
+        producer_id=request_producer,
     )
     attestations = []
     public_key_hex = ""
@@ -55,17 +69,20 @@ def _fixtures(*, failed_criterion: str | None = None):
             task_id=f"external-{criterion}-task",
             domain=f"domain-{criterion}",
             run_id="external-run-1",
-            producer="candidate-system",
+            producer=attestation_producer,
             verifier_id="lab-a-key-1",
             suite_id=challenge.suite_id,
             suite_version="1.0",
             suite_sha256=challenge.suite_sha256,
-            artifact_sha256=f"{index:02x}" * 32,
+            artifact_sha256=attestation_artifact,
             result_sha256=f"{index + 16:02x}" * 32,
             challenge_nonce=challenge.nonce,
             evaluated_at="2026-08-16T09:30:00+00:00",
             repeat_index=0,
-            metadata={"runner": "independent"},
+            metadata={
+                "runner": "independent",
+                "evaluation_request_sha256": request["request_sha256"],
+            },
             signature_algorithm="ed25519",
             signature_hex="00" * 64,
         )
@@ -81,6 +98,7 @@ def _fixtures(*, failed_criterion: str | None = None):
     )
     ledger = {
         "schema_version": 1,
+        "evaluation_requests": [request],
         "challenges": [asdict(challenge)],
         "disclosures": [],
         "attestations": [asdict(item) for item in attestations],
@@ -123,6 +141,12 @@ def test_clean_signed_external_ledger_reaches_six_criterion_gate_with_explicit_s
     assert all(
         check["groups"] == ["independent-lab-a"]
         for check in report["external_group_checks"].values()
+    )
+    assert all(
+        item["system_commit_sha"] == "ab" * 20
+        and item["system_repository"] == "example/system"
+        and item["artifact_sha256"] == "33" * 32
+        for item in report["external_attestations"]
     )
 
 
@@ -191,6 +215,79 @@ def test_invalid_signature_fails_closed_before_core_claim_evaluation() -> None:
     assert report["evidence_records"] == []
 
 
+def test_signed_request_digest_tampering_fails_provenance_before_claim() -> None:
+    ledger, registry = _fixtures()
+    ledger["attestations"][0]["metadata"]["evaluation_request_sha256"] = "ff" * 32
+
+    report = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+    )
+
+    assert report["agi_claim_supported"] is False
+    assert report["provenance_audit"]["clean"] is False
+    assert report["core_evaluation"] is None
+
+
+def test_missing_or_tampered_request_manifest_fails_closed() -> None:
+    ledger, registry = _fixtures()
+    ledger["evaluation_requests"] = []
+    missing = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
+    )
+    assert missing["agi_claim_supported"] is False
+    assert "strict evaluation request" in missing["error"]
+
+    ledger, registry = _fixtures()
+    ledger["evaluation_requests"][0]["subject"]["commit_sha"] = "cd" * 20
+    tampered = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
+    )
+    assert tampered["agi_claim_supported"] is False
+    assert "request_sha256 does not match" in tampered["error"]
+
+
+def test_valid_signature_bound_to_mismatched_request_subject_fails_closed() -> None:
+    ledger, registry = _fixtures(request_producer="other-system")
+    producer_mismatch = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
+    )
+    assert producer_mismatch["provenance_audit"]["clean"] is True
+    assert producer_mismatch["agi_claim_supported"] is False
+    assert "producer does not match" in producer_mismatch["error"]
+
+    ledger, registry = _fixtures(request_artifact="99" * 32)
+    artifact_mismatch = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
+    )
+    assert artifact_mismatch["provenance_audit"]["clean"] is True
+    assert artifact_mismatch["agi_claim_supported"] is False
+    assert "artifact does not match" in artifact_mismatch["error"]
+
+
 def test_valid_signed_production_failure_is_preserved_and_blocks_claim() -> None:
     ledger, registry = _fixtures(failed_criterion="robustness")
 
@@ -219,6 +316,10 @@ def test_valid_signed_production_failure_is_preserved_and_blocks_claim() -> None
             "verifier_id": "lab-a-key-1",
             "independent_group": "independent-lab-a",
             "success": False,
+            "evaluation_request_sha256": ledger["evaluation_requests"][0]["request_sha256"],
+            "system_repository": "example/system",
+            "system_commit_sha": "ab" * 20,
+            "artifact_sha256": "33" * 32,
         }
     ]
 
