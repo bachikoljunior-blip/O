@@ -223,7 +223,7 @@ def test_bounded_object_construction_is_falsifiable_and_transfers_to_unseen_valu
         validate_program_descriptor(invalid_key)
 
     too_small_output = {
-        "input_domain": "string",
+        "input_domain": "numeric",
         "output_domain": "object",
         "expression": {
             "op": "object_pair",
@@ -235,7 +235,7 @@ def test_bounded_object_construction_is_falsifiable_and_transfers_to_unseen_valu
         "max_output_length": 8,
     }
     with pytest.raises(AcquiredProgramError, match="object output exceeds runtime bound"):
-        execute_program(too_small_output, "long-value")
+        execute_program(too_small_output, 123)
 
 
 def test_structured_ops_are_explicitly_falsifiable_and_fail_closed_on_bad_objects() -> None:
