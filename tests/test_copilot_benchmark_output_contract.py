@@ -79,6 +79,10 @@ def test_copilot_workspace_instructions_make_persistent_tool_addressing_explicit
     assert value == {"kind": "final", "answer": "done"}
     assert captured["payload"] is payload
     instructions = captured["instructions"]
+    assert "exact data shape requested" in instructions
+    assert "write that value itself" in instructions
+    assert "do not wrap it in a key/value" in instructions
+    assert "JSON number" in instructions
     assert "Persistent-state tool addressing is exact" in instructions
     assert "namespace exactly as named" in instructions
     assert "taught mapping key as `key`" in instructions
