@@ -75,10 +75,12 @@ def test_materialization_workflow_requires_review_branch_and_never_auto_merges()
     ).read_text(encoding="utf-8")
 
     assert "agi/materialized-capabilities-*" in workflow
-    assert "permissions:\n  contents: write" in workflow
+    assert "permissions:\n  contents: write\n  models: read" in workflow
+    assert "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}" in workflow
     assert "github.actor != 'github-actions[bot]'" in workflow
     assert "Enforce repository mutation boundary" in workflow
     assert "auto_merge': False" in workflow
     assert "git push origin" in workflow
+    assert "[skip ci]" not in workflow
     assert "gh pr merge" not in workflow
     assert "git push origin main" not in workflow
