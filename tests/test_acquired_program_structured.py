@@ -176,6 +176,68 @@ def test_value_sensitive_object_classification_requires_observed_constants_and_e
     assert execute_program(descriptor, "different") is False
 
 
+def test_bounded_object_construction_is_falsifiable_and_transfers_to_unseen_values() -> None:
+    examples = [
+        ProgramExample(2, {"score": 2}),
+        ProgramExample(-3, {"score": -3}),
+        ProgramExample(7, {"score": 7}),
+    ]
+
+    with pytest.raises(AcquiredProgramError, match="no bounded pure typed program"):
+        synthesize_program(
+            input_domain="numeric",
+            output_domain="object",
+            examples=examples,
+            max_nodes=3,
+            allow_object_construction=False,
+        )
+
+    learned = synthesize_program(
+        input_domain="numeric",
+        output_domain="object",
+        examples=examples,
+        max_nodes=3,
+    )
+
+    assert learned.expression == {
+        "op": "object_pair",
+        "key": "score",
+        "value": {"op": "input"},
+    }
+    assert learned.apply(11) == {"score": 11}
+    assert learned.apply(-8) == {"score": -8}
+
+    invalid_key = {
+        "input_domain": "numeric",
+        "output_domain": "object",
+        "expression": {
+            "op": "object_pair",
+            "key": "",
+            "value": {"op": "input"},
+        },
+        "effects": [],
+        "max_steps": 4,
+        "max_output_length": 128,
+    }
+    with pytest.raises(AcquiredProgramError, match="object key"):
+        validate_program_descriptor(invalid_key)
+
+    too_small_output = {
+        "input_domain": "numeric",
+        "output_domain": "object",
+        "expression": {
+            "op": "object_pair",
+            "key": "value",
+            "value": {"op": "input"},
+        },
+        "effects": [],
+        "max_steps": 4,
+        "max_output_length": 8,
+    }
+    with pytest.raises(AcquiredProgramError, match="object output exceeds runtime bound"):
+        execute_program(too_small_output, 123)
+
+
 def test_structured_ops_are_explicitly_falsifiable_and_fail_closed_on_bad_objects() -> None:
     examples = [
         ProgramExample({"score": 2}, 2),
