@@ -1,0 +1,1 @@
+Continue the unfinished AGI program from latest main only. Persist the completed strict-claim CLI quorum hardening from PR 148 as native O self-application state, retain exact CI and merge provenance, keep task-chat-produced evidence inadmissible for AGI claims, and continue immediately to the next nonduplicate falsifiable AGI milestone.
