@@ -25,6 +25,22 @@ _BENCHMARK_OUTPUT_CONTRACT = """
 For every benchmark response, `state_update` and `procedure_update` must each be JSON objects.
 If no persistent state or procedure change is needed, return {} for that field. Never return null,
 arrays, strings, numbers, or booleans for either field. The harness will reject malformed values.
+The `answer` field must contain the direct task result rather than an explanatory wrapper. Put
+optional diagnosis or explanation in `evidence`; do not wrap a requested scalar/list result inside
+an object unless the task itself explicitly requests an object.
+"""
+_WORKSPACE_OUTPUT_CONTRACT = """
+Every workspace turn must be exactly one JSON object and nothing else: no prose, markdown fences,
+prefixes, suffixes, or commentary. A tool turn must use exactly the documented `kind`, `tool`, and
+`arguments` action shape. Once the trace and latest observation show the externally checkable goal
+is complete, return the documented `kind: final` JSON object on that turn; never replace it with a
+natural-language completion message. Malformed or non-object output is rejected, not interpreted.
+"""
+_WORKSPACE_JSON_RETRY = """
+The immediately preceding model response for this same workspace observation was rejected before
+any action was accepted because it was not exactly one JSON action object. Retry once using only the
+required JSON action schema. Do not add prose or markdown and do not assume any unrecorded action
+occurred; use only the supplied observation and trace.
 """
 
 
@@ -44,6 +60,23 @@ class CopilotWorkspaceAgent(OpenAIWorkspaceAgent):
     def __init__(self, model: str):
         super().__init__(model=model, client=CopilotResponsesClient())
         self.name = f"github-copilot-workspace:{model}"
+
+    def _respond(self, *, instructions: str, payload):
+        strict_instructions = (
+            instructions.rstrip() + "\n" + _WORKSPACE_OUTPUT_CONTRACT.strip() + "\n"
+        )
+        try:
+            return super()._respond(instructions=strict_instructions, payload=payload)
+        except (json.JSONDecodeError, ValueError):
+            # A malformed response never becomes a workspace action. One bounded retry improves
+            # provider reliability while preserving the exact parser, tool contract, evaluator,
+            # step budget, and fail-closed semantics. The retry sees the same persisted trace only.
+            return super()._respond(
+                instructions=(
+                    strict_instructions.rstrip() + "\n" + _WORKSPACE_JSON_RETRY.strip() + "\n"
+                ),
+                payload=payload,
+            )
 
 
 class CopilotLongHorizonAgent(OpenAILongHorizonAgent):
