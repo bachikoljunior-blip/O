@@ -78,7 +78,9 @@ def test_materialization_workflow_requires_review_branch_and_never_auto_merges()
     assert "permissions:\n  contents: write\n  models: read" in workflow
     assert "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}" in workflow
     assert "python -m pip install '.[test]'" in workflow
-    assert "python -m pip install -e '.[test]'" not in workflow
+    assert "Restore clean worktree after package build" in workflow
+    assert "rm -rf build src/continual_chatgpt.egg-info" in workflow
+    assert "Package setup unexpectedly changed the repository" in workflow
     assert "github.actor != 'github-actions[bot]'" in workflow
     assert "Enforce repository mutation boundary" in workflow
     assert "auto_merge': False" in workflow

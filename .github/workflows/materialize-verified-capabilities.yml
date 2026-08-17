@@ -29,6 +29,17 @@ jobs:
           python-version: '3.11'
           cache: pip
       - run: python -m pip install '.[test]'
+      - name: Restore clean worktree after package build
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf build src/continual_chatgpt.egg-info
+          setup_dirty="$(git status --porcelain)"
+          if [[ -n "${setup_dirty}" ]]; then
+            echo "Package setup unexpectedly changed the repository:" >&2
+            echo "${setup_dirty}" >&2
+            exit 1
+          fi
       - name: Validate materialization request
         id: request
         shell: bash
