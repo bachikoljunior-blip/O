@@ -32,4 +32,12 @@ from .attested_learning_engine import LearningEnabledEngine as _attested_learnin
 
 _learning_engine.LearningEnabledEngine = _attested_learning_engine
 
+# Task-chat self-application is a public persistence boundary. Install strict boolean and native-path
+# collision guards before callers import the recorder so malformed context flags or reused Run,
+# Episode, and evidence identifiers fail before any durable mutation.
+from .self_application_guard import install_self_application_guard as _install_self_application_guard
+
+_install_self_application_guard()
+
 del _install_trial_integration
+del _install_self_application_guard
