@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  models: read
 
 concurrency:
   group: materialize-verified-capabilities-${{ github.ref }}
@@ -55,6 +56,7 @@ jobs:
         shell: bash
         env:
           CAMPAIGN_ID: ${{ steps.request.outputs.campaign_id }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           seed_source="github-run-${GITHUB_RUN_ID}"
@@ -105,5 +107,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A .continual agi/CAPABILITY_MATERIALIZATION_REQUEST.json
           git diff --cached --quiet && { echo 'No materialized state to commit.' >&2; exit 1; }
-          git commit -m "Materialize verified capabilities ${CAMPAIGN_ID} [skip ci]"
+          git commit -m "Materialize verified capabilities ${CAMPAIGN_ID}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
