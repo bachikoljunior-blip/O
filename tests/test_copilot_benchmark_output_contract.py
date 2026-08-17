@@ -6,8 +6,8 @@ from types import SimpleNamespace
 import pytest
 
 from agi.benchmark import AgentState, BenchmarkTask
-from agi.copilot_cli import CopilotBenchmarkAgent
-from agi.openai_agent import OpenAIBenchmarkAgent
+from agi.copilot_cli import CopilotBenchmarkAgent, CopilotWorkspaceAgent
+from agi.openai_agent import OpenAIBenchmarkAgent, OpenAIWorkspaceAgent
 
 
 class _Responses:
@@ -58,6 +58,48 @@ def test_copilot_benchmark_instructions_make_persistent_update_contract_explicit
     assert "procedure_update" in captured["instructions"]
     assert "JSON objects" in captured["instructions"]
     assert "return {}" in captured["instructions"]
+    assert "direct task result" in captured["instructions"]
+    assert "evidence" in captured["instructions"]
+
+
+def test_copilot_workspace_retries_one_malformed_json_response_without_relaxing_parser(monkeypatch):
+    calls = []
+
+    def fake_respond(self, *, instructions, payload):
+        calls.append((instructions, payload))
+        if len(calls) == 1:
+            raise json.JSONDecodeError("Expecting value", "done", 0)
+        return {"kind": "final", "answer": "done"}
+
+    monkeypatch.setattr(OpenAIWorkspaceAgent, "_respond", fake_respond)
+    agent = object.__new__(CopilotWorkspaceAgent)
+    payload = {"latest_observation": {"status": "ok"}, "trace": []}
+
+    value = agent._respond(instructions="base workspace instructions", payload=payload)
+
+    assert value == {"kind": "final", "answer": "done"}
+    assert len(calls) == 2
+    assert calls[0][1] is payload
+    assert calls[1][1] is payload
+    assert "exactly one JSON object" in calls[0][0]
+    assert "previous response" in calls[1][0]
+    assert "same workspace observation" in calls[1][0]
+
+
+def test_copilot_workspace_keeps_second_malformed_response_fail_closed(monkeypatch):
+    calls = []
+
+    def fake_respond(self, *, instructions, payload):
+        calls.append((instructions, payload))
+        raise json.JSONDecodeError("Expecting value", "still not json", 0)
+
+    monkeypatch.setattr(OpenAIWorkspaceAgent, "_respond", fake_respond)
+    agent = object.__new__(CopilotWorkspaceAgent)
+
+    with pytest.raises(json.JSONDecodeError):
+        agent._respond(instructions="base", payload={"trace": []})
+
+    assert len(calls) == 2
 
 
 @pytest.mark.parametrize(
