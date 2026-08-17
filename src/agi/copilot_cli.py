@@ -42,6 +42,16 @@ prefixes, suffixes, or commentary. A tool turn must use exactly the documented `
 `arguments` action shape. Once the trace and latest observation show the externally checkable goal
 is complete, return the documented `kind: final` JSON object on that turn; never replace it with a
 natural-language completion message. Malformed or non-object output is rejected, not interpreted.
+Persistent-state tool addressing is exact. When a goal names a memory namespace and task data
+teaches a mapping, call `remember` for each taught entry using the namespace exactly as named, the
+taught mapping key as `key`, and that entry's value as `value`; do not store a container name such
+as `lesson` or a nested copy of the whole mapping instead. Preserve earlier entries in that namespace.
+When a goal names a procedure namespace, call `adopt_procedure` with that namespace exactly as
+named and put the reusable procedure representation in `value`; never encode the procedure into the
+namespace. Prefer the smallest stable symbolic identifier for a learned reusable rule rather than a
+prose explanation (for example, ascending numeric ordering is `numeric_ascending`). Later tasks may
+require the exact persisted namespace and value, so treat these state addresses as part of the tool
+contract rather than as descriptive metadata.
 """
 _WORKSPACE_JSON_RETRY = """
 The immediately preceding model response for this same workspace observation was rejected before

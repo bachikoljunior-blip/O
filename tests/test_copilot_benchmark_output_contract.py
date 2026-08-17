@@ -62,6 +62,33 @@ def test_copilot_benchmark_instructions_make_persistent_update_contract_explicit
     assert "evidence" in captured["instructions"]
 
 
+def test_copilot_workspace_instructions_make_persistent_tool_addressing_explicit(monkeypatch):
+    captured = {}
+
+    def fake_respond(self, *, instructions, payload):
+        captured["instructions"] = instructions
+        captured["payload"] = payload
+        return {"kind": "final", "answer": "done"}
+
+    monkeypatch.setattr(OpenAIWorkspaceAgent, "_respond", fake_respond)
+    agent = object.__new__(CopilotWorkspaceAgent)
+    payload = {"latest_observation": {"status": "ok"}, "trace": []}
+
+    value = agent._respond(instructions="base workspace instructions", payload=payload)
+
+    assert value == {"kind": "final", "answer": "done"}
+    assert captured["payload"] is payload
+    instructions = captured["instructions"]
+    assert "Persistent-state tool addressing is exact" in instructions
+    assert "namespace exactly as named" in instructions
+    assert "taught mapping key as `key`" in instructions
+    assert "entry's value as `value`" in instructions
+    assert "Preserve earlier entries" in instructions
+    assert "never encode the procedure into the" in instructions
+    assert "numeric_ascending" in instructions
+    assert "Later tasks may" in instructions
+
+
 def test_copilot_benchmark_retries_one_malformed_json_response_without_relaxing_parser(monkeypatch):
     calls = []
 
