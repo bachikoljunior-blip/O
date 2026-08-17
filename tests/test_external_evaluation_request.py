@@ -35,6 +35,7 @@ def test_strict_external_request_is_secret_free_and_bound_to_exact_policy() -> N
     assert request["core_evaluation_policy"] == vars(EvaluationPolicy())
     assert request["subject"]["system_manifest_sha256"] == "c" * 64
     assert request["provenance_protocol"]["runtime_system_manifest_required"] is True
+    assert request["provenance_protocol"]["signed_observed_system_manifest_required"] is True
     assert (
         request["external_quorum"]["min_independent_groups_per_criterion"]
         == DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION
@@ -51,7 +52,7 @@ def test_strict_external_request_is_secret_free_and_bound_to_exact_policy() -> N
         assert f'"{forbidden_key}":' not in encoded
 
 
-def test_strict_external_request_rejects_policy_weakening_secret_embedding_and_missing_runtime_manifest() -> None:
+def test_strict_external_request_rejects_policy_weakening_secret_embedding_and_runtime_observation_weakening() -> None:
     request = _request()
 
     weakened = copy.deepcopy(request)
@@ -78,6 +79,11 @@ def test_strict_external_request_rejects_policy_weakening_secret_embedding_and_m
     weakened_runtime_binding["provenance_protocol"]["runtime_system_manifest_required"] = False
     with pytest.raises(ExternalEvaluationRequestError, match="provenance_protocol"):
         validate_external_evaluation_request(weakened_runtime_binding)
+
+    weakened_observation = copy.deepcopy(request)
+    weakened_observation["provenance_protocol"]["signed_observed_system_manifest_required"] = False
+    with pytest.raises(ExternalEvaluationRequestError, match="provenance_protocol"):
+        validate_external_evaluation_request(weakened_observation)
 
 
 def test_strict_external_request_digest_detects_tampering() -> None:
