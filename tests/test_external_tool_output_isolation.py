@@ -32,12 +32,17 @@ def _write_json(path: Path, value: Any) -> None:
     )
 
 
-def _measurement(task_id: str, score: float, artifact: Any) -> dict[str, Any]:
+def _measurement(
+    task_id: str,
+    repeat_index: int,
+    score: float,
+    artifact: Any,
+) -> dict[str, Any]:
     return {
         "task_id": task_id,
         "criterion": "self_improvement",
         "domain": "external-tool:object-to-object",
-        "repeat_index": 0,
+        "repeat_index": repeat_index,
         "passed": score == 1.0,
         "score": score,
         "artifact_sha256": _json_sha256(artifact),
@@ -83,13 +88,25 @@ def test_host_adapter_cannot_share_mutable_output_with_runtime_caller(runtime_re
     target_task = "withheld-external-output-isolation"
     protected_task = "protected-existing-capability"
     baseline = [
-        _measurement(target_task, 0.0, {"candidate_id": candidate_id, "baseline": True}),
-        _measurement(protected_task, 1.0, {"protected": True}),
+        _measurement(
+            target_task,
+            repeat,
+            0.0,
+            {"candidate_id": candidate_id, "baseline": True, "repeat": repeat},
+        )
+        for repeat in range(2)
     ]
+    baseline.append(_measurement(protected_task, 0, 1.0, {"protected": True}))
     trial = [
-        _measurement(target_task, 1.0, {"candidate_id": candidate_id, "trial": True}),
-        _measurement(protected_task, 1.0, {"protected": True}),
+        _measurement(
+            target_task,
+            repeat,
+            1.0,
+            {"candidate_id": candidate_id, "trial": True, "repeat": repeat},
+        )
+        for repeat in range(2)
     ]
+    trial.append(_measurement(protected_task, 0, 1.0, {"protected": True}))
     regression_dir = candidate_dir / "regression-input"
     baseline_path = regression_dir / "baseline.json"
     trial_path = regression_dir / "candidate-valid.json"
