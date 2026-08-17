@@ -1,0 +1,92 @@
+name: live-agi-request
+
+on:
+  push:
+    branches:
+      - 'agi/live-campaign-*'
+    paths:
+      - 'agi/LIVE_CAMPAIGN_REQUEST.json'
+
+permissions:
+  contents: read
+  copilot-requests: write
+
+concurrency:
+  group: live-agi-request-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  campaign:
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e '.[test,copilot]'
+      - name: Validate bounded request
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "${GITHUB_OUTPUT}"
+          import json
+          import re
+          from pathlib import Path
+
+          path = Path('agi/LIVE_CAMPAIGN_REQUEST.json')
+          value = json.loads(path.read_text(encoding='utf-8'))
+          if not isinstance(value, dict) or value.get('schema_version') != 1:
+              raise SystemExit('request must be a schema_version=1 object')
+          allowed = {'schema_version', 'provider', 'model', 'runs', 'longhorizon_instances', 'purpose'}
+          unknown = sorted(set(value) - allowed)
+          if unknown:
+              raise SystemExit('unknown request keys: ' + ', '.join(unknown))
+          if value.get('provider') != 'copilot':
+              raise SystemExit('autonomous request workflow supports provider=copilot only')
+          model = value.get('model')
+          if not isinstance(model, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/-]{0,79}', model):
+              raise SystemExit('model must be a bounded public identifier')
+          runs = value.get('runs')
+          instances = value.get('longhorizon_instances')
+          if not isinstance(runs, int) or isinstance(runs, bool) or not 1 <= runs <= 3:
+              raise SystemExit('runs must be an integer from 1 through 3')
+          if not isinstance(instances, int) or isinstance(instances, bool) or not 1 <= instances <= 3:
+              raise SystemExit('longhorizon_instances must be an integer from 1 through 3')
+          purpose = value.get('purpose', '')
+          if not isinstance(purpose, str) or len(purpose) > 300:
+              raise SystemExit('purpose must be a string of at most 300 characters')
+          print(f'model={model}')
+          print(f'runs={runs}')
+          print(f'instances={instances}')
+          PY
+      - name: Run bounded Copilot capability and retention request
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MODEL: ${{ steps.request.outputs.model }}
+          RUNS: ${{ steps.request.outputs.runs }}
+          INSTANCES: ${{ steps.request.outputs.instances }}
+        run: |
+          set -euo pipefail
+          campaign_id="copilot-request-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          output_dir=".continual/evidence/campaigns/${campaign_id}"
+          agi-copilot run-campaign \
+            --model "${MODEL}" \
+            --runs "${RUNS}" \
+            --campaign-id "${campaign_id}" \
+            --output-dir "${output_dir}"
+          agi-copilot run-longhorizon \
+            --model "${MODEL}" \
+            --instances "${INSTANCES}" \
+            --output-dir "${output_dir}/longhorizon"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-agi-request-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .continual/evidence/campaigns/
+          if-no-files-found: warn
+          retention-days: 30

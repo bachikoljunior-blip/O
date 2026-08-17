@@ -3,10 +3,24 @@ name: live-agi-development
 on:
   workflow_dispatch:
     inputs:
-      model:
+      provider:
+        description: Live model provider; auto prefers OpenAI when its repository secret is configured
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - openai
+          - copilot
+      openai_model:
         description: OpenAI API model alias or snapshot
         required: true
         default: gpt-5
+        type: string
+      copilot_model:
+        description: GitHub Copilot model identifier
+        required: true
+        default: gpt-5.4
         type: string
       runs:
         description: Number of repeated campaign runs
@@ -16,6 +30,7 @@ on:
 
 permissions:
   contents: read
+  copilot-requests: write
 
 concurrency:
   group: live-agi-development
@@ -26,8 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ inputs.model }}
+      OPENAI_MODEL: ${{ inputs.openai_model }}
+      COPILOT_MODEL: ${{ inputs.copilot_model }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -35,22 +50,47 @@ jobs:
           python-version: '3.11'
           cache: pip
       - run: python -m pip install -e '.[test]'
-      - name: Require configured API key
+      - name: Resolve bounded live provider
+        id: provider
         shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-            echo "OPENAI_API_KEY repository secret is not configured." >&2
-            exit 1
-          fi
-      - name: Run bounded development campaign
-        shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
           case "${{ inputs.runs }}" in
             1|2|3|4|5) ;;
             *) echo "runs must be an integer from 1 through 5" >&2; exit 2 ;;
           esac
+          requested="${{ inputs.provider }}"
+          case "${requested}" in
+            auto)
+              if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+                resolved=openai
+              else
+                resolved=copilot
+              fi
+              ;;
+            openai)
+              if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+                echo "provider=openai requires OPENAI_API_KEY repository secret." >&2
+                exit 1
+              fi
+              resolved=openai
+              ;;
+            copilot) resolved=copilot ;;
+            *) echo "unsupported provider: ${requested}" >&2; exit 2 ;;
+          esac
+          echo "provider=${resolved}" >> "${GITHUB_OUTPUT}"
+      - name: Install Copilot SDK only for Copilot trial
+        if: steps.provider.outputs.provider == 'copilot'
+        run: python -m pip install 'github-copilot-sdk>=1.0.8,<2'
+      - name: Run OpenAI repeated capability campaign
+        if: steps.provider.outputs.provider == 'openai'
+        shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
           campaign_id="openai-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           output_dir=".continual/evidence/campaigns/${campaign_id}"
           agi-benchmark run-campaign-openai \
@@ -58,6 +98,28 @@ jobs:
             --runs "${{ inputs.runs }}" \
             --campaign-id "${campaign_id}" \
             --output-dir "${output_dir}"
+          agi-longhorizon run-openai \
+            --model "${OPENAI_MODEL}" \
+            --instances 3 \
+            --output-dir "${output_dir}/longhorizon"
+      - name: Run Copilot SDK repeated capability and retention campaign
+        if: steps.provider.outputs.provider == 'copilot'
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          campaign_id="copilot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          output_dir=".continual/evidence/campaigns/${campaign_id}"
+          agi-copilot run-campaign \
+            --model "${COPILOT_MODEL}" \
+            --runs "${{ inputs.runs }}" \
+            --campaign-id "${campaign_id}" \
+            --output-dir "${output_dir}"
+          agi-copilot run-longhorizon \
+            --model "${COPILOT_MODEL}" \
+            --instances 3 \
+            --output-dir "${output_dir}/longhorizon"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
