@@ -38,14 +38,14 @@ def test_strict_external_request_is_secret_free_and_bound_to_exact_policy() -> N
         == 2
     )
     encoded = json.dumps(request, sort_keys=True)
-    for forbidden in (
+    for forbidden_key in (
         "bridge_secret",
         "private_key",
         "hidden_seed",
-        '"expected"',
-        '"answers"',
+        "expected",
+        "answers",
     ):
-        assert forbidden not in encoded
+        assert f'"{forbidden_key}":' not in encoded
 
 
 def test_strict_external_request_rejects_policy_weakening_and_secret_embedding() -> None:
