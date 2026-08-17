@@ -94,3 +94,27 @@ def test_malformed_json_is_conservative_and_can_write_report(tmp_path, capsys) -
     assert printed == persisted
     assert printed["agi_claim_supported"] is False
     assert "error" in printed
+
+
+def test_strict_cli_rejects_quorum_below_repository_default_before_reading_evidence(tmp_path, capsys) -> None:
+    ledger = tmp_path / "missing-ledger.json"
+    registry = tmp_path / "missing-registry.json"
+
+    code = run_cli(
+        [
+            "--ledger",
+            str(ledger),
+            "--registry",
+            str(registry),
+            "--bridge-attestor-id",
+            "bridge-a",
+            "--min-independent-groups-per-criterion",
+            "1",
+        ],
+        environ={"AGI_EVIDENCE_BRIDGE_SECRET": "secret"},
+    )
+
+    output = json.loads(capsys.readouterr().out)
+    assert code == 2
+    assert output["agi_claim_supported"] is False
+    assert "cannot be lowered below 2" in output["error"]
