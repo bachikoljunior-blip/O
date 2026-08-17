@@ -40,7 +40,7 @@ def _json_sha256(value: Any) -> str:
 
 
 def _detached_json(value: Any) -> Any:
-    """Return a canonical JSON copy so host adapters cannot mutate caller/contract objects."""
+    """Return a canonical JSON copy so host/caller mutable references cannot alias runtime state."""
 
     return json.loads(_json_bytes(value).decode("utf-8"))
 
@@ -172,6 +172,7 @@ class ExternalToolContract:
             "binding_challenge_count": len(self.binding_challenges),
             "behavior_binding_required": self.behavior_binding_required,
             "input_isolation": "canonical-json-copy",
+            "output_isolation": "canonical-json-copy",
             "description": self.description,
         }
 
@@ -197,9 +198,10 @@ class ContractedExternalToolRegistry:
     committed challenge inputs and compares canonical output hashes before exposing it. Legacy
     contracts without challenges remain readable evidence but fail closed and cannot execute. Only
     effect-free adapters are executable, and every registry instance enforces exact scope, typed I/O,
-    call count, JSON byte limits, and canonical JSON input isolation. Shell, network, filesystem,
+    call count, JSON byte limits, and canonical JSON input/output isolation. Shell, network, filesystem,
     subprocess, and arbitrary generated-code effects therefore do not become available merely because
-    a Candidate requests them; caller-owned JSON objects are never handed directly to host adapters.
+    a Candidate requests them; caller-owned inputs never reach host adapters by reference and
+    adapter-owned mutable outputs are never returned directly to callers.
     """
 
     def __init__(self, root: Path, adapters: Mapping[str, ExternalToolAdapter]) -> None:
@@ -315,7 +317,7 @@ class ContractedExternalToolRegistry:
             )
         if _json_size(output) > contract.max_output_bytes:
             raise ContractedExternalToolError("external tool output exceeds contract byte limit")
-        return output
+        return _detached_json(output)
 
 
 def contracted_external_tool_candidate_payload(
