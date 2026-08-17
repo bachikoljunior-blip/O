@@ -123,6 +123,59 @@ def test_object_projection_presence_and_numeric_predicate_transfer_to_unseen_inp
     assert predicate.apply({"score": 5}) is True
 
 
+def test_value_sensitive_object_classification_requires_observed_constants_and_equality() -> None:
+    examples = [
+        ProgramExample({"kind": "target", "noise": 0}, True),
+        ProgramExample({"kind": "other", "noise": 0}, False),
+        ProgramExample({"kind": "target", "noise": 0}, True),
+        ProgramExample({"kind": "alternate", "noise": 0}, False),
+    ]
+
+    with pytest.raises(AcquiredProgramError, match="no bounded pure typed program"):
+        synthesize_program(
+            input_domain="object",
+            output_domain="boolean",
+            examples=examples,
+            max_nodes=5,
+            allow_observed_constants=False,
+        )
+    with pytest.raises(AcquiredProgramError, match="no bounded pure typed program"):
+        synthesize_program(
+            input_domain="object",
+            output_domain="boolean",
+            examples=examples,
+            max_nodes=5,
+            allow_scalar_equality=False,
+        )
+
+    learned = synthesize_program(
+        input_domain="object",
+        output_domain="boolean",
+        examples=examples,
+        max_nodes=5,
+    )
+
+    assert learned.expression["op"] == "eq_string"
+    assert learned.apply({"kind": "target", "noise": 999, "fresh": True}) is True
+    assert learned.apply({"kind": "other", "noise": -999, "fresh": True}) is False
+    assert learned.apply({"kind": "novel", "noise": 0, "fresh": True}) is False
+
+    descriptor = {
+        "input_domain": "string",
+        "output_domain": "boolean",
+        "expression": {
+            "op": "eq_string",
+            "left": {"op": "input"},
+            "right": {"op": "const", "domain": "string", "value": "bounded"},
+        },
+        "effects": [],
+        "max_steps": 4,
+        "max_output_length": 128,
+    }
+    assert execute_program(descriptor, "bounded") is True
+    assert execute_program(descriptor, "different") is False
+
+
 def test_structured_ops_are_explicitly_falsifiable_and_fail_closed_on_bad_objects() -> None:
     examples = [
         ProgramExample({"score": 2}, 2),
