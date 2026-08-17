@@ -2,7 +2,7 @@
   "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
   "target_component": "execute",
   "expected_scope": "agi/live-genuine-model-campaign-migration",
-  "status": "candidate",
+  "status": "active-for-scope",
   "prompt_mode": "overlay",
   "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
   "what_it_changes": "Add a current Copilot SDK provider and least-privilege GitHub Actions path for bounded genuine-model development campaigns while preserving the OpenAI provider.",
@@ -15,12 +15,17 @@
     "ordinary unrelated software tasks"
   ],
   "scope_states": {
-    "agi/live-genuine-model-campaign-migration": "candidate",
+    "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
     "global": "untested"
   },
   "supporting_evidence": [
     {
       "finding": "Current official GitHub documentation supports Copilot SDK/CLI automation in GitHub Actions with GITHUB_TOKEN and copilot-requests: write, while GitHub Models is retired."
+    },
+    {
+      "scope": "agi/live-genuine-model-campaign-migration",
+      "finding": "PR 155 exact unchanged head d3d222e3526dc3af336f3fd1890565eb7a65700e passed the full repository test workflow in CI run 32054713002 and merged as f8f6925e3138589d36650b15e55d23648adabbfc.",
+      "evidence_kind": "exact_head_ci_and_merge"
     }
   ],
   "contradictory_evidence": [],
@@ -29,7 +34,9 @@
   "conflicts_with": [
     "candidate-github-models-live-campaign-v1"
   ],
-  "tested_with": [],
+  "tested_with": [
+    "PR155 head d3d222e3526dc3af336f3fd1890565eb7a65700e / CI 32054713002 / merge f8f6925e3138589d36650b15e55d23648adabbfc"
+  ],
   "incompatible_with": [],
   "source_refs": [
     ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
