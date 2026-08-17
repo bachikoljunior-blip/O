@@ -61,8 +61,9 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
 
     The tool accepts the previously unsupported object domain and its implementation is supplied by
     the host rather than persisted/generated source code. The Candidate declares exact type, effect,
-    call, and byte limits. Effectful requests remain quarantined. Deterministic regression must pass
-    before the host adapter is exposed, and runtime limits fail closed after promotion.
+    call, and byte limits plus deterministic behavior-attestation probes. Effectful requests remain
+    quarantined. Deterministic regression must pass before the host adapter is exposed, and runtime
+    limits or a same-identity behavior drift fail closed after promotion.
     """
 
     if not isinstance(seed, str) or not seed.strip():
@@ -73,6 +74,14 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
     candidate_id = f"external-tool-{token}"
     tool_id = f"host-object-summary-{token}"
     max_calls = 4
+    attestation_inputs = (
+        {"attest": 2, "drift": -1, "label": "alpha"},
+        {"attest": 4, "z": 7, "label": "beta"},
+    )
+    attestation_cases = tuple(
+        {"input": value, "output_sha256": _digest(adapter_fn(value))}
+        for value in attestation_inputs
+    )
 
     effectful_rejected = False
     try:
@@ -106,6 +115,7 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
         max_output_bytes=2048,
         adapter_sha256=adapter_sha,
         description="Host-provided bounded object summarizer acquired outside the handwritten primitive grammar.",
+        attestation_cases=attestation_cases,
     )
     candidate["supporting_evidence"] = [
         {
@@ -117,6 +127,7 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
                 "max_input_bytes": 2048,
                 "max_output_bytes": 2048,
             },
+            "behavior_attestation_case_count": len(attestation_cases),
             "raw_seed_persisted": False,
         }
     ]
@@ -203,6 +214,15 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
     if not wrong_identity_rejected:
         raise RuntimeError("mismatched host adapter identity was accepted")
 
+    same_identity_behavior_drift_rejected = False
+    drifted = ExternalToolAdapter(adapter_sha256=adapter_sha, function=lambda _value: "behavior-drift")
+    try:
+        ContractedExternalToolRegistry(root, {tool_id: drifted}).descriptors(EXTERNAL_TOOL_SCOPE)
+    except ContractedExternalToolError:
+        same_identity_behavior_drift_rejected = True
+    if not same_identity_behavior_drift_rejected:
+        raise RuntimeError("same-identity host adapter behavior drift was accepted")
+
     registry = ContractedExternalToolRegistry(root, {tool_id: adapter})
     runtime_results = []
     for query in heldout:
@@ -258,11 +278,13 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
         "outside_handwritten_program_grammar": True,
         "adapter_source_persisted": False,
         "effects": [],
+        "behavior_attestation_case_count": len(attestation_cases),
         "effectful_candidate_rejected": effectful_rejected,
         "inactive_before_regression": inactive_before_regression,
         "forced_protected_regression_rejected": rejected["decision"]["adopt_candidate"] is False,
         "promotion_adopted": promoted["decision"]["adopt_candidate"],
         "wrong_adapter_identity_rejected": wrong_identity_rejected,
+        "same_identity_behavior_drift_rejected": same_identity_behavior_drift_rejected,
         "runtime_results": runtime_results,
         "fourth_output_sha256": _digest(fourth_answer),
         "call_budget_failed_closed": call_budget_failed_closed,
@@ -270,18 +292,21 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
         "negative_evidence_retained": bool(state.get("contradictory_evidence")),
         "claim_boundary": (
             "This demonstrates bounded onboarding of a host-supplied effect-free tool outside the "
-            "handwritten program grammar. Host adapter attestation and the evaluator remain internal; "
-            "effectful adapters are still quarantined, so this is not open-ended tool use or AGI proof."
+            "handwritten program grammar with runtime behavior re-attestation. Host execution and the "
+            "evaluator remain internal; effectful adapters are still quarantined, so this is not "
+            "open-ended tool use or AGI proof."
         ),
     }
     report["passed"] = bool(
         report["outside_handwritten_program_grammar"]
         and report["adapter_source_persisted"] is False
+        and report["behavior_attestation_case_count"] >= 2
         and report["effectful_candidate_rejected"]
         and report["inactive_before_regression"]
         and report["forced_protected_regression_rejected"]
         and report["promotion_adopted"]
         and report["wrong_adapter_identity_rejected"]
+        and report["same_identity_behavior_drift_rejected"]
         and all(item["success"] for item in runtime_results)
         and report["call_budget_failed_closed"]
         and report["oversized_input_failed_closed"]
