@@ -28,12 +28,17 @@ _BINARY_SIGNATURES = {
     "and_boolean": ("boolean", "boolean", "boolean"),
     "or_boolean": ("boolean", "boolean", "boolean"),
     "ge_numeric": ("numeric", "numeric", "boolean"),
+    "eq_numeric": ("numeric", "numeric", "boolean"),
+    "eq_string": ("string", "string", "boolean"),
+    "eq_boolean": ("boolean", "boolean", "boolean"),
 }
+_SCALAR_EQUALITY_OPS = frozenset({"eq_numeric", "eq_string", "eq_boolean"})
 _FOLD_IDENTITIES = {"add": 0, "mul": 1}
 _OBJECT_KEY_LIMIT = 128
 _OBJECT_FIELD_LIMIT = 32
 _JSON_DEPTH_LIMIT = 6
 _JSON_NODE_LIMIT = 256
+_OBSERVED_CONSTANT_LIMIT_PER_DOMAIN = 16
 
 
 class AcquiredProgramError(ValueError):
@@ -545,6 +550,8 @@ def execute_program(descriptor: Mapping[str, Any], value: Any) -> Any:
             result = bool(left or right)
         elif op == "ge_numeric":
             result = bool(left >= right)
+        elif op in _SCALAR_EQUALITY_OPS:
+            result = bool(left == right)
         else:
             raise AcquiredProgramError(op)
         return (
@@ -602,6 +609,37 @@ def _collect_object_keys(value: Any, keys: set[str], *, depth: int = 0) -> None:
             _collect_object_keys(item, keys, depth=depth + 1)
 
 
+def _collect_scalar_constants(
+    value: Any,
+    constants: dict[str, dict[str, Any]],
+    *,
+    depth: int = 0,
+) -> None:
+    if depth > _JSON_DEPTH_LIMIT:
+        return
+    domain = _domain_of_value(value)
+    if domain in {"numeric", "string", "boolean"}:
+        try:
+            _validate_constant(value, domain)
+        except AcquiredProgramError:
+            return
+        key = json.dumps(
+            value,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+        constants[domain].setdefault(key, value)
+        return
+    if isinstance(value, dict):
+        for item in value.values():
+            _collect_scalar_constants(item, constants, depth=depth + 1)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            _collect_scalar_constants(item, constants, depth=depth + 1)
+
+
 def synthesize_program(
     *,
     input_domain: str,
@@ -611,17 +649,20 @@ def synthesize_program(
     allow_sequence_folds: bool = True,
     allow_conditionals: bool = True,
     allow_structured_ops: bool = True,
+    allow_scalar_equality: bool = True,
+    allow_observed_constants: bool = True,
 ) -> AcquiredProgram:
     """Deterministically synthesize a pure typed expression from demonstrations.
 
     The search is over a bounded typed expression grammar rather than a catalogue of named task
     families. Behavioral deduplication keeps one minimal expression per observed behavior. Numeric
-    sequence folds, finite object projection/presence, boolean predicates, and data-dependent
-    conditionals are generic bounded kernels admitted only through the same exact-scope Candidate
-    regression gate. Intermediate typed expressions remain available even when their domain differs
-    from the requested final output, allowing already admitted kernels to compose without arbitrary
-    host code. The resulting program remains inactive until continual regression verifies its exact
-    scope on repeated held-out measurements.
+    sequence folds, finite object projection/presence, scalar value equality, bounded observed
+    constants, boolean predicates, and data-dependent conditionals are generic bounded kernels
+    admitted only through the same exact-scope Candidate regression gate. Intermediate typed
+    expressions remain available even when their domain differs from the requested final output,
+    allowing already admitted kernels to compose without arbitrary host code. The resulting program
+    remains inactive until continual regression verifies its exact scope on repeated held-out
+    measurements.
     """
 
     if input_domain not in _ALLOWED_DOMAINS or output_domain not in _ALLOWED_DOMAINS:
@@ -638,6 +679,10 @@ def synthesize_program(
         raise AcquiredProgramError("allow_conditionals must be boolean")
     if not isinstance(allow_structured_ops, bool):
         raise AcquiredProgramError("allow_structured_ops must be boolean")
+    if not isinstance(allow_scalar_equality, bool):
+        raise AcquiredProgramError("allow_scalar_equality must be boolean")
+    if not isinstance(allow_observed_constants, bool):
+        raise AcquiredProgramError("allow_observed_constants must be boolean")
     if len(examples) < 3:
         raise AcquiredProgramError("at least three demonstrations are required")
     for item in examples:
@@ -694,17 +739,42 @@ def synthesize_program(
     match = add(1, input_domain, {"op": "input"})
     if match:
         return match
-    base_constants: tuple[tuple[str, Any], ...] = tuple(
-        [("numeric", value) for value in range(-5, 6)]
-        + [
-            ("string", ""),
-            ("sequence", []),
-            ("boolean", False),
-            ("boolean", True),
-            ("object", {}),
-        ]
-    )
+    base_constants: list[tuple[str, Any]] = [
+        *[("numeric", value) for value in range(-5, 6)],
+        ("string", ""),
+        ("sequence", []),
+        ("boolean", False),
+        ("boolean", True),
+        ("object", {}),
+    ]
+    if allow_observed_constants:
+        observed: dict[str, dict[str, Any]] = {
+            "numeric": {},
+            "string": {},
+            "boolean": {},
+        }
+        for item in examples:
+            _collect_scalar_constants(item.input, observed)
+            _collect_scalar_constants(item.output, observed)
+        for domain in ("numeric", "string", "boolean"):
+            for key in sorted(observed[domain])[:_OBSERVED_CONSTANT_LIMIT_PER_DOMAIN]:
+                base_constants.append((domain, observed[domain][key]))
+    unique_constants: list[tuple[str, Any]] = []
+    constant_keys: set[tuple[str, str]] = set()
     for domain, constant in base_constants:
+        encoded = json.dumps(
+            constant,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+        identifier = (domain, encoded)
+        if identifier in constant_keys:
+            continue
+        constant_keys.add(identifier)
+        unique_constants.append((domain, constant))
+    for domain, constant in unique_constants:
         match = add(
             1,
             domain,
@@ -777,6 +847,8 @@ def synthesize_program(
             right_required,
             output,
         ) in _BINARY_SIGNATURES.items():
+            if op in _SCALAR_EQUALITY_OPS and not allow_scalar_equality:
+                continue
             for left_cost in range(1, cost - 1):
                 right_cost = cost - 1 - left_cost
                 if right_cost < 1:
