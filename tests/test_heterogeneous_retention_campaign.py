@@ -1,0 +1,37 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from agi.heterogeneous_retention_campaign import run_heterogeneous_retention_campaign
+
+
+def test_heterogeneous_capabilities_accumulate_without_forgetting(
+    runtime_repo: Path,
+) -> None:
+    report = run_heterogeneous_retention_campaign(
+        runtime_repo,
+        "heterogeneous-retention-seed",
+    )
+
+    assert report["passed"] is True
+    assert report["capability_count"] == 4
+    assert report["input_domains"] == ["numeric", "string", "sequence", "object"]
+    assert report["output_domains"] == ["numeric", "string", "numeric", "boolean"]
+    assert len(set(report["candidate_ids"])) == 4
+    assert len(set(report["scopes"])) == 4
+    assert len(set(report["fresh_engine_runs"])) == 4
+    assert report["fresh_engine_count"] == 4
+    assert report["cumulative_replay_invocation_count"] == 10
+    assert report["all_negative_evidence_retained"] is True
+    assert report["candidate_trial_state_unchanged_after_later_learning"] is True
+    assert report["all_fresh_engine_replays_matched"] is True
+    assert report["live_model_invocation_required"] is False
+    assert all(count > 0 for count in report["candidate_trial_file_counts"].values())
+
+    evidence_dir = runtime_repo / ".continual" / "evidence" / "heterogeneous-retention"
+    files = list(evidence_dir.glob("heterogeneous-retention-*.json"))
+    assert len(files) == 1
+    persisted = json.loads(files[0].read_text(encoding="utf-8"))
+    assert persisted["digest"] == report["digest"]
+    assert persisted["passed"] is True
