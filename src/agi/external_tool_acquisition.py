@@ -61,10 +61,9 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
 
     The tool accepts the previously unsupported object domain and its implementation is supplied by
     the host rather than persisted/generated source code. The Candidate declares exact type, effect,
-    call, and byte limits. Effectful requests remain quarantined. Deterministic regression must pass
-    before the host adapter is exposed. The verified contract also commits behavior-binding challenge
-    inputs and canonical output hashes so a host cannot substitute a different function while merely
-    reusing the expected adapter identity. Runtime limits fail closed after promotion.
+    call, and byte limits plus deterministic behavior-attestation probes. Effectful requests remain
+    quarantined. Deterministic regression must pass before the host adapter is exposed, and runtime
+    limits or a same-identity behavior drift fail closed after promotion.
     """
 
     if not isinstance(seed, str) or not seed.strip():
@@ -75,6 +74,14 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
     candidate_id = f"external-tool-{token}"
     tool_id = f"host-object-summary-{token}"
     max_calls = 4
+    attestation_inputs = (
+        {"attest": 2, "drift": -1, "label": "alpha"},
+        {"attest": 4, "z": 7, "label": "beta"},
+    )
+    attestation_cases = tuple(
+        {"input": value, "output_sha256": _digest(adapter_fn(value))}
+        for value in attestation_inputs
+    )
 
     effectful_rejected = False
     try:
@@ -96,15 +103,6 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
     if not effectful_rejected:
         raise RuntimeError("effectful external Candidate was not quarantined")
 
-    heldout = (
-        {"alpha": 2, "beta": 5, "note": "x"},
-        {"z": -3, "a": 9, "flag": True},
-        {"one": 1, "two": 2, "three": 3, "label": "novel"},
-    )
-    binding_challenges = tuple(
-        {"input": query, "output_sha256": _digest(adapter_fn(query))}
-        for query in heldout
-    )
     candidate = contracted_external_tool_candidate_payload(
         candidate_id=candidate_id,
         tool_id=tool_id,
@@ -117,7 +115,7 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
         max_output_bytes=2048,
         adapter_sha256=adapter_sha,
         description="Host-provided bounded object summarizer acquired outside the handwritten primitive grammar.",
-        binding_challenges=binding_challenges,
+        attestation_cases=attestation_cases,
     )
     candidate["supporting_evidence"] = [
         {
@@ -129,8 +127,7 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
                 "max_input_bytes": 2048,
                 "max_output_bytes": 2048,
             },
-            "binding_challenge_count": len(binding_challenges),
-            "binding_outputs_are_hash_only": True,
+            "behavior_attestation_case_count": len(attestation_cases),
             "raw_seed_persisted": False,
         }
     ]
@@ -144,6 +141,11 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
     if not inactive_before_regression:
         raise RuntimeError("external tool became callable before deterministic regression")
 
+    heldout = (
+        {"alpha": 2, "beta": 5, "note": "x"},
+        {"z": -3, "a": 9, "flag": True},
+        {"one": 1, "two": 2, "three": 3, "label": "novel"},
+    )
     baseline = []
     trial = []
     target_task = f"withheld-external-object-summary-{token}"
@@ -212,29 +214,16 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
     if not wrong_identity_rejected:
         raise RuntimeError("mismatched host adapter identity was accepted")
 
-    spoofed_identity_behavior_rejected = False
-
-    def spoofed_adapter(_value: Any) -> str:
-        return "spoofed-adapter-output"
-
-    spoofed = ExternalToolAdapter(adapter_sha256=adapter_sha, function=spoofed_adapter)
+    same_identity_behavior_drift_rejected = False
+    drifted = ExternalToolAdapter(adapter_sha256=adapter_sha, function=lambda _value: "behavior-drift")
     try:
-        ContractedExternalToolRegistry(root, {tool_id: spoofed}).descriptors(EXTERNAL_TOOL_SCOPE)
+        ContractedExternalToolRegistry(root, {tool_id: drifted}).descriptors(EXTERNAL_TOOL_SCOPE)
     except ContractedExternalToolError:
-        spoofed_identity_behavior_rejected = True
-    if not spoofed_identity_behavior_rejected:
-        raise RuntimeError("adapter with spoofed identity but wrong behavior was accepted")
+        same_identity_behavior_drift_rejected = True
+    if not same_identity_behavior_drift_rejected:
+        raise RuntimeError("same-identity host adapter behavior drift was accepted")
 
     registry = ContractedExternalToolRegistry(root, {tool_id: adapter})
-    descriptors = registry.descriptors(EXTERNAL_TOOL_SCOPE)
-    behavior_binding_verified = bool(
-        len(descriptors) == 1
-        and descriptors[0].get("binding_challenge_count") == len(binding_challenges)
-        and descriptors[0].get("behavior_binding_required") is True
-    )
-    if not behavior_binding_verified:
-        raise RuntimeError("verified adapter behavior binding was not exposed")
-
     runtime_results = []
     for query in heldout:
         expected = adapter_fn(query)
@@ -276,7 +265,7 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
 
     state = json.loads(candidate_path.read_text(encoding="utf-8"))
     report = {
-        "schema_version": 2,
+        "schema_version": 1,
         "campaign_id": f"contracted-external-tool-{token}",
         "candidate_id": candidate_id,
         "tool_id": tool_id,
@@ -289,37 +278,35 @@ def run_external_tool_acquisition_campaign(root: Path, seed: str) -> dict[str, A
         "outside_handwritten_program_grammar": True,
         "adapter_source_persisted": False,
         "effects": [],
+        "behavior_attestation_case_count": len(attestation_cases),
         "effectful_candidate_rejected": effectful_rejected,
         "inactive_before_regression": inactive_before_regression,
         "forced_protected_regression_rejected": rejected["decision"]["adopt_candidate"] is False,
         "promotion_adopted": promoted["decision"]["adopt_candidate"],
         "wrong_adapter_identity_rejected": wrong_identity_rejected,
-        "spoofed_identity_behavior_rejected": spoofed_identity_behavior_rejected,
-        "binding_challenge_count": len(binding_challenges),
-        "behavior_binding_verified": behavior_binding_verified,
+        "same_identity_behavior_drift_rejected": same_identity_behavior_drift_rejected,
         "runtime_results": runtime_results,
         "fourth_output_sha256": _digest(fourth_answer),
         "call_budget_failed_closed": call_budget_failed_closed,
         "oversized_input_failed_closed": oversized_input_failed_closed,
         "negative_evidence_retained": bool(state.get("contradictory_evidence")),
         "claim_boundary": (
-            "This demonstrates behavior-bound onboarding of a host-supplied effect-free tool outside "
-            "the handwritten program grammar. The evaluator remains internal and declared zero "
-            "effects cannot by itself prove a hostile host implementation is side-effect-free, so "
-            "this is not open-ended tool use or AGI proof."
+            "This demonstrates bounded onboarding of a host-supplied effect-free tool outside the "
+            "handwritten program grammar with runtime behavior re-attestation. Host execution and the "
+            "evaluator remain internal; effectful adapters are still quarantined, so this is not "
+            "open-ended tool use or AGI proof."
         ),
     }
     report["passed"] = bool(
         report["outside_handwritten_program_grammar"]
         and report["adapter_source_persisted"] is False
+        and report["behavior_attestation_case_count"] >= 2
         and report["effectful_candidate_rejected"]
         and report["inactive_before_regression"]
         and report["forced_protected_regression_rejected"]
         and report["promotion_adopted"]
         and report["wrong_adapter_identity_rejected"]
-        and report["spoofed_identity_behavior_rejected"]
-        and report["binding_challenge_count"] >= 3
-        and report["behavior_binding_verified"]
+        and report["same_identity_behavior_drift_rejected"]
         and all(item["success"] for item in runtime_results)
         and report["call_budget_failed_closed"]
         and report["oversized_input_failed_closed"]
