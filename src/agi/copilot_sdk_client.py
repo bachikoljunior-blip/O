@@ -40,7 +40,7 @@ class CopilotResponsesClient:
     def __init__(
         self,
         *,
-        client_factory: Callable[[Any], Any] | None = None,
+        client_factory: Callable[..., Any] | None = None,
         permission_handler: Any | None = None,
         require_auth: bool = True,
     ) -> None:
@@ -78,8 +78,12 @@ class CopilotResponsesClient:
         instructions: str,
         input: str,
     ) -> str:
+        # github-copilot-sdk v1 exposes a keyword-only CopilotClient constructor.
+        # Keep the injected factory on the same contract so tests cannot accidentally
+        # validate a positional call that the production SDK rejects.
         client = self._client_factory(
-            {"mode": "empty", "use_logged_in_user": False}
+            mode="empty",
+            use_logged_in_user=False,
         )
         await client.start()
         try:
