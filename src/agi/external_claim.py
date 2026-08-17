@@ -81,8 +81,9 @@ def _evaluation_request_map(ledger: Mapping[str, Any]) -> dict[str, Mapping[str,
 
     The provenance layer already validates evaluator signatures, challenges, held-out timing, and replay.
     This additional gate makes the signed result identify the exact request that froze the system subject.
-    A request digest therefore transitively binds repository, source commit, artifact digest, producer,
-    six-criterion policy, and the default two-independent-group quorum without putting secrets in the ledger.
+    A request digest therefore transitively binds repository, source commit, source-artifact digest,
+    public runtime/system-manifest digest, producer, six-criterion policy, and the default
+    two-independent-group quorum without putting secrets in the ledger.
     """
 
     values = ledger.get("evaluation_requests")
@@ -111,6 +112,7 @@ def _evaluation_request_map(ledger: Mapping[str, Any]) -> dict[str, Mapping[str,
         repository = str(subject.get("repository", ""))
         commit_sha = str(subject.get("commit_sha", ""))
         artifact_sha256 = str(subject.get("artifact_sha256", ""))
+        system_manifest_sha256 = str(subject.get("system_manifest_sha256", ""))
         producer_id = str(subject.get("producer_id", ""))
         if (
             not repository.strip()
@@ -123,6 +125,10 @@ def _evaluation_request_map(ledger: Mapping[str, Any]) -> dict[str, Mapping[str,
             raise ExternalEvidenceError("evaluation request commit_sha must be canonical lowercase 40-hex")
         if not _is_lower_hex(artifact_sha256, 64):
             raise ExternalEvidenceError("evaluation request artifact_sha256 must be canonical lowercase SHA-256")
+        if not _is_lower_hex(system_manifest_sha256, 64):
+            raise ExternalEvidenceError(
+                "evaluation request system_manifest_sha256 must be canonical lowercase SHA-256"
+            )
         if not producer_id.strip():
             raise ExternalEvidenceError("evaluation request producer_id must be non-empty")
         if raw.get("required_criteria") != list(CRITERION_KEYS):
@@ -132,6 +138,9 @@ def _evaluation_request_map(ledger: Mapping[str, Any]) -> dict[str, Mapping[str,
         quorum = raw.get("external_quorum")
         if not isinstance(quorum, Mapping) or dict(quorum) != strict_quorum:
             raise ExternalEvidenceError("evaluation request does not preserve the strict external quorum")
+        provenance = raw.get("provenance_protocol")
+        if not isinstance(provenance, Mapping) or provenance.get("runtime_system_manifest_required") is not True:
+            raise ExternalEvidenceError("evaluation request does not require a runtime system manifest")
         digest = raw.get("request_sha256")
         if not isinstance(digest, str) or not _is_lower_hex(digest, 64):
             raise ExternalEvidenceError("evaluation request request_sha256 is missing or malformed")
@@ -250,9 +259,10 @@ def evaluate_external_ledger_claim(
 
     Every accepted result must additionally carry a signed ``evaluation_request_sha256`` metadata
     field resolving to a strict request manifest stored in the ledger. The request is independently
-    revalidated here and binds the result to the exact repository commit, artifact digest, producer,
-    six-criterion policy, and default two-group quorum. This prevents a valid result artifact from being
-    silently reassigned to a different source commit or evaluation handoff.
+    revalidated here and binds the result to the exact repository commit, source artifact, public
+    runtime/system-manifest digest, producer, six-criterion policy, and default two-group quorum.
+    This prevents a valid result artifact from being silently reassigned to a different source commit,
+    model/provider/runner configuration, or evaluation handoff.
 
     Distinct external evaluator organizations are counted from the verified public-key registry,
     not from bridge keys. The strict default requires two independent groups per criterion, and a
@@ -328,6 +338,7 @@ def evaluate_external_ledger_claim(
                     "system_repository": subject["repository"],
                     "system_commit_sha": subject["commit_sha"],
                     "artifact_sha256": subject["artifact_sha256"],
+                    "system_manifest_sha256": subject["system_manifest_sha256"],
                 }
             )
     except ExternalEvidenceError as exc:
@@ -373,7 +384,8 @@ def evaluate_external_ledger_claim(
         ),
         "claim_boundary": (
             "This result can support a claim only when every upstream external signature, challenge, held-out status, "
-            "request-to-system binding, bridge trust secret, production result, and policy threshold is independently "
-            "auditable. The default quorum requires two cryptographically distinct external evaluator groups per criterion."
+            "request-to-source-and-runtime binding, bridge trust secret, production result, and policy threshold is "
+            "independently auditable. The default quorum requires two cryptographically distinct external evaluator "
+            "groups per criterion."
         ),
     }
