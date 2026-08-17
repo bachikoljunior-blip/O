@@ -56,6 +56,7 @@ def _fixtures(
         repository="example/system",
         commit_sha="ab" * 20,
         artifact_sha256=request_artifact,
+        system_manifest_sha256="44" * 32,
         producer_id=request_producer,
     )
     attestations = []
@@ -146,6 +147,7 @@ def test_clean_signed_external_ledger_reaches_six_criterion_gate_with_explicit_s
         item["system_commit_sha"] == "ab" * 20
         and item["system_repository"] == "example/system"
         and item["artifact_sha256"] == "33" * 32
+        and item["system_manifest_sha256"] == "44" * 32
         for item in report["external_attestations"]
     )
 
@@ -260,6 +262,27 @@ def test_missing_or_tampered_request_manifest_fails_closed() -> None:
     assert "request_sha256 does not match" in tampered["error"]
 
 
+def test_request_without_runtime_manifest_binding_fails_closed() -> None:
+    ledger, registry = _fixtures()
+    request = ledger["evaluation_requests"][0]
+    request["subject"].pop("system_manifest_sha256")
+    request["request_sha256"] = __import__("agi.external_provenance", fromlist=["sha256_json"]).sha256_json(
+        {key: value for key, value in request.items() if key != "request_sha256"}
+    )
+
+    report = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
+    )
+
+    assert report["agi_claim_supported"] is False
+    assert "system_manifest_sha256" in report["error"]
+
+
 def test_valid_signature_bound_to_mismatched_request_subject_fails_closed() -> None:
     ledger, registry = _fixtures(request_producer="other-system")
     producer_mismatch = evaluate_external_ledger_claim(
@@ -320,6 +343,7 @@ def test_valid_signed_production_failure_is_preserved_and_blocks_claim() -> None
             "system_repository": "example/system",
             "system_commit_sha": "ab" * 20,
             "artifact_sha256": "33" * 32,
+            "system_manifest_sha256": "44" * 32,
         }
     ]
 

@@ -21,6 +21,7 @@ def _request() -> dict:
         repository="example/system",
         commit_sha="a" * 40,
         artifact_sha256="b" * 64,
+        system_manifest_sha256="c" * 64,
         producer_id="system-producer",
     )
 
@@ -32,6 +33,8 @@ def test_strict_external_request_is_secret_free_and_bound_to_exact_policy() -> N
     assert result["valid"] is True
     assert request["required_criteria"] == list(CRITERION_KEYS)
     assert request["core_evaluation_policy"] == vars(EvaluationPolicy())
+    assert request["subject"]["system_manifest_sha256"] == "c" * 64
+    assert request["provenance_protocol"]["runtime_system_manifest_required"] is True
     assert (
         request["external_quorum"]["min_independent_groups_per_criterion"]
         == DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION
@@ -48,7 +51,7 @@ def test_strict_external_request_is_secret_free_and_bound_to_exact_policy() -> N
         assert f'"{forbidden_key}":' not in encoded
 
 
-def test_strict_external_request_rejects_policy_weakening_and_secret_embedding() -> None:
+def test_strict_external_request_rejects_policy_weakening_secret_embedding_and_missing_runtime_manifest() -> None:
     request = _request()
 
     weakened = copy.deepcopy(request)
@@ -66,10 +69,20 @@ def test_strict_external_request_rejects_policy_weakening_and_secret_embedding()
     with pytest.raises(ExternalEvaluationRequestError, match="forbidden"):
         validate_external_evaluation_request(embedded_secret)
 
+    missing_manifest = copy.deepcopy(request)
+    missing_manifest["subject"].pop("system_manifest_sha256")
+    with pytest.raises(ExternalEvaluationRequestError, match="system_manifest_sha256"):
+        validate_external_evaluation_request(missing_manifest)
+
+    weakened_runtime_binding = copy.deepcopy(request)
+    weakened_runtime_binding["provenance_protocol"]["runtime_system_manifest_required"] = False
+    with pytest.raises(ExternalEvaluationRequestError, match="provenance_protocol"):
+        validate_external_evaluation_request(weakened_runtime_binding)
+
 
 def test_strict_external_request_digest_detects_tampering() -> None:
     request = _request()
-    request["subject"]["producer_id"] = "different-producer"
+    request["subject"]["system_manifest_sha256"] = "d" * 64
     with pytest.raises(ExternalEvaluationRequestError, match="request_sha256"):
         validate_external_evaluation_request(request)
 
@@ -85,6 +98,8 @@ def test_external_request_cli_create_and_validate(tmp_path: Path, capsys: pytest
             "c" * 40,
             "--artifact-sha256",
             "d" * 64,
+            "--system-manifest-sha256",
+            "e" * 64,
             "--producer-id",
             "system-producer",
             "--output",
@@ -100,3 +115,4 @@ def test_external_request_cli_create_and_validate(tmp_path: Path, capsys: pytest
     payload = json.loads(capsys.readouterr().out)
     assert payload["valid"] is True
     assert payload["min_independent_groups_per_criterion"] == 2
+    assert payload["system_manifest_sha256"] == "e" * 64
