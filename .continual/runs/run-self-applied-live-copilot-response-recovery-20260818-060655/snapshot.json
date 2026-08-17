@@ -4,11 +4,11 @@
   "execution_id": "self-live-copilot-response-recovery-20260818-060655",
   "status": "continue",
   "phase": "self-application-in-progress",
-  "revision": 2,
+  "revision": 3,
   "created_at": "2026-08-18T06:06:55+09:00",
-  "updated_at": "2026-08-18T06:27:11+09:00",
-  "request": "Recover the stale O AGI execution from latest main, retain failed live Copilot campaigns as negative evidence, correct only falsified provider-output boundaries, validate exact-head CI, then run fresh bounded genuine-model campaigns and continue.",
-  "objective": "Improve live Copilot capability reliability without weakening benchmark scoring. PR159 fixed direct-answer/workspace JSON boundaries; fresh workflow 32070352400 falsified core JSON parsing; PR160 added exactly one bounded strict-JSON retry to the core benchmark path while preserving parser, state/procedure validation, task expectations, scoring, and the external AGI gate. Fresh validation is running now.",
+  "updated_at": "2026-08-18T07:01:38+09:00",
+  "request": "Recover stale O AGI execution from latest main, retain failed live Copilot campaigns as negative evidence, correct only falsified provider-output boundaries, validate exact-head CI, then run fresh bounded genuine-model campaigns and continue.",
+  "objective": "Fresh workflow 32071032454 falsified semantic persistent-state tool use after PR160 made core JSON reliable: the core suite passed, while the workspace suite failed only exact continual-memory/procedure semantics. Correct only Copilot workspace tool-argument guidance without weakening workspace expectations, state/procedure checks, event checks, parser, scoring, or the external AGI gate; validate exact-head CI and rerun fresh.",
   "scope": "agi/live-copilot-provider-output-reliability",
   "executor": {"kind":"task_chat_model","model":"GPT-5.6 Sol","model_verified":true,"verification_source":"platform runtime system identity"},
   "execution_mode": "task-chat-model-self-application",
@@ -22,37 +22,44 @@
   },
   "last_fresh_validation": {
     "kind": "fresh_bounded_copilot_campaign",
-    "branch": "agi/live-campaign-20260818-0618-copilot-gpt54-r4",
-    "request_commit": "9be2e834046b4b0bb710d54e91ba71b16792328a",
-    "workflow_run": 32070352400,
-    "workflow_job": 95511934107,
-    "status": "completed",
-    "conclusion": "failure",
-    "provider": "copilot",
-    "model": "gpt-5.4",
-    "failure_stage": "core_campaign_before_report_write",
-    "failure": "CopilotBenchmarkAgent response was not parseable as a JSON object; strict parser raised JSONDecodeError at line 1 column 1; no campaign artifact existed because report writing had not started"
-  },
-  "in_flight": {
-    "kind": "fresh_bounded_copilot_campaign",
     "branch": "agi/live-campaign-20260818-0626-copilot-gpt54-r5",
     "request_commit": "5aa0074118c4e77a25b4c13af2faac5e5e043a09",
     "workflow_run": 32071032454,
     "workflow_job": 95514086663,
-    "status": "in_progress",
+    "status": "completed",
+    "conclusion": "failure",
     "provider": "copilot",
     "model": "gpt-5.4",
-    "runs": 1,
-    "longhorizon_instances": 1
+    "artifact_id": 9302036061,
+    "core_passed": true,
+    "workspace_passed": false,
+    "failed_workspace_tasks": [
+      {
+        "task_id": "workspace-continual-learn",
+        "finding": "model called remember with namespace labels but key lesson and nested {azure:7}; exact required remember event key azure failed even though answer file was correct"
+      },
+      {
+        "task_id": "workspace-self-improvement-diagnose",
+        "finding": "model wrote the correct sorted answer but called adopt_procedure with namespace sorting.numeric_ascending and prose value; exact sorting namespace/procedure state and event checks failed"
+      },
+      {
+        "task_id": "workspace-self-improvement-reuse",
+        "finding": "model wrote the correct sorted answer but prior malformed procedure address meant required persisted sorting procedure was absent"
+      }
+    ],
+    "all_other_workspace_tasks_passed": true,
+    "longhorizon_status": "skipped_after_campaign_failure"
   },
+  "in_flight": null,
   "retained_failures": [
     {"workflow_run":32057684108,"type":"TypeError","retained":true},
     {"workflow_run":32059066667,"type":"ValueError","detail":"state_update and/or procedure_update was not a JSON object","retained":true},
     {"workflow_run":32063661025,"type":"live_campaign_failure","detail":"core diagnosis answer wrapped the expected list and multiple workspace turns ended in JSONDecodeError after correct tool traces","artifact_id":9299447663,"retained":true},
     {"pr":159,"head_sha":"753d729bb0a2df45169ca73b887b4d916e805865","ci_run":32069768798,"type":"test_assertion_failure","detail":"300 tests passed; one new wording assertion failed; head not merged","retained":true},
-    {"workflow_run":32070352400,"workflow_job":95511934107,"request_commit":"9be2e834046b4b0bb710d54e91ba71b16792328a","type":"JSONDecodeError","detail":"fresh post-PR159 Copilot core response failed strict JSON object parsing before any report artifact was written","retained":true}
+    {"workflow_run":32070352400,"workflow_job":95511934107,"request_commit":"9be2e834046b4b0bb710d54e91ba71b16792328a","type":"JSONDecodeError","detail":"fresh post-PR159 Copilot core response failed strict JSON object parsing before any report artifact was written","retained":true},
+    {"workflow_run":32071032454,"workflow_job":95514086663,"request_commit":"5aa0074118c4e77a25b4c13af2faac5e5e043a09","artifact_id":9302036061,"type":"workspace_semantic_persistence_failure","detail":"core passed; three workspace tasks failed exact persistent memory/procedure address semantics while their answer files were correct; all other workspace tasks passed; long-horizon skipped","retained":true}
   ],
-  "next_action": "Inspect workflow 32071032454. If it fails, retain the exact newly falsified core/workspace/long-horizon boundary and correct only that boundary. If it passes, download and inspect campaign and long-horizon artifacts, consolidate this self-application Episode/internal evidence, then immediately run a longer fresh capability/retention milestone rather than stopping.",
+  "next_action": "Add generic Copilot workspace guidance that memory entries use the exact namespace named by the goal and each taught mapping key/value directly, while procedure adoption uses the exact named namespace and a stable compact procedure identifier rather than encoding the procedure into the namespace. Add regression tests proving the guidance is present while second malformed JSON remains fail-closed; keep workspace task expectations and scoring unchanged. Then exact-head CI, merge only if passing, and rerun a fresh bounded Copilot campaign.",
   "claim_tier": "internal_development",
   "external_claim_admissible": false,
   "agi_status": "unverified"
