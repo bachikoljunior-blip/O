@@ -1,0 +1,1 @@
+Continue the unfinished AGI program from latest main and repository-persisted state only. Treat O development itself as an O self-application work unit, preserve negative evidence, merge only validated exact heads, and keep the strict independent external evidence gate unchanged.
