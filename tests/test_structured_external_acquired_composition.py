@@ -21,4 +21,4 @@ def test_structured_external_output_composes_into_newly_acquired_object_program(
     assert set(report["learned_target_repeats"].values()) == {2}
     assert report["decisions"] == [False, True]
     assert report["live_model_invocation_required"] is False
-    assert "does not prove" in report["claim_boundary"]
+    assert "do not prove" in report["claim_boundary"]
