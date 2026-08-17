@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import tempfile
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -83,38 +84,41 @@ class CopilotResponsesClient:
         instructions: str,
         input: str,
     ) -> str:
-        # github-copilot-sdk v1 exposes a keyword-only CopilotClient constructor.
-        # It also only places an auth token into the spawned runtime when the
-        # github_token option is supplied. In Actions we therefore pass the
-        # ephemeral token explicitly rather than relying on ambient GITHUB_TOKEN.
-        client_options: dict[str, Any] = {
-            "mode": "empty",
-            "use_logged_in_user": False,
-        }
-        if self._github_token is not None:
-            client_options["github_token"] = self._github_token
-        client = self._client_factory(**client_options)
-        await client.start()
-        try:
-            session = await client.create_session(
-                model=model,
-                available_tools=[],
-                on_permission_request=self._permission_handler,
-            )
+        # github-copilot-sdk v1 exposes a keyword-only constructor, requires an
+        # explicit per-tenant storage boundary for mode="empty", and only places
+        # an auth token into its spawned runtime when github_token is supplied.
+        # A temporary base directory gives every benchmark invocation a fresh,
+        # isolated storage boundary that is removed after client cleanup.
+        with tempfile.TemporaryDirectory(prefix="o-copilot-") as base_directory:
+            client_options: dict[str, Any] = {
+                "mode": "empty",
+                "use_logged_in_user": False,
+                "base_directory": base_directory,
+            }
+            if self._github_token is not None:
+                client_options["github_token"] = self._github_token
+            client = self._client_factory(**client_options)
+            await client.start()
             try:
-                response = await session.send_and_wait(
-                    self._prompt(instructions=instructions, input=input)
+                session = await client.create_session(
+                    model=model,
+                    available_tools=[],
+                    on_permission_request=self._permission_handler,
                 )
+                try:
+                    response = await session.send_and_wait(
+                        self._prompt(instructions=instructions, input=input)
+                    )
+                finally:
+                    disconnect = getattr(session, "disconnect", None)
+                    if callable(disconnect):
+                        await disconnect()
+                content = getattr(getattr(response, "data", None), "content", None)
+                if not isinstance(content, str) or not content.strip():
+                    raise RuntimeError("Copilot SDK returned an empty or non-text response")
+                return content
             finally:
-                disconnect = getattr(session, "disconnect", None)
-                if callable(disconnect):
-                    await disconnect()
-            content = getattr(getattr(response, "data", None), "content", None)
-            if not isinstance(content, str) or not content.strip():
-                raise RuntimeError("Copilot SDK returned an empty or non-text response")
-            return content
-        finally:
-            await client.stop()
+                await client.stop()
 
     def respond(self, *, model: str, instructions: str, input: str) -> str:
         try:
