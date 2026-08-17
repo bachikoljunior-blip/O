@@ -114,14 +114,15 @@ def test_default_client_requires_sdk_and_supported_auth_environment(monkeypatch)
         CopilotResponsesClient()
 
 
-def test_supported_environment_auth_allows_default_factory(monkeypatch):
-    captured = []
+def test_supported_environment_auth_is_forwarded_to_sdk_without_logged_in_user(monkeypatch):
+    clients = []
 
-    class Factory:
-        def __init__(self, **options):
-            captured.append(options)
+    def factory(**options):
+        client = _FakeClient(options, '{"answer": 4}')
+        clients.append(client)
+        return client
 
-    monkeypatch.setattr(client_module, "CopilotClient", Factory)
+    monkeypatch.setattr(client_module, "CopilotClient", factory)
     monkeypatch.setattr(
         client_module,
         "PermissionHandler",
@@ -130,7 +131,12 @@ def test_supported_environment_auth_allows_default_factory(monkeypatch):
     monkeypatch.setenv("GITHUB_TOKEN", "ephemeral-actions-token")
 
     adapter = CopilotResponsesClient()
+    response = adapter.responses.create(model="gpt-test", instructions="x", input="{}")
 
-    assert adapter._permission_handler == "approve"
-    assert adapter._client_factory is Factory
-    assert captured == []
+    assert response.output_text == '{"answer": 4}'
+    assert clients[0].options == {
+        "mode": "empty",
+        "use_logged_in_user": False,
+        "github_token": "ephemeral-actions-token",
+    }
+    assert clients[0].stopped is True
