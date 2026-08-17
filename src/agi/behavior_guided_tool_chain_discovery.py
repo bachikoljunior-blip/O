@@ -13,6 +13,7 @@ from agi.materialized_runtime_replay import (
     _mechanical_engine,
     _new_runtime_run,
 )
+from continual.acquired_program_tools import AcquiredProgramToolError
 
 
 def _planner_specs() -> tuple[dict[str, Any], ...]:
@@ -145,7 +146,10 @@ def _chain_matches(
     examples: Sequence[ProgramExample],
 ) -> bool:
     for example in examples:
-        output, _run_id, _refs = _execute_chain(root, chain, example.input)
+        try:
+            output, _run_id, _refs = _execute_chain(root, chain, example.input)
+        except AcquiredProgramToolError:
+            return False
         if output != example.output:
             return False
     return True
@@ -160,6 +164,11 @@ def run_behavior_guided_tool_chain_discovery(root: Path, seed: str) -> dict[str,
     were not used for synthesis, selects the shortest behaviorally consistent chain, and only then
     derives a separate challenge family. Every selected-chain challenge is replayed through fresh
     mechanical Engines while Candidate trial ledgers remain byte-identical.
+
+    A verified learned program may still be partial over later task inputs (for example, a structured
+    projection can reject an object that lacks a field it was trained to read). Such a deterministic
+    learned-tool rejection is a behavioral non-match for planning rather than a planner crash. Other
+    malformed runtime outputs and unexpected exceptions still fail loudly.
 
     This is internal bounded composition evidence. The chain search, planning examples, and scorer are
     repository-authored and credential-free, so the result does not establish open-world autonomous
