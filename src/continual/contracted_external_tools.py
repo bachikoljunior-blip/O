@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -17,9 +18,9 @@ class ContractedExternalToolError(ValueError):
     pass
 
 
-def _json_size(value: Any) -> int:
+def _json_bytes(value: Any) -> bytes:
     try:
-        encoded = json.dumps(
+        return json.dumps(
             value,
             ensure_ascii=False,
             sort_keys=True,
@@ -28,7 +29,18 @@ def _json_size(value: Any) -> int:
         ).encode("utf-8")
     except (TypeError, ValueError) as exc:
         raise ContractedExternalToolError("external tool value must be finite JSON") from exc
-    return len(encoded)
+
+
+def _json_size(value: Any) -> int:
+    return len(_json_bytes(value))
+
+
+def _json_sha256(value: Any) -> str:
+    return hashlib.sha256(_json_bytes(value)).hexdigest()
+
+
+def _json_copy(value: Any) -> Any:
+    return json.loads(_json_bytes(value).decode("utf-8"))
 
 
 def _matches_domain(domain: str, value: Any) -> bool:
@@ -45,6 +57,26 @@ def _matches_domain(domain: str, value: Any) -> bool:
     return False
 
 
+def _normalize_attestation_cases(raw: Any) -> tuple[dict[str, Any], ...]:
+    if raw is None:
+        return ()
+    if not isinstance(raw, (list, tuple)):
+        raise ContractedExternalToolError("external tool attestation_cases must be a list")
+    cases: list[dict[str, Any]] = []
+    for item in raw:
+        if not isinstance(item, Mapping) or set(item) != {"input", "output_sha256"}:
+            raise ContractedExternalToolError(
+                "each external tool attestation case must contain only input and output_sha256"
+            )
+        cases.append(
+            {
+                "input": _json_copy(item["input"]),
+                "output_sha256": str(item["output_sha256"]),
+            }
+        )
+    return tuple(cases)
+
+
 @dataclass(frozen=True)
 class ExternalToolContract:
     tool_id: str
@@ -58,6 +90,7 @@ class ExternalToolContract:
     max_output_bytes: int
     adapter_sha256: str
     description: str
+    attestation_cases: tuple[dict[str, Any], ...] = ()
 
     @classmethod
     def from_candidate(cls, candidate: Mapping[str, Any]) -> "ExternalToolContract":
@@ -81,6 +114,7 @@ class ExternalToolContract:
             max_output_bytes=int(limits.get("max_output_bytes", 0)),
             adapter_sha256=str(raw.get("adapter_sha256", "")),
             description=str(raw.get("description", "")),
+            attestation_cases=_normalize_attestation_cases(raw.get("attestation_cases", [])),
         )
         value.validate()
         expected_scope = candidate.get("expected_scope")
@@ -109,6 +143,20 @@ class ExternalToolContract:
             raise ContractedExternalToolError("adapter_sha256 must be lowercase SHA-256")
         if not self.description.strip():
             raise ContractedExternalToolError("external tool description must be non-empty")
+        if len(self.attestation_cases) > 8:
+            raise ContractedExternalToolError("external tool behavior attestation is limited to 8 cases")
+        for case in self.attestation_cases:
+            value = case["input"]
+            if not _matches_domain(self.input_domain, value):
+                raise ContractedExternalToolError(
+                    f"external tool attestation expected {self.input_domain} input"
+                )
+            if _json_size(value) > self.max_input_bytes:
+                raise ContractedExternalToolError("external tool attestation input exceeds byte limit")
+            if not _SHA256.fullmatch(case["output_sha256"]):
+                raise ContractedExternalToolError(
+                    "external tool attestation output_sha256 must be lowercase SHA-256"
+                )
 
     def descriptor(self) -> dict[str, Any]:
         return {
@@ -123,6 +171,7 @@ class ExternalToolContract:
             "max_input_bytes": self.max_input_bytes,
             "max_output_bytes": self.max_output_bytes,
             "adapter_sha256": self.adapter_sha256,
+            "behavior_attestation_case_count": len(self.attestation_cases),
             "description": self.description,
         }
 
@@ -143,16 +192,17 @@ class ContractedExternalToolRegistry:
     """Expose host-supplied unknown tools only after exact contract regression verification.
 
     The repository persists no executable adapter source. A host must explicitly supply an adapter
-    whose immutable identity matches the Candidate contract. Only effect-free adapters are currently
-    executable, and every registry instance enforces exact scope, typed I/O, call count, and JSON byte
-    limits. Shell, network, filesystem, subprocess, and arbitrary generated-code effects therefore do
-    not become available merely because a Candidate requests them.
+    whose immutable identity matches the Candidate contract. New Candidates may additionally bind
+    deterministic behavior-attestation probes, which are checked once per fresh registry before the
+    adapter is exposed. Only effect-free adapters are currently executable, and every registry
+    instance enforces exact scope, typed I/O, call count, and JSON byte limits.
     """
 
     def __init__(self, root: Path, adapters: Mapping[str, ExternalToolAdapter]) -> None:
         self.root = root.resolve()
         self.adapters = dict(adapters)
         self._calls: dict[tuple[str, str], int] = {}
+        self._attested: set[tuple[str, str, str]] = set()
         for key, adapter in self.adapters.items():
             if not isinstance(key, str) or not _SAFE_ID.fullmatch(key):
                 raise ContractedExternalToolError("adapter map contains invalid tool_id")
@@ -171,6 +221,36 @@ class ContractedExternalToolRegistry:
             if isinstance(raw, dict) and raw.get("target_component") == "contracted_external_tool":
                 values.append(raw)
         return tuple(values)
+
+    def _attest_behavior(
+        self,
+        contract: ExternalToolContract,
+        adapter: ExternalToolAdapter,
+    ) -> None:
+        key = (contract.candidate_id, contract.tool_id, contract.adapter_sha256)
+        if key in self._attested or not contract.attestation_cases:
+            return
+        for case in contract.attestation_cases:
+            probe = _json_copy(case["input"])
+            try:
+                output = adapter.function(probe)
+            except Exception as exc:
+                raise ContractedExternalToolError(
+                    "host adapter failed verified behavior attestation"
+                ) from exc
+            if not _matches_domain(contract.output_domain, output):
+                raise ContractedExternalToolError(
+                    f"host adapter behavior attestation returned invalid {contract.output_domain} output"
+                )
+            if _json_size(output) > contract.max_output_bytes:
+                raise ContractedExternalToolError(
+                    "host adapter behavior attestation output exceeds contract byte limit"
+                )
+            if _json_sha256(output) != case["output_sha256"]:
+                raise ContractedExternalToolError(
+                    "host adapter behavior does not match verified Candidate attestation"
+                )
+        self._attested.add(key)
 
     def available(self, scope: str) -> tuple[ExternalToolContract, ...]:
         if not isinstance(scope, str) or not scope.strip():
@@ -191,6 +271,7 @@ class ContractedExternalToolRegistry:
                 continue
             if adapter.adapter_sha256 != contract.adapter_sha256:
                 raise ContractedExternalToolError("host adapter identity does not match verified contract")
+            self._attest_behavior(contract, adapter)
             if contract.tool_id in selected:
                 raise ContractedExternalToolError("duplicate verified external tool_id")
             selected[contract.tool_id] = contract
@@ -243,7 +324,9 @@ def contracted_external_tool_candidate_payload(
     max_output_bytes: int,
     adapter_sha256: str,
     description: str,
+    attestation_cases: tuple[Mapping[str, Any], ...] = (),
 ) -> dict[str, Any]:
+    normalized_attestation = _normalize_attestation_cases(attestation_cases)
     contract = ExternalToolContract(
         tool_id=tool_id,
         candidate_id=candidate_id,
@@ -256,6 +339,7 @@ def contracted_external_tool_candidate_payload(
         max_output_bytes=max_output_bytes,
         adapter_sha256=adapter_sha256,
         description=description,
+        attestation_cases=normalized_attestation,
     )
     contract.validate()
     return {
@@ -280,6 +364,7 @@ def contracted_external_tool_candidate_payload(
                 "max_output_bytes": max_output_bytes,
             },
             "adapter_sha256": adapter_sha256,
+            "attestation_cases": [dict(case) for case in normalized_attestation],
             "description": description,
         },
     }
