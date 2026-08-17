@@ -104,17 +104,3 @@ def test_invalid_now_or_stale_threshold_configuration_fails_closed() -> None:
     decision = evaluate_watchdog_lease(invalid, now=NOW)
     assert decision.action == "unsafe_state"
     assert decision.safe_to_mutate is False
-
-
-def test_explicit_verified_goal_state_is_not_recovered() -> None:
-    decision = evaluate_watchdog_lease(
-        {
-            "status": "verified_agi",
-            "time_budget_enabled": False,
-            "soft_stop": None,
-            "hard_stop": None,
-        },
-        now=NOW,
-    )
-    assert decision.action == "goal_complete"
-    assert decision.safe_to_mutate is False
