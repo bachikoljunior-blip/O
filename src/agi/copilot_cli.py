@@ -21,12 +21,23 @@ from .sandbox_protocol import (
 
 
 _DEFAULT_MODEL = "gpt-5.4"
+_BENCHMARK_OUTPUT_CONTRACT = """
+For every benchmark response, `state_update` and `procedure_update` must each be JSON objects.
+If no persistent state or procedure change is needed, return {} for that field. Never return null,
+arrays, strings, numbers, or booleans for either field. The harness will reject malformed values.
+"""
 
 
 class CopilotBenchmarkAgent(OpenAIBenchmarkAgent):
     def __init__(self, model: str):
         super().__init__(model=model, client=CopilotResponsesClient())
         self.name = f"github-copilot:{model}"
+
+    def _respond(self, *, instructions: str, payload):
+        return super()._respond(
+            instructions=instructions.rstrip() + "\n" + _BENCHMARK_OUTPUT_CONTRACT.strip() + "\n",
+            payload=payload,
+        )
 
 
 class CopilotWorkspaceAgent(OpenAIWorkspaceAgent):
