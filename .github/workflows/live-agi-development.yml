@@ -41,7 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ inputs.openai_model }}
       COPILOT_MODEL: ${{ inputs.copilot_model }}
     steps:
@@ -54,6 +53,8 @@ jobs:
       - name: Resolve bounded live provider
         id: provider
         shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
           case "${{ inputs.runs }}" in
@@ -86,6 +87,8 @@ jobs:
       - name: Run OpenAI repeated capability campaign
         if: steps.provider.outputs.provider == 'openai'
         shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
           campaign_id="openai-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
