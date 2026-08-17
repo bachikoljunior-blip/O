@@ -44,12 +44,17 @@ class CopilotResponsesClient:
         permission_handler: Any | None = None,
         require_auth: bool = True,
     ) -> None:
+        self._github_token: str | None = None
         if client_factory is None:
             if CopilotClient is None or PermissionHandler is None:
                 raise RuntimeError(
                     "github-copilot-sdk is required; install the 'copilot' extra"
                 )
-            if require_auth and not any(os.environ.get(name) for name in _AUTH_ENV):
+            self._github_token = next(
+                (value for name in _AUTH_ENV if (value := os.environ.get(name))),
+                None,
+            )
+            if require_auth and self._github_token is None:
                 raise RuntimeError(
                     "Copilot execution requires COPILOT_GITHUB_TOKEN, GH_TOKEN, or GITHUB_TOKEN"
                 )
@@ -79,12 +84,16 @@ class CopilotResponsesClient:
         input: str,
     ) -> str:
         # github-copilot-sdk v1 exposes a keyword-only CopilotClient constructor.
-        # Keep the injected factory on the same contract so tests cannot accidentally
-        # validate a positional call that the production SDK rejects.
-        client = self._client_factory(
-            mode="empty",
-            use_logged_in_user=False,
-        )
+        # It also only places an auth token into the spawned runtime when the
+        # github_token option is supplied. In Actions we therefore pass the
+        # ephemeral token explicitly rather than relying on ambient GITHUB_TOKEN.
+        client_options: dict[str, Any] = {
+            "mode": "empty",
+            "use_logged_in_user": False,
+        }
+        if self._github_token is not None:
+            client_options["github_token"] = self._github_token
+        client = self._client_factory(**client_options)
         await client.start()
         try:
             session = await client.create_session(
