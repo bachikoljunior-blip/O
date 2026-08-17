@@ -16,13 +16,23 @@ The O repository is the unfinished AGI architecture, Engine, tools, learned skil
 - At each execution perform a logical context reset.
 - Do not use prior execution chat text, final answers, summaries, hidden reasoning, unsaved plans, cached state, or unpersisted tool results as current work state.
 - If platform-level physical context exclusion is not externally verified, record `platform_context_exclusion_verified: false`.
-- The first line of the saved request is exactly: `agiを作って`.
+- The first line of the saved request is exactly: `最短でagiを作って。`.
 - Repository contents are the durable work product and memory.
 - At most one hourly execution may hold the execution lease.
 
-At execution start calculate:
+### Deterministic hourly-window resolution
 
-- `scheduled_start`: assigned hourly boundary in `Asia/Tokyo`.
+Resolve the execution window before acquiring or changing the lease. Do not infer the assigned run by blindly flooring the first clock reading.
+
+1. Capture `scheduler_fired_at` from platform trigger metadata when available. If the platform does not expose it, use the first timezone-aware `Asia/Tokyo` clock reading and record that trigger metadata was unavailable.
+2. If the platform provides the assigned scheduled time, store it as `platform_scheduled_start`; it is authoritative after verifying that it is an exact hourly boundary.
+3. If assigned-time metadata is unavailable, resolve the boundary with `python -m agi.hourly_window --fired-at <ISO-8601 timestamp>`. The deterministic fallback assigns triggers from `xx:58:00` through `xx:59:59.999999` to the next hour, triggers from `xx:00:00` through `xx:01:59.999999` to the current hour, and otherwise floors to the current hour.
+4. Therefore `10:59:30` is the `11:00` run, with `soft_stop=11:50` and `hard_stop=11:55`; it must not be discarded as a late `10:00` run. `10:58:00` also belongs to `11:00`, while `10:57:59.999999` belongs to `10:00` when no platform assignment exists.
+5. Keep `scheduler_fired_at`, `actual_started_at`, and `scheduled_start` distinct. An early trigger may legitimately have `scheduler_fired_at < scheduled_start`.
+6. Persist `platform_scheduled_start`, `schedule_metadata_available`, `scheduled_start_resolution`, and `boundary_tolerance_seconds` so the decision is externally auditable.
+
+After resolving `scheduled_start`, calculate:
+
 - `next_scheduled_start = scheduled_start + 1 hour`.
 - `soft_stop = next_scheduled_start - 10 minutes`.
 - `hard_stop = next_scheduled_start - 5 minutes`.
@@ -38,6 +48,7 @@ Read latest `main` and at least:
 - `agi/AUTONOMY_STATE.json`
 - `agi/HOURLY_EXECUTION_STATE.json`
 - `agi/LATEST_HOURLY_REPORT.json`
+- `src/agi/hourly_window.py`
 - relevant `.continual/runs/`, `.continual/episodes/`, `.continual/candidates/`, `.continual/system/`
 - relevant evidence/trial/invocation ledgers
 - relevant `src/` and `tests/`
@@ -48,11 +59,13 @@ If chat history conflicts with repository latest `main`, repository latest `main
 ## Saved hourly request
 
 ```text
-agiを作って。
+最短でagiを作って。
 
 この実行は前回と同じ自動実行セッション・同じタスクチャットを再利用する。ただし、前回実行の会話本文、最終回答、途中報告、要約、隠れた推論、未保存の計画、ツール結果、キャッシュ、モデル内部の記憶を今回の作業状態として使用してはならない。今回の継続状態はGitHubリポジトリbachikoljunior-blip/Oの最新mainだけから復元すること。
 
 開始時に logical_context_reset: true、prior_execution_chat_context_used: false、continuation_source: repository_latest_main_only を記録する。物理的なチャットコンテキスト除外をプラットフォーム上で非自己申告に確認できない場合は platform_context_exclusion_verified: false とする。
+
+開始直後に scheduler_fired_at と、プラットフォームが提供する場合は platform_scheduled_start を取得する。platform_scheduled_start が取得できる場合は、それを正確な毎時00分境界であることを検証したうえで scheduled_start の正本とする。取得できない場合は `python -m agi.hourly_window --fired-at <scheduler_fired_at>` を実行し、境界前後120秒以内は最も近い00分境界へ割り当てること。10:59:30の発火は11:00枠であり、10:00枠のhard_stop超過として捨ててはならない。scheduler_fired_at、actual_started_at、scheduled_start、platform_scheduled_start、schedule_metadata_available、scheduled_start_resolution、boundary_tolerance_secondsを別々に保存すること。
 
 このセッションで実際に動いているモデル自身が主要な思考、判断、実装、反証、検証を行うこと。GPT-5.6 Proは利用可能でプラットフォーム確認できるなら優先するが、モデル不一致だけを理由にAGI開発を停止しない。モデル名を確認できない場合は actual_model: unverified、model_verified: false と記録する。
 
@@ -72,7 +85,8 @@ AGI完成は自己申告しないこと。未知課題への一般化、継続�
 Use `agi/HOURLY_EXECUTION_STATE.json` as the durable lease. At start atomically record at least:
 
 - `status: running`
-- `scheduled_start`, `actual_started_at`, `next_scheduled_start`, `soft_stop`, `hard_stop`
+- `scheduler_fired_at`, `actual_started_at`, `scheduled_start`, `next_scheduled_start`, `soft_stop`, `hard_stop`
+- `platform_scheduled_start`, `schedule_metadata_available`, `scheduled_start_resolution`, `boundary_tolerance_seconds`
 - unique `execution_id`/`session_id`
 - `task_chat_reused: true`
 - `logical_context_reset: true`
@@ -118,4 +132,4 @@ Finalization is one-way:
 7. Deliver the final report to the same task chat.
 8. Perform no repository mutation after lease release.
 
-Every report must state the schedule window, context-reset fields, model-verification fields, completed capability work, PR/head/merge/main SHAs, successful and failed validation, retained counterexamples/negative evidence, unfinished/blocked/pending work, exact next action, AGI claim boundary, and whether the strict independent external evidence gate passed.
+Every report must state the trigger and schedule resolution fields, schedule window, context-reset fields, model-verification fields, completed capability work, PR/head/merge/main SHAs, successful and failed validation, retained counterexamples/negative evidence, unfinished/blocked/pending work, exact next action, AGI claim boundary, and whether the strict independent external evidence gate passed.
