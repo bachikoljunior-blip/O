@@ -61,11 +61,24 @@ def _policy_compliant(state: Mapping[str, Any]) -> bool:
     )
 
 
+def _optional_int(state: Mapping[str, Any], key: str) -> int | None:
+    value = state.get(key)
+    if isinstance(value, int) and not isinstance(value, bool):
+        return value
+    return None
+
+
+def _optional_text(state: Mapping[str, Any], key: str) -> str | None:
+    value = state.get(key)
+    return str(value) if value is not None else None
+
+
 def evaluate_watchdog_lease(
     state: Mapping[str, Any],
     *,
     now: datetime | str,
     max_future_heartbeat_skew_seconds: int = 120,
+    verified_goal: bool = False,
 ) -> WatchdogLeaseDecision:
     """Classify whether a watchdog may safely recover a repository execution lease.
 
@@ -79,10 +92,17 @@ def evaluate_watchdog_lease(
     compliance only checks that active watchdog mode disables time budgeting. This keeps concurrency
     safety separate from the audit schedule and prevents a clock boundary from manufacturing a stale
     lease.
+
+    A lease string that claims ``verified_agi`` or ``goal_complete`` is not sufficient to stop recovery.
+    The caller must separately validate the repository's strict external claim gate and pass
+    ``verified_goal=True``. Without that independent result, an apparent completion marker is treated as
+    recoverable so a stale or corrupted repository field cannot silently terminate AGI development.
     """
 
     if not isinstance(state, Mapping):
         raise WatchdogLeaseError("watchdog state must be an object")
+    if not isinstance(verified_goal, bool):
+        raise WatchdogLeaseError("verified_goal must be boolean")
     if (
         not isinstance(max_future_heartbeat_skew_seconds, int)
         or isinstance(max_future_heartbeat_skew_seconds, bool)
@@ -117,18 +137,9 @@ def evaluate_watchdog_lease(
                 action="unsafe_state",
                 reason=str(exc),
                 status=status,
-                heartbeat_at=(
-                    str(state.get("heartbeat_at"))
-                    if state.get("heartbeat_at") is not None
-                    else None
-                ),
+                heartbeat_at=_optional_text(state, "heartbeat_at"),
                 heartbeat_age_seconds=None,
-                stale_after_seconds=(
-                    state.get("stale_after_seconds")
-                    if isinstance(state.get("stale_after_seconds"), int)
-                    and not isinstance(state.get("stale_after_seconds"), bool)
-                    else None
-                ),
+                stale_after_seconds=_optional_int(state, "stale_after_seconds"),
                 policy_compliant=policy_compliant,
                 safe_to_mutate=False,
             )
@@ -172,53 +183,43 @@ def evaluate_watchdog_lease(
             action="recover_released",
             reason=f"lease status {status} permits repository-only recovery",
             status=status,
-            heartbeat_at=(
-                str(state.get("heartbeat_at")) if state.get("heartbeat_at") is not None else None
-            ),
+            heartbeat_at=_optional_text(state, "heartbeat_at"),
             heartbeat_age_seconds=None,
-            stale_after_seconds=(
-                state.get("stale_after_seconds")
-                if isinstance(state.get("stale_after_seconds"), int)
-                and not isinstance(state.get("stale_after_seconds"), bool)
-                else None
-            ),
+            stale_after_seconds=_optional_int(state, "stale_after_seconds"),
             policy_compliant=policy_compliant,
             safe_to_mutate=True,
         )
 
     if status in {"verified_agi", "goal_complete"}:
+        if verified_goal:
+            return WatchdogLeaseDecision(
+                action="goal_complete",
+                reason="lease completion marker is backed by separately verified strict external AGI evidence",
+                status=status,
+                heartbeat_at=_optional_text(state, "heartbeat_at"),
+                heartbeat_age_seconds=None,
+                stale_after_seconds=_optional_int(state, "stale_after_seconds"),
+                policy_compliant=policy_compliant,
+                safe_to_mutate=False,
+            )
         return WatchdogLeaseDecision(
-            action="goal_complete",
-            reason="lease explicitly records verified goal completion",
+            action="recover_unverified_completion",
+            reason="lease claims goal completion but no separately verified external AGI gate result was supplied",
             status=status,
-            heartbeat_at=(
-                str(state.get("heartbeat_at")) if state.get("heartbeat_at") is not None else None
-            ),
+            heartbeat_at=_optional_text(state, "heartbeat_at"),
             heartbeat_age_seconds=None,
-            stale_after_seconds=(
-                state.get("stale_after_seconds")
-                if isinstance(state.get("stale_after_seconds"), int)
-                and not isinstance(state.get("stale_after_seconds"), bool)
-                else None
-            ),
+            stale_after_seconds=_optional_int(state, "stale_after_seconds"),
             policy_compliant=policy_compliant,
-            safe_to_mutate=False,
+            safe_to_mutate=True,
         )
 
     return WatchdogLeaseDecision(
         action="unsafe_state",
         reason=f"unrecognized lease status: {status}",
         status=status,
-        heartbeat_at=(
-            str(state.get("heartbeat_at")) if state.get("heartbeat_at") is not None else None
-        ),
+        heartbeat_at=_optional_text(state, "heartbeat_at"),
         heartbeat_age_seconds=None,
-        stale_after_seconds=(
-            state.get("stale_after_seconds")
-            if isinstance(state.get("stale_after_seconds"), int)
-            and not isinstance(state.get("stale_after_seconds"), bool)
-            else None
-        ),
+        stale_after_seconds=_optional_int(state, "stale_after_seconds"),
         policy_compliant=policy_compliant,
         safe_to_mutate=False,
     )
