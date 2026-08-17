@@ -83,6 +83,12 @@ def test_materialization_workflow_requires_review_branch_and_never_auto_merges()
     assert "Package setup unexpectedly changed the repository" in workflow
     assert "github.actor != 'github-actions[bot]'" in workflow
     assert "Enforce repository mutation boundary" in workflow
+    assert "git add -f -A .continual/candidates" in workflow
+    assert "git clone --quiet --local --no-hardlinks" in workflow
+    assert "python -m agi.materialized_candidate_validation" in workflow
+    assert "git commit --amend --no-edit" in workflow
+    assert "'candidate_ids': candidate_ids" in workflow
+    assert "'schema_version': 2" in workflow
     assert "auto_merge': False" in workflow
     assert "git push origin" in workflow
     assert "[skip ci]" not in workflow

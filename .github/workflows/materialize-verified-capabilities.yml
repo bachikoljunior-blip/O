@@ -83,13 +83,20 @@ jobs:
 
           campaign_id = os.environ['CAMPAIGN_ID']
           request = json.loads(Path('agi/CAPABILITY_MATERIALIZATION_REQUEST.json').read_text(encoding='utf-8'))
+          candidate_ids = sorted(
+              path.parent.name
+              for path in Path('.continual/candidates').glob('*/candidate.json')
+          )
+          if not candidate_ids:
+              raise SystemExit('materialization produced no Candidate state')
           record = {
-              'schema_version': 1,
+              'schema_version': 2,
               'campaign_id': campaign_id,
               'source': 'github-actions-materialization',
               'github_run_id': os.environ['GITHUB_RUN_ID'],
               'github_sha': os.environ['GITHUB_SHA'],
               'purpose': request.get('purpose', ''),
+              'candidate_ids': candidate_ids,
               'raw_seed_source_persisted': False,
               'auto_merge': False,
           }
@@ -102,13 +109,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          unexpected="$({ git status --porcelain | awk '{print $2}' | grep -Ev '^(\.continual/|agi/CAPABILITY_MATERIALIZATION_REQUEST\.json$)' || true; })"
+          unexpected="$({ git status --porcelain --untracked-files=all | awk '{print $2}' | grep -Ev '^(\.continual/|agi/CAPABILITY_MATERIALIZATION_REQUEST\.json$)' || true; })"
           if [[ -n "${unexpected}" ]]; then
             echo "Materialization changed paths outside the approved boundary:" >&2
             echo "${unexpected}" >&2
             exit 1
           fi
-      - name: Commit materialized state to the same review branch
+      - name: Commit and fresh-checkout verify materialized state
         shell: bash
         env:
           CAMPAIGN_ID: ${{ steps.request.outputs.campaign_id }}
@@ -117,6 +124,21 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A .continual agi/CAPABILITY_MATERIALIZATION_REQUEST.json
+          # Candidate directories are intentionally ignored during ordinary local operation. A
+          # reviewed materialization is the explicit exception: durable runtime capability requires
+          # candidate.json plus its exact regression decision bindings in the committed checkout.
+          git add -f -A .continual/candidates
           git diff --cached --quiet && { echo 'No materialized state to commit.' >&2; exit 1; }
           git commit -m "Materialize verified capabilities ${CAMPAIGN_ID}"
+
+          fresh_root="$(mktemp -d)"
+          git clone --quiet --local --no-hardlinks . "${fresh_root}"
+          test "$(git -C "${fresh_root}" rev-parse HEAD)" = "$(git rev-parse HEAD)"
+          python -m agi.materialized_candidate_validation --root "${fresh_root}" \
+            > "/tmp/${CAMPAIGN_ID}-fresh-checkout.json"
+          cp "/tmp/${CAMPAIGN_ID}-fresh-checkout.json" \
+            ".continual/evidence/capability-materialization/${CAMPAIGN_ID}-fresh-checkout.json"
+          git add ".continual/evidence/capability-materialization/${CAMPAIGN_ID}-fresh-checkout.json"
+          git commit --amend --no-edit
+
           git push origin "HEAD:${GITHUB_REF_NAME}"
