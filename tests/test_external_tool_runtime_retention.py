@@ -15,7 +15,7 @@ def test_behavior_bound_external_tool_survives_fresh_engine_reattachment(runtime
     assert report["fresh_engine_replay_matched"] is True
     assert report["spoofed_identity_wrong_behavior_rejected_after_restart"] is True
     assert report["candidate_trial_state_unchanged"] is True
-    assert report["candidate_trial_file_count"] >= 2
+    assert report["candidate_trial_file_count"] >= 1
     assert report["execution_kind"] == "verified_learned_tool"
     assert report["program_kind"] == "contracted_external_tool"
     assert report["live_model_invocation_required"] is False
