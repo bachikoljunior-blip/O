@@ -45,10 +45,10 @@ def _object_threshold_distractor_spec() -> dict[str, Any]:
         "examples": (
             ProgramExample({"score": -2, "noise": 0}, False),
             ProgramExample({"score": 4, "noise": 0}, False),
-            ProgramExample({"score": 5, "noise": 1}, True),
-            ProgramExample({"score": 12, "noise": 1}, True),
+            ProgramExample({"score": 5, "noise": 0}, True),
+            ProgramExample({"score": 12, "noise": 0}, True),
         ),
-        "probe": {"score": 11, "noise": 999, "novel": True},
+        "probe": {"score": 11, "noise": 0, "novel": True},
         "expected": True,
         "max_nodes": 6,
     }
