@@ -82,7 +82,7 @@ def test_copilot_workspace_retries_one_malformed_json_response_without_relaxing_
     assert calls[0][1] is payload
     assert calls[1][1] is payload
     assert "exactly one JSON object" in calls[0][0]
-    assert "previous response" in calls[1][0]
+    assert "preceding model response" in calls[1][0]
     assert "same workspace observation" in calls[1][0]
 
 
