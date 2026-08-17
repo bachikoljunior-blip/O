@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "episode_id": "episode-self-applied-runtime-system-manifest-20260818-015624",
+  "source_run_id": "run-self-applied-runtime-system-manifest-20260818-015624",
+  "execution_id": "o-agi-watchdog-recovery-20260818T015428JST",
+  "mode": "task-chat-model-self-application",
+  "task": "Bind strict external AGI evaluation to the public runtime identity actually intended for evaluation, not only to tracked source.",
+  "objective": "Create and validate a canonical provider/model/runner manifest whose digest is part of the strict external evaluation request and production claim bridge.",
+  "outcome": "completed",
+  "task_verdict": "PASS",
+  "claim_tier": "internal_development",
+  "external_claim_admissible": false,
+  "executor": {
+    "kind": "task_chat_model",
+    "model": "GPT-5.6 Sol",
+    "model_verified": true,
+    "verification_source": "platform runtime system identity",
+    "role": "O semantic execution, implementation, falsification, and validation stage"
+  },
+  "success_conditions": [
+    "The public runtime manifest is canonical, secret-free, and commits to repository, exact source artifact, provider, model, and runner.",
+    "Changing runtime identity changes the manifest digest.",
+    "Strict requests fail closed without a canonical system-manifest digest or if runtime-manifest provenance is weakened.",
+    "The production claim bridge independently requires the runtime-manifest binding.",
+    "Source artifact and system manifest are checked for exact commit and artifact consistency.",
+    "The exact head passes full CI before merge."
+  ],
+  "actions": [
+    "Implemented `src/agi/external_system_manifest.py` and the `agi-external-system-manifest` CLI.",
+    "Added `system_manifest_sha256` to strict evaluation request subjects and required runtime-system-manifest provenance.",
+    "Made the external claim bridge reject source-only request manifests and surface the bound system-manifest digest.",
+    "Extended exact-commit handoff generation and validation to include the public system manifest.",
+    "Verified head c45185674e5a20d7dabd49254f0897ad6d872eee with CI run 32048778292 and merged PR 152 as 76ff2a55be5bbb6724318de37a622d7d547887be."
+  ],
+  "decisions": [
+    "Keep runtime identity public and secret-free; evaluator credentials and hidden tasks remain independently controlled.",
+    "Mark producer runtime identity only as declared-for-independent-verification rather than self-verifying it.",
+    "Continue toward signed evaluator confirmation of the observed runtime manifest before returning focus to longer continual capability growth."
+  ],
+  "observations": [
+    "The strict request now freezes both tracked source and declared runtime configuration.",
+    "A request-bound manifest still does not prove the evaluator actually executed that runtime; the next falsifiable boundary is evaluator-signed observed runtime identity."
+  ],
+  "results": [
+    "PR #152",
+    "head c45185674e5a20d7dabd49254f0897ad6d872eee",
+    "CI run 32048778292",
+    "merge 76ff2a55be5bbb6724318de37a622d7d547887be"
+  ],
+  "evidence_refs": [
+    ".continual/evidence/self-application/self-applied-runtime-system-manifest-20260818-015624.json",
+    "PR #152",
+    "CI run 32048778292",
+    "merge 76ff2a55be5bbb6724318de37a622d7d547887be"
+  ],
+  "candidate_refs": [],
+  "claims": [
+    "Strict external evaluation requests now bind exact source plus a canonical public provider/model/runner system-manifest digest.",
+    "AGI remains unverified because genuinely independent signed production evidence has not passed the strict gate."
+  ],
+  "failures": [
+    "The first PR 152 merge API attempt returned a transient HTTP 502; no merge was assumed, and the unchanged CI-passing head was retried safely and merged."
+  ],
+  "unknowns": [
+    "Whether an independent evaluator will truthfully execute and attest the exact requested runtime remains unknown.",
+    "The effect of the current learned skill stack in substantially longer genuine-model continual campaigns remains insufficiently measured."
+  ],
+  "unresolved": [
+    "Require independently signed attestations to report the observed system-manifest digest and reject a mismatch with the bound request.",
+    "Exercise longer genuine-model continual campaigns with fresh transfer/retention boundaries and complete failure retention.",
+    "Obtain genuinely independent signed production evidence for every criterion and both required evaluator groups."
+  ],
+  "context": {
+    "boundary": "development",
+    "risk_signals": [],
+    "logical_reset_used": true,
+    "fresh_execution_used": false,
+    "independent_execution_used": false,
+    "boundary_satisfied": true,
+    "physical_fresh_context_fixed_requirement": false,
+    "repository_latest_main_is_durable_state": true,
+    "decision": {
+      "boundary": "development",
+      "mode": "reuse_current_context",
+      "logical_reset_required": false,
+      "fresh_execution_required": false,
+      "independent_execution_required": false,
+      "persist_before_switch": false,
+      "reason_codes": ["no_contamination_signal"]
+    }
+  }
+}

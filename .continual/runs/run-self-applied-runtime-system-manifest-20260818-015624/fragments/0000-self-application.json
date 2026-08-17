@@ -1,0 +1,26 @@
+{
+  "component": "execute",
+  "scope": "agi/repository-development",
+  "objective": "Bind strict external evaluation to a canonical public provider/model/runner system identity in addition to exact source identity.",
+  "actions": [
+    "Implemented a canonical secret-free public runtime/system manifest and validator.",
+    "Bound the manifest SHA-256 into the strict external evaluation request subject.",
+    "Required the runtime-manifest binding again inside the production external-claim bridge so legacy source-only requests fail closed.",
+    "Extended exact-commit handoff generation to emit source artifact, public system manifest, and strict request together.",
+    "Added tamper, secret-field, runtime-change, source/runtime consistency, claim-gate, and CLI regression tests.",
+    "Merged only after exact-head full CI success."
+  ],
+  "observations": [
+    "PR 150 fixed tracked-source identity but did not distinguish different provider/model/runner configurations sharing that source.",
+    "PR 152 closes request-level runtime reassignment, while actual runtime use and evaluator independence still require independently signed production evidence."
+  ],
+  "validation": [
+    {"kind": "ci", "run_id": 32048778292, "conclusion": "success", "head_sha": "c45185674e5a20d7dabd49254f0897ad6d872eee"},
+    {"kind": "merge", "merge_sha": "76ff2a55be5bbb6724318de37a622d7d547887be"}
+  ],
+  "claims": [
+    "Strict external evaluation requests now cryptographically commit to a public runtime/system manifest digest as well as exact tracked source.",
+    "This is evaluation-subject hardening, not evidence that the declared runtime was used or that AGI was achieved."
+  ],
+  "external_claim_admissible": false
+}
