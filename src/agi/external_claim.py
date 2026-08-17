@@ -12,10 +12,25 @@ from .external_provenance import (
     TaskDisclosure,
     audit_external_ledger,
     bridge_external_attestation,
+    sha256_json,
 )
 
 
 DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION = 2
+_REQUEST_KIND = "strict-independent-agi-evaluation-request"
+_FORBIDDEN_REQUEST_KEYS = frozenset(
+    {
+        "bridge_secret",
+        "private_key",
+        "private_key_hex",
+        "signing_key",
+        "signing_key_hex",
+        "hidden_seed",
+        "expected",
+        "expected_answer",
+        "answers",
+    }
+)
 
 
 def _failure_result(
@@ -37,6 +52,124 @@ def _failure_result(
         "claim": "AGI claim is not supported; external production evidence did not pass the provenance-to-claim bridge.",
         "error": message,
     }
+
+
+def _is_lower_hex(value: str, length: int) -> bool:
+    if len(value) != length or value.lower() != value:
+        return False
+    try:
+        bytes.fromhex(value)
+    except ValueError:
+        return False
+    return True
+
+
+def _contains_forbidden_request_key(value: Any) -> bool:
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            if str(key).lower() in _FORBIDDEN_REQUEST_KEYS:
+                return True
+            if _contains_forbidden_request_key(item):
+                return True
+    elif isinstance(value, (list, tuple)):
+        return any(_contains_forbidden_request_key(item) for item in value)
+    return False
+
+
+def _evaluation_request_map(ledger: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
+    """Validate strict request manifests that externally signed results may bind to.
+
+    The provenance layer already validates evaluator signatures, challenges, held-out timing, and replay.
+    This additional gate makes the signed result identify the exact request that froze the system subject.
+    A request digest therefore transitively binds repository, source commit, artifact digest, producer,
+    six-criterion policy, and the default two-independent-group quorum without putting secrets in the ledger.
+    """
+
+    values = ledger.get("evaluation_requests")
+    if not isinstance(values, list) or not values:
+        raise ExternalEvidenceError(
+            "ledger must include at least one strict evaluation request for subject binding"
+        )
+    strict_policy = asdict(EvaluationPolicy())
+    strict_quorum = {
+        "min_independent_groups_per_criterion": DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
+        "distinct_public_keys_required": True,
+        "producer_may_not_be_evaluator": True,
+        "bridge_attestor_must_be_third_identity": True,
+    }
+    requests: dict[str, Mapping[str, Any]] = {}
+    for raw in values:
+        if not isinstance(raw, Mapping):
+            raise ExternalEvidenceError("evaluation request entry must be an object")
+        if raw.get("schema_version") != 1 or raw.get("request_kind") != _REQUEST_KIND:
+            raise ExternalEvidenceError("unsupported external evaluation request schema/kind")
+        if _contains_forbidden_request_key(raw):
+            raise ExternalEvidenceError("external evaluation request embeds forbidden secret/answer fields")
+        subject = raw.get("subject")
+        if not isinstance(subject, Mapping):
+            raise ExternalEvidenceError("external evaluation request subject must be an object")
+        repository = str(subject.get("repository", ""))
+        commit_sha = str(subject.get("commit_sha", ""))
+        artifact_sha256 = str(subject.get("artifact_sha256", ""))
+        producer_id = str(subject.get("producer_id", ""))
+        if (
+            not repository.strip()
+            or "/" not in repository
+            or repository.startswith("/")
+            or repository.endswith("/")
+        ):
+            raise ExternalEvidenceError("evaluation request subject.repository must be owner/name")
+        if not _is_lower_hex(commit_sha, 40):
+            raise ExternalEvidenceError("evaluation request commit_sha must be canonical lowercase 40-hex")
+        if not _is_lower_hex(artifact_sha256, 64):
+            raise ExternalEvidenceError("evaluation request artifact_sha256 must be canonical lowercase SHA-256")
+        if not producer_id.strip():
+            raise ExternalEvidenceError("evaluation request producer_id must be non-empty")
+        if raw.get("required_criteria") != list(CRITERION_KEYS):
+            raise ExternalEvidenceError("evaluation request does not preserve the six-criterion gate")
+        if raw.get("core_evaluation_policy") != strict_policy:
+            raise ExternalEvidenceError("evaluation request does not preserve the conservative core policy")
+        quorum = raw.get("external_quorum")
+        if not isinstance(quorum, Mapping) or dict(quorum) != strict_quorum:
+            raise ExternalEvidenceError("evaluation request does not preserve the strict external quorum")
+        digest = raw.get("request_sha256")
+        if not isinstance(digest, str) or not _is_lower_hex(digest, 64):
+            raise ExternalEvidenceError("evaluation request request_sha256 is missing or malformed")
+        payload = dict(raw)
+        payload.pop("request_sha256", None)
+        if sha256_json(payload) != digest:
+            raise ExternalEvidenceError("evaluation request request_sha256 does not match canonical request")
+        if digest in requests:
+            raise ExternalEvidenceError("duplicate evaluation request digest")
+        requests[digest] = raw
+    return requests
+
+
+def _bound_request(
+    attestation: ExternalAttestation,
+    requests: Mapping[str, Mapping[str, Any]],
+) -> Mapping[str, Any]:
+    digest = attestation.metadata.get("evaluation_request_sha256")
+    if not isinstance(digest, str) or not _is_lower_hex(digest, 64):
+        raise ExternalEvidenceError(
+            "external attestation metadata must include signed evaluation_request_sha256"
+        )
+    request = requests.get(digest)
+    if request is None:
+        raise ExternalEvidenceError(
+            "external attestation references an evaluation request not present in the ledger"
+        )
+    subject = request["subject"]
+    assert isinstance(subject, Mapping)
+    if attestation.artifact_sha256 != str(subject["artifact_sha256"]):
+        raise ExternalEvidenceError(
+            "external attestation artifact does not match its bound evaluation request"
+        )
+    if attestation.producer != str(subject["producer_id"]):
+        raise ExternalEvidenceError(
+            "external attestation producer does not match its bound evaluation request"
+        )
+    return request
 
 
 def _registry_map(registry: Mapping[str, Any]) -> dict[str, ExternalVerifier]:
@@ -115,6 +248,12 @@ def evaluate_external_ledger_claim(
     silently dropped. Only a clean ledger is bridged into the existing HMAC trust boundary.
     The bridge secret is supplied out of band and is never included in the returned report.
 
+    Every accepted result must additionally carry a signed ``evaluation_request_sha256`` metadata
+    field resolving to a strict request manifest stored in the ledger. The request is independently
+    revalidated here and binds the result to the exact repository commit, artifact digest, producer,
+    six-criterion policy, and default two-group quorum. This prevents a valid result artifact from being
+    silently reassigned to a different source commit or evaluation handoff.
+
     Distinct external evaluator organizations are counted from the verified public-key registry,
     not from bridge keys. The strict default requires two independent groups per criterion, and a
     single Ed25519 public key cannot be relabeled as multiple independent groups. Callers may raise
@@ -150,6 +289,7 @@ def evaluate_external_ledger_claim(
         )
 
     try:
+        requests = _evaluation_request_map(ledger)
         verifiers = _registry_map(registry)
         challenges = _challenge_map(ledger)
         disclosures = _disclosures(ledger)
@@ -162,6 +302,9 @@ def evaluate_external_ledger_claim(
             challenge = challenges.get(attestation.challenge_nonce)
             if verifier is None or challenge is None:
                 raise ExternalEvidenceError("clean audit contained unresolved verifier or challenge")
+            request = _bound_request(attestation, requests)
+            subject = request["subject"]
+            assert isinstance(subject, Mapping)
             record = bridge_external_attestation(
                 attestation,
                 verifier=verifier,
@@ -181,6 +324,10 @@ def evaluate_external_ledger_claim(
                     "verifier_id": verifier.verifier_id,
                     "independent_group": verifier.independent_group,
                     "success": attestation.success,
+                    "evaluation_request_sha256": request["request_sha256"],
+                    "system_repository": subject["repository"],
+                    "system_commit_sha": subject["commit_sha"],
+                    "artifact_sha256": subject["artifact_sha256"],
                 }
             )
     except ExternalEvidenceError as exc:
@@ -226,7 +373,7 @@ def evaluate_external_ledger_claim(
         ),
         "claim_boundary": (
             "This result can support a claim only when every upstream external signature, challenge, held-out status, "
-            "bridge trust secret, production result, and policy threshold is independently auditable. The default "
-            "quorum requires two cryptographically distinct external evaluator groups per criterion."
+            "request-to-system binding, bridge trust secret, production result, and policy threshold is independently "
+            "auditable. The default quorum requires two cryptographically distinct external evaluator groups per criterion."
         ),
     }
