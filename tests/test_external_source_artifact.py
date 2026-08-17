@@ -12,6 +12,7 @@ from agi.external_source_artifact import (
     build_git_archive_artifact,
     validate_git_archive_artifact,
 )
+from agi.external_system_manifest import validate_public_system_manifest
 
 
 def _git(root: Path, *args: str) -> str:
@@ -65,22 +66,29 @@ def test_new_commit_changes_source_artifact_digest(tmp_path: Path) -> None:
     assert second["artifact_sha256"] != first["artifact_sha256"]
 
 
-def test_external_handoff_binds_request_to_reconstructed_archive(tmp_path: Path) -> None:
+def test_external_handoff_binds_request_to_source_and_runtime_identity(tmp_path: Path) -> None:
     root, commit = _repo(tmp_path)
-    artifact, request, archive = build_external_handoff_from_git(
+    artifact, system_manifest, request, archive = build_external_handoff_from_git(
         root=root,
         repository="example/system",
         commit_sha=commit,
         producer_id="candidate-system",
+        provider="example-provider",
+        model="example-model-v1",
+        runner="sandbox-runner-v2",
     )
 
     assert request["subject"] == {
         "repository": "example/system",
         "commit_sha": commit,
         "artifact_sha256": artifact["artifact_sha256"],
+        "system_manifest_sha256": system_manifest["manifest_sha256"],
         "producer_id": "candidate-system",
     }
     assert validate_git_archive_artifact(artifact, archive)["artifact_sha256"] == request["subject"]["artifact_sha256"]
+    manifest_result = validate_public_system_manifest(system_manifest)
+    assert manifest_result["manifest_sha256"] == request["subject"]["system_manifest_sha256"]
+    assert manifest_result["model"] == "example-model-v1"
     assert request["request_sha256"]
 
 
@@ -94,12 +102,13 @@ def test_archive_validation_rejects_tampering_and_noncanonical_commit(tmp_path: 
         build_git_archive_artifact(root, commit.upper())
 
 
-def test_cli_outputs_reconstructable_metadata_request_and_archive(tmp_path: Path, capsys) -> None:
+def test_cli_outputs_reconstructable_source_runtime_request_and_archive(tmp_path: Path, capsys) -> None:
     from agi.external_source_artifact import run_cli
 
     root, commit = _repo(tmp_path)
     archive = tmp_path / "handoff" / "system.tar"
     metadata = tmp_path / "handoff" / "artifact.json"
+    system_manifest = tmp_path / "handoff" / "system-manifest.json"
     request = tmp_path / "handoff" / "request.json"
 
     code = run_cli(
@@ -113,10 +122,18 @@ def test_cli_outputs_reconstructable_metadata_request_and_archive(tmp_path: Path
             commit,
             "--producer-id",
             "candidate-system",
+            "--provider",
+            "example-provider",
+            "--model",
+            "example-model-v1",
+            "--runner",
+            "sandbox-runner-v2",
             "--archive-output",
             str(archive),
             "--metadata-output",
             str(metadata),
+            "--system-manifest-output",
+            str(system_manifest),
             "--request-output",
             str(request),
         ]
@@ -124,14 +141,27 @@ def test_cli_outputs_reconstructable_metadata_request_and_archive(tmp_path: Path
 
     output = json.loads(capsys.readouterr().out)
     metadata_value = json.loads(metadata.read_text(encoding="utf-8"))
+    manifest_value = json.loads(system_manifest.read_text(encoding="utf-8"))
     request_value = json.loads(request.read_text(encoding="utf-8"))
     assert code == 0
     assert output["valid"] is True
     assert archive.is_file()
     assert metadata_value["artifact_sha256"] == request_value["subject"]["artifact_sha256"]
+    assert manifest_value["manifest_sha256"] == request_value["subject"]["system_manifest_sha256"]
     assert request_value["subject"]["commit_sha"] == commit
 
-    validate_code = run_cli(["validate", "--metadata", str(metadata), "--archive", str(archive)])
+    validate_code = run_cli(
+        [
+            "validate",
+            "--metadata",
+            str(metadata),
+            "--archive",
+            str(archive),
+            "--system-manifest",
+            str(system_manifest),
+        ]
+    )
     validated = json.loads(capsys.readouterr().out)
     assert validate_code == 0
     assert validated["valid"] is True
+    assert validated["system_manifest"]["model"] == "example-model-v1"
