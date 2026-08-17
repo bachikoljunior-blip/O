@@ -24,4 +24,12 @@ def _public_record_candidate_regression(*args, **kwargs):
 
 _candidate_regression.record_candidate_regression = _public_record_candidate_regression
 
+# The historical contracted-external-tool module remains readable for prior internal evidence, but
+# the ordinary LearningEnabledEngine constructor is replaced with the fail-closed runner-attested
+# implementation. This keeps direct legacy harness reproduction separate from the active runtime path.
+from . import learning_engine as _learning_engine
+from .attested_learning_engine import LearningEnabledEngine as _attested_learning_engine
+
+_learning_engine.LearningEnabledEngine = _attested_learning_engine
+
 del _install_trial_integration

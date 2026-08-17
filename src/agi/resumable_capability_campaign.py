@@ -4,7 +4,11 @@ import json
 from pathlib import Path
 from typing import Any, Mapping
 
-from continual.contracted_external_tools import ExternalToolAdapter
+from continual.attested_external_tools import (
+    ExternalToolRunner,
+    PinnedRunnerAttestationVerifier,
+    RunnerIsolationAttestation,
+)
 from continual.learning_engine import LearningEnabledEngine
 
 from .acquired_program_runtime import _atomic_json, _digest, _new_runtime_run
@@ -88,10 +92,34 @@ def _run_external_engine_stage(root: Path, seed: str) -> dict[str, Any]:
     if not acquisition["passed"]:
         raise RuntimeError("external tool acquisition prerequisite failed")
     adapter_fn, adapter_sha = _hidden_external_adapter(seed)
-    adapter = ExternalToolAdapter(adapter_sha256=adapter_sha, function=adapter_fn)
+    runner_id = f"campaign-runner-{_digest(seed)[:16]}"
+    verifier_id = "internal-campaign-runner-pin"
+    runner_sha = _digest(
+        {
+            "kind": "external-isolated-runner-test-double",
+            "runner_id": runner_id,
+            "transport": "canonical-json",
+        }
+    )
+    attestation = RunnerIsolationAttestation.create(
+        verifier_id=verifier_id,
+        runner_id=runner_id,
+        runner_sha256=runner_sha,
+        adapter_sha256=adapter_sha,
+    )
+    runner = ExternalToolRunner(
+        adapter_sha256=adapter_sha,
+        runner_sha256=runner_sha,
+        attestation=attestation,
+        invoke=adapter_fn,
+    )
+    verifier = PinnedRunnerAttestationVerifier(
+        {(verifier_id, runner_id): attestation.statement_sha256}
+    )
     engine = LearningEnabledEngine(
         root,
-        external_tool_adapters={str(acquisition["tool_id"]): adapter},
+        external_tool_runners={str(acquisition["tool_id"]): runner},
+        external_runner_verifier=verifier,
     )
     run_id = _new_runtime_run(engine)
     query = {"campaign": 3, "resume": 11, "kind": "external-engine-stage"}
@@ -112,12 +140,16 @@ def _run_external_engine_stage(root: Path, seed: str) -> dict[str, Any]:
         "expected_sha256": _digest(expected),
         "success": output == expected,
         "adapter_source_persisted": False,
+        "runner_attestation_checked": True,
+        "runner_attestation_sha256": attestation.statement_sha256,
+        "runner_test_double_only": True,
     }
     payload["passed"] = bool(
         acquisition["passed"]
         and payload["engine_run_persisted"]
         and payload["success"]
         and payload["adapter_source_persisted"] is False
+        and payload["runner_attestation_checked"]
     )
     payload["digest"] = _digest({key: value for key, value in payload.items() if key != "digest"})
     return payload
