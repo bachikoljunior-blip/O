@@ -62,6 +62,52 @@ def test_copilot_benchmark_instructions_make_persistent_update_contract_explicit
     assert "evidence" in captured["instructions"]
 
 
+def test_copilot_benchmark_retries_one_malformed_json_response_without_relaxing_parser(monkeypatch):
+    calls = []
+
+    def fake_respond(self, *, instructions, payload):
+        calls.append((instructions, payload))
+        if len(calls) == 1:
+            raise json.JSONDecodeError("Expecting value", "not json", 0)
+        return {
+            "answer": 1,
+            "evidence": [],
+            "state_update": {},
+            "procedure_update": {},
+        }
+
+    monkeypatch.setattr(OpenAIBenchmarkAgent, "_respond", fake_respond)
+    agent = object.__new__(CopilotBenchmarkAgent)
+    payload = {"task": {"task_id": "x"}, "state": {}}
+
+    value = agent._respond(instructions="base benchmark instructions", payload=payload)
+
+    assert value["answer"] == 1
+    assert len(calls) == 2
+    assert calls[0][1] is payload
+    assert calls[1][1] is payload
+    assert "direct task result" in calls[0][0]
+    assert "preceding model response" in calls[1][0]
+    assert "same benchmark input" in calls[1][0]
+    assert "no prose or markdown" in calls[1][0]
+
+
+def test_copilot_benchmark_keeps_second_malformed_response_fail_closed(monkeypatch):
+    calls = []
+
+    def fake_respond(self, *, instructions, payload):
+        calls.append((instructions, payload))
+        raise json.JSONDecodeError("Expecting value", "still not json", 0)
+
+    monkeypatch.setattr(OpenAIBenchmarkAgent, "_respond", fake_respond)
+    agent = object.__new__(CopilotBenchmarkAgent)
+
+    with pytest.raises(json.JSONDecodeError):
+        agent._respond(instructions="base", payload={"task": {}})
+
+    assert len(calls) == 2
+
+
 def test_copilot_workspace_retries_one_malformed_json_response_without_relaxing_parser(monkeypatch):
     calls = []
 
