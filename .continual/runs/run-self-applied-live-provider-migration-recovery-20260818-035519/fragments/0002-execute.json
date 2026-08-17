@@ -1,0 +1,16 @@
+{
+  "component":"execute",
+  "actions":[
+    {"action":"recover_watchdog_lease","result":"Recovered the stale execution from repository latest main without repeating completed side effects."},
+    {"action":"merge_pr","pr":155,"head_sha":"d3d222e3526dc3af336f3fd1890565eb7a65700e","ci_run":32054713002,"merge_sha":"f8f6925e3138589d36650b15e55d23648adabbfc"},
+    {"action":"run_bounded_live_campaign","request_commit":"ecaaa2149896024035b45cb51996d5e8022f188c","workflow_run":32057684108,"workflow_job":95471486722,"result":"failure_retained"},
+    {"action":"correct_sdk_integration","pr":156,"head_sha":"5fe42e1cbc52205c7286383fdd954b3fbd168b08","ci_run":32058751513,"merge_sha":"d644272040b40db4b3a02c2a2bf205d0da069ed1"},
+    {"action":"launch_fresh_bounded_retry","request_commit":"8c4bea22d9354d8318d581ca25a9141b90228787","workflow_run":32059066667}
+  ],
+  "decisions":["Preserve the first live SDK failure as negative evidence.","Use official SDK v1.0.11 contracts to correct constructor, auth, and empty-mode storage boundaries.","Keep all live campaign output internal-development evidence."],
+  "observations":["PR155 exact head passed CI 32054713002.","First live SDK run failed at positional CopilotClient construction.","PR156 exact head passed CI 32058751513 and merged as d644272040b40db4b3a02c2a2bf205d0da069ed1.","Fresh retry workflow 32059066667 was launched."],
+  "failures":[{"workflow_run":32057684108,"workflow_job":95471486722,"type":"TypeError","summary":"CopilotClient options were passed positionally although v1.0.11 requires keyword-only options.","retained":true}],
+  "unknowns":["Outcome of fresh retry workflow 32059066667.","Whether gpt-5.4 is accepted by the live Copilot service.","Whether another runtime boundary appears after session startup."],
+  "artifacts":["src/agi/copilot_sdk_client.py","tests/test_copilot_sdk_client.py",".continual/candidates/candidate-copilot-sdk-live-campaign-v1/candidate.json","agi/HOURLY_EXECUTION_STATE.json"],
+  "validation":[{"kind":"exact_head_ci","pr":155,"run":32054713002,"result":"success"},{"kind":"live_falsification","workflow_run":32057684108,"result":"failure_retained"},{"kind":"exact_head_ci","pr":156,"run":32058751513,"result":"success"}]
+}
