@@ -6,7 +6,9 @@ from pathlib import Path
 from agi.external_tool_acquisition import run_external_tool_acquisition_campaign
 
 
-def test_unknown_host_tool_is_regression_gated_and_resource_bounded(runtime_repo: Path) -> None:
+def test_unknown_host_tool_is_regression_gated_behavior_bound_and_resource_bounded(
+    runtime_repo: Path,
+) -> None:
     seed = "unknown-host-object-tool-20260817"
 
     report = run_external_tool_acquisition_campaign(runtime_repo, seed)
@@ -23,6 +25,9 @@ def test_unknown_host_tool_is_regression_gated_and_resource_bounded(runtime_repo
     assert report["forced_protected_regression_rejected"] is True
     assert report["promotion_adopted"] is True
     assert report["wrong_adapter_identity_rejected"] is True
+    assert report["spoofed_identity_behavior_rejected"] is True
+    assert report["binding_challenge_count"] == 3
+    assert report["behavior_binding_verified"] is True
     assert all(item["success"] for item in report["runtime_results"])
     assert report["call_budget_failed_closed"] is True
     assert report["oversized_input_failed_closed"] is True
@@ -37,6 +42,12 @@ def test_unknown_host_tool_is_regression_gated_and_resource_bounded(runtime_repo
     assert contract["limits"]["max_calls"] == 4
     assert contract["limits"]["max_input_bytes"] == 2048
     assert contract["adapter_sha256"] == report["adapter_sha256"]
+    assert len(contract["binding_challenges"]) == 3
+    assert all(
+        set(challenge) == {"input", "output_sha256"}
+        and len(challenge["output_sha256"]) == 64
+        for challenge in contract["binding_challenges"]
+    )
     assert candidate["scope_states"][report["scope"]] == "VERIFIED_FOR_SCOPE"
 
     evidence_path = (
