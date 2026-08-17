@@ -17,12 +17,12 @@
   "soft_stop": null,
   "hard_stop": null,
   "actual_started_at": "2026-08-17T15:07:09+09:00",
-  "heartbeat_at": "2026-08-17T15:07:09+09:00",
+  "heartbeat_at": "2026-08-17T15:21:44+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-20260817T1500JST-150709",
   "session_id": "same-task-chat-watchdog-20260817T1500JST-150709",
   "active_run_id": "run-watchdog-agi-20260817-1500",
-  "current_work_unit": "reconcile PR 110 exact head and CI; merge only if still verified, then continue to the next highest-value falsifiable AGI milestone",
+  "current_work_unit": "expand bounded typed acquisition with finite object construction and verify transfer without protected regressions",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -35,13 +35,35 @@
   "platform_context_exclusion_verified": false,
   "platform_context_exclusion_verification_source": null,
   "started_at": "2026-08-17T15:07:09+09:00",
-  "last_progress_at": "2026-08-17T15:07:09+09:00",
+  "last_progress_at": "2026-08-17T15:21:44+09:00",
   "latest_main_sha_at_start": "da100d656433996cb515670969c4e2b156a597ab",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-20260817T1400JST-140823",
     "last_progress_at": "2026-08-17T14:10:29+09:00",
     "reason": "no heartbeat or repository progress for more than stale_after_seconds; PR 110 CI completed and the previous execution did not resume"
   },
-  "completed_units": [],
+  "completed_units": [
+    {
+      "kind": "claim_gate_hardening",
+      "pr": 111,
+      "head_sha": "7153b1a130f8b6962c5388223fc52afb9a820ff8",
+      "ci_run": 32000465255,
+      "ci_conclusion": "success",
+      "merge_sha": "b0df0923c5e0ef1c4452e50a6f814f8e97516cbc",
+      "note": "PR 110 exact head had already passed CI but became non-mergeable after lease commits; successor replayed the same three-file change on latest main, passed its own full CI, and merged. PR 110 was closed unmerged as retained evidence."
+    },
+    {
+      "kind": "value_sensitive_structured_acquisition",
+      "pr": 112,
+      "failed_head_sha": "67184e503b2185d2d97c7b5b2cce122226867a6a",
+      "failed_ci_run": 32000814433,
+      "failure": "2 failed, 208 passed: globally observed constants expanded unrelated sequence synthesis and displaced protected programs from the bounded search frontier",
+      "corrected_head_sha": "18dc21149d314bbb59644a4ac56f5ac1b5d1a79f",
+      "corrected_ci_run": 32001165925,
+      "corrected_ci_conclusion": "success",
+      "merge_sha": "b28e7bd3796a2237254389a4ea4dfc76cd80cf41",
+      "note": "Scoped observed constants and equality synthesis to object inputs, retaining the failed head as negative evidence; full pytest, compile, benchmark, held-out, long-horizon, and campaign reference checks then passed."
+    }
+  ],
   "rule": "The hourly trigger is only a watchdog. A recent running heartbeat means another execution is alive and this run must not mutate the repository. A stale or released lease may be recovered. The active execution does not stop because an hourly boundary or time budget was reached; it continues until verified AGI or the platform/process actually ends, while persisting heartbeats and exact continuation state. Derived hourly boundaries are retained for audit but are not enforced as stop conditions in watchdog mode."
 }
