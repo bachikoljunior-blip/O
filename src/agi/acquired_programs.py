@@ -656,13 +656,13 @@ def synthesize_program(
 
     The search is over a bounded typed expression grammar rather than a catalogue of named task
     families. Behavioral deduplication keeps one minimal expression per observed behavior. Numeric
-    sequence folds, finite object projection/presence, scalar value equality, bounded observed
-    constants, boolean predicates, and data-dependent conditionals are generic bounded kernels
-    admitted only through the same exact-scope Candidate regression gate. Intermediate typed
-    expressions remain available even when their domain differs from the requested final output,
-    allowing already admitted kernels to compose without arbitrary host code. The resulting program
-    remains inactive until continual regression verifies its exact scope on repeated held-out
-    measurements.
+    sequence folds, finite object projection/presence, value-sensitive scalar equality for structured
+    object inputs, bounded observed constants, boolean predicates, and data-dependent conditionals
+    are generic bounded kernels admitted only through the same exact-scope Candidate regression gate.
+    Intermediate typed expressions remain available even when their domain differs from the requested
+    final output, allowing already admitted kernels to compose without arbitrary host code. The
+    resulting program remains inactive until continual regression verifies its exact scope on repeated
+    held-out measurements.
     """
 
     if input_domain not in _ALLOWED_DOMAINS or output_domain not in _ALLOWED_DOMAINS:
@@ -747,7 +747,7 @@ def synthesize_program(
         ("boolean", True),
         ("object", {}),
     ]
-    if allow_observed_constants:
+    if allow_observed_constants and input_domain == "object":
         observed: dict[str, dict[str, Any]] = {
             "numeric": {},
             "string": {},
@@ -847,7 +847,9 @@ def synthesize_program(
             right_required,
             output,
         ) in _BINARY_SIGNATURES.items():
-            if op in _SCALAR_EQUALITY_OPS and not allow_scalar_equality:
+            if op in _SCALAR_EQUALITY_OPS and (
+                not allow_scalar_equality or input_domain != "object"
+            ):
                 continue
             for left_cost in range(1, cost - 1):
                 right_cost = cost - 1 - left_cost
