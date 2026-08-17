@@ -4,21 +4,21 @@
   "execution_id": "self-live-copilot-response-recovery-20260818-060655",
   "status": "continue",
   "phase": "self-application-in-progress",
-  "revision": 4,
+  "revision": 5,
   "created_at": "2026-08-18T06:06:55+09:00",
-  "updated_at": "2026-08-18T07:20:00+09:00",
+  "updated_at": "2026-08-18T08:10:44+09:00",
   "request": "Recover stale O AGI execution from latest main, retain failed live Copilot campaigns as negative evidence, correct only falsified provider-output boundaries, validate exact-head CI, then run fresh bounded genuine-model campaigns and continue.",
-  "objective": "Fresh workflow 32074826306 showed PR161 fixed exact memory/procedure addressing: core passed, workspace memory acquisition and both self-improvement tasks passed, and only workspace continual retention failed because answer.json wrapped the recalled scalar as {azure:7} instead of writing the queried JSON value 7. Correct only generic Copilot workspace output-shape guidance without changing task expectations, state/procedure checks, events, parser, scoring, or external AGI gate; validate exact-head CI and rerun fresh.",
+  "objective": "PR162 corrected only the falsified generic Copilot workspace answer-file shape boundary after fresh workflow 32074826306 passed core plus 11/12 workspace tasks. Its exact head e4773014b841db55ede640143e185d72c23605e2 passed CI 32075841226 and merged as 5922c087dc42ead6191e6649e59da29369f08314. A fresh bounded Copilot gpt-5.4 campaign has now been requested from that merged main with benchmark scoring, persistence semantics, Candidate gates, and the external AGI evidence gate unchanged.",
   "scope": "agi/live-copilot-provider-output-reliability",
   "executor": {"kind":"task_chat_model","model":"GPT-5.6 Sol","model_verified":true,"verification_source":"platform runtime system identity"},
   "execution_mode": "task-chat-model-self-application",
   "context": {"boundary":"development","risk_signals":["stale_state_risk"],"logical_reset_used":true,"fresh_execution_used":true,"independent_execution_used":false,"boundary_satisfied":true},
   "last_completed": {
-    "pr": 161,
-    "head_sha": "b83a00d3ab137dadd84e02629daccc4dbb24d89b",
-    "ci_run": 32074543682,
+    "pr": 162,
+    "head_sha": "e4773014b841db55ede640143e185d72c23605e2",
+    "ci_run": 32075841226,
     "ci_conclusion": "success",
-    "merge_sha": "558fda088c84c6e3a1954fd95e17c6e3e16379fb"
+    "merge_sha": "5922c087dc42ead6191e6649e59da29369f08314"
   },
   "last_fresh_validation": {
     "kind": "fresh_bounded_copilot_campaign",
@@ -48,7 +48,20 @@
     "all_other_workspace_tasks_passed": true,
     "longhorizon_status": "skipped_after_campaign_failure"
   },
-  "in_flight": null,
+  "in_flight": {
+    "kind": "fresh_bounded_copilot_campaign",
+    "boundary": "fresh_execution",
+    "branch": "agi/live-campaign-20260818-0810-copilot-gpt54-r6",
+    "request_commit": "b37c0aa735fa72f2c609a4159b5b44c19963ee5d",
+    "provider": "copilot",
+    "model": "gpt-5.4",
+    "runs": 1,
+    "longhorizon_instances": 1,
+    "trigger": "push to live-agi-request branch",
+    "workflow_run": null,
+    "status": "requested_pending_observation",
+    "purpose": "fresh post-PR162 answer-shape validation with evaluator and scoring unchanged"
+  },
   "retained_failures": [
     {"workflow_run":32057684108,"type":"TypeError","retained":true},
     {"workflow_run":32059066667,"type":"ValueError","detail":"state_update and/or procedure_update was not a JSON object","retained":true},
@@ -58,7 +71,7 @@
     {"workflow_run":32071032454,"workflow_job":95514086663,"request_commit":"5aa0074118c4e77a25b4c13af2faac5e5e043a09","artifact_id":9302036061,"type":"workspace_semantic_persistence_failure","detail":"core passed; three workspace tasks failed exact persistent memory/procedure address semantics while their answer files were correct; all other workspace tasks passed; long-horizon skipped","retained":true},
     {"workflow_run":32074826306,"workflow_job":95525639371,"request_commit":"2077d350a13b1dcd507fd0e1162c4fdccc2ffceb","artifact_id":9303260818,"type":"workspace_output_shape_failure","detail":"core passed and PR161 semantic state fixes held; only workspace-continual-retain failed because recalled scalar 7 was wrapped as {azure:7}; memory, procedure, event, safety, and all other workspace checks passed; long-horizon skipped","retained":true}
   ],
-  "next_action": "Add generic Copilot workspace guidance that when a goal asks to write a queried value, scalar, list, or string as JSON/text, the file must contain that value in the exact requested shape and must not wrap it in a key/value object unless the goal explicitly asks for an object. Add regression coverage for the guidance while leaving the evaluator and malformed-response fail-closed behavior unchanged. Then exact-head CI, merge only if passing, and rerun a fresh bounded Copilot campaign.",
+  "next_action": "Observe the fresh branch-push workflow for request commit b37c0aa735fa72f2c609a4159b5b44c19963ee5d. If it fails, retain the exact new counterexample and change only the falsified boundary without weakening task expectations or scoring. If it passes, persist campaign and long-horizon evidence and immediately advance to a longer multi-run genuine-model retention/transfer milestone. Keep the strict independent external production evidence gate unchanged.",
   "claim_tier": "internal_development",
   "external_claim_admissible": false,
   "agi_status": "unverified"
