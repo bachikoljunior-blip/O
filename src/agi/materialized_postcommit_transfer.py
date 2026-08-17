@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import tempfile
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -78,17 +79,18 @@ def run_materialized_postcommit_transfer(root: Path, *, minimum_candidates: int 
         inputs = _challenge_inputs(candidate_id, domain)
         expected = tuple(execute_program(program, value) for value in inputs)
 
-        baseline_engine = _mechanical_engine(root.parent / f".empty-{candidate_id}")
-        baseline_run = _new_runtime_run(baseline_engine)
-        baseline_successes = 0
-        for value in inputs:
-            try:
-                _invoke(baseline_engine, baseline_run, scope=scope, tool_id=tool_id, value=value)
-            except LearnedToolError:
-                continue
-            baseline_successes += 1
-        if baseline_successes:
-            raise RuntimeError(f"Candidate {candidate_id} baseline unexpectedly exposed the learned tool")
+        with tempfile.TemporaryDirectory(prefix="agi-postcommit-baseline-") as temporary:
+            baseline_engine = _mechanical_engine(Path(temporary))
+            baseline_run = _new_runtime_run(baseline_engine)
+            baseline_successes = 0
+            for value in inputs:
+                try:
+                    _invoke(baseline_engine, baseline_run, scope=scope, tool_id=tool_id, value=value)
+                except LearnedToolError:
+                    continue
+                baseline_successes += 1
+            if baseline_successes:
+                raise RuntimeError(f"Candidate {candidate_id} baseline unexpectedly exposed the learned tool")
 
         engine = _mechanical_engine(root)
         run_id = _new_runtime_run(engine)
