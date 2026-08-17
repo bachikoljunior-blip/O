@@ -1,0 +1,1 @@
+Continue the unfinished AGI program from latest main only. Recover the stale execution without using prior chat as work state, persist the completed PR 146 request-bound external claim hardening as native O self-application state, preserve all negative evidence, keep self-produced evidence inadmissible for AGI claims, and continue to the next nonduplicate falsifiable milestone.
