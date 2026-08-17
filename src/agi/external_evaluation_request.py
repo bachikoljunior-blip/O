@@ -80,14 +80,16 @@ def build_external_evaluation_request(
     repository: str,
     commit_sha: str,
     artifact_sha256: str,
+    system_manifest_sha256: str,
     producer_id: str,
 ) -> dict[str, Any]:
     """Build a secret-free handoff manifest for the repository's strict external AGI gate.
 
-    The request binds an exact system source commit and artifact digest to the current conservative
-    six-criterion policy. It does not generate a hidden suite, verifier identity, challenge, signature,
-    bridge secret, or success result; those must remain under independent control. The manifest is
-    therefore operational scaffolding only, not evidence.
+    The request binds an exact system source commit, tracked-source artifact digest, and public
+    runtime/system manifest digest to the current conservative six-criterion policy. It does not
+    generate a hidden suite, verifier identity, challenge, signature, bridge secret, or success result;
+    those must remain under independent control. The manifest is operational scaffolding only, not
+    evidence.
     """
 
     request: dict[str, Any] = {
@@ -97,6 +99,7 @@ def build_external_evaluation_request(
             "repository": repository,
             "commit_sha": commit_sha,
             "artifact_sha256": artifact_sha256,
+            "system_manifest_sha256": system_manifest_sha256,
             "producer_id": producer_id,
         },
         "required_criteria": list(CRITERION_KEYS),
@@ -119,6 +122,7 @@ def build_external_evaluation_request(
             "heldout_disclosure_history_required": True,
             "external_ledger_audit_required": True,
             "bridge_secret_out_of_band_required": True,
+            "runtime_system_manifest_required": True,
         },
         "handoff": {
             "evaluator_must_supply": [
@@ -127,6 +131,7 @@ def build_external_evaluation_request(
                 "fresh suite-bound challenge",
                 "raw evaluation artifacts and result digests",
                 "signed production attestations with preserved failures",
+                "independent confirmation that the executed runtime matches the bound public system manifest",
             ],
             "repository_must_not_supply": [
                 "evaluator private key",
@@ -139,7 +144,8 @@ def build_external_evaluation_request(
             "This manifest is a request for independently controlled production evaluation. It is not "
             "an attestation, a production result, or AGI evidence. A claim remains blocked until the "
             "external ledger passes provenance audit, the strict two-group quorum is met for every "
-            "criterion, and the conservative core evaluation policy passes with no unresolved blocking "
+            "criterion, the signed request remains bound to the exact source and runtime-system "
+            "manifest, and the conservative core evaluation policy passes with no unresolved blocking "
             "production failures."
         ),
     }
@@ -167,6 +173,7 @@ def validate_external_evaluation_request(
     repository = str(subject.get("repository", ""))
     commit_sha = str(subject.get("commit_sha", ""))
     artifact_sha256 = str(subject.get("artifact_sha256", ""))
+    system_manifest_sha256 = str(subject.get("system_manifest_sha256", ""))
     producer_id = str(subject.get("producer_id", ""))
     if not repository.strip() or "/" not in repository or repository.startswith("/") or repository.endswith("/"):
         raise ExternalEvaluationRequestError("subject.repository must be owner/name")
@@ -175,6 +182,10 @@ def validate_external_evaluation_request(
     if not _is_lower_hex(artifact_sha256, 64):
         raise ExternalEvaluationRequestError(
             "subject.artifact_sha256 must be canonical lowercase SHA-256"
+        )
+    if not _is_lower_hex(system_manifest_sha256, 64):
+        raise ExternalEvaluationRequestError(
+            "subject.system_manifest_sha256 must be canonical lowercase SHA-256"
         )
     if not producer_id.strip():
         raise ExternalEvaluationRequestError("subject.producer_id must be non-empty")
@@ -218,6 +229,7 @@ def validate_external_evaluation_request(
         "heldout_disclosure_history_required": True,
         "external_ledger_audit_required": True,
         "bridge_secret_out_of_band_required": True,
+        "runtime_system_manifest_required": True,
     }
     if dict(provenance) != required_provenance:
         raise ExternalEvaluationRequestError(
@@ -229,7 +241,7 @@ def validate_external_evaluation_request(
         raise ExternalEvaluationRequestError("handoff must be an object")
     evaluator_supply = handoff.get("evaluator_must_supply")
     repository_forbidden = handoff.get("repository_must_not_supply")
-    if not isinstance(evaluator_supply, list) or len(evaluator_supply) < 5:
+    if not isinstance(evaluator_supply, list) or len(evaluator_supply) < 6:
         raise ExternalEvaluationRequestError("handoff is missing evaluator-controlled requirements")
     if not isinstance(repository_forbidden, list) or len(repository_forbidden) < 4:
         raise ExternalEvaluationRequestError("handoff is missing repository non-control requirements")
@@ -251,12 +263,14 @@ def validate_external_evaluation_request(
         "repository": repository,
         "commit_sha": commit_sha,
         "artifact_sha256": artifact_sha256,
+        "system_manifest_sha256": system_manifest_sha256,
         "producer_id": producer_id,
         "criteria": list(CRITERION_KEYS),
         "min_independent_groups_per_criterion": DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
         "claim_boundary": (
             "Validation proves only that this handoff request preserves the repository's strict external "
-            "evaluation requirements. It does not prove that any independent evaluation occurred."
+            "evaluation requirements and binds a public runtime-system manifest. It does not prove that "
+            "any independent evaluation occurred or that the declared runtime was actually used."
         ),
     }
 
@@ -281,6 +295,7 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--repository", required=True)
     create.add_argument("--commit-sha", required=True)
     create.add_argument("--artifact-sha256", required=True)
+    create.add_argument("--system-manifest-sha256", required=True)
     create.add_argument("--producer-id", required=True)
     create.add_argument("--output", type=Path, required=True)
     validate = subparsers.add_parser("validate")
@@ -296,6 +311,7 @@ def run_cli(argv: list[str] | None = None) -> int:
                 repository=args.repository,
                 commit_sha=args.commit_sha,
                 artifact_sha256=args.artifact_sha256,
+                system_manifest_sha256=args.system_manifest_sha256,
                 producer_id=args.producer_id,
             )
             args.output.parent.mkdir(parents=True, exist_ok=True)
