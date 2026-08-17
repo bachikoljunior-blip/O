@@ -29,6 +29,13 @@ The `answer` field must contain the direct task result rather than an explanator
 optional diagnosis or explanation in `evidence`; do not wrap a requested scalar/list result inside
 an object unless the task itself explicitly requests an object.
 """
+_BENCHMARK_JSON_RETRY = """
+The immediately preceding model response for this same benchmark input was rejected before any
+answer was accepted because it was not exactly one JSON object. Retry once using only the required
+benchmark response schema. Return the direct task result in `answer`, JSON objects for
+`state_update` and `procedure_update`, and no prose or markdown outside the JSON object. Do not
+assume the rejected response changed persistent state.
+"""
 _WORKSPACE_OUTPUT_CONTRACT = """
 Every workspace turn must be exactly one JSON object and nothing else: no prose, markdown fences,
 prefixes, suffixes, or commentary. A tool turn must use exactly the documented `kind`, `tool`, and
@@ -50,10 +57,21 @@ class CopilotBenchmarkAgent(OpenAIBenchmarkAgent):
         self.name = f"github-copilot:{model}"
 
     def _respond(self, *, instructions: str, payload):
-        return super()._respond(
-            instructions=instructions.rstrip() + "\n" + _BENCHMARK_OUTPUT_CONTRACT.strip() + "\n",
-            payload=payload,
+        strict_instructions = (
+            instructions.rstrip() + "\n" + _BENCHMARK_OUTPUT_CONTRACT.strip() + "\n"
         )
+        try:
+            return super()._respond(instructions=strict_instructions, payload=payload)
+        except (json.JSONDecodeError, ValueError):
+            # The rejected output never becomes a benchmark answer or state update. One bounded
+            # retry improves provider reliability while keeping the strict parser, evaluator,
+            # task expectations, state/procedure validation, and scoring unchanged.
+            return super()._respond(
+                instructions=(
+                    strict_instructions.rstrip() + "\n" + _BENCHMARK_JSON_RETRY.strip() + "\n"
+                ),
+                payload=payload,
+            )
 
 
 class CopilotWorkspaceAgent(OpenAIWorkspaceAgent):
