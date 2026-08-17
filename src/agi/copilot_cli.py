@@ -42,6 +42,10 @@ prefixes, suffixes, or commentary. A tool turn must use exactly the documented `
 `arguments` action shape. Once the trace and latest observation show the externally checkable goal
 is complete, return the documented `kind: final` JSON object on that turn; never replace it with a
 natural-language completion message. Malformed or non-object output is rejected, not interpreted.
+When writing an answer file, preserve the exact data shape requested by the goal. If the goal asks
+for a queried value, scalar, list, or string, write that value itself; do not wrap it in a key/value
+object unless the goal explicitly requests an object or named fields. JSON syntax does not imply an
+object shape: a JSON number, string, list, boolean, or null is valid when that is the requested value.
 Persistent-state tool addressing is exact. When a goal names a memory namespace and task data
 teaches a mapping, call `remember` for each taught entry using the namespace exactly as named, the
 taught mapping key as `key`, and that entry's value as `value`; do not store a container name such
