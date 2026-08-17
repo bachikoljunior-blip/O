@@ -46,8 +46,14 @@ class _FakeClient:
 def _factory(content: str | None):
     clients = []
 
-    def factory(options):
-        client = _FakeClient(options, content)
+    # github-copilot-sdk v1 makes CopilotClient.__init__ keyword-only. Keeping
+    # the fake on that same contract prevents a positional production call from
+    # passing tests while failing immediately in a live campaign.
+    def factory(*, mode, use_logged_in_user):
+        client = _FakeClient(
+            {"mode": mode, "use_logged_in_user": use_logged_in_user},
+            content,
+        )
         clients.append(client)
         return client
 
@@ -95,7 +101,7 @@ def test_empty_copilot_response_fails_closed_after_cleanup():
 
 
 def test_default_client_requires_sdk_and_supported_auth_environment(monkeypatch):
-    monkeypatch.setattr(client_module, "CopilotClient", lambda _options: object())
+    monkeypatch.setattr(client_module, "CopilotClient", lambda **_options: object())
     monkeypatch.setattr(
         client_module,
         "PermissionHandler",
@@ -112,7 +118,7 @@ def test_supported_environment_auth_allows_default_factory(monkeypatch):
     captured = []
 
     class Factory:
-        def __init__(self, options):
+        def __init__(self, **options):
             captured.append(options)
 
     monkeypatch.setattr(client_module, "CopilotClient", Factory)
