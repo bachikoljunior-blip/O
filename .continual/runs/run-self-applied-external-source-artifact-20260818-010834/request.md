@@ -1,0 +1,1 @@
+Continue the unfinished AGI program from latest main only. Persist PR 150 reproducible exact-commit external source-artifact handoff as native O self-application state, preserve exact CI/merge evidence, keep internal evidence inadmissible for AGI claims, then continue immediately to the next nonduplicate falsifiable AGI milestone.

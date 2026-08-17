@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "evidence_id": "self-applied-external-source-artifact-20260818-010834",
+  "kind": "self_application",
+  "tier": "internal_development",
+  "admissible_for_agi_claim": false,
+  "execution_id": "o-agi-watchdog-recovery-20260818T005019JST",
+  "run_id": "run-self-applied-external-source-artifact-20260818-010834",
+  "episode_id": "episode-self-applied-external-source-artifact-20260818-010834",
+  "scope": "agi/repository-development",
+  "objective": "Derive a strict external evaluation source-artifact digest mechanically from an exact Git commit rather than mutable local state or an opaque manual hash.",
+  "repository": "bachikoljunior-blip/O",
+  "validated_change": {
+    "pr": 150,
+    "head_sha": "a53a9f6ac41dcf2d9f5d6c6a3fbe2caaaa563a7d",
+    "ci_run": 32044318820,
+    "ci_conclusion": "success",
+    "merge_sha": "3ec632e2e7a9663a70bbd92c8d1d5a14a9a070d1"
+  },
+  "findings": [
+    "`git archive --format=tar <exact commit>` provides a commit-object source artifact that is independent of dirty or untracked working-tree state.",
+    "The archive SHA-256 can be fed directly into the strict external evaluation request subject and validated before an evaluator run.",
+    "This improves subject reproducibility but does not establish model/runtime identity or evaluator independence."
+  ],
+  "claim_boundary": "This is internal development evidence. It documents external-evaluation scaffolding and cannot satisfy any independent production AGI criterion by itself."
+}

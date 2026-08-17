@@ -1,0 +1,25 @@
+{
+  "component": "execute",
+  "scope": "agi/repository-development",
+  "objective": "Make the strict external evaluator handoff derive its tracked-source artifact digest from an exact Git commit.",
+  "actions": [
+    "Implemented a commit-only `git archive --format=tar` source artifact builder and validator.",
+    "Bound the resulting SHA-256 into the existing strict external evaluation request.",
+    "Excluded dirty working-tree and untracked state by construction.",
+    "Added CLI and regression tests for invariance, commit sensitivity, request binding, tampering, canonical commit ids, and round-trip validation.",
+    "Merged only after exact-head CI success."
+  ],
+  "observations": [
+    "PR 146 eliminated result-to-request reassignment, while PR 150 removes an opaque manual source-artifact digest step from request construction.",
+    "The handoff still does not itself create an independent evaluator, hidden suite, signature, or production result."
+  ],
+  "validation": [
+    {"kind": "ci", "run_id": 32044318820, "conclusion": "success", "head_sha": "a53a9f6ac41dcf2d9f5d6c6a3fbe2caaaa563a7d"},
+    {"kind": "merge", "merge_sha": "3ec632e2e7a9663a70bbd92c8d1d5a14a9a070d1"}
+  ],
+  "claims": [
+    "The source archive digest in a strict external evaluation handoff can now be reconstructed from an exact commit without consuming dirty or untracked local state.",
+    "This is evaluation scaffolding, not evidence that AGI was achieved."
+  ],
+  "external_claim_admissible": false
+}
