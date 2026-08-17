@@ -1,0 +1,109 @@
+name: materialize-verified-capabilities
+
+on:
+  push:
+    branches:
+      - 'agi/materialized-capabilities-*'
+    paths:
+      - 'agi/CAPABILITY_MATERIALIZATION_REQUEST.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-verified-capabilities-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e '.[test]'
+      - name: Validate materialization request
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import re
+          from pathlib import Path
+
+          path = Path('agi/CAPABILITY_MATERIALIZATION_REQUEST.json')
+          value = json.loads(path.read_text(encoding='utf-8'))
+          if not isinstance(value, dict) or value.get('schema_version') != 1:
+              raise SystemExit('materialization request must be a schema_version=1 object')
+          allowed = {'schema_version', 'campaign_id', 'purpose'}
+          unknown = sorted(set(value) - allowed)
+          if unknown:
+              raise SystemExit('unknown materialization request keys: ' + ', '.join(unknown))
+          campaign_id = value.get('campaign_id')
+          if not isinstance(campaign_id, str) or not re.fullmatch(r'[a-z0-9][a-z0-9._-]{2,63}', campaign_id):
+              raise SystemExit('campaign_id must be a safe lowercase identifier')
+          print(f'campaign_id={campaign_id}')
+          PY
+      - name: Materialize verified capability state
+        shell: bash
+        env:
+          CAMPAIGN_ID: ${{ steps.request.outputs.campaign_id }}
+        run: |
+          set -euo pipefail
+          seed_source="github-run-${GITHUB_RUN_ID}"
+          agi-capability-campaign \
+            --root . \
+            --campaign-id "${CAMPAIGN_ID}" \
+            --seed-source "${seed_source}" \
+            --output ".continual/evidence/capability-materialization/${CAMPAIGN_ID}.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          campaign_id = os.environ['CAMPAIGN_ID']
+          request = json.loads(Path('agi/CAPABILITY_MATERIALIZATION_REQUEST.json').read_text(encoding='utf-8'))
+          record = {
+              'schema_version': 1,
+              'campaign_id': campaign_id,
+              'source': 'github-actions-materialization',
+              'github_run_id': os.environ['GITHUB_RUN_ID'],
+              'github_sha': os.environ['GITHUB_SHA'],
+              'purpose': request.get('purpose', ''),
+              'raw_seed_source_persisted': False,
+              'auto_merge': False,
+          }
+          target = Path('.continual/system/materialization-requests') / f'{campaign_id}.json'
+          target.parent.mkdir(parents=True, exist_ok=True)
+          target.write_text(json.dumps(record, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          Path('agi/CAPABILITY_MATERIALIZATION_REQUEST.json').unlink()
+          PY
+      - name: Enforce repository mutation boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          unexpected="$({ git status --porcelain | awk '{print $2}' | grep -Ev '^(\.continual/|agi/CAPABILITY_MATERIALIZATION_REQUEST\.json$)' || true; })"
+          if [[ -n "${unexpected}" ]]; then
+            echo "Materialization changed paths outside the approved boundary:" >&2
+            echo "${unexpected}" >&2
+            exit 1
+          fi
+      - name: Commit materialized state to the same review branch
+        shell: bash
+        env:
+          CAMPAIGN_ID: ${{ steps.request.outputs.campaign_id }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A .continual agi/CAPABILITY_MATERIALIZATION_REQUEST.json
+          git diff --cached --quiet && { echo 'No materialized state to commit.' >&2; exit 1; }
+          git commit -m "Materialize verified capabilities ${CAMPAIGN_ID} [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
