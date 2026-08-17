@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .external_evaluation_request import build_external_evaluation_request
+from .external_system_manifest import (
+    build_public_system_manifest,
+    validate_public_system_manifest,
+)
 
 
 ARTIFACT_KIND = "git-archive-tar-v1"
@@ -120,15 +124,27 @@ def build_external_handoff_from_git(
     repository: str,
     commit_sha: str,
     producer_id: str,
-) -> tuple[dict[str, Any], dict[str, Any], bytes]:
+    provider: str,
+    model: str,
+    runner: str,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], bytes]:
     artifact, archive = build_git_archive_artifact(root, commit_sha)
+    system_manifest = build_public_system_manifest(
+        repository=repository,
+        commit_sha=commit_sha,
+        artifact_sha256=artifact["artifact_sha256"],
+        provider=provider,
+        model=model,
+        runner=runner,
+    )
     request = build_external_evaluation_request(
         repository=repository,
         commit_sha=commit_sha,
         artifact_sha256=artifact["artifact_sha256"],
+        system_manifest_sha256=system_manifest["manifest_sha256"],
         producer_id=producer_id,
     )
-    return artifact, request, archive
+    return artifact, system_manifest, request, archive
 
 
 def _write_json(path: Path, value: Mapping[str, Any]) -> None:
@@ -143,8 +159,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agi-external-artifact",
         description=(
-            "Build or validate a deterministic tracked-source Git archive for the strict external "
-            "AGI evaluation handoff."
+            "Build or validate a deterministic tracked-source Git archive and bound public runtime "
+            "manifest for the strict external AGI evaluation handoff."
         ),
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -153,12 +169,17 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--repository", required=True)
     create.add_argument("--commit-sha", required=True)
     create.add_argument("--producer-id", required=True)
+    create.add_argument("--provider", required=True)
+    create.add_argument("--model", required=True)
+    create.add_argument("--runner", required=True)
     create.add_argument("--archive-output", type=Path, required=True)
     create.add_argument("--metadata-output", type=Path, required=True)
+    create.add_argument("--system-manifest-output", type=Path, required=True)
     create.add_argument("--request-output", type=Path, required=True)
     validate = subparsers.add_parser("validate")
     validate.add_argument("--metadata", type=Path, required=True)
     validate.add_argument("--archive", type=Path, required=True)
+    validate.add_argument("--system-manifest", type=Path)
     return parser
 
 
@@ -166,22 +187,28 @@ def run_cli(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.command == "create":
-            artifact, request, archive = build_external_handoff_from_git(
+            artifact, system_manifest, request, archive = build_external_handoff_from_git(
                 root=args.root,
                 repository=args.repository,
                 commit_sha=args.commit_sha,
                 producer_id=args.producer_id,
+                provider=args.provider,
+                model=args.model,
+                runner=args.runner,
             )
             args.archive_output.parent.mkdir(parents=True, exist_ok=True)
             args.archive_output.write_bytes(archive)
             _write_json(args.metadata_output, artifact)
+            _write_json(args.system_manifest_output, system_manifest)
             _write_json(args.request_output, request)
             result: Mapping[str, Any] = {
                 "valid": True,
                 "artifact": artifact,
+                "system_manifest_sha256": system_manifest["manifest_sha256"],
                 "evaluation_request_sha256": request["request_sha256"],
                 "archive_output": str(args.archive_output),
                 "metadata_output": str(args.metadata_output),
+                "system_manifest_output": str(args.system_manifest_output),
                 "request_output": str(args.request_output),
                 "claim_boundary": "The generated handoff is operational scaffolding, not AGI evidence.",
             }
@@ -190,7 +217,19 @@ def run_cli(argv: list[str] | None = None) -> int:
             if not isinstance(metadata, Mapping):
                 raise ExternalSourceArtifactError("metadata must contain a JSON object")
             result = validate_git_archive_artifact(metadata, args.archive.read_bytes())
-    except (ExternalSourceArtifactError, OSError, json.JSONDecodeError) as exc:
+            if args.system_manifest is not None:
+                manifest = json.loads(args.system_manifest.read_text(encoding="utf-8"))
+                if not isinstance(manifest, Mapping):
+                    raise ExternalSourceArtifactError("system manifest must contain a JSON object")
+                manifest_result = validate_public_system_manifest(manifest)
+                if manifest_result["commit_sha"] != result["commit_sha"]:
+                    raise ExternalSourceArtifactError("system manifest commit does not match source artifact")
+                if manifest_result["artifact_sha256"] != result["artifact_sha256"]:
+                    raise ExternalSourceArtifactError(
+                        "system manifest artifact digest does not match source artifact"
+                    )
+                result = {**result, "system_manifest": manifest_result}
+    except (ExternalSourceArtifactError, ValueError, OSError, json.JSONDecodeError) as exc:
         print(json.dumps({"valid": False, "error": str(exc)}, sort_keys=True))
         return 2
     print(json.dumps(dict(result), ensure_ascii=False, sort_keys=True, indent=2))
