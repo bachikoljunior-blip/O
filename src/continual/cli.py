@@ -9,6 +9,7 @@ from agi.regression import RegressionPolicy
 
 from .candidate_regression import record_candidate_regression
 from .engine import Engine
+from .self_application import record_self_application
 
 
 def _print(value: Any) -> None:
@@ -43,6 +44,17 @@ def build_parser() -> argparse.ArgumentParser:
     feedback.add_argument("episode_id")
     feedback.add_argument("text")
 
+    self_apply = sub.add_parser(
+        "self-apply",
+        help="Persist one task-chat repository-development result as native O state.",
+    )
+    self_apply.add_argument(
+        "--record",
+        type=Path,
+        required=True,
+        help="JSON record containing outcomes, evidence, context risks and an optional Candidate.",
+    )
+
     adopt = sub.add_parser(
         "candidate-regression",
         help="Recompute protected-baseline measurements and record one scoped Candidate decision.",
@@ -61,6 +73,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = build_parser().parse_args()
+    if args.cmd == "self-apply":
+        record = json.loads(args.record.read_text(encoding="utf-8"))
+        _print(record_self_application(args.root, record))
+        return
+
     if args.cmd == "candidate-regression":
         policy = RegressionPolicy(
             maximum_protected_score_drop=args.maximum_protected_score_drop,
