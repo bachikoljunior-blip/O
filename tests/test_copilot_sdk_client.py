@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -46,8 +47,18 @@ class _FakeClient:
 def _factory(content: str | None):
     clients = []
 
-    def factory(options):
-        client = _FakeClient(options, content)
+    # github-copilot-sdk v1 makes CopilotClient.__init__ keyword-only and
+    # mode="empty" requires explicit tenant storage. Keep the fake on that
+    # same production contract so live-only construction errors cannot hide.
+    def factory(*, mode, use_logged_in_user, base_directory):
+        client = _FakeClient(
+            {
+                "mode": mode,
+                "use_logged_in_user": use_logged_in_user,
+                "base_directory": base_directory,
+            },
+            content,
+        )
         clients.append(client)
         return client
 
@@ -70,7 +81,10 @@ def test_responses_proxy_uses_fresh_tool_free_session_and_cleans_up():
     assert response.output_text == '{"answer": 4}'
     assert len(clients) == 1
     client = clients[0]
-    assert client.options == {"mode": "empty", "use_logged_in_user": False}
+    assert client.options["mode"] == "empty"
+    assert client.options["use_logged_in_user"] is False
+    assert Path(client.options["base_directory"]).name.startswith("o-copilot-")
+    assert not Path(client.options["base_directory"]).exists()
     assert client.started is True
     assert client.stopped is True
     assert client.session_kwargs == {
@@ -92,10 +106,11 @@ def test_empty_copilot_response_fails_closed_after_cleanup():
 
     assert clients[0].session.disconnected is True
     assert clients[0].stopped is True
+    assert not Path(clients[0].options["base_directory"]).exists()
 
 
 def test_default_client_requires_sdk_and_supported_auth_environment(monkeypatch):
-    monkeypatch.setattr(client_module, "CopilotClient", lambda _options: object())
+    monkeypatch.setattr(client_module, "CopilotClient", lambda **_options: object())
     monkeypatch.setattr(
         client_module,
         "PermissionHandler",
@@ -108,14 +123,15 @@ def test_default_client_requires_sdk_and_supported_auth_environment(monkeypatch)
         CopilotResponsesClient()
 
 
-def test_supported_environment_auth_allows_default_factory(monkeypatch):
-    captured = []
+def test_supported_environment_auth_is_forwarded_to_sdk_without_logged_in_user(monkeypatch):
+    clients = []
 
-    class Factory:
-        def __init__(self, options):
-            captured.append(options)
+    def factory(**options):
+        client = _FakeClient(options, '{"answer": 4}')
+        clients.append(client)
+        return client
 
-    monkeypatch.setattr(client_module, "CopilotClient", Factory)
+    monkeypatch.setattr(client_module, "CopilotClient", factory)
     monkeypatch.setattr(
         client_module,
         "PermissionHandler",
@@ -124,7 +140,16 @@ def test_supported_environment_auth_allows_default_factory(monkeypatch):
     monkeypatch.setenv("GITHUB_TOKEN", "ephemeral-actions-token")
 
     adapter = CopilotResponsesClient()
+    response = adapter.responses.create(model="gpt-test", instructions="x", input="{}")
 
-    assert adapter._permission_handler == "approve"
-    assert adapter._client_factory is Factory
-    assert captured == []
+    assert response.output_text == '{"answer": 4}'
+    options = dict(clients[0].options)
+    base_directory = options.pop("base_directory")
+    assert options == {
+        "mode": "empty",
+        "use_logged_in_user": False,
+        "github_token": "ephemeral-actions-token",
+    }
+    assert Path(base_directory).name.startswith("o-copilot-")
+    assert not Path(base_directory).exists()
+    assert clients[0].stopped is True
