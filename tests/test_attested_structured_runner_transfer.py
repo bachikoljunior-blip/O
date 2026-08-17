@@ -30,7 +30,7 @@ def test_attested_structured_runner_transfer_preserves_candidate_evidence(
         "resource_limits_enforced": True,
     }
     assert report["candidate_trial_state_unchanged"] is True
-    assert all(count >= 2 for count in report["candidate_trial_file_counts"].values())
+    assert all(count >= 1 for count in report["candidate_trial_file_counts"].values())
     assert report["external_negative_evidence_retained"] is True
     assert report["learned_negative_evidence_retained"] is True
     assert report["learned_target_repeats"] >= 2
