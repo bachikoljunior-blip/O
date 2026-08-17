@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from copy import deepcopy
 from functools import wraps
 from pathlib import Path
@@ -8,6 +9,7 @@ from typing import Any, Callable, Mapping
 from .store import Store
 
 
+_SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$")
 _CONTEXT_BOOLEAN_FIELDS = (
     "logical_reset_used",
     "fresh_execution_used",
@@ -20,6 +22,14 @@ def _required_text(record: Mapping[str, Any], key: str, error_type: type[ValueEr
     if not isinstance(value, str) or not value.strip():
         raise error_type(f"{key} must be a non-empty string")
     return value.strip()
+
+
+def _safe_id(value: Any, field: str, error_type: type[ValueError]) -> str:
+    if not isinstance(value, str) or not _SAFE_ID.fullmatch(value):
+        raise error_type(
+            f"{field} must contain only letters, digits, '.', '_' or '-' and be 3-128 characters"
+        )
+    return value
 
 
 def _assert_context_booleans(
@@ -44,24 +54,25 @@ def _assert_unclaimed_native_paths(
     """Prevent a self-application record from overwriting unrelated native O state."""
 
     store = Store(root)
-    execution_id = _required_text(record, "execution_id", error_type)
+    execution_id = _safe_id(
+        _required_text(record, "execution_id", error_type),
+        "execution_id",
+        error_type,
+    )
     run_id = record.get("run_id")
     if run_id is None:
         run_id = f"run-self-{store.stable_digest(execution_id, length=20)}"
-    if not isinstance(run_id, str) or not run_id:
-        raise error_type("run_id must be a non-empty string")
+    run_id = _safe_id(run_id, "run_id", error_type)
 
     episode_id = record.get("episode_id")
     if episode_id is None:
         episode_id = f"episode-{run_id.removeprefix('run-')}"
-    if not isinstance(episode_id, str) or not episode_id:
-        raise error_type("episode_id must be a non-empty string")
+    episode_id = _safe_id(episode_id, "episode_id", error_type)
 
     evidence_id = record.get("evidence_id")
     if evidence_id is None:
         evidence_id = f"self-application-{store.stable_digest(execution_id, length=20)}"
-    if not isinstance(evidence_id, str) or not evidence_id:
-        raise error_type("evidence_id must be a non-empty string")
+    evidence_id = _safe_id(evidence_id, "evidence_id", error_type)
 
     run_dir = store.run_dir(run_id)
     invocation_path = run_dir / "invocations" / "self-application.json"
