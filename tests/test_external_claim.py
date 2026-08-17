@@ -17,6 +17,7 @@ from agi.external_provenance import (
     _L,
     _encode_point,
     _scalar_multiply,
+    sha256_json,
 )
 
 
@@ -43,6 +44,8 @@ def _fixtures(
     attestation_producer: str = "candidate-system",
     request_artifact: str = "33" * 32,
     attestation_artifact: str = "33" * 32,
+    include_observed_manifest: bool = True,
+    observed_manifest: str = "44" * 32,
 ):
     seed = b"E" * 32
     challenge = ExternalChallenge(
@@ -62,6 +65,12 @@ def _fixtures(
     attestations = []
     public_key_hex = ""
     for index, criterion in enumerate(CRITERION_KEYS, start=1):
+        metadata = {
+            "runner": "independent",
+            "evaluation_request_sha256": request["request_sha256"],
+        }
+        if include_observed_manifest:
+            metadata["observed_system_manifest_sha256"] = observed_manifest
         unsigned = ExternalAttestation(
             schema_version=1,
             criterion=criterion,
@@ -80,10 +89,7 @@ def _fixtures(
             challenge_nonce=challenge.nonce,
             evaluated_at="2026-08-16T09:30:00+00:00",
             repeat_index=0,
-            metadata={
-                "runner": "independent",
-                "evaluation_request_sha256": request["request_sha256"],
-            },
+            metadata=metadata,
             signature_algorithm="ed25519",
             signature_hex="00" * 64,
         )
@@ -148,6 +154,7 @@ def test_clean_signed_external_ledger_reaches_six_criterion_gate_with_explicit_s
         and item["system_repository"] == "example/system"
         and item["artifact_sha256"] == "33" * 32
         and item["system_manifest_sha256"] == "44" * 32
+        and item["observed_system_manifest_sha256"] == "44" * 32
         for item in report["external_attestations"]
     )
 
@@ -266,7 +273,7 @@ def test_request_without_runtime_manifest_binding_fails_closed() -> None:
     ledger, registry = _fixtures()
     request = ledger["evaluation_requests"][0]
     request["subject"].pop("system_manifest_sha256")
-    request["request_sha256"] = __import__("agi.external_provenance", fromlist=["sha256_json"]).sha256_json(
+    request["request_sha256"] = sha256_json(
         {key: value for key, value in request.items() if key != "request_sha256"}
     )
 
@@ -281,6 +288,34 @@ def test_request_without_runtime_manifest_binding_fails_closed() -> None:
 
     assert report["agi_claim_supported"] is False
     assert "system_manifest_sha256" in report["error"]
+
+
+def test_valid_signed_attestation_requires_observed_runtime_manifest() -> None:
+    ledger, registry = _fixtures(include_observed_manifest=False)
+    missing = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
+    )
+    assert missing["provenance_audit"]["clean"] is True
+    assert missing["agi_claim_supported"] is False
+    assert "observed_system_manifest_sha256" in missing["error"]
+
+    ledger, registry = _fixtures(observed_manifest="55" * 32)
+    mismatch = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
+    )
+    assert mismatch["provenance_audit"]["clean"] is True
+    assert mismatch["agi_claim_supported"] is False
+    assert "observed system manifest does not match" in mismatch["error"]
 
 
 def test_valid_signature_bound_to_mismatched_request_subject_fails_closed() -> None:
@@ -344,6 +379,7 @@ def test_valid_signed_production_failure_is_preserved_and_blocks_claim() -> None
             "system_commit_sha": "ab" * 20,
             "artifact_sha256": "33" * 32,
             "system_manifest_sha256": "44" * 32,
+            "observed_system_manifest_sha256": "44" * 32,
         }
     ]
 

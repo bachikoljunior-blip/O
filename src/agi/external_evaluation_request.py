@@ -86,10 +86,11 @@ def build_external_evaluation_request(
     """Build a secret-free handoff manifest for the repository's strict external AGI gate.
 
     The request binds an exact system source commit, tracked-source artifact digest, and public
-    runtime/system manifest digest to the current conservative six-criterion policy. It does not
-    generate a hidden suite, verifier identity, challenge, signature, bridge secret, or success result;
-    those must remain under independent control. The manifest is operational scaffolding only, not
-    evidence.
+    runtime/system manifest digest to the current conservative six-criterion policy. Independently
+    signed attestations must report the runtime manifest they actually observed, allowing the claim
+    bridge to reject a producer declaration that was not the runtime under evaluation. The request does
+    not generate a hidden suite, verifier identity, challenge, signature, bridge secret, or success
+    result; those remain under independent control. This is operational scaffolding only, not evidence.
     """
 
     request: dict[str, Any] = {
@@ -123,6 +124,7 @@ def build_external_evaluation_request(
             "external_ledger_audit_required": True,
             "bridge_secret_out_of_band_required": True,
             "runtime_system_manifest_required": True,
+            "signed_observed_system_manifest_required": True,
         },
         "handoff": {
             "evaluator_must_supply": [
@@ -131,7 +133,7 @@ def build_external_evaluation_request(
                 "fresh suite-bound challenge",
                 "raw evaluation artifacts and result digests",
                 "signed production attestations with preserved failures",
-                "independent confirmation that the executed runtime matches the bound public system manifest",
+                "signed attestation metadata observed_system_manifest_sha256 identifying the runtime manifest actually observed during evaluation",
             ],
             "repository_must_not_supply": [
                 "evaluator private key",
@@ -144,9 +146,9 @@ def build_external_evaluation_request(
             "This manifest is a request for independently controlled production evaluation. It is not "
             "an attestation, a production result, or AGI evidence. A claim remains blocked until the "
             "external ledger passes provenance audit, the strict two-group quorum is met for every "
-            "criterion, the signed request remains bound to the exact source and runtime-system "
-            "manifest, and the conservative core evaluation policy passes with no unresolved blocking "
-            "production failures."
+            "criterion, each signed attestation reports the same observed runtime-system manifest bound "
+            "by the request, and the conservative core evaluation policy passes with no unresolved "
+            "blocking production failures."
         ),
     }
     validate_external_evaluation_request(request, require_digest=False)
@@ -230,6 +232,7 @@ def validate_external_evaluation_request(
         "external_ledger_audit_required": True,
         "bridge_secret_out_of_band_required": True,
         "runtime_system_manifest_required": True,
+        "signed_observed_system_manifest_required": True,
     }
     if dict(provenance) != required_provenance:
         raise ExternalEvaluationRequestError(
@@ -269,8 +272,8 @@ def validate_external_evaluation_request(
         "min_independent_groups_per_criterion": DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
         "claim_boundary": (
             "Validation proves only that this handoff request preserves the repository's strict external "
-            "evaluation requirements and binds a public runtime-system manifest. It does not prove that "
-            "any independent evaluation occurred or that the declared runtime was actually used."
+            "evaluation requirements and requires signed observed runtime identity. It does not prove "
+            "that any independent evaluation occurred or that the declared runtime was actually used."
         ),
     }
 

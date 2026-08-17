@@ -83,7 +83,8 @@ def _evaluation_request_map(ledger: Mapping[str, Any]) -> dict[str, Mapping[str,
     This additional gate makes the signed result identify the exact request that froze the system subject.
     A request digest therefore transitively binds repository, source commit, source-artifact digest,
     public runtime/system-manifest digest, producer, six-criterion policy, and the default
-    two-independent-group quorum without putting secrets in the ledger.
+    two-independent-group quorum without putting secrets in the ledger. The request must also require
+    each signed attestation to report the runtime-manifest digest independently observed by the evaluator.
     """
 
     values = ledger.get("evaluation_requests")
@@ -141,6 +142,10 @@ def _evaluation_request_map(ledger: Mapping[str, Any]) -> dict[str, Mapping[str,
         provenance = raw.get("provenance_protocol")
         if not isinstance(provenance, Mapping) or provenance.get("runtime_system_manifest_required") is not True:
             raise ExternalEvidenceError("evaluation request does not require a runtime system manifest")
+        if provenance.get("signed_observed_system_manifest_required") is not True:
+            raise ExternalEvidenceError(
+                "evaluation request does not require signed observed runtime system identity"
+            )
         digest = raw.get("request_sha256")
         if not isinstance(digest, str) or not _is_lower_hex(digest, 64):
             raise ExternalEvidenceError("evaluation request request_sha256 is missing or malformed")
@@ -177,6 +182,15 @@ def _bound_request(
     if attestation.producer != str(subject["producer_id"]):
         raise ExternalEvidenceError(
             "external attestation producer does not match its bound evaluation request"
+        )
+    observed_manifest = attestation.metadata.get("observed_system_manifest_sha256")
+    if not isinstance(observed_manifest, str) or not _is_lower_hex(observed_manifest, 64):
+        raise ExternalEvidenceError(
+            "external attestation metadata must include signed observed_system_manifest_sha256"
+        )
+    if observed_manifest != str(subject["system_manifest_sha256"]):
+        raise ExternalEvidenceError(
+            "external attestation observed system manifest does not match its bound evaluation request"
         )
     return request
 
@@ -257,12 +271,12 @@ def evaluate_external_ledger_claim(
     silently dropped. Only a clean ledger is bridged into the existing HMAC trust boundary.
     The bridge secret is supplied out of band and is never included in the returned report.
 
-    Every accepted result must additionally carry a signed ``evaluation_request_sha256`` metadata
-    field resolving to a strict request manifest stored in the ledger. The request is independently
-    revalidated here and binds the result to the exact repository commit, source artifact, public
-    runtime/system-manifest digest, producer, six-criterion policy, and default two-group quorum.
-    This prevents a valid result artifact from being silently reassigned to a different source commit,
-    model/provider/runner configuration, or evaluation handoff.
+    Every accepted result must carry signed ``evaluation_request_sha256`` and
+    ``observed_system_manifest_sha256`` metadata. The request binds exact source plus the intended public
+    runtime/system manifest; the separately signed observed digest binds what the independent evaluator
+    says it actually executed. A mismatch fails the claim closed before evidence bridging. This prevents
+    valid result artifacts from being silently reassigned across source commits, model/provider/runner
+    configurations, or evaluation handoffs.
 
     Distinct external evaluator organizations are counted from the verified public-key registry,
     not from bridge keys. The strict default requires two independent groups per criterion, and a
@@ -339,6 +353,9 @@ def evaluate_external_ledger_claim(
                     "system_commit_sha": subject["commit_sha"],
                     "artifact_sha256": subject["artifact_sha256"],
                     "system_manifest_sha256": subject["system_manifest_sha256"],
+                    "observed_system_manifest_sha256": attestation.metadata[
+                        "observed_system_manifest_sha256"
+                    ],
                 }
             )
     except ExternalEvidenceError as exc:
@@ -384,8 +401,8 @@ def evaluate_external_ledger_claim(
         ),
         "claim_boundary": (
             "This result can support a claim only when every upstream external signature, challenge, held-out status, "
-            "request-to-source-and-runtime binding, bridge trust secret, production result, and policy threshold is "
-            "independently auditable. The default quorum requires two cryptographically distinct external evaluator "
-            "groups per criterion."
+            "request-to-source-and-runtime binding, signed observed runtime identity, bridge trust secret, production "
+            "result, and policy threshold is independently auditable. The default quorum requires two "
+            "cryptographically distinct external evaluator groups per criterion."
         ),
     }
