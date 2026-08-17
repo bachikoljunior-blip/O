@@ -7,8 +7,40 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from agi.acquired_programs import execute_program
+from continual.contracted_external_tools import ContractedExternalToolRegistry
 from continual.learned_tools import LearnedToolError
 from continual.learning_engine import LearningEnabledEngine
+from continual.store import Store
+
+
+class _ForbiddenModelClient:
+    """Fail immediately if a supposedly mechanical replay tries to invoke a live model."""
+
+    model = "disabled-for-mechanical-replay"
+
+    def call(self, *_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError(
+            "materialized runtime replay unexpectedly requested live model execution"
+        )
+
+
+def _mechanical_engine(root: Path) -> LearningEnabledEngine:
+    """Construct only the stateful mechanical half of LearningEnabledEngine.
+
+    The retained-capability replay deliberately exercises the verified learned-tool dispatch path,
+    which is required to be deterministic and credential-free after Candidate materialization. Using
+    the normal constructor would eagerly create ModelClient even though this probe must never call a
+    model. Bypassing that eager dependency makes the test stricter: any accidental semantic fallback
+    hits _ForbiddenModelClient and fails immediately instead of depending on CI credentials.
+    """
+
+    resolved = root.resolve()
+    engine = object.__new__(LearningEnabledEngine)
+    engine.root = resolved
+    engine.store = Store(resolved)
+    engine.model = _ForbiddenModelClient()
+    engine._external_tool_registry = ContractedExternalToolRegistry(resolved, {})
+    return engine
 
 
 def _digest_bytes(path: Path) -> str:
@@ -94,9 +126,9 @@ def run_materialized_runtime_retention_replay(root: Path) -> dict[str, Any]:
     A materialization is useful only if runtime code can consume the committed Candidate state after
     checkout without spending another Candidate trial. This probe selects a persisted verified pure
     acquired program, establishes that the same tool is unavailable from a repository root with no
-    Candidate state, then exercises it through the real LearningEnabledEngine twice in one run and
-    once more through a newly constructed Engine. The deterministic Candidate trial files must remain
-    byte-identical throughout.
+    Candidate state, then exercises it through the real LearningEnabledEngine mechanical dispatch
+    twice in one run and once more through a newly constructed Engine. The deterministic Candidate
+    trial files must remain byte-identical throughout, and no live-model credential may be required.
     """
 
     root = root.resolve()
@@ -113,7 +145,7 @@ def run_materialized_runtime_retention_replay(root: Path) -> dict[str, Any]:
 
     with tempfile.TemporaryDirectory(prefix="agi-materialized-baseline-") as temporary:
         empty_root = Path(temporary)
-        empty_engine = LearningEnabledEngine(empty_root)
+        empty_engine = _mechanical_engine(empty_root)
         empty_run = _new_runtime_run(empty_engine)
         baseline_failed_closed = False
         try:
@@ -131,12 +163,12 @@ def run_materialized_runtime_retention_replay(root: Path) -> dict[str, Any]:
 
     trial_snapshot_before = _candidate_trial_snapshot(root, candidate_id)
 
-    first_engine = LearningEnabledEngine(root)
+    first_engine = _mechanical_engine(root)
     first_run = _new_runtime_run(first_engine)
     first = _invoke(first_engine, first_run, scope=scope, tool_id=tool_id, value=probe)
     repeated = _invoke(first_engine, first_run, scope=scope, tool_id=tool_id, value=probe)
 
-    second_engine = LearningEnabledEngine(root)
+    second_engine = _mechanical_engine(root)
     second_run = _new_runtime_run(second_engine)
     restarted = _invoke(second_engine, second_run, scope=scope, tool_id=tool_id, value=probe)
 
@@ -175,6 +207,7 @@ def run_materialized_runtime_retention_replay(root: Path) -> dict[str, Any]:
         "fresh_engine_replay_matched": restarted["result"] == first_result,
         "candidate_trial_state_unchanged": True,
         "candidate_trial_file_count": len(trial_snapshot_before),
+        "live_model_invocation_required": False,
         "execution_kind": first_result.get("execution_kind"),
         "program_kind": first_result.get("program_kind"),
         "claim_boundary": (
