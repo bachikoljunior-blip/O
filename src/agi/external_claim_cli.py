@@ -6,7 +6,10 @@ import os
 from pathlib import Path
 from typing import Any, Mapping
 
-from .external_claim import evaluate_external_ledger_claim
+from .external_claim import (
+    DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
+    evaluate_external_ledger_claim,
+)
 
 DEFAULT_SECRET_ENV = "AGI_EVIDENCE_BRIDGE_SECRET"
 
@@ -34,7 +37,15 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_SECRET_ENV,
         help=f"Environment variable containing the bridge trust secret (default: {DEFAULT_SECRET_ENV}).",
     )
-    parser.add_argument("--min-independent-groups-per-criterion", type=int, default=1)
+    parser.add_argument(
+        "--min-independent-groups-per-criterion",
+        type=int,
+        default=DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
+        help=(
+            "Minimum cryptographically distinct external evaluator groups required for every criterion "
+            f"(strict default: {DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION})."
+        ),
+    )
     parser.add_argument("--output", type=Path)
     return parser
 

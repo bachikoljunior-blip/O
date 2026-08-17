@@ -15,13 +15,21 @@ from .external_provenance import (
 )
 
 
-def _failure_result(message: str, audit: Mapping[str, Any] | None = None) -> dict[str, Any]:
+DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION = 2
+
+
+def _failure_result(
+    message: str,
+    audit: Mapping[str, Any] | None = None,
+    *,
+    required_groups: int = DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
+) -> dict[str, Any]:
     return {
         "agi_claim_supported": False,
         "provenance_audit": dict(audit or {"clean": False, "error": message}),
         "core_evaluation": None,
         "external_group_checks": {
-            key: {"passed": False, "count": 0, "required": 1, "groups": []}
+            key: {"passed": False, "count": 0, "required": required_groups, "groups": []}
             for key in CRITERION_KEYS
         },
         "evidence_records": [],
@@ -35,12 +43,19 @@ def _registry_map(registry: Mapping[str, Any]) -> dict[str, ExternalVerifier]:
     if registry.get("schema_version") != 1 or not isinstance(registry.get("verifiers"), list):
         raise ExternalEvidenceError("verifier registry must have schema_version 1 and verifiers array")
     result: dict[str, ExternalVerifier] = {}
+    public_key_groups: dict[str, str] = {}
     for raw in registry["verifiers"]:
         if not isinstance(raw, Mapping):
             raise ExternalEvidenceError("verifier entry must be an object")
         verifier = ExternalVerifier.from_mapping(raw)
         if verifier.verifier_id in result:
             raise ExternalEvidenceError(f"duplicate verifier_id: {verifier.verifier_id}")
+        previous_group = public_key_groups.get(verifier.public_key_hex)
+        if previous_group is not None and previous_group != verifier.independent_group:
+            raise ExternalEvidenceError(
+                "one verifier public key cannot represent multiple independent groups"
+            )
+        public_key_groups[verifier.public_key_hex] = verifier.independent_group
         result[verifier.verifier_id] = verifier
     return result
 
@@ -91,7 +106,7 @@ def evaluate_external_ledger_claim(
     bridge_attestor_id: str,
     bridge_secret: str,
     policy: EvaluationPolicy | None = None,
-    min_independent_groups_per_criterion: int = 1,
+    min_independent_groups_per_criterion: int = DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
 ) -> dict[str, Any]:
     """Bridge independently signed production results into the six-criterion claim gate.
 
@@ -101,22 +116,38 @@ def evaluate_external_ledger_claim(
     The bridge secret is supplied out of band and is never included in the returned report.
 
     Distinct external evaluator organizations are counted from the verified public-key registry,
-    not from bridge keys. This prevents one bridge identity from fabricating independent labs.
+    not from bridge keys. The strict default requires two independent groups per criterion, and a
+    single Ed25519 public key cannot be relabeled as multiple independent groups. Callers may raise
+    the quorum further for stronger production policies; lowering it is an explicit non-default
+    policy choice and must never be mistaken for the repository's strict AGI claim gate.
     """
 
-    if not isinstance(bridge_attestor_id, str) or not bridge_attestor_id.strip():
-        return _failure_result("bridge_attestor_id must be non-empty")
-    if not isinstance(bridge_secret, str) or not bridge_secret:
-        return _failure_result("bridge_secret must be non-empty")
     if min_independent_groups_per_criterion < 1:
         raise ValueError("min_independent_groups_per_criterion must be at least 1")
+    if not isinstance(bridge_attestor_id, str) or not bridge_attestor_id.strip():
+        return _failure_result(
+            "bridge_attestor_id must be non-empty",
+            required_groups=min_independent_groups_per_criterion,
+        )
+    if not isinstance(bridge_secret, str) or not bridge_secret:
+        return _failure_result(
+            "bridge_secret must be non-empty",
+            required_groups=min_independent_groups_per_criterion,
+        )
 
     try:
         audit = audit_external_ledger(ledger, registry)
     except ExternalEvidenceError as exc:
-        return _failure_result(str(exc))
+        return _failure_result(
+            str(exc),
+            required_groups=min_independent_groups_per_criterion,
+        )
     if not audit.get("clean"):
-        return _failure_result("external provenance audit is not clean", audit)
+        return _failure_result(
+            "external provenance audit is not clean",
+            audit,
+            required_groups=min_independent_groups_per_criterion,
+        )
 
     try:
         verifiers = _registry_map(registry)
@@ -153,7 +184,11 @@ def evaluate_external_ledger_claim(
                 }
             )
     except ExternalEvidenceError as exc:
-        return _failure_result(str(exc), audit)
+        return _failure_result(
+            str(exc),
+            audit,
+            required_groups=min_independent_groups_per_criterion,
+        )
 
     selected_policy = policy or EvaluationPolicy()
     core = evaluate_evidence(
@@ -191,6 +226,7 @@ def evaluate_external_ledger_claim(
         ),
         "claim_boundary": (
             "This result can support a claim only when every upstream external signature, challenge, held-out status, "
-            "bridge trust secret, production result, and policy threshold is independently auditable."
+            "bridge trust secret, production result, and policy threshold is independently auditable. The default "
+            "quorum requires two cryptographically distinct external evaluator groups per criterion."
         ),
     }

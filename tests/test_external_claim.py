@@ -4,7 +4,10 @@ import hashlib
 from dataclasses import asdict, replace
 
 from agi.evaluation import CRITERION_KEYS, EvaluationPolicy
-from agi.external_claim import evaluate_external_ledger_claim
+from agi.external_claim import (
+    DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
+    evaluate_external_ledger_claim,
+)
 from agi.external_provenance import (
     ExternalAttestation,
     ExternalChallenge,
@@ -100,7 +103,7 @@ def _minimal_policy() -> EvaluationPolicy:
     )
 
 
-def test_clean_signed_external_ledger_reaches_six_criterion_gate() -> None:
+def test_clean_signed_external_ledger_reaches_six_criterion_gate_with_explicit_single_group_policy() -> None:
     ledger, registry = _fixtures()
 
     report = evaluate_external_ledger_claim(
@@ -109,6 +112,7 @@ def test_clean_signed_external_ledger_reaches_six_criterion_gate() -> None:
         bridge_attestor_id="evidence-bridge",
         bridge_secret="test-secret",
         policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
     )
 
     assert report["provenance_audit"]["clean"] is True
@@ -120,6 +124,53 @@ def test_clean_signed_external_ledger_reaches_six_criterion_gate() -> None:
         check["groups"] == ["independent-lab-a"]
         for check in report["external_group_checks"].values()
     )
+
+
+def test_strict_default_requires_two_independent_groups_per_criterion() -> None:
+    ledger, registry = _fixtures()
+
+    report = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+    )
+
+    assert DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION == 2
+    assert report["provenance_audit"]["clean"] is True
+    assert report["core_evaluation"]["agi_claim_supported"] is True
+    assert report["agi_claim_supported"] is False
+    assert set(report["missing"]) == set(CRITERION_KEYS)
+    assert all(
+        check == {
+            "passed": False,
+            "count": 1,
+            "required": 2,
+            "groups": ["independent-lab-a"],
+        }
+        for check in report["external_group_checks"].values()
+    )
+
+
+def test_one_public_key_cannot_be_relabelled_as_multiple_independent_groups() -> None:
+    ledger, registry = _fixtures()
+    copied = dict(registry["verifiers"][0])
+    copied["verifier_id"] = "lab-b-key-1"
+    copied["independent_group"] = "independent-lab-b"
+    registry["verifiers"].append(copied)
+
+    report = evaluate_external_ledger_claim(
+        ledger,
+        registry,
+        bridge_attestor_id="evidence-bridge",
+        bridge_secret="test-secret",
+        policy=_minimal_policy(),
+    )
+
+    assert report["agi_claim_supported"] is False
+    assert report["core_evaluation"] is None
+    assert "public key cannot represent multiple independent groups" in report["error"]
 
 
 def test_invalid_signature_fails_closed_before_core_claim_evaluation() -> None:
@@ -149,6 +200,7 @@ def test_valid_signed_production_failure_is_preserved_and_blocks_claim() -> None
         bridge_attestor_id="evidence-bridge",
         bridge_secret="test-secret",
         policy=_minimal_policy(),
+        min_independent_groups_per_criterion=1,
     )
 
     assert report["provenance_audit"]["clean"] is True
