@@ -42,8 +42,8 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION,
         help=(
-            "Minimum cryptographically distinct external evaluator groups required for every criterion "
-            f"(strict default: {DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION})."
+            "Minimum cryptographically distinct external evaluator groups required for every criterion. "
+            f"The strict AGI claim CLI cannot lower this below {DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION}."
         ),
     )
     parser.add_argument("--output", type=Path)
@@ -67,7 +67,12 @@ def run_cli(
     environment = os.environ if environ is None else environ
     secret = environment.get(args.bridge_secret_env, "")
     try:
-        if not secret:
+        if args.min_independent_groups_per_criterion < DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION:
+            report = _failure(
+                "strict AGI claim quorum cannot be lowered below "
+                f"{DEFAULT_MIN_INDEPENDENT_GROUPS_PER_CRITERION} independent groups per criterion"
+            )
+        elif not secret:
             report = _failure(
                 f"required bridge secret environment variable is missing: {args.bridge_secret_env}"
             )
