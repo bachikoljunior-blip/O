@@ -33,5 +33,6 @@ def test_attested_structured_runner_transfer_preserves_candidate_evidence(
     assert all(count >= 1 for count in report["candidate_trial_file_counts"].values())
     assert report["external_negative_evidence_retained"] is True
     assert report["learned_negative_evidence_retained"] is True
-    assert report["learned_target_repeats"] >= 2
+    target_task_id = report["learned_target_task_id"]
+    assert report["learned_target_repeats"][target_task_id] >= 2
     assert report["live_model_invocation_required"] is False
