@@ -6,7 +6,7 @@ import math
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping, Sequence
 
-_ALLOWED_DOMAINS = {"numeric", "string", "sequence", "boolean", "object"}
+_ALLOWED_DOMAINS = ("numeric", "string", "sequence", "boolean", "object")
 _UNARY_SIGNATURES = {
     "neg": ("numeric", "numeric"),
     "abs": ("numeric", "numeric"),
@@ -389,16 +389,9 @@ def _check_runtime_value(value: Any, domain: str, max_output_length: int) -> Any
     elif domain == "string" and len(value) > max_output_length:
         raise AcquiredProgramError("program string output exceeds runtime bound")
     elif domain == "sequence":
-        _validate_json_tree(value)
-        encoded = json.dumps(
-            value,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-            allow_nan=False,
-        ).encode("utf-8")
-        if len(encoded) > max_output_length:
+        if len(value) > max_output_length:
             raise AcquiredProgramError("program sequence output exceeds runtime bound")
+        _validate_json_tree(value)
     elif domain == "object":
         _validate_json_tree(value)
         encoded = json.dumps(
@@ -759,7 +752,7 @@ def synthesize_program(
             )
             if match:
                 return match
-            for domain in sorted(_ALLOWED_DOMAINS):
+            for domain in _ALLOWED_DOMAINS:
                 match = add(
                     2,
                     domain,
@@ -813,7 +806,7 @@ def synthesize_program(
                     )
                     if match:
                         return match
-                    for domain in sorted(_ALLOWED_DOMAINS):
+                    for domain in _ALLOWED_DOMAINS:
                         match = add(
                             cost,
                             domain,
