@@ -13,13 +13,13 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-18T06:06:55+09:00",
   "started_at": "2026-08-18T06:06:55+09:00",
-  "heartbeat_at": "2026-08-18T06:14:20+09:00",
-  "last_progress_at": "2026-08-18T06:14:16+09:00",
+  "heartbeat_at": "2026-08-18T06:19:54+09:00",
+  "last_progress_at": "2026-08-18T06:19:54+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260818T060655JST",
   "session_id": "same-task-chat-watchdog-recovery-20260818T060655JST",
   "active_run_id": "run-self-applied-live-copilot-response-recovery-20260818-060655",
-  "current_work_unit": "validate corrected PR 159 exact head e157866e5e1e319fade4bdf9d1f504a79782fde0 after retaining failed head 753d729bb0a2df45169ca73b887b4d916e805865; merge only a passing unchanged head, then launch a fresh bounded Copilot campaign and continue to the next falsifiable capability/retention milestone",
+  "current_work_unit": "retain fresh workflow 32070352400 core JSONDecodeError as negative evidence; add exactly one bounded strict-JSON retry to CopilotBenchmarkAgent without changing parser, benchmark scoring, task expectations, state/procedure validation, or the external AGI gate; exact-head CI, merge only if unchanged head passes, then launch another fresh bounded Copilot campaign and continue",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -30,12 +30,12 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "70ca09d3d9c7fb4aa95756c7162faa5862a99eff",
-  "latest_main_sha_before_heartbeat": "3b103d828454c2d6c7ec961c9c58df8856b14ba7",
-  "unmerged_pr": 159,
-  "unmerged_branch": "agi/copilot-json-action-recovery",
-  "unmerged_head_sha": "e157866e5e1e319fade4bdf9d1f504a79782fde0",
-  "unmerged_ci_run": 32070051811,
-  "unmerged_ci_status": "queued_or_in_progress",
+  "latest_main_sha_before_heartbeat": "5c63f3084be4b08553f8f6c0e469d9f7960a90c4",
+  "unmerged_pr": null,
+  "unmerged_branch": null,
+  "unmerged_head_sha": null,
+  "unmerged_ci_run": null,
+  "unmerged_ci_status": "none",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260818T045509JST",
     "session_id": "same-task-chat-watchdog-recovery-20260818T045509JST",
@@ -61,7 +61,8 @@
   "recent_completed_units": [
     {"pr": 155, "head_sha": "d3d222e3526dc3af336f3fd1890565eb7a65700e", "ci_run": 32054713002, "ci_conclusion": "success", "merge_sha": "f8f6925e3138589d36650b15e55d23648adabbfc"},
     {"pr": 156, "head_sha": "5fe42e1cbc52205c7286383fdd954b3fbd168b08", "ci_run": 32058751513, "ci_conclusion": "success", "merge_sha": "d644272040b40db4b3a02c2a2bf205d0da069ed1"},
-    {"pr": 158, "head_sha": "1b7e4c0fc8bb5d850d2e4b15abd3952085edd47e", "ci_run": 32063352590, "ci_conclusion": "success", "merge_sha": "1cc974800dc6b3887261bb3ebad178ee9613de1c"}
+    {"pr": 158, "head_sha": "1b7e4c0fc8bb5d850d2e4b15abd3952085edd47e", "ci_run": 32063352590, "ci_conclusion": "success", "merge_sha": "1cc974800dc6b3887261bb3ebad178ee9613de1c"},
+    {"pr": 159, "head_sha": "e157866e5e1e319fade4bdf9d1f504a79782fde0", "ci_run": 32070051811, "ci_conclusion": "success", "merge_sha": "5e0c60bfcf12880c6ef9f0b75f167095b26b5034"}
   ],
   "live_campaign": {
     "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
@@ -71,13 +72,13 @@
     "runs": 1,
     "longhorizon_instances": 1,
     "last_attempt": {
-      "request_commit": "1eb1158c70c968100bc26e43ea415574a8949a3f",
-      "workflow_run": 32063661025,
-      "workflow_job": 95490474245,
+      "request_commit": "9be2e834046b4b0bb710d54e91ba71b16792328a",
+      "workflow_run": 32070352400,
+      "workflow_job": 95511934107,
       "status": "completed",
       "conclusion": "failure",
-      "artifact_id": 9299447663,
-      "artifact_sha256": "093c6592080cb7d93356d13bea676a915ae5b730f0b61fd96b017814f405b6f8"
+      "artifact_id": null,
+      "failure_stage": "core_campaign_before_report_write"
     },
     "evidence_class": "internal_development",
     "admissible_for_agi_claim": false
@@ -87,7 +88,8 @@
     {"workflow_run": 32057684108, "workflow_job": 95471486722, "request_commit": "ecaaa2149896024035b45cb51996d5e8022f188c", "conclusion": "failure", "failure": "first live Copilot campaign reached github-copilot-sdk 1.0.11 and failed at positional CopilotClient construction before model execution; exact traceback retained"},
     {"workflow_run": 32059066667, "workflow_job": 95475892643, "request_commit": "8c4bea22d9354d8318d581ca25a9141b90228787", "conclusion": "failure", "failure": "post-PR156 live Copilot campaign reached real model interaction but strict benchmark validation rejected a non-object state_update and/or procedure_update; no report artifact existed before failure; exact traceback retained in Actions logs"},
     {"workflow_run": 32063661025, "workflow_job": 95490474245, "request_commit": "1eb1158c70c968100bc26e43ea415574a8949a3f", "conclusion": "failure", "failure": "after PR158, the real Copilot campaign produced mostly correct core answers but core self-improvement diagnosis returned a structured object instead of the exact expected list, while multiple workspace tasks performed correct file actions and then failed with JSONDecodeError/final_action=false; artifact 9299447663 retained for root-cause analysis"},
-    {"pr": 159, "head_sha": "753d729bb0a2df45169ca73b887b4d916e805865", "ci_run": 32069768798, "conclusion": "failure", "failure": "300 tests passed and one newly added assertion failed because the test searched for the literal phrase 'previous response' while the retry instruction used 'immediately preceding model response'; implementation was not merged and the corrected test head is under exact-head CI"}
+    {"pr": 159, "head_sha": "753d729bb0a2df45169ca73b887b4d916e805865", "ci_run": 32069768798, "conclusion": "failure", "failure": "300 tests passed and one newly added assertion failed because the test searched for a different literal wording than the retry instruction; implementation was not merged; corrected exact head later passed"},
+    {"workflow_run": 32070352400, "workflow_job": 95511934107, "request_commit": "9be2e834046b4b0bb710d54e91ba71b16792328a", "conclusion": "failure", "failure": "fresh post-PR159 Copilot gpt-5.4 campaign failed in CopilotBenchmarkAgent core response parsing with JSONDecodeError at line 1 column 1 before any report artifact was written; workspace retry was therefore never reached; strict parser and scoring remained unchanged"}
   ],
   "rule": "The hourly trigger is only a watchdog. A recent running heartbeat suppresses duplicate work. A stale or released lease may be recovered. Hourly boundaries and derived stops are audit-only and never terminate an active execution. Every O-development work unit is persisted as native self-application state; internal self-produced evidence never satisfies the strict external AGI gate."
 }
