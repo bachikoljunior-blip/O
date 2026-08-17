@@ -8,6 +8,22 @@ The existing `EvidenceRecord` claim gate requires production-tier results, repea
 
 The external signature is bound to the criterion, pass/fail result, source kind, task, domain, run, system producer, verifier identity, hidden-suite identifier/version/hash, artifact hash, result hash, a fresh challenge nonce, evaluation time, repeat index, and metadata.
 
+## Secret-free evaluator handoff
+
+Before contacting an external evaluator, create a machine-readable request bound to the exact system commit and artifact digest:
+
+```sh
+agi-external-request create \
+  --repository owner/repository \
+  --commit-sha <40-hex-commit> \
+  --artifact-sha256 <64-hex-artifact-digest> \
+  --producer-id <system-producer-id> \
+  --output external-evaluation-request.json
+agi-external-request validate external-evaluation-request.json
+```
+
+The request freezes the repository's strict six-criterion core policy and the default requirement for two cryptographically distinct external evaluator groups per criterion. Validation fails closed if those requirements are weakened, if the exact subject binding is malformed or tampered with, or if a private signing key, bridge secret, hidden seed, or expected answer is embedded. The request deliberately does not create an evaluator, hidden suite, challenge, result, signature, or production evidence; those remain independently controlled.
+
 ## Evidence flow
 
 1. **Register an independent verifier.** Add only a vetted verifier identity and Ed25519 public key to `evidence/external_verifiers.json`. Private keys stay with the independent evaluator. Do not register the system-under-test as its own verifier.
