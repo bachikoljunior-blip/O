@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "episode_id": "episode-self-applied-strict-claim-quorum-20260818-005902",
+  "source_run_id": "run-self-applied-strict-claim-quorum-20260818-005902",
+  "execution_id": "o-agi-watchdog-recovery-20260818T005019JST",
+  "mode": "task-chat-model-self-application",
+  "task": "Harden the strict external AGI claim path after PR 146 so a weakened evaluator quorum cannot be presented through the production CLI as a valid strict claim configuration.",
+  "objective": "Fail closed when the strict claim CLI is asked to use fewer than two independent evaluator groups per criterion and preserve the result as native O self-application state.",
+  "outcome": "completed",
+  "task_verdict": "PASS",
+  "claim_tier": "internal_development",
+  "external_claim_admissible": false,
+  "executor": {
+    "kind": "task_chat_model",
+    "model": "GPT-5.6 Sol",
+    "model_verified": true,
+    "verification_source": "platform runtime system identity",
+    "role": "O semantic execution, implementation, falsification, and validation stage"
+  },
+  "success_conditions": [
+    "A CLI request for one independent evaluator group per criterion fails closed before reading evidence.",
+    "The default strict quorum remains two independent groups per criterion.",
+    "Existing valid strict-path behavior and full repository tests remain passing.",
+    "The change is merged only after exact-head CI success.",
+    "The resulting self-application record remains internal and inadmissible for an AGI claim."
+  ],
+  "actions": [
+    "Reviewed the production external claim interface and found a caller-controlled lower quorum argument.",
+    "Implemented a strict lower bound at the CLI boundary and clarified help text.",
+    "Added a regression test using missing evidence files to prove the weakened quorum is rejected before any evidence read.",
+    "Verified exact head 8dc4cebfe31f3689230b7d3b5071c63762f47438 passed full CI run 32043824282 before merge.",
+    "Merged PR 148 as f17487cdd363c19a64fca86aadfc1d52ad0df19c."
+  ],
+  "decisions": [
+    "Keep the production strict CLI fail-closed even though lower-level library calls may still be used explicitly for non-default development experiments.",
+    "Do not reinterpret the hardening as external evidence or capability proof.",
+    "Continue after this milestone to reduce external-evaluation friction and capability failure risk rather than stopping on merge."
+  ],
+  "observations": [
+    "The prior CLI accepted --min-independent-groups-per-criterion=1 despite describing itself as the strict AGI claim gate.",
+    "The corrected CLI now blocks that weakening before touching the ledger or registry.",
+    "The independent production evidence ledger remains insufficient for an AGI claim."
+  ],
+  "results": [
+    "PR #148",
+    "head 8dc4cebfe31f3689230b7d3b5071c63762f47438",
+    "CI run 32043824282",
+    "merge f17487cdd363c19a64fca86aadfc1d52ad0df19c"
+  ],
+  "evidence_refs": [
+    ".continual/evidence/self-application/self-applied-strict-claim-quorum-20260818-005902.json",
+    "PR #148",
+    "head 8dc4cebfe31f3689230b7d3b5071c63762f47438",
+    "CI run 32043824282",
+    "merge f17487cdd363c19a64fca86aadfc1d52ad0df19c"
+  ],
+  "candidate_refs": [],
+  "claims": [
+    "The user-facing strict claim CLI cannot lower the external evaluator quorum below two independent groups per criterion.",
+    "AGI remains unverified because no strict independent production evidence quorum has passed."
+  ],
+  "failures": [],
+  "unknowns": [
+    "Whether independent external evaluators will complete the strict protocol remains unknown.",
+    "Whether the lower-level library should eventually separate development-policy support from the AGI-positive field more explicitly remains a review item."
+  ],
+  "unresolved": [
+    "Build a reproducible evaluator handoff that derives an exact source artifact digest from a frozen commit instead of relying on an opaque caller-supplied artifact hash.",
+    "Obtain genuinely independent signed production evidence across all six criteria and both required evaluator groups.",
+    "Continue capability and retention work that reduces the probability of external evaluation failure."
+  ],
+  "context": {
+    "boundary": "development",
+    "risk_signals": [],
+    "logical_reset_used": true,
+    "fresh_execution_used": false,
+    "independent_execution_used": false,
+    "boundary_satisfied": true,
+    "physical_fresh_context_fixed_requirement": false,
+    "repository_latest_main_is_durable_state": true,
+    "decision": {
+      "boundary": "development",
+      "mode": "reuse_current_context",
+      "logical_reset_required": false,
+      "fresh_execution_required": false,
+      "independent_execution_required": false,
+      "persist_before_switch": false,
+      "reason_codes": ["no_contamination_signal"]
+    }
+  }
+}
