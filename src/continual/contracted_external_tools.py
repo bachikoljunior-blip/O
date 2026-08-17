@@ -39,6 +39,12 @@ def _json_sha256(value: Any) -> str:
     return hashlib.sha256(_json_bytes(value)).hexdigest()
 
 
+def _detached_json(value: Any) -> Any:
+    """Return a canonical JSON copy so host adapters cannot mutate caller/contract objects."""
+
+    return json.loads(_json_bytes(value).decode("utf-8"))
+
+
 def _matches_domain(domain: str, value: Any) -> bool:
     if domain == "string":
         return isinstance(value, str)
@@ -165,6 +171,7 @@ class ExternalToolContract:
             "adapter_sha256": self.adapter_sha256,
             "binding_challenge_count": len(self.binding_challenges),
             "behavior_binding_required": self.behavior_binding_required,
+            "input_isolation": "canonical-json-copy",
             "description": self.description,
         }
 
@@ -190,8 +197,9 @@ class ContractedExternalToolRegistry:
     committed challenge inputs and compares canonical output hashes before exposing it. Legacy
     contracts without challenges remain readable evidence but fail closed and cannot execute. Only
     effect-free adapters are executable, and every registry instance enforces exact scope, typed I/O,
-    call count, and JSON byte limits. Shell, network, filesystem, subprocess, and arbitrary generated-
-    code effects therefore do not become available merely because a Candidate requests them.
+    call count, JSON byte limits, and canonical JSON input isolation. Shell, network, filesystem,
+    subprocess, and arbitrary generated-code effects therefore do not become available merely because
+    a Candidate requests them; caller-owned JSON objects are never handed directly to host adapters.
     """
 
     def __init__(self, root: Path, adapters: Mapping[str, ExternalToolAdapter]) -> None:
@@ -232,7 +240,7 @@ class ContractedExternalToolRegistry:
             )
         for challenge_input, expected_sha256 in contract.binding_challenges:
             try:
-                output = adapter.function(challenge_input)
+                output = adapter.function(_detached_json(challenge_input))
             except Exception as exc:
                 raise ContractedExternalToolError(
                     "external adapter failed behavior-binding challenge"
@@ -298,7 +306,7 @@ class ContractedExternalToolRegistry:
         self._calls[key] = used + 1
         adapter = self.adapters[tool_id]
         try:
-            output = adapter.function(value)
+            output = adapter.function(_detached_json(value))
         except Exception as exc:
             raise ContractedExternalToolError("external adapter execution failed") from exc
         if not _matches_domain(contract.output_domain, output):
