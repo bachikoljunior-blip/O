@@ -1,0 +1,41 @@
+{
+  "component": "execute",
+  "actions": [
+    "Recovered stale single-execution lease from latest main after the prior heartbeat exceeded 900 seconds.",
+    "Verified PR 210 exact head 745e7b26b343f52f8dc4c4337b7d8d4707d46241 had completed CI 32175508855 successfully and remained mergeable.",
+    "Merged only that unchanged PR 210 head as ebed78d5fb6e3a683743a1b8b16d782e894c2809.",
+    "Retargeted PR 211 to main and reconstructed its type-pair delta on verified PR 210 main to avoid inheriting an earlier failed base.",
+    "Retained PR 211 CI 32179940203 when it falsified a hard-coded sequence->sequence test assumption while the campaign itself returned five observed valid pairs.",
+    "Corrected the test to validate the observed pair registry instead of imposing a fixed pair family and started fresh exact-head CI 32180933796 on head 2d31154aa853eb3d65d454e0903f5d9d6beec404.",
+    "Staged PR 212 as a non-conflicting next milestone that selects hidden targets from the full runtime-admissible behavior frontier without fixed per-domain/per-pair quotas."
+  ],
+  "decisions": [
+    "Do not weaken runtime budgets, held-back challenge shapes, regression gates, or the strict external AGI gate.",
+    "Treat the missing sequence->sequence pair as valid observation rather than force the graph to match a repository-authored expectation.",
+    "Keep PR 212 unmerged until PR 211 dependency is settled and fresh exact-head validation is repeated on the resulting main."
+  ],
+  "observations": [
+    "PR 210 final exact head passed full CI and was integrated unchanged.",
+    "PR 211 campaign returned observed pairs numeric->numeric, numeric->object, sequence->numeric, sequence->object, and string->string before the over-specific assertion failed.",
+    "Live Copilot validation remains externally blocked by monthly quota exhaustion; no semantic regression should be inferred from that provider failure."
+  ],
+  "failures": [
+    {"pr": 211, "head_sha": "97acb878e1fb22ecaff708713a6e323082a67be2", "ci_run": 32179940203, "finding": "360 tests passed; one test failed because it required a fixed sequence->sequence pair not present in the observed verified graph."}
+  ],
+  "unknowns": [
+    "Whether corrected PR 211 head 2d31154aa853eb3d65d454e0903f5d9d6beec404 will pass all full CI stages.",
+    "Whether the staged behavior-frontier milestone will expose a new runtime, ambiguity, or control failure after PR 211 is settled."
+  ],
+  "artifacts": [
+    "agi/HOURLY_EXECUTION_STATE.json",
+    "agi/CONTINUATION.json",
+    "PR 210 merge ebed78d5fb6e3a683743a1b8b16d782e894c2809",
+    "PR 211 head 2d31154aa853eb3d65d454e0903f5d9d6beec404",
+    "PR 212 head 2a49d3a6c8fc0021e83d6e34f131c376cd85a7cc"
+  ],
+  "validation": [
+    {"kind": "github_actions", "run": 32175508855, "head_sha": "745e7b26b343f52f8dc4c4337b7d8d4707d46241", "conclusion": "success"},
+    {"kind": "github_actions", "run": 32179940203, "head_sha": "97acb878e1fb22ecaff708713a6e323082a67be2", "conclusion": "failure", "retained": true},
+    {"kind": "github_actions", "run": 32180933796, "head_sha": "2d31154aa853eb3d65d454e0903f5d9d6beec404", "status": "in_progress"}
+  ]
+}

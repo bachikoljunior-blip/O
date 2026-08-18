@@ -1,0 +1,1 @@
+Resume unfinished AGI development from repository latest main only; avoid duplicate execution, preserve failed evidence, integrate only exact-head validated changes, and continue to the next falsifiable milestone while the strict external AGI gate remains unmet.
