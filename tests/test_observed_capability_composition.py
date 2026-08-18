@@ -15,7 +15,14 @@ def test_fresh_planner_generates_composed_target_from_observed_library_without_r
     )
 
     assert report["passed"] is True
-    assert report["campaign_kind"] == "observed-capability-composition-v1"
+    assert report["campaign_kind"] == "observed-capability-composition-v2"
+    assert report["prerequisite_seed_search_attempts"] >= 2
+    assert report["rejected_prerequisite_seed_count"] >= 1
+    assert report["rejected_prerequisite_seeds"]
+    first_rejected = report["rejected_prerequisite_seeds"][0]
+    assert first_rejected["seed"] == "observed-capability-composition-seed:capability-base"
+    assert first_rejected["unsupported_parameters"]["offset"] == 6
+    assert "outside" in first_rejected["reason"]
     assert report["caller_supplied_candidate_ids"] is False
     assert report["caller_named_capability_roles"] is False
     assert report["planner_used_candidate_names"] is False
