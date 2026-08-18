@@ -10,15 +10,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T02:08:07+09:00",
   "started_at": "2026-08-19T02:08:07+09:00",
-  "heartbeat_at": "2026-08-19T02:13:23+09:00",
-  "last_progress_at": "2026-08-19T02:13:15+09:00",
+  "heartbeat_at": "2026-08-19T02:20:55+09:00",
+  "last_progress_at": "2026-08-19T02:20:32+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T020807JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T020807JST",
   "active_run_id": "run-self-applied-sequence-gap-recovery-20260819-020807",
-  "current_work_unit": "Recovered stale execution from latest main only. PR 208 exact head 340c65ab5267a550924f7a5a68bca25be4e27ab5 had already passed CI 32160295800 and was re-read unchanged, then merged as 219941f888b203837a1e739813999d084f1a8ce4. Immediately advanced to observed-gap domain selection: PR 209 head d9d736f8ff13d66b24082fb2a9528098aae4e6bc precommits numeric/string/sequence target schedules before support checks, selects the next domain from observed fail-closed counts rather than fixed order, learns one exact-scope target transactionally, retains prior three-domain behavior after fresh restart, and leaves an untouched control gap fail-closed. Exact-head CI has been requested by PR creation and must pass before integration.",
+  "current_work_unit": "PR 208 exact head 340c65ab5267a550924f7a5a68bca25be4e27ab5 passed CI 32160295800 and merged as 219941f888b203837a1e739813999d084f1a8ce4. PR 209 initial head d9d736f8ff13d66b24082fb2a9528098aae4e6bc failed CI 32164449848 during pytest collection because _string_retention_examples was imported from the wrong module; failed head retained and not merged. Corrected PR 209 head 21fe92c65e0b30897c715d4f5e20faa61737d7dc is under exact-head CI 32164610937. While that non-conflicting CI runs, stacked PR 210 head b30fd6071bdd52fca2560028a78435d49df9936b derives target-generator source domains from the observed verified skill graph and explicitly adds string-origin target generation; its CI 32165090975 is queued. Do not merge PR 210 before PR 209 is settled and the stacked change is reconstructed/revalidated on resulting main.",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -29,13 +29,22 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "4ee29e4bae7b3e52a91d93cbe497bb441257d2aa",
-  "latest_main_sha_before_heartbeat": "219941f888b203837a1e739813999d084f1a8ce4",
+  "latest_main_sha_before_heartbeat": "a4acc75e45d43fd06a7f14393adf555b68a3dc01",
   "unmerged_pr": 209,
   "unmerged_branch": "agi/observed-gap-domain-curriculum-r44",
-  "unmerged_head_sha": "d9d736f8ff13d66b24082fb2a9528098aae4e6bc",
-  "unmerged_ci_run": null,
-  "unmerged_ci_status": "awaiting_exact_head_run_after_pr_creation",
-  "additional_in_flight_prs": [],
+  "unmerged_head_sha": "21fe92c65e0b30897c715d4f5e20faa61737d7dc",
+  "unmerged_ci_run": 32164610937,
+  "unmerged_ci_status": "in_progress",
+  "additional_in_flight_prs": [
+    {
+      "pr": 210,
+      "base": "agi/observed-gap-domain-curriculum-r44",
+      "head_sha": "b30fd6071bdd52fca2560028a78435d49df9936b",
+      "ci_run": 32165090975,
+      "ci_status": "queued",
+      "merge_policy": "stacked_only; never merge before PR 209 settles; reconstruct or retarget on verified resulting main and require exact-head CI"
+    }
+  ],
   "superseded_work": [
     {
       "pr": 207,
@@ -69,7 +78,7 @@
     {"pr": 206, "failed_head_sha": "1e39cef897ddcdfa76df6b4ebd44d391fdb5d28d", "failed_ci_run": 32158579756, "head_sha": "31eaca1e11fd3eb78f089f5b8aac405a299d61de", "ci_run": 32159495711, "ci_conclusion": "success", "merge_sha": "4ee29e4bae7b3e52a91d93cbe497bb441257d2aa"},
     {"pr": 208, "head_sha": "340c65ab5267a550924f7a5a68bca25be4e27ab5", "ci_run": 32160295800, "ci_conclusion": "success", "merge_sha": "219941f888b203837a1e739813999d084f1a8ce4"}
   ],
-  "next_falsifiable_milestone": "Settle PR 209 exact-head CI. If the unchanged head passes, integrate it and immediately increase curriculum pressure beyond a fixed repository-authored domain set: derive a bounded candidate target-source registry from observed typed capabilities and unsupported input/output-domain pairs, precommit the registry snapshot before probing support, select one eligible source by measured gap evidence, retain all prior skills after fresh state-only replay, and preserve an untouched cross-source control gap. If PR 209 fails, retain the exact failed head/run and repair only the demonstrated boundary.",
+  "next_falsifiable_milestone": "First settle corrected PR 209 exact-head CI. If it passes unchanged, integrate it, then reconstruct or retarget stacked PR 210 on the resulting verified main and require fresh exact-head CI before integration. PR 210 must falsify the fixed numeric/sequence generator-source assumption by deriving probeable source domains from actual verified Candidate input domains, exercising one precommitted multistage target from numeric, string, and sequence without exposing hidden Candidate IDs, preserving source Candidate/trial state across fresh replay, and keeping an unrelated cross-source control fail-closed. If either PR fails, retain the exact failed head/run and repair only the demonstrated boundary. After both are settled, advance to an observed typed input/output-pair target-source registry rather than stopping at merge.",
   "live_campaign": {
     "provider": "copilot",
     "model": "gpt-5.4",
@@ -94,7 +103,8 @@
     {"pr": 196, "head_sha": "b3d7e55ce8e18fa06aa0bde16199107c39ed2841", "ci_run": 32129355499, "failure": "338 tests passed; unsupported-row assertion was overconstrained; failed head retained and not merged"},
     {"pr": 198, "head_sha": "27cb9e71bf41cfda7adc94a4928751fbfd454afc", "ci_run": 32134990908, "failure": "340 tests passed; prerequisite generated a numeric constant outside the bounded synthesis frontier; failed head retained and not merged"},
     {"pr": 203, "head_sha": "6b22e891f2a0c6d9bbbf6952310210cad2c3a032", "ci_run": 32146008400, "failure": "348 tests passed; multi-seed wrapper used non-empty snapshot logic before bootstrap; failed head retained and not merged"},
-    {"pr": 206, "head_sha": "1e39cef897ddcdfa76df6b4ebd44d391fdb5d28d", "ci_run": 32158579756, "failure": "352 tests passed; isolated cross-domain test root lacked the verified adaptive skill-graph prerequisite; failed head retained and not merged"}
+    {"pr": 206, "head_sha": "1e39cef897ddcdfa76df6b4ebd44d391fdb5d28d", "ci_run": 32158579756, "failure": "352 tests passed; isolated cross-domain test root lacked the verified adaptive skill-graph prerequisite; failed head retained and not merged"},
+    {"pr": 209, "head_sha": "d9d736f8ff13d66b24082fb2a9528098aae4e6bc", "ci_run": 32164449848, "failure": "pytest collection failed because observed_gap_domain_curriculum imported _string_retention_examples from cross_domain_seed_gap_acquisition instead of sequence_seed_gap_acquisition; failed head retained and not merged"}
   ],
   "external_evidence_state": {
     "ledger_path": "evidence/external_ledger.json",
