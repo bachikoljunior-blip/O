@@ -7,8 +7,8 @@
   "execution_policy_path": "agi/STANDALONE_HOURLY_AUTOMATION.md",
   "self_application_policy_path": "agi/SELF_APPLICATION.md",
   "claim_boundary": "No architecture, model choice, self-application record, internal benchmark, CI result, Candidate promotion, repository-authored evaluator, Copilot campaign, or weakened policy can establish AGI. A verified claim requires the conservative independent production evidence gate to pass on genuinely external signed evidence across all required criteria and evaluator groups with no unresolved contamination or admissible failures.",
-  "completed_through": "The system now includes the previously retained bounded learning/transfer/materialization/evidence infrastructure plus an observable live Copilot path. In the latest recovery, workflow 32090346077 showed two strict capability/workspace repeats at suite_score 1.0, then falsified the live-request orchestration because two long-horizon instances were accepted although the sandbox protocol requires at least three. PR167 preserved that negative evidence, shared the sandbox minimum with request validation, retained the live request maximum of three, passed full exact-head CI, and merged without weakening scoring or the sandbox protocol. These are internal development results, not verified AGI.",
-  "current_main_sha_before_continuation_update": "76ef82ebb042cb32fec95827fd6048d1416d7340",
+  "completed_through": "The system now includes the previously retained bounded learning/transfer/materialization/evidence infrastructure plus an observable live Copilot path. Workflow 32090346077 produced two strict capability/workspace repeats at suite_score 1.0 and falsified a request/runtime long-horizon bound. PR167 preserved that counterexample, shared the sandbox minimum with request validation, passed corrected exact-head CI and merged. Fresh workflow 32094156066 then proved the minimum-valid three-instance request reaches both capability/workspace and long-horizon model stages, but both were externally blocked when Copilot reported monthly quota exhausted. This provider resource exhaustion is retained separately from semantic capability evidence. These remain internal development results, not verified AGI.",
+  "current_main_sha_before_continuation_update": "40c6c38d65f5a161aeb09819422765a521c614d5",
   "last_completed_milestone": {
     "pr": 167,
     "title": "Align live long-horizon requests with sandbox repetition minimum",
@@ -26,7 +26,7 @@
     "claim_tier": "internal_development",
     "admissible_for_agi_claim": false
   },
-  "in_flight": {
+  "last_live_validation": {
     "kind": "fresh_bounded_copilot_campaign",
     "boundary": "fresh_execution",
     "branch": "agi/live-campaign-post-pr167-r8",
@@ -36,8 +36,14 @@
     "runs": 2,
     "longhorizon_instances": 3,
     "workflow_run": 32094156066,
-    "status": "in_progress",
-    "purpose": "fresh post-PR167 strict two-run capability/workspace plus minimum-valid three-instance long-horizon validation"
+    "workflow_job": 95582110612,
+    "status": "completed",
+    "conclusion": "failure",
+    "failure_class": "provider_resource_exhaustion",
+    "provider_block": "monthly_quota_exhausted",
+    "artifact_id": 9309386241,
+    "artifact_digest": "sha256:5ffa882ceb277f0c12525656ecd31698a913314c92a5afe57cfcc0211494cdf3",
+    "finding": "Three-instance request validation succeeded. Capability/workspace and long-horizon stages were both attempted and reached model execution, then the provider refused requests because monthly quota was exceeded. Do not infer a semantic capability regression and do not retrigger until provider capacity returns."
   },
   "retained_negative_evidence": [
     {"workflow_run": 32059066667, "finding": "Strict core validation rejected non-object state/procedure update after real Copilot model interaction."},
@@ -46,19 +52,31 @@
     {"workflow_run": 32071032454, "finding": "Core passed; workspace exposed exact persistent memory/procedure addressing failures."},
     {"workflow_run": 32074826306, "finding": "Core and 11/12 workspace tasks passed; only recalled scalar answer-file shape failed."},
     {"workflow_run": 32090346077, "workflow_job": 95571127755, "finding": "Two capability/workspace repeats scored 1.0; long-horizon orchestration failed before model execution because request validation accepted two instances but sandbox minimum is three."},
-    {"pr": 167, "head_sha": "073487a364f1b4b7d6f50432d56dbc02fd209974", "ci_run": 32093707492, "finding": "313 tests passed; one error-message compatibility assertion failed. This head was not merged."}
+    {"pr": 167, "head_sha": "073487a364f1b4b7d6f50432d56dbc02fd209974", "ci_run": 32093707492, "finding": "313 tests passed; one error-message compatibility assertion failed. This head was not merged."},
+    {"workflow_run": 32094156066, "workflow_job": 95582110612, "finding": "Minimum-valid three-instance request passed validation and both stages reached model execution; provider monthly quota exhaustion then blocked both stages. Artifact 9309386241 retained; classify as external resource exhaustion rather than capability regression."}
   ],
+  "provider_blocks": {
+    "copilot": {
+      "status": "blocked",
+      "reason": "monthly_quota_exhausted",
+      "observed_workflow": 32094156066,
+      "retry_policy": "do_not_retrigger_while_blocked",
+      "next_engineering_action": "Add stable fail-closed provider-block classification and prove no automatic retry on quota exhaustion."
+    }
+  },
   "unfinished_work": [
-    "Observe workflow 32094156066 without issuing a duplicate request; preserve exact campaign and long-horizon results.",
-    "If it fails, retain the exact artifact/log counterexample and change only the newly falsified boundary without weakening benchmark expectations, scoring, sandbox rules, Candidate gates, or the external claim gate.",
-    "If it passes, persist campaign plus long-horizon evidence and immediately advance to a longer genuine-model retention/transfer milestone with multiple fresh runs.",
+    "Add fail-closed stable Copilot provider resource classification for monthly quota exhaustion; preserve raw unknown errors, never convert provider exhaustion into benchmark success, and prove recognized quota errors are not retried.",
+    "Run exact-head CI and merge only an unchanged passing provider-classification head.",
+    "While Copilot quota remains exhausted, advance a non-Copilot retained capability/no-forgetting milestone instead of repeatedly triggering the blocked provider path.",
+    "When provider capacity returns, rerun the strict two-run plus three-instance live validation from a fresh request and preserve exact evidence.",
     "Continue expanding retained typed/open-ended capability coverage and no-forgetting evidence.",
     "Obtain genuinely independent signed production trials across breadth, transfer, autonomy, continual learning, self-improvement, and robustness with the required evaluator quorum."
   ],
   "next_actions": [
-    "First inspect workflow 32094156066 and its uploaded artifact when terminal; do not retrigger request commit e576612e7eee50779e7add4a2a6a35efd600292f while it is active.",
-    "On failure, preserve the exact counterexample and make the smallest falsifiable correction, then exact-head CI and a new fresh request.",
-    "On success, persist both stages and immediately move to a longer multi-run genuine-model retention/transfer campaign.",
+    "Implement and regression-test stable fail-closed monthly-quota classification at the Copilot SDK boundary with no retry and deterministic cleanup.",
+    "Exact-head CI that change and merge only if passing unchanged.",
+    "Then select a non-Copilot multi-fresh-engine retention/transfer milestone while the provider is resource-blocked.",
+    "Do not retrigger workflow 32094156066 or another Copilot live campaign while monthly quota remains exhausted.",
     "Keep AGI claim false until the strict independent production evidence gate passes."
   ],
   "execution_schedule": {
@@ -75,5 +93,5 @@
     "retention_transfer_boundary": "fresh_execution",
     "independent_evaluation_boundary": "fresh_independent_execution"
   },
-  "updated_utc": "2026-08-18T03:05:10Z"
+  "updated_utc": "2026-08-18T03:10:45Z"
 }
