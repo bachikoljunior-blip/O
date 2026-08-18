@@ -3,10 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from agi.dynamic_skillgraph_input_domains import (
-    _observed_generator_input_domains,
-    run_dynamic_skillgraph_input_domains,
-)
+from agi.dynamic_skillgraph_growth_campaign import run_dynamic_skillgraph_growth_campaign
+from agi.dynamic_skillgraph_input_domains import _observed_generator_input_domains
 
 
 def test_observed_generator_input_domains_come_from_verified_items() -> None:
@@ -20,26 +18,29 @@ def test_observed_generator_input_domains_come_from_verified_items() -> None:
     assert _observed_generator_input_domains(items[:1]) == ("numeric",)
 
 
-def test_dynamic_skillgraph_exercises_string_source_and_fresh_transfer(
+def test_dynamic_skillgraph_grows_missing_string_capacity_then_transfers(
     runtime_repo: Path,
 ) -> None:
-    report = run_dynamic_skillgraph_input_domains(
+    report = run_dynamic_skillgraph_growth_campaign(
         runtime_repo,
         "dynamic-skillgraph-input-domain-test",
     )
 
     assert report["passed"] is True
-    assert report["campaign_kind"] == "dynamic-skillgraph-input-domain-targets-v1"
+    assert report["campaign_kind"] == "dynamic-skillgraph-growth-campaign-v1"
+    assert report["failure_boundary_weakened"] is False
+    assert report["string_growth_candidate_id"]
+    assert report["string_growth_candidate_negative_evidence_retained"] is True
+    assert report["string_growth_transactional_commit"]["atomic_directory_rename"] is True
+    assert report["string_growth_transactional_commit"]["overwrite_allowed"] is False
+    assert report["string_growth_control_gap_remained_failed_closed"] is True
     assert set(report["observed_generator_input_domains"]) == {
         "numeric",
         "string",
         "sequence",
     }
-    assert report["observed_input_domain_count"] == 3
     assert report["fixed_numeric_sequence_start_set_used"] is False
     assert report["target_plan_precommitted_before_solver_execution"] is True
-    assert set(report["target_input_domains"]) == set(report["observed_generator_input_domains"])
-    assert report["target_record_count"] == 3
     assert report["string_source_target_exercised"] is True
     assert report["all_generator_hidden_ids_withheld"] is True
     assert report["all_solver_calls_candidate_id_free"] is True
@@ -52,7 +53,13 @@ def test_dynamic_skillgraph_exercises_string_source_and_fresh_transfer(
     assert report["unrelated_cross_source_control_failed_closed"] is True
     assert report["live_model_invocation_required"] is False
 
-    for record in report["target_records"]:
+    records = report["target_records"]
+    assert {record["input_domain"] for record in records} == {
+        "numeric",
+        "string",
+        "sequence",
+    }
+    for record in records:
         assert record["generator_hidden_candidate_ids"]
         assert record["generator_hidden_depth"] >= 2
         assert record["generator_hidden_candidate_ids_supplied_to_solver"] is False
@@ -71,15 +78,28 @@ def test_dynamic_skillgraph_exercises_string_source_and_fresh_transfer(
         assert record["prior_episodes_copied"] is False
         assert record["prior_evidence_copied"] is False
 
-    evidence_dir = (
-        runtime_repo
-        / ".continual"
-        / "evidence"
-        / "dynamic-skillgraph-input-domains"
+    dynamic_evidence = list(
+        (
+            runtime_repo
+            / ".continual"
+            / "evidence"
+            / "dynamic-skillgraph-input-domains"
+        ).glob("dynamic-inputs-*.json")
     )
-    files = list(evidence_dir.glob("dynamic-inputs-*.json"))
-    assert len(files) == 1
-    persisted = json.loads(files[0].read_text(encoding="utf-8"))
-    assert persisted["digest"] == report["digest"]
-    assert persisted["string_source_target_exercised"] is True
-    assert "does not establish open-domain target generation" in persisted["claim_boundary"]
+    assert len(dynamic_evidence) == 1
+    dynamic_persisted = json.loads(dynamic_evidence[0].read_text(encoding="utf-8"))
+    assert dynamic_persisted["string_source_target_exercised"] is True
+
+    growth_evidence = list(
+        (
+            runtime_repo
+            / ".continual"
+            / "evidence"
+            / "dynamic-skillgraph-growth-campaign"
+        ).glob("growth-*.json")
+    )
+    assert len(growth_evidence) == 1
+    growth_persisted = json.loads(growth_evidence[0].read_text(encoding="utf-8"))
+    assert growth_persisted["digest"] == report["digest"]
+    assert growth_persisted["failure_boundary_weakened"] is False
+    assert "does not establish open-domain target generation" in growth_persisted["claim_boundary"]
