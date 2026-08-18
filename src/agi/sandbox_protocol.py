@@ -12,6 +12,7 @@ from .longhorizon import LongHorizonAgent, LongHorizonResult, LongHorizonTask, r
 
 _INSTANCE_ID = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
 _REQUIRED_CHECKPOINT_KEYS = {"phase", "workspace", "durable_memory", "completed_phases"}
+MIN_REPEATED_INSTANCES = 3
 
 
 @dataclass(frozen=True)
@@ -95,10 +96,12 @@ def _task_for_index(index: int) -> LongHorizonTask:
     )
 
 
-def deterministic_sandbox_instances(count: int = 3) -> tuple[SandboxProtocolInstance, ...]:
+def deterministic_sandbox_instances(count: int = MIN_REPEATED_INSTANCES) -> tuple[SandboxProtocolInstance, ...]:
     """Return deterministic but semantically varied long-horizon task instances."""
-    if count < 3:
-        raise ValueError("sandbox protocol requires at least three repeated instances")
+    if count < MIN_REPEATED_INSTANCES:
+        raise ValueError(
+            f"sandbox protocol requires at least {MIN_REPEATED_INSTANCES} repeated instances"
+        )
     return tuple(
         SandboxProtocolInstance(
             instance_id=f"longhorizon-{index:02d}",
@@ -115,8 +118,8 @@ def validate_sandbox_instances(instances: Iterable[SandboxProtocolInstance]) -> 
     task_ids = [item.task.task_id for item in items]
     task_commitments = [item.task.commitment() for item in items]
     memory_keys = [item.task.memory_key for item in items]
-    if len(items) < 3:
-        reasons.append("at least three repeated instances are required")
+    if len(items) < MIN_REPEATED_INSTANCES:
+        reasons.append(f"at least {MIN_REPEATED_INSTANCES} repeated instances are required")
     if len(ids) != len(set(ids)):
         reasons.append("instance ids must be unique")
     if len(task_ids) != len(set(task_ids)):
@@ -263,7 +266,7 @@ def run_sandbox_protocol(
         for item in results
     ]
     passed = bool(
-        instance_count >= 3
+        instance_count >= MIN_REPEATED_INSTANCES
         and varied_task_count == instance_count
         and passed_instances == instance_count
         and verified_checkpoints == instance_count
