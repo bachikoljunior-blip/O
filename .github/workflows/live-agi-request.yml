@@ -76,21 +76,25 @@ jobs:
           RUNS: ${{ steps.request.outputs.runs }}
           INSTANCES: ${{ steps.request.outputs.instances }}
         run: |
-          set -uo pipefail
+          set -euo pipefail
           campaign_id="copilot-request-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           output_dir=".continual/evidence/campaigns/${campaign_id}"
           mkdir -p "${output_dir}"
           campaign_status=0
+          longhorizon_status=0
+          set +e
           agi-copilot run-campaign \
             --model "${MODEL}" \
             --runs "${RUNS}" \
             --campaign-id "${campaign_id}" \
-            --output-dir "${output_dir}" || campaign_status=$?
-          longhorizon_status=0
+            --output-dir "${output_dir}"
+          campaign_status=$?
           agi-copilot run-longhorizon \
             --model "${MODEL}" \
             --instances "${INSTANCES}" \
-            --output-dir "${output_dir}/longhorizon" || longhorizon_status=$?
+            --output-dir "${output_dir}/longhorizon"
+          longhorizon_status=$?
+          set -e
           printf '{"campaign_exit_code":%d,"longhorizon_exit_code":%d}\n' \
             "${campaign_status}" "${longhorizon_status}" \
             > "${output_dir}/request-stage-status.json"
