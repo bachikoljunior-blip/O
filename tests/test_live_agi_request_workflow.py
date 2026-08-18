@@ -29,17 +29,11 @@ def test_live_request_workflow_publishes_observable_request_commit_status():
     text = Path(".github/workflows/live-agi-request.yml").read_text(encoding="utf-8")
 
     assert "Publish pending request status" in text
+    assert "python -m agi.live_request_status pending" in text
     assert "Publish final request status" in text
-    assert "'context': 'o/live-agi-request'" in text
-    assert "'state': 'pending'" in text
-    assert "mapping = {'success': 'success', 'failure': 'failure', 'cancelled': 'error'}" in text
-    assert "${{ job.status }}" in text
+    assert 'python -m agi.live_request_status final --job-status "${JOB_STATUS}"' in text
+    assert "JOB_STATUS: ${{ job.status }}" in text
     assert "if: always()" in text
-    assert "GITHUB_API_URL" in text
-    assert "/statuses/{os.environ['GITHUB_SHA']}" in text
-    assert "/actions/runs/{run_id}" in text
-    assert "X-GitHub-Api-Version" in text
-    assert "response.status != 201" in text
 
 
 def test_live_request_workflow_never_commits_model_outputs():
