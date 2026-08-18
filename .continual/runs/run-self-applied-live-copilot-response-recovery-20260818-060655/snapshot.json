@@ -4,15 +4,15 @@
   "execution_id": "self-live-copilot-response-recovery-20260818-060655",
   "status": "continue",
   "phase": "self-application-in-progress",
-  "revision": 6,
+  "revision": 7,
   "created_at": "2026-08-18T06:06:55+09:00",
-  "updated_at": "2026-08-18T12:05:10+09:00",
+  "updated_at": "2026-08-18T12:10:45+09:00",
   "request": "Recover stale O AGI execution from latest main, retain failed live Copilot campaigns as negative evidence, correct only falsified boundaries, validate exact-head CI, then run fresh bounded genuine-model campaigns and continue.",
-  "objective": "Workflow 32090346077 produced two strict Copilot gpt-5.4 capability/workspace repeats at suite_score 1.0 and then falsified the live-request long-horizon bound before model execution: two instances passed workflow validation but the sandbox protocol requires at least three. PR167 retained this counterexample, shared the sandbox minimum with the bounded request validator, restored an initially broken error-string compatibility contract, passed exact-head CI, and merged. A fresh two-run plus three-instance Copilot validation is now running with scoring, sandbox semantics, Candidate gates, and the external AGI evidence gate unchanged.",
+  "objective": "PR167 corrected the long-horizon request/runtime bound without weakening the sandbox minimum. Fresh workflow 32094156066 validated a three-instance request and attempted both capability/workspace and long-horizon stages, but both reached Copilot model execution and were externally blocked because the provider monthly quota was exhausted. Preserve this as provider resource exhaustion, add stable fail-closed classification with no retry, and continue on non-Copilot capability/retention work while live provider capacity is unavailable.",
   "scope": "agi/live-copilot-retention-validation",
   "executor": {"kind":"task_chat_model","model":"GPT-5.6 Sol","model_verified":true,"verification_source":"platform runtime system identity"},
   "execution_mode": "task-chat-model-self-application",
-  "context": {"boundary":"development","risk_signals":["stale_state_risk"],"logical_reset_used":true,"fresh_execution_used":true,"independent_execution_used":false,"boundary_satisfied":true},
+  "context": {"boundary":"development","risk_signals":["stale_state_risk","provider_resource_exhaustion"],"logical_reset_used":true,"fresh_execution_used":true,"independent_execution_used":false,"boundary_satisfied":true},
   "last_completed": {
     "pr": 167,
     "head_sha": "6165b2553c58f1bdb5747653e7daf666cb4a0967",
@@ -22,32 +22,33 @@
   },
   "last_fresh_validation": {
     "kind": "fresh_bounded_copilot_campaign",
-    "branch": "agi/live-campaign-post-pr165-r7",
-    "request_commit": "82ea01be87a6f65228dbe20bd997042731acec43",
-    "workflow_run": 32090346077,
-    "workflow_job": 95571127755,
+    "branch": "agi/live-campaign-post-pr167-r8",
+    "request_commit": "e576612e7eee50779e7add4a2a6a35efd600292f",
+    "workflow_run": 32094156066,
+    "workflow_job": 95582110612,
     "status": "completed",
     "conclusion": "failure",
     "provider": "copilot",
     "model": "gpt-5.4",
-    "core_and_workspace_runs": 2,
-    "core_and_workspace_passed": 2,
-    "suite_scores": [1.0, 1.0],
-    "longhorizon_status": "failed_before_model_execution",
-    "finding": "deterministic_sandbox_instances(2) rejected the request because at least three repeated instances are required; request validation had incorrectly accepted two"
-  },
-  "in_flight": {
-    "kind": "fresh_bounded_copilot_campaign",
-    "boundary": "fresh_execution",
-    "branch": "agi/live-campaign-post-pr167-r8",
-    "request_commit": "e576612e7eee50779e7add4a2a6a35efd600292f",
-    "workflow_run": 32094156066,
-    "provider": "copilot",
-    "model": "gpt-5.4",
     "runs": 2,
     "longhorizon_instances": 3,
-    "status": "in_progress",
-    "purpose": "post-PR167 strict repeat plus minimum-valid long-horizon retention validation"
+    "request_validation": "passed",
+    "capability_workspace_stage": "provider_blocked_after_model_execution_started",
+    "longhorizon_stage": "provider_blocked_after_model_execution_started",
+    "failure_class": "provider_resource_exhaustion",
+    "provider_block": "monthly_quota_exhausted",
+    "artifact_id": 9309386241,
+    "artifact_digest": "sha256:5ffa882ceb277f0c12525656ecd31698a913314c92a5afe57cfcc0211494cdf3",
+    "finding": "Both stages were attempted and reached Copilot model calls; provider quota exhaustion prevented semantic evaluation. No capability/scoring regression is inferred."
+  },
+  "in_flight": null,
+  "provider_blocks": {
+    "copilot": {
+      "reason": "monthly_quota_exhausted",
+      "observed_workflow": 32094156066,
+      "retry": false,
+      "classification_pending": true
+    }
   },
   "retained_failures": [
     {"workflow_run":32057684108,"type":"TypeError","retained":true},
@@ -57,9 +58,10 @@
     {"workflow_run":32071032454,"type":"workspace_semantic_persistence_failure","retained":true},
     {"workflow_run":32074826306,"type":"workspace_output_shape_failure","retained":true},
     {"workflow_run":32090346077,"workflow_job":95571127755,"request_commit":"82ea01be87a6f65228dbe20bd997042731acec43","type":"live_request_runtime_bound_mismatch","detail":"two capability/workspace repeats scored 1.0; long-horizon failed pre-model because request validation accepted two instances while sandbox minimum is three","retained":true},
-    {"pr":167,"head_sha":"073487a364f1b4b7d6f50432d56dbc02fd209974","ci_run":32093707492,"type":"test_assertion_failure","detail":"313 tests passed; one existing error-message compatibility assertion failed; head not merged","retained":true}
+    {"pr":167,"head_sha":"073487a364f1b4b7d6f50432d56dbc02fd209974","ci_run":32093707492,"type":"test_assertion_failure","detail":"313 tests passed; one existing error-message compatibility assertion failed; head not merged","retained":true},
+    {"workflow_run":32094156066,"workflow_job":95582110612,"request_commit":"e576612e7eee50779e7add4a2a6a35efd600292f","type":"provider_resource_exhaustion","detail":"minimum-valid request passed validation; capability/workspace and long-horizon both reached model calls and were blocked by Copilot monthly quota exhaustion; artifact 9309386241 retained","retained":true}
   ],
-  "next_action": "Observe workflow 32094156066 without retriggering. If it fails, retain the exact artifact/log counterexample and change only the falsified boundary. If it passes, persist campaign and three-instance long-horizon evidence and immediately advance to a longer multi-run genuine-model retention/transfer milestone. Keep the strict independent external production evidence gate unchanged.",
+  "next_action": "Add stable fail-closed Copilot monthly-quota classification at the SDK boundary with deterministic cleanup and no retry. Preserve unrecognized errors. Exact-head CI and merge only if passing unchanged. Then advance to a non-Copilot multi-fresh-engine retention/transfer milestone while provider capacity is blocked. Do not retrigger Copilot quota failures. Keep the strict independent external production evidence gate unchanged.",
   "claim_tier": "internal_development",
   "external_claim_admissible": false,
   "agi_status": "unverified"
