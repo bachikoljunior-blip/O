@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T08:01:06+09:00",
   "started_at": "2026-08-19T08:01:06+09:00",
-  "heartbeat_at": "2026-08-19T08:01:06+09:00",
-  "last_progress_at": "2026-08-19T08:01:06+09:00",
+  "heartbeat_at": "2026-08-19T08:16:11+09:00",
+  "last_progress_at": "2026-08-19T08:05:10+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T080106JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T080106JST",
@@ -26,13 +26,13 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "7a90d868b7178e786de14edbff997ee1e9fa8830",
-  "latest_main_sha_before_heartbeat": "7a90d868b7178e786de14edbff997ee1e9fa8830",
-  "current_work_unit": "Recovered after PR 214 exact head b9ac61029f7da35e9df241bde4309768904721de passed CI 32192186266 and merged as 7a90d868b7178e786de14edbff997ee1e9fa8830. PR 215 head 819227ea097e11bfea9e99df132941cc84d31554 then failed exact-head CI 32192797901: isolated runtime_repo contains no pre-existing Candidate files, and persisted_failure_curriculum called durable _tree_snapshot on the empty prior Candidate set before source acquisition. PRs 216 and 217 remain stacked on this failed prerequisite and are not merge-eligible. Recover PR 215 on verified main, preserve the failed head/run as negative evidence, repair only the empty-prior-graph preservation invariant without weakening durable-state checks for non-empty graphs, then require fresh exact-head CI.",
+  "latest_main_sha_before_heartbeat": "25c0041477cb31b1b7c03e186a98ecee70c48856",
+  "current_work_unit": "PR 215 was retargeted to main and repaired only at the demonstrated empty-prior-graph boundary. Failed head 819227ea097e11bfea9e99df132941cc84d31554 / CI 32192797901 remains negative evidence. New exact head c417e9bb4249d51a5ddb99b78670baaeaf87c35c changes only src/agi/persisted_failure_curriculum.py relative to that failed head (19 additions, 7 deletions), keeps durable _tree_snapshot/_trial_snapshot checks for every non-empty prior graph, treats an empty prior Candidate set as vacuous immutability, and is under fresh CI 32195643938. PRs 216 and 217 remain stacked and blocked until this prerequisite is verified and merged.",
   "unmerged_pr": 215,
   "unmerged_branch": "agi/persisted-failure-curriculum-r50",
-  "unmerged_head_sha": "819227ea097e11bfea9e99df132941cc84d31554",
-  "unmerged_ci_run": 32192797901,
-  "unmerged_ci_status": "failure_retained_repair_required",
+  "unmerged_head_sha": "c417e9bb4249d51a5ddb99b78670baaeaf87c35c",
+  "unmerged_ci_run": 32195643938,
+  "unmerged_ci_status": "in_progress_fresh_exact_head",
   "additional_in_flight": [
     {"pr": 216, "branch": "agi/evidence-derived-target-synthesis-r51", "head_sha": "9c74537e0559d953082f02202e5691fb88b74d7b", "base_pr": 215, "ci_status": "stacked_blocked_requires_reconstruction_after_pr215"},
     {"pr": 217, "branch": "agi/crossdomain-failure-derived-target-r52", "head_sha": "38debd33a9acb15aa17fe3ce313a01c6e26aa736", "base_pr": 216, "ci_status": "stacked_blocked_requires_reconstruction_after_pr216"}
@@ -79,6 +79,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Reconstruct PR 215 directly on verified main 7a90d868b7178e786de14edbff997ee1e9fa8830, preserve failed head 819227ea097e11bfea9e99df132941cc84d31554 / CI 32192797901, and make prior-Candidate immutability vacuously valid for an empty prior set while continuing to use durable _tree_snapshot/_trial_snapshot for every non-empty prior graph. Require fresh exact-head CI before merge. Only after PR 215 integrates may PR 216 be reconstructed on new main, followed by PR 217 after PR 216.",
+  "next_falsifiable_milestone": "Observe CI 32195643938 for exact PR 215 head c417e9bb4249d51a5ddb99b78670baaeaf87c35c. Merge only that unchanged head if it passes. On failure retain exact head/run and repair only the newly demonstrated invariant. After PR 215 integrates, reconstruct PR 216 on resulting verified main and require fresh exact-head CI; then do the same for PR 217 only after PR 216 integrates.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
