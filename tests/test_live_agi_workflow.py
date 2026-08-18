@@ -46,3 +46,38 @@ def test_openai_secret_is_not_job_wide_and_is_only_used_for_resolution_and_opena
     first_secret = text.index(secret_line)
     second_secret = text.index(secret_line, first_secret + 1)
     assert job_env < resolve_step < first_secret < openai_step < second_secret < copilot_step
+
+
+def test_each_live_provider_attempts_capability_and_longhorizon_before_aggregating_failure():
+    text = _workflow()
+    cases = [
+        (
+            "- name: Run OpenAI repeated capability campaign",
+            "- name: Run Copilot SDK repeated capability and retention campaign",
+            "agi-benchmark run-campaign-openai",
+            "agi-longhorizon run-openai",
+        ),
+        (
+            "- name: Run Copilot SDK repeated capability and retention campaign",
+            "- uses: actions/upload-artifact@v4",
+            "agi-copilot run-campaign",
+            "agi-copilot run-longhorizon",
+        ),
+    ]
+    for start_marker, end_marker, campaign_command, longhorizon_command in cases:
+        start = text.index(start_marker)
+        end = text.index(end_marker, start)
+        step = text[start:end]
+        campaign = step.index(campaign_command)
+        longhorizon = step.index(longhorizon_command)
+        status = step.index("request-stage-status.json")
+        aggregate = step.index("if (( campaign_status != 0 || longhorizon_status != 0 ))")
+        assert campaign < longhorizon < status < aggregate
+        assert "set -uo pipefail" in step
+        assert "campaign_status=0" in step
+        assert "|| campaign_status=$?" in step
+        assert "longhorizon_status=0" in step
+        assert "|| longhorizon_status=$?" in step
+        assert 'mkdir -p "${output_dir}"' in step
+
+    assert text.count("request-stage-status.json") == 2
