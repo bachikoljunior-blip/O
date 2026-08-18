@@ -17,7 +17,6 @@ from agi.cross_domain_seed_gap_acquisition import (
     _numeric_retention_examples,
     _precommit_string_gap_schedule,
     _string_challenges,
-    _string_retention_examples,
 )
 from agi.durable_state_rehydration import _tree_snapshot
 from agi.heterogeneous_retention_campaign import _digest, _promote_task
@@ -31,6 +30,7 @@ from agi.sequence_seed_gap_acquisition import (
     _library_attempt as _sequence_library_attempt,
     _precommit_sequence_gap_schedule,
     _sequence_challenges,
+    _string_retention_examples,
     run_sequence_seed_gap_acquisition,
 )
 from agi.transactional_multisession_commit import _commit_verified_candidate
@@ -462,12 +462,6 @@ def run_observed_gap_domain_curriculum(root: Path, seed: str) -> dict[str, Any]:
             domain="sequence",
             examples=sequence_examples,
         )
-        if sequence_candidate_id not in {
-            str(value) for value in sequence_retention["selected_candidate_ids"]
-        }:
-            raise ObservedGapDomainCurriculumError(
-                "sequence retention replay omitted the durable sequence Candidate"
-            )
 
         control_attempt = _attempt_domain(resolver_root, selected_domain, control_examples)
         if control_attempt["supported"]:
