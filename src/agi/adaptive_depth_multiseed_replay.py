@@ -27,6 +27,14 @@ class AdaptiveDepthMultiSeedReplayError(RuntimeError):
     pass
 
 
+def _tree_snapshot_or_empty(root: Path, candidate_ids: list[str]) -> dict[str, str]:
+    return _tree_snapshot(root, candidate_ids) if candidate_ids else {}
+
+
+def _trial_snapshot_or_empty(root: Path, candidate_ids: list[str]) -> dict[str, Any]:
+    return _trial_snapshot(root, candidate_ids) if candidate_ids else {}
+
+
 def _behavior_fingerprint(
     items: tuple[dict[str, Any], ...],
     *,
@@ -270,8 +278,8 @@ def run_adaptive_depth_multiseed_replay(
 
     root = root.resolve()
     source_ids = _all_candidate_ids(root)
-    source_tree = _tree_snapshot(root, source_ids)
-    source_trials = _trial_snapshot(root, source_ids)
+    source_tree = _tree_snapshot_or_empty(root, source_ids)
+    source_trials = _trial_snapshot_or_empty(root, source_ids)
     seed_schedule = [f"{seed}:round-{index}" for index in range(max_seed_attempts)]
     seed_schedule_commitment = _digest(
         {
@@ -289,11 +297,11 @@ def run_adaptive_depth_multiseed_replay(
         for index, round_seed in enumerate(seed_schedule):
             seed_root = campaign_root / f"seed-{index}"
             _copy_persistent_state(root, seed_root)
-            if _tree_snapshot(seed_root, source_ids) != source_tree:
+            if _tree_snapshot_or_empty(seed_root, source_ids) != source_tree:
                 raise AdaptiveDepthMultiSeedReplayError(
                     "seed reconstruction changed source Candidate bytes"
                 )
-            if _trial_snapshot(seed_root, source_ids) != source_trials:
+            if _trial_snapshot_or_empty(seed_root, source_ids) != source_trials:
                 raise AdaptiveDepthMultiSeedReplayError(
                     "seed reconstruction changed source Candidate trials"
                 )
@@ -317,11 +325,11 @@ def run_adaptive_depth_multiseed_replay(
         raise AdaptiveDepthMultiSeedReplayError(
             "bounded precommitted seed schedule exposed insufficient route behavior diversity"
         )
-    if _tree_snapshot(root, source_ids) != source_tree:
+    if _tree_snapshot_or_empty(root, source_ids) != source_tree:
         raise AdaptiveDepthMultiSeedReplayError(
             "multi-seed validation mutated source Candidate bytes"
         )
-    if _trial_snapshot(root, source_ids) != source_trials:
+    if _trial_snapshot_or_empty(root, source_ids) != source_trials:
         raise AdaptiveDepthMultiSeedReplayError(
             "multi-seed validation mutated source Candidate trials"
         )
