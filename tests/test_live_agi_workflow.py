@@ -73,11 +73,15 @@ def test_each_live_provider_attempts_capability_and_longhorizon_before_aggregati
         status = step.index("request-stage-status.json")
         aggregate = step.index("if (( campaign_status != 0 || longhorizon_status != 0 ))")
         assert campaign < longhorizon < status < aggregate
-        assert "set -uo pipefail" in step
+        assert "set -euo pipefail" in step
+        assert "set +e" in step
+        assert "set -e" in step
         assert "campaign_status=0" in step
-        assert "|| campaign_status=$?" in step
+        assert "campaign_status=$?" in step
         assert "longhorizon_status=0" in step
-        assert "|| longhorizon_status=$?" in step
+        assert "longhorizon_status=$?" in step
         assert 'mkdir -p "${output_dir}"' in step
+        assert "|| campaign_status=$?" not in step
+        assert "|| longhorizon_status=$?" not in step
 
     assert text.count("request-stage-status.json") == 2
