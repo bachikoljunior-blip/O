@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from agi.adaptive_depth_composition import run_adaptive_depth_composition
 from agi.sequence_seed_gap_acquisition import (
     _precommit_sequence_gap_schedule,
     run_sequence_seed_gap_acquisition,
@@ -27,9 +28,17 @@ def test_sequence_gap_schedule_is_deterministic_and_generic() -> None:
     )
 
 
-def test_sequence_seed_gap_acquisition_retains_numeric_and_string(tmp_path: Path) -> None:
+def test_sequence_seed_gap_acquisition_retains_numeric_and_string(
+    runtime_repo: Path,
+) -> None:
+    prerequisite = run_adaptive_depth_composition(
+        runtime_repo,
+        "sequence-gap-base-library",
+    )
+    assert prerequisite["passed"] is True
+
     report = run_sequence_seed_gap_acquisition(
-        tmp_path,
+        runtime_repo,
         "sequence-gap-acquisition-test",
         max_target_attempts=3,
     )
@@ -62,7 +71,7 @@ def test_sequence_seed_gap_acquisition_retains_numeric_and_string(tmp_path: Path
 
     matches = list(
         (
-            tmp_path
+            runtime_repo
             / ".continual"
             / "evidence"
             / "sequence-seed-gap-acquisition"
