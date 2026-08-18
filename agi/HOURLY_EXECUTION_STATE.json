@@ -10,15 +10,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-18T19:53:55+09:00",
   "started_at": "2026-08-18T19:53:55+09:00",
-  "heartbeat_at": "2026-08-18T19:59:25+09:00",
-  "last_progress_at": "2026-08-18T19:57:54+09:00",
+  "heartbeat_at": "2026-08-18T20:06:33+09:00",
+  "last_progress_at": "2026-08-18T20:06:20+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260818T195355JST",
   "session_id": "same-task-chat-watchdog-recovery-20260818T195355JST",
   "active_run_id": "run-self-applied-functional-no-forgetting-recovery-20260818-195355",
-  "current_work_unit": "PR 193 was merged after exact-head CI success. PR 196 now tests the next persisted falsifiable milestone: after two independently seeded generated skills each survive post-commit crash recovery, one final fresh state-only resolver with no caller Candidate IDs must rediscover both accumulated Candidates, solve both held-back challenges, preserve all Candidate bytes/trials, and leave a fresh unrelated generated gap fail-closed. Exact head b3d7e55ce8e18fa06aa0bde16199107c39ed2841 is under CI 32129355499; do not merge unless this unchanged head passes.",
+  "current_work_unit": "PR 196 first head b3d7e55ce8e18fa06aa0bde16199107c39ed2841 retained a failed exact-head CI: 338 tests passed and one new test assertion failed because unsupported classifications omit candidate_ids_supplied_by_caller rather than setting it false. The capability checks before that assertion passed. The test was corrected without weakening fail-closed behavior: reject only explicit true, matching repository classification semantics. Corrected exact head 2042c258ac4c4302b8a36791f890547db7de4d86 is under CI 32130063990. Do not merge unless this unchanged head passes.",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -29,11 +29,11 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "7b1d9173614fff7c9facace94d115a05c5294e15",
-  "latest_main_sha_before_heartbeat": "57d5ad8ebee24c8e67b232f23ac3c959acaa1ce0",
+  "latest_main_sha_before_heartbeat": "dc22f9d86c0880941190f9049bc5afcfd11db51e",
   "unmerged_pr": 196,
   "unmerged_branch": "agi/generated-skill-functional-no-forgetting-r32",
-  "unmerged_head_sha": "b3d7e55ce8e18fa06aa0bde16199107c39ed2841",
-  "unmerged_ci_run": 32129355499,
+  "unmerged_head_sha": "2042c258ac4c4302b8a36791f890547db7de4d86",
+  "unmerged_ci_run": 32130063990,
   "unmerged_ci_status": "in_progress_exact_head",
   "additional_in_flight_prs": [],
   "recovered_stale_lease": {
@@ -61,7 +61,7 @@
     {"pr": 192, "head_sha": "b0a5013db57ee666bbdc515f3ec4348fb0968afb", "ci_run": 32124401328, "ci_conclusion": "success", "merge_sha": "de768ac78dcb091e69f0f139f3ee77c8660d9c26"},
     {"pr": 193, "head_sha": "51fe1440349cfcad1b9d7d200970f09e258c74c2", "ci_run": 32125541907, "ci_conclusion": "success", "merge_sha": "57d5ad8ebee24c8e67b232f23ac3c959acaa1ce0"}
   ],
-  "next_falsifiable_milestone": "Validate PR 196 exact head. If it passes and remains unchanged/mergeable, merge it and immediately test autonomous transfer/composition over multiple accumulated generated skills after a fresh state-only restart, preserving no-forgetting and fail-closed unknown gaps. If it fails, retain the exact failed head and counterexample, fix only the falsified boundary, and rerun exact-head validation.",
+  "next_falsifiable_milestone": "Validate corrected PR 196 exact head. If it passes and remains unchanged/mergeable, merge it and immediately test autonomous transfer/composition over multiple accumulated generated skills after a fresh state-only restart, preserving no-forgetting and fail-closed unknown gaps. If it fails, retain the exact failed head and new counterexample, fix only the falsified boundary, and rerun exact-head validation.",
   "live_campaign": {
     "provider": "copilot",
     "model": "gpt-5.4",
@@ -82,7 +82,8 @@
     {"workflow_run": 32090346077, "failure": "two capability/workspace repeats scored 1.0; long-horizon request/runtime minimum mismatch; retained"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "both model stages reached Copilot and were blocked by monthly quota exhaustion; retained"},
     {"pr": 167, "head_sha": "073487a364f1b4b7d6f50432d56dbc02fd209974", "ci_run": 32093707492, "failure": "313 tests passed; one compatibility assertion failed; failed head not merged"},
-    {"pr": 172, "head_sha": "bdd114ea9c96edff912c842fce0f0a53372cf061", "ci_run": 32098470596, "failure": "319 tests passed; rollback-isolation assertion inspected the wrong durable regression location; failed head not merged"}
+    {"pr": 172, "head_sha": "bdd114ea9c96edff912c842fce0f0a53372cf061", "ci_run": 32098470596, "failure": "319 tests passed; rollback-isolation assertion inspected the wrong durable regression location; failed head not merged"},
+    {"pr": 196, "head_sha": "b3d7e55ce8e18fa06aa0bde16199107c39ed2841", "ci_run": 32129355499, "failure": "338 tests passed; new functional no-forgetting test overconstrained unsupported classification rows to carry an explicit false candidate_ids_supplied_by_caller field. Unsupported rows legitimately omit that field; failed head retained and not merged."}
   ],
   "external_evidence_state": {
     "ledger_path": "evidence/external_ledger.json",
