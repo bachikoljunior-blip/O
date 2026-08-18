@@ -34,6 +34,10 @@ def test_seed_committed_generic_grammar_gap_is_acquired_and_retained(
         item["candidate_ids_supplied_by_caller"] is False
         for item in report["support_attempts"]
     )
+    assert sum(
+        item["supported_before_learning"] is False
+        for item in report["support_attempts"]
+    ) >= 2
     assert report["acquisition_target_index"] != report["control_target_index"]
     assert (
         report["acquisition_behavior_fingerprint"]
