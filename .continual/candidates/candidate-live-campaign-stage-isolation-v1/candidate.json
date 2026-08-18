@@ -1,0 +1,44 @@
+{
+  "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+  "target_component": "execute",
+  "expected_scope": "agi/live-campaign-evidence-coverage",
+  "status": "candidate",
+  "prompt_mode": "overlay",
+  "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+  "what_it_changes": "Run the capability and long-horizon stages independently inside one already-bounded live request, persist both stage outcomes, and aggregate failure only after both stages have been attempted.",
+  "applicability": [
+    "agi/live-campaign-evidence-coverage",
+    "bounded genuine-model development campaigns that request both capability and long-horizon evidence"
+  ],
+  "non_applicability": [
+    "external AGI claim evaluation",
+    "unbounded retries or extra workflow runs",
+    "ordinary unrelated software tasks"
+  ],
+  "scope_states": {
+    "agi/live-campaign-evidence-coverage": "candidate",
+    "global": "untested"
+  },
+  "supporting_evidence": [
+    {
+      "finding": "Recent live Copilot campaign failures caused the current shell's set -e behavior to skip the explicitly requested long-horizon stage, leaving less falsifiable evidence from the same bounded request."
+    },
+    {
+      "finding": "PR 163 made future request commits observable without changing campaign bounds, scoring, or evidence admissibility, so per-stage outcomes can be retained without weakening the claim gate."
+    }
+  ],
+  "contradictory_evidence": [],
+  "rejected_reasons": [],
+  "depends_on": [
+    "candidate-copilot-sdk-live-campaign-v1",
+    "candidate-live-request-status-rendezvous-v1"
+  ],
+  "conflicts_with": [],
+  "tested_with": [],
+  "incompatible_with": [],
+  "source_refs": [
+    ".github/workflows/live-agi-request.yml",
+    ".github/workflows/live-agi-development.yml",
+    "agi/HOURLY_EXECUTION_STATE.json"
+  ]
+}
