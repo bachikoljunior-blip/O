@@ -3,18 +3,16 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from agi.adaptive_depth_composition import run_adaptive_depth_composition
 from agi.seed_committed_gap_acquisition import run_seed_committed_gap_acquisition
-from agi.seed_committed_target_generator import run_seed_committed_target_generator
 
 
 def test_seed_committed_generic_grammar_gap_is_acquired_and_retained(
     runtime_repo: Path,
 ) -> None:
-    prerequisite = run_seed_committed_target_generator(
+    prerequisite = run_adaptive_depth_composition(
         runtime_repo,
         "seed-grammar-gap-prerequisite",
-        max_target_attempts=2,
-        required_distinct_semantics=2,
     )
     assert prerequisite["passed"] is True
 
