@@ -10,15 +10,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T02:50:24+09:00",
   "started_at": "2026-08-19T02:50:24+09:00",
-  "heartbeat_at": "2026-08-19T02:59:20+09:00",
-  "last_progress_at": "2026-08-19T02:54:12+09:00",
+  "heartbeat_at": "2026-08-19T03:06:10+09:00",
+  "last_progress_at": "2026-08-19T03:05:20+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T025024JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T025024JST",
   "active_run_id": "run-self-applied-dynamic-source-recovery-20260819-025024",
-  "current_work_unit": "PR 210 exact head 738f71602dbc6eb10b2f091f6852defb47165dd6 failed CI 32166073144 after 359 passing tests because the corrective string-growth wrapper entered the seed-committed acquisition chain with an empty verified Candidate graph. The failure is retained. The wrapper now establishes the existing adaptive verified base graph before the cross-domain string-growth acquisition; no target, scoring, Candidate gate, control gap, or multi-stage requirement was weakened. New exact head 5a4c8e99b998d32d67cc74cfb5dbe06fceffef84 is under CI 32168086382. Merge only this unchanged head if the full exact-head run passes; otherwise retain the exact failure and repair only its demonstrated boundary.",
+  "current_work_unit": "PR 210 head 5a4c8e99b998d32d67cc74cfb5dbe06fceffef84 failed exact-head CI 32168086382 after 359 passing tests. The empty-graph bootstrap was fixed, but repeated prerequisite reconstruction created a graph that still lacked a unique multistage string-origin target. That exact failure is retained. Head 69ab06bc35d6b3ea6f4a7a1b9ddec2c00147cac6 now establishes the adaptive/three-domain graph once, probes the unchanged dynamic planner, and performs bounded counterexample-driven string acquisition only while the specific missing-string boundary persists; it then validates the already prepared graph without duplicate semantic prerequisite reconstruction. Targets, scoring, hidden-ID isolation, fresh-engine transfer, trial immutability, and the untouched cross-source control are unchanged. Exact-head CI 32169156514 is in progress.",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -29,11 +29,11 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "356f1f156a92832bfd49f66702fcd1cdd8080c27",
-  "latest_main_sha_before_heartbeat": "f799e24bb68512f75024d347a591a962768832b0",
+  "latest_main_sha_before_heartbeat": "ebf5782c72de16f3712500921649818e136b7e46",
   "unmerged_pr": 210,
   "unmerged_branch": "agi/dynamic-skillgraph-input-domains-r45",
-  "unmerged_head_sha": "5a4c8e99b998d32d67cc74cfb5dbe06fceffef84",
-  "unmerged_ci_run": 32168086382,
+  "unmerged_head_sha": "69ab06bc35d6b3ea6f4a7a1b9ddec2c00147cac6",
+  "unmerged_ci_run": 32169156514,
   "unmerged_ci_status": "in_progress",
   "additional_in_flight_prs": [],
   "recovered_stale_lease": {
@@ -43,14 +43,6 @@
     "last_repository_progress": "main commit 356f1f156a92832bfd49f66702fcd1cdd8080c27 retained the first PR 210 dynamic-source failure and recorded validation of corrected head 738f71602dbc6eb10b2f091f6852defb47165dd6",
     "reason": "running heartbeat and repository progress both exceeded stale_after_seconds; recovered idempotently from latest main and inspected already-completed CI rather than re-running it"
   },
-  "superseded_work": [
-    {
-      "pr": 207,
-      "head_sha": "9a5a2b5aa1fc45ed8e0fb2f82ccd77f1aaee54ca",
-      "status": "closed_unmerged_superseded_by_pr_208",
-      "reason": "stacked head required reconstruction on resulting main after PR 206; PR 208 was the main-based reconstruction"
-    }
-  ],
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
@@ -70,7 +62,7 @@
     {"pr": 208, "head_sha": "340c65ab5267a550924f7a5a68bca25be4e27ab5", "ci_run": 32160295800, "ci_conclusion": "success", "merge_sha": "219941f888b203837a1e739813999d084f1a8ce4"},
     {"pr": 209, "failed_head_sha": "d9d736f8ff13d66b24082fb2a9528098aae4e6bc", "failed_ci_run": 32164449848, "head_sha": "21fe92c65e0b30897c715d4f5e20faa61737d7dc", "ci_run": 32164610937, "ci_conclusion": "success", "merge_sha": "08ba68ab3d4adc304a2daff2c9416a560865d846"}
   ],
-  "next_falsifiable_milestone": "Settle PR 210 exact head 5a4c8e99b998d32d67cc74cfb5dbe06fceffef84 under CI 32168086382. If it passes, integrate unchanged and immediately advance to a precommitted registry of observed typed input/output-pair target sources with an untouched cross-pair control. If it fails, retain the exact failed head/run and repair only the demonstrated boundary. The prior one-string-skill insufficiency and empty-graph bootstrap failures remain negative evidence.",
+  "next_falsifiable_milestone": "Settle PR 210 exact head 69ab06bc35d6b3ea6f4a7a1b9ddec2c00147cac6 under CI 32169156514. If it passes, merge only that unchanged head and immediately advance to a precommitted registry of observed typed input/output-pair target sources with an untouched cross-pair control. If it fails, retain the exact head/run and repair only the newly demonstrated boundary. Do not weaken the unique multistage string-origin requirement.",
   "live_campaign": {
     "provider": "copilot",
     "model": "gpt-5.4",
@@ -98,7 +90,8 @@
     {"pr": 206, "head_sha": "1e39cef897ddcdfa76df6b4ebd44d391fdb5d28d", "ci_run": 32158579756, "failure": "352 tests passed; isolated cross-domain test root lacked the verified adaptive skill-graph prerequisite; failed head retained and not merged"},
     {"pr": 209, "head_sha": "d9d736f8ff13d66b24082fb2a9528098aae4e6bc", "ci_run": 32164449848, "failure": "pytest collection failed because observed_gap_domain_curriculum imported _string_retention_examples from cross_domain_seed_gap_acquisition instead of sequence_seed_gap_acquisition; failed head retained and not merged"},
     {"pr": 210, "head_sha": "b30fd6071bdd52fca2560028a78435d49df9936b", "ci_run": 32165090975, "failure": "359 tests passed; dynamic target registry exposed string as an observed input domain but found no unique multi-stage string-origin target because only one verified string skill existed; failed head retained and not merged"},
-    {"pr": 210, "head_sha": "738f71602dbc6eb10b2f091f6852defb47165dd6", "ci_run": 32166073144, "failure": "359 tests passed; the corrective growth wrapper invoked the existing cross-domain acquisition on an empty isolated Candidate graph, so its seed-committed numeric prerequisite failed with 'verified skill graph is empty'; failed head retained and not merged"}
+    {"pr": 210, "head_sha": "738f71602dbc6eb10b2f091f6852defb47165dd6", "ci_run": 32166073144, "failure": "359 tests passed; corrective growth wrapper entered seed-committed acquisition on an empty Candidate graph and failed with 'verified skill graph is empty'; failed head retained and not merged"},
+    {"pr": 210, "head_sha": "5a4c8e99b998d32d67cc74cfb5dbe06fceffef84", "ci_run": 32168086382, "failure": "359 tests passed; bootstrap succeeded but duplicate prerequisite reconstruction still left the observed string source without a unique multistage target; failed head retained and not merged"}
   ],
   "external_evidence_state": {
     "ledger_path": "evidence/external_ledger.json",
