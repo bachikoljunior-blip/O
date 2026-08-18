@@ -1,0 +1,40 @@
+{
+  "candidate_id": "candidate-live-request-status-rendezvous-v1",
+  "target_component": "execute",
+  "expected_scope": "agi/live-request-observability",
+  "status": "candidate",
+  "prompt_mode": "overlay",
+  "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+  "what_it_changes": "Publish a fail-closed commit-status rendezvous for each bounded push-triggered live campaign so watchdog recovery can observe the immutable request commit without enumerating unknown workflow-run IDs.",
+  "applicability": [
+    "agi/live-request-observability",
+    "idempotent watchdog recovery of bounded genuine-model campaign requests"
+  ],
+  "non_applicability": [
+    "external AGI claim evaluation",
+    "campaign scoring or expected answers",
+    "ordinary unrelated software tasks"
+  ],
+  "scope_states": {
+    "agi/live-request-observability": "candidate",
+    "global": "untested"
+  },
+  "supporting_evidence": [
+    {
+      "finding": "Request commit b37c0aa735fa72f2c609a4159b5b44c19963ee5d remained durably known while the connected GitHub interface could not enumerate its unknown push-triggered workflow run; the prior lease was released rather than duplicate the external request."
+    }
+  ],
+  "contradictory_evidence": [],
+  "rejected_reasons": [],
+  "depends_on": [
+    "candidate-copilot-sdk-live-campaign-v1"
+  ],
+  "conflicts_with": [],
+  "tested_with": [],
+  "incompatible_with": [],
+  "source_refs": [
+    "agi/HOURLY_EXECUTION_STATE.json",
+    ".github/workflows/live-agi-request.yml",
+    "tests/test_live_agi_request_workflow.py"
+  ]
+}
