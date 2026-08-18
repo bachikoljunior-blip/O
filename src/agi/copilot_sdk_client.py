@@ -14,6 +14,22 @@ except ImportError:  # Optional except for live Copilot execution.
     PermissionHandler = None  # type: ignore[assignment]
 
 _AUTH_ENV = ("COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN")
+_MONTHLY_QUOTA_MARKER = "exceeded your monthly quota"
+
+
+class CopilotProviderBlocked(RuntimeError):
+    """Stable fail-closed classification for a recognized external provider block."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+        super().__init__(f"Copilot provider blocked: {reason}")
+
+
+def classify_copilot_provider_error(exc: BaseException) -> str | None:
+    """Return a stable non-secret class for recognized provider resource failures."""
+    if _MONTHLY_QUOTA_MARKER in str(exc).lower():
+        return "monthly_quota_exhausted"
+    return None
 
 
 @dataclass(frozen=True)
@@ -106,9 +122,15 @@ class CopilotResponsesClient:
                     on_permission_request=self._permission_handler,
                 )
                 try:
-                    response = await session.send_and_wait(
-                        self._prompt(instructions=instructions, input=input)
-                    )
+                    try:
+                        response = await session.send_and_wait(
+                            self._prompt(instructions=instructions, input=input)
+                        )
+                    except Exception as exc:
+                        reason = classify_copilot_provider_error(exc)
+                        if reason is not None:
+                            raise CopilotProviderBlocked(reason) from exc
+                        raise
                 finally:
                     disconnect = getattr(session, "disconnect", None)
                     if callable(disconnect):
