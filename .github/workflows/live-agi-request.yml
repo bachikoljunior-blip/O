@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
   copilot-requests: write
 
 concurrency:
@@ -63,6 +64,10 @@ jobs:
           print(f'runs={runs}')
           print(f'instances={instances}')
           PY
+      - name: Publish pending request status
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -m agi.live_request_status pending
       - name: Run bounded Copilot capability and retention request
         shell: bash
         env:
@@ -90,3 +95,9 @@ jobs:
           path: .continual/evidence/campaigns/
           if-no-files-found: warn
           retention-days: 30
+      - name: Publish final request status
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: python -m agi.live_request_status final --job-status "${JOB_STATUS}"
