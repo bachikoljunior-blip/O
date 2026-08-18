@@ -1,0 +1,1 @@
+Continue unfinished AGI development in bachikoljunior-blip/O from latest persisted main only; avoid duplicate execution; validate incrementally; integrate only verified changes; never claim AGI without strict independent external evidence.
