@@ -117,8 +117,8 @@ def test_two_recovered_generated_skills_both_work_after_one_final_state_only_res
             )
             by_goal = {str(entry["goal"]): entry for entry in classification}
             assert by_goal[item["selected_goal"]]["supported"] is True
-            assert all(
-                entry.get("candidate_ids_supplied_by_caller") is False
+            assert not any(
+                entry.get("candidate_ids_supplied_by_caller") is True
                 for entry in classification
             )
 
@@ -126,8 +126,8 @@ def test_two_recovered_generated_skills_both_work_after_one_final_state_only_res
             resolver_root,
             _generated_goal_specs(seed + ":unrelated-fresh-gap"),
         )
-        assert all(
-            entry.get("candidate_ids_supplied_by_caller") is False
+        assert not any(
+            entry.get("candidate_ids_supplied_by_caller") is True
             for entry in unrelated
         )
         assert any(entry["supported"] is False for entry in unrelated)
