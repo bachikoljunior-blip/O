@@ -3,12 +3,19 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from agi.adaptive_depth_composition import run_adaptive_depth_composition
 from agi.persisted_failure_curriculum import run_persisted_failure_curriculum
 
 
 def test_persisted_failure_evidence_drives_next_curriculum_step(
     runtime_repo: Path,
 ) -> None:
+    prerequisite = run_adaptive_depth_composition(
+        runtime_repo,
+        "persisted-failure-curriculum-prerequisite",
+    )
+    assert prerequisite["passed"] is True
+
     report = run_persisted_failure_curriculum(
         runtime_repo,
         "persisted-failure-curriculum-test",
