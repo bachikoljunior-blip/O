@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from agi.acquired_program_runtime import _atomic_json
+from agi.adaptive_depth_composition import run_adaptive_depth_composition
 from agi.cross_domain_seed_gap_acquisition import run_cross_domain_seed_gap_acquisition
 from agi.dynamic_skillgraph_input_domains import (
     DynamicSkillGraphInputDomainError,
@@ -21,12 +22,13 @@ def run_dynamic_skillgraph_growth_campaign(root: Path, seed: str) -> dict[str, A
 
     The first dynamic-source attempt correctly failed because a graph with only one verified string-origin
     skill cannot expose a unique multi-stage string-origin behavior. This campaign preserves that negative
-    result as a capability-gap observation rather than weakening the milestone. It first runs the existing
-    seed-committed cross-domain acquisition path with a distinct seed so the library must acquire another
-    exact-scope string behavior only after it is shown unsupported, regression-gate it, transactionally
-    commit it, replay it from fresh durable state, and retain its numeric prerequisite. The dynamic target
-    generator then derives its source domains from the enlarged verified graph and must exercise numeric,
-    string, and sequence multi-stage targets without caller Candidate IDs.
+    result as a capability-gap observation rather than weakening the milestone. It first establishes the
+    same verified adaptive base graph required by the existing seed-committed acquisition path, then runs
+    the cross-domain acquisition with a distinct seed so the library must acquire another exact-scope
+    string behavior only after it is shown unsupported, regression-gate it, transactionally commit it,
+    replay it from fresh durable state, and retain its numeric prerequisite. The dynamic target generator
+    then derives its source domains from the enlarged verified graph and must exercise numeric, string,
+    and sequence multi-stage targets without caller Candidate IDs.
 
     All evidence remains bounded repository-authored internal development evidence. This does not prove
     open-domain autonomous learning, evaluator independence, production deployment, or AGI.
@@ -35,6 +37,15 @@ def run_dynamic_skillgraph_growth_campaign(root: Path, seed: str) -> dict[str, A
     if not isinstance(seed, str) or not seed.strip():
         raise ValueError("seed must be non-empty")
     root = root.resolve()
+
+    adaptive = run_adaptive_depth_composition(
+        root,
+        f"{seed}:pre-dynamic-base-graph",
+    )
+    if not adaptive.get("passed"):
+        raise DynamicSkillGraphGrowthError(
+            "pre-dynamic adaptive base graph did not pass"
+        )
 
     string_growth = run_cross_domain_seed_gap_acquisition(
         root,
