@@ -64,6 +64,12 @@ def _assert_unchanged(
     *,
     label: str,
 ) -> None:
+    if not candidate_ids:
+        if tree_before or trials_before:
+            raise PersistedFailureCurriculumError(
+                f"{label} supplied non-empty snapshots for an empty prior Candidate set"
+            )
+        return
     if _tree_snapshot(root, candidate_ids) != dict(tree_before):
         raise PersistedFailureCurriculumError(f"{label} changed prior Candidate bytes")
     if _trial_snapshot(root, candidate_ids) != dict(trials_before):
@@ -142,14 +148,20 @@ def run_persisted_failure_curriculum(root: Path, seed: str) -> dict[str, Any]:
     # preceding dynamic-growth bootstrap. CI 32191724187 demonstrated that replaying that
     # bootstrap after later frontier growth can construct a deeper route whose execution
     # exceeds the unchanged deterministic step budget. The failed head is retained as
-    # negative evidence; this milestone must preserve, not recreate, the current graph.
+    # negative evidence; this milestone must preserve, not recreate, any graph already here.
+    # An isolated fresh runtime may legitimately have no prior Candidates; preserving that
+    # empty prior set is vacuous and must not weaken _tree_snapshot for non-empty graphs.
     bootstrap_ids = _all_candidate_ids(root)
-    bootstrap_tree = _tree_snapshot(root, bootstrap_ids)
-    bootstrap_trials = _trial_snapshot(root, bootstrap_ids)
-    if not bootstrap_ids or not all(
-        bootstrap_trials.get(candidate_id) for candidate_id in bootstrap_ids
-    ):
-        raise PersistedFailureCurriculumError("source skill graph lacks durable Candidate trials")
+    if bootstrap_ids:
+        bootstrap_tree = _tree_snapshot(root, bootstrap_ids)
+        bootstrap_trials = _trial_snapshot(root, bootstrap_ids)
+        if not all(bootstrap_trials.get(candidate_id) for candidate_id in bootstrap_ids):
+            raise PersistedFailureCurriculumError(
+                "source skill graph lacks durable Candidate trials"
+            )
+    else:
+        bootstrap_tree = {}
+        bootstrap_trials = {}
 
     evidence_seed = f"{seed}:evidence-source"
     first = run_seed_committed_gap_acquisition(root, evidence_seed, max_target_attempts=24)
