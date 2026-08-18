@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -34,6 +35,14 @@ def _load_measurements(path: Path) -> list[dict[str, Any]]:
             f"regression input must be a measurement array: {path}"
         )
     return [dict(item) for item in raw]
+
+
+def _regression_snapshots(root: Path, candidate_id: str) -> dict[str, str]:
+    regression_dir = root / ".continual" / "candidates" / candidate_id / "regression"
+    return {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted(regression_dir.glob("*.json"))
+    }
 
 
 def _run_one(
@@ -123,7 +132,7 @@ def run_cross_family_rollback_isolation(root: Path, seed: str) -> dict[str, Any]
         *recursive_ids,
     ]
     stable_trials_before = _trial_snapshots(root, stable_ids)
-    target_trials_before = _trial_snapshots(root, [target_id])[target_id]
+    target_regression_before = _regression_snapshots(root, target_id)
 
     candidate_dir = root / ".continual" / "candidates" / target_id
     regression_input = candidate_dir / "regression-input"
@@ -275,13 +284,13 @@ def run_cross_family_rollback_isolation(root: Path, seed: str) -> dict[str, Any]
             "target recovery rewrote another family's Candidate trial evidence"
         )
 
-    target_trials_after = _trial_snapshots(root, [target_id])[target_id]
-    new_target_trial_records = sorted(
-        set(target_trials_after) - set(target_trials_before)
+    target_regression_after = _regression_snapshots(root, target_id)
+    new_target_regression_records = sorted(
+        set(target_regression_after) - set(target_regression_before)
     )
-    if len(new_target_trial_records) != 1:
+    if new_target_regression_records != [Path(rollback["decision_ref"]).name]:
         raise CrossFamilyRollbackIsolationError(
-            "rollback did not retain exactly one new target regression record"
+            "rollback did not retain exactly the new failed regression decision"
         )
 
     target_state = json.loads((candidate_dir / "candidate.json").read_text(encoding="utf-8"))
@@ -321,7 +330,8 @@ def run_cross_family_rollback_isolation(root: Path, seed: str) -> dict[str, Any]
             stable_trials_unchanged_after_recovery
         ),
         "rollback_negative_evidence_retained": rollback_negative_retained,
-        "new_target_trial_record_count": len(new_target_trial_records),
+        "new_target_regression_record_count": len(new_target_regression_records),
+        "new_target_regression_records": new_target_regression_records,
         "fresh_engine_run_count": len(fresh_runs),
         "fresh_engine_runs": fresh_runs,
         "live_model_invocation_required": False,
