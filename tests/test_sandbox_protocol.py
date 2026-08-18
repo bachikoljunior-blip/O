@@ -7,6 +7,7 @@ import pytest
 
 from agi.longhorizon import LongHorizonTask, ReferenceLongHorizonAgent
 from agi.sandbox_protocol import (
+    MIN_REPEATED_INSTANCES,
     SandboxProtocolInstance,
     deterministic_sandbox_instances,
     run_sandbox_protocol,
@@ -38,7 +39,7 @@ def test_reference_sandbox_protocol_repeats_varied_durable_recovery(tmp_path):
         instances=protocol,
     )
     assert report.passed is True
-    assert report.instance_count == 3
+    assert report.instance_count == MIN_REPEATED_INSTANCES == 3
     assert report.varied_task_count == 3
     assert report.passed_instances == 3
     assert report.verified_checkpoints == 3
@@ -108,7 +109,7 @@ def test_sandbox_protocol_definition_is_deterministic_varied_and_valid():
     assert first == second
     validation = validate_sandbox_instances(first)
     assert validation["valid"] is True
-    assert validation["instance_count"] == 3
+    assert validation["instance_count"] == MIN_REPEATED_INSTANCES
     assert validation["varied_task_count"] == 3
     assert len(set(validation["instance_commitments"])) == 3
     assert len(set(validation["task_commitments"])) == 3
@@ -141,4 +142,4 @@ def test_duplicate_or_unvaried_protocol_is_rejected(tmp_path):
         run_sandbox_protocol(_reference_factory, sandbox_root=tmp_path, instances=unvaried)
 
     with pytest.raises(ValueError, match="at least three"):
-        deterministic_sandbox_instances(2)
+        deterministic_sandbox_instances(MIN_REPEATED_INSTANCES - 1)

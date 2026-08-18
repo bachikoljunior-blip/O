@@ -20,7 +20,9 @@ def test_live_request_workflow_is_narrow_and_copilot_only():
     assert "python -m pip install -e '.[test,copilot]'" in text
     assert "provider=copilot only" in text
     assert "1 <= runs <= 3" in text
-    assert "1 <= instances <= 3" in text
+    assert "from agi.sandbox_protocol import MIN_REPEATED_INSTANCES" in text
+    assert "MIN_REPEATED_INSTANCES <= instances <= 3" in text
+    assert "1 <= instances <= 3" not in text
     assert "agi-copilot run-campaign" in text
     assert "agi-copilot run-longhorizon" in text
     assert "GITHUB_TOKEN: ${{ github.token }}" in text
