@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "evidence_class": "internal_development",
+  "admissible_for_external_agi_claim": false,
+  "run_id": "run-self-applied-live-copilot-response-recovery-20260818-060655",
+  "execution_id": "o-agi-watchdog-recovery-20260818T160242JST",
+  "logical_context_reset": true,
+  "prior_execution_chat_context_used": false,
+  "continuation_source": "repository_latest_main_only",
+  "objective": "Continue unfinished O AGI development from durable repository state without duplicate execution, integrate only exact-head validated changes, preserve negative evidence, and keep the strict independent external evidence gate unchanged.",
+  "recovery": {
+    "stale_execution_id": "o-agi-watchdog-recovery-20260818T150836JST",
+    "stale_heartbeat_at": "2026-08-18T15:30:02+09:00",
+    "stale_after_seconds": 900,
+    "latest_main_sha_at_recovery": "9c7ccc952fb844abaaa5ee4b518f473b113b020f",
+    "finding": "The persisted running heartbeat was stale. Recovery inspected latest main and existing PR/CI state before mutating and reused pre-existing PR 184 and PR 185 rather than recreating their work."
+  },
+  "completed_actions": [
+    {
+      "pr": 184,
+      "head_sha": "2ecbfdec8d24b8d41875728efa4c63976e214831",
+      "ci_run": 32107161364,
+      "ci_conclusion": "success",
+      "merge_sha": "7e5cec58789cc3e80903422920840147f9788e7f",
+      "finding": "A failure-driven acquired square skill was reused after restart as one stage in later autonomous composition with an older retained skill; shorter type-correct behavior was rejected and Candidate/trial state remained unchanged."
+    },
+    {
+      "pr": 185,
+      "head_sha": "e17c96a30ea3a51a492d1e82f84d1e02258037db",
+      "ci_run": 32107357703,
+      "ci_conclusion": "success",
+      "merge_sha": "b098998cadd1185b18c24ed5c77e45eb3a3da865",
+      "finding": "Two distinct fail-closed capability gaps were independently learned and transactionally retained across separate restart sessions, then both new gains were combined with an older retained skill in a fresh three-stage composition without forgetting."
+    },
+    {
+      "pr": 186,
+      "head_sha": "c2bdbccdfb3de09039bd736151265ca6dfacc589",
+      "ci_run": 32110034659,
+      "ci_conclusion": "success",
+      "merge_sha": "a8933f5596ace394e8fbd6d33a0836355589eec9",
+      "finding": "The multi-gap curriculum was split into four durable phases and explicitly resumed one phase at a time without replaying completed learning/transaction phases; final fresh-state composition reused both retained gains with immutable Candidate/trial evidence."
+    }
+  ],
+  "current_work": {
+    "pr": 187,
+    "branch": "agi/receipt-reconciled-curriculum-r25",
+    "head_sha": "ae700174ed370bb2d5d765f6521c987070018a24",
+    "ci_run": 32110543148,
+    "ci_status": "in_progress",
+    "falsifiable_goal": "Close the post-side-effect/pre-journal crash window by writing a phase completion receipt bound to campaign, seed commitment, attempt, result metadata, and all durable Candidate/trial fingerprints. A simulated interrupted square acquisition must reconcile without replay or a second attempt; a tampered receipt must fail closed; later phases must still complete with protected state unchanged."
+  },
+  "retained_negative_evidence": [
+    {"workflow_run": 32059066667, "finding": "Strict benchmark validation rejected non-object state/procedure update."},
+    {"workflow_run": 32063661025, "finding": "Mostly correct live behavior still produced output-shape and strict-JSON failures."},
+    {"workflow_run": 32070352400, "finding": "Fresh core response failed strict JSON parsing."},
+    {"workflow_run": 32071032454, "finding": "Core passed; workspace persistent memory/procedure semantics failed."},
+    {"workflow_run": 32074826306, "finding": "Core and 11/12 workspace passed; recalled scalar output shape failed."},
+    {"workflow_run": 32090346077, "finding": "Two live capability/workspace repeats scored 1.0; long-horizon orchestration exposed request/runtime minimum mismatch."},
+    {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "finding": "Both live stages reached Copilot but monthly quota exhaustion blocked semantic evaluation; do not retrigger while blocked."},
+    {"pr": 167, "head_sha": "073487a364f1b4b7d6f50432d56dbc02fd209974", "ci_run": 32093707492, "finding": "One compatibility assertion failed; failed head was not merged."},
+    {"pr": 172, "head_sha": "bdd114ea9c96edff912c842fce0f0a53372cf061", "ci_run": 32098470596, "finding": "Rollback-isolation assertion inspected the wrong durable regression location; failed head was not merged."}
+  ],
+  "provider_blocks": {
+    "copilot": {
+      "status": "blocked",
+      "reason": "monthly_quota_exhausted",
+      "last_workflow_run": 32094156066,
+      "retry_policy": "do_not_retrigger_while_blocked"
+    }
+  },
+  "external_evidence_state": {
+    "evaluation_requests": 0,
+    "challenges": 0,
+    "disclosures": 0,
+    "attestations": 0,
+    "registered_verifiers": 0,
+    "agi_claim_supported": false
+  },
+  "next_action": "Observe PR 187 exact-head CI without duplicating it. Merge only the unchanged passing head. On failure retain the exact failed run and repair only the demonstrated boundary. After success immediately choose the next capability/autonomy milestone rather than treating crash-recovery reliability as AGI completion.",
+  "claim_boundary": "Everything in this record is self-produced repository development evidence. It cannot satisfy the independent external production AGI gate."
+}
