@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from agi.adaptive_depth_composition import run_adaptive_depth_composition
 from agi.cross_domain_seed_gap_acquisition import (
     _precommit_string_gap_schedule,
     run_cross_domain_seed_gap_acquisition,
@@ -27,9 +28,17 @@ def test_string_gap_schedule_is_seed_committed_and_generic() -> None:
     )
 
 
-def test_cross_domain_seed_gap_acquisition_retains_numeric_and_learns_string(tmp_path: Path) -> None:
+def test_cross_domain_seed_gap_acquisition_retains_numeric_and_learns_string(
+    runtime_repo: Path,
+) -> None:
+    prerequisite = run_adaptive_depth_composition(
+        runtime_repo,
+        "cross-domain-string-gap-base-library",
+    )
+    assert prerequisite["passed"] is True
+
     report = run_cross_domain_seed_gap_acquisition(
-        tmp_path,
+        runtime_repo,
         "cross-domain-string-gap-test",
         max_target_attempts=16,
     )
@@ -60,7 +69,7 @@ def test_cross_domain_seed_gap_acquisition_retains_numeric_and_learns_string(tmp
     assert "does not establish independent production evaluation or AGI" in report["claim_boundary"]
 
     evidence_path = (
-        tmp_path
+        runtime_repo
         / ".continual"
         / "evidence"
         / "cross-domain-seed-gap-acquisition"
