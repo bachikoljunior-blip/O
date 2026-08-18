@@ -2,7 +2,7 @@
   "candidate_id": "candidate-live-campaign-stage-isolation-v1",
   "target_component": "execute",
   "expected_scope": "agi/live-campaign-evidence-coverage",
-  "status": "candidate",
+  "status": "active-for-scope",
   "prompt_mode": "overlay",
   "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
   "what_it_changes": "Run the capability and long-horizon stages independently inside one already-bounded live request, persist both stage outcomes, and aggregate failure only after both stages have been attempted.",
@@ -16,7 +16,7 @@
     "ordinary unrelated software tasks"
   ],
   "scope_states": {
-    "agi/live-campaign-evidence-coverage": "candidate",
+    "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
     "global": "untested"
   },
   "supporting_evidence": [
@@ -25,6 +25,11 @@
     },
     {
       "finding": "PR 163 made future request commits observable without changing campaign bounds, scoring, or evidence admissibility, so per-stage outcomes can be retained without weakening the claim gate."
+    },
+    {
+      "scope": "agi/live-campaign-evidence-coverage",
+      "finding": "PR 164 corrected trial head f6049d8d71376e14d215d62dc4aecea5c47780a5 passed the full repository test workflow in CI run 32087476553. The exact tested implementation restores fail-closed shell behavior outside the two bounded model stages, captures both stage exit codes, persists request-stage-status.json, and leaves run bounds, evaluators, parsers, scoring, sandbox rules, Candidate gates, and the external AGI claim gate unchanged.",
+      "evidence_kind": "exact_head_ci"
     }
   ],
   "contradictory_evidence": [],
@@ -34,11 +39,15 @@
     "candidate-live-request-status-rendezvous-v1"
   ],
   "conflicts_with": [],
-  "tested_with": [],
+  "tested_with": [
+    "PR164 corrected trial head f6049d8d71376e14d215d62dc4aecea5c47780a5 / CI 32087476553"
+  ],
   "incompatible_with": [],
   "source_refs": [
     ".github/workflows/live-agi-request.yml",
     ".github/workflows/live-agi-development.yml",
+    "tests/test_live_agi_request_workflow.py",
+    "tests/test_live_agi_workflow.py",
     "agi/HOURLY_EXECUTION_STATE.json"
   ]
 }
