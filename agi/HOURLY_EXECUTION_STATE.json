@@ -10,15 +10,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-18T22:01:21+09:00",
   "started_at": "2026-08-18T22:01:21+09:00",
-  "heartbeat_at": "2026-08-18T22:08:35+09:00",
-  "last_progress_at": "2026-08-18T22:07:58+09:00",
+  "heartbeat_at": "2026-08-18T22:16:30+09:00",
+  "last_progress_at": "2026-08-18T22:16:23+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260818T220121JST",
   "session_id": "same-task-chat-watchdog-recovery-20260818T220121JST",
   "active_run_id": "run-self-applied-adaptive-depth-recovery-20260818-220121",
-  "current_work_unit": "PR 200 exact head 9d29f6d7b8aa775fba2baee3b48079d229582752 passed full CI 32136696638 and merged unchanged as 89d4446b1b1ffa745cd549f234101bfeb2bf918d. Development immediately advanced to PR 201 head 3b8070c87f46cafb611bd9c30311e008e914f031: bounded adaptive shallowest-sufficient composition depth search with explicit search/behavior budgets, fail-closed minimal-depth ambiguity, unsupported-domain and budget rejection, fresh state-only discovery without caller Candidate IDs, behavior rejection of shorter type-correct routes, fresh Engine transfer, and immutable Candidate/trial state. Exact-head CI 32140613801 is in progress; do not merge unless this unchanged head passes.",
+  "current_work_unit": "PR 201 head 3b8070c87f46cafb611bd9c30311e008e914f031 is under exact-head CI 32140613801. While that non-conflicting validation runs, stacked PR 202 head 175f8cbf5bb037d27147fc396f28733e3854f504 adds the next retention pressure: after an adaptively selected route is learned, independently add a later object-to-boolean capability, fresh-restart from durable state, rediscover the original route at the same minimal behavior depth without caller Candidate IDs, reject later-skill hijacking, replay held-back challenges, and keep an unrelated string-to-numeric gap fail-closed. PR 202 is explicitly stacked on PR 201 and must not merge before PR 201; after PR 201 integration, its two new files require fresh exact-head CI on main.",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -29,13 +29,22 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "60bb9822b5cbf221aaf5d6d855dc54aad409d798",
-  "latest_main_sha_before_heartbeat": "89d4446b1b1ffa745cd549f234101bfeb2bf918d",
+  "latest_main_sha_before_heartbeat": "6908d929bdec700d21eecf80137e67e007039ecc",
   "unmerged_pr": 201,
   "unmerged_branch": "agi/adaptive-depth-composition-r37",
   "unmerged_head_sha": "3b8070c87f46cafb611bd9c30311e008e914f031",
   "unmerged_ci_run": 32140613801,
   "unmerged_ci_status": "in_progress_exact_head",
-  "additional_in_flight_prs": [],
+  "additional_in_flight_prs": [
+    {
+      "pr": 202,
+      "branch": "agi/cross-seed-adaptive-depth-retention-r38",
+      "base_branch": "agi/adaptive-depth-composition-r37",
+      "head_sha": "175f8cbf5bb037d27147fc396f28733e3854f504",
+      "status": "stacked_unmerged_pending_base_validation",
+      "rule": "Do not merge before PR 201; reconstruct/rebase only PR 202's two new files onto the PR 201 merge result and require fresh exact-head CI."
+    }
+  ],
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260818T210126JST",
     "last_heartbeat_at": "2026-08-18T21:25:07+09:00",
@@ -59,7 +68,7 @@
     {"pr": 198, "failed_head_sha": "27cb9e71bf41cfda7adc94a4928751fbfd454afc", "failed_ci_run": 32134990908, "head_sha": "c364dd7622c03bb58847106233a729b2a0ddd8c3", "ci_run": 32135928828, "ci_conclusion": "success", "merge_sha": "a977ef1df599f1cee8c638f4e70ebf560cf9e638"},
     {"pr": 200, "head_sha": "9d29f6d7b8aa775fba2baee3b48079d229582752", "ci_run": 32136696638, "ci_conclusion": "success", "merge_sha": "89d4446b1b1ffa745cd549f234101bfeb2bf918d"}
   ],
-  "next_falsifiable_milestone": "Validate PR 201 exact head 3b8070c87f46cafb611bd9c30311e008e914f031. If it passes unchanged and remains mergeable, merge it and immediately increase pressure from one seed-selected adaptive route to cross-seed adaptive-depth retention: require multiple fresh state-only planners to independently choose different minimal depths where available, preserve exact search budgets and no-forgetting, and replay retained routes after a later heterogeneous capability addition. If PR 201 fails, retain the exact failed head/run and repair only the demonstrated boundary.",
+  "next_falsifiable_milestone": "First settle PR 201 exact-head CI without moving or merging an unverified head. If PR 201 passes, merge unchanged and reconstruct/rebase only PR 202's two post-addition-retention files onto resulting main, then require fresh exact-head CI. If PR 201 fails, retain its exact failed head/run and repair only the demonstrated boundary; keep PR 202 stacked and unmerged until the corrected base is revalidated. After PR 202 passes and integrates, continue to multi-seed/minimal-depth diversity and cross-session retained replay rather than treating one retained route as completion.",
   "live_campaign": {
     "provider": "copilot",
     "model": "gpt-5.4",
