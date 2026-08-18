@@ -16,32 +16,30 @@
   "execution_policy_path": "agi/STANDALONE_HOURLY_AUTOMATION.md",
   "self_application_policy_path": "agi/SELF_APPLICATION.md",
   "lease_path": "agi/HOURLY_EXECUTION_STATE.json",
-  "active_run_id": "run-self-applied-pr211-recovery-20260819-055716",
-  "run_status": "Recovered the stale prior lease from latest main only; merged exact-head CI-passing PR 211; reconstructed PR 212 on verified main and started fresh exact-head CI; staged PR 213 to test single-round counterexample-driven frontier expansion and PR 214 to test repeated frontier growth with functional no-forgetting while dependencies validate.",
-  "last_watchdog_recovery": "2026-08-19T05:57:16+09:00",
-  "last_heartbeat_at": "2026-08-19T06:01:51+09:00",
+  "active_run_id": "run-self-applied-pr215-recovery-20260819-085551",
+  "run_status": "Recovered a stale lease from latest main only after PR 215 CI 32195643938 failed. Retained that exact head/run, repaired only the isolated-test prerequisite by establishing the verified adaptive-depth skill graph in the test before invoking the production persisted-failure curriculum, and started fresh exact-head CI 32199356185 on head c71d5a6bf6ad35a58547a651d0f22f96b6f301a6. PRs 216 and 217 remain stacked and blocked until dependencies are verified and merged.",
+  "last_watchdog_recovery": "2026-08-19T08:55:51+09:00",
+  "last_heartbeat_at": "2026-08-19T08:59:30+09:00",
   "trigger_role": "watchdog_only",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
   "hourly_boundary_is_stop_condition": false,
   "active_execution_continues_until": "verified_agi_or_platform_process_end",
-  "last_completed_capability_sha": "ec2d7ccc7163ad829d12851d1947a655c37493c9",
-  "unmerged_pr": 212,
-  "unmerged_head_sha": "8211d706e16d0508b6aa934d0200144858c9f6cf",
-  "unmerged_ci_run": 32185407560,
-  "unmerged_ci_status": "in_progress_fresh_main_exact_head",
+  "last_completed_capability_sha": "7a90d868b7178e786de14edbff997ee1e9fa8830",
+  "unmerged_pr": 215,
+  "unmerged_head_sha": "c71d5a6bf6ad35a58547a651d0f22f96b6f301a6",
+  "unmerged_ci_run": 32199356185,
+  "unmerged_ci_status": "in_progress_fresh_exact_head",
   "stacked_next_prs": [
-    {"pr": 213, "head_sha": "fa402663255421ab76d67cadc9122f93fb666b2c", "base_pr": 212, "ci_run": 32185888963, "ci_status": "in_progress"},
-    {"pr": 214, "head_sha": "b1b8865d2752eb252772acdcd9123b21ae047258", "base_pr": 213, "ci_status": "started_or_pending_observation"}
+    {"pr": 216, "head_sha": "9c74537e0559d953082f02202e5691fb88b74d7b", "base_pr": 215, "ci_status": "blocked_requires_reconstruction_after_pr215"},
+    {"pr": 217, "head_sha": "38debd33a9acb15aa17fe3ce313a01c6e26aa736", "base_pr": 216, "ci_status": "blocked_requires_reconstruction_after_pr216"}
   ],
-  "failed_validation": "All historical failed heads remain retained in agi/CONTINUATION.json and agi/HOURLY_EXECUTION_STATE.json. The current recovery introduced no merged failed head. Copilot live validation remains quota-blocked and was not retriggered.",
-  "next_executable_action": "Finish PR 212 fresh exact-head CI 32185407560 and merge only unchanged head 8211d706e16d0508b6aa934d0200144858c9f6cf if it passes. Then reconstruct PR 213 on the resulting main and require fresh exact-head CI; after that settles, reconstruct PR 214 and require fresh exact-head CI. Failed heads become retained negative evidence rather than being merged or hidden.",
+  "failed_validation": "PR 215 head c417e9bb4249d51a5ddb99b78670baaeaf87c35c / CI 32195643938 failed with 363 passed and one fail-closed empty-verified-graph error. Earlier PR 215 failed heads and Copilot quota exhaustion remain retained as negative evidence. No failed head was merged.",
+  "next_executable_action": "Observe PR 215 fresh exact-head CI 32199356185 without duplicating it. Merge only unchanged passing head c71d5a6bf6ad35a58547a651d0f22f96b6f301a6. Then reconstruct PR 216 directly on the verified post-PR-215 main and require fresh exact-head CI; preserve every failed head/run.",
   "self_application_state": {
     "enabled": true,
-    "run_id": "run-self-applied-pr211-recovery-20260819-055716",
-    "snapshot_ref": ".continual/runs/run-self-applied-pr211-recovery-20260819-055716/snapshot.json",
-    "events_ref": ".continual/runs/run-self-applied-pr211-recovery-20260819-055716/events.jsonl",
+    "run_id": "run-self-applied-pr215-recovery-20260819-085551",
     "ordinary_context_reuse_allowed": true,
     "logical_reset_on_contamination": true,
     "fresh_retention_transfer_required": true,
@@ -49,12 +47,7 @@
     "external_claim_admissible": false
   },
   "provider_blocks": {
-    "copilot": {
-      "status": "blocked",
-      "reason": "monthly_quota_exhausted",
-      "observed_workflow": 32094156066,
-      "retry_policy": "do_not_retrigger_while_blocked"
-    }
+    "copilot": {"status": "blocked", "reason": "monthly_quota_exhausted", "observed_workflow": 32094156066, "retry_policy": "do_not_retrigger_while_blocked"}
   },
   "external_evidence_state": {
     "evaluation_requests": 0,
@@ -66,5 +59,5 @@
   },
   "automation_control_status": "A fresh running heartbeat suppresses duplicate work; a stale or released lease while the AGI goal remains unmet permits latest-main-only recovery. Repository state is durable continuation, not scheduler control-plane proof.",
   "rule": "Every recovery reconstructs work from latest main only. Retention and transfer validation use fresh execution; independent evaluation uses fresh independent execution; work units are persisted through native self-application. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries are not stop conditions. Verified AGI remains gated on genuinely independent production evidence.",
-  "updated_utc": "2026-08-18T21:10:15Z"
+  "updated_utc": "2026-08-18T23:59:30Z"
 }
