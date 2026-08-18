@@ -10,15 +10,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-18T18:56:30+09:00",
   "started_at": "2026-08-18T18:56:30+09:00",
-  "heartbeat_at": "2026-08-18T18:56:30+09:00",
-  "last_progress_at": "2026-08-18T18:56:30+09:00",
+  "heartbeat_at": "2026-08-18T19:03:02+09:00",
+  "last_progress_at": "2026-08-18T19:03:02+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260818T185630JST",
   "session_id": "same-task-chat-watchdog-recovery-20260818T185630JST",
   "active_run_id": "run-self-applied-resumable-generated-recovery-20260818-185630",
-  "current_work_unit": "PR 192 exact head b983250db7c90a952546da3e49856550bc53e75c completed CI 32120176212 successfully and remains open/mergeable. Re-read and merge only this unchanged head, then immediately continue to the next bounded generated-goal autonomy milestone with protected Candidate/trial preservation and strict fail-closed behavior.",
+  "current_work_unit": "Recovered the previously unjournaled in-flight PR 193 after discovering it during open-PR reconciliation. Closed recovery-created overlapping PR 194 without merge. PR 192 was reconstructed on recovered main as exact intended head b0a5013db57ee666bbdc515f3ec4348fb0968afb and CI 32124401328 is in progress. PR 193 was reconstructed on that exact PR 192 head as d7a639d9c564400785c7e4635f5ef20cb73d6eb6 preserving only its intended repeated-round regression change; await exact-head CI. Merge PR 192 only after its exact head passes, then retarget/revalidate PR 193 on merged main before integration.",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -29,19 +29,36 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "c6982510707bef0f2b50d92e11e102c99850cb6b",
-  "latest_main_sha_before_heartbeat": "c6982510707bef0f2b50d92e11e102c99850cb6b",
+  "latest_main_sha_before_heartbeat": "677751d289229bc80fcdb0b10d55998789b53c51",
   "unmerged_pr": 192,
   "unmerged_branch": "agi/resumable-generated-goal-round-r30",
-  "unmerged_head_sha": "b983250db7c90a952546da3e49856550bc53e75c",
-  "unmerged_ci_run": 32120176212,
-  "unmerged_ci_status": "success_exact_head",
-  "additional_in_flight_prs": [],
+  "unmerged_head_sha": "b0a5013db57ee666bbdc515f3ec4348fb0968afb",
+  "unmerged_ci_run": 32124401328,
+  "unmerged_ci_status": "in_progress_exact_head",
+  "additional_in_flight_prs": [
+    {
+      "pr": 193,
+      "branch": "agi/multi-round-generated-goal-recovery-r31",
+      "head_sha": "d7a639d9c564400785c7e4635f5ef20cb73d6eb6",
+      "base": "agi/resumable-generated-goal-round-r30",
+      "status": "awaiting_exact_head_ci_after_reconstruction",
+      "falsifiable_goal": "prove the single-round post-commit recovery mechanism composes across two successive seed-generated learning rounds and fresh recoveries without replay or forgetting"
+    }
+  ],
+  "superseded_duplicate_work": [
+    {
+      "pr": 194,
+      "branch": "agi/multi-seed-generated-curriculum-r31",
+      "action": "closed_without_merge",
+      "reason": "opened during stale recovery before pre-existing PR 193 was discovered; closed to restore the no-duplicate invariant"
+    }
+  ],
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260818T180638JST",
     "last_heartbeat_at": "2026-08-18T18:10:40+09:00",
-    "last_repository_progress_at": "2026-08-18T18:11:05+09:00",
-    "last_repository_progress": "main heartbeat while PR 192 exact-head CI was running; PR 192 exact head later completed CI successfully and remained open",
-    "reason": "running heartbeat and repository progress both exceeded stale_after_seconds; recovered idempotently from latest main"
+    "last_repository_progress_at": "2026-08-18T18:13:21+09:00",
+    "last_repository_progress": "PR 193 was created after the last persisted heartbeat as the next repeated generated-goal crash-recovery milestone; the prior process then stopped without journaling it in the lease",
+    "reason": "running heartbeat and all repository progress exceeded stale_after_seconds; recovered idempotently from latest main and reconciled the unjournaled PR before further development"
   },
   "self_application": {
     "enabled": true,
