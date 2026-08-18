@@ -38,6 +38,8 @@ jobs:
           import re
           from pathlib import Path
 
+          from agi.sandbox_protocol import MIN_REPEATED_INSTANCES
+
           path = Path('agi/LIVE_CAMPAIGN_REQUEST.json')
           value = json.loads(path.read_text(encoding='utf-8'))
           if not isinstance(value, dict) or value.get('schema_version') != 1:
@@ -55,8 +57,14 @@ jobs:
           instances = value.get('longhorizon_instances')
           if not isinstance(runs, int) or isinstance(runs, bool) or not 1 <= runs <= 3:
               raise SystemExit('runs must be an integer from 1 through 3')
-          if not isinstance(instances, int) or isinstance(instances, bool) or not 1 <= instances <= 3:
-              raise SystemExit('longhorizon_instances must be an integer from 1 through 3')
+          if (
+              not isinstance(instances, int)
+              or isinstance(instances, bool)
+              or not MIN_REPEATED_INSTANCES <= instances <= 3
+          ):
+              raise SystemExit(
+                  f'longhorizon_instances must be an integer from {MIN_REPEATED_INSTANCES} through 3'
+              )
           purpose = value.get('purpose', '')
           if not isinstance(purpose, str) or len(purpose) > 300:
               raise SystemExit('purpose must be a string of at most 300 characters')
