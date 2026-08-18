@@ -13,15 +13,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-18T14:00:02+09:00",
   "started_at": "2026-08-18T14:00:02+09:00",
-  "heartbeat_at": "2026-08-18T14:03:18+09:00",
-  "last_progress_at": "2026-08-18T14:03:18+09:00",
+  "heartbeat_at": "2026-08-18T14:08:12+09:00",
+  "last_progress_at": "2026-08-18T14:08:12+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260818T140002JST",
   "session_id": "same-task-chat-watchdog-recovery-20260818T140002JST",
   "active_run_id": "run-self-applied-live-copilot-response-recovery-20260818-060655",
-  "current_work_unit": "PR 172 failed head bdd114ea9c96edff912c842fce0f0a53372cf061 is retained. Corrected head 529958bc1d671c9df01f8aec405a67b8ed964bb5 now validates exact regression/ evidence accounting in CI 32101302443. In parallel PR 173 head 43f40028f19369dfd4af8592e8864c09f2c3c99c validates durable-state rehydration: copy only Candidate/system persistent state into a distinct root, require no-Candidate control fail-closed, replay all accumulated heterogeneous and recursive skills through fresh Engines, and preserve Candidate bytes/trial ledgers. Merge only unchanged passing heads; then continue immediately to the next falsifiable retained-capability milestone.",
+  "current_work_unit": "PR 172 corrected exact head 529958bc1d671c9df01f8aec405a67b8ed964bb5 passed CI 32101302443 and merged as e336c2d25de31d7c19c93d4b2292a2981c04ca2d; failed head bdd114ea9c96edff912c842fce0f0a53372cf061 remains negative evidence. PR 173 passed against the pre-PR172 base but was closed unmerged rather than assuming green checks compose. Replacement PR 174 exact head b361d293b5fef432d0d5e62de2ae291206a76344 is based on PR172-merged main and is validating durable-state rehydration in CI 32101699661. Merge only unchanged passing head, then immediately test selective corruption/removal of one rehydrated Candidate/regression record: exact capability must fail closed, unrelated accumulated families must replay unchanged, source restoration must recover only the affected scope, and tamper evidence must remain retained.",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -32,20 +32,22 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "b8ffd6b5079c2c14aa07c534100bf7d4e76fb9bb",
-  "latest_main_sha_before_heartbeat": "6fb021cc23b671a81c22217fdde92e8a7ad2caa5",
-  "unmerged_pr": 172,
-  "unmerged_branch": "agi/cross-family-rollback-isolation-r13",
-  "unmerged_head_sha": "529958bc1d671c9df01f8aec405a67b8ed964bb5",
-  "unmerged_ci_run": 32101302443,
+  "latest_main_sha_before_heartbeat": "e336c2d25de31d7c19c93d4b2292a2981c04ca2d",
+  "unmerged_pr": 174,
+  "unmerged_branch": "agi/durable-state-rehydration-r14b",
+  "unmerged_head_sha": "b361d293b5fef432d0d5e62de2ae291206a76344",
+  "unmerged_ci_run": 32101699661,
   "unmerged_ci_status": "in_progress",
-  "additional_in_flight_prs": [
+  "additional_in_flight_prs": [],
+  "superseded_unmerged_prs": [
     {
       "pr": 173,
-      "branch": "agi/durable-state-rehydration-r14",
       "head_sha": "43f40028f19369dfd4af8592e8864c09f2c3c99c",
       "ci_run": 32101385134,
-      "ci_status": "queued",
-      "work_unit": "durable Candidate/system state rehydration in a distinct filesystem root"
+      "ci_conclusion": "success",
+      "base_sha": "6fb021cc23b671a81c22217fdde92e8a7ad2caa5",
+      "state": "closed_unmerged",
+      "reason": "CI passed before PR 172 merged; superseded by PR 174 rebased on verified rollback-isolation main to require combined-state validation"
     }
   ],
   "recovered_stale_lease": {
@@ -69,11 +71,10 @@
     "external_claim_admissible": false
   },
   "recent_completed_units": [
-    {"pr": 167, "head_sha": "6165b2553c58f1bdb5747653e7daf666cb4a0967", "ci_run": 32093943754, "ci_conclusion": "success", "merge_sha": "37a9e7b3a0a9ad864b104330f0b3e679f01feaeb"},
-    {"pr": 168, "head_sha": "979951aa401fb960dee14780a5d7f927d1f7b0cd", "ci_run": 32094755405, "ci_conclusion": "success", "merge_sha": "db6cca7100b435b4dfda8e6f0f32eb37c7fbfd97"},
     {"pr": 169, "head_sha": "4d676beef1fed54e831a23c62ecd466e8d24325f", "ci_run": 32094861196, "ci_conclusion": "success", "merge_sha": "cab27a3913cd52ab01b8cb6a885dd78796966bb6"},
     {"pr": 170, "head_sha": "1a2e9aaede0eb879dd74490d7c1d66ef0ade4b6f", "ci_run": 32098014733, "ci_conclusion": "success", "merge_sha": "2d22f175c6c26ac12b8bf2006f26a405db4c6d8a"},
-    {"pr": 171, "head_sha": "0dcf770cc91b251f9fd8cf279c4e5230b6b3df33", "ci_run": 32098127741, "ci_conclusion": "success", "merge_sha": "678166d5f576ce4e07e7a53dbe7312dbeb97496e"}
+    {"pr": 171, "head_sha": "0dcf770cc91b251f9fd8cf279c4e5230b6b3df33", "ci_run": 32098127741, "ci_conclusion": "success", "merge_sha": "678166d5f576ce4e07e7a53dbe7312dbeb97496e"},
+    {"pr": 172, "failed_head_sha": "bdd114ea9c96edff912c842fce0f0a53372cf061", "failed_ci_run": 32098470596, "head_sha": "529958bc1d671c9df01f8aec405a67b8ed964bb5", "ci_run": 32101302443, "ci_conclusion": "success", "merge_sha": "e336c2d25de31d7c19c93d4b2292a2981c04ca2d"}
   ],
   "live_campaign": {
     "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
