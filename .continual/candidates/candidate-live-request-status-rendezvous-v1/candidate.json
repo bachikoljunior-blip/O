@@ -2,7 +2,7 @@
   "candidate_id": "candidate-live-request-status-rendezvous-v1",
   "target_component": "execute",
   "expected_scope": "agi/live-request-observability",
-  "status": "candidate",
+  "status": "active-for-scope",
   "prompt_mode": "overlay",
   "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
   "what_it_changes": "Publish a fail-closed commit-status rendezvous for each bounded push-triggered live campaign so watchdog recovery can observe the immutable request commit without enumerating unknown workflow-run IDs.",
@@ -16,12 +16,17 @@
     "ordinary unrelated software tasks"
   ],
   "scope_states": {
-    "agi/live-request-observability": "candidate",
+    "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
     "global": "untested"
   },
   "supporting_evidence": [
     {
       "finding": "Request commit b37c0aa735fa72f2c609a4159b5b44c19963ee5d remained durably known while the connected GitHub interface could not enumerate its unknown push-triggered workflow run; the prior lease was released rather than duplicate the external request."
+    },
+    {
+      "scope": "agi/live-request-observability",
+      "finding": "PR 163 trial head bde5dd7cd6e3f3ec17ee79259cc8b30842690595 passed the full repository test workflow in CI run 32086768563 with the narrow statuses: write permission, fail-closed status publisher, artifact-only model outputs, and unchanged benchmark/external claim gates.",
+      "evidence_kind": "exact_head_ci"
     }
   ],
   "contradictory_evidence": [],
@@ -30,11 +35,15 @@
     "candidate-copilot-sdk-live-campaign-v1"
   ],
   "conflicts_with": [],
-  "tested_with": [],
+  "tested_with": [
+    "PR163 trial head bde5dd7cd6e3f3ec17ee79259cc8b30842690595 / CI 32086768563"
+  ],
   "incompatible_with": [],
   "source_refs": [
     "agi/HOURLY_EXECUTION_STATE.json",
     ".github/workflows/live-agi-request.yml",
-    "tests/test_live_agi_request_workflow.py"
+    "src/agi/live_request_status.py",
+    "tests/test_live_agi_request_workflow.py",
+    "tests/test_live_request_status.py"
   ]
 }
