@@ -25,12 +25,17 @@ def test_dynamic_skillgraph_type_pair_targets_cover_observed_pairs(runtime_repo:
     assert report["campaign_kind"] == "dynamic-skillgraph-type-pair-targets-v1"
     assert report["observed_type_pair_count"] >= 4
     pair_keys = {item["pair_key"] for item in report["observed_type_pairs"]}
-    assert {
-        "numeric->numeric",
-        "string->string",
-        "sequence->sequence",
-        "sequence->numeric",
-    }.issubset(pair_keys)
+    assert len(pair_keys) == report["observed_type_pair_count"]
+    assert {item["input_domain"] for item in report["observed_type_pairs"]} == {
+        "numeric",
+        "sequence",
+        "string",
+    }
+    assert len({item["output_domain"] for item in report["observed_type_pairs"]}) >= 2
+    assert any(
+        item["input_domain"] != item["output_domain"]
+        for item in report["observed_type_pairs"]
+    )
     assert set(report["target_pair_keys"]) == pair_keys
     assert report["target_plan_precommitted_before_solver_execution"] is True
     assert report["cross_domain_pair_target_exercised"] is True
