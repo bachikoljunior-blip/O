@@ -14,6 +14,7 @@ from agi.generated_parameter_composition_transfer import (
 from agi.heterogeneous_retention_campaign import _digest
 from agi.multi_gap_autonomous_curriculum import _all_candidate_ids, _trial_snapshot
 from agi.multi_session_continual_chain import _copy_persistent_state
+from agi.seeded_generated_goal_acquisition import _generated_goal_specs
 from agi.verified_macro_library_discovery import (
     discover_verified_acquired_program_ids,
     synthesize_from_verified_macro_library,
@@ -47,15 +48,90 @@ def _chain_vector(
     return tuple(outputs)
 
 
+def _generated_spec(seed: str, prefix: str) -> dict[str, Any]:
+    try:
+        return next(
+            spec for spec in _generated_goal_specs(seed) if str(spec["name"]).startswith(prefix)
+        )
+    except StopIteration as exc:  # pragma: no cover - fixed generator contract
+        raise ObservedCapabilityCompositionError(f"missing generated spec: {prefix}") from exc
+
+
+def _prerequisite_parameters(base_seed: str) -> dict[str, int]:
+    scale = int(
+        _generated_spec(f"{base_seed}:scale-source", "generated-scale-")["generated_parameter"]
+    )
+    offset = int(
+        _generated_spec(f"{base_seed}:offset-source", "generated-offset-")["generated_parameter"]
+    )
+    distractor_scale: int | None = None
+    for index in range(16):
+        value = int(
+            _generated_spec(
+                f"{base_seed}:distractor:{index}",
+                "generated-scale-",
+            )["generated_parameter"]
+        )
+        if value != scale:
+            distractor_scale = value
+            break
+    if distractor_scale is None:
+        raise ObservedCapabilityCompositionError(
+            "bounded prerequisite seed search found no distinct scale distractor"
+        )
+    return {
+        "scale": scale,
+        "offset": offset,
+        "distractor_scale": distractor_scale,
+    }
+
+
+def _select_synthesizable_prerequisite_seed(seed: str) -> tuple[str, list[dict[str, Any]]]:
+    """Choose a generated prerequisite whose parameters fit the existing bounded grammar.
+
+    The underlying generated affine acquisition uses max_nodes=3. Its numeric binary expression can use
+    the existing grammar's directly admitted scalar constants -5..5, so generated scale/offset values
+    above 5 are known before mutation to be outside that exact synthesis frontier. Rather than partially
+    learning one component and then failing on another, preflight a bounded deterministic seed sequence,
+    retain rejected parameter instances as negative evidence, and execute only a compatible seed.
+    """
+
+    candidates = [f"{seed}:capability-base"] + [
+        f"{seed}:capability-base:compatible:{index}" for index in range(32)
+    ]
+    rejected: list[dict[str, Any]] = []
+    for candidate_seed in candidates:
+        parameters = _prerequisite_parameters(candidate_seed)
+        unsupported = {
+            name: value for name, value in parameters.items() if not 2 <= int(value) <= 5
+        }
+        if not unsupported:
+            return candidate_seed, rejected
+        rejected.append(
+            {
+                "seed": candidate_seed,
+                "parameters": parameters,
+                "reason": "generated parameter is outside the max_nodes=3 numeric constant frontier [-5,5]",
+                "unsupported_parameters": unsupported,
+            }
+        )
+    raise ObservedCapabilityCompositionError(
+        "bounded prerequisite seed search found no parameter set inside synthesis frontier"
+    )
+
+
 def run_observed_capability_composition(root: Path, seed: str) -> dict[str, Any]:
     """Generate a new composed target from observed durable capabilities, not caller role names.
 
-    A bounded prerequisite first installs independently regression-verified generated numeric skills. A
-    fresh planner then discovers the verified durable library without caller Candidate IDs and inspects
-    only typed program behavior on seed-derived probes. It does not select candidates by names or by
-    scale/offset roles. Instead it enumerates bounded two-stage behaviors, chooses a uniquely identifiable
-    behavior that no one-stage route can realize, creates target examples from that observed composition,
-    and asks the ordinary durable-library synthesizer to rediscover the route with no Candidate IDs.
+    A bounded prerequisite first installs independently regression-verified generated numeric skills. Its
+    generated parameters are preflighted against the existing max_nodes=3 synthesis frontier before any
+    mutation; incompatible generated instances are retained as negative evidence and a bounded seed
+    search selects the first compatible instance. A fresh planner then discovers the verified durable
+    library without caller Candidate IDs and inspects only typed program behavior on seed-derived probes.
+    It does not select candidates by names or by scale/offset roles. Instead it enumerates bounded
+    two-stage behaviors, chooses a uniquely identifiable behavior that no one-stage route can realize,
+    creates target examples from that observed composition, and asks the ordinary durable-library
+    synthesizer to rediscover the route with no Candidate IDs.
 
     Post-selection challenges are generated only after the route is fixed and are executed through both
     the compiled program and fresh mechanical Engine runs. Candidate bytes and trial ledgers must remain
@@ -67,10 +143,8 @@ def run_observed_capability_composition(root: Path, seed: str) -> dict[str, Any]
         raise ValueError("seed must be non-empty")
     root = root.resolve()
 
-    prerequisite = run_generated_parameter_composition_transfer(
-        root,
-        f"{seed}:capability-base",
-    )
+    prerequisite_seed, rejected_prerequisite_seeds = _select_synthesizable_prerequisite_seed(seed)
+    prerequisite = run_generated_parameter_composition_transfer(root, prerequisite_seed)
     if not prerequisite.get("passed"):
         raise ObservedCapabilityCompositionError("generated capability prerequisite did not pass")
 
@@ -214,9 +288,13 @@ def run_observed_capability_composition(root: Path, seed: str) -> dict[str, Any]
         raise ObservedCapabilityCompositionError("fresh transfer mutated source Candidate trials")
 
     report: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "passed": True,
-        "campaign_kind": "observed-capability-composition-v1",
+        "campaign_kind": "observed-capability-composition-v2",
+        "prerequisite_seed": prerequisite_seed,
+        "prerequisite_seed_search_attempts": len(rejected_prerequisite_seeds) + 1,
+        "rejected_prerequisite_seed_count": len(rejected_prerequisite_seeds),
+        "rejected_prerequisite_seeds": rejected_prerequisite_seeds,
         "prerequisite_digest": str(prerequisite["digest"]),
         "caller_supplied_candidate_ids": False,
         "caller_named_capability_roles": False,
@@ -246,11 +324,12 @@ def run_observed_capability_composition(root: Path, seed: str) -> dict[str, Any]
         "prior_evidence_copied": prior_evidence_copied,
         "live_model_invocation_required": False,
         "claim_boundary": (
-            "Internal bounded observed-capability composition evidence only. The fresh planner generated "
-            "a two-stage target from mechanically observed durable numeric behaviors without caller "
-            "Candidate IDs or named capability roles, then the verified library rediscovered and "
-            "transferred that route. Repository-authored generation, search, runtime, regression, and "
-            "scoring do not establish independent production evidence or AGI."
+            "Internal bounded observed-capability composition evidence only. Unsynthesizable generated "
+            "prerequisite parameters are rejected before mutation and retained as negative evidence. The "
+            "fresh planner then generates a two-stage target from mechanically observed durable numeric "
+            "behaviors without caller Candidate IDs or named capability roles, and the verified library "
+            "rediscovers and transfers that route. Repository-authored generation, search, runtime, "
+            "regression, and scoring do not establish independent production evidence or AGI."
         ),
     }
     if not all(
