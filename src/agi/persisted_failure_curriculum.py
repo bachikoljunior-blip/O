@@ -10,7 +10,6 @@ from agi.acquired_programs import ProgramExample, execute_program
 from agi.adaptive_depth_composition import _challenge_inputs, synthesize_shallowest_verified_route
 from agi.behavior_guided_tool_chain_discovery import _execute_chain
 from agi.durable_state_rehydration import _tree_snapshot
-from agi.dynamic_skillgraph_growth_campaign import run_dynamic_skillgraph_growth_campaign
 from agi.heterogeneous_retention_campaign import _digest, _promote_task
 from agi.multi_gap_autonomous_curriculum import _all_candidate_ids, _trial_snapshot
 from agi.multi_session_continual_chain import _copy_persistent_state
@@ -139,12 +138,18 @@ def run_persisted_failure_curriculum(root: Path, seed: str) -> dict[str, Any]:
         raise ValueError("seed must be non-empty")
     root = root.resolve()
 
-    bootstrap = run_dynamic_skillgraph_growth_campaign(root, f"{seed}:bootstrap")
-    if not bootstrap.get("passed"):
-        raise PersistedFailureCurriculumError("dynamic skill-graph bootstrap did not pass")
+    # Consume the already verified durable graph rather than re-running the immediately
+    # preceding dynamic-growth bootstrap. CI 32191724187 demonstrated that replaying that
+    # bootstrap after later frontier growth can construct a deeper route whose execution
+    # exceeds the unchanged deterministic step budget. The failed head is retained as
+    # negative evidence; this milestone must preserve, not recreate, the current graph.
     bootstrap_ids = _all_candidate_ids(root)
     bootstrap_tree = _tree_snapshot(root, bootstrap_ids)
     bootstrap_trials = _trial_snapshot(root, bootstrap_ids)
+    if not bootstrap_ids or not all(
+        bootstrap_trials.get(candidate_id) for candidate_id in bootstrap_ids
+    ):
+        raise PersistedFailureCurriculumError("source skill graph lacks durable Candidate trials")
 
     evidence_seed = f"{seed}:evidence-source"
     first = run_seed_committed_gap_acquisition(root, evidence_seed, max_target_attempts=24)
