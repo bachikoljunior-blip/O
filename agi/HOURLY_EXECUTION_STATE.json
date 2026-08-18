@@ -10,15 +10,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-18T21:01:26+09:00",
   "started_at": "2026-08-18T21:01:26+09:00",
-  "heartbeat_at": "2026-08-18T21:05:32+09:00",
-  "last_progress_at": "2026-08-18T21:05:10+09:00",
+  "heartbeat_at": "2026-08-18T21:16:16+09:00",
+  "last_progress_at": "2026-08-18T21:16:01+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260818T210126JST",
   "session_id": "same-task-chat-watchdog-recovery-20260818T210126JST",
   "active_run_id": "run-self-applied-observed-composition-recovery-20260818-210126",
-  "current_work_unit": "PR 197 exact head 5136b0cc13a52e51443dc4de5ec6d8717347da61 passed full CI 32130979484 and merged unchanged as 970b7cdfb6f901b505f12ad7b34c81a10ccf4053. Development advanced immediately to PR 198: a fresh planner discovers durable numeric capabilities, observes bounded single/two-stage behavior signatures without caller Candidate IDs or named scale/offset roles, seed-selects a unique two-stage behavior not realizable by one stage, and requires verified-library synthesis plus fresh Engine challenges to rediscover/transfer it without changing Candidate bytes or trials. Exact head 27cb9e71bf41cfda7adc94a4928751fbfd454afc is under CI 32134990908; do not merge unless unchanged head passes.",
+  "current_work_unit": "PR 198 first exact head 27cb9e71bf41cfda7adc94a4928751fbfd454afc failed CI 32134990908 with 340 tests passing and one new test failing because its generated prerequisite produced offset=6 outside the existing max_nodes=3 numeric constant frontier [-5,5]. The failed head is retained and was not merged. Corrected head c364dd7622c03bb58847106233a729b2a0ddd8c3 now preflights a bounded deterministic prerequisite-seed sequence before mutation, retains incompatible generated parameters as negative evidence, and executes only a parameter set inside the existing synthesis frontier; await exact-head CI and do not merge until it passes unchanged. In parallel, non-conflicting PR 199 head 58c81de5ff59f4015acf78328e4248a2c97c03c1 tests heterogeneous observed-capability composition and incompatible-chain fail-closed behavior under CI 32135717911.",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -29,13 +29,22 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "4fd2d9b4bf04935585d303f32b5a770f7825ad84",
-  "latest_main_sha_before_heartbeat": "970b7cdfb6f901b505f12ad7b34c81a10ccf4053",
+  "latest_main_sha_before_heartbeat": "591bc225fe0595a43e753317ebd7403c36fe09b2",
   "unmerged_pr": 198,
   "unmerged_branch": "agi/observed-capability-composition-r34",
-  "unmerged_head_sha": "27cb9e71bf41cfda7adc94a4928751fbfd454afc",
-  "unmerged_ci_run": 32134990908,
-  "unmerged_ci_status": "queued_exact_head",
-  "additional_in_flight_prs": [],
+  "unmerged_head_sha": "c364dd7622c03bb58847106233a729b2a0ddd8c3",
+  "unmerged_ci_run": null,
+  "unmerged_ci_status": "awaiting_new_exact_head_run",
+  "additional_in_flight_prs": [
+    {
+      "pr": 199,
+      "branch": "agi/heterogeneous-observed-composition-r35",
+      "head_sha": "58c81de5ff59f4015acf78328e4248a2c97c03c1",
+      "ci_run": 32135717911,
+      "ci_status": "in_progress_exact_head",
+      "relationship": "non-conflicting next milestone prepared while PR 198 validation was external-waiting; never merge over an unverified dependency"
+    }
+  ],
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260818T195355JST",
     "last_heartbeat_at": "2026-08-18T20:17:41+09:00",
@@ -59,7 +68,7 @@
     {"pr": 196, "failed_head_sha": "b3d7e55ce8e18fa06aa0bde16199107c39ed2841", "failed_ci_run": 32129355499, "head_sha": "2042c258ac4c4302b8a36791f890547db7de4d86", "ci_run": 32130063990, "ci_conclusion": "success", "merge_sha": "7da080147885aac6916a79773af179ef83c1dcf0"},
     {"pr": 197, "head_sha": "5136b0cc13a52e51443dc4de5ec6d8717347da61", "ci_run": 32130979484, "ci_conclusion": "success", "merge_sha": "970b7cdfb6f901b505f12ad7b34c81a10ccf4053"}
   ],
-  "next_falsifiable_milestone": "Validate PR 198 exact head. If it passes unchanged, merge it and immediately increase pressure again: require autonomous selection of a useful composed target from a heterogeneous observed durable library, including at least two domain signatures, while failing closed on incompatible chains and preserving fresh-state discovery, no-forgetting, trial-ledger immutability, and protected regression. If PR 198 fails, retain the exact failed head/run and repair only the demonstrated boundary.",
+  "next_falsifiable_milestone": "Validate PR 198 corrected exact head c364dd7622c03bb58847106233a729b2a0ddd8c3. If it passes unchanged and remains mergeable, merge it. Independently validate PR 199; after PR 198 settles, rebase/retarget or otherwise reconcile PR 199 against latest main and require a new exact-head CI if its effective head changes. Then continue to autonomous heterogeneous target generation with fresh-state discovery, incompatible-chain fail-closed behavior, no-forgetting, protected regressions, and immutable trial ledgers. If either fails, retain the exact failed head/run and repair only the falsified boundary.",
   "live_campaign": {
     "provider": "copilot",
     "model": "gpt-5.4",
@@ -81,7 +90,8 @@
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "both model stages reached Copilot and were blocked by monthly quota exhaustion; retained"},
     {"pr": 167, "head_sha": "073487a364f1b4b7d6f50432d56dbc02fd209974", "ci_run": 32093707492, "failure": "313 tests passed; one compatibility assertion failed; failed head not merged"},
     {"pr": 172, "head_sha": "bdd114ea9c96edff912c842fce0f0a53372cf061", "ci_run": 32098470596, "failure": "319 tests passed; rollback-isolation assertion inspected the wrong durable regression location; failed head not merged"},
-    {"pr": 196, "head_sha": "b3d7e55ce8e18fa06aa0bde16199107c39ed2841", "ci_run": 32129355499, "failure": "338 tests passed; new functional no-forgetting test overconstrained unsupported classification rows to carry an explicit false candidate_ids_supplied_by_caller field. Unsupported rows legitimately omit that field; failed head retained and not merged."}
+    {"pr": 196, "head_sha": "b3d7e55ce8e18fa06aa0bde16199107c39ed2841", "ci_run": 32129355499, "failure": "338 tests passed; new functional no-forgetting test overconstrained unsupported classification rows to carry an explicit false candidate_ids_supplied_by_caller field. Unsupported rows legitimately omit that field; failed head retained and not merged."},
+    {"pr": 198, "head_sha": "27cb9e71bf41cfda7adc94a4928751fbfd454afc", "ci_run": 32134990908, "failure": "340 tests passed; observed-composition prerequisite generated offset=6, outside the existing max_nodes=3 numeric synthesis constant frontier [-5,5], so bounded program synthesis failed. Failed head retained and not merged."}
   ],
   "external_evidence_state": {
     "ledger_path": "evidence/external_ledger.json",
