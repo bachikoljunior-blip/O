@@ -13,15 +13,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-18T10:52:02+09:00",
   "started_at": "2026-08-18T10:52:02+09:00",
-  "heartbeat_at": "2026-08-18T10:52:02+09:00",
-  "last_progress_at": "2026-08-18T10:52:02+09:00",
+  "heartbeat_at": "2026-08-18T10:58:16+09:00",
+  "last_progress_at": "2026-08-18T10:58:16+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260818T105202JST",
   "session_id": "same-task-chat-watchdog-recovery-20260818T105202JST",
   "active_run_id": "run-self-applied-live-copilot-response-recovery-20260818-060655",
-  "current_work_unit": "recover stale prior execution from latest main; PR 164 final head c830a753bf0c3c17516d0917754670fc02776908 is mergeable and exact-head CI 32087699720 succeeded, so merge only that unchanged head, then use the PR163 request-commit rendezvous to observe unresolved request b37c0aa735fa72f2c609a4159b5b44c19963ee5d without retriggering it and continue to the next falsifiable genuine-model retention/transfer milestone",
+  "current_work_unit": "PR 164 exact head c830a753bf0c3c17516d0917754670fc02776908 passed CI 32087699720 and merged as a31e7675643240139a0a1d7a384543d44b86d275; unresolved live request b37c0aa735fa72f2c609a4159b5b44c19963ee5d has no observable request status and must not be retriggered; while that external result remains unresolved, validate PR 165 exact head 6103859360fe188fa61e509b0916743d4e6c9c3e adding a fresh-agent cross-run explicit-state retention/no-relearning/protected-regression gate, then merge only if exact-head CI succeeds and continue",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -32,18 +32,18 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "5dff583663f909a86d9ff0a39087c02c7a036f63",
-  "latest_main_sha_before_heartbeat": "5dff583663f909a86d9ff0a39087c02c7a036f63",
-  "unmerged_pr": 164,
-  "unmerged_branch": "agi/live-campaign-stage-isolation",
-  "unmerged_head_sha": "c830a753bf0c3c17516d0917754670fc02776908",
-  "unmerged_ci_run": 32087699720,
-  "unmerged_ci_status": "success",
+  "latest_main_sha_before_heartbeat": "a31e7675643240139a0a1d7a384543d44b86d275",
+  "unmerged_pr": 165,
+  "unmerged_branch": "agi/cross-run-live-retention-gate",
+  "unmerged_head_sha": "6103859360fe188fa61e509b0916743d4e6c9c3e",
+  "unmerged_ci_run": 32090123069,
+  "unmerged_ci_status": "in_progress",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260818T095419JST",
     "last_heartbeat_at": "2026-08-18T10:11:17+09:00",
     "last_repository_progress_at": "2026-08-18T10:11:50+09:00",
     "last_repository_progress": "main commit 5dff583663f909a86d9ff0a39087c02c7a036f63 heartbeat after PR 163 merge; PR 164 subsequently advanced to final head c830a753bf0c3c17516d0917754670fc02776908 and exact-head CI 32087699720 succeeded while the lease heartbeat became stale",
-    "reason": "running heartbeat exceeded stale_after_seconds and no newer main progress was observed; recover idempotently from latest main and do not retrigger unresolved live request b37c0aa735fa72f2c609a4159b5b44c19963ee5d"
+    "reason": "running heartbeat exceeded stale_after_seconds and no newer main progress was observed; recovered idempotently from latest main and did not retrigger unresolved live request b37c0aa735fa72f2c609a4159b5b44c19963ee5d"
   },
   "self_application": {
     "enabled": true,
@@ -66,7 +66,8 @@
     {"pr": 160, "head_sha": "1fb67366d4db7c6711534d92d6c93e3c7fc130d5", "ci_run": 32070742952, "ci_conclusion": "success", "merge_sha": "4a6d7e6d3003be245f2414b1c8b3eeaa79bfeb26"},
     {"pr": 161, "head_sha": "b83a00d3ab137dadd84e02629daccc4dbb24d89b", "ci_run": 32074543682, "ci_conclusion": "success", "merge_sha": "558fda088c84c6e3a1954fd95e17c6e3e16379fb"},
     {"pr": 162, "head_sha": "e4773014b841db55ede640143e185d72c23605e2", "ci_run": 32075841226, "ci_conclusion": "success", "merge_sha": "5922c087dc42ead6191e6649e59da29369f08314"},
-    {"pr": 163, "head_sha": "bab3f2aadf0e8f315354488d830a84c4c7cf8305", "ci_run": 32086998012, "ci_conclusion": "success", "merge_sha": "ca9f3715107e1c94d55d6702e9e6907bb2f6ce6f"}
+    {"pr": 163, "head_sha": "bab3f2aadf0e8f315354488d830a84c4c7cf8305", "ci_run": 32086998012, "ci_conclusion": "success", "merge_sha": "ca9f3715107e1c94d55d6702e9e6907bb2f6ce6f"},
+    {"pr": 164, "head_sha": "c830a753bf0c3c17516d0917754670fc02776908", "ci_run": 32087699720, "ci_conclusion": "success", "merge_sha": "a31e7675643240139a0a1d7a384543d44b86d275"}
   ],
   "live_campaign": {
     "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
@@ -90,6 +91,7 @@
       "request_commit": "b37c0aa735fa72f2c609a4159b5b44c19963ee5d",
       "status": "requested_pending_observation",
       "workflow_run": null,
+      "request_commit_combined_status": "pending_no_status_contexts",
       "purpose": "fresh post-PR162 answer-shape validation with evaluator and scoring unchanged"
     },
     "evidence_class": "internal_development",
