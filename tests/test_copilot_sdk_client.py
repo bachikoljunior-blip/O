@@ -6,17 +6,20 @@ from types import SimpleNamespace
 import pytest
 
 import agi.copilot_sdk_client as client_module
-from agi.copilot_sdk_client import CopilotResponsesClient
+from agi.copilot_sdk_client import CopilotProviderBlocked, CopilotResponsesClient
 
 
 class _FakeSession:
-    def __init__(self, content: str | None):
+    def __init__(self, content: str | None, error: Exception | None = None):
         self.content = content
+        self.error = error
         self.prompts: list[str] = []
         self.disconnected = False
 
     async def send_and_wait(self, prompt: str):
         self.prompts.append(prompt)
+        if self.error is not None:
+            raise self.error
         return SimpleNamespace(data=SimpleNamespace(content=self.content))
 
     async def disconnect(self):
@@ -24,9 +27,10 @@ class _FakeSession:
 
 
 class _FakeClient:
-    def __init__(self, options, content: str | None):
+    def __init__(self, options, content: str | None, error: Exception | None = None):
         self.options = options
         self.content = content
+        self.error = error
         self.started = False
         self.stopped = False
         self.session_kwargs = None
@@ -37,14 +41,14 @@ class _FakeClient:
 
     async def create_session(self, **kwargs):
         self.session_kwargs = kwargs
-        self.session = _FakeSession(self.content)
+        self.session = _FakeSession(self.content, self.error)
         return self.session
 
     async def stop(self):
         self.stopped = True
 
 
-def _factory(content: str | None):
+def _factory(content: str | None, error: Exception | None = None):
     clients = []
 
     # github-copilot-sdk v1 makes CopilotClient.__init__ keyword-only and
@@ -58,6 +62,7 @@ def _factory(content: str | None):
                 "base_directory": base_directory,
             },
             content,
+            error,
         )
         clients.append(client)
         return client
@@ -107,6 +112,42 @@ def test_empty_copilot_response_fails_closed_after_cleanup():
     assert clients[0].session.disconnected is True
     assert clients[0].stopped is True
     assert not Path(clients[0].options["base_directory"]).exists()
+
+
+def test_monthly_quota_block_is_stable_not_retried_and_cleans_up():
+    raw = RuntimeError(
+        "Session error: You have exceeded your monthly quota. request_id=sensitive-runtime-id"
+    )
+    factory, clients = _factory(None, raw)
+    adapter = CopilotResponsesClient(client_factory=factory)
+
+    with pytest.raises(CopilotProviderBlocked) as raised:
+        adapter.responses.create(model="gpt-test", instructions="x", input="{}")
+
+    assert raised.value.reason == "monthly_quota_exhausted"
+    assert str(raised.value) == "Copilot provider blocked: monthly_quota_exhausted"
+    assert "sensitive-runtime-id" not in str(raised.value)
+    client = clients[0]
+    assert len(client.session.prompts) == 1
+    assert client.session.disconnected is True
+    assert client.stopped is True
+    assert not Path(client.options["base_directory"]).exists()
+
+
+def test_unknown_provider_error_propagates_without_retry_after_cleanup():
+    raw = RuntimeError("unclassified provider failure")
+    factory, clients = _factory(None, raw)
+    adapter = CopilotResponsesClient(client_factory=factory)
+
+    with pytest.raises(RuntimeError, match="unclassified provider failure") as raised:
+        adapter.responses.create(model="gpt-test", instructions="x", input="{}")
+
+    assert raised.value is raw
+    client = clients[0]
+    assert len(client.session.prompts) == 1
+    assert client.session.disconnected is True
+    assert client.stopped is True
+    assert not Path(client.options["base_directory"]).exists()
 
 
 def test_default_client_requires_sdk_and_supported_auth_environment(monkeypatch):
