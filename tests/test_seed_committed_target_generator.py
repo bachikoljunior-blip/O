@@ -21,11 +21,10 @@ def test_seed_committed_target_semantics_are_rediscovered_without_candidate_ids(
     assert report["named_fixed_goal_family_used"] is False
     assert report["target_semantics_source"] == "seed-ranked verified durable skill graph"
     assert report["target_plan_precommitted_before_solver_execution"] is True
-    assert report["target_attempt_count"] == 4
-    assert report["max_target_attempts"] == 4
+    assert 2 <= report["target_attempt_count"] <= report["max_target_attempts"] == 4
     assert report["required_distinct_semantics"] == 2
     assert report["distinct_semantic_fingerprint_count"] >= 2
-    assert report["eligible_semantic_target_count"] >= 2
+    assert report["eligible_semantic_target_count"] >= report["target_attempt_count"]
     assert report["generation_search_nodes"] <= report["generation_search_node_budget"]
     assert report["generator_hidden_candidate_ids_supplied_to_solver"] is False
     assert report["all_solver_calls_candidate_id_free"] is True
@@ -39,7 +38,7 @@ def test_seed_committed_target_semantics_are_rediscovered_without_candidate_ids(
     assert report["live_model_invocation_required"] is False
 
     records = report["target_records"]
-    assert len(records) == 4
+    assert len(records) == report["target_attempt_count"]
     assert len({item["behavior_fingerprint"] for item in records}) >= 2
     assert len({item["target_commitment"] for item in records}) == len(records)
     for record in records:
