@@ -10,15 +10,15 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-18T18:56:30+09:00",
   "started_at": "2026-08-18T18:56:30+09:00",
-  "heartbeat_at": "2026-08-18T19:03:02+09:00",
-  "last_progress_at": "2026-08-18T19:03:02+09:00",
+  "heartbeat_at": "2026-08-18T19:12:02+09:00",
+  "last_progress_at": "2026-08-18T19:12:02+09:00",
   "released_at": null,
   "release_reason": null,
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260818T185630JST",
   "session_id": "same-task-chat-watchdog-recovery-20260818T185630JST",
   "active_run_id": "run-self-applied-resumable-generated-recovery-20260818-185630",
-  "current_work_unit": "Recovered the previously unjournaled in-flight PR 193 after discovering it during open-PR reconciliation. Closed recovery-created overlapping PR 194 without merge. PR 192 was reconstructed on recovered main as exact intended head b0a5013db57ee666bbdc515f3ec4348fb0968afb and CI 32124401328 is in progress. PR 193 was reconstructed on that exact PR 192 head as d7a639d9c564400785c7e4635f5ef20cb73d6eb6 preserving only its intended repeated-round regression change; await exact-head CI. Merge PR 192 only after its exact head passes, then retarget/revalidate PR 193 on merged main before integration.",
+  "current_work_unit": "PR 192 reconstructed exact head b0a5013db57ee666bbdc515f3ec4348fb0968afb passed fresh CI 32124401328 and merged as de768ac78dcb091e69f0f139f3ee77c8660d9c26. PR 193 has been reduced to its single intended 96-line repeated-round regression, retargeted to merged main, and reconstructed as exact head 51fe1440349cfcad1b9d7d200970f09e258c74c2. Fresh exact-head CI 32125541907 is in progress. Merge only unchanged passing head; then proceed to functional no-forgetting across the accumulated generated skills rather than stopping at crash-recovery composition.",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -29,22 +29,13 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "c6982510707bef0f2b50d92e11e102c99850cb6b",
-  "latest_main_sha_before_heartbeat": "677751d289229bc80fcdb0b10d55998789b53c51",
-  "unmerged_pr": 192,
-  "unmerged_branch": "agi/resumable-generated-goal-round-r30",
-  "unmerged_head_sha": "b0a5013db57ee666bbdc515f3ec4348fb0968afb",
-  "unmerged_ci_run": 32124401328,
+  "latest_main_sha_before_heartbeat": "de768ac78dcb091e69f0f139f3ee77c8660d9c26",
+  "unmerged_pr": 193,
+  "unmerged_branch": "agi/multi-round-generated-goal-recovery-r31",
+  "unmerged_head_sha": "51fe1440349cfcad1b9d7d200970f09e258c74c2",
+  "unmerged_ci_run": 32125541907,
   "unmerged_ci_status": "in_progress_exact_head",
-  "additional_in_flight_prs": [
-    {
-      "pr": 193,
-      "branch": "agi/multi-round-generated-goal-recovery-r31",
-      "head_sha": "d7a639d9c564400785c7e4635f5ef20cb73d6eb6",
-      "base": "agi/resumable-generated-goal-round-r30",
-      "status": "awaiting_exact_head_ci_after_reconstruction",
-      "falsifiable_goal": "prove the single-round post-commit recovery mechanism composes across two successive seed-generated learning rounds and fresh recoveries without replay or forgetting"
-    }
-  ],
+  "additional_in_flight_prs": [],
   "superseded_duplicate_work": [
     {
       "pr": 194,
@@ -74,8 +65,10 @@
     {"pr": 188, "head_sha": "7cf1d24b2651a63a4433f877f4736d2eb9fd1156", "ci_run": 32110936477, "ci_conclusion": "success", "merge_sha": "ce539e8ba6b964a985182875f55b00094ab855bc"},
     {"pr": 189, "head_sha": "d32377bdcbba8ba12e728914616b3a94ddc08189", "ci_run": 32113948959, "ci_conclusion": "success", "merge_sha": "29a6a07f6b0fc4bba75d0b4a162e432fcab3d9b2"},
     {"pr": 190, "head_sha": "9b7ed00d6e11d163880d7f6b1f582afb38859f9a", "ci_run": 32114689151, "ci_conclusion": "success", "merge_sha": "657b3acd221dac48ce51cb6475234f5097f5583f"},
-    {"pr": 191, "head_sha": "67ec3f3a68c10f838e5ff1dd9a341197e243506b", "ci_run": 32114916500, "ci_conclusion": "success", "merge_sha": "e837b1d5e1f574c41871cda0603c8403c098a93d"}
+    {"pr": 191, "head_sha": "67ec3f3a68c10f838e5ff1dd9a341197e243506b", "ci_run": 32114916500, "ci_conclusion": "success", "merge_sha": "e837b1d5e1f574c41871cda0603c8403c098a93d"},
+    {"pr": 192, "head_sha": "b0a5013db57ee666bbdc515f3ec4348fb0968afb", "ci_run": 32124401328, "ci_conclusion": "success", "merge_sha": "de768ac78dcb091e69f0f139f3ee77c8660d9c26"}
   ],
+  "next_falsifiable_milestone": "After PR 193, prove functional no-forgetting, not merely byte/trial immutability: after two independently seed-generated learned skills and crash recoveries, a fresh state-only resolver with no caller Candidate IDs must rediscover and solve held-back challenges for both earlier and later skills while Candidate bytes/trials remain unchanged and unrelated unsupported generated gaps remain fail-closed.",
   "live_campaign": {
     "provider": "copilot",
     "model": "gpt-5.4",
