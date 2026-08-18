@@ -90,21 +90,25 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          set -uo pipefail
+          set -euo pipefail
           campaign_id="openai-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           output_dir=".continual/evidence/campaigns/${campaign_id}"
           mkdir -p "${output_dir}"
           campaign_status=0
+          longhorizon_status=0
+          set +e
           agi-benchmark run-campaign-openai \
             --model "${OPENAI_MODEL}" \
             --runs "${{ inputs.runs }}" \
             --campaign-id "${campaign_id}" \
-            --output-dir "${output_dir}" || campaign_status=$?
-          longhorizon_status=0
+            --output-dir "${output_dir}"
+          campaign_status=$?
           agi-longhorizon run-openai \
             --model "${OPENAI_MODEL}" \
             --instances 3 \
-            --output-dir "${output_dir}/longhorizon" || longhorizon_status=$?
+            --output-dir "${output_dir}/longhorizon"
+          longhorizon_status=$?
+          set -e
           printf '{"campaign_exit_code":%d,"longhorizon_exit_code":%d}\n' \
             "${campaign_status}" "${longhorizon_status}" \
             > "${output_dir}/request-stage-status.json"
@@ -118,21 +122,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          set -uo pipefail
+          set -euo pipefail
           campaign_id="copilot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           output_dir=".continual/evidence/campaigns/${campaign_id}"
           mkdir -p "${output_dir}"
           campaign_status=0
+          longhorizon_status=0
+          set +e
           agi-copilot run-campaign \
             --model "${COPILOT_MODEL}" \
             --runs "${{ inputs.runs }}" \
             --campaign-id "${campaign_id}" \
-            --output-dir "${output_dir}" || campaign_status=$?
-          longhorizon_status=0
+            --output-dir "${output_dir}"
+          campaign_status=$?
           agi-copilot run-longhorizon \
             --model "${COPILOT_MODEL}" \
             --instances 3 \
-            --output-dir "${output_dir}/longhorizon" || longhorizon_status=$?
+            --output-dir "${output_dir}/longhorizon"
+          longhorizon_status=$?
+          set -e
           printf '{"campaign_exit_code":%d,"longhorizon_exit_code":%d}\n' \
             "${campaign_status}" "${longhorizon_status}" \
             > "${output_dir}/request-stage-status.json"
