@@ -41,6 +41,10 @@ def test_dynamic_skillgraph_grows_missing_string_capacity_then_transfers(
     }
     assert report["fixed_numeric_sequence_start_set_used"] is False
     assert report["target_plan_precommitted_before_solver_execution"] is True
+    assert report["runtime_budget_unchanged"] is True
+    assert report["heldback_challenge_shape_unchanged"] is True
+    assert isinstance(report["runtime_shape_rejections"], list)
+    assert isinstance(report["exact_runtime_rejections"], list)
     assert report["string_source_target_exercised"] is True
     assert report["all_generator_hidden_ids_withheld"] is True
     assert report["all_solver_calls_candidate_id_free"] is True
@@ -89,6 +93,8 @@ def test_dynamic_skillgraph_grows_missing_string_capacity_then_transfers(
     assert len(dynamic_evidence) == 1
     dynamic_persisted = json.loads(dynamic_evidence[0].read_text(encoding="utf-8"))
     assert dynamic_persisted["string_source_target_exercised"] is True
+    assert dynamic_persisted["runtime_budget_unchanged"] is True
+    assert dynamic_persisted["heldback_challenge_shape_unchanged"] is True
 
     growth_evidence = list(
         (
@@ -102,4 +108,6 @@ def test_dynamic_skillgraph_grows_missing_string_capacity_then_transfers(
     growth_persisted = json.loads(growth_evidence[0].read_text(encoding="utf-8"))
     assert growth_persisted["digest"] == report["digest"]
     assert growth_persisted["failure_boundary_weakened"] is False
+    assert growth_persisted["runtime_budget_unchanged"] is True
+    assert growth_persisted["heldback_challenge_shape_unchanged"] is True
     assert "does not establish open-domain target generation" in growth_persisted["claim_boundary"]
