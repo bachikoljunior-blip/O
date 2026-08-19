@@ -2,7 +2,7 @@
   "schema_version": 2,
   "mode": "watchdog_repository_only_same_task_chat",
   "timezone": "Asia/Tokyo",
-  "status": "running",
+  "status": "released",
   "lease_mode": "watchdog_continuation",
   "scheduler_fired_at": "2026-08-20T03:52:11+09:00",
   "time_budget_enabled": false,
@@ -10,8 +10,9 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T03:52:11+09:00",
   "started_at": "2026-08-20T03:52:11+09:00",
-  "heartbeat_at": "2026-08-20T03:53:35+09:00",
-  "last_progress_at": "2026-08-20T03:53:35+09:00",
+  "heartbeat_at": "2026-08-20T04:06:55+09:00",
+  "last_progress_at": "2026-08-20T04:06:55+09:00",
+  "released_at": "2026-08-20T04:06:55+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T035211JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T035211JST",
@@ -26,7 +27,7 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "6f9cdce1bf1a99ea5774c89684cce44fd1f451c4",
-  "latest_main_sha_before_heartbeat": "9b749fe92bfb7d0a483790e1845bbf55f5c24101",
+  "latest_main_sha_before_release": "947a74bae35c3fd5a97c43606367f173cad51bf4",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260820T030432JST",
     "last_heartbeat_at": "2026-08-20T03:06:45+09:00",
@@ -34,7 +35,7 @@
     "last_external_progress_at": "2026-08-20T03:28:12+09:00",
     "reason": "running heartbeat, latest main progress, and PR 227 exact-head CI completion all exceeded stale_after_seconds; no later repository mutation was observed"
   },
-  "current_work_unit": "Recovered stale execution, verified PR 227 exact head b22a5f6b9edd2430bde7812c1092b5389937cd6e passed full exact-head CI 32285477346 unchanged, and merged it as 9b749fe92bfb7d0a483790e1845bbf55f5c24101. The merge persists the one-shot repair request for counterexample PR 223/CI 32273144513. Observe the repository-controlled materializer on agi/sequence-affine-char-synthesis-r60; do not merge capability code until the materialized source/test head is inspected and fresh full exact-head CI passes.",
+  "current_work_unit": "Recovered stale execution, verified PR 227 exact head b22a5f6b9edd2430bde7812c1092b5389937cd6e passed full exact-head CI 32285477346 unchanged, and merged it as 9b749fe92bfb7d0a483790e1845bbf55f5c24101. PR 227 contains only the one-shot request for retained PR 223/CI 32273144513. The repository-controlled materializer had not yet produced an observable clean r60 source/test head at release; the pre-controller r60 branch still exposed only its obsolete temporary-workflow delta. Exact PR 223 source/test blobs and reconstruction instructions are persisted in agi/CONTINUATION.json.",
   "unmerged_pr": null,
   "unmerged_branch": "agi/sequence-affine-char-synthesis-r60",
   "unmerged_head_sha": null,
@@ -46,7 +47,7 @@
   ],
   "additional_in_flight": [
     {"pr": 223, "branch": "agi/evidence-frontier-iterated-expansion-r57", "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "ci_status": "completed_failure_379_passed_1_failed", "merge_admissible": false},
-    {"branch": "agi/sequence-affine-char-synthesis-r60", "status": "awaiting_controller_materialization_after_pr227_merge", "merge_admissible": false},
+    {"branch": "agi/sequence-affine-char-synthesis-r60", "status": "repository_controlled_materialization_requested_not_yet_observed", "merge_admissible": false},
     {"issue": 222, "purpose": "independent_external_evaluator_coordination", "status": "open", "comments": 0}
   ],
   "negative_evidence": [
@@ -73,6 +74,7 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe the controller-materialized r60 source/test head produced from merged request 9b749fe92bfb7d0a483790e1845bbf55f5c24101. Inspect that it changes only the narrow post-legacy-frontier sequence->sequence canonical affine-character terminal plus regression coverage. Open/identify its PR, require fresh full exact-head CI, and merge only an unchanged passing head. Then reconstruct PR 223 on verified repaired main and rerun iterated no-forgetting.",
+  "next_falsifiable_milestone": "Observe the controller-produced r60 source/test head without duplicating the one-shot request. Inspect that it changes only the narrow post-legacy-frontier sequence->sequence canonical affine-character terminal plus regression coverage; open/identify its PR, require fresh full exact-head CI, and merge only an unchanged passing head. Then reconstruct PR 223 from preserved blob SHAs on verified repaired main and rerun iterated no-forgetting.",
+  "release_reason": "The next safe mutation on the active capability path depends on the already-requested repository-controlled materializer producing an observable branch head. Retrying the request before its bounded workflow can settle would duplicate the same external side effect. Exact continuation, negative evidence, preserved PR 223 blobs, and next action are committed on main.",
   "rule": "Fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries are not stop conditions. Internal evidence cannot satisfy the strict external AGI gate."
 }
