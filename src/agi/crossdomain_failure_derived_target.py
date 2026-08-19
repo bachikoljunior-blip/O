@@ -38,6 +38,83 @@ def _unique_inputs(records: Sequence[Mapping[str, Any]]) -> tuple[Any, ...]:
     return tuple(values)
 
 
+def _expand_support_inputs(
+    base_program: Mapping[str, Any],
+    persisted_inputs: Sequence[Any],
+    *,
+    history_digest: str,
+) -> tuple[Any, ...]:
+    """Deterministically enrich persisted support without consulting sealed held-out answers."""
+    values = [copy.deepcopy(value) for value in persisted_inputs]
+    seen = {_digest(value) for value in values}
+    input_domain = str(base_program["input_domain"])
+    candidates: list[Any] = []
+
+    if input_domain == "sequence":
+        sequences = [list(value) for value in persisted_inputs if isinstance(value, list)]
+        numeric = [
+            value
+            for value in sequences
+            if value and all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in value)
+        ]
+        if not numeric:
+            raise CrossDomainFailureDerivedTargetError(
+                "persisted sequence failure history has no numeric anchor for support expansion"
+            )
+        anchor = next((value for value in numeric if sum(value) != 0), numeric[0])
+        candidates = [
+            [*anchor, *anchor],
+            [-item for item in anchor],
+            [*anchor, *anchor, *anchor],
+            [*anchor, *[-item for item in anchor], *anchor],
+            list(reversed(anchor)),
+            [*list(reversed(anchor)), *anchor],
+        ]
+    elif input_domain == "string":
+        strings = [value for value in persisted_inputs if isinstance(value, str)]
+        nonempty = [value for value in strings if value]
+        if not nonempty:
+            raise CrossDomainFailureDerivedTargetError(
+                "persisted string failure history has no non-empty anchor for support expansion"
+            )
+        anchor = next((value for value in nonempty if value != value[::-1]), max(nonempty, key=len))
+        candidates = [
+            anchor * 2,
+            anchor * 3,
+            anchor * 4,
+            anchor[::-1],
+            anchor + anchor[:1],
+            anchor[:1] + anchor,
+            anchor.swapcase(),
+            anchor.upper() + anchor.lower(),
+        ]
+    else:
+        raise CrossDomainFailureDerivedTargetError(
+            f"unsupported persisted input domain for support expansion: {input_domain}"
+        )
+
+    if candidates:
+        rotation = int(history_digest[16:24], 16) % len(candidates)
+        candidates = [*candidates[rotation:], *candidates[:rotation]]
+    for candidate in candidates:
+        if input_domain == "sequence" and (not isinstance(candidate, list) or len(candidate) > 32):
+            continue
+        if input_domain == "string" and (not isinstance(candidate, str) or len(candidate) > 128):
+            continue
+        key = _digest(candidate)
+        if key in seen:
+            continue
+        seen.add(key)
+        values.append(copy.deepcopy(candidate))
+        if len(values) >= 8:
+            break
+    if len(values) < 5:
+        raise CrossDomainFailureDerivedTargetError(
+            "persisted failure history could not produce enough distinct bounded support inputs"
+        )
+    return tuple(values)
+
+
 def _semantic_signature(target: Mapping[str, Any]) -> str:
     return _digest(
         {
@@ -310,7 +387,12 @@ def run_crossdomain_failure_derived_target(root: Path, seed: str) -> dict[str, A
         raise CrossDomainFailureDerivedTargetError("durable source Candidate type changed")
 
     support_records = [*history["initial_demonstrations"], *history["counterexamples"]]
-    support_inputs = _unique_inputs(support_records)
+    persisted_support_inputs = _unique_inputs(support_records)
+    support_inputs = _expand_support_inputs(
+        base_program,
+        persisted_support_inputs,
+        history_digest=history_digest,
+    )
     schedule = _precommit_schedule(
         base_program,
         history_digest=history_digest,
@@ -351,7 +433,7 @@ def run_crossdomain_failure_derived_target(root: Path, seed: str) -> dict[str, A
         raise CrossDomainFailureDerivedTargetError("sealed source generator reconstruction changed")
     support_digests = {_digest(item) for item in support_inputs}
     if any(_digest(value) in support_digests for value in final_inputs):
-        raise CrossDomainFailureDerivedTargetError("held-back cross-domain inputs overlap persisted support")
+        raise CrossDomainFailureDerivedTargetError("held-back cross-domain inputs overlap expanded support")
     commitment = _digest(
         {
             "schedule_commitment": schedule["schedule_commitment"],
@@ -439,6 +521,10 @@ def run_crossdomain_failure_derived_target(root: Path, seed: str) -> dict[str, A
         "source_history_digest": history_digest,
         "target_generation_source": "persisted_crossdomain_counterexample_history",
         "source_seed_value_persisted": False,
+        "persisted_support_input_count": len(persisted_support_inputs),
+        "expanded_support_input_count": len(support_inputs),
+        "support_inputs_expanded_from_persisted_history": True,
+        "sealed_final_answers_exposed_to_learner": False,
         "derived_schedule_precommitted_before_support_checks": True,
         "derived_schedule_commitment": str(schedule["schedule_commitment"]),
         "support_attempts": attempts,
@@ -463,14 +549,17 @@ def run_crossdomain_failure_derived_target(root: Path, seed: str) -> dict[str, A
         "claim_boundary": (
             "Internal bounded cross-domain evidence-driven curriculum evidence only. The next target is "
             "derived from a regression-verified learned program plus its persisted CEGIS counterexample "
-            "history and is precommitted before support checks. The source generator, transformations, "
-            "learner, evaluator, and held-out probes remain repository-authored; this is not independent "
-            "production evidence, open-domain autonomous objective invention, or AGI."
+            "history. Support enrichment is deterministic from persisted inputs and is committed before "
+            "support checks; sealed final answers remain outside target selection and learning. The source "
+            "generator, transformations, learner, evaluator, and held-out probes remain repository-authored; "
+            "this is not independent production evidence, open-domain autonomous objective invention, or AGI."
         ),
     }
     if not all(
         (
             report["source_negative_evidence_retained"],
+            report["support_inputs_expanded_from_persisted_history"],
+            report["sealed_final_answers_exposed_to_learner"] is False,
             report["derived_schedule_precommitted_before_support_checks"],
             report["derived_target_failed_closed_before_learning"],
             report["derived_control_failed_closed_before_learning"],
