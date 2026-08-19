@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T22:55:07+09:00",
   "started_at": "2026-08-19T22:55:07+09:00",
-  "heartbeat_at": "2026-08-19T22:55:07+09:00",
-  "last_progress_at": "2026-08-19T22:55:07+09:00",
+  "heartbeat_at": "2026-08-19T23:09:40+09:00",
+  "last_progress_at": "2026-08-19T23:07:06+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T225507JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T225507JST",
@@ -26,13 +26,21 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "db130477f0fdbff4df9d062b74442fd9b28b8cb7",
-  "current_work_unit": "Recovered the stale 22:08 execution from latest main only after its 22:23:57 heartbeat exceeded the 900-second lease. Exact PR 224 head 9fab4b0cd1e21518cbf638c40f317b7fe691cced / CI 32257602305 completed failure at 22:37:03 JST; diagnostic-only PR 225 head b2f46dccc01799488971c37300c69f4cc04da03e / CI 32257686851 also completed failure at 22:52:02 JST, proving the untouched PR 221 delta still fails on the append-only ±6 repair. Repository inspection and a faithful bounded-search reproduction identify the remaining boundary without widening stored frontier caps: the desired numeric intermediate 6*sum(sequence)+2 is generated at cost 6 but appears after the 256 retained numeric frontier, so it is pruned before the final to_string terminal conversion can be tested. Next repair is a generic terminal-unary overflow check that tests one-step final-domain unary conversions on generated overflow intermediates before truncation while leaving retained frontier ordering/caps unchanged.",
+  "current_work_unit": "Recovered stale execution and inspected exact failed CI logs. PR 224 head 9fab4b0cd1e21518cbf638c40f317b7fe691cced / CI 32257602305 failed 6 tests / 372 passed. Exact logs falsified the append-only global ±6 repair more strongly than the prior continuation recorded: the extra global numeric constants changed unrelated behavior signatures/frontiers, caused the protected object-classification fail-closed test to become spuriously solvable, regressed previously working sequence->string synthesis, and still failed coefficient-six. The repair direction is therefore narrower: restore the legacy -5..5 global frontier byte-for-byte and add a post-legacy-frontier, demonstration-derived bounded integer affine sequence-sum -> canonical numeric-string terminal kernel that introduces no derived literals into generic seen/frontier state. A temporary branch-only repair workflow has been refined at PR 224 head 50e42008ffd761e323eada27988fa28f0b3134d3 to apply that source delta only after focused coefficient-six, protected object fail-closed, prior sequence-string regression, and compile checks pass. The ordinary exact-head full PR CI 32262110340 is also in progress on that temporary workflow head. The helper file itself is not merge-admissible and must be deleted before final exact-head validation/merge.",
   "unmerged_pr": 224,
   "unmerged_branch": "agi/sequence-affine-six-synthesis-r58",
-  "unmerged_head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced",
-  "unmerged_ci_run": 32257602305,
-  "unmerged_ci_status": "completed_failure",
+  "unmerged_head_sha": "50e42008ffd761e323eada27988fa28f0b3134d3",
+  "unmerged_ci_run": 32262110340,
+  "unmerged_ci_status": "in_progress_temporary_helper_head_not_merge_admissible",
   "additional_in_flight": [
+    {
+      "pr": 224,
+      "kind": "branch_only_repair_helper",
+      "head_sha": "50e42008ffd761e323eada27988fa28f0b3134d3",
+      "path": ".github/workflows/repair-pr224-terminal-overflow.yml",
+      "merge_admissible": false,
+      "required_cleanup": "delete helper after it has either produced a focused-validated source commit or failed; final PR head must exclude this workflow"
+    },
     {
       "pr": 225,
       "kind": "diagnostic_only_never_merge",
@@ -68,7 +76,7 @@
     "last_heartbeat_at": "2026-08-19T22:23:57+09:00",
     "last_repository_progress_at": "2026-08-19T22:24:38+09:00",
     "last_external_progress_at": "2026-08-19T22:52:02+09:00",
-    "reason": "running heartbeat exceeded stale_after_seconds; both known exact-head workflows were inspected and found completed failures, so recovery resumed idempotently from latest main without rerunning them"
+    "reason": "running heartbeat exceeded stale_after_seconds; all known prior workflows had completed, so recovery resumed idempotently from latest main without rerunning them"
   },
   "recent_completed_units": [
     {"pr": 217, "head_sha": "7a77acd791813233547b36692f3bd4d285495a9a", "ci_run": 32214874171, "ci_conclusion": "success", "merge_sha": "4c2edf22669a8cc36625fddec61c846bd312d070"},
@@ -80,8 +88,8 @@
     {"pr": 221, "head_sha": "d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577", "ci_run": 32246111435, "failure": "377 passed / 1 failed; evidence-derived sequence->string target was not synthesized by the bounded pure typed learner"},
     {"pr": 223, "head_sha": "5689add8037742aeeaa8260e43f6cfc202ac2c56", "ci_run": 32251368051, "failure": "2 failed / 377 passed; harness repair removed live ModelClient failure, leaving two functional synthesis-frontier failures"},
     {"pr": 224, "head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6", "ci_run": 32251059159, "failure": "6 failed / 372 passed; prepending -6 perturbed deterministic bounded-frontier ordering and still failed coefficient-six synthesis"},
-    {"pr": 224, "head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced", "ci_run": 32257602305, "failure": "append-only ±6 preserved prior seed order but full CI still failed; bounded-search reproduction shows the matching cost-6 numeric intermediate is generated after the 256-entry retained frontier and pruned before terminal to_string"},
-    {"pr": 225, "head_sha": "b2f46dccc01799488971c37300c69f4cc04da03e", "ci_run": 32257686851, "failure": "diagnostic-only full CI failed, so the exact original PR 221 delta remains unrepaired on the append-only ±6 base"},
+    {"pr": 224, "head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced", "ci_run": 32257602305, "failure": "6 failed / 372 passed; append-only global ±6 still changed generic behavior/frontier semantics, broke protected object fail-closed and prior sequence-string synthesis, and still failed coefficient-six"},
+    {"pr": 225, "head_sha": "b2f46dccc01799488971c37300c69f4cc04da03e", "ci_run": 32257686851, "failure": "diagnostic-only full CI failed, proving the original PR 221 delta remained unrepaired on the append-only ±6 base"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
   "self_application": {
@@ -103,6 +111,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair PR 224 without widening the retained 128/256 search frontiers: before each cost frontier is truncated, test generic one-step unary conversions whose output domain is the requested final domain against overflow intermediates. Preserve prior frontier ordering and caps, keep the coefficient-six held-out regression unchanged, require focused validation and then fresh full exact-head CI. If it passes, merge only unchanged head, reconstruct PR 221 on verified main, and continue immediately.",
+  "next_falsifiable_milestone": "Obtain focused validation for the restored-legacy-frontier plus post-exhaustion derived affine terminal repair. If focused validation fails, retain the exact helper head/result and narrow only the demonstrated boundary. If it passes, remove the temporary helper workflow, require fresh full exact-head CI on the clean source/test-only PR 224 head, merge only an unchanged passing head, then immediately reconstruct PR 221 on verified main and require fresh full exact-head CI.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
