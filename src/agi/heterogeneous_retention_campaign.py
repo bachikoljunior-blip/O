@@ -47,6 +47,12 @@ def _bounded_sequence_fold_affine_to_string(
     execution or new constants: it enumerates only the already admitted add/mul folds,
     numeric constants -5..5, add/mul/neg, and to_string, under the caller's unchanged node
     bound, then verifies every demonstration through the normal acquired-program runtime.
+
+    Runtime accounting includes one deterministic step per folded sequence element. The fallback
+    therefore derives its step budget from the longest observed demonstration as well as the
+    unchanged structural node bound. This only makes a grammar-valid bounded program executable on
+    the very support used to verify it; it does not widen the grammar, node bound, constants, or
+    output/resource limits.
     """
 
     if max_nodes < 2:
@@ -55,6 +61,22 @@ def _bounded_sequence_fold_affine_to_string(
         {"input": item.input, "output": item.output}
         for item in examples
     ]
+    sequence_lengths = [
+        len(item.input)
+        for item in examples
+        if isinstance(item.input, list)
+    ]
+    if len(sequence_lengths) != len(examples):
+        return None
+    max_observed_sequence_length = max(sequence_lengths, default=0)
+    runtime_step_budget = min(
+        128,
+        max(
+            16,
+            max_nodes * 2,
+            max_nodes + max_observed_sequence_length,
+        ),
+    )
     for reducer, initial in (("add", 0), ("mul", 1)):
         fold = {
             "op": "fold_numeric",
@@ -117,7 +139,7 @@ def _bounded_sequence_fold_affine_to_string(
                     output_domain="string",
                     expression=expression,
                     support_sha256=_digest(support),
-                    max_steps=max(16, max_nodes * 2),
+                    max_steps=runtime_step_budget,
                     max_output_length=1024,
                     effects=(),
                 )
