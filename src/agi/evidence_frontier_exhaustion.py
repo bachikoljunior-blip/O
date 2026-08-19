@@ -339,6 +339,10 @@ def run_evidence_frontier_exhaustion(root: Path, seed: str) -> dict[str, Any]:
         "prior_trial_state_unchanged": True,
         "first_selected_behavior_replay": first_selected_replay,
         "second_selected_behavior_replay": second_selected_replay,
+        "first_candidate_rediscovered_after_round_two": first_candidate_id
+        in {str(value) for value in first_selected_replay["solver_selected_candidate_ids"]},
+        "second_candidate_rediscovered_without_caller_ids": second_candidate_id
+        in {str(value) for value in second_selected_replay["solver_selected_candidate_ids"]},
         "fresh_resolver_required_persisted_evidence": False,
         "base_behavior_replays": base_replays,
         "all_base_source_behaviors_retained": all(
