@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T14:03:55+09:00",
   "started_at": "2026-08-19T14:03:55+09:00",
-  "heartbeat_at": "2026-08-19T14:04:46+09:00",
-  "last_progress_at": "2026-08-19T14:04:46+09:00",
+  "heartbeat_at": "2026-08-19T14:10:37+09:00",
+  "last_progress_at": "2026-08-19T14:10:37+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T140355JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T140355JST",
@@ -26,13 +26,13 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "8855f3f78a3d7de684628447d0eb2a73c35429ee",
-  "latest_main_sha_before_heartbeat": "4c2edf22669a8cc36625fddec61c846bd312d070",
-  "current_work_unit": "Recovered the stale prior execution after both its heartbeat and repository progress exceeded stale_after_seconds=900. PR 217 exact head 7a77acd791813233547b36692f3bd4d285495a9a had completed fresh full CI 32214874171 successfully and remained unchanged. Latest main differed from its verified base only in durable watchdog state files, so PR 217 was merged unchanged as 4c2edf22669a8cc36625fddec61c846bd312d070. Next work is to reconstruct PR 218's two-file cumulative heterogeneous retention delta directly on this verified main, applying only the already-demonstrated empty-preexisting-Candidate snapshot fix and integrated PR 217 support reconstruction, then require fresh exact-head full CI before merge.",
+  "latest_main_sha_before_heartbeat": "b80805c9f6088036893956f3f9f9a84f88b72210",
+  "current_work_unit": "Recovered stale execution from latest main only; PR 217 exact head 7a77acd791813233547b36692f3bd4d285495a9a passed fresh full CI 32214874171 and merged unchanged as 4c2edf22669a8cc36625fddec61c846bd312d070. PR 218 was reconstructed directly on verified post-PR-217 main as exact head cf8b33d24b84ca0b7f57a3de1d42a8698f164bb9 with only two demonstrated repairs: empty protected Candidate subsets snapshot as empty maps, and persisted target/control schedule reconstruction uses PR 217's integrated deterministic support expansion. Fresh exact-head full CI 32218239903 is in progress; do not duplicate or merge before exact-head success.",
   "unmerged_pr": 218,
   "unmerged_branch": "agi/cumulative-crossdomain-failure-retention-r53",
-  "unmerged_head_sha": "7ddb82364ae763342a08890de05a35689eaacd84",
-  "unmerged_ci_run": 32204018811,
-  "unmerged_ci_status": "stacked_failed_preliminary_requires_reconstruction_on_post_pr217_main",
+  "unmerged_head_sha": "cf8b33d24b84ca0b7f57a3de1d42a8698f164bb9",
+  "unmerged_ci_run": 32218239903,
+  "unmerged_ci_status": "in_progress",
   "additional_in_flight": [],
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260819T125010JST",
@@ -57,7 +57,7 @@
     {"pr": 217, "head_sha": "f043218d6fca83e699f39ed01a0989509c7be7c8", "ci_run": 32207910025, "failure": "365 passed / 1 failed; deterministic support enrichment remained insufficient to identify the target"},
     {"pr": 217, "head_sha": "4c4e9f0ff132cc122c2b9f231b597fea543d67e3", "ci_run": 32211208363, "failure": "366 passed / 1 failed; removing total support truncation did not create enough sequence-value coverage and the synthesized Candidate still failed sealed cross-domain input"},
     {"pr": 217, "head_sha": "11f382dc2fc8ac81c3757bc2769e1eeab0820444", "ci_run": 32213784278, "attempt": 1, "failure": "367 passed / 1 failed; evidence-derived target learning made the source persisted untouched control behavior supported; audit/storage digest was being used as semantic target-selection salt"},
-    {"pr": 218, "head_sha": "7ddb82364ae763342a08890de05a35689eaacd84", "ci_run": 32204018811, "failure": "preliminary stacked CI exposed the empty-preexisting-Candidate snapshot boundary"},
+    {"pr": 218, "head_sha": "7ddb82364ae763342a08890de05a35689eaacd84", "ci_run": 32204018811, "failure": "preliminary stacked CI had 365 passed / 2 failed: inherited pre-PR-217 sequence-to-string synthesis failure plus PR 218 empty-preexisting-Candidate snapshot failure"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
   "self_application": {
@@ -77,6 +77,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Reconstruct PR 218 directly on verified post-PR-217 main. Preserve its two-file cumulative heterogeneous retention delta, fix only empty-preexisting Candidate snapshot handling, reconstruct target/control schedules using integrated PR 217 deterministic support expansion, and require fresh exact-head full CI. Merge only an unchanged passing head; on failure retain the exact head/run and repair only the newly demonstrated invariant.",
+  "next_falsifiable_milestone": "Observe fresh exact-head full CI 32218239903 for PR 218 head cf8b33d24b84ca0b7f57a3de1d42a8698f164bb9 without duplicating it. Merge only that unchanged head if every required check succeeds. On failure, retain the exact head/run and repair only the demonstrated cumulative heterogeneous-retention invariant. After successful integration, advance immediately to a fresh evidence-driven capability-growth milestone that derives its next bounded objective from persisted failure/evidence structure while preserving all prior source/derived behaviors, controls, Candidate bytes/trials, rollback safety, and fail-closed semantics.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
