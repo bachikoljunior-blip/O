@@ -4,7 +4,54 @@ import json
 from pathlib import Path
 
 from agi.adaptive_depth_composition import run_adaptive_depth_composition
-from agi.evidence_derived_target_synthesis import run_evidence_derived_target_synthesis
+from agi.evidence_derived_target_synthesis import (
+    _derived_target,
+    _precommit_evidence_derived_schedule,
+    _source_semantic_commitment,
+    run_evidence_derived_target_synthesis,
+)
+
+
+def test_target_schedule_ignores_audit_only_storage_digest() -> None:
+    source_a = {
+        "target_schedule_commitment": "1" * 64,
+        "acquisition_behavior_fingerprint": "2" * 64,
+        "control_behavior_fingerprint": "3" * 64,
+        "digest": "a" * 64,
+        "transactional_commit": {"tree_digest": "b" * 64},
+    }
+    source_b = {
+        **source_a,
+        "digest": "c" * 64,
+        "transactional_commit": {"tree_digest": "d" * 64},
+    }
+    semantic_a = _source_semantic_commitment(source_a)
+    semantic_b = _source_semantic_commitment(source_b)
+    assert semantic_a == semantic_b
+
+    support_inputs = (-13, -3, 2, 11, 18)
+    source_target = _derived_target(
+        {
+            "op": "add",
+            "left": {"op": "input"},
+            "right": {"op": "const", "domain": "numeric", "value": 1},
+        },
+        support_inputs,
+    )
+    schedule_a = _precommit_evidence_derived_schedule(
+        source_target=source_target,
+        source_semantic_commitment=semantic_a,
+        source_schedule_signatures=set(),
+        support_inputs=support_inputs,
+    )
+    schedule_b = _precommit_evidence_derived_schedule(
+        source_target=source_target,
+        source_semantic_commitment=semantic_b,
+        source_schedule_signatures=set(),
+        support_inputs=support_inputs,
+    )
+    assert schedule_a["schedule_commitment"] == schedule_b["schedule_commitment"]
+    assert schedule_a["target_schedule"] == schedule_b["target_schedule"]
 
 
 def test_persisted_failure_structure_generates_a_new_learning_target(runtime_repo: Path) -> None:
@@ -22,6 +69,7 @@ def test_persisted_failure_structure_generates_a_new_learning_target(runtime_rep
     assert report["passed"] is True
     assert report["campaign_kind"] == "evidence-derived-target-synthesis-v1"
     assert report["target_generation_source"] == "persisted_failure_structure"
+    assert report["target_selection_uses_audit_storage_digest"] is False
     assert report["fresh_global_grammar_enumeration_used_for_derived_targets"] is False
     assert report["finite_source_schedule_target_replayed_as_new_objective"] is False
     assert report["derived_schedule_precommitted_before_support_checks"] is True
