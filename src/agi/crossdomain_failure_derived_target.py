@@ -62,6 +62,9 @@ def _expand_support_inputs(
                 "persisted sequence failure history has no numeric anchor for support expansion"
             )
         anchor = next((value for value in numeric if sum(value) != 0), numeric[0])
+        canonical_sums = list(range(-10, 11))
+        sum_rotation = int(history_digest[24:32], 16) % len(canonical_sums)
+        canonical_sums = [*canonical_sums[sum_rotation:], *canonical_sums[:sum_rotation]]
         candidates = [
             [*anchor, *anchor],
             [-item for item in anchor],
@@ -69,6 +72,7 @@ def _expand_support_inputs(
             [*anchor, *[-item for item in anchor], *anchor],
             list(reversed(anchor)),
             [*list(reversed(anchor)), *anchor],
+            *[[value, 0, 0] for value in canonical_sums],
         ]
     elif input_domain == "string":
         strings = [value for value in persisted_inputs if isinstance(value, str)]
