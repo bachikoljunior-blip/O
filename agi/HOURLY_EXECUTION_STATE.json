@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T17:50:21+09:00",
   "started_at": "2026-08-19T17:50:21+09:00",
-  "heartbeat_at": "2026-08-19T17:50:21+09:00",
-  "last_progress_at": "2026-08-19T17:50:21+09:00",
+  "heartbeat_at": "2026-08-19T18:04:56+09:00",
+  "last_progress_at": "2026-08-19T17:54:59+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T175021JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T175021JST",
@@ -26,13 +26,13 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "f7bdaea30f95df9afbb4372f7f249dfb2d22de12",
-  "latest_main_sha_before_heartbeat": "f7bdaea30f95df9afbb4372f7f249dfb2d22de12",
-  "current_work_unit": "Recovered stale execution from latest main only. Prior heartbeat was 2026-08-19T17:05:55+09:00, latest repository-side PR progress was 2026-08-19T17:09:55+09:00, and PR 220 exact-head CI 32231272647 completed at 2026-08-19T17:24:23+09:00; all exceed stale_after_seconds=900 at recovery. Current PR 220 exact head 0f860048dda59e083eca052d090781f29beddd8d failed full CI with 374 passed / 1 failed. The retained counterexample is a bounded sequence-to-string synthesized target still not realizable by the current fallback despite prior affine/runtime/abs repairs. Repair only this demonstrated synthesis frontier, add focused regression, then require a new exact-head full CI. PR 221 remains stacked and unmergeable until PR 220 passes and merges unchanged.",
+  "latest_main_sha_before_heartbeat": "d0db1119027b1d57cd98a80e74c9f64e5f7b875a",
+  "current_work_unit": "Recovered the stale predecessor from latest main only, retained PR 220 exact-head failure 0f860048dda59e083eca052d090781f29beddd8d / CI 32231272647 (374 passed / 1 failed), and repaired only the demonstrated bounded sequence-to-string synthesis frontier. New exact head 0388dfa4a38bf826e168d7cd13f0d8c989e503b9 explores the already-admitted abs(fold) composition before the unchanged affine/to_string layer, preserves the existing node/constant/effect/resource bounds, and adds a focused regression. Fresh exact-head full CI 32234956074 is in progress; do not duplicate it. PR 221 remains stacked and must be reconstructed only after PR 220 integrates unchanged.",
   "unmerged_pr": 220,
   "unmerged_branch": "agi/evidence-frontier-exhaustion-r55",
-  "unmerged_head_sha": "0f860048dda59e083eca052d090781f29beddd8d",
-  "unmerged_ci_run": 32231272647,
-  "unmerged_ci_status": "failure_exact_head_374_passed_1_failed",
+  "unmerged_head_sha": "0388dfa4a38bf826e168d7cd13f0d8c989e503b9",
+  "unmerged_ci_run": 32234956074,
+  "unmerged_ci_status": "in_progress_exact_head_full_ci",
   "additional_in_flight": [
     {
       "pr": 221,
@@ -45,7 +45,8 @@
     {
       "issue": 222,
       "purpose": "independent_external_evaluator_coordination",
-      "status": "open_no_external_evidence_received"
+      "status": "open_no_external_evidence_received",
+      "comments": 0
     }
   ],
   "recovered_stale_lease": {
@@ -61,23 +62,14 @@
     {"pr": 219, "head_sha": "9b92a3b5edaacfeecf967f058def260935af011b", "ci_run": 32222554312, "ci_conclusion": "success", "merge_sha": "b6385bfc7d1e444bb2eb409b2f0926b46353f84e"}
   ],
   "negative_evidence": [
-    {"pr": 217, "head_sha": "861a747f7ae4c45e7ea7a325e626a7635ae435b9", "ci_run": 32200581797, "failure": "canonical acquired-program Candidate payload stores descriptor at acquired_program.program"},
-    {"pr": 217, "head_sha": "221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a", "ci_run": 32203820158, "failure": "derived schedule selected a target outside the unchanged bounded synthesizer grammar"},
-    {"pr": 217, "head_sha": "bb7cf33a1513c2d4e1439015f7190ac930e3ba6b", "ci_run": 32206823741, "failure": "persisted support underdetermined a grammar-admissible target; support-equivalent Candidate failed sealed inputs"},
-    {"pr": 217, "head_sha": "f043218d6fca83e699f39ed01a0989509c7be7c8", "ci_run": 32207910025, "failure": "365 passed / 1 failed; deterministic support enrichment remained insufficient to identify the target"},
-    {"pr": 217, "head_sha": "4c4e9f0ff132cc122c2b9f231b597fea543d67e3", "ci_run": 32211208363, "failure": "366 passed / 1 failed; sequence-value coverage remained insufficient for sealed cross-domain replay"},
-    {"pr": 217, "head_sha": "11f382dc2fc8ac81c3757bc2769e1eeab0820444", "ci_run": 32213784278, "failure": "367 passed / 1 failed; audit/storage digest leaked into semantic target-selection salt"},
-    {"pr": 218, "head_sha": "7ddb82364ae763342a08890de05a35689eaacd84", "ci_run": 32204018811, "failure": "preliminary stacked CI inherited synthesis failure plus empty-preexisting-Candidate snapshot failure"},
-    {"pr": 218, "head_sha": "cf8b33d24b84ca0b7f57a3de1d42a8698f164bb9", "ci_run": 32218239903, "failure": "369 passed / 1 failed; immutable-prior verification invoked a non-empty rehydration helper with an empty prior Candidate set"},
-    {"pr": 218, "head_sha": "03bc202e21ed92c9335072a3e94ddeb936548556", "ci_run": 32218994089, "failure": "369 passed / 1 failed; bounded typed synthesizer could not realize a precommitted sequence-to-string behavior"},
-    {"pr": 219, "head_sha": "c5401e84ffe90d118f8823e72cf5f102725092a9", "ci_run": 32218618494, "failure": "stacked diagnostic retained an inherited prerequisite failure and entered ModelClient without provider credentials"},
-    {"pr": 219, "head_sha": "713129fe3504acbfefdbd8078c6258a71e683595", "ci_run": 32219379130, "failure": "370 passed / 1 failed; repaired diagnostic retained only the inherited PR 218 synthesis failure"},
-    {"pr": 220, "head_sha": "afd815a0f613c2352e2fad4eb953823458abd7f1", "ci_run": 32219409927, "failure": "370 passed / 2 failed; inherited PR 218 cumulative failure plus a second evidence-frontier seed exposed the same bounded synthesis frontier"},
+    {"pr": 220, "head_sha": "afd815a0f613c2352e2fad4eb953823458abd7f1", "ci_run": 32219409927, "failure": "inherited prerequisite failure plus a second evidence-frontier seed exposed the bounded sequence-to-string synthesis boundary"},
     {"pr": 220, "head_sha": "8a8a6a83427289e0bcde431237a6745ef7bcd754", "ci_run": 32226365369, "failure": "373 passed / 1 failed; repeated evidence-frontier campaign selected a sequence-to-string behavior outside the effective bounded synthesis search"},
     {"pr": 220, "head_sha": "38defc124e2a43a9309408522f3170a0e1dd97b3", "ci_run": 32228013783, "failure": "374 passed / 1 failed; runtime-budget regression did not repair the same sequence-to-string synthesis failure"},
-    {"pr": 220, "head_sha": "0f860048dda59e083eca052d090781f29beddd8d", "ci_run": 32231272647, "failure": "374 passed / 1 failed; adding absolute affine output still did not realize the demonstrated sequence-to-string target"},
+    {"pr": 220, "head_sha": "0f860048dda59e083eca052d090781f29beddd8d", "ci_run": 32231272647, "failure": "374 passed / 1 failed; adding post-affine absolute output still did not realize the demonstrated sequence-to-string target"},
+    {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "ci_run": 32227017529, "failure": "preliminary stacked run failed PR 220 prerequisite and PR 221 through the same inherited sequence-to-string synthesis frontier"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
+  "negative_evidence_history_note": "Earlier retained failures for PRs 217-219 and PR 220 are preserved in repository history and agi/CONTINUATION.json; this heartbeat keeps the active frontier concise without deleting their underlying PR/CI/evidence artifacts.",
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
@@ -94,8 +86,9 @@
     "attestations": 0,
     "registered_verifiers": 0,
     "coordination_issue": 222,
+    "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair only the exact bounded sequence-to-string synthesis frontier demonstrated by PR 220 CI 32231272647, add a focused regression that reproduces that semantic class without weakening task expectations, Candidate regression, fail-closed controls, or the external evidence gate, then require a new exact-head full CI. Merge only an unchanged passing PR 220 head. After integration reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before merge.",
+  "next_falsifiable_milestone": "Observe exact-head full CI 32234956074 without duplicating it. If it fails, retain exact head/run and repair only the newly demonstrated synthesis boundary. If it passes, merge only unchanged PR 220 head 0388dfa4a38bf826e168d7cd13f0d8c989e503b9, then reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
