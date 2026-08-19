@@ -17,9 +17,9 @@
   "self_application_policy_path": "agi/SELF_APPLICATION.md",
   "lease_path": "agi/HOURLY_EXECUTION_STATE.json",
   "active_run_id": "run-self-applied-pr220-recovery-20260819-185911",
-  "run_status": "Recovered a stale execution from latest main only after PR 220 exact head 066516e8419c7a3e6f031bd3b9a42a50affcdefa / CI 32236567598 failed with 376 passed / 1 failed. The failure was a fresh-restart evidence boundary: Candidate/system-only resolver state was correct, but replay incorrectly reloaded persisted evidence from the resolver. Current exact head 28a901be47042335674594eac9080800a1c1069c preloads the fixed round descriptions from the source root before restart and replays them against state-only resolver capability state; a regression forbids evidence loading on the resolver. Fresh full CI 32240702620 is in progress. PR 221 remains intentionally stacked and cannot merge until PR 220 integrates and PR 221 is reconstructed on verified main.",
+  "run_status": "Recovered a stale execution from latest main only. PR 220 head 28a901be47042335674594eac9080800a1c1069c / CI 32240702620 completed with 376 passed / 1 failed after state-only behavioral replay succeeded; the sole failure was a latent report KeyError because two already-proven replay-retention booleans were referenced by aggregate validation but absent from the report dict. That exact failure is retained. Current head 22e1e3e1603e2850667acce1db09d5165a608b11 adds only those booleans from existing replay selections. Fresh full CI 32242145512 is in progress. PR 221 remains stacked and cannot merge until PR 220 integrates and PR 221 is reconstructed on verified main.",
   "last_watchdog_recovery": "2026-08-19T18:59:11+09:00",
-  "last_heartbeat_at": "2026-08-19T19:03:13+09:00",
+  "last_heartbeat_at": "2026-08-19T19:20:18+09:00",
   "trigger_role": "watchdog_only",
   "time_budget_enabled": false,
   "soft_stop": null,
@@ -28,14 +28,14 @@
   "active_execution_continues_until": "verified_agi_or_platform_process_end",
   "last_completed_capability_sha": "b6385bfc7d1e444bb2eb409b2f0926b46353f84e",
   "unmerged_pr": 220,
-  "unmerged_head_sha": "28a901be47042335674594eac9080800a1c1069c",
-  "unmerged_ci_run": 32240702620,
+  "unmerged_head_sha": "22e1e3e1603e2850667acce1db09d5165a608b11",
+  "unmerged_ci_run": 32242145512,
   "unmerged_ci_status": "in_progress_fresh_exact_head",
   "stacked_next_prs": [
     {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "base_pr": 220, "ci_run": 32227017529, "ci_status": "preliminary_stacked_failed_requires_reconstruction_after_pr220"}
   ],
-  "failed_validation": "PR 220 failed heads remain retained across bounded synthesis and restart-isolation counterexamples. The latest retained head 066516e8419c7a3e6f031bd3b9a42a50affcdefa / CI 32236567598 reached 376 passed / 1 failed and demonstrated that fresh resolver replay must not depend on evidence excluded from state-only transfer. Preliminary PR 221 head 5948bba04a517a3e651a8347969299a991218b97 / CI 32227017529 inherited the then-unresolved PR 220 synthesis prerequisite and is diagnostic only. Copilot quota exhaustion remains provider-resource negative evidence. No failed head has been merged.",
-  "next_executable_action": "Observe exact-head CI 32240702620 without duplicating it. Merge only unchanged PR 220 head 28a901be47042335674594eac9080800a1c1069c if full CI succeeds after reconciling main bookkeeping-only divergence; on failure retain exact evidence and repair only the newly demonstrated invariant. If it integrates, reconstruct PR 221's two-file delta directly on verified post-PR-220 main, retarget to main, and require fresh exact-head full CI before any merge.",
+  "failed_validation": "PR 220 failed heads remain retained across bounded synthesis, restart-isolation, and report-invariant counterexamples. Head 066516e8419c7a3e6f031bd3b9a42a50affcdefa / CI 32236567598 reached 376 passed / 1 failed at resolver-side evidence loading. Head 28a901be47042335674594eac9080800a1c1069c / CI 32240702620 again reached 376 passed / 1 failed only after all behavioral replays succeeded, exposing missing report booleans. Preliminary PR 221 head 5948bba04a517a3e651a8347969299a991218b97 / CI 32227017529 inherited an older PR 220 prerequisite and is diagnostic only. Copilot quota exhaustion remains provider-resource negative evidence. No failed head has been merged.",
+  "next_executable_action": "Observe exact-head CI 32242145512 without duplicating it. Merge only unchanged PR 220 head 22e1e3e1603e2850667acce1db09d5165a608b11 if full CI succeeds after reconciling main bookkeeping-only divergence; on failure retain exact evidence and repair only the newly demonstrated invariant. If it integrates, reconstruct PR 221's two-file delta directly on verified post-PR-220 main, retarget to main, and require fresh exact-head full CI before any merge.",
   "self_application_state": {
     "enabled": true,
     "run_id": "run-self-applied-pr220-recovery-20260819-185911",
@@ -61,5 +61,5 @@
   },
   "automation_control_status": "A fresh running heartbeat suppresses duplicate work; a stale or released lease while the AGI goal remains unmet permits latest-main-only recovery. Repository state is durable continuation, not scheduler control-plane proof.",
   "rule": "Every recovery reconstructs work from latest main only. Retention and transfer validation use fresh execution; independent evaluation uses fresh independent execution; work units are persisted through native self-application. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries are not stop conditions. Verified AGI remains gated on genuinely independent production evidence.",
-  "updated_utc": "2026-08-19T10:09:30Z"
+  "updated_utc": "2026-08-19T10:22:10Z"
 }
