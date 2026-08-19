@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T20:56:27+09:00",
   "started_at": "2026-08-19T20:56:27+09:00",
-  "heartbeat_at": "2026-08-19T21:08:02+09:00",
-  "last_progress_at": "2026-08-19T21:07:52+09:00",
+  "heartbeat_at": "2026-08-19T21:20:17+09:00",
+  "last_progress_at": "2026-08-19T21:14:39+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T205627JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T205627JST",
@@ -26,20 +26,30 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "f3706810f2f7b48c73fbd941792757ad462abf90",
-  "latest_main_sha_before_heartbeat": "9b2c15ddaf777b2963c942da8f3af1ec94b3b9aa",
-  "current_work_unit": "Recovered PR 221 fresh exact-head failure from Actions job log. CI 32246111435 on head d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577 had 377 passed / 1 failed. The failing sequence->string demonstrations exactly require to_string(6 * sum(sequence) + 2), but generic bounded synthesis admitted fixed numeric constants only -5..5; the target remains within the existing 9-node pure typed grammar. Opened prerequisite PR 224 exact head 60fdfe91705c9c4dc568ae301649ecf7f528e1e6 to admit only ±6 and add a held-out regression, without changing node/runtime/effect/regression/evidence gates. Await fresh full exact-head CI; do not merge until unchanged head passes. PR 221 remains blocked and its temporary diagnostic workflow head 58a5e99e75b9191d101763d908d3036e351b8b83 must not be merged; after PR 224 integrates, restore/reconstruct PR 221 against verified main and require fresh full CI.",
+  "latest_main_sha_before_heartbeat": "e8fbe0d600352f405631b8fb5f058d6f7c2862d3",
+  "current_work_unit": "PR 221 exact-head CI 32246111435 was diagnosed from Actions logs: 377 passed / 1 failed because the evidence-derived sequence->string target requires behavior to_string(6 * sum(sequence) + 2) while the bounded learner's fixed numeric seed constants ended at ±5 and its frontier pruning can drop late intermediates. PR 224 exact head 60fdfe91705c9c4dc568ae301649ecf7f528e1e6 adds only ±6 plus a held-out regression; full CI 32251059159 is in progress and is not merge-admissible until complete. To falsify whether that minimal repair actually fixes the original PR 221 counterexample, diagnostic-only draft PR 225 stacks the untouched original PR 221 exact head d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577 on PR 224's branch; never merge PR 225. Separately, PR 223's deterministic test-harness bug from CI 32246774682 was repaired on stacked head 5689add8037742aeeaa8260e43f6cfc202ac2c56; diagnostic CI 32251368051 is in progress but remains non-merge-admissible until PR 221 integrates and the delta is rebuilt on verified main.",
   "unmerged_pr": 224,
   "unmerged_branch": "agi/sequence-affine-six-synthesis-r58",
   "unmerged_head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6",
-  "unmerged_ci_run": null,
-  "unmerged_ci_status": "awaiting_fresh_exact_head_run_observation",
+  "unmerged_ci_run": 32251059159,
+  "unmerged_ci_status": "in_progress_fresh_full_exact_head",
   "additional_in_flight": [
+    {
+      "pr": 225,
+      "kind": "diagnostic_only_never_merge",
+      "head_sha": "d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577",
+      "base_branch": "agi/sequence-affine-six-synthesis-r58",
+      "base_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6",
+      "merge_ref_sha": "d7daa87b421f1d83dbf4ae6566abf68a97afc369",
+      "purpose": "directly test PR 224 against the untouched original PR 221 failing delta",
+      "merge_admissible": false
+    },
     {
       "pr": 221,
       "branch": "agi/evidence-frontier-expansion-r56",
       "failed_head_sha": "d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577",
       "failed_ci_run": 32246111435,
-      "failure": "377 passed / 1 failed: bounded synthesizer could not learn sequence->string affine coefficient six",
+      "failure": "377 passed / 1 failed: bounded synthesizer could not learn the derived sequence->string target",
       "temporary_diagnostic_head_sha": "58a5e99e75b9191d101763d908d3036e351b8b83",
       "temporary_diagnostic_ci_run": 32250414560,
       "status": "blocked_on_pr224_do_not_merge_diagnostic_head"
@@ -47,10 +57,11 @@
     {
       "pr": 223,
       "branch": "agi/evidence-frontier-iterated-expansion-r57",
-      "head_sha": "6c225236d4394654ec2fbfe7c5b725da484c9057",
+      "head_sha": "5689add8037742aeeaa8260e43f6cfc202ac2c56",
       "base_pr": 221,
-      "ci_run": 32246774682,
-      "ci_status": "completed_failure_diagnostic_only_requires_reconstruction_after_pr221"
+      "ci_run": 32251368051,
+      "ci_status": "in_progress_diagnostic_only_requires_reconstruction_after_pr221",
+      "merge_admissible": false
     },
     {
       "issue": 222,
@@ -73,8 +84,8 @@
   ],
   "negative_evidence": [
     {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "ci_run": 32227017529, "failure": "preliminary stacked run inherited unresolved PR 220 synthesis prerequisite"},
-    {"pr": 221, "head_sha": "d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577", "ci_run": 32246111435, "failure": "377 passed / 1 failed; sequence->string derived target to_string(6 * sum(sequence) + 2) exceeded the synthesizer fixed constant kernel -5..5 despite remaining within the 9-node typed grammar"},
-    {"pr": 223, "head_sha": "6c225236d4394654ec2fbfe7c5b725da484c9057", "ci_run": 32246774682, "failure": "preliminary stacked full CI completed failure; diagnostic only until PR 221 is repaired and verified"},
+    {"pr": 221, "head_sha": "d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577", "ci_run": 32246111435, "failure": "377 passed / 1 failed; evidence-derived sequence->string target was not synthesized by the bounded pure typed learner"},
+    {"pr": 223, "head_sha": "6c225236d4394654ec2fbfe7c5b725da484c9057", "ci_run": 32246774682, "failure": "2 failed / 377 passed; inherited PR 221 synthesis counterexample plus a deterministic test-harness bug that attempted live ModelClient construction without credentials"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
   "self_application": {
@@ -96,6 +107,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe fresh full CI for PR 224 exact head 60fdfe91705c9c4dc568ae301649ecf7f528e1e6. If any check fails, retain exact head/run and repair only the demonstrated bounded-synthesis regression. If unchanged head passes, merge PR 224, then restore/reconstruct PR 221's original two-file expansion delta on verified post-224 main (excluding the temporary diagnostic workflow change), require fresh exact-head full CI, and continue to PR 223 only after PR 221 integrates.",
+  "next_falsifiable_milestone": "Observe PR 224 full CI 32251059159 and the diagnostic-only PR 225 merge-ref validation without duplicating either. PR 224 may merge only if its unchanged exact head passes every required check and the stacked diagnostic confirms the original PR 221 counterexample is actually repaired; otherwise retain exact failed heads/runs and repair only the demonstrated bounded-synthesis frontier boundary. After a verified prerequisite integrates, reconstruct PR 221 without its temporary workflow diagnostic and require fresh full exact-head CI. PR 223 remains blocked and diagnostic until PR 221 integrates.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
