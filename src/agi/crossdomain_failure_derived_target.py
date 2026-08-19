@@ -106,7 +106,7 @@ def _expand_support_inputs(
             continue
         seen.add(key)
         values.append(copy.deepcopy(candidate))
-        if len(values) >= 8:
+        if len(values) >= 32:
             break
     if len(values) < 5:
         raise CrossDomainFailureDerivedTargetError(
