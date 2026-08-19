@@ -9,9 +9,8 @@
   "soft_stop": null,
   "hard_stop": null,
   "actual_started_at": "2026-08-20T02:09:07+09:00",
-  "started_at": "2026-08-20T02:09:07+09:00",
-  "heartbeat_at": "2026-08-20T02:19:12+09:00",
-  "last_progress_at": "2026-08-20T02:19:12+09:00",
+  "heartbeat_at": "2026-08-20T02:31:15+09:00",
+  "last_progress_at": "2026-08-20T02:31:15+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T020907JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T020907JST",
@@ -26,50 +25,35 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "64dd0ac68b3ef34c5a3adac1c4aed11998fcae62",
-  "latest_main_sha_before_heartbeat": "3b46217a63ca4fd5564fc1ee270c0391cc0ced91",
-  "current_work_unit": "Recovered the reproduced PR 223 sequence->sequence canonical-character synthesis failure. The old branch-local r60 materializer still did not emit a clean repair head after an idempotent retrigger, so recovery moved the same persisted repair direction behind reviewed default-branch infrastructure rather than weakening validation. PR 226 exact head 8d969491b277f92138de3832832efdee455b42f2 adds a one-shot schema-gated controller and is in full CI 32280863192. PR 227 exact head ca95fcfb59b5b263faf08f2a93fbd4fd78f2c609 is intentionally stacked on PR 226 and carries only the schema-exact request; preliminary full CI 32280907540 is queued. Neither is merge-admissible until its required exact-head validation and dependency conditions pass.",
-  "unmerged_pr": 226,
-  "unmerged_branch": "agi/repair-controller-r61",
-  "unmerged_head_sha": "8d969491b277f92138de3832832efdee455b42f2",
-  "unmerged_ci_run": 32280863192,
-  "unmerged_ci_status": "in_progress_full_exact_head",
-  "additional_in_flight": [
-    {"pr": 227, "branch": "agi/sequence-char-repair-request-r62", "head_sha": "ca95fcfb59b5b263faf08f2a93fbd4fd78f2c609", "base_pr": 226, "ci_run": 32280907540, "ci_status": "queued_preliminary_stacked_full_ci_requires_retarget_after_pr226", "merge_admissible": false},
-    {"branch": "agi/sequence-affine-char-synthesis-r60", "kind": "superseded_branch_local_materializer_state", "latest_observed_controller_commit": "74309a10cfee8363a75652b7167507c69cde376b", "base_sha": "3a610191202069e4cba02b6551d61cc7665b0c4a", "status": "no_clean_source_test_head_observed", "merge_admissible": false},
-    {"pr": 223, "branch": "agi/evidence-frontier-iterated-expansion-r57", "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "ci_status": "completed_failure_379_passed_1_failed_sequence_to_sequence_canonical_character_synthesis", "merge_admissible": false},
-    {"issue": 222, "purpose": "independent_external_evaluator_coordination", "status": "open_no_external_evidence_received", "comments": 0}
-  ],
+  "latest_main_sha_before_heartbeat": "a278c1716e45b5b0cbe8686b14d7500c5fad5fac",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260820T005302JST",
     "last_heartbeat_at": "2026-08-20T01:16:40+09:00",
     "last_repository_progress_at": "2026-08-20T01:18:01+09:00",
     "last_external_progress_at": "2026-08-20T01:22:27+09:00",
-    "reason": "running heartbeat, latest-main progress, and latest known CI completion all exceeded stale_after_seconds; recent commit search showed no later repository mutation, so recovery resumed idempotently from latest main"
+    "reason": "heartbeat, repository progress, and known CI completion all exceeded the 900-second stale threshold; no later mutation was observed"
   },
-  "recent_completed_units": [
-    {"pr": 217, "head_sha": "7a77acd791813233547b36692f3bd4d285495a9a", "ci_run": 32214874171, "ci_conclusion": "success", "merge_sha": "4c2edf22669a8cc36625fddec61c846bd312d070"},
-    {"pr": 218, "head_sha": "30fd69abe8a00f7c0b40fd83f4abafffc14d42f6", "ci_run": 32221540540, "ci_conclusion": "success", "merge_sha": "aa1af71e51b2698be04dc89f1ea30a84828b7a9d"},
-    {"pr": 219, "head_sha": "9b92a3b5edaacfeecf967f058def260935af011b", "ci_run": 32222554312, "ci_conclusion": "success", "merge_sha": "b6385bfc7d1e444bb2eb409b2f0926b46353f84e"},
-    {"pr": 220, "head_sha": "22e1e3e1603e2850667acce1db09d5165a608b11", "ci_run": 32242145512, "ci_conclusion": "success", "merge_sha": "853bdbc6223735ce9e2f5ea3a058cd5f12ef5e45"},
-    {"pr": 224, "head_sha": "835b4d14e4ff369f0e6728f6ef25c790e2b4eb81", "ci_run": 32262476203, "ci_conclusion": "success", "merge_sha": "e6f02235cfb52c095942e771212241665968bdfd"},
-    {"pr": 221, "head_sha": "10386a2641c8a63c49a700d0661ee7ff53478e56", "ci_run": 32267130425, "ci_conclusion": "success", "merge_sha": "3a610191202069e4cba02b6551d61cc7665b0c4a"}
+  "current_work_unit": "PR 223 exact head 2a6c1cc8fb301e4ff73840810bf820161a6bed1d reproduced the retained sequence->sequence canonical numeric-character synthesis failure in fresh full CI 32273144513: 379 passed / 1 failed. The old branch-local r60 workflow failed to produce a clean head, so the same narrow repair is being recovered behind reviewed infrastructure rather than bypassing validation. PR 226 exact head 8d969491b277f92138de3832832efdee455b42f2 adds a schema-gated one-shot controller; full CI 32280863192 is in progress. PR 227 exact head ca95fcfb59b5b263faf08f2a93fbd4fd78f2c609 is intentionally stacked and carries only the exact repair request; preliminary full CI 32280907540 is also in progress. Neither is merge-admissible yet.",
+  "unmerged_pr": 226,
+  "unmerged_branch": "agi/repair-controller-r61",
+  "unmerged_head_sha": "8d969491b277f92138de3832832efdee455b42f2",
+  "unmerged_ci_run": 32280863192,
+  "unmerged_ci_status": "in_progress_pytest",
+  "additional_in_flight": [
+    {"pr": 227, "branch": "agi/sequence-char-repair-request-r62", "head_sha": "ca95fcfb59b5b263faf08f2a93fbd4fd78f2c609", "base_pr": 226, "ci_run": 32280907540, "ci_status": "in_progress_preliminary_stacked", "merge_admissible": false},
+    {"pr": 223, "branch": "agi/evidence-frontier-iterated-expansion-r57", "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "ci_status": "completed_failure_379_passed_1_failed", "merge_admissible": false},
+    {"branch": "agi/sequence-affine-char-synthesis-r60", "latest_observed_head": "74309a10cfee8363a75652b7167507c69cde376b", "status": "old_branch_local_materializer_no_clean_head_observed", "merge_admissible": false},
+    {"issue": 222, "purpose": "independent_external_evaluator_coordination", "status": "open", "comments": 0}
   ],
   "negative_evidence": [
-    {"pr": 221, "head_sha": "d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577", "ci_run": 32246111435, "failure": "377 passed / 1 failed; evidence-derived sequence->string target was not synthesized by the bounded pure typed learner"},
-    {"pr": 223, "head_sha": "5689add8037742aeeaa8260e43f6cfc202ac2c56", "ci_run": 32251368051, "failure": "2 failed / 377 passed after deterministic no-live-model harness repair: inherited sequence->string boundary plus an independent sequence->sequence canonical-character bounded-synthesis failure"},
-    {"pr": 223, "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32267247966, "failure": "379 passed / 1 failed; sequence->sequence canonical numeric-character target remains outside the bounded synthesis frontier"},
-    {"pr": 223, "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "failure": "379 passed / 1 failed on fresh post-PR221 main; the same sequence->sequence canonical numeric-character bounded-synthesis counterexample reproduced"},
-    {"pr": 224, "head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6", "ci_run": 32251059159, "failure": "6 failed / 372 passed; prepending -6 perturbed deterministic bounded-frontier ordering and still failed coefficient-six synthesis"},
-    {"pr": 224, "head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced", "ci_run": 32257602305, "failure": "6 failed / 372 passed; append-only global ±6 changed unrelated frontier semantics and protected fail-closed behavior"},
-    {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
-  ],
-  "supporting_diagnostic_evidence": [
-    {"pr": 225, "head_sha": "e99a8478e46cf30c2dd209e46acea06865fa6abe", "ci_run": 32262566880, "result": "success", "claim": "diagnostic only; never merge and not AGI evidence"}
+    {"pr": 223, "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "failure": "379 passed / 1 failed; fresh post-PR221 validation reproduced the sequence->sequence canonical numeric-character bounded-synthesis counterexample"},
+    {"pr": 224, "head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6", "ci_run": 32251059159, "failure": "global -6 frontier change perturbed deterministic search and failed protected tests"},
+    {"pr": 224, "head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced", "ci_run": 32257602305, "failure": "append-only global ±6 still changed unrelated frontier semantics and protected fail-closed behavior"},
+    {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion; do not retrigger while blocked"}
   ],
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "recorder_path": "src/continual/self_application.py",
     "run_id": "run-self-applied-pr223-synthesis-recovery-20260820-020907",
     "checkpoint_persistence_pending": true,
     "external_claim_admissible": false
@@ -85,6 +69,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Require PR 226 exact-head CI 32280863192 to pass before merging its controller. Then retarget/reconstruct PR 227 onto that verified main and require fresh exact-head CI before merging the one-shot request. Observe the resulting clean r60 repair head, open a normal repair PR, require full exact-head CI, merge only unchanged success, then reconstruct PR 223 on the verified repaired main and rerun its iterated-retention milestone.",
-  "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
+  "next_falsifiable_milestone": "Require PR 226 exact-head full CI 32280863192 to pass. Merge only unchanged success. Then retarget/reconstruct PR 227 onto verified main and require fresh exact-head CI; merge its request only if unchanged success. Observe the resulting clean r60 source/test repair, open a normal PR, require full exact-head CI and merge only unchanged success. Reconstruct PR 223 on that verified repaired main and rerun the iterated no-forgetting milestone.",
+  "rule": "Fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries are not stop conditions. Internal evidence cannot satisfy the strict external AGI gate."
 }
