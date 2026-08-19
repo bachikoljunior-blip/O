@@ -4,18 +4,18 @@
   "timezone": "Asia/Tokyo",
   "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-19T17:50:21+09:00",
+  "scheduler_fired_at": "2026-08-19T18:59:11+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-19T17:50:21+09:00",
-  "started_at": "2026-08-19T17:50:21+09:00",
-  "heartbeat_at": "2026-08-19T18:14:22+09:00",
-  "last_progress_at": "2026-08-19T18:11:45+09:00",
+  "actual_started_at": "2026-08-19T18:59:11+09:00",
+  "started_at": "2026-08-19T18:59:11+09:00",
+  "heartbeat_at": "2026-08-19T18:59:11+09:00",
+  "last_progress_at": "2026-08-19T18:59:11+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260819T175021JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260819T175021JST",
-  "active_run_id": "run-self-applied-pr220-recovery-20260819-175021",
+  "execution_id": "o-agi-watchdog-recovery-20260819T185911JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260819T185911JST",
+  "active_run_id": "run-self-applied-pr220-recovery-20260819-185911",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -25,13 +25,13 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "f7bdaea30f95df9afbb4372f7f249dfb2d22de12",
-  "current_work_unit": "PR 220 exact head 0388dfa4a38bf826e168d7cd13f0d8c989e503b9 failed fresh full CI 32234956074 with 375 passed / 1 failed, preserving the same sequence-to-string synthesis counterexample despite the abs-before-affine repair. The exact failure family remains bounded and grammar-valid. A second minimal repair now covers reverse(to_string(affine(fold(input)))) using only already-admitted reverse/to_string/fold/arithmetic operators under the unchanged max_nodes=8, constants, effects, runtime resource bounds, regression gate, and external claim gate. New exact head 066516e8419c7a3e6f031bd3b9a42a50affcdefa adds a focused regression and is undergoing fresh full CI 32236567598. Do not duplicate that run. PR 221 remains stacked and unmergeable until PR 220 passes and merges unchanged.",
+  "latest_main_sha_at_start": "e9077a3a89e1101a9193aad71ed9e2a4f49cccd4",
+  "current_work_unit": "Recovered stale execution after PR 220 exact head 066516e8419c7a3e6f031bd3b9a42a50affcdefa failed fresh full CI 32236567598 with 376 passed / 1 failed. The demonstrated boundary is not synthesis: the fresh state-only resolver deliberately copies Candidate/system state only, but the replay loop incorrectly reloads heterogeneous round evidence from that resolver and therefore fails on a missing .continual/evidence/crossdomain-failure-derived-target report. Preserve the failed head/run as negative evidence. Repair only this evidence-transfer boundary by preloading/reconstructing the committed round descriptions from the source root before the fresh resolver and replaying them against resolver Candidate/system state without copying evidence into the resolver. PR 221 remains stacked and unmergeable until PR 220 passes and merges unchanged.",
   "unmerged_pr": 220,
   "unmerged_branch": "agi/evidence-frontier-exhaustion-r55",
   "unmerged_head_sha": "066516e8419c7a3e6f031bd3b9a42a50affcdefa",
   "unmerged_ci_run": 32236567598,
-  "unmerged_ci_status": "in_progress_exact_head_full_ci",
+  "unmerged_ci_status": "failed_exact_head_full_ci_needs_targeted_evidence_boundary_repair",
   "additional_in_flight": [
     {
       "pr": 221,
@@ -49,10 +49,10 @@
     }
   ],
   "recovered_stale_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260819T170320JST",
-    "last_heartbeat_at": "2026-08-19T17:05:55+09:00",
-    "last_repository_progress_at": "2026-08-19T17:09:55+09:00",
-    "last_external_validation_at": "2026-08-19T17:24:23+09:00",
+    "execution_id": "o-agi-watchdog-recovery-20260819T175021JST",
+    "last_heartbeat_at": "2026-08-19T18:14:22+09:00",
+    "last_repository_progress_at": "2026-08-19T18:14:47+09:00",
+    "last_external_validation_at": "2026-08-19T18:29:30+09:00",
     "reason": "running heartbeat, repository progress, and known exact-head CI completion all exceeded stale_after_seconds; recovery started idempotently from latest main only"
   },
   "recent_completed_units": [
@@ -66,14 +66,15 @@
     {"pr": 220, "head_sha": "38defc124e2a43a9309408522f3170a0e1dd97b3", "ci_run": 32228013783, "failure": "374 passed / 1 failed; runtime-budget regression did not repair the same sequence-to-string synthesis failure"},
     {"pr": 220, "head_sha": "0f860048dda59e083eca052d090781f29beddd8d", "ci_run": 32231272647, "failure": "374 passed / 1 failed; post-affine absolute output did not realize the demonstrated sequence-to-string target"},
     {"pr": 220, "head_sha": "0388dfa4a38bf826e168d7cd13f0d8c989e503b9", "ci_run": 32234956074, "failure": "375 passed / 1 failed; abs-before-affine focused regression passed but the real persisted evidence-frontier sequence-to-string target remained unsynthesized"},
-    {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "ci_run": 32227017529, "failure": "preliminary stacked run inherited the same unresolved PR 220 sequence-to-string synthesis frontier"},
+    {"pr": 220, "head_sha": "066516e8419c7a3e6f031bd3b9a42a50affcdefa", "ci_run": 32236567598, "failure": "376 passed / 1 failed; synthesis boundary was repaired, then fresh state-only replay incorrectly attempted to reload deliberately excluded persisted evidence from the resolver"},
+    {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "ci_run": 32227017529, "failure": "preliminary stacked run inherited the unresolved PR 220 boundary and requires reconstruction after PR 220"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
     "recorder_path": "src/continual/self_application.py",
-    "run_id": "run-self-applied-pr220-recovery-20260819-175021",
+    "run_id": "run-self-applied-pr220-recovery-20260819-185911",
     "checkpoint_persistence_pending": true,
     "external_claim_admissible": false
   },
@@ -88,6 +89,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe exact-head full CI 32236567598 without duplicating it. If it fails, retain exact head/run and repair only the newly demonstrated boundary. If it passes, merge only unchanged PR 220 head 066516e8419c7a3e6f031bd3b9a42a50affcdefa, then reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
+  "next_falsifiable_milestone": "Repair only PR 220's demonstrated fresh-resolver evidence boundary: source evidence may define and precommit replay semantics before restart, but the fresh resolver must execute from Candidate/system state only and must not require copied evidence. Add a regression that proves resolver replay does not call the evidence loader on the resolver root, run focused tests, then require fresh exact-head full CI. Merge only an unchanged passing head; afterward reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
