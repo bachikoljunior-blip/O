@@ -1,0 +1,59 @@
+name: repair-pr224-terminal-overflow
+
+on:
+  push:
+    branches:
+      - 'agi/sequence-affine-six-synthesis-r58'
+    paths:
+      - '.github/workflows/repair-pr224-terminal-overflow.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e '.[test]'
+      - name: Patch only the demonstrated terminal-overflow boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/agi/acquired_programs.py')
+          text = path.read_text(encoding='utf-8')
+          old = '''        for domain in _ALLOWED_DOMAINS:\n            if len(by_cost[cost][domain]) > 256:\n                by_cost[cost][domain] = by_cost[cost][domain][\n                    :256\n                ]\n'''
+          new = '''        # A one-step final-domain unary conversion must not become impossible solely\n        # because its otherwise-valid intermediate lands just beyond the retained\n        # per-cost frontier. Check only overflow intermediates here; retained entries\n        # keep their original ordering and are still explored normally at the next cost.\n        if cost < max_nodes:\n            for terminal_op, (required, terminal_output) in _UNARY_SIGNATURES.items():\n                if terminal_output != output_domain:\n                    continue\n                for arg in by_cost[cost][required][256:]:\n                    expression = {"op": terminal_op, "arg": arg}\n                    if _candidate_outputs(expression, input_domain, examples) != expected:\n                        continue\n                    match = add(cost + 1, terminal_output, expression)\n                    if match:\n                        return match\n        for domain in _ALLOWED_DOMAINS:\n            if len(by_cost[cost][domain]) > 256:\n                by_cost[cost][domain] = by_cost[cost][domain][\n                    :256\n                ]\n'''
+          if text.count(old) != 1:
+              raise SystemExit('expected truncation block not found exactly once')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+      - name: Focused coefficient-six regression
+        run: pytest -q tests/test_sequence_affine_string_synthesis.py
+      - name: Full Python regression suite
+        run: pytest -q
+      - name: Compile source
+        run: python -m compileall -q src
+      - name: Commit validated repair to PR branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --exit-code -- .github/workflows/repair-pr224-terminal-overflow.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/agi/acquired_programs.py
+          git diff --cached --quiet && { echo 'repair produced no source change' >&2; exit 1; }
+          git commit -m 'Preserve bounded frontier through terminal conversion'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
