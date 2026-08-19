@@ -1,0 +1,66 @@
+name: sequence-six-scoped-diagnostic-once
+
+on:
+  push:
+    branches:
+      - 'agi/sequence-affine-six-scoped-diagnostic-r60'
+    paths:
+      - '.github/workflows/sequence-six-scoped-diagnostic-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e '.[test]'
+      - name: Scope coefficient-six seeds to demonstrated sequence input domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/agi/acquired_programs.py')
+          text = path.read_text(encoding='utf-8')
+          old = '''    base_constants: list[tuple[str, Any]] = [
+        *[("numeric", value) for value in range(-5, 6)],
+        ("numeric", -6),
+        ("numeric", 6),
+        ("string", ""),
+        ("sequence", []),
+        ("boolean", False),
+        ("boolean", True),
+        ("object", {}),
+    ]
+'''
+          new = '''    base_constants: list[tuple[str, Any]] = [
+        *[("numeric", value) for value in range(-5, 6)],
+        ("string", ""),
+        ("sequence", []),
+        ("boolean", False),
+        ("boolean", True),
+        ("object", {}),
+    ]
+    if input_domain == "sequence":
+        base_constants.extend((("numeric", -6), ("numeric", 6)))
+'''
+          if text.count(old) != 1:
+              raise SystemExit('expected exactly one appended coefficient-six seed block')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+          git diff --check
+      - name: Run focused protected and sequence synthesis regressions
+        run: |
+          pytest -q \
+            tests/test_acquired_program_structured.py \
+            tests/test_sequence_affine_string_synthesis.py \
+            tests/test_generated_crossdomain_cegis.py \
+            tests/test_crossdomain_failure_derived_target.py
