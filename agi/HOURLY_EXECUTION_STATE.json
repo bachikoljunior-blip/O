@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T12:50:10+09:00",
   "started_at": "2026-08-19T12:50:10+09:00",
-  "heartbeat_at": "2026-08-19T12:50:10+09:00",
-  "last_progress_at": "2026-08-19T12:50:10+09:00",
+  "heartbeat_at": "2026-08-19T13:02:25+09:00",
+  "last_progress_at": "2026-08-19T13:02:25+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T125010JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T125010JST",
@@ -26,12 +26,13 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "973a3f95fbaa4fad22edddcfbd4960917f20373b",
-  "current_work_unit": "Recovered stale PR 217 execution from latest main only after exact-head CI 32211208363 completed failure on unchanged head 4c4e9f0ff132cc122c2b9f231b597fea543d67e3: 366 passed / 1 failed because the learned support-equivalent Candidate still failed sealed cross-domain input. The demonstrated invariant is that the sequence support expansion produced too little semantic range despite removing the old total-count truncation. Repair only deterministic non-sealed sequence support coverage, retain the failed head/run, and require fresh exact-head full CI before merge.",
+  "latest_main_sha_before_heartbeat": "442c70e5ceaa69a83ad2cb6337c59c0a0f9461ca",
+  "current_work_unit": "PR 217 failed exact-head CI 32211208363 on head 4c4e9f0ff132cc122c2b9f231b597fea543d67e3 with 366 passed / 1 failed because sequence support still underidentified the sealed behavior. The failed head/run remains negative evidence. Repaired only that demonstrated boundary: head 11f382dc2fc8ac81c3757bc2769e1eeab0820444 adds deterministic bounded sequence witnesses spanning signed sums -10..10 without consulting sealed inputs or answers, plus a direct regression test. Fresh exact-head CI 32213784278 is in progress; do not duplicate it.",
   "unmerged_pr": 217,
   "unmerged_branch": "agi/crossdomain-failure-derived-target-r52",
-  "unmerged_head_sha": "4c4e9f0ff132cc122c2b9f231b597fea543d67e3",
-  "unmerged_ci_run": 32211208363,
-  "unmerged_ci_status": "failed_exact_head_retained_repair_in_progress",
+  "unmerged_head_sha": "11f382dc2fc8ac81c3757bc2769e1eeab0820444",
+  "unmerged_ci_run": 32213784278,
+  "unmerged_ci_status": "in_progress_fresh_exact_head",
   "additional_in_flight": [
     {
       "pr": 218,
@@ -40,7 +41,7 @@
       "base_pr": 217,
       "ci_run": 32204018811,
       "ci_status": "stacked_failed_preliminary_requires_reconstruction_after_pr217",
-      "known_counterexample": "empty preexisting Candidate subset must snapshot as empty locally rather than invoking the non-empty rehydration assertion"
+      "known_counterexample": "empty preexisting Candidate subset must snapshot as empty locally rather than invoking the non-empty rehydration assertion; target reconstruction must use integrated PR 217 support expansion"
     }
   ],
   "recovered_stale_lease": {
@@ -76,6 +77,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair only PR 217's demonstrated sequence support-identifiability boundary using deterministic bounded support witnesses derived without sealed final answers. Require a direct regression proving broad negative/positive sequence-sum coverage, then fresh exact-head full CI. Merge only an unchanged passing head after exact-head reconciliation; otherwise retain the exact new head/run and repair only the next demonstrated invariant. After PR 217 integrates, reconstruct PR 218 on verified main and fix only its known empty-preexisting-state wrapper before fresh exact-head CI.",
+  "next_falsifiable_milestone": "Observe exact-head CI 32213784278 without duplicating it. If unchanged head 11f382dc2fc8ac81c3757bc2769e1eeab0820444 passes, reconcile it with latest main and integrate only that validated head, then reconstruct PR 218 on verified post-PR-217 main using the same support expansion and only the demonstrated empty-preexisting-state snapshot fix. On failure, retain exact head/run and repair only the newly demonstrated invariant.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
