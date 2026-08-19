@@ -990,6 +990,118 @@ def synthesize_program(
                 by_cost[cost][domain] = by_cost[cost][domain][
                     :256
                 ]
+    # Preserve the legacy deterministic frontier exactly. Only after that frontier
+    # is exhausted, derive a bounded integer affine literal pair from demonstrations
+    # for a sequence-sum -> canonical numeric-string terminal program. The derived
+    # literals never enter the generic frontier/seen sets, so unrelated synthesis
+    # ordering and protected fail-closed behavior remain unchanged.
+    if (
+        input_domain == "sequence"
+        and output_domain == "string"
+        and allow_sequence_folds
+        and max_nodes >= 7
+    ):
+        affine_points: list[tuple[int, int]] = []
+        affine_valid = True
+        for item in examples:
+            total = 0
+            if not isinstance(item.input, (list, tuple)):
+                affine_valid = False
+                break
+            for raw in item.input:
+                if (
+                    isinstance(raw, bool)
+                    or not isinstance(raw, (int, float))
+                    or not math.isfinite(float(raw))
+                    or not float(raw).is_integer()
+                ):
+                    affine_valid = False
+                    break
+                total += int(raw)
+            if not affine_valid:
+                break
+            rendered = item.output
+            if not isinstance(rendered, str):
+                affine_valid = False
+                break
+            try:
+                target_value = int(rendered)
+            except ValueError:
+                affine_valid = False
+                break
+            if str(target_value) != rendered:
+                affine_valid = False
+                break
+            affine_points.append((total, target_value))
+
+        if affine_valid:
+            anchor: tuple[int, int, int, int] | None = None
+            for left_index, (left_x, left_y) in enumerate(affine_points):
+                for right_x, right_y in affine_points[left_index + 1 :]:
+                    if right_x != left_x:
+                        anchor = (left_x, left_y, right_x, right_y)
+                        break
+                if anchor is not None:
+                    break
+            if anchor is not None:
+                left_x, left_y, right_x, right_y = anchor
+                delta_x = right_x - left_x
+                delta_y = right_y - left_y
+                if delta_y % delta_x == 0:
+                    coefficient = delta_y // delta_x
+                    offset = left_y - coefficient * left_x
+                    try:
+                        _validate_constant(coefficient, "numeric")
+                        _validate_constant(offset, "numeric")
+                    except AcquiredProgramError:
+                        pass
+                    else:
+                        if all(
+                            coefficient * observed_x + offset == observed_y
+                            for observed_x, observed_y in affine_points
+                        ):
+                            expression = {
+                                "op": "to_string",
+                                "arg": {
+                                    "op": "add",
+                                    "left": {
+                                        "op": "mul",
+                                        "left": {
+                                            "op": "fold_numeric",
+                                            "arg": {"op": "input"},
+                                            "reducer": "add",
+                                            "initial": 0,
+                                        },
+                                        "right": {
+                                            "op": "const",
+                                            "domain": "numeric",
+                                            "value": coefficient,
+                                        },
+                                    },
+                                    "right": {
+                                        "op": "const",
+                                        "domain": "numeric",
+                                        "value": offset,
+                                    },
+                                },
+                            }
+                            if _candidate_outputs(expression, input_domain, examples) == expected:
+                                support = [
+                                    {"input": item.input, "output": item.output}
+                                    for item in examples
+                                ]
+                                program = AcquiredProgram(
+                                    input_domain=input_domain,
+                                    output_domain=output_domain,
+                                    expression=expression,
+                                    support_sha256=_digest(support),
+                                    max_steps=max(16, max_nodes * 2),
+                                    max_output_length=1024,
+                                    effects=(),
+                                )
+                                program.validate()
+                                return program
+
     raise AcquiredProgramError(
         "no bounded pure typed program matches all demonstrations"
     )
