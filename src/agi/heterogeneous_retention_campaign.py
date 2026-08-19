@@ -39,14 +39,14 @@ def _bounded_sequence_fold_affine_to_string(
     examples: tuple[ProgramExample, ...] | list[ProgramExample],
     max_nodes: int,
 ) -> AcquiredProgram | None:
-    """Search a small generic affine extension of the existing numeric sequence folds.
+    """Search a small generic numeric extension of the existing sequence folds.
 
-    The ordinary enumerator deliberately keeps bounded per-cost behavior pools. A retained
-    counterexample showed that those pools can prune a grammar-valid sequence->string program
-    before the later affine composition is reached. This fallback does not add host-code
-    execution or new constants: it enumerates only the already admitted add/mul folds,
-    numeric constants -5..5, add/mul/neg, and to_string, under the caller's unchanged node
-    bound, then verifies every demonstration through the normal acquired-program runtime.
+    The ordinary enumerator deliberately keeps bounded per-cost behavior pools. Retained
+    counterexamples showed that those pools can prune grammar-valid sequence->string programs
+    before later numeric composition is reached. This fallback does not add host-code execution
+    or new constants: it enumerates only the already admitted add/mul folds, numeric constants
+    -5..5, add/mul/neg/abs, and to_string, under the caller's unchanged node bound, then verifies
+    every demonstration through the normal acquired-program runtime.
 
     Runtime accounting includes one deterministic step per folded sequence element. The fallback
     therefore derives its step budget from the longest observed demonstration as well as the
@@ -131,27 +131,32 @@ def _bounded_sequence_fold_affine_to_string(
                         },
                     }
                     numeric_nodes = scaled_nodes + 2
-                expression = {"op": "to_string", "arg": numeric}
-                if numeric_nodes + 1 > max_nodes:
-                    continue
-                learned = AcquiredProgram(
-                    input_domain="sequence",
-                    output_domain="string",
-                    expression=expression,
-                    support_sha256=_digest(support),
-                    max_steps=runtime_step_budget,
-                    max_output_length=1024,
-                    effects=(),
-                )
-                try:
-                    learned.validate()
-                    if all(
-                        learned.apply(item.input) == item.output
-                        for item in examples
-                    ):
-                        return learned
-                except (AcquiredProgramError, TypeError, ValueError, OverflowError):
-                    continue
+                numeric_variants: list[tuple[dict[str, Any], int]] = [
+                    (numeric, numeric_nodes),
+                    ({"op": "abs", "arg": numeric}, numeric_nodes + 1),
+                ]
+                for numeric_variant, variant_nodes in numeric_variants:
+                    expression = {"op": "to_string", "arg": numeric_variant}
+                    if variant_nodes + 1 > max_nodes:
+                        continue
+                    learned = AcquiredProgram(
+                        input_domain="sequence",
+                        output_domain="string",
+                        expression=expression,
+                        support_sha256=_digest(support),
+                        max_steps=runtime_step_budget,
+                        max_output_length=1024,
+                        effects=(),
+                    )
+                    try:
+                        learned.validate()
+                        if all(
+                            learned.apply(item.input) == item.output
+                            for item in examples
+                        ):
+                            return learned
+                    except (AcquiredProgramError, TypeError, ValueError, OverflowError):
+                        continue
     return None
 
 
