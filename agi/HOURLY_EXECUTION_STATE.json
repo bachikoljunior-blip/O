@@ -4,18 +4,18 @@
   "timezone": "Asia/Tokyo",
   "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-19T22:08:17+09:00",
+  "scheduler_fired_at": "2026-08-19T22:55:07+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-19T22:08:17+09:00",
-  "started_at": "2026-08-19T22:08:17+09:00",
-  "heartbeat_at": "2026-08-19T22:23:57+09:00",
-  "last_progress_at": "2026-08-19T22:23:57+09:00",
+  "actual_started_at": "2026-08-19T22:55:07+09:00",
+  "started_at": "2026-08-19T22:55:07+09:00",
+  "heartbeat_at": "2026-08-19T22:55:07+09:00",
+  "last_progress_at": "2026-08-19T22:55:07+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260819T220817JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260819T220817JST",
-  "active_run_id": "run-self-applied-synthesis-frontier-recovery-20260819-220817",
+  "execution_id": "o-agi-watchdog-recovery-20260819T225507JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260819T225507JST",
+  "active_run_id": "run-self-applied-synthesis-overflow-recovery-20260819-225507",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -25,21 +25,20 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "5d222f93998693e6d54982a7edd78e1393a44abd",
-  "current_work_unit": "Recovered stale execution from latest main only, then inspected exact GitHub Actions logs. PR 224 head 60fdfe91705c9c4dc568ae301649ecf7f528e1e6 / CI 32251059159 failed 6 tests with 372 passes: prepending -6 to the bounded numeric seed order perturbed the deterministic retained frontier, regressing protected synthesis paths, and still failed the coefficient-six regression. Repaired only that demonstrated search-order boundary: preserve the prior -5..5 order byte-for-byte and append -6 then 6, without widening node/search/runtime/effect/Candidate/evidence gates. Final PR 224 head is 9fab4b0cd1e21518cbf638c40f317b7fe691cced; fresh full exact-head CI 32257602305 is in progress at pytest. Diagnostic-only PR 225 final head b2f46dccc01799488971c37300c69f4cc04da03e is also revalidating the untouched PR 221 delta against the repaired PR 224 base in CI 32257686851. PR 223 repaired diagnostic CI 32251368051 failed only the two remaining functional synthesis-frontier tests; its former ModelClient harness failure is absent.",
+  "latest_main_sha_at_start": "db130477f0fdbff4df9d062b74442fd9b28b8cb7",
+  "current_work_unit": "Recovered the stale 22:08 execution from latest main only after its 22:23:57 heartbeat exceeded the 900-second lease. Exact PR 224 head 9fab4b0cd1e21518cbf638c40f317b7fe691cced / CI 32257602305 completed failure at 22:37:03 JST; diagnostic-only PR 225 head b2f46dccc01799488971c37300c69f4cc04da03e / CI 32257686851 also completed failure at 22:52:02 JST, proving the untouched PR 221 delta still fails on the append-only ±6 repair. Repository inspection and a faithful bounded-search reproduction identify the remaining boundary without widening stored frontier caps: the desired numeric intermediate 6*sum(sequence)+2 is generated at cost 6 but appears after the 256 retained numeric frontier, so it is pruned before the final to_string terminal conversion can be tested. Next repair is a generic terminal-unary overflow check that tests one-step final-domain unary conversions on generated overflow intermediates before truncation while leaving retained frontier ordering/caps unchanged.",
   "unmerged_pr": 224,
   "unmerged_branch": "agi/sequence-affine-six-synthesis-r58",
   "unmerged_head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced",
   "unmerged_ci_run": 32257602305,
-  "unmerged_ci_status": "in_progress_pytest",
+  "unmerged_ci_status": "completed_failure",
   "additional_in_flight": [
     {
       "pr": 225,
       "kind": "diagnostic_only_never_merge",
       "head_sha": "b2f46dccc01799488971c37300c69f4cc04da03e",
-      "base_branch": "agi/sequence-affine-six-synthesis-r58",
       "ci_run": 32257686851,
-      "ci_status": "in_progress",
+      "ci_status": "completed_failure",
       "merge_admissible": false
     },
     {
@@ -65,11 +64,11 @@
     }
   ],
   "recovered_stale_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260819T205627JST",
-    "last_heartbeat_at": "2026-08-19T21:20:17+09:00",
-    "last_repository_progress_at": "2026-08-19T21:20:45+09:00",
-    "last_external_progress_at": "2026-08-19T21:36:43+09:00",
-    "reason": "running heartbeat, repository progress, and all known in-flight workflow progress exceeded stale_after_seconds; recovery started idempotently from latest main only"
+    "execution_id": "o-agi-watchdog-recovery-20260819T220817JST",
+    "last_heartbeat_at": "2026-08-19T22:23:57+09:00",
+    "last_repository_progress_at": "2026-08-19T22:24:38+09:00",
+    "last_external_progress_at": "2026-08-19T22:52:02+09:00",
+    "reason": "running heartbeat exceeded stale_after_seconds; both known exact-head workflows were inspected and found completed failures, so recovery resumed idempotently from latest main without rerunning them"
   },
   "recent_completed_units": [
     {"pr": 217, "head_sha": "7a77acd791813233547b36692f3bd4d285495a9a", "ci_run": 32214874171, "ci_conclusion": "success", "merge_sha": "4c2edf22669a8cc36625fddec61c846bd312d070"},
@@ -78,19 +77,18 @@
     {"pr": 220, "head_sha": "22e1e3e1603e2850667acce1db09d5165a608b11", "ci_run": 32242145512, "ci_conclusion": "success", "merge_sha": "853bdbc6223735ce9e2f5ea3a058cd5f12ef5e45"}
   ],
   "negative_evidence": [
-    {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "ci_run": 32227017529, "failure": "preliminary stacked run inherited unresolved PR 220 synthesis prerequisite"},
     {"pr": 221, "head_sha": "d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577", "ci_run": 32246111435, "failure": "377 passed / 1 failed; evidence-derived sequence->string target was not synthesized by the bounded pure typed learner"},
-    {"pr": 223, "head_sha": "6c225236d4394654ec2fbfe7c5b725da484c9057", "ci_run": 32246774682, "failure": "2 failed / 377 passed; inherited PR 221 synthesis counterexample plus deterministic test-harness live ModelClient construction"},
-    {"pr": 224, "head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6", "ci_run": 32251059159, "failure": "6 failed / 372 passed; changing fixed numeric constants from -5..5 to -6..6 perturbed deterministic bounded-frontier ordering, regressed protected synthesis behavior, and still did not synthesize the coefficient-six target"},
-    {"pr": 225, "head_sha": "d6398ee5beeb7b8616f7ad1fca3b2829c9ea3577", "ci_run": 32251647167, "failure": "diagnostic merge-ref validation on the failed first PR 224 repair did not demonstrate the original PR 221 counterexample repaired"},
-    {"pr": 223, "head_sha": "5689add8037742aeeaa8260e43f6cfc202ac2c56", "ci_run": 32251368051, "failure": "2 failed / 377 passed; repaired harness removed the prior ModelClient-construction failure, leaving functional sequence->string prerequisite and later sequence->sequence frontier synthesis failures"},
+    {"pr": 223, "head_sha": "5689add8037742aeeaa8260e43f6cfc202ac2c56", "ci_run": 32251368051, "failure": "2 failed / 377 passed; harness repair removed live ModelClient failure, leaving two functional synthesis-frontier failures"},
+    {"pr": 224, "head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6", "ci_run": 32251059159, "failure": "6 failed / 372 passed; prepending -6 perturbed deterministic bounded-frontier ordering and still failed coefficient-six synthesis"},
+    {"pr": 224, "head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced", "ci_run": 32257602305, "failure": "append-only ±6 preserved prior seed order but full CI still failed; bounded-search reproduction shows the matching cost-6 numeric intermediate is generated after the 256-entry retained frontier and pruned before terminal to_string"},
+    {"pr": 225, "head_sha": "b2f46dccc01799488971c37300c69f4cc04da03e", "ci_run": 32257686851, "failure": "diagnostic-only full CI failed, so the exact original PR 221 delta remains unrepaired on the append-only ±6 base"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
     "recorder_path": "src/continual/self_application.py",
-    "run_id": "run-self-applied-synthesis-frontier-recovery-20260819-220817",
+    "run_id": "run-self-applied-synthesis-overflow-recovery-20260819-225507",
     "checkpoint_persistence_pending": true,
     "external_claim_admissible": false
   },
@@ -105,6 +103,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe PR 224 exact-head CI 32257602305 without duplicating it. Merge only unchanged head 9fab4b0cd1e21518cbf638c40f317b7fe691cced if full CI passes; if it fails, retain the exact head/run and repair only the newly demonstrated protected/frontier boundary. Use diagnostic PR 225 only as evidence that the untouched original PR 221 delta now passes or still fails on the repaired base; never merge PR 225. After a verified PR 224 merge, reconstruct PR 221 directly on resulting main and require fresh full exact-head CI, then reconstruct PR 223 only after PR 221 integrates.",
+  "next_falsifiable_milestone": "Repair PR 224 without widening the retained 128/256 search frontiers: before each cost frontier is truncated, test generic one-step unary conversions whose output domain is the requested final domain against overflow intermediates. Preserve prior frontier ordering and caps, keep the coefficient-six held-out regression unchanged, require focused validation and then fresh full exact-head CI. If it passes, merge only unchanged head, reconstruct PR 221 on verified main, and continue immediately.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
