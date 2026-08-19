@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T12:50:10+09:00",
   "started_at": "2026-08-19T12:50:10+09:00",
-  "heartbeat_at": "2026-08-19T13:02:25+09:00",
-  "last_progress_at": "2026-08-19T13:02:25+09:00",
+  "heartbeat_at": "2026-08-19T13:12:30+09:00",
+  "last_progress_at": "2026-08-19T13:12:30+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T125010JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T125010JST",
@@ -26,12 +26,12 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "973a3f95fbaa4fad22edddcfbd4960917f20373b",
-  "latest_main_sha_before_heartbeat": "442c70e5ceaa69a83ad2cb6337c59c0a0f9461ca",
-  "current_work_unit": "PR 217 failed exact-head CI 32211208363 on head 4c4e9f0ff132cc122c2b9f231b597fea543d67e3 with 366 passed / 1 failed because sequence support still underidentified the sealed behavior. The failed head/run remains negative evidence. Repaired only that demonstrated boundary: head 11f382dc2fc8ac81c3757bc2769e1eeab0820444 adds deterministic bounded sequence witnesses spanning signed sums -10..10 without consulting sealed inputs or answers, plus a direct regression test. Fresh exact-head CI 32213784278 is in progress; do not duplicate it.",
+  "latest_main_sha_before_heartbeat": "7b56f6f94a911bacb7f7a38e67189a7754c1c8f4",
+  "current_work_unit": "PR 217 head 11f382dc2fc8ac81c3757bc2769e1eeab0820444 passed its new cross-domain regression but full CI 32213784278 attempt 1 failed with 367 passed / 1 failed because the existing evidence-derived-target campaign overgeneralized its persisted untouched control. Root cause boundary: the evidence-derived scheduler used a full persisted evidence digest as target-selection entropy even though that digest contains transactional Candidate storage bytes whose regression record includes recorded_at wall-clock metadata. Repaired without weakening any control: exact head 7a77acd791813233547b36692f3bd4d285495a9a keeps the full audit digest for integrity but derives target ranking only from stable committed source schedule/acquisition/control behavior fingerprints, with a direct audit-digest-independence regression. Fresh exact-head full CI 32214874171 is in progress. The rerun of old head 11f382 remains negative-evidence falsification only and is not merge-eligible.",
   "unmerged_pr": 217,
   "unmerged_branch": "agi/crossdomain-failure-derived-target-r52",
-  "unmerged_head_sha": "11f382dc2fc8ac81c3757bc2769e1eeab0820444",
-  "unmerged_ci_run": 32213784278,
+  "unmerged_head_sha": "7a77acd791813233547b36692f3bd4d285495a9a",
+  "unmerged_ci_run": 32214874171,
   "unmerged_ci_status": "in_progress_fresh_exact_head",
   "additional_in_flight": [
     {
@@ -42,6 +42,12 @@
       "ci_run": 32204018811,
       "ci_status": "stacked_failed_preliminary_requires_reconstruction_after_pr217",
       "known_counterexample": "empty preexisting Candidate subset must snapshot as empty locally rather than invoking the non-empty rehydration assertion; target reconstruction must use integrated PR 217 support expansion"
+    },
+    {
+      "workflow_run": 32213784278,
+      "head_sha": "11f382dc2fc8ac81c3757bc2769e1eeab0820444",
+      "status": "rerun_in_progress_evidence_only",
+      "purpose": "falsify whether the protected-control failure was reproducible; result cannot supersede current head validation"
     }
   ],
   "recovered_stale_lease": {
@@ -57,6 +63,7 @@
     {"pr": 217, "head_sha": "bb7cf33a1513c2d4e1439015f7190ac930e3ba6b", "ci_run": 32206823741, "failure": "persisted support underdetermined a grammar-admissible target; support-equivalent Candidate failed sealed inputs"},
     {"pr": 217, "head_sha": "f043218d6fca83e699f39ed01a0989509c7be7c8", "ci_run": 32207910025, "failure": "365 passed / 1 failed; deterministic support enrichment remained insufficient to identify the target"},
     {"pr": 217, "head_sha": "4c4e9f0ff132cc122c2b9f231b597fea543d67e3", "ci_run": 32211208363, "failure": "366 passed / 1 failed; removing total support truncation did not create enough sequence-value coverage and the synthesized Candidate still failed sealed cross-domain input"},
+    {"pr": 217, "head_sha": "11f382dc2fc8ac81c3757bc2769e1eeab0820444", "ci_run": 32213784278, "attempt": 1, "failure": "367 passed / 1 failed; evidence-derived target learning made the source persisted untouched control behavior supported; audit/storage digest was being used as semantic target-selection salt"},
     {"pr": 218, "head_sha": "7ddb82364ae763342a08890de05a35689eaacd84", "ci_run": 32204018811, "failure": "preliminary stacked CI independently exposed empty-preexisting-Candidate snapshot boundary"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
@@ -77,6 +84,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe exact-head CI 32213784278 without duplicating it. If unchanged head 11f382dc2fc8ac81c3757bc2769e1eeab0820444 passes, reconcile it with latest main and integrate only that validated head, then reconstruct PR 218 on verified post-PR-217 main using the same support expansion and only the demonstrated empty-preexisting-state snapshot fix. On failure, retain exact head/run and repair only the newly demonstrated invariant.",
+  "next_falsifiable_milestone": "Observe fresh exact-head CI 32214874171 for current head 7a77acd791813233547b36692f3bd4d285495a9a. Merge only if that unchanged head passes all checks after exact-head/base reconciliation. On failure retain the exact run and repair only the demonstrated invariant. After integration reconstruct PR 218 on verified main, applying only its known empty-preexisting-state snapshot fix plus integrated deterministic support reconstruction, then require fresh exact-head CI before merge.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
