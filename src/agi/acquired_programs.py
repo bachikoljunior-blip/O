@@ -1102,6 +1102,126 @@ def synthesize_program(
                                 program.validate()
                                 return program
 
+    # A retained sequence->sequence counterexample exposes the composed sibling of
+    # the numeric-string terminal: chars(to_string(a * sum(sequence) + b)). Keep
+    # this demonstration-derived terminal behind the unchanged legacy frontier and
+    # accept it only when every output is the canonical character sequence of an
+    # integer. Derived literals never enter generic frontier/seen state.
+    if (
+        input_domain == "sequence"
+        and output_domain == "sequence"
+        and allow_sequence_folds
+        and max_nodes >= 8
+    ):
+        affine_char_points: list[tuple[int, int]] = []
+        affine_chars_valid = True
+        for item in examples:
+            total = 0
+            if not isinstance(item.input, (list, tuple)):
+                affine_chars_valid = False
+                break
+            for raw in item.input:
+                if (
+                    isinstance(raw, bool)
+                    or not isinstance(raw, (int, float))
+                    or not math.isfinite(float(raw))
+                    or not float(raw).is_integer()
+                ):
+                    affine_chars_valid = False
+                    break
+                total += int(raw)
+            if not affine_chars_valid:
+                break
+            rendered = item.output
+            if (
+                not isinstance(rendered, (list, tuple))
+                or not rendered
+                or not all(isinstance(value, str) and len(value) == 1 for value in rendered)
+            ):
+                affine_chars_valid = False
+                break
+            rendered_text = "".join(rendered)
+            try:
+                target_value = int(rendered_text)
+            except ValueError:
+                affine_chars_valid = False
+                break
+            if list(str(target_value)) != list(rendered):
+                affine_chars_valid = False
+                break
+            affine_char_points.append((total, target_value))
+
+        if affine_chars_valid:
+            anchor: tuple[int, int, int, int] | None = None
+            for left_index, (left_x, left_y) in enumerate(affine_char_points):
+                for right_x, right_y in affine_char_points[left_index + 1 :]:
+                    if right_x != left_x:
+                        anchor = (left_x, left_y, right_x, right_y)
+                        break
+                if anchor is not None:
+                    break
+            if anchor is not None:
+                left_x, left_y, right_x, right_y = anchor
+                delta_x = right_x - left_x
+                delta_y = right_y - left_y
+                if delta_y % delta_x == 0:
+                    coefficient = delta_y // delta_x
+                    offset = left_y - coefficient * left_x
+                    try:
+                        _validate_constant(coefficient, "numeric")
+                        _validate_constant(offset, "numeric")
+                    except AcquiredProgramError:
+                        pass
+                    else:
+                        if all(
+                            coefficient * observed_x + offset == observed_y
+                            for observed_x, observed_y in affine_char_points
+                        ):
+                            expression = {
+                                "op": "chars",
+                                "arg": {
+                                    "op": "to_string",
+                                    "arg": {
+                                        "op": "add",
+                                        "left": {
+                                            "op": "mul",
+                                            "left": {
+                                                "op": "fold_numeric",
+                                                "arg": {"op": "input"},
+                                                "reducer": "add",
+                                                "initial": 0,
+                                            },
+                                            "right": {
+                                                "op": "const",
+                                                "domain": "numeric",
+                                                "value": coefficient,
+                                            },
+                                        },
+                                        "right": {
+                                            "op": "const",
+                                            "domain": "numeric",
+                                            "value": offset,
+                                        },
+                                    },
+                                },
+                            }
+                            if _candidate_outputs(expression, input_domain, examples) == expected:
+                                support = [
+                                    {"input": item.input, "output": item.output}
+                                    for item in examples
+                                ]
+                                program = AcquiredProgram(
+                                    input_domain=input_domain,
+                                    output_domain=output_domain,
+                                    expression=expression,
+                                    support_sha256=_digest(support),
+                                    max_steps=max(16, max_nodes * 2),
+                                    max_output_length=1024,
+                                    effects=(),
+                                )
+                                program.validate()
+                                return program
+
     raise AcquiredProgramError(
         "no bounded pure typed program matches all demonstrations"
     )
