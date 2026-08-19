@@ -6,7 +6,12 @@ from pathlib import Path
 from typing import Any, Callable
 
 from agi.acquired_program_runtime import _atomic_json
-from agi.acquired_programs import ProgramExample, synthesize_program
+from agi.acquired_programs import (
+    AcquiredProgram,
+    AcquiredProgramError,
+    ProgramExample,
+    synthesize_program,
+)
 from agi.materialized_runtime_replay import (
     _candidate_trial_snapshot,
     _invoke,
@@ -27,6 +32,129 @@ def _digest(value: Any) -> str:
         allow_nan=False,
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def _bounded_sequence_fold_affine_to_string(
+    *,
+    examples: tuple[ProgramExample, ...] | list[ProgramExample],
+    max_nodes: int,
+) -> AcquiredProgram | None:
+    """Search a small generic affine extension of the existing numeric sequence folds.
+
+    The ordinary enumerator deliberately keeps bounded per-cost behavior pools. A retained
+    counterexample showed that those pools can prune a grammar-valid sequence->string program
+    before the later affine composition is reached. This fallback does not add host-code
+    execution or new constants: it enumerates only the already admitted add/mul folds,
+    numeric constants -5..5, add/mul/neg, and to_string, under the caller's unchanged node
+    bound, then verifies every demonstration through the normal acquired-program runtime.
+    """
+
+    if max_nodes < 2:
+        return None
+    support = [
+        {"input": item.input, "output": item.output}
+        for item in examples
+    ]
+    for reducer, initial in (("add", 0), ("mul", 1)):
+        fold = {
+            "op": "fold_numeric",
+            "arg": {"op": "input"},
+            "reducer": reducer,
+            "initial": initial,
+        }
+        for scale in range(-5, 6):
+            if scale == 0:
+                scaled: dict[str, Any] = {
+                    "op": "const",
+                    "domain": "numeric",
+                    "value": 0,
+                }
+                scaled_nodes = 1
+            elif scale == 1:
+                scaled = fold
+                scaled_nodes = 2
+            elif scale == -1:
+                scaled = {"op": "neg", "arg": fold}
+                scaled_nodes = 3
+            else:
+                scaled = {
+                    "op": "mul",
+                    "left": fold,
+                    "right": {
+                        "op": "const",
+                        "domain": "numeric",
+                        "value": scale,
+                    },
+                }
+                scaled_nodes = 4
+            for offset in range(-5, 6):
+                if scale == 0:
+                    numeric: dict[str, Any] = {
+                        "op": "const",
+                        "domain": "numeric",
+                        "value": offset,
+                    }
+                    numeric_nodes = 1
+                elif offset == 0:
+                    numeric = scaled
+                    numeric_nodes = scaled_nodes
+                else:
+                    numeric = {
+                        "op": "add",
+                        "left": scaled,
+                        "right": {
+                            "op": "const",
+                            "domain": "numeric",
+                            "value": offset,
+                        },
+                    }
+                    numeric_nodes = scaled_nodes + 2
+                expression = {"op": "to_string", "arg": numeric}
+                if numeric_nodes + 1 > max_nodes:
+                    continue
+                learned = AcquiredProgram(
+                    input_domain="sequence",
+                    output_domain="string",
+                    expression=expression,
+                    support_sha256=_digest(support),
+                    max_steps=max(16, max_nodes * 2),
+                    max_output_length=1024,
+                    effects=(),
+                )
+                try:
+                    learned.validate()
+                    if all(
+                        learned.apply(item.input) == item.output
+                        for item in examples
+                    ):
+                        return learned
+                except (AcquiredProgramError, TypeError, ValueError, OverflowError):
+                    continue
+    return None
+
+
+def _synthesize_task_program(spec: dict[str, Any]) -> AcquiredProgram:
+    input_domain = str(spec["input_domain"])
+    output_domain = str(spec["output_domain"])
+    max_nodes = int(spec["max_nodes"])
+    examples = tuple(spec["examples"])
+    try:
+        return synthesize_program(
+            input_domain=input_domain,
+            output_domain=output_domain,
+            examples=examples,
+            max_nodes=max_nodes,
+        )
+    except AcquiredProgramError:
+        if input_domain != "sequence" or output_domain != "string":
+            raise
+        fallback = _bounded_sequence_fold_affine_to_string(
+            examples=examples,
+            max_nodes=max_nodes,
+        )
+        if fallback is None:
+            raise
+        return fallback
 
 
 def _measurement(
@@ -116,12 +244,7 @@ def _promote_task(
     candidate_id = f"hetero-{spec['name']}-{token}"
     tool_id = f"hetero-tool-{spec['name']}-{token}"
     scope = f"agi/acquired-program/heterogeneous/{spec['name']}/v1"
-    learned = synthesize_program(
-        input_domain=str(spec["input_domain"]),
-        output_domain=str(spec["output_domain"]),
-        examples=spec["examples"],
-        max_nodes=int(spec["max_nodes"]),
-    )
+    learned = _synthesize_task_program(spec)
 
     candidate_dir = root / ".continual" / "candidates" / candidate_id
     _atomic_json(
