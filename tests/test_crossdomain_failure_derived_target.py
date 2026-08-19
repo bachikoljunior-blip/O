@@ -4,7 +4,10 @@ import json
 from pathlib import Path
 
 import continual.engine as engine_module
-from agi.crossdomain_failure_derived_target import run_crossdomain_failure_derived_target
+from agi.crossdomain_failure_derived_target import (
+    _expand_support_inputs,
+    run_crossdomain_failure_derived_target,
+)
 
 
 class NeverModelClient:
@@ -17,6 +20,25 @@ class NeverModelClient:
     def call(self, component: str, payload: dict, prompt_path: str | None = None) -> dict:
         type(self).calls.append((component, payload, prompt_path))
         raise AssertionError(f"model call was not expected in mechanical failure-derived target: {component}")
+
+
+def test_sequence_support_expansion_spans_a_broad_numeric_frontier() -> None:
+    support = _expand_support_inputs(
+        {"input_domain": "sequence"},
+        ([], [1, -1], [2, -3, 1], [1]),
+        history_digest="0" * 64,
+    )
+
+    sums = {
+        sum(value)
+        for value in support
+        if isinstance(value, list)
+        and all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in value)
+    }
+    assert len(support) > 8
+    assert min(sums) <= -10
+    assert max(sums) >= 10
+    assert all(not isinstance(value, list) or len(value) <= 32 for value in support)
 
 
 def test_crossdomain_counterexample_history_drives_next_target(
