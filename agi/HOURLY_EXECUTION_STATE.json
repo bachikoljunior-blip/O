@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T14:52:01+09:00",
   "started_at": "2026-08-19T14:52:01+09:00",
-  "heartbeat_at": "2026-08-19T14:52:01+09:00",
-  "last_progress_at": "2026-08-19T14:52:01+09:00",
+  "heartbeat_at": "2026-08-19T15:14:25+09:00",
+  "last_progress_at": "2026-08-19T15:14:25+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T145201JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T145201JST",
@@ -26,29 +26,21 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "5d68904d20664d2d117cfdd16cf9191be0a15087",
-  "latest_main_sha_before_heartbeat": "5d68904d20664d2d117cfdd16cf9191be0a15087",
-  "current_work_unit": "Recovered the stale PR 218 execution from latest main after all three previously in-flight validations finished and repository progress stopped. PR 218 exact head 03bc202e21ed92c9335072a3e94ddeb936548556 / CI 32218994089 is retained as negative evidence: full pytest reached 369 passed / 1 failed because the bounded typed synthesizer could not learn a sequence-to-string derived behavior from its demonstrations (AcquiredProgramError: no bounded pure typed program matches all demonstrations). PR 219 diagnostic head 713129fe3504acbfefdbd8078c6258a71e683595 / CI 32219379130 failed only on the inherited PR 218 synthesis boundary (370 passed / 1 failed), confirming its local no-live-model guard no longer adds a failure. PR 220 diagnostic head afd815a0f613c2352e2fad4eb953823458abd7f1 / CI 32219409927 retained the inherited PR 218 failure plus a second evidence-frontier case exposing the same sequence-to-string bounded synthesis gap (370 passed / 2 failed). The next repair must strengthen only the demonstrated bounded learner search frontier without weakening the target, scoring, Candidate regression gate, retention checks, or external AGI evidence gate.",
-  "unmerged_pr": 218,
-  "unmerged_branch": "agi/cumulative-crossdomain-failure-retention-r53",
-  "unmerged_head_sha": "03bc202e21ed92c9335072a3e94ddeb936548556",
-  "unmerged_ci_run": 32218994089,
-  "unmerged_ci_status": "completed_failure_retained",
+  "latest_main_sha_before_heartbeat": "aa1af71e51b2698be04dc89f1ea30a84828b7a9d",
+  "current_work_unit": "Recovered the stale execution from latest main, retained PR 218/219/220 failed heads and exact CI as negative evidence, repaired only the demonstrated bounded sequence-to-string synthesis frontier, and added a focused unrelated-domain fail-closed regression. PR 218 exact head 30fd69abe8a00f7c0b40fd83f4abafffc14d42f6 passed fresh full CI 32221540540 and merged unchanged as aa1af71e51b2698be04dc89f1ea30a84828b7a9d. PR 219 has now been reconstructed directly on that verified main as exact head 9b92a3b5edaacfeecf967f058def260935af011b; fresh exact-head full CI 32222554312 is in progress and is the only merge authority for PR 219. PR 220 remains a diagnostic stacked milestone and must be reconstructed only after PR 219 settles.",
+  "unmerged_pr": 219,
+  "unmerged_branch": "agi/evidence-frontier-objective-r54",
+  "unmerged_head_sha": "9b92a3b5edaacfeecf967f058def260935af011b",
+  "unmerged_ci_run": 32222554312,
+  "unmerged_ci_status": "in_progress_fresh_exact_head",
   "additional_in_flight": [
-    {
-      "pr": 219,
-      "branch": "agi/evidence-frontier-objective-r54",
-      "head_sha": "713129fe3504acbfefdbd8078c6258a71e683595",
-      "base_pr": 218,
-      "ci_run": 32219379130,
-      "ci_status": "completed_failure_inherited_pr218_boundary_requires_reconstruction_after_pr218"
-    },
     {
       "pr": 220,
       "branch": "agi/evidence-frontier-exhaustion-r55",
       "head_sha": "afd815a0f613c2352e2fad4eb953823458abd7f1",
       "base_pr": 219,
       "ci_run": 32219409927,
-      "ci_status": "completed_failure_inherited_and_second_same_synthesis_boundary_requires_pr218_then_pr219_reconstruction"
+      "ci_status": "diagnostic_failed_requires_reconstruction_after_pr219"
     }
   ],
   "recovered_stale_lease": {
@@ -67,6 +59,13 @@
       "ci_run": 32214874171,
       "ci_conclusion": "success",
       "merge_sha": "4c2edf22669a8cc36625fddec61c846bd312d070"
+    },
+    {
+      "pr": 218,
+      "head_sha": "30fd69abe8a00f7c0b40fd83f4abafffc14d42f6",
+      "ci_run": 32221540540,
+      "ci_conclusion": "success",
+      "merge_sha": "aa1af71e51b2698be04dc89f1ea30a84828b7a9d"
     }
   ],
   "negative_evidence": [
@@ -101,6 +100,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair only the demonstrated generic bounded synthesis frontier so the existing sequence numeric fold can compose with bounded affine numeric transforms and to_string without being pruned before cost 8. Add a focused regression that reproduces the observed sequence-to-string examples without weakening any limits or evaluator. Update PR 218, require a fresh exact-head full CI, and merge only an unchanged passing head. If PR 218 integrates, reconstruct PR 219 directly on verified main and require fresh exact-head CI before any merge; then do the same for PR 220.",
+  "next_falsifiable_milestone": "Observe fresh exact-head full CI 32222554312 for reconstructed PR 219 head 9b92a3b5edaacfeecf967f058def260935af011b. Merge only if the head is unchanged and CI succeeds; on failure retain the exact head/run and repair only the demonstrated evidence-frontier invariant. After PR 219 integrates, reconstruct PR 220 directly on resulting verified main and require fresh exact-head full CI before any merge. Then advance immediately to the next failure/evidence-derived bounded objective-generation milestone while preserving precommitment, contamination controls, no-forgetting, and fail-closed safety.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
