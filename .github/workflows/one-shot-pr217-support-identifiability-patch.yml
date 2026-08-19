@@ -1,0 +1,50 @@
+name: one-shot-pr217-support-identifiability-patch
+
+on:
+  push:
+    branches:
+      - 'agi/crossdomain-failure-derived-target-r52'
+    paths:
+      - '.github/workflows/one-shot-pr217-support-identifiability-patch.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: one-shot-pr217-support-identifiability-patch
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - name: Apply bounded support-identifiability repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path('src/agi/crossdomain_failure_derived_target.py')
+          text = source.read_text(encoding='utf-8')
+          old = '''        if len(values) >= 8:\n            break\n'''
+          new = '''        if len(values) >= 32:\n            break\n'''
+          if text.count(old) != 1:
+              raise SystemExit(f'expected exactly one support cap, found {text.count(old)}')
+          source.write_text(text.replace(old, new), encoding='utf-8')
+
+          workflow = Path('.github/workflows/one-shot-pr217-support-identifiability-patch.yml')
+          workflow.unlink()
+          PY
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Use all bounded persisted-derived support in PR 217'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
