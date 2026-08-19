@@ -1,0 +1,236 @@
+name: materialize-sequence-affine-char-repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - agi/SEQUENCE_AFFINE_CHAR_REPAIR_REQUEST.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-sequence-affine-char-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Validate one-shot repair request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          value = json.loads(Path('agi/SEQUENCE_AFFINE_CHAR_REPAIR_REQUEST.json').read_text(encoding='utf-8'))
+          expected = {
+              'schema_version': 1,
+              'counterexample_pr': 223,
+              'counterexample_ci': 32273144513,
+              'target_branch': 'agi/sequence-affine-char-synthesis-r60',
+          }
+          if value != expected:
+              raise SystemExit(f'unexpected repair request: {value!r}')
+          PY
+      - name: Reconstruct clean repair branch from verified main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -B agi/sequence-affine-char-synthesis-r60 "$GITHUB_SHA"
+          python - <<'PY'
+          from pathlib import Path
+
+          source_path = Path('src/agi/acquired_programs.py')
+          source = source_path.read_text(encoding='utf-8')
+          marker = '''\n    raise AcquiredProgramError(\n        "no bounded pure typed program matches all demonstrations"\n    )\n'''
+          if source.count(marker) != 1:
+              raise SystemExit('expected one terminal synthesis failure marker')
+          insert = r'''
+    # A retained sequence->sequence counterexample exposes the composed sibling of
+    # the numeric-string terminal: chars(to_string(a * sum(sequence) + b)). Keep
+    # this demonstration-derived terminal behind the unchanged legacy frontier and
+    # accept it only when every output is the canonical character sequence of an
+    # integer. Derived literals never enter generic frontier/seen state.
+    if (
+        input_domain == "sequence"
+        and output_domain == "sequence"
+        and allow_sequence_folds
+        and max_nodes >= 8
+    ):
+        affine_char_points: list[tuple[int, int]] = []
+        affine_chars_valid = True
+        for item in examples:
+            total = 0
+            if not isinstance(item.input, (list, tuple)):
+                affine_chars_valid = False
+                break
+            for raw in item.input:
+                if (
+                    isinstance(raw, bool)
+                    or not isinstance(raw, (int, float))
+                    or not math.isfinite(float(raw))
+                    or not float(raw).is_integer()
+                ):
+                    affine_chars_valid = False
+                    break
+                total += int(raw)
+            if not affine_chars_valid:
+                break
+            rendered = item.output
+            if (
+                not isinstance(rendered, (list, tuple))
+                or not rendered
+                or not all(isinstance(value, str) and len(value) == 1 for value in rendered)
+            ):
+                affine_chars_valid = False
+                break
+            rendered_text = "".join(rendered)
+            try:
+                target_value = int(rendered_text)
+            except ValueError:
+                affine_chars_valid = False
+                break
+            if list(str(target_value)) != list(rendered):
+                affine_chars_valid = False
+                break
+            affine_char_points.append((total, target_value))
+
+        if affine_chars_valid:
+            anchor: tuple[int, int, int, int] | None = None
+            for left_index, (left_x, left_y) in enumerate(affine_char_points):
+                for right_x, right_y in affine_char_points[left_index + 1 :]:
+                    if right_x != left_x:
+                        anchor = (left_x, left_y, right_x, right_y)
+                        break
+                if anchor is not None:
+                    break
+            if anchor is not None:
+                left_x, left_y, right_x, right_y = anchor
+                delta_x = right_x - left_x
+                delta_y = right_y - left_y
+                if delta_y % delta_x == 0:
+                    coefficient = delta_y // delta_x
+                    offset = left_y - coefficient * left_x
+                    try:
+                        _validate_constant(coefficient, "numeric")
+                        _validate_constant(offset, "numeric")
+                    except AcquiredProgramError:
+                        pass
+                    else:
+                        if all(
+                            coefficient * observed_x + offset == observed_y
+                            for observed_x, observed_y in affine_char_points
+                        ):
+                            expression = {
+                                "op": "chars",
+                                "arg": {
+                                    "op": "to_string",
+                                    "arg": {
+                                        "op": "add",
+                                        "left": {
+                                            "op": "mul",
+                                            "left": {
+                                                "op": "fold_numeric",
+                                                "arg": {"op": "input"},
+                                                "reducer": "add",
+                                                "initial": 0,
+                                            },
+                                            "right": {
+                                                "op": "const",
+                                                "domain": "numeric",
+                                                "value": coefficient,
+                                            },
+                                        },
+                                        "right": {
+                                            "op": "const",
+                                            "domain": "numeric",
+                                            "value": offset,
+                                        },
+                                    },
+                                },
+                            }
+                            if _candidate_outputs(expression, input_domain, examples) == expected:
+                                support = [
+                                    {"input": item.input, "output": item.output}
+                                    for item in examples
+                                ]
+                                program = AcquiredProgram(
+                                    input_domain=input_domain,
+                                    output_domain=output_domain,
+                                    expression=expression,
+                                    support_sha256=_digest(support),
+                                    max_steps=max(16, max_nodes * 2),
+                                    max_output_length=1024,
+                                    effects=(),
+                                )
+                                program.validate()
+                                return program
+'''
+          source_path.write_text(source.replace(marker, insert + marker), encoding='utf-8')
+
+          Path('tests/test_sequence_affine_char_sequence_synthesis.py').write_text(r'''from __future__ import annotations
+
+import pytest
+
+from agi.acquired_programs import AcquiredProgramError, ProgramExample, synthesize_program
+
+
+def _chars(value: int) -> list[str]:
+    return list(str(value))
+
+
+def test_sequence_affine_char_sequence_is_derived_after_legacy_frontier() -> None:
+    examples = tuple(
+        ProgramExample(value, _chars(2 * sum(value) + 1))
+        for value in ([], [1, -1], [2, -3, 1], [1], [1, -1, 1], [1, 1], [-2, 0, 0])
+    )
+    program = synthesize_program(
+        input_domain="sequence",
+        output_domain="sequence",
+        examples=examples,
+        max_nodes=8,
+        allow_sequence_folds=True,
+        allow_conditionals=True,
+        allow_structured_ops=True,
+        allow_scalar_equality=True,
+        allow_observed_constants=True,
+        allow_object_construction=True,
+    )
+    assert program.expression["op"] == "chars"
+    for value in ([3], [-1], [4, -2, 1], [-5, 2]):
+        assert program.apply(value) == _chars(2 * sum(value) + 1)
+
+
+def test_sequence_affine_char_fallback_does_not_accept_noncanonical_sequence_output() -> None:
+    examples = (
+        ProgramExample([], ["01"]),
+        ProgramExample([1], ["03"]),
+        ProgramExample([2], ["05"]),
+    )
+    with pytest.raises(AcquiredProgramError):
+        synthesize_program(
+            input_domain="sequence",
+            output_domain="sequence",
+            examples=examples,
+            max_nodes=8,
+        )
+''', encoding='utf-8')
+          PY
+          python -m pip install -e '.[test]'
+          pytest -q tests/test_sequence_affine_char_sequence_synthesis.py tests/test_sequence_affine_string_synthesis.py
+          python -m compileall -q src
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/agi/acquired_programs.py tests/test_sequence_affine_char_sequence_synthesis.py
+          git commit -m 'Derive bounded affine character sequences after legacy frontier exhaustion'
+          git push --force origin HEAD:agi/sequence-affine-char-synthesis-r60
