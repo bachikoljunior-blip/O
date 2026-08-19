@@ -72,6 +72,10 @@ def run_evidence_frontier_exhaustion(root: Path, seed: str) -> dict[str, Any]:
         )
 
     post_first_state, reconstructed = _frontier_state(root, frontier)
+    round_reports = {
+        str(entry["round_seed"]): _load_round_report(root, str(entry["round_seed"]))
+        for entry in frontier
+    }
     first_signature = str(first["selected_semantic_signature"])
     first_state = next(
         (item for item in post_first_state if item["semantic_signature"] == first_signature),
@@ -107,7 +111,7 @@ def run_evidence_frontier_exhaustion(root: Path, seed: str) -> dict[str, Any]:
         )
 
     second_seed = str(second_entry["round_seed"])
-    second_report = _load_round_report(root, second_seed)
+    second_report = round_reports[second_seed]
     second_control = reconstructed[second_seed]["control"]
     if str(second_control["semantic_signature"]) != str(second_entry["semantic_signature"]):
         raise EvidenceFrontierExhaustionError(
@@ -213,8 +217,8 @@ def run_evidence_frontier_exhaustion(root: Path, seed: str) -> dict[str, Any]:
         )
 
     first_seed = str(first["selected_round_seed"])
-    first_report = _load_round_report(root, first_seed)
-    first_control = _reconstruct_targets(root, first_report)["control"]
+    first_report = round_reports[first_seed]
+    first_control = reconstructed[first_seed]["control"]
     base_replays: list[dict[str, Any]] = []
     remaining_controls: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(prefix="agi-evidence-frontier-r2-resolver-") as temporary:
@@ -247,8 +251,8 @@ def run_evidence_frontier_exhaustion(root: Path, seed: str) -> dict[str, Any]:
 
         for entry in frontier:
             round_seed = str(entry["round_seed"])
-            round_report = _load_round_report(resolver, round_seed)
-            round_targets = _reconstruct_targets(resolver, round_report)
+            round_report = round_reports[round_seed]
+            round_targets = reconstructed[round_seed]
             round_final_inputs = tuple(
                 copy.deepcopy(value)
                 for value in generated_crossdomain_target(f"{round_seed}:source-cegis")[4]
@@ -335,10 +339,7 @@ def run_evidence_frontier_exhaustion(root: Path, seed: str) -> dict[str, Any]:
         "prior_trial_state_unchanged": True,
         "first_selected_behavior_replay": first_selected_replay,
         "second_selected_behavior_replay": second_selected_replay,
-        "first_candidate_rediscovered_after_round_two": first_candidate_id
-        in {str(value) for value in first_selected_replay["solver_selected_candidate_ids"]},
-        "second_candidate_rediscovered_without_caller_ids": second_candidate_id
-        in {str(value) for value in second_selected_replay["solver_selected_candidate_ids"]},
+        "fresh_resolver_required_persisted_evidence": False,
         "base_behavior_replays": base_replays,
         "all_base_source_behaviors_retained": all(
             str(item["source_candidate_id"])
@@ -369,6 +370,8 @@ def run_evidence_frontier_exhaustion(root: Path, seed: str) -> dict[str, Any]:
             "next still-fail-closed objective from the same persisted heterogeneous evidence frontier "
             "after round-one learning, without caller-selected source domains or a fresh target generator "
             "for objective choice, while requiring functional no-forgetting and fail-closed controls. "
+            "The fresh resolver receives Candidate/system state only; precommitted replay semantics are "
+            "reconstructed from source evidence before restart rather than copied into the resolver. "
             "Generators, failure reconstruction, synthesis, regression, evaluator, probes and scoring "
             "remain repository-authored; this is not independent production evidence, open-domain "
             "autonomous objective invention, or AGI."
@@ -386,6 +389,7 @@ def run_evidence_frontier_exhaustion(root: Path, seed: str) -> dict[str, Any]:
             report["prior_trial_state_unchanged"],
             report["first_candidate_rediscovered_after_round_two"],
             report["second_candidate_rediscovered_without_caller_ids"],
+            report["fresh_resolver_required_persisted_evidence"] is False,
             report["all_base_source_behaviors_retained"],
             report["all_base_derived_behaviors_retained"],
             report["all_remaining_controls_failed_closed"],
