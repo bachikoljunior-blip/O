@@ -46,7 +46,9 @@ def _bounded_sequence_fold_affine_to_string(
     before later numeric composition is reached. This fallback does not add host-code execution
     or new constants: it enumerates only the already admitted add/mul folds, numeric constants
     -5..5, add/mul/neg/abs, and to_string, under the caller's unchanged node bound, then verifies
-    every demonstration through the normal acquired-program runtime.
+    every demonstration through the normal acquired-program runtime. Absolute value is explored
+    both before and after the affine layer so already-admitted compositions such as
+    to_string(scale * abs(fold(input)) + offset) are not lost to behavior-pool pruning.
 
     Runtime accounting includes one deterministic step per folded sequence element. The fallback
     therefore derives its step budget from the longest observed demonstration as well as the
@@ -84,79 +86,84 @@ def _bounded_sequence_fold_affine_to_string(
             "reducer": reducer,
             "initial": initial,
         }
-        for scale in range(-5, 6):
-            if scale == 0:
-                scaled: dict[str, Any] = {
-                    "op": "const",
-                    "domain": "numeric",
-                    "value": 0,
-                }
-                scaled_nodes = 1
-            elif scale == 1:
-                scaled = fold
-                scaled_nodes = 2
-            elif scale == -1:
-                scaled = {"op": "neg", "arg": fold}
-                scaled_nodes = 3
-            else:
-                scaled = {
-                    "op": "mul",
-                    "left": fold,
-                    "right": {
-                        "op": "const",
-                        "domain": "numeric",
-                        "value": scale,
-                    },
-                }
-                scaled_nodes = 4
-            for offset in range(-5, 6):
+        fold_variants: list[tuple[dict[str, Any], int]] = [
+            (fold, 2),
+            ({"op": "abs", "arg": fold}, 3),
+        ]
+        for fold_variant, fold_nodes in fold_variants:
+            for scale in range(-5, 6):
                 if scale == 0:
-                    numeric: dict[str, Any] = {
+                    scaled: dict[str, Any] = {
                         "op": "const",
                         "domain": "numeric",
-                        "value": offset,
+                        "value": 0,
                     }
-                    numeric_nodes = 1
-                elif offset == 0:
-                    numeric = scaled
-                    numeric_nodes = scaled_nodes
+                    scaled_nodes = 1
+                elif scale == 1:
+                    scaled = fold_variant
+                    scaled_nodes = fold_nodes
+                elif scale == -1:
+                    scaled = {"op": "neg", "arg": fold_variant}
+                    scaled_nodes = fold_nodes + 1
                 else:
-                    numeric = {
-                        "op": "add",
-                        "left": scaled,
+                    scaled = {
+                        "op": "mul",
+                        "left": fold_variant,
                         "right": {
                             "op": "const",
                             "domain": "numeric",
-                            "value": offset,
+                            "value": scale,
                         },
                     }
-                    numeric_nodes = scaled_nodes + 2
-                numeric_variants: list[tuple[dict[str, Any], int]] = [
-                    (numeric, numeric_nodes),
-                    ({"op": "abs", "arg": numeric}, numeric_nodes + 1),
-                ]
-                for numeric_variant, variant_nodes in numeric_variants:
-                    expression = {"op": "to_string", "arg": numeric_variant}
-                    if variant_nodes + 1 > max_nodes:
-                        continue
-                    learned = AcquiredProgram(
-                        input_domain="sequence",
-                        output_domain="string",
-                        expression=expression,
-                        support_sha256=_digest(support),
-                        max_steps=runtime_step_budget,
-                        max_output_length=1024,
-                        effects=(),
-                    )
-                    try:
-                        learned.validate()
-                        if all(
-                            learned.apply(item.input) == item.output
-                            for item in examples
-                        ):
-                            return learned
-                    except (AcquiredProgramError, TypeError, ValueError, OverflowError):
-                        continue
+                    scaled_nodes = fold_nodes + 2
+                for offset in range(-5, 6):
+                    if scale == 0:
+                        numeric: dict[str, Any] = {
+                            "op": "const",
+                            "domain": "numeric",
+                            "value": offset,
+                        }
+                        numeric_nodes = 1
+                    elif offset == 0:
+                        numeric = scaled
+                        numeric_nodes = scaled_nodes
+                    else:
+                        numeric = {
+                            "op": "add",
+                            "left": scaled,
+                            "right": {
+                                "op": "const",
+                                "domain": "numeric",
+                                "value": offset,
+                            },
+                        }
+                        numeric_nodes = scaled_nodes + 2
+                    numeric_variants: list[tuple[dict[str, Any], int]] = [
+                        (numeric, numeric_nodes),
+                        ({"op": "abs", "arg": numeric}, numeric_nodes + 1),
+                    ]
+                    for numeric_variant, variant_nodes in numeric_variants:
+                        expression = {"op": "to_string", "arg": numeric_variant}
+                        if variant_nodes + 1 > max_nodes:
+                            continue
+                        learned = AcquiredProgram(
+                            input_domain="sequence",
+                            output_domain="string",
+                            expression=expression,
+                            support_sha256=_digest(support),
+                            max_steps=runtime_step_budget,
+                            max_output_length=1024,
+                            effects=(),
+                        )
+                        try:
+                            learned.validate()
+                            if all(
+                                learned.apply(item.input) == item.output
+                                for item in examples
+                            ):
+                                return learned
+                        except (AcquiredProgramError, TypeError, ValueError, OverflowError):
+                            continue
     return None
 
 

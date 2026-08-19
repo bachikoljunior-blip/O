@@ -31,6 +31,25 @@ def test_sequence_affine_fallback_accounts_for_fold_runtime_steps() -> None:
     assert all(learned.apply(item.input) == item.output for item in examples)
 
 
+def test_sequence_affine_fallback_composes_abs_before_affine() -> None:
+    examples = (
+        ProgramExample([], "2"),
+        ProgramExample([1], "5"),
+        ProgramExample([-1], "5"),
+        ProgramExample([1, -1], "2"),
+        ProgramExample([-2, 1], "5"),
+        ProgramExample([2, -5], "11"),
+    )
+
+    learned = _bounded_sequence_fold_affine_to_string(
+        examples=examples,
+        max_nodes=8,
+    )
+
+    assert learned is not None
+    assert all(learned.apply(item.input) == item.output for item in examples)
+
+
 def test_heterogeneous_capabilities_accumulate_without_forgetting(
     runtime_repo: Path,
 ) -> None:
