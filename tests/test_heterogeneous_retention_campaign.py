@@ -3,7 +3,71 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from agi.heterogeneous_retention_campaign import run_heterogeneous_retention_campaign
+from agi.acquired_programs import ProgramExample
+from agi.heterogeneous_retention_campaign import (
+    _bounded_sequence_fold_affine_to_string,
+    run_heterogeneous_retention_campaign,
+)
+
+
+def test_sequence_affine_fallback_accounts_for_fold_runtime_steps() -> None:
+    examples = (
+        ProgramExample([], "2"),
+        ProgramExample([1], "5"),
+        ProgramExample([1, -1], "2"),
+        ProgramExample([1] * 20, "62"),
+        ProgramExample([-1] * 12, "-34"),
+    )
+
+    learned = _bounded_sequence_fold_affine_to_string(
+        examples=examples,
+        max_nodes=8,
+    )
+
+    assert learned is not None
+    descriptor = learned.descriptor()
+    assert descriptor["max_steps"] == 28
+    assert descriptor["max_steps"] <= 128
+    assert all(learned.apply(item.input) == item.output for item in examples)
+
+
+def test_sequence_affine_fallback_composes_abs_before_affine() -> None:
+    examples = (
+        ProgramExample([], "2"),
+        ProgramExample([1], "5"),
+        ProgramExample([-1], "5"),
+        ProgramExample([1, -1], "2"),
+        ProgramExample([-2, 1], "5"),
+        ProgramExample([2, -5], "11"),
+    )
+
+    learned = _bounded_sequence_fold_affine_to_string(
+        examples=examples,
+        max_nodes=8,
+    )
+
+    assert learned is not None
+    assert all(learned.apply(item.input) == item.output for item in examples)
+
+
+def test_sequence_affine_fallback_composes_reverse_after_to_string() -> None:
+    examples = (
+        ProgramExample([], "2"),
+        ProgramExample([1], "5"),
+        ProgramExample([-1], "1-"),
+        ProgramExample([4], "41"),
+        ProgramExample([-2], "4-"),
+        ProgramExample([1, -1], "2"),
+    )
+
+    learned = _bounded_sequence_fold_affine_to_string(
+        examples=examples,
+        max_nodes=8,
+    )
+
+    assert learned is not None
+    assert learned.expression.get("op") == "reverse"
+    assert all(learned.apply(item.input) == item.output for item in examples)
 
 
 def test_heterogeneous_capabilities_accumulate_without_forgetting(
