@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import continual.engine as engine_module
+import agi.evidence_frontier_exhaustion as exhaustion_module
 from agi.evidence_frontier_exhaustion import run_evidence_frontier_exhaustion
 
 
@@ -27,6 +28,17 @@ def test_evidence_frontier_takes_second_objective_without_forgetting(
     NeverModelClient.calls = []
     monkeypatch.setattr(engine_module, "ModelClient", NeverModelClient)
 
+    source_loader = exhaustion_module._load_round_report
+    loaded_roots: list[Path] = []
+
+    def source_only_loader(root: Path, round_seed: str):
+        resolved = root.resolve()
+        assert not resolved.name.startswith("agi-evidence-frontier-r2-resolver-")
+        loaded_roots.append(resolved)
+        return source_loader(root, round_seed)
+
+    monkeypatch.setattr(exhaustion_module, "_load_round_report", source_only_loader)
+
     report = run_evidence_frontier_exhaustion(
         runtime_repo,
         "evidence-frontier-exhaustion-test",
@@ -44,12 +56,14 @@ def test_evidence_frontier_takes_second_objective_without_forgetting(
     assert report["prior_trial_state_unchanged"] is True
     assert report["first_candidate_rediscovered_after_round_two"] is True
     assert report["second_candidate_rediscovered_without_caller_ids"] is True
+    assert report["fresh_resolver_required_persisted_evidence"] is False
     assert report["all_base_source_behaviors_retained"] is True
     assert report["all_base_derived_behaviors_retained"] is True
     assert report["all_remaining_controls_failed_closed"] is True
     assert report["all_replays_avoided_caller_candidate_ids"] is True
     assert report["base_behavior_replays"]
     assert report["live_model_invocation_required"] is False
+    assert loaded_roots
     assert NeverModelClient.calls == []
     assert "independent production evidence" in report["claim_boundary"]
     assert "AGI" in report["claim_boundary"]
