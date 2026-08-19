@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T18:59:11+09:00",
   "started_at": "2026-08-19T18:59:11+09:00",
-  "heartbeat_at": "2026-08-19T19:12:14+09:00",
-  "last_progress_at": "2026-08-19T19:09:30+09:00",
+  "heartbeat_at": "2026-08-19T19:20:18+09:00",
+  "last_progress_at": "2026-08-19T19:20:05+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T185911JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T185911JST",
@@ -26,12 +26,11 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "e9077a3a89e1101a9193aad71ed9e2a4f49cccd4",
-  "latest_main_sha_before_heartbeat": "7cc0c804b6b0f311b13e86cb8b2cd1f6cdfcd884",
-  "current_work_unit": "Recovered PR 220 after exact head 066516e8419c7a3e6f031bd3b9a42a50affcdefa / full CI 32236567598 failed with 376 passed / 1 failed because the fresh state-only resolver attempted to reload evidence that _copy_persistent_state deliberately excludes. The exact failed head/run remains negative evidence. Current exact PR 220 head 28a901be47042335674594eac9080800a1c1069c preloads/reconstructs the committed round descriptions on the source side and replays them against Candidate/system-only resolver state; a regression forbids resolver-side evidence loading. Fresh full CI 32240702620 is still in progress and must not be duplicated. CONTINUATION.json and AUTONOMY_STATE.json now persist this recovery. PR 221 remains stacked and unmergeable until PR 220 passes and merges unchanged.",
+  "current_work_unit": "PR 220 exact head 28a901be47042335674594eac9080800a1c1069c / full CI 32240702620 completed with 376 passed / 1 failed after all state-only behavioral replays succeeded. The sole failure was a latent report invariant: aggregate validation referenced first_candidate_rediscovered_after_round_two and second_candidate_rediscovered_without_caller_ids even though those booleans were not materialized in the report dict. That exact head/run is retained as negative evidence. Current head 22e1e3e1603e2850667acce1db09d5165a608b11 adds only those two booleans from already-computed replay selections; it does not change learning, synthesis, scoring, Candidate state, replay behavior, or the external gate. Fresh full CI 32242145512 is in progress and must not be duplicated. PR 221 remains stacked and unmergeable until PR 220 passes and merges unchanged.",
   "unmerged_pr": 220,
   "unmerged_branch": "agi/evidence-frontier-exhaustion-r55",
-  "unmerged_head_sha": "28a901be47042335674594eac9080800a1c1069c",
-  "unmerged_ci_run": 32240702620,
+  "unmerged_head_sha": "22e1e3e1603e2850667acce1db09d5165a608b11",
+  "unmerged_ci_run": 32242145512,
   "unmerged_ci_status": "in_progress_exact_head_full_ci",
   "additional_in_flight": [
     {"pr": 221, "branch": "agi/evidence-frontier-expansion-r56", "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "base_pr": 220, "ci_run": 32227017529, "ci_status": "preliminary_stacked_failure_requires_reconstruction_after_pr220"},
@@ -56,6 +55,7 @@
     {"pr": 220, "head_sha": "0f860048dda59e083eca052d090781f29beddd8d", "ci_run": 32231272647, "failure": "374 passed / 1 failed; post-affine absolute output did not realize the demonstrated sequence-to-string target"},
     {"pr": 220, "head_sha": "0388dfa4a38bf826e168d7cd13f0d8c989e503b9", "ci_run": 32234956074, "failure": "375 passed / 1 failed; abs-before-affine focused regression passed but the real persisted evidence-frontier sequence-to-string target remained unsynthesized"},
     {"pr": 220, "head_sha": "066516e8419c7a3e6f031bd3b9a42a50affcdefa", "ci_run": 32236567598, "failure": "376 passed / 1 failed; synthesis boundary was repaired, then fresh state-only replay incorrectly attempted to reload deliberately excluded persisted evidence from the resolver"},
+    {"pr": 220, "head_sha": "28a901be47042335674594eac9080800a1c1069c", "ci_run": 32240702620, "failure": "376 passed / 1 failed; all behavioral replays completed, then aggregate report validation raised KeyError because two already-proven replay-retention booleans were not materialized in the report"},
     {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "ci_run": 32227017529, "failure": "preliminary stacked run inherited the unresolved PR 220 boundary and requires reconstruction after PR 220"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
@@ -78,6 +78,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe exact-head full CI 32240702620 without duplicating it. If it fails, retain exact head/run and repair only the newly demonstrated boundary. If it passes, merge only unchanged PR 220 head 28a901be47042335674594eac9080800a1c1069c, then reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
+  "next_falsifiable_milestone": "Observe exact-head full CI 32242145512 without duplicating it. If it fails, retain exact head/run and repair only the newly demonstrated boundary. If it passes, merge only unchanged PR 220 head 22e1e3e1603e2850667acce1db09d5165a608b11 after reconciling bookkeeping-only main divergence, then reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
