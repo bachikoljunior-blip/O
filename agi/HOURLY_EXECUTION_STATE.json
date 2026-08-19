@@ -4,18 +4,18 @@
   "timezone": "Asia/Tokyo",
   "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-19T09:55:33+09:00",
+  "scheduler_fired_at": "2026-08-19T10:53:35+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-19T09:55:33+09:00",
-  "started_at": "2026-08-19T09:55:33+09:00",
-  "heartbeat_at": "2026-08-19T10:08:05+09:00",
-  "last_progress_at": "2026-08-19T10:08:05+09:00",
+  "actual_started_at": "2026-08-19T10:53:35+09:00",
+  "started_at": "2026-08-19T10:53:35+09:00",
+  "heartbeat_at": "2026-08-19T10:53:35+09:00",
+  "last_progress_at": "2026-08-19T10:53:35+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260819T095533JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260819T095533JST",
-  "active_run_id": "run-self-applied-pr215-recovery-20260819-095533",
+  "execution_id": "o-agi-watchdog-recovery-20260819T105335JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260819T105335JST",
+  "active_run_id": "run-self-applied-pr217-recovery-20260819-105335",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -25,21 +25,29 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "3d425917d6e22ff05f99f7837853a3409854462e",
-  "latest_main_sha_before_heartbeat": "a83e08ba5b88bcb5daedf2dbf579cba264ca062c",
-  "current_work_unit": "PR 215 exact head 5de03bbc6d50d25df2b1fb872712f3114cca6baa passed CI 32200421226 and merged unchanged as 4bcfaa99e29a817b334c556380ee78eb8a4d936a. PR 216 was reconstructed directly on that verified main as head cf47b7ddd59943268835b29437eae2fc4d8bb794, passed fresh exact-head CI 32203198081, and merged unchanged as a83e08ba5b88bcb5daedf2dbf579cba264ca062c. Preliminary PR 217 CI 32200581797 retained a concrete schema counterexample: candidate program data lives at acquired_program.program, not top-level program. Only that demonstrated access path was repaired. PR 217 has now been reconstructed directly on post-PR-216 main as exact head 221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a and awaits fresh exact-head CI observation before any merge.",
+  "latest_main_sha_at_start": "09949e032f7a7fb5bfb8d775d558fea01fa3f5ce",
+  "latest_main_sha_before_heartbeat": "09949e032f7a7fb5bfb8d775d558fea01fa3f5ce",
+  "current_work_unit": "Recovered stale execution after PR 217 exact head 221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a completed CI 32203820158 with 365 passed / 1 failed. The retained counterexample is that the precommitted failure-derived sequence->string target produced demonstrations such as [] -> '2x' and [1] -> '5x', but the unchanged bounded synthesizer cannot express the derived non-empty string suffix and correctly raised AcquiredProgramError rather than weakening its gate. Repair only the demonstrated target-derivation/admissibility invariant, then require fresh exact-head full CI before any merge.",
   "unmerged_pr": 217,
   "unmerged_branch": "agi/crossdomain-failure-derived-target-r52",
   "unmerged_head_sha": "221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a",
-  "unmerged_ci_run": null,
-  "unmerged_ci_status": "awaiting_fresh_exact_head_run_observation",
-  "additional_in_flight": [],
+  "unmerged_ci_run": 32203820158,
+  "unmerged_ci_status": "failed_exact_head_retained",
+  "additional_in_flight": [
+    {
+      "pr": 218,
+      "branch": "agi/cumulative-crossdomain-failure-retention-r53",
+      "head_sha": "7ddb82364ae763342a08890de05a35689eaacd84",
+      "base_pr": 217,
+      "ci_status": "stacked_blocked_requires_reconstruction_after_pr217"
+    }
+  ],
   "recovered_stale_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260819T085551JST",
-    "last_heartbeat_at": "2026-08-19T09:14:33+09:00",
-    "last_repository_progress_at": "2026-08-19T09:14:56+09:00",
-    "last_external_validation_at": "2026-08-19T09:25:03+09:00",
-    "reason": "running heartbeat, repository progress, and completed CI all exceeded stale_after_seconds=900; recovery started idempotently from latest main only"
+    "execution_id": "o-agi-watchdog-recovery-20260819T095533JST",
+    "last_heartbeat_at": "2026-08-19T10:08:05+09:00",
+    "last_repository_progress_at": "2026-08-19T10:11:08+09:00",
+    "last_external_validation_at": "2026-08-19T10:18:29+09:00",
+    "reason": "running heartbeat, repository progress, and completed PR 217 CI all exceeded stale_after_seconds=900; recovery started idempotently from latest main only"
   },
   "recent_completed_units": [
     {"pr": 210, "head_sha": "745e7b26b343f52f8dc4c4337b7d8d4707d46241", "ci_run": 32175508855, "ci_conclusion": "success", "merge_sha": "ebed78d5fb6e3a683743a1b8b16d782e894c2809"},
@@ -56,13 +64,14 @@
     {"pr": 215, "head_sha": "c417e9bb4249d51a5ddb99b78670baaeaf87c35c", "ci_run": 32195643938, "failure": "363 tests passed; isolated persisted-failure test invoked seed-committed acquisition without a verified graph and the production planner correctly failed closed"},
     {"pr": 215, "head_sha": "c71d5a6bf6ad35a58547a651d0f22f96b6f301a6", "ci_run": 32199356185, "failure": "pytest reached 79% with no reported failures then GitHub Actions cancelled the unchanged 15-minute job timeout; later validation steps were skipped"},
     {"pr": 217, "head_sha": "861a747f7ae4c45e7ea7a325e626a7635ae435b9", "ci_run": 32200581797, "failure": "365 tests passed and one failed because crossdomain failure-derived target read candidate['program'] although canonical acquired-program Candidate payload stores the descriptor at candidate['acquired_program']['program']"},
+    {"pr": 217, "head_sha": "221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a", "ci_run": 32203820158, "failure": "365 tests passed and one failed because the derived sequence->string target required a non-empty string suffix not expressible by the unchanged bounded synthesizer; synthesis correctly failed closed with no bounded pure typed program matching all demonstrations"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
     "recorder_path": "src/continual/self_application.py",
-    "run_id": "run-self-applied-pr215-recovery-20260819-095533",
+    "run_id": "run-self-applied-pr217-recovery-20260819-105335",
     "checkpoint_persistence_pending": true,
     "external_claim_admissible": false
   },
@@ -75,6 +84,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe fresh exact-head CI for reconstructed PR 217 head 221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a. Merge only an unchanged passing head; on failure retain the exact head/run and repair only the demonstrated cross-domain failure-derived invariant. After PR 217 integrates, re-read latest main and select the next highest-value falsifiable capability/retention milestone rather than treating the merge as completion.",
+  "next_falsifiable_milestone": "Repair only PR 217's demonstrated derivation/admissibility mismatch without weakening synthesis, scoring, regression, or safety gates. Require a fresh exact-head full CI on the repaired PR 217. Merge only an unchanged passing head; then reconstruct stacked PR 218 on the resulting verified main and require fresh exact-head CI for heterogeneous retained failure-derived skills.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
