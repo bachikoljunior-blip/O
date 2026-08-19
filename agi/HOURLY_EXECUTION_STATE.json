@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T18:59:11+09:00",
   "started_at": "2026-08-19T18:59:11+09:00",
-  "heartbeat_at": "2026-08-19T18:59:11+09:00",
-  "last_progress_at": "2026-08-19T18:59:11+09:00",
+  "heartbeat_at": "2026-08-19T19:03:13+09:00",
+  "last_progress_at": "2026-08-19T19:02:36+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T185911JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T185911JST",
@@ -26,12 +26,13 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "e9077a3a89e1101a9193aad71ed9e2a4f49cccd4",
-  "current_work_unit": "Recovered stale execution after PR 220 exact head 066516e8419c7a3e6f031bd3b9a42a50affcdefa failed fresh full CI 32236567598 with 376 passed / 1 failed. The demonstrated boundary is not synthesis: the fresh state-only resolver deliberately copies Candidate/system state only, but the replay loop incorrectly reloads heterogeneous round evidence from that resolver and therefore fails on a missing .continual/evidence/crossdomain-failure-derived-target report. Preserve the failed head/run as negative evidence. Repair only this evidence-transfer boundary by preloading/reconstructing the committed round descriptions from the source root before the fresh resolver and replaying them against resolver Candidate/system state without copying evidence into the resolver. PR 221 remains stacked and unmergeable until PR 220 passes and merges unchanged.",
+  "latest_main_sha_before_heartbeat": "7a91c821b1f89283097e582f0bb07e8719ea91d7",
+  "current_work_unit": "Recovered PR 220 after exact head 066516e8419c7a3e6f031bd3b9a42a50affcdefa / full CI 32236567598 failed with 376 passed / 1 failed because the fresh state-only resolver attempted to reload evidence that _copy_persistent_state deliberately excludes. The exact failed head/run remains negative evidence. The repair preloads the committed round reports and reconstructed target descriptions from the source root before restart, then replays those precommitted semantics against Candidate/system-only resolver state; it does not copy evidence into the resolver. A focused regression asserts the evidence loader is never called on the fresh resolver. Current exact PR 220 head 28a901be47042335674594eac9080800a1c1069c is undergoing fresh full CI 32240702620. Do not duplicate that run. PR 221 remains stacked and unmergeable until PR 220 passes and merges unchanged.",
   "unmerged_pr": 220,
   "unmerged_branch": "agi/evidence-frontier-exhaustion-r55",
-  "unmerged_head_sha": "066516e8419c7a3e6f031bd3b9a42a50affcdefa",
-  "unmerged_ci_run": 32236567598,
-  "unmerged_ci_status": "failed_exact_head_full_ci_needs_targeted_evidence_boundary_repair",
+  "unmerged_head_sha": "28a901be47042335674594eac9080800a1c1069c",
+  "unmerged_ci_run": 32240702620,
+  "unmerged_ci_status": "in_progress_exact_head_full_ci",
   "additional_in_flight": [
     {
       "pr": 221,
@@ -89,6 +90,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair only PR 220's demonstrated fresh-resolver evidence boundary: source evidence may define and precommit replay semantics before restart, but the fresh resolver must execute from Candidate/system state only and must not require copied evidence. Add a regression that proves resolver replay does not call the evidence loader on the resolver root, run focused tests, then require fresh exact-head full CI. Merge only an unchanged passing head; afterward reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
+  "next_falsifiable_milestone": "Observe exact-head full CI 32240702620 without duplicating it. If it fails, retain exact head/run and repair only the newly demonstrated boundary. If it passes, merge only unchanged PR 220 head 28a901be47042335674594eac9080800a1c1069c, then reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
