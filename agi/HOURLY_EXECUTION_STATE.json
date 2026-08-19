@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T14:03:55+09:00",
   "started_at": "2026-08-19T14:03:55+09:00",
-  "heartbeat_at": "2026-08-19T14:20:43+09:00",
-  "last_progress_at": "2026-08-19T14:20:43+09:00",
+  "heartbeat_at": "2026-08-19T14:26:32+09:00",
+  "last_progress_at": "2026-08-19T14:26:32+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T140355JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T140355JST",
@@ -26,8 +26,8 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "8855f3f78a3d7de684628447d0eb2a73c35429ee",
-  "latest_main_sha_before_heartbeat": "a66d898d180d418ba63c809d5e75104304310d99",
-  "current_work_unit": "PR 217 exact head 7a77acd791813233547b36692f3bd4d285495a9a passed full CI 32214874171 and merged unchanged as 4c2edf22669a8cc36625fddec61c846bd312d070. PR 218 reconstructed head cf8b33d24b84ca0b7f57a3de1d42a8698f164bb9 failed fresh exact-head CI 32218239903 with 369 passed / 1 failed: after the first heterogeneous learning round, immutable-prior verification still passed an empty prior Candidate set to a helper that intentionally rejects empty rehydration. That exact head/run is retained. Current PR 218 head 03bc202e21ed92c9335072a3e94ddeb936548556 repairs only this demonstrated boundary through the already existing empty-safe subset snapshot and is under fresh exact-head full CI 32218994089. Non-conflicting next milestones are staged: PR 219 c5401e84ffe90d118f8823e72cf5f102725092a9 chooses one next objective from persisted heterogeneous failure controls; PR 220 a61773b1115253aedc3ffdb8fae151010565e0ad tests a second evidence-driven objective while retaining the first. Both are stacked diagnostic heads and require reconstruction plus fresh exact-head CI after prerequisites integrate.",
+  "latest_main_sha_before_heartbeat": "ee51271b25da33759b3780bddaa56d2c734c9ee4",
+  "current_work_unit": "PR 218 current exact head 03bc202e21ed92c9335072a3e94ddeb936548556 is under fresh full CI 32218994089 after preserving failed head cf8b33d24b84ca0b7f57a3de1d42a8698f164bb9 / CI 32218239903 (369 passed / 1 failed on empty prior-Candidate rehydration). While PR 218 validates, PR 219 diagnostic head c5401e84ffe90d118f8823e72cf5f102725092a9 / CI 32218618494 produced independent negative evidence: its mechanical test entered the live ModelClient path with no provider credential. The PR 219 test was repaired only by adding the same fail-fast NeverModelClient guard used by the prerequisite and asserting zero model calls; current restacked head 713129fe3504acbfefdbd8078c6258a71e683595 has diagnostic CI 32219379130 in progress. PR 220 was restacked on that repaired prerequisite as head afd815a0f613c2352e2fad4eb953823458abd7f1 with the same no-live-model test guard; diagnostic CI 32219409927 is in progress. Stacked diagnostics are not merge authority.",
   "unmerged_pr": 218,
   "unmerged_branch": "agi/cumulative-crossdomain-failure-retention-r53",
   "unmerged_head_sha": "03bc202e21ed92c9335072a3e94ddeb936548556",
@@ -37,18 +37,18 @@
     {
       "pr": 219,
       "branch": "agi/evidence-frontier-objective-r54",
-      "head_sha": "c5401e84ffe90d118f8823e72cf5f102725092a9",
+      "head_sha": "713129fe3504acbfefdbd8078c6258a71e683595",
       "base_pr": 218,
-      "ci_run": 32218618494,
-      "ci_status": "stacked_diagnostic_requires_reconstruction_after_pr218"
+      "ci_run": 32219379130,
+      "ci_status": "stacked_diagnostic_in_progress_requires_reconstruction_after_pr218"
     },
     {
       "pr": 220,
       "branch": "agi/evidence-frontier-exhaustion-r55",
-      "head_sha": "a61773b1115253aedc3ffdb8fae151010565e0ad",
+      "head_sha": "afd815a0f613c2352e2fad4eb953823458abd7f1",
       "base_pr": 219,
-      "ci_run": null,
-      "ci_status": "stacked_diagnostic_pending_or_started_requires_pr218_then_pr219_reconstruction"
+      "ci_run": 32219409927,
+      "ci_status": "stacked_diagnostic_in_progress_requires_pr218_then_pr219_reconstruction"
     }
   ],
   "recovered_stale_lease": {
@@ -70,6 +70,7 @@
     {"pr": 217, "head_sha": "11f382dc2fc8ac81c3757bc2769e1eeab0820444", "ci_run": 32213784278, "attempt": 1, "failure": "367 passed / 1 failed; audit/storage digest was being used as semantic target-selection salt and made the untouched control supported"},
     {"pr": 218, "head_sha": "7ddb82364ae763342a08890de05a35689eaacd84", "ci_run": 32204018811, "failure": "preliminary stacked CI had 365 passed / 2 failed: inherited pre-PR-217 sequence-to-string synthesis failure plus empty-preexisting-Candidate snapshot failure"},
     {"pr": 218, "head_sha": "cf8b33d24b84ca0b7f57a3de1d42a8698f164bb9", "ci_run": 32218239903, "failure": "fresh post-PR-217 exact-head CI had 369 passed / 1 failed; immutable-prior verification after first-round learning invoked the non-empty rehydration helper with an empty prior Candidate set"},
+    {"pr": 219, "head_sha": "c5401e84ffe90d118f8823e72cf5f102725092a9", "ci_run": 32218618494, "failure": "stacked diagnostic had 369 passed / 2 failed; one inherited old PR 218 empty-prior failure and one PR 219-local failure because a mechanical no-live-model test entered ModelClient without provider credentials"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
   "self_application": {
@@ -89,6 +90,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe fresh exact-head full CI 32218994089 for PR 218 head 03bc202e21ed92c9335072a3e94ddeb936548556 without duplicating it. Merge only that unchanged head if every required check succeeds; on failure retain the exact head/run and repair only the demonstrated cumulative-retention invariant. After PR 218 integrates, reconstruct PR 219's two-file delta directly on verified main and require fresh exact-head CI. Only after PR 219 integrates, reconstruct PR 220's two-file repeated-objective delta and require fresh exact-head CI.",
+  "next_falsifiable_milestone": "Observe fresh exact-head full CI 32218994089 for PR 218 head 03bc202e21ed92c9335072a3e94ddeb936548556 without duplicating it. Merge only that unchanged head if every required check succeeds; on failure retain the exact head/run and repair only the demonstrated cumulative-retention invariant. Use PR 219 diagnostic CI 32219379130 and PR 220 diagnostic CI 32219409927 only for early counterexample discovery. After PR 218 integrates, reconstruct the repaired PR 219 delta directly on verified main and require fresh exact-head CI; after PR 219 integrates, do the same for PR 220.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
