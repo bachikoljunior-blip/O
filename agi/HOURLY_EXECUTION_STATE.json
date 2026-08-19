@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T06:59:58+09:00",
   "started_at": "2026-08-20T06:59:58+09:00",
-  "heartbeat_at": "2026-08-20T06:59:58+09:00",
-  "last_progress_at": "2026-08-20T06:59:58+09:00",
+  "heartbeat_at": "2026-08-20T07:03:29+09:00",
+  "last_progress_at": "2026-08-20T07:03:29+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T065958JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T065958JST",
@@ -26,7 +26,7 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "6202d51e68efb41d3d5d3832ae5809304cd27e28",
-  "latest_main_sha_before_heartbeat": "6202d51e68efb41d3d5d3832ae5809304cd27e28",
+  "latest_main_sha_before_heartbeat": "c0d858d1f49591d0e101bab1a8901dc2d6f36446",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260820T055619JST",
     "last_heartbeat_at": "2026-08-20T06:10:47+09:00",
@@ -34,21 +34,27 @@
     "last_external_progress_at": "2026-08-20T06:24:26+09:00",
     "reason": "running heartbeat, latest repository progress, and the latest known exact-head CI completion all exceeded stale_after_seconds; recovered idempotently from latest main only"
   },
-  "current_work_unit": "Recovered after fresh reconstructed PR 229 exact head 34a4a18900ec34411ab21cbe6a1f397466f8e397 completed full CI 32301496143 with failure. The repository-prescribed next action is to retain that failed exact head/run as negative evidence, reconstruct PR 231's narrow two-file sequence-character derived-frontier repair directly on verified main, require fresh full exact-head CI, and only after a passing unchanged repair reconstruct/revalidate PR 229. Preliminary stacked PR 230 and PR 231 runs are cancelled/diagnostic and are not merge-admissible.",
+  "current_work_unit": "Fresh reconstructed PR 229 exact head 34a4a18900ec34411ab21cbe6a1f397466f8e397 / CI 32301496143 failed and is retained as negative evidence. PR 231 was reconstructed directly on verified main as the exact two-file repair head 1e525453d534198977033dd31f6792ba4e03dbf5; PR base is now main and fresh full exact-head CI 32306921293 is in progress. The prior stacked PR 231 head remains historical diagnostic evidence only. If this unchanged repair head passes, merge it and reconstruct PR 229 from preserved exact blobs on the resulting verified main; if it fails, retain the exact head/run and repair only the demonstrated frontier boundary.",
   "recent_completed_units": [
     {"pr": 228, "head_sha": "5bba8274589e4f9ef5583d0d251d0db2bf07db4f", "ci_run": 32296669349, "ci_conclusion": "success", "merge_sha": "cfd66a7711bdc58567aebc1b70340176868a59ea"}
   ],
-  "unmerged_pr": 229,
-  "unmerged_branch": "agi/evidence-frontier-iterated-expansion-r64",
-  "unmerged_head_sha": "34a4a18900ec34411ab21cbe6a1f397466f8e397",
-  "unmerged_ci_run": 32301496143,
-  "unmerged_ci_status": "completed_failure_repair_required_before_revalidation",
+  "unmerged_pr": 231,
+  "unmerged_branch": "agi/sequence-char-derived-frontier-r66",
+  "unmerged_head_sha": "1e525453d534198977033dd31f6792ba4e03dbf5",
+  "unmerged_ci_run": 32306921293,
+  "unmerged_ci_status": "in_progress",
   "additional_in_flight": [
+    {"pr": 229, "branch": "agi/evidence-frontier-iterated-expansion-r64", "head_sha": "34a4a18900ec34411ab21cbe6a1f397466f8e397", "ci_run": 32301496143, "ci_status": "completed_failure_revalidation_blocked_on_pr231", "merge_admissible": false},
     {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "14d90c46730217ab857202f897403edd9f1039ff", "base_pr": 229, "ci_run": 32301884682, "ci_status": "preliminary_stacked_cancelled", "merge_admissible": false},
-    {"pr": 231, "branch": "agi/sequence-char-derived-frontier-r66", "head_sha": "7b0deecc191bb3ba555457f597b1dae9d3886c6d", "base_pr": 229, "ci_run": 32302510798, "ci_status": "preliminary_stacked_cancelled_or_superseded", "merge_admissible": false},
     {"pr": 223, "branch": "agi/evidence-frontier-iterated-expansion-r57", "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "ci_status": "completed_failure_379_passed_1_failed", "merge_admissible": false},
     {"issue": 222, "purpose": "independent_external_evaluator_coordination", "status": "open", "comments": 0}
   ],
+  "preserved_reconstruction_blobs": {
+    "pr229_src": "12b1b15209efc3edbfe089b198ddeed7712ee030",
+    "pr229_test": "611fcc71d44a607eb734a96c0903e87c225fbb21",
+    "pr230_src": "b22a0157ba7693358b9c6d67c921298178899a14",
+    "pr230_test": "5cd9baacea9ba221e7ea15693b72855b33f9c1b4"
+  },
   "negative_evidence": [
     {"pr": 223, "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "failure": "379 passed / 1 failed; fresh post-PR221 validation reproduced the sequence->sequence canonical numeric-character bounded-synthesis counterexample"},
     {"pr": 224, "head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6", "ci_run": 32251059159, "failure": "global -6 frontier change perturbed deterministic search and failed protected tests"},
@@ -76,6 +82,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Reconstruct PR 231's exact two-file narrow derived-frontier repair directly on verified main, require fresh full exact-head CI, merge only unchanged success, then reconstruct/revalidate PR 229 on the repaired verified main. Never merge any stacked PR 230/231 head directly.",
+  "next_falsifiable_milestone": "Observe PR 231 exact-head full CI 32306921293. Merge only unchanged success. On success reconstruct PR 229 from preserved exact blobs on verified post-231 main and require fresh full exact-head CI; on failure retain exact head/run and repair only the demonstrated derived-frontier boundary.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
