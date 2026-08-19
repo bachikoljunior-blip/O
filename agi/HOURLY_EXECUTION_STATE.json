@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T08:55:51+09:00",
   "started_at": "2026-08-19T08:55:51+09:00",
-  "heartbeat_at": "2026-08-19T08:55:51+09:00",
-  "last_progress_at": "2026-08-19T08:55:51+09:00",
+  "heartbeat_at": "2026-08-19T09:03:43+09:00",
+  "last_progress_at": "2026-08-19T09:03:43+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T085551JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T085551JST",
@@ -26,15 +26,15 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "18ab4ea8c9e290efca547abc06938f4948d75c7d",
-  "current_work_unit": "Recovered stale execution after PR 215 exact-head CI 32195643938 completed failure at 08:31:12 JST with 363 passed / 1 failed. The demonstrated boundary is an isolated empty runtime fixture: run_seed_committed_gap_acquisition requires a verified skill graph before it can precommit its protected target plan. Preserve non-empty durable graphs unchanged; repair only the isolated-test prerequisite boundary before re-running fresh exact-head CI.",
+  "current_work_unit": "PR 215 failed exact head c417e9bb4249d51a5ddb99b78670baaeaf87c35c at CI 32195643938 with 363 passed / 1 failed because its isolated runtime fixture had no verified skill graph. Production fail-closed graph requirements were preserved; only the PR 215 test now establishes the same adaptive-depth verified prerequisite already used by seed-committed acquisition tests. New exact head c71d5a6bf6ad35a58547a651d0f22f96b6f301a6 is under fresh CI 32199356185. While that dependency validates, PR 216 test was non-conflictingly prepared with the same verified-graph prerequisite at preliminary stacked head c2ab644ad1cbc41300a649b69e90a349f7b44682, CI 32199642556. Historical PR 217 CI 32192833778 was inspected and its own additional counterexample is retained: its new test constructed a live ModelClient without credentials instead of using the established NeverModel test boundary.",
   "unmerged_pr": 215,
   "unmerged_branch": "agi/persisted-failure-curriculum-r50",
-  "unmerged_head_sha": "c417e9bb4249d51a5ddb99b78670baaeaf87c35c",
-  "unmerged_ci_run": 32195643938,
-  "unmerged_ci_status": "failed_exact_head",
+  "unmerged_head_sha": "c71d5a6bf6ad35a58547a651d0f22f96b6f301a6",
+  "unmerged_ci_run": 32199356185,
+  "unmerged_ci_status": "in_progress_fresh_exact_head",
   "additional_in_flight": [
-    {"pr": 216, "branch": "agi/evidence-derived-target-synthesis-r51", "head_sha": "9c74537e0559d953082f02202e5691fb88b74d7b", "base_pr": 215, "ci_status": "stacked_blocked_requires_reconstruction_after_pr215"},
-    {"pr": 217, "branch": "agi/crossdomain-failure-derived-target-r52", "head_sha": "38debd33a9acb15aa17fe3ce313a01c6e26aa736", "base_pr": 216, "ci_status": "stacked_blocked_requires_reconstruction_after_pr216"}
+    {"pr": 216, "branch": "agi/evidence-derived-target-synthesis-r51", "head_sha": "c2ab644ad1cbc41300a649b69e90a349f7b44682", "base_pr": 215, "ci_run": 32199642556, "ci_status": "preliminary_stacked_in_progress_requires_reconstruction_after_pr215"},
+    {"pr": 217, "branch": "agi/crossdomain-failure-derived-target-r52", "head_sha": "38debd33a9acb15aa17fe3ce313a01c6e26aa736", "base_pr": 216, "ci_run": 32192833778, "ci_status": "historical_stacked_failure_requires_reconstruction_after_pr216"}
   ],
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260819T080106JST",
@@ -54,6 +54,7 @@
     {"pr": 215, "head_sha": "5fd6b3cfe5149d8477f4ad8040c88fde6e5340ab", "ci_run": 32187288936, "failure": "stacked persisted-failure curriculum used stale schedule/synthesis API assumptions"},
     {"pr": 215, "head_sha": "819227ea097e11bfea9e99df132941cc84d31554", "ci_run": 32192797901, "failure": "isolated runtime_repo had an empty prior Candidate set and durable snapshot logic rejected it before source acquisition"},
     {"pr": 215, "head_sha": "c417e9bb4249d51a5ddb99b78670baaeaf87c35c", "ci_run": 32195643938, "failure": "363 tests passed; persisted-failure curriculum still invoked seed-committed acquisition on an empty isolated runtime, whose protected target planner correctly failed closed with verified skill graph is empty"},
+    {"pr": 217, "head_sha": "38debd33a9acb15aa17fe3ce313a01c6e26aa736", "ci_run": 32192833778, "failure": "stacked run had three failures: inherited PR 215/216 empty-graph fixture failures plus PR 217's own test constructing ModelClient without OPENAI_API_KEY/GITHUB_TOKEN instead of using the existing non-live NeverModel boundary"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
   "self_application": {
@@ -73,6 +74,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair only the demonstrated empty-fixture prerequisite boundary for PR 215 without weakening non-empty durable graph immutability or fail-closed target generation. Require fresh exact-head CI. Merge only an unchanged passing head; then reconstruct PR 216 on resulting verified main and require fresh exact-head CI before any merge.",
+  "next_falsifiable_milestone": "Finish fresh exact-head CI 32199356185 for PR 215 and merge only unchanged passing head c71d5a6bf6ad35a58547a651d0f22f96b6f301a6. Then reconstruct PR 216 on resulting verified main using only its two-file delta, require fresh exact-head CI, and retain preliminary stacked CI separately. After PR 216 settles, reconstruct PR 217 and repair only its demonstrated test-engine boundary before fresh exact-head CI.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
