@@ -767,7 +767,7 @@ def synthesize_program(
     if match:
         return match
     base_constants: list[tuple[str, Any]] = [
-        *[("numeric", value) for value in range(-5, 6)],
+        *[("numeric", value) for value in range(-6, 7)],
         ("string", ""),
         ("sequence", []),
         ("boolean", False),
