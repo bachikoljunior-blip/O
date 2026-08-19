@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T10:53:35+09:00",
   "started_at": "2026-08-19T10:53:35+09:00",
-  "heartbeat_at": "2026-08-19T10:53:35+09:00",
-  "last_progress_at": "2026-08-19T10:53:35+09:00",
+  "heartbeat_at": "2026-08-19T10:58:58+09:00",
+  "last_progress_at": "2026-08-19T10:57:50+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T105335JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T105335JST",
@@ -26,13 +26,13 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "09949e032f7a7fb5bfb8d775d558fea01fa3f5ce",
-  "latest_main_sha_before_heartbeat": "09949e032f7a7fb5bfb8d775d558fea01fa3f5ce",
-  "current_work_unit": "Recovered stale execution after PR 217 exact head 221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a completed CI 32203820158 with 365 passed / 1 failed. The retained counterexample is that the precommitted failure-derived sequence->string target produced demonstrations such as [] -> '2x' and [1] -> '5x', but the unchanged bounded synthesizer cannot express the derived non-empty string suffix and correctly raised AcquiredProgramError rather than weakening its gate. Repair only the demonstrated target-derivation/admissibility invariant, then require fresh exact-head full CI before any merge.",
+  "latest_main_sha_before_heartbeat": "446084ae2aacb19ef82938f2706acf6e8f628f42",
+  "current_work_unit": "Recovered stale execution after PR 217 exact head 221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a failed CI 32203820158 with 365 passed / 1 failed. Retained that head/run. Repaired only the demonstrated target-derivation/admissibility mismatch: failure-derived targets no longer require non-empty string constants or non-object scalar equality absent from the unchanged learner grammar; numeric derived constants remain inside the learner's admitted -5..5 set; sequence->string sources can derive bounded transformations from the persisted numeric inner expression. PR 217 exact head bb7cf33a1513c2d4e1439015f7190ac930e3ba6b is now under fresh full CI 32206823741. Learner synthesis, scoring, regression, safety, and external claim gates were not weakened.",
   "unmerged_pr": 217,
   "unmerged_branch": "agi/crossdomain-failure-derived-target-r52",
-  "unmerged_head_sha": "221c5e9ffd7547a89fc3b271c0dd00eb41e1e88a",
-  "unmerged_ci_run": 32203820158,
-  "unmerged_ci_status": "failed_exact_head_retained",
+  "unmerged_head_sha": "bb7cf33a1513c2d4e1439015f7190ac930e3ba6b",
+  "unmerged_ci_run": 32206823741,
+  "unmerged_ci_status": "in_progress_fresh_exact_head",
   "additional_in_flight": [
     {
       "pr": 218,
@@ -84,6 +84,6 @@
     "registered_verifiers": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair only PR 217's demonstrated derivation/admissibility mismatch without weakening synthesis, scoring, regression, or safety gates. Require a fresh exact-head full CI on the repaired PR 217. Merge only an unchanged passing head; then reconstruct stacked PR 218 on the resulting verified main and require fresh exact-head CI for heterogeneous retained failure-derived skills.",
+  "next_falsifiable_milestone": "Observe fresh exact-head CI 32206823741 for PR 217 head bb7cf33a1513c2d4e1439015f7190ac930e3ba6b without duplicating it. Merge only an unchanged passing head after reconciling it with latest main; on failure retain the exact head/run and repair only the new demonstrated invariant. After PR 217 integrates, reconstruct stacked PR 218 on the resulting verified main and require fresh exact-head CI for heterogeneous retained failure-derived skills.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
