@@ -4,18 +4,18 @@
   "timezone": "Asia/Tokyo",
   "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-20T04:58:00+09:00",
+  "scheduler_fired_at": "2026-08-20T05:56:19+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-20T04:58:00+09:00",
-  "started_at": "2026-08-20T04:58:00+09:00",
-  "heartbeat_at": "2026-08-20T05:19:07+09:00",
-  "last_progress_at": "2026-08-20T05:18:30+09:00",
+  "actual_started_at": "2026-08-20T05:56:19+09:00",
+  "started_at": "2026-08-20T05:56:19+09:00",
+  "heartbeat_at": "2026-08-20T05:56:19+09:00",
+  "last_progress_at": "2026-08-20T05:56:19+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260820T045800JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260820T045800JST",
-  "active_run_id": "run-self-applied-r60-materialization-recovery-20260820-045800",
+  "execution_id": "o-agi-watchdog-recovery-20260820T055619JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260820T055619JST",
+  "active_run_id": "run-self-applied-pr228-recovery-20260820-055619",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -25,43 +25,38 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "9f37f0b86886a1615c36258e91328ab28cf38a68",
-  "latest_main_sha_before_heartbeat": "53addc6e23314f1176cfb2400656fabe2445a1da",
-  "recovered_released_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260820T035211JST",
-    "released_at": "2026-08-20T04:06:55+09:00",
-    "last_heartbeat_at": "2026-08-20T04:06:55+09:00",
-    "reason": "lease was explicitly released with AGI unverified and repository-controlled r60 materialization pending; no newer clean r60 source/test head was observed before recovery"
+  "latest_main_sha_at_start": "bd90443ec94f2803ec1b0afcdd50279e622e8aa3",
+  "latest_main_sha_before_heartbeat": "bd90443ec94f2803ec1b0afcdd50279e622e8aa3",
+  "recovered_stale_lease": {
+    "execution_id": "o-agi-watchdog-recovery-20260820T045800JST",
+    "last_heartbeat_at": "2026-08-20T05:19:07+09:00",
+    "last_repository_progress_at": "2026-08-20T05:19:30+09:00",
+    "last_external_progress_at": "2026-08-20T05:33:17+09:00",
+    "reason": "running heartbeat and all known repository/CI progress exceeded stale_after_seconds; recover idempotently from latest main only"
   },
-  "current_work_unit": "The reviewed r60 one-shot materializer remained inert, so the already-reviewed narrow repair was materialized idempotently on PR 228 exact head 5bba8274589e4f9ef5583d0d251d0db2bf07db4f; full CI 32296669349 is still running pytest. While it validates, preserved PR223 logic is stacked as diagnostic PR229 head c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23 / CI 32296827454, and a next falsifiable recursive-growth diagnostic is stacked as PR230 head ee3f5094cfc603939c51cdb4048c73b62376d319 / CI 32297775217. Neither stacked head is merge-admissible; each must be reconstructed on verified main after its prerequisite integrates.",
+  "current_work_unit": "PR 228 exact head 5bba8274589e4f9ef5583d0d251d0db2bf07db4f completed full CI 32296669349 successfully and remains unchanged/open. Preliminary stacked PR 229 CI 32296827454 failed and is not merge-admissible; its exact two-file delta must be reconstructed only after PR 228 integrates. Recover by merging only the unchanged validated PR 228 head, then reconstruct PR 229 on verified post-228 main and require fresh full exact-head CI.",
   "unmerged_pr": 228,
   "unmerged_branch": "agi/sequence-affine-char-synthesis-r63",
   "unmerged_head_sha": "5bba8274589e4f9ef5583d0d251d0db2bf07db4f",
   "unmerged_ci_run": 32296669349,
-  "unmerged_ci_status": "in_progress_pytest",
+  "unmerged_ci_status": "completed_success",
   "additional_in_flight": [
-    {"pr": 229, "branch": "agi/evidence-frontier-iterated-expansion-r64", "head_sha": "c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23", "base_pr": 228, "ci_run": 32296827454, "ci_status": "preliminary_stacked_in_progress_pytest", "merge_admissible": false},
-    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "ee3f5094cfc603939c51cdb4048c73b62376d319", "base_pr": 229, "ci_run": 32297775217, "ci_status": "preliminary_stacked_in_progress", "merge_admissible": false},
+    {"pr": 229, "branch": "agi/evidence-frontier-iterated-expansion-r64", "head_sha": "c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23", "base_pr": 228, "ci_run": 32296827454, "ci_status": "preliminary_stacked_failure", "merge_admissible": false},
+    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "ee3f5094cfc603939c51cdb4048c73b62376d319", "base_pr": 229, "ci_run": 32297775217, "ci_status": "preliminary_stacked_requires_observation", "merge_admissible": false},
     {"pr": 223, "branch": "agi/evidence-frontier-iterated-expansion-r57", "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "ci_status": "completed_failure_379_passed_1_failed", "merge_admissible": false},
-    {"branch": "agi/sequence-affine-char-synthesis-r60", "status": "obsolete_inert_controller_target_contains_only_temporary_workflow_delta", "merge_admissible": false},
     {"issue": 222, "purpose": "independent_external_evaluator_coordination", "status": "open", "comments": 0}
-  ],
-  "recent_actions": [
-    {"main_commit": "3123e68b850b10df60c7b98bf747923e12b94a60", "action": "semantics-preserving formatting-only retrigger of the already-merged r60 repair request after the first controller request remained unmaterialized; no second semantic request was created"},
-    {"pr": 228, "head_sha": "5bba8274589e4f9ef5583d0d251d0db2bf07db4f", "ci_run": 32296669349, "action": "direct idempotent fallback materialization of the already-reviewed narrow repair on fresh post-request main"},
-    {"pr": 229, "head_sha": "c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23", "ci_run": 32296827454, "action": "reconstructed exact preserved PR223 two-file diagnostic stack while PR228 validates"},
-    {"pr": 230, "head_sha": "ee3f5094cfc603939c51cdb4048c73b62376d319", "ci_run": 32297775217, "action": "staged recursive post-iteration frontier growth from the newly learned behavior as a non-mergeable diagnostic stack"}
   ],
   "negative_evidence": [
     {"pr": 223, "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "failure": "379 passed / 1 failed; fresh post-PR221 validation reproduced the sequence->sequence canonical numeric-character bounded-synthesis counterexample"},
     {"pr": 224, "head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6", "ci_run": 32251059159, "failure": "global -6 frontier change perturbed deterministic search and failed protected tests"},
     {"pr": 224, "head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced", "ci_run": 32257602305, "failure": "append-only global ±6 still changed unrelated frontier semantics and protected fail-closed behavior"},
+    {"pr": 229, "head_sha": "c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23", "ci_run": 32296827454, "failure": "preliminary stacked validation failed; current stacked head is diagnostic only and must not be merged"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion; do not retrigger while blocked"}
   ],
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "run_id": "run-self-applied-r60-materialization-recovery-20260820-045800",
+    "run_id": "run-self-applied-pr228-recovery-20260820-055619",
     "checkpoint_persistence_pending": true,
     "external_claim_admissible": false
   },
@@ -76,6 +71,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "First settle PR228 exact-head CI without moving or weakening it. If it succeeds, merge only unchanged head and reconstruct PR229's exact two-file delta on verified main for fresh full CI. After that integrates, reconstruct PR230's two-file recursive-growth delta on verified main and require fresh full CI. If any layer fails, retain the exact head/run and repair only the demonstrated counterexample before proceeding.",
+  "next_falsifiable_milestone": "Merge only unchanged PR 228 head after its successful full CI, then reconstruct the exact preserved PR 229 two-file delta on verified post-228 main and require fresh full exact-head CI. If reconstructed PR 229 fails, retain exact head/run and repair only the demonstrated boundary; if it succeeds, integrate and reconstruct PR 230 on resulting verified main.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
