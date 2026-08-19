@@ -42,6 +42,34 @@ def _semantic_signature(target: Mapping[str, Any]) -> str:
     )
 
 
+def _source_semantic_commitment(source_evidence: Mapping[str, Any]) -> str:
+    """Bind target planning only to stable source semantics, not audit-time storage bytes.
+
+    The persisted evidence digest remains an integrity/audit binding, but it includes the
+    transactional Candidate directory digest. Regression records in that directory carry an audit
+    timestamp, so using the whole evidence digest as a target-selection salt makes an otherwise
+    deterministic curriculum depend on wall-clock storage metadata. Keep that audit digest intact
+    while deriving the curriculum salt from the already committed source schedule and behavior
+    fingerprints only.
+    """
+
+    fields = {
+        "target_schedule_commitment": source_evidence.get("target_schedule_commitment"),
+        "acquisition_behavior_fingerprint": source_evidence.get("acquisition_behavior_fingerprint"),
+        "control_behavior_fingerprint": source_evidence.get("control_behavior_fingerprint"),
+    }
+    if any(not isinstance(value, str) or not value for value in fields.values()):
+        raise EvidenceDerivedTargetSynthesisError(
+            "persisted source evidence lacks stable semantic commitments"
+        )
+    return _digest(
+        {
+            **fields,
+            "phase": "evidence-derived-source-semantic-commitment-v1",
+        }
+    )
+
+
 def _derived_target(expression: Mapping[str, Any], support_inputs: Sequence[int]) -> dict[str, Any]:
     descriptor = _numeric_descriptor(expression)
     meta = validate_program_descriptor(descriptor)
@@ -95,11 +123,13 @@ def _candidate_expressions(base: Mapping[str, Any], salt: int) -> list[dict[str,
 def _precommit_evidence_derived_schedule(
     *,
     source_target: Mapping[str, Any],
-    source_evidence_digest: str,
+    source_semantic_commitment: str,
     source_schedule_signatures: set[str],
     support_inputs: Sequence[int],
 ) -> dict[str, Any]:
-    salt = int(source_evidence_digest[:8], 16)
+    if not isinstance(source_semantic_commitment, str) or len(source_semantic_commitment) != 64:
+        raise EvidenceDerivedTargetSynthesisError("source semantic commitment must be a SHA-256 digest")
+    salt = int(source_semantic_commitment[:8], 16)
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
     for expression in _candidate_expressions(source_target["expression"], salt):
@@ -117,10 +147,10 @@ def _precommit_evidence_derived_schedule(
     items.sort(
         key=lambda item: _digest(
             {
-                "source_evidence_digest": source_evidence_digest,
+                "source_semantic_commitment": source_semantic_commitment,
                 "semantic_signature": item["semantic_signature"],
                 "expression": item["expression"],
-                "phase": "evidence-derived-target-rank-v1",
+                "phase": "evidence-derived-target-rank-v2",
             }
         )
     )
@@ -132,10 +162,10 @@ def _precommit_evidence_derived_schedule(
         item["target_index"] = index
     commitment = _digest(
         {
-            "source_evidence_digest": source_evidence_digest,
+            "source_semantic_commitment": source_semantic_commitment,
             "source_semantic_signature": _semantic_signature(source_target),
             "targets": items,
-            "phase": "evidence-derived-target-schedule-v1",
+            "phase": "evidence-derived-target-schedule-v2",
         }
     )
     return {
@@ -161,6 +191,7 @@ def run_evidence_derived_target_synthesis(root: Path, seed: str) -> dict[str, An
     source_evidence = json.loads(source_evidence_path.read_text(encoding="utf-8"))
     if source_evidence.get("digest") != prior["source_evidence_digest"]:
         raise EvidenceDerivedTargetSynthesisError("persisted source failure evidence digest changed")
+    source_semantic_commitment = _source_semantic_commitment(source_evidence)
 
     evidence_seed = f"{seed}:persisted-curriculum:evidence-source"
     source_schedule = _precommit_gap_schedule(root, evidence_seed, max_target_attempts=24)
@@ -183,7 +214,7 @@ def run_evidence_derived_target_synthesis(root: Path, seed: str) -> dict[str, An
 
     derived = _precommit_evidence_derived_schedule(
         source_target=source_target,
-        source_evidence_digest=str(source_evidence["digest"]),
+        source_semantic_commitment=source_semantic_commitment,
         source_schedule_signatures=source_signatures,
         support_inputs=tuple(int(value) for value in source_schedule["support_inputs"]),
     )
@@ -306,8 +337,10 @@ def run_evidence_derived_target_synthesis(root: Path, seed: str) -> dict[str, An
         "seed": seed,
         "source_curriculum_digest": str(prior["digest"]),
         "source_failure_evidence_digest": str(source_evidence["digest"]),
+        "source_failure_semantic_commitment": source_semantic_commitment,
         "source_failure_schedule_reconstructed": True,
         "target_generation_source": "persisted_failure_structure",
+        "target_selection_uses_audit_storage_digest": False,
         "fresh_global_grammar_enumeration_used_for_derived_targets": False,
         "finite_source_schedule_target_replayed_as_new_objective": False,
         "source_semantic_signature": _semantic_signature(source_target),
@@ -339,16 +372,18 @@ def run_evidence_derived_target_synthesis(root: Path, seed: str) -> dict[str, An
         "live_model_invocation_required": False,
         "claim_boundary": (
             "Internal bounded evidence-derived target synthesis only. A new finite target schedule is "
-            "constructed deterministically from the structure of a persisted fail-closed behavior and its "
-            "evidence digest, and canonical support semantics exclude behaviors already in the original "
-            "finite source schedule. It remains repository-authored, bounded, numeric, and internally "
-            "evaluated; this is not open-domain autonomous objective invention, independent production "
-            "evidence, or AGI."
+            "constructed deterministically from stable committed source behavior semantics; the complete "
+            "persisted evidence digest is retained for integrity/audit but is not used as target-selection "
+            "entropy because audit-time storage metadata is not task semantics. Canonical support semantics "
+            "exclude behaviors already in the original finite source schedule. This remains repository-authored, "
+            "bounded, numeric, and internally evaluated; this is not open-domain autonomous objective "
+            "invention, independent production evidence, or AGI."
         ),
     }
     if not all(
         (
             report["source_failure_schedule_reconstructed"],
+            report["target_selection_uses_audit_storage_digest"] is False,
             report["derived_schedule_precommitted_before_support_checks"],
             report["derived_target_absent_from_source_schedule"],
             report["derived_target_failed_closed_before_learning"],
