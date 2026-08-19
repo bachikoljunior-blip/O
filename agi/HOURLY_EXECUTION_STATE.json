@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T02:09:07+09:00",
   "started_at": "2026-08-20T02:09:07+09:00",
-  "heartbeat_at": "2026-08-20T02:09:07+09:00",
-  "last_progress_at": "2026-08-20T02:09:07+09:00",
+  "heartbeat_at": "2026-08-20T02:19:12+09:00",
+  "last_progress_at": "2026-08-20T02:19:12+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T020907JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T020907JST",
@@ -26,16 +26,17 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "64dd0ac68b3ef34c5a3adac1c4aed11998fcae62",
-  "latest_main_sha_before_heartbeat": "64dd0ac68b3ef34c5a3adac1c4aed11998fcae62",
-  "current_work_unit": "Recovered a stale execution from latest main only. The prior heartbeat was 2026-08-20T01:16:40+09:00; latest main progress was 2026-08-20T01:18:01+09:00; PR 223 exact head 2a6c1cc8fb301e4ff73840810bf820161a6bed1d full CI 32273144513 completed failure at 2026-08-20T01:22:27+09:00 with 379 passed / 1 failed, reproducing the retained sequence->sequence canonical numeric-character bounded-synthesis counterexample. No later repository commit or clean r60 repair head was observed. Recover the already-persisted r60 repair direction idempotently, preserve generic frontier ordering and fail-closed controls, validate focused tests and full exact-head CI before any merge, then reconstruct PR 223 on verified repaired main.",
-  "unmerged_pr": 223,
-  "unmerged_branch": "agi/evidence-frontier-iterated-expansion-r57",
-  "unmerged_head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d",
-  "unmerged_ci_run": 32273144513,
-  "unmerged_ci_status": "completed_failure_379_passed_1_failed_sequence_to_sequence_canonical_character_synthesis",
+  "latest_main_sha_before_heartbeat": "3b46217a63ca4fd5564fc1ee270c0391cc0ced91",
+  "current_work_unit": "Recovered the reproduced PR 223 sequence->sequence canonical-character synthesis failure. The old branch-local r60 materializer still did not emit a clean repair head after an idempotent retrigger, so recovery moved the same persisted repair direction behind reviewed default-branch infrastructure rather than weakening validation. PR 226 exact head 8d969491b277f92138de3832832efdee455b42f2 adds a one-shot schema-gated controller and is in full CI 32280863192. PR 227 exact head ca95fcfb59b5b263faf08f2a93fbd4fd78f2c609 is intentionally stacked on PR 226 and carries only the schema-exact request; preliminary full CI 32280907540 is queued. Neither is merge-admissible until its required exact-head validation and dependency conditions pass.",
+  "unmerged_pr": 226,
+  "unmerged_branch": "agi/repair-controller-r61",
+  "unmerged_head_sha": "8d969491b277f92138de3832832efdee455b42f2",
+  "unmerged_ci_run": 32280863192,
+  "unmerged_ci_status": "in_progress_full_exact_head",
   "additional_in_flight": [
-    {"branch": "agi/sequence-affine-char-synthesis-r60", "kind": "preparatory_repair_from_retained_pr223_counterexample", "staging_commit": "6f22bdc5ad4f4da3adaaf8ce116b0046aa37383d", "base_sha": "3a610191202069e4cba02b6551d61cc7665b0c4a", "status": "staging_workflow_did_not_produce_clean_head_before_recovery", "merge_admissible": false},
-    {"pr": 225, "kind": "diagnostic_only_closed_without_merge", "head_sha": "e99a8478e46cf30c2dd209e46acea06865fa6abe", "ci_run": 32262566880, "ci_status": "completed_success", "merge_admissible": false, "state": "closed"},
+    {"pr": 227, "branch": "agi/sequence-char-repair-request-r62", "head_sha": "ca95fcfb59b5b263faf08f2a93fbd4fd78f2c609", "base_pr": 226, "ci_run": 32280907540, "ci_status": "queued_preliminary_stacked_full_ci_requires_retarget_after_pr226", "merge_admissible": false},
+    {"branch": "agi/sequence-affine-char-synthesis-r60", "kind": "superseded_branch_local_materializer_state", "latest_observed_controller_commit": "74309a10cfee8363a75652b7167507c69cde376b", "base_sha": "3a610191202069e4cba02b6551d61cc7665b0c4a", "status": "no_clean_source_test_head_observed", "merge_admissible": false},
+    {"pr": 223, "branch": "agi/evidence-frontier-iterated-expansion-r57", "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "ci_status": "completed_failure_379_passed_1_failed_sequence_to_sequence_canonical_character_synthesis", "merge_admissible": false},
     {"issue": 222, "purpose": "independent_external_evaluator_coordination", "status": "open_no_external_evidence_received", "comments": 0}
   ],
   "recovered_stale_lease": {
@@ -84,6 +85,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Materialize the already-persisted sequence->sequence canonical-character synthesis repair as a clean source/test branch from latest main, require focused tests and full exact-head CI, merge only an unchanged passing head, then reconstruct PR 223 on the verified repaired main and require fresh full exact-head CI before any integration.",
+  "next_falsifiable_milestone": "Require PR 226 exact-head CI 32280863192 to pass before merging its controller. Then retarget/reconstruct PR 227 onto that verified main and require fresh exact-head CI before merging the one-shot request. Observe the resulting clean r60 repair head, open a normal repair PR, require full exact-head CI, merge only unchanged success, then reconstruct PR 223 on the verified repaired main and rerun its iterated-retention milestone.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
