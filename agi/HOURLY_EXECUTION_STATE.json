@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-19T17:50:21+09:00",
   "started_at": "2026-08-19T17:50:21+09:00",
-  "heartbeat_at": "2026-08-19T18:04:56+09:00",
-  "last_progress_at": "2026-08-19T17:54:59+09:00",
+  "heartbeat_at": "2026-08-19T18:14:22+09:00",
+  "last_progress_at": "2026-08-19T18:11:45+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260819T175021JST",
   "session_id": "same-task-chat-watchdog-recovery-20260819T175021JST",
@@ -26,12 +26,11 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "f7bdaea30f95df9afbb4372f7f249dfb2d22de12",
-  "latest_main_sha_before_heartbeat": "d0db1119027b1d57cd98a80e74c9f64e5f7b875a",
-  "current_work_unit": "Recovered the stale predecessor from latest main only, retained PR 220 exact-head failure 0f860048dda59e083eca052d090781f29beddd8d / CI 32231272647 (374 passed / 1 failed), and repaired only the demonstrated bounded sequence-to-string synthesis frontier. New exact head 0388dfa4a38bf826e168d7cd13f0d8c989e503b9 explores the already-admitted abs(fold) composition before the unchanged affine/to_string layer, preserves the existing node/constant/effect/resource bounds, and adds a focused regression. Fresh exact-head full CI 32234956074 is in progress; do not duplicate it. PR 221 remains stacked and must be reconstructed only after PR 220 integrates unchanged.",
+  "current_work_unit": "PR 220 exact head 0388dfa4a38bf826e168d7cd13f0d8c989e503b9 failed fresh full CI 32234956074 with 375 passed / 1 failed, preserving the same sequence-to-string synthesis counterexample despite the abs-before-affine repair. The exact failure family remains bounded and grammar-valid. A second minimal repair now covers reverse(to_string(affine(fold(input)))) using only already-admitted reverse/to_string/fold/arithmetic operators under the unchanged max_nodes=8, constants, effects, runtime resource bounds, regression gate, and external claim gate. New exact head 066516e8419c7a3e6f031bd3b9a42a50affcdefa adds a focused regression and is undergoing fresh full CI 32236567598. Do not duplicate that run. PR 221 remains stacked and unmergeable until PR 220 passes and merges unchanged.",
   "unmerged_pr": 220,
   "unmerged_branch": "agi/evidence-frontier-exhaustion-r55",
-  "unmerged_head_sha": "0388dfa4a38bf826e168d7cd13f0d8c989e503b9",
-  "unmerged_ci_run": 32234956074,
+  "unmerged_head_sha": "066516e8419c7a3e6f031bd3b9a42a50affcdefa",
+  "unmerged_ci_run": 32236567598,
   "unmerged_ci_status": "in_progress_exact_head_full_ci",
   "additional_in_flight": [
     {
@@ -65,11 +64,11 @@
     {"pr": 220, "head_sha": "afd815a0f613c2352e2fad4eb953823458abd7f1", "ci_run": 32219409927, "failure": "inherited prerequisite failure plus a second evidence-frontier seed exposed the bounded sequence-to-string synthesis boundary"},
     {"pr": 220, "head_sha": "8a8a6a83427289e0bcde431237a6745ef7bcd754", "ci_run": 32226365369, "failure": "373 passed / 1 failed; repeated evidence-frontier campaign selected a sequence-to-string behavior outside the effective bounded synthesis search"},
     {"pr": 220, "head_sha": "38defc124e2a43a9309408522f3170a0e1dd97b3", "ci_run": 32228013783, "failure": "374 passed / 1 failed; runtime-budget regression did not repair the same sequence-to-string synthesis failure"},
-    {"pr": 220, "head_sha": "0f860048dda59e083eca052d090781f29beddd8d", "ci_run": 32231272647, "failure": "374 passed / 1 failed; adding post-affine absolute output still did not realize the demonstrated sequence-to-string target"},
-    {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "ci_run": 32227017529, "failure": "preliminary stacked run failed PR 220 prerequisite and PR 221 through the same inherited sequence-to-string synthesis frontier"},
+    {"pr": 220, "head_sha": "0f860048dda59e083eca052d090781f29beddd8d", "ci_run": 32231272647, "failure": "374 passed / 1 failed; post-affine absolute output did not realize the demonstrated sequence-to-string target"},
+    {"pr": 220, "head_sha": "0388dfa4a38bf826e168d7cd13f0d8c989e503b9", "ci_run": 32234956074, "failure": "375 passed / 1 failed; abs-before-affine focused regression passed but the real persisted evidence-frontier sequence-to-string target remained unsynthesized"},
+    {"pr": 221, "head_sha": "5948bba04a517a3e651a8347969299a991218b97", "ci_run": 32227017529, "failure": "preliminary stacked run inherited the same unresolved PR 220 sequence-to-string synthesis frontier"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live model validation; do not retrigger while blocked"}
   ],
-  "negative_evidence_history_note": "Earlier retained failures for PRs 217-219 and PR 220 are preserved in repository history and agi/CONTINUATION.json; this heartbeat keeps the active frontier concise without deleting their underlying PR/CI/evidence artifacts.",
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
@@ -89,6 +88,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe exact-head full CI 32234956074 without duplicating it. If it fails, retain exact head/run and repair only the newly demonstrated synthesis boundary. If it passes, merge only unchanged PR 220 head 0388dfa4a38bf826e168d7cd13f0d8c989e503b9, then reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
+  "next_falsifiable_milestone": "Observe exact-head full CI 32236567598 without duplicating it. If it fails, retain exact head/run and repair only the newly demonstrated boundary. If it passes, merge only unchanged PR 220 head 066516e8419c7a3e6f031bd3b9a42a50affcdefa, then reconstruct PR 221 directly on resulting main and require fresh exact-head full CI before any merge.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
