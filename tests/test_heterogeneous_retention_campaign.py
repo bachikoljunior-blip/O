@@ -50,6 +50,26 @@ def test_sequence_affine_fallback_composes_abs_before_affine() -> None:
     assert all(learned.apply(item.input) == item.output for item in examples)
 
 
+def test_sequence_affine_fallback_composes_reverse_after_to_string() -> None:
+    examples = (
+        ProgramExample([], "2"),
+        ProgramExample([1], "5"),
+        ProgramExample([-1], "1-"),
+        ProgramExample([4], "41"),
+        ProgramExample([-2], "4-"),
+        ProgramExample([1, -1], "2"),
+    )
+
+    learned = _bounded_sequence_fold_affine_to_string(
+        examples=examples,
+        max_nodes=8,
+    )
+
+    assert learned is not None
+    assert learned.expression.get("op") == "reverse"
+    assert all(learned.apply(item.input) == item.output for item in examples)
+
+
 def test_heterogeneous_capabilities_accumulate_without_forgetting(
     runtime_repo: Path,
 ) -> None:

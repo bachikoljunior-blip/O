@@ -39,16 +39,16 @@ def _bounded_sequence_fold_affine_to_string(
     examples: tuple[ProgramExample, ...] | list[ProgramExample],
     max_nodes: int,
 ) -> AcquiredProgram | None:
-    """Search a small generic numeric extension of the existing sequence folds.
+    """Search a small generic extension of the existing sequence/string grammar.
 
     The ordinary enumerator deliberately keeps bounded per-cost behavior pools. Retained
     counterexamples showed that those pools can prune grammar-valid sequence->string programs
-    before later numeric composition is reached. This fallback does not add host-code execution
-    or new constants: it enumerates only the already admitted add/mul folds, numeric constants
-    -5..5, add/mul/neg/abs, and to_string, under the caller's unchanged node bound, then verifies
+    before later composition is reached. This fallback does not add host-code execution or new
+    constants: it enumerates only the already admitted add/mul folds, numeric constants -5..5,
+    add/mul/neg/abs, to_string, and reverse under the caller's unchanged node bound, then verifies
     every demonstration through the normal acquired-program runtime. Absolute value is explored
-    both before and after the affine layer so already-admitted compositions such as
-    to_string(scale * abs(fold(input)) + offset) are not lost to behavior-pool pruning.
+    both before and after the affine layer, and reverse is explored only after conversion to string,
+    so admitted compositions are not lost solely because an intermediate behavior was pruned.
 
     Runtime accounting includes one deterministic step per folded sequence element. The fallback
     therefore derives its step budget from the longest observed demonstration as well as the
@@ -143,27 +143,32 @@ def _bounded_sequence_fold_affine_to_string(
                         ({"op": "abs", "arg": numeric}, numeric_nodes + 1),
                     ]
                     for numeric_variant, variant_nodes in numeric_variants:
-                        expression = {"op": "to_string", "arg": numeric_variant}
-                        if variant_nodes + 1 > max_nodes:
-                            continue
-                        learned = AcquiredProgram(
-                            input_domain="sequence",
-                            output_domain="string",
-                            expression=expression,
-                            support_sha256=_digest(support),
-                            max_steps=runtime_step_budget,
-                            max_output_length=1024,
-                            effects=(),
-                        )
-                        try:
-                            learned.validate()
-                            if all(
-                                learned.apply(item.input) == item.output
-                                for item in examples
-                            ):
-                                return learned
-                        except (AcquiredProgramError, TypeError, ValueError, OverflowError):
-                            continue
+                        converted = {"op": "to_string", "arg": numeric_variant}
+                        string_variants: list[tuple[dict[str, Any], int]] = [
+                            (converted, variant_nodes + 1),
+                            ({"op": "reverse", "arg": converted}, variant_nodes + 2),
+                        ]
+                        for expression, expression_nodes in string_variants:
+                            if expression_nodes > max_nodes:
+                                continue
+                            learned = AcquiredProgram(
+                                input_domain="sequence",
+                                output_domain="string",
+                                expression=expression,
+                                support_sha256=_digest(support),
+                                max_steps=runtime_step_budget,
+                                max_output_length=1024,
+                                effects=(),
+                            )
+                            try:
+                                learned.validate()
+                                if all(
+                                    learned.apply(item.input) == item.output
+                                    for item in examples
+                                ):
+                                    return learned
+                            except (AcquiredProgramError, TypeError, ValueError, OverflowError):
+                                continue
     return None
 
 
