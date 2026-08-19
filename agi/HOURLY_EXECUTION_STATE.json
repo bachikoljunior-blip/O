@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T04:58:00+09:00",
   "started_at": "2026-08-20T04:58:00+09:00",
-  "heartbeat_at": "2026-08-20T04:58:00+09:00",
-  "last_progress_at": "2026-08-20T04:58:00+09:00",
+  "heartbeat_at": "2026-08-20T05:10:04+09:00",
+  "last_progress_at": "2026-08-20T05:07:40+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T045800JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T045800JST",
@@ -26,26 +26,29 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "9f37f0b86886a1615c36258e91328ab28cf38a68",
+  "latest_main_sha_before_heartbeat": "3123e68b850b10df60c7b98bf747923e12b94a60",
   "recovered_released_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260820T035211JST",
     "released_at": "2026-08-20T04:06:55+09:00",
     "last_heartbeat_at": "2026-08-20T04:06:55+09:00",
     "reason": "lease was explicitly released with AGI unverified and repository-controlled r60 materialization pending; no newer clean r60 source/test head was observed before recovery"
   },
-  "current_work_unit": "Recovered the released watchdog from latest main only. The one-shot repair request remains present on main, but agi/sequence-affine-char-synthesis-r60 is still diverged from main with only the obsolete temporary workflow delta and no controller-produced source/test repair. Determine whether the reviewed materializer failed to trigger or failed during execution without duplicating the request; if the controller path is irrecoverably inert, materialize the already-reviewed narrow repair idempotently on a fresh branch from latest main, validate it, and integrate only an unchanged passing exact head.",
-  "unmerged_pr": null,
-  "unmerged_branch": "agi/sequence-affine-char-synthesis-r60",
-  "unmerged_head_sha": null,
-  "unmerged_ci_run": null,
-  "unmerged_ci_status": "materialization_absent_at_recovery",
-  "recent_completed_units": [
-    {"pr": 226, "head_sha": "8d969491b277f92138de3832832efdee455b42f2", "ci_run": 32280863192, "ci_conclusion": "success", "merge_sha": "18133db864adc1c77996f1b694de9d2f2e1dc51f"},
-    {"pr": 227, "head_sha": "b22a5f6b9edd2430bde7812c1092b5389937cd6e", "ci_run": 32285477346, "ci_conclusion": "success", "merge_sha": "9b749fe92bfb7d0a483790e1845bbf55f5c24101"}
-  ],
+  "current_work_unit": "The reviewed r60 one-shot materializer remained inert even after a semantics-preserving request-file retrigger on main. Recovered idempotently by applying the already-reviewed narrow sequence->sequence canonical affine-character terminal on fresh branch agi/sequence-affine-char-synthesis-r63. PR 228 exact head 5bba8274589e4f9ef5583d0d251d0db2bf07db4f is in full CI 32296669349. While that validates, the exact preserved PR 223 source/test blobs were reconstructed as stacked diagnostic PR 229 head c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23 with preliminary CI 32296827454. PR 229 is not merge-admissible until PR 228 integrates and its two-file delta is reconstructed on verified main.",
+  "unmerged_pr": 228,
+  "unmerged_branch": "agi/sequence-affine-char-synthesis-r63",
+  "unmerged_head_sha": "5bba8274589e4f9ef5583d0d251d0db2bf07db4f",
+  "unmerged_ci_run": 32296669349,
+  "unmerged_ci_status": "in_progress_pytest",
   "additional_in_flight": [
+    {"pr": 229, "branch": "agi/evidence-frontier-iterated-expansion-r64", "head_sha": "c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23", "base_pr": 228, "ci_run": 32296827454, "ci_status": "preliminary_stacked_in_progress_pytest", "merge_admissible": false},
     {"pr": 223, "branch": "agi/evidence-frontier-iterated-expansion-r57", "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "ci_status": "completed_failure_379_passed_1_failed", "merge_admissible": false},
-    {"branch": "agi/sequence-affine-char-synthesis-r60", "status": "controller_materialization_not_observed_after_prior_release", "merge_admissible": false},
+    {"branch": "agi/sequence-affine-char-synthesis-r60", "status": "obsolete_inert_controller_target_contains_only_temporary_workflow_delta", "merge_admissible": false},
     {"issue": 222, "purpose": "independent_external_evaluator_coordination", "status": "open", "comments": 0}
+  ],
+  "recent_actions": [
+    {"main_commit": "3123e68b850b10df60c7b98bf747923e12b94a60", "action": "semantics-preserving formatting-only retrigger of the already-merged r60 repair request after the first controller request remained unmaterialized; no second semantic request was created"},
+    {"pr": 228, "head_sha": "5bba8274589e4f9ef5583d0d251d0db2bf07db4f", "ci_run": 32296669349, "action": "direct idempotent fallback materialization of the already-reviewed narrow repair on fresh post-request main"},
+    {"pr": 229, "head_sha": "c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23", "ci_run": 32296827454, "action": "reconstructed exact preserved PR223 two-file diagnostic stack while PR228 validates"}
   ],
   "negative_evidence": [
     {"pr": 223, "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "failure": "379 passed / 1 failed; fresh post-PR221 validation reproduced the sequence->sequence canonical numeric-character bounded-synthesis counterexample"},
@@ -71,6 +74,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Resolve the missing r60 materialization without duplicating the already-merged one-shot request. Produce exactly the reviewed demonstration-derived sequence->sequence canonical affine-character terminal after legacy frontier exhaustion plus focused regression on a fresh post-request main base, require fresh full exact-head CI, and merge only unchanged success. Then reconstruct PR 223 from preserved blobs and rerun iterated no-forgetting.",
+  "next_falsifiable_milestone": "Observe exact-head full CI 32296669349 for PR 228. Merge only unchanged head 5bba8274589e4f9ef5583d0d251d0db2bf07db4f if every required check passes; on failure retain the exact head/run and repair only the demonstrated boundary. After successful integration, reconstruct exactly the preserved PR223 source/test delta onto resulting main and require fresh exact-head full CI before any merge, regardless of preliminary stacked PR229 CI outcome.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
