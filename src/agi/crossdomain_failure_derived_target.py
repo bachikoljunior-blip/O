@@ -89,31 +89,43 @@ def _candidate_expressions(base_program: Mapping[str, Any], salt: int) -> list[d
     def numeric_const(value: int) -> dict[str, Any]:
         return {"op": "const", "domain": "numeric", "value": value}
 
-    if output_domain == "numeric":
-        magnitude = 2 + salt % 5
+    def numeric_variants(value: Mapping[str, Any]) -> list[dict[str, Any]]:
+        numeric = copy.deepcopy(dict(value))
+        magnitude = 2 + salt % 4
         return [
-            {"op": "neg", "arg": copy.deepcopy(base)},
-            {"op": "abs", "arg": copy.deepcopy(base)},
-            {"op": "add", "left": copy.deepcopy(base), "right": numeric_const(magnitude)},
-            {"op": "sub", "left": copy.deepcopy(base), "right": numeric_const(magnitude)},
-            {"op": "mul", "left": copy.deepcopy(base), "right": numeric_const(2)},
+            {"op": "neg", "arg": copy.deepcopy(numeric)},
+            {"op": "abs", "arg": copy.deepcopy(numeric)},
+            {"op": "add", "left": copy.deepcopy(numeric), "right": numeric_const(magnitude)},
+            {"op": "sub", "left": copy.deepcopy(numeric), "right": numeric_const(magnitude)},
+            {"op": "mul", "left": copy.deepcopy(numeric), "right": numeric_const(2)},
+            {"op": "ge_numeric", "left": copy.deepcopy(numeric), "right": numeric_const(0)},
+        ]
+
+    if output_domain == "numeric":
+        return [
+            *numeric_variants(base),
             {"op": "to_string", "arg": copy.deepcopy(base)},
-            {"op": "ge_numeric", "left": copy.deepcopy(base), "right": numeric_const(0)},
-            {"op": "eq_numeric", "left": copy.deepcopy(base), "right": numeric_const(0)},
         ]
     if output_domain == "string":
-        suffix = chr(ord("a") + salt % 26)
-        string_const = {"op": "const", "domain": "string", "value": suffix}
-        empty = {"op": "const", "domain": "string", "value": ""}
-        return [
+        expressions = [
             {"op": "reverse", "arg": copy.deepcopy(base)},
             {"op": "upper", "arg": copy.deepcopy(base)},
             {"op": "lower", "arg": copy.deepcopy(base)},
             {"op": "length_string", "arg": copy.deepcopy(base)},
             {"op": "chars", "arg": copy.deepcopy(base)},
-            {"op": "concat_string", "left": copy.deepcopy(base), "right": string_const},
-            {"op": "eq_string", "left": copy.deepcopy(base), "right": empty},
         ]
+        if isinstance(base, dict) and base.get("op") == "to_string" and isinstance(base.get("arg"), dict):
+            inner = copy.deepcopy(base["arg"])
+            inner_variants = numeric_variants(inner)
+            expressions = [
+                *inner_variants,
+                *[
+                    {"op": "to_string", "arg": copy.deepcopy(item)}
+                    for item in inner_variants[:5]
+                ],
+                *expressions,
+            ]
+        return expressions
     if output_domain == "sequence":
         input_domain = str(base_program["input_domain"])
         expressions = [
