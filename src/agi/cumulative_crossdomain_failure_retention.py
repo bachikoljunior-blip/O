@@ -169,11 +169,12 @@ def run_cumulative_crossdomain_failure_retention(root: Path, seed: str) -> dict[
             raise CumulativeCrossDomainFailureRetentionError(
                 "round derived control was overgeneralized"
             )
-        if _tree_snapshot(root, prior_ids) != prior_tree:
+        current_prior_tree, current_prior_trials = _snapshot_subset(root, prior_ids)
+        if current_prior_tree != prior_tree:
             raise CumulativeCrossDomainFailureRetentionError(
                 "later cross-domain learning changed prior Candidate bytes"
             )
-        if _trial_snapshot(root, prior_ids) != prior_trials:
+        if current_prior_trials != prior_trials:
             raise CumulativeCrossDomainFailureRetentionError(
                 "later cross-domain learning changed prior Candidate trials"
             )
