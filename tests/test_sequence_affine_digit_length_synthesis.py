@@ -19,6 +19,7 @@ def test_sequence_affine_digit_length_fallback_recovers_retained_counterexample(
             [1, -1, 1],
             [1, 1],
             [-2, 0, 0],
+            [4],
             [-5],
             [-8, 0, 0],
             [-7, 0, 0],
