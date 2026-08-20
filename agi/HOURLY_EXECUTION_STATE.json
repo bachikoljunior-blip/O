@@ -4,18 +4,18 @@
   "timezone": "Asia/Tokyo",
   "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-20T18:01:10+09:00",
+  "scheduler_fired_at": "2026-08-20T18:52:58+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-20T18:01:10+09:00",
-  "started_at": "2026-08-20T18:01:10+09:00",
-  "heartbeat_at": "2026-08-20T18:01:10+09:00",
-  "last_progress_at": "2026-08-20T18:01:10+09:00",
+  "actual_started_at": "2026-08-20T18:52:58+09:00",
+  "started_at": "2026-08-20T18:52:58+09:00",
+  "heartbeat_at": "2026-08-20T18:52:58+09:00",
+  "last_progress_at": "2026-08-20T18:52:58+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260820T180110JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260820T180110JST",
-  "active_run_id": "run-self-applied-pr235-pr237-recovery-20260820-180110",
+  "execution_id": "o-agi-watchdog-recovery-20260820T185258JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260820T185258JST",
+  "active_run_id": "run-self-applied-pr235-recovery-20260820-185258",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -25,9 +25,9 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "c3e3a9643fa272c6c0a2f0a9d1eaf5f35ad48e8d",
-  "current_work_unit": "Recovered the explicitly released lease from repository latest main only. PR235 CI 32346087767 and PR237 CI 32346155145 completed successfully on base 41cc7043a0cf4e3b02febf6cc46c86b2d7aae956, which is stale relative to current main. Diagnostic PR236 CI 32346430163 was cancelled and remains non-merge evidence. Reconstruct fresh-base candidates before any merge.",
-  "primary_unmerged": {"pr": 235, "branch": "agi/sequence-affine-char-reverse-r69", "head_sha": "0ace9354ab270e6d9b44b8d2857eda673224d129", "ci_run": 32346087767, "ci_status": "success_stale_base_requires_reconstruction", "merge_admissible": false},
+  "latest_main_sha_at_start": "b49c1f5e985b12a4f5b3acc73c4ac2f92b16d95c",
+  "current_work_unit": "Recovered a stale running lease from repository latest main only. PR235 exact head 1ce7cb59f8285526ee0a22b1d04bb4a71480c319 completed full CI 32352327315 successfully at 2026-08-20T18:42:00+09:00 on then-latest main b49c1f5e985b12a4f5b3acc73c4ac2f92b16d95c. This lease recovery advances main bookkeeping, so reconstruct the same exact two-file repair on the recovered latest main and require fresh full exact-head CI before merge under the repository's strict fresh-base practice.",
+  "primary_unmerged": {"pr": 235, "branch": "agi/sequence-affine-char-reverse-r69", "head_sha": "1ce7cb59f8285526ee0a22b1d04bb4a71480c319", "ci_run": 32352327315, "ci_status": "success_pre_recovery_main_requires_reconstruction", "merge_admissible": false},
   "additional_in_flight": [
     {"pr": 237, "branch": "agi/generated-cross-round-functional-retention-r71", "head_sha": "6ac11c30041c5931d29e02a9356c5aac57c921a4", "ci_run": 32346155145, "ci_status": "success_stale_base_requires_reconstruction", "merge_admissible": false},
     {"pr": 236, "branch": "agi/recursive-evidence-frontier-r70-diagnostic", "head_sha": "b5063d14c95159588aa43fd8cd5e0d2290b1fca2", "ci_run": 32346430163, "ci_status": "cancelled_diagnostic_only", "merge_admissible": false},
@@ -36,11 +36,12 @@
     {"pr": 233, "branch": "agi/observed-schema-extrapolation-r68", "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled_known_binding_defect", "merge_admissible": false},
     {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
   ],
-  "recovered_released_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260820T165114JST",
-    "released_at": "2026-08-20T16:58:55+09:00",
-    "latest_main_at_recovery": "c3e3a9643fa272c6c0a2f0a9d1eaf5f35ad48e8d",
-    "reason": "prior execution explicitly released the lease while AGI objective remained unmet"
+  "recovered_stale_lease": {
+    "execution_id": "o-agi-watchdog-recovery-20260820T180110JST",
+    "last_heartbeat_at": "2026-08-20T18:01:10+09:00",
+    "last_repository_progress_at": "2026-08-20T18:08:13+09:00",
+    "last_external_ci_progress_at": "2026-08-20T18:42:00+09:00",
+    "reason": "running heartbeat exceeded stale_after_seconds and no later durable heartbeat was persisted; recovery started idempotently from latest main only after inspecting the active PR and exact CI result"
   },
   "negative_evidence": [
     {"pr": 230, "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "failure": "385 passed / 1 failed; iterated prerequisite selected a reversed canonical numeric-character sequence target that ordinary bounded synthesis could not match"},
@@ -56,7 +57,7 @@
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "run_id": "run-self-applied-pr235-pr237-recovery-20260820-180110",
+    "run_id": "run-self-applied-pr235-recovery-20260820-185258",
     "checkpoint_persistence_pending": true,
     "checkpoint_truthfulness": "native continual self-apply CLI has not yet been executed in this connector session; no native Run/Episode is claimed",
     "external_claim_admissible": false
@@ -72,6 +73,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Reconstruct PR235 and PR237 independently on the newly acquired latest main, require fresh full exact-head CI, and merge only unchanged passing heads. Prioritize PR235, then reconstruct PR230 from preserved blobs and test whether the recursive frontier advances. Independently integrate PR237 only after fresh-base validation, then reconstruct PR238 on the verified post-PR237 main and require fresh full CI before merge. After PR230 settles, repair PR233's persisted-iterated Candidate-ID binding and add direct end-to-end coverage.",
+  "next_falsifiable_milestone": "Reconstruct PR235's exact two-file repair on recovered latest main, require fresh full exact-head CI, and merge only an unchanged passing head. Then reconstruct PR230 from preserved blobs on verified post-PR235 main and test whether recursive evidence-frontier growth advances. In parallel only where non-conflicting, fresh-base validate PR237, then reconstruct PR238 after PR237 integrates. After PR230 settles, repair PR233's persisted-iterated Candidate-ID binding and add direct end-to-end coverage.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Released or stale lease may be recovered from repository latest main only. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never prove AGI. Internal evidence cannot satisfy the strict external AGI gate."
 }
