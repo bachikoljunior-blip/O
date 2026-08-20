@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T18:52:58+09:00",
   "started_at": "2026-08-20T18:52:58+09:00",
-  "heartbeat_at": "2026-08-20T18:52:58+09:00",
-  "last_progress_at": "2026-08-20T18:52:58+09:00",
+  "heartbeat_at": "2026-08-20T19:08:20+09:00",
+  "last_progress_at": "2026-08-20T19:08:20+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T185258JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T185258JST",
@@ -26,12 +26,13 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "b49c1f5e985b12a4f5b3acc73c4ac2f92b16d95c",
-  "current_work_unit": "Recovered a stale running lease from repository latest main only. PR235 exact head 1ce7cb59f8285526ee0a22b1d04bb4a71480c319 completed full CI 32352327315 successfully at 2026-08-20T18:42:00+09:00 on then-latest main b49c1f5e985b12a4f5b3acc73c4ac2f92b16d95c. This lease recovery advances main bookkeeping, so reconstruct the same exact two-file repair on the recovered latest main and require fresh full exact-head CI before merge under the repository's strict fresh-base practice.",
-  "primary_unmerged": {"pr": 235, "branch": "agi/sequence-affine-char-reverse-r69", "head_sha": "1ce7cb59f8285526ee0a22b1d04bb4a71480c319", "ci_run": 32352327315, "ci_status": "success_pre_recovery_main_requires_reconstruction", "merge_admissible": false},
+  "latest_main_sha_before_heartbeat": "148d5dedc42233062fd95c74dccc07517d411d32",
+  "current_work_unit": "Recovered stale lease, reconstructed PR235 exact repair on recovered main as d0631ade5be04bb7ff81ff435e6597c90ff13869 with full CI 32356329121 in progress, reconstructed PR237 as 9c24291f1d8f41044dfbbdfd4df73f58054f09a6 with CI 32356373607 in progress, reconstructed diagnostic PR236 as afb6bbb59e50620e56540dbe84d0840aba8335d0 with CI 32356424570 in progress, and reconstructed stacked PR238 as cb2ff840232e260d33c8cc4b053fd906a2e8b240 with CI 32356661124 in progress. This heartbeat advances main bookkeeping only; none of these pre-heartbeat heads are merge-admissible under the repository's strict fresh-base convention without reconstruction after their semantic CI result is observed.",
+  "primary_unmerged": {"pr": 235, "branch": "agi/sequence-affine-char-reverse-r69", "head_sha": "d0631ade5be04bb7ff81ff435e6597c90ff13869", "ci_run": 32356329121, "ci_status": "in_progress_pytest_pre_heartbeat_base", "merge_admissible": false},
   "additional_in_flight": [
-    {"pr": 237, "branch": "agi/generated-cross-round-functional-retention-r71", "head_sha": "6ac11c30041c5931d29e02a9356c5aac57c921a4", "ci_run": 32346155145, "ci_status": "success_stale_base_requires_reconstruction", "merge_admissible": false},
-    {"pr": 236, "branch": "agi/recursive-evidence-frontier-r70-diagnostic", "head_sha": "b5063d14c95159588aa43fd8cd5e0d2290b1fca2", "ci_run": 32346430163, "ci_status": "cancelled_diagnostic_only", "merge_admissible": false},
-    {"pr": 238, "branch": "agi/generated-multisession-retention-r72", "head_sha": "b46660e12faf89f7f271af489a0398d554a8d0a4", "ci_run": 32339006434, "ci_status": "preliminary_stacked_success", "merge_admissible": false},
+    {"pr": 237, "branch": "agi/generated-cross-round-functional-retention-r71", "head_sha": "9c24291f1d8f41044dfbbdfd4df73f58054f09a6", "ci_run": 32356373607, "ci_status": "in_progress_pytest_pre_heartbeat_base", "merge_admissible": false},
+    {"pr": 236, "branch": "agi/recursive-evidence-frontier-r70-diagnostic", "head_sha": "afb6bbb59e50620e56540dbe84d0840aba8335d0", "ci_run": 32356424570, "ci_status": "in_progress_pytest_diagnostic_only", "merge_admissible": false},
+    {"pr": 238, "branch": "agi/generated-multisession-retention-r72", "head_sha": "cb2ff840232e260d33c8cc4b053fd906a2e8b240", "ci_run": 32356661124, "ci_status": "in_progress_stacked_diagnostic", "merge_admissible": false},
     {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "ci_status": "failure_385_passed_1_failed", "merge_admissible": false},
     {"pr": 233, "branch": "agi/observed-schema-extrapolation-r68", "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled_known_binding_defect", "merge_admissible": false},
     {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
@@ -45,10 +46,16 @@
   },
   "negative_evidence": [
     {"pr": 230, "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "failure": "385 passed / 1 failed; iterated prerequisite selected a reversed canonical numeric-character sequence target that ordinary bounded synthesis could not match"},
-    {"pr": 236, "head_sha": "b5063d14c95159588aa43fd8cd5e0d2290b1fca2", "ci_run": 32346430163, "failure": "diagnostic-only CI cancelled; no semantic conclusion and never merge-admissible"},
+    {"pr": 236, "head_sha": "b5063d14c95159588aa43fd8cd5e0d2290b1fca2", "ci_run": 32346430163, "failure": "earlier diagnostic-only CI cancelled; no semantic conclusion and never merge-admissible"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"}
   ],
   "preserved_reconstruction_blobs": {
+    "pr235_src": "c58fd064b152ae533e33f7d8430ace717b3b3c88",
+    "pr235_test": "f02353f7ee241f126bb5f2c698bb48e74f74e858",
+    "pr237_src": "fdffd2caf1c04c00eb5226f9f868acb81b96a53e",
+    "pr237_test": "32ef5ebd330528ac44cf42f2b8904c7493c550d5",
+    "pr238_src": "7b6213a72e9172146967f21bec6fc10eeb531263",
+    "pr238_test": "40f7e51a5b5ccab8360314601ab9775c165d4cc6",
     "pr230_src": "b22a0157ba7693358b9c6d67c921298178899a14",
     "pr230_test": "5cd9baacea9ba221e7ea15693b72855b33f9c1b4",
     "pr233_src": "a57b5fecfda0fb9768e205e48f3d812084d8bf0c",
@@ -73,6 +80,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Reconstruct PR235's exact two-file repair on recovered latest main, require fresh full exact-head CI, and merge only an unchanged passing head. Then reconstruct PR230 from preserved blobs on verified post-PR235 main and test whether recursive evidence-frontier growth advances. In parallel only where non-conflicting, fresh-base validate PR237, then reconstruct PR238 after PR237 integrates. After PR230 settles, repair PR233's persisted-iterated Candidate-ID binding and add direct end-to-end coverage.",
+  "next_falsifiable_milestone": "Observe the four exact-head CI runs without duplicating them. If PR235 semantic CI succeeds, reconstruct its exact two-file blobs on the then-current main and require fresh exact-head CI before merge; after PR235 integrates reconstruct PR230 from preserved blobs and test recursive evidence-frontier growth. Independently, if PR237 semantic CI succeeds reconstruct it on then-current verified main after higher-priority PR235 movement and require fresh CI; after PR237 integrates reconstruct PR238 directly on post-PR237 main. Preserve diagnostic PR236 results only as preliminary evidence. After PR230 settles repair PR233's persisted-iterated Candidate-ID binding and add direct end-to-end coverage.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Released or stale lease may be recovered from repository latest main only. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never prove AGI. Internal evidence cannot satisfy the strict external AGI gate."
 }
