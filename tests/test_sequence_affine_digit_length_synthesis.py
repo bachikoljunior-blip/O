@@ -19,6 +19,7 @@ def test_sequence_affine_digit_length_fallback_recovers_retained_counterexample(
             [1, -1, 1],
             [1, 1],
             [-2, 0, 0],
+            [-5],
             [-8, 0, 0],
             [-7, 0, 0],
         )
@@ -32,7 +33,7 @@ def test_sequence_affine_digit_length_fallback_recovers_retained_counterexample(
     assert learned is not None
     assert learned.expression["op"] == "length_string"
     assert learned.descriptor()["max_steps"] <= 128
-    for value in ([3], [-1], [4, -2, 1], [-5, 2], [8, 0, 0]):
+    for value in ([3], [-1], [4, -2, 1], [-6], [5], [8, 0, 0]):
         assert learned.apply(value) == _digit_length(2 * sum(value) + 1)
 
 
