@@ -2,7 +2,7 @@
   "schema_version": 2,
   "mode": "watchdog_repository_only_same_task_chat",
   "timezone": "Asia/Tokyo",
-  "status": "running",
+  "status": "released",
   "lease_mode": "watchdog_continuation",
   "scheduler_fired_at": "2026-08-20T11:59:41+09:00",
   "time_budget_enabled": false,
@@ -10,8 +10,9 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T11:59:41+09:00",
   "started_at": "2026-08-20T11:59:41+09:00",
-  "heartbeat_at": "2026-08-20T12:03:26+09:00",
-  "last_progress_at": "2026-08-20T12:03:26+09:00",
+  "heartbeat_at": "2026-08-20T12:10:24+09:00",
+  "last_progress_at": "2026-08-20T12:10:24+09:00",
+  "released_at": "2026-08-20T12:10:24+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T115941JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T115941JST",
@@ -26,7 +27,7 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "a25fe9940423e1a63f249e08de0a3cb78a08534c",
-  "latest_main_sha_before_heartbeat": "f26144734d97477791eb85ca36e5689d7ba3a732",
+  "latest_main_sha_before_release": "e106d4a95434c26017b6991c71a9b98715c4f0df",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260820T105028JST",
     "last_heartbeat_at": "2026-08-20T11:11:29+09:00",
@@ -34,7 +35,8 @@
     "last_external_progress_at": "2026-08-20T11:37:14+09:00",
     "reason": "running heartbeat, latest-main progress, and known PR234 CI completion all exceeded stale_after_seconds; recovered idempotently from latest main only"
   },
-  "current_work_unit": "PR234 exact head b6417d4daae495f68ff582b6fbea683583cf7b2e passed full CI 32323618763 and merged unchanged as f26144734d97477791eb85ca36e5689d7ba3a732. PR229 was reconstructed directly on that verified main from preserved exact source/test blobs as head 6f3a1e86f21f443b92313eb9c632a7ecfac0cfb; fresh full CI 32326756624 is in progress. PR230 was separately reconstructed as a diagnostic-only stack on the exact PR229 head plus its preserved recursive two-file delta as head 4c558a347b56368a4dce9b78052f17251fd73936; diagnostic CI 32326798604 is in progress and is not merge-admissible.",
+  "current_work_unit": "PR234 exact head b6417d4daae495f68ff582b6fbea683583cf7b2e passed full CI 32323618763 and merged unchanged as f26144734d97477791eb85ca36e5689d7ba3a732. PR229 was reconstructed directly on that verified main from preserved exact source/test blobs as head 6f3a1e86f21f443b92313eb9c632a7ecfac0cfb; fresh full CI 32326756624 remains in progress. PR230 was separately reconstructed as a diagnostic-only stack on the exact PR229 head plus its preserved recursive two-file delta as head 4c558a347b56368a4dce9b78052f17251fd73936; diagnostic CI 32326798604 remains in progress and is not merge-admissible. PR233's Candidate-ID binding defect is documented durably for repair after PR230 settles.",
+  "release_reason": "The current tool session cannot synchronously remain alive for long-running external CI. All safe non-conflicting work available before those results was completed, exact continuation/report state was persisted, and both known CI runs were left running without duplication. A later watchdog may resume from latest main and first observe those exact runs.",
   "recent_completed_units": [
     {"pr": 232, "head_sha": "22f5e68b1d083160d1dbe172572fd7e2758f2ebf", "ci_run": 32307731617, "ci_conclusion": "success", "merge_sha": "ce536f8202030036a0c198ffa125b626c419b74a"},
     {"pr": 231, "head_sha": "1e525453d534198977033dd31f6792ba4e03dbf5", "ci_run": 32306921293, "ci_conclusion": "success", "merge_sha": "ae11e709dc643cc698f5c8686e8abc270fb14270"},
@@ -44,18 +46,20 @@
   "unmerged_branch": "agi/evidence-frontier-iterated-expansion-r64",
   "unmerged_head_sha": "6f3a1e86f21f443b92313eb9c632a7ecfac0cfb1",
   "unmerged_ci_run": 32326756624,
-  "unmerged_ci_status": "in_progress",
+  "unmerged_ci_status": "in_progress_at_release",
   "additional_in_flight": [
-    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "4c558a347b56368a4dce9b78052f17251fd73936", "base_pr": 229, "ci_run": 32326798604, "ci_status": "in_progress_diagnostic_only", "merge_admissible": false},
+    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "4c558a347b56368a4dce9b78052f17251fd73936", "base_pr": 229, "ci_run": 32326798604, "ci_status": "in_progress_diagnostic_only_at_release", "merge_admissible": false},
     {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "known_defect": "full campaign reads first four Candidate IDs from recursive report instead of persisted iterated prerequisite"},
-    {"issue": 222, "status": "open", "purpose": "independent external evaluator coordination"}
+    {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
   ],
   "retained_negative_evidence_ref": "agi/CONTINUATION.json",
+  "report_path": "agi/reports/20260820T120902JST.md",
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
     "run_id": "run-self-applied-pr234-recovery-20260820-115941",
     "checkpoint_persistence_pending": true,
+    "checkpoint_truthfulness": "native continual self-apply CLI was not executed in this tool session; repository continuation was persisted directly and no native Run/Episode is claimed",
     "external_claim_admissible": false
   },
   "external_evidence_state": {
@@ -66,8 +70,9 @@
     "attestations": 0,
     "registered_verifiers": 0,
     "coordination_issue": 222,
+    "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe PR229 exact-head CI 32326756624. Merge only unchanged success. Treat PR230 CI 32326798604 as early falsification only; after PR229 merges, reconstruct PR230's exact recursive two-file delta on verified main and require a fresh merge-admissible full CI. After PR230 settles, repair PR233 Candidate-ID binding from observed['iterated'] and add direct end-to-end campaign regression before any schema-extrapolation merge.",
+  "next_falsifiable_milestone": "First observe PR229 exact-head CI 32326756624 without duplicating it. Merge only unchanged success after verifying the two-file diff. Then reconstruct PR230's exact recursive two-file delta on verified post-PR229 main and require a fresh merge-admissible full CI; current PR230 CI 32326798604 is diagnostic only. On PR229 failure, retain exact head/run and repair only the demonstrated iterated-frontier boundary. After PR230 settles, repair PR233 Candidate-ID binding from observed['iterated'] and add direct end-to-end campaign regression before any schema-extrapolation merge.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
