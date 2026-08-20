@@ -4,18 +4,18 @@
   "timezone": "Asia/Tokyo",
   "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-20T21:02:35+09:00",
+  "scheduler_fired_at": "2026-08-20T22:02:24+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-20T21:02:35+09:00",
-  "started_at": "2026-08-20T21:02:35+09:00",
-  "heartbeat_at": "2026-08-20T21:02:35+09:00",
-  "last_progress_at": "2026-08-20T21:03:23+09:00",
+  "actual_started_at": "2026-08-20T22:02:24+09:00",
+  "started_at": "2026-08-20T22:02:24+09:00",
+  "heartbeat_at": "2026-08-20T22:02:24+09:00",
+  "last_progress_at": "2026-08-20T22:02:24+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260820T210235JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260820T210235JST",
-  "active_run_id": "run-self-applied-pr230-post235-recovery-20260820-210235",
+  "execution_id": "o-agi-watchdog-recovery-20260820T220224JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260820T220224JST",
+  "active_run_id": "run-self-applied-pr230-reverse-frontier-recovery-20260820-220224",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -25,36 +25,20 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "d35dc999f3b715958124ae42ef68b8258e3e0337",
-  "latest_main_sha_before_heartbeat": "409831b7d0f480f475eb1755e7e91168eddd54bf",
-  "current_work_unit": "Recovered stale lease after confirming no remaining in-flight work. PR235 exact head e6fc8634ad612c27f7a6fb7018fd852db7a5dd61 passed fresh full CI 32361188457 on unchanged base d35dc999f3b715958124ae42ef68b8258e3e0337 and merged unchanged as 409831b7d0f480f475eb1755e7e91168eddd54bf. Next reconstruct preserved PR230 source/test delta directly on this verified post-PR235 main, require fresh full exact-head CI, and merge only an unchanged passing head. In parallel, reconstruct PR237 only after this main movement and keep PR238 stacked until PR237 integrates.",
+  "latest_main_sha_at_start": "4c2ec9032f9839fe8046faae7c86df960f61059c",
+  "current_work_unit": "Recovered stale lease from latest main only after PR230 exact head e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b completed fresh full CI 32367064061 with 386 passed / 1 failed. The retained failure is CrossDomainFailureDerivedTargetError: fewer than two derived behaviors fit unchanged bounds when the learned base is chars(reverse(to_string(numeric))). Repair only the existing sequence numeric-character fallback so it preserves the optional reverse wrapper, add a focused regression, require fresh exact-head full CI, and do not weaken node/runtime/output bounds or fail-closed behavior.",
   "primary_unmerged": {
     "pr": 230,
     "branch": "agi/recursive-evidence-frontier-r65",
-    "previous_head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7",
-    "previous_ci_run": 32330171761,
-    "previous_ci_status": "failure_385_passed_1_failed_requires_post_pr235_reconstruction",
+    "head_sha": "e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b",
+    "ci_run": 32367064061,
+    "ci_status": "failure_386_passed_1_failed",
     "merge_admissible": false
   },
-  "additional_in_flight": [
-    {"pr": 237, "branch": "agi/generated-cross-round-functional-retention-r71", "head_sha": "9c24291f1d8f41044dfbbdfd4df73f58054f09a6", "ci_run": 32356373607, "ci_status": "success_stale_base_requires_reconstruction_after_pr235", "merge_admissible": false},
-    {"pr": 238, "branch": "agi/generated-multisession-retention-r72", "head_sha": "cb2ff840232e260d33c8cc4b053fd906a2e8b240", "ci_run": 32356661124, "ci_status": "success_stacked_diagnostic_requires_post_pr237_reconstruction", "merge_admissible": false},
-    {"pr": 233, "branch": "agi/observed-schema-extrapolation-r68", "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled_known_binding_defect", "merge_admissible": false},
-    {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
-  ],
-  "recovered_stale_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260820T195232JST",
-    "last_heartbeat_at": "2026-08-20T19:52:32+09:00",
-    "last_repository_progress_at": "2026-08-20T19:57:11+09:00",
-    "last_external_ci_progress_at": "2026-08-20T20:28:25+09:00",
-    "reason": "running heartbeat, repository progress, and PR235 external CI completion all exceeded stale_after_seconds; no later main progress or in-flight run remained"
-  },
-  "recent_completed_units": [
-    {"pr": 235, "head_sha": "e6fc8634ad612c27f7a6fb7018fd852db7a5dd61", "ci_run": 32361188457, "ci_conclusion": "success", "merge_sha": "409831b7d0f480f475eb1755e7e91168eddd54bf"}
-  ],
   "negative_evidence": [
-    {"pr": 230, "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "failure": "385 passed / 1 failed; iterated prerequisite selected a reversed canonical numeric-character sequence target that ordinary bounded synthesis could not match"},
-    {"pr": 236, "head_sha": "afb6bbb59e50620e56540dbe84d0840aba8335d0", "ci_run": 32356424570, "failure": "diagnostic-only CI cancelled; no semantic conclusion and never merge-admissible"},
+    {"pr": 230, "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "failure": "385 passed / 1 failed; iterated prerequisite selected a reversed canonical numeric-character sequence target ordinary bounded synthesis could not match"},
+    {"pr": 240, "head_sha": "aeb2ce4bc538d432544f77bc0b84ca159c4b38f8", "ci_run": 32361932655, "failure": "386 passed / 1 failed; diagnostic advanced past PR235 repair and exposed fewer than two derived behaviors for chars(reverse(to_string(numeric)))"},
+    {"pr": 230, "head_sha": "e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b", "ci_run": 32367064061, "failure": "386 passed / 1 failed; reproduced fewer than two derived behaviors for chars(reverse(to_string(numeric))) under unchanged bounds"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"}
   ],
   "preserved_reconstruction_blobs": {
@@ -67,10 +51,17 @@
     "pr233_src": "a57b5fecfda0fb9768e205e48f3d812084d8bf0c",
     "pr233_test": "ab0aa39777a624f20545f1541b2e4e37f8a10459"
   },
+  "recovered_stale_lease": {
+    "execution_id": "o-agi-watchdog-recovery-20260820T210235JST",
+    "last_heartbeat_at": "2026-08-20T21:02:35+09:00",
+    "last_repository_progress_at": "2026-08-20T21:21:20+09:00",
+    "last_external_ci_progress_at": "2026-08-20T21:33:11+09:00",
+    "reason": "running heartbeat, repository progress, and PR230 CI completion all exceeded stale_after_seconds; no later main progress or in-flight run remained"
+  },
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "run_id": "run-self-applied-pr230-post235-recovery-20260820-210235",
+    "run_id": "run-self-applied-pr230-reverse-frontier-recovery-20260820-220224",
     "checkpoint_persistence_pending": true,
     "checkpoint_truthfulness": "native continual self-apply CLI has not been executed in this connector session; no native Run/Episode is claimed",
     "external_claim_admissible": false
@@ -86,6 +77,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Reconstruct PR230 from preserved source/test blobs on the verified post-PR235 main plus this lease recovery commit, require fresh full exact-head CI, and merge only an unchanged passing head. On failure preserve exact head/run and repair only the demonstrated recursive-frontier boundary. Independently reconstruct PR237 on the same latest main; after PR237 integrates reconstruct PR238 on post-PR237 main. After PR230 settles repair PR233's persisted-iterated Candidate-ID binding and add direct end-to-end coverage.",
+  "next_falsifiable_milestone": "Repair only the demonstrated optional-reverse numeric-character derivation boundary on latest main, add a regression that proves at least two bounded novel derived behaviors for chars(reverse(to_string(numeric))) while preserving the wrapper and unchanged bounds, require fresh full exact-head CI, then reconstruct PR230 on the verified repair and rerun its full recursive milestone. Independently preserve PR237/PR238 and repair PR233 only after PR230 settles.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Released or stale lease may be recovered from repository latest main only. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never prove AGI. Internal evidence cannot satisfy the strict external AGI gate."
 }
