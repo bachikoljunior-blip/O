@@ -238,6 +238,17 @@ def _sequence_numeric_char_fallback_expressions(
     if not isinstance(base, dict) or base.get("op") != "chars":
         return []
     rendered = base.get("arg")
+    if not isinstance(rendered, dict):
+        return []
+
+    # Preserve the only wrapper distinction observed in retained evidence. PR229 established the
+    # plain chars(to_string(numeric)) fallback; PR240/PR230 later exposed the same verified numeric
+    # family under chars(reverse(to_string(numeric))). Unwrap only that optional reverse so the
+    # constant mutation stays identical, then restore it on every sibling. Do not admit any other
+    # string transform or widen the global derivation grammar.
+    reverse_wrapper = rendered.get("op") == "reverse"
+    if reverse_wrapper:
+        rendered = rendered.get("arg")
     if not isinstance(rendered, dict) or rendered.get("op") != "to_string":
         return []
     inner = rendered.get("arg")
@@ -253,10 +264,9 @@ def _sequence_numeric_char_fallback_expressions(
     if inner_domain != "numeric":
         return []
 
-    # The retained PR229 counterexample is an acquired affine numeric terminal wrapped by
-    # to_string/chars. Mutate only its already-verified numeric constants so every sibling retains
-    # the same AST size and remains inside the unchanged acquisition family. Do not introduce
-    # generic new literals or increase the global derivation frontier.
+    # Mutate only already-verified numeric constants so every sibling retains the same numeric AST
+    # size and remains inside the unchanged acquisition family. The optional reverse wrapper is
+    # restored below, preserving the observed base shape and unchanged runtime/output bounds.
     magnitude = 1 + salt % 3
     variants: list[dict[str, Any]] = []
 
@@ -299,10 +309,13 @@ def _sequence_numeric_char_fallback_expressions(
         append_constant_mutations(inner, ("left",), (1, -1))
         append_constant_mutations(inner, ("right",), (1, -1))
 
-    return [
-        {"op": "chars", "arg": {"op": "to_string", "arg": variant}}
-        for variant in variants
-    ]
+    expressions: list[dict[str, Any]] = []
+    for variant in variants:
+        string_expression: dict[str, Any] = {"op": "to_string", "arg": variant}
+        if reverse_wrapper:
+            string_expression = {"op": "reverse", "arg": string_expression}
+        expressions.append({"op": "chars", "arg": string_expression})
+    return expressions
 
 
 def _precommit_schedule(
