@@ -9,9 +9,8 @@
   "soft_stop": null,
   "hard_stop": null,
   "actual_started_at": "2026-08-20T09:04:42+09:00",
-  "started_at": "2026-08-20T09:04:42+09:00",
-  "heartbeat_at": "2026-08-20T09:11:30+09:00",
-  "last_progress_at": "2026-08-20T09:11:30+09:00",
+  "heartbeat_at": "2026-08-20T09:21:16+09:00",
+  "last_progress_at": "2026-08-20T09:19:11+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T090442JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T090442JST",
@@ -26,17 +25,16 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "69ed88cea0292e0c3dfb39e111fb2ff81b690dd6",
-  "latest_main_sha_before_heartbeat": "9d990e0a00fcdebf949d12741b69dca976000fe4",
+  "latest_main_sha_before_heartbeat": "39c6f8161e76694543c13cca1de86778e22aec77",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260820T065958JST",
     "last_heartbeat_at": "2026-08-20T07:14:55+09:00",
     "last_repository_progress_at": "2026-08-20T07:15:17+09:00",
     "last_external_progress_at": "2026-08-20T07:38:41+09:00",
-    "reason": "running heartbeat, latest main progress, and the latest known in-flight CI completion all exceeded stale_after_seconds; recovery started idempotently from latest main only"
+    "reason": "heartbeat, repository progress, and prior in-flight CI completion all exceeded stale threshold; recovered idempotently from latest main only"
   },
-  "current_work_unit": "Recovered stale execution from latest main only. PR232 exact head 22f5e68b1d083160d1dbe172572fd7e2758f2ebf passed full CI 32307731617 and merged unchanged as ce536f8202030036a0c198ffa125b626c419b74a. PR231 exact head 1e525453d534198977033dd31f6792ba4e03dbf5 passed full CI 32306921293 and merged unchanged as ae11e709dc643cc698f5c8686e8abc270fb14270. PR229 exact head de863252769cbd23862eb6b3ccc127deaad85f30 was retargeted directly to main after a two-file-only compare and fresh full CI 32316026589 is currently in pytest. PR230 exact head aa94fee13e3478ba7820e1a33a7157b478e6345f was retargeted to main only as a non-mergeable four-file combined diagnostic; fresh CI 32316151375 is currently in pytest under the verified 45-minute budget.",
+  "current_work_unit": "PR229 exact head de863252769cbd23862eb6b3ccc127deaad85f30 is retargeted to main and fresh full CI 32316026589 is in pytest. PR230 exact head aa94fee13e3478ba7820e1a33a7157b478e6345f is a non-mergeable combined diagnostic with CI 32316151375 in pytest; after PR229 integration it must reduce to exactly two recursive files and receive another fresh full CI. In parallel, stacked diagnostic PR233 exact head cb97bbb2a05e68b8f6033541409bf43efb464876 introduces and tests a data-derived same-shape literal-delta extrapolation frontier; CI 32316840236 is in progress and the PR is not merge-admissible before PR229/230 settle.",
   "recent_completed_units": [
-    {"pr": 228, "head_sha": "5bba8274589e4f9ef5583d0d251d0db2bf07db4f", "ci_run": 32296669349, "ci_conclusion": "success", "merge_sha": "cfd66a7711bdc58567aebc1b70340176868a59ea"},
     {"pr": 232, "head_sha": "22f5e68b1d083160d1dbe172572fd7e2758f2ebf", "ci_run": 32307731617, "ci_conclusion": "success", "merge_sha": "ce536f8202030036a0c198ffa125b626c419b74a"},
     {"pr": 231, "head_sha": "1e525453d534198977033dd31f6792ba4e03dbf5", "ci_run": 32306921293, "ci_conclusion": "success", "merge_sha": "ae11e709dc643cc698f5c8686e8abc270fb14270"}
   ],
@@ -46,26 +44,11 @@
   "unmerged_ci_run": 32316026589,
   "unmerged_ci_status": "in_progress_pytest",
   "additional_in_flight": [
-    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "base_pr": 229, "ci_run": 32316151375, "ci_status": "combined_four_file_diagnostic_in_progress_pytest", "merge_admissible": false},
-    {"pr": 223, "branch": "agi/evidence-frontier-iterated-expansion-r57", "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "ci_status": "completed_failure_379_passed_1_failed", "merge_admissible": false},
-    {"issue": 222, "purpose": "independent_external_evaluator_coordination", "status": "open", "comments": 0}
+    {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "merge_admissible": false, "purpose": "combined recursive diagnostic"},
+    {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "merge_admissible": false, "purpose": "observed learned-program schema extrapolation diagnostic"},
+    {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
   ],
-  "preserved_reconstruction_blobs": {
-    "pr229_src": "12b1b15209efc3edbfe089b198ddeed7712ee030",
-    "pr229_test": "611fcc71d44a607eb734a96c0903e87c225fbb21",
-    "pr230_src": "b22a0157ba7693358b9c6d67c921298178899a14",
-    "pr230_test": "5cd9baacea9ba221e7ea15693b72855b33f9c1b4"
-  },
-  "negative_evidence": [
-    {"pr": 223, "head_sha": "2a6c1cc8fb301e4ff73840810bf820161a6bed1d", "ci_run": 32273144513, "failure": "379 passed / 1 failed; fresh post-PR221 validation reproduced the sequence->sequence canonical numeric-character bounded-synthesis counterexample"},
-    {"pr": 224, "head_sha": "60fdfe91705c9c4dc568ae301649ecf7f528e1e6", "ci_run": 32251059159, "failure": "global -6 frontier change perturbed deterministic search and failed protected tests"},
-    {"pr": 224, "head_sha": "9fab4b0cd1e21518cbf638c40f317b7fe691cced", "ci_run": 32257602305, "failure": "append-only global +/-6 still changed unrelated frontier semantics and protected fail-closed behavior"},
-    {"pr": 229, "head_sha": "c5bfe4ac61d6cd97bc4f20b097827c9e20fcdb23", "ci_run": 32296827454, "failure": "381 passed / 1 failed; first expansion precommit schedule had fewer than two derived behaviors under the stacked base"},
-    {"pr": 229, "head_sha": "34a4a18900ec34411ab21cbe6a1f397466f8e397", "ci_run": 32301496143, "failure": "381 passed / 1 failed; fresh post-PR228 main reproduced fewer than two derived behaviors for persisted canonical sequence-character learned behavior"},
-    {"pr": 230, "head_sha": "ee3f5094cfc603939c51cdb4048c73b62376d319", "ci_run": 32297775217, "failure": "preliminary stacked run was cancelled after dependency branch reconstruction"},
-    {"ci_run": 32302510798, "failure_class": "infrastructure_timeout", "failure": "combined PR229+PR231 diagnostic pytest reached 75% and was cancelled near the old 30-minute limit; PR232 verified the 45-minute timeout-only repair"},
-    {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion; do not retrigger while blocked"}
-  ],
+  "retained_negative_evidence_ref": "agi/CONTINUATION.json",
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
@@ -84,6 +67,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe PR229 fresh full CI 32316026589 without duplication. Merge only unchanged exact-head success. If it succeeds, reduce PR230 to its exact two-file recursive delta relative to the resulting verified main and require a fresh full merge-admissible CI; current PR230 run 32316151375 is diagnostic only. If PR229 fails, retain exact head/run and repair only the demonstrated iterated-frontier boundary.",
-  "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
+  "next_falsifiable_milestone": "Observe PR229 fresh exact-head CI without duplication; merge only unchanged success. Then require PR230 to reduce to its two-file recursive delta on verified post-PR229 main and pass a new full exact-head CI. Use PR233 only as stacked diagnostic evidence until both dependencies integrate; if its data-derived schema primitive survives, reconstruct a clean two-file/validated campaign delta on the resulting verified main.",
+  "rule": "Fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries are not stop conditions. Internal evidence cannot satisfy the strict external AGI gate."
 }
