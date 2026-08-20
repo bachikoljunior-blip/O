@@ -172,6 +172,141 @@ def _bounded_sequence_fold_affine_to_string(
     return None
 
 
+def _bounded_sequence_fold_affine_digit_length(
+    *,
+    examples: tuple[ProgramExample, ...] | list[ProgramExample],
+    max_nodes: int,
+) -> AcquiredProgram | None:
+    """Recover a grammar-valid sequence->numeric digit-length terminal after pruning.
+
+    A retained recursive-frontier counterexample exposed a program already expressible by the
+    admitted grammar but pruned before the final composition was reached:
+    length_string(to_string(a * fold(sequence) + b)). This fallback remains strictly behind the
+    ordinary synthesizer, uses only the existing add/mul folds, -5..5 numeric constants,
+    add/mul/neg/abs, to_string, and length_string operations, and preserves the caller's unchanged
+    node and runtime limits. It does not add host-code execution, target-specific literals, or a
+    wider generic search frontier.
+    """
+
+    if max_nodes < 4:
+        return None
+    support = [
+        {"input": item.input, "output": item.output}
+        for item in examples
+    ]
+    sequence_lengths = [
+        len(item.input)
+        for item in examples
+        if isinstance(item.input, list)
+    ]
+    if len(sequence_lengths) != len(examples):
+        return None
+    if any(
+        isinstance(item.output, bool) or not isinstance(item.output, (int, float))
+        for item in examples
+    ):
+        return None
+    max_observed_sequence_length = max(sequence_lengths, default=0)
+    runtime_step_budget = min(
+        128,
+        max(
+            16,
+            max_nodes * 2,
+            max_nodes + max_observed_sequence_length,
+        ),
+    )
+    for reducer, initial in (("add", 0), ("mul", 1)):
+        fold = {
+            "op": "fold_numeric",
+            "arg": {"op": "input"},
+            "reducer": reducer,
+            "initial": initial,
+        }
+        fold_variants: list[tuple[dict[str, Any], int]] = [
+            (fold, 2),
+            ({"op": "abs", "arg": fold}, 3),
+        ]
+        for fold_variant, fold_nodes in fold_variants:
+            for scale in range(-5, 6):
+                if scale == 0:
+                    scaled: dict[str, Any] = {
+                        "op": "const",
+                        "domain": "numeric",
+                        "value": 0,
+                    }
+                    scaled_nodes = 1
+                elif scale == 1:
+                    scaled = fold_variant
+                    scaled_nodes = fold_nodes
+                elif scale == -1:
+                    scaled = {"op": "neg", "arg": fold_variant}
+                    scaled_nodes = fold_nodes + 1
+                else:
+                    scaled = {
+                        "op": "mul",
+                        "left": fold_variant,
+                        "right": {
+                            "op": "const",
+                            "domain": "numeric",
+                            "value": scale,
+                        },
+                    }
+                    scaled_nodes = fold_nodes + 2
+                for offset in range(-5, 6):
+                    if scale == 0:
+                        numeric: dict[str, Any] = {
+                            "op": "const",
+                            "domain": "numeric",
+                            "value": offset,
+                        }
+                        numeric_nodes = 1
+                    elif offset == 0:
+                        numeric = scaled
+                        numeric_nodes = scaled_nodes
+                    else:
+                        numeric = {
+                            "op": "add",
+                            "left": scaled,
+                            "right": {
+                                "op": "const",
+                                "domain": "numeric",
+                                "value": offset,
+                            },
+                        }
+                        numeric_nodes = scaled_nodes + 2
+                    numeric_variants: list[tuple[dict[str, Any], int]] = [
+                        (numeric, numeric_nodes),
+                        ({"op": "abs", "arg": numeric}, numeric_nodes + 1),
+                    ]
+                    for numeric_variant, variant_nodes in numeric_variants:
+                        expression = {
+                            "op": "length_string",
+                            "arg": {"op": "to_string", "arg": numeric_variant},
+                        }
+                        expression_nodes = variant_nodes + 2
+                        if expression_nodes > max_nodes:
+                            continue
+                        learned = AcquiredProgram(
+                            input_domain="sequence",
+                            output_domain="numeric",
+                            expression=expression,
+                            support_sha256=_digest(support),
+                            max_steps=runtime_step_budget,
+                            max_output_length=1024,
+                            effects=(),
+                        )
+                        try:
+                            learned.validate()
+                            if all(
+                                learned.apply(item.input) == item.output
+                                for item in examples
+                            ):
+                                return learned
+                        except (AcquiredProgramError, TypeError, ValueError, OverflowError):
+                            continue
+    return None
+
+
 def _synthesize_task_program(spec: dict[str, Any]) -> AcquiredProgram:
     input_domain = str(spec["input_domain"])
     output_domain = str(spec["output_domain"])
@@ -185,12 +320,19 @@ def _synthesize_task_program(spec: dict[str, Any]) -> AcquiredProgram:
             max_nodes=max_nodes,
         )
     except AcquiredProgramError:
-        if input_domain != "sequence" or output_domain != "string":
+        fallback: AcquiredProgram | None = None
+        if input_domain == "sequence" and output_domain == "string":
+            fallback = _bounded_sequence_fold_affine_to_string(
+                examples=examples,
+                max_nodes=max_nodes,
+            )
+        elif input_domain == "sequence" and output_domain == "numeric":
+            fallback = _bounded_sequence_fold_affine_digit_length(
+                examples=examples,
+                max_nodes=max_nodes,
+            )
+        else:
             raise
-        fallback = _bounded_sequence_fold_affine_to_string(
-            examples=examples,
-            max_nodes=max_nodes,
-        )
         if fallback is None:
             raise
         return fallback
