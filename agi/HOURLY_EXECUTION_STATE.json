@@ -2,22 +2,20 @@
   "schema_version": 2,
   "mode": "watchdog_repository_only_same_task_chat",
   "timezone": "Asia/Tokyo",
-  "status": "released",
+  "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-21T06:59:47+09:00",
+  "scheduler_fired_at": "2026-08-21T08:06:56+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-21T06:59:47+09:00",
-  "started_at": "2026-08-21T06:59:47+09:00",
-  "heartbeat_at": "2026-08-21T07:14:07+09:00",
-  "last_progress_at": "2026-08-21T07:14:07+09:00",
-  "released_at": "2026-08-21T07:14:07+09:00",
-  "release_reason": "No further non-conflicting local mutation is merge-safe until the already-started external exact-head CI runs return. Exact heads/runs, reconstruction blobs, negative evidence, and successor actions are persisted; do not duplicate those runs.",
+  "actual_started_at": "2026-08-21T08:06:56+09:00",
+  "started_at": "2026-08-21T08:06:56+09:00",
+  "heartbeat_at": "2026-08-21T08:06:56+09:00",
+  "last_progress_at": "2026-08-21T08:06:56+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260821T065947JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260821T065947JST",
-  "active_run_id": "run-self-applied-post-pr237-recovery-20260821-065947",
+  "execution_id": "o-agi-watchdog-recovery-20260821T080656JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260821T080656JST",
+  "active_run_id": "run-self-applied-post-release-recovery-20260821-080656",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -27,138 +25,34 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "11b947ff677f23b2b0c9c18968cda86bbac0af23",
-  "recovery_main_sha": "46e9ae640c9430e243c7e4e0099ac8dd33d9a10f",
-  "latest_main_sha_before_release_checkpoint": "46e9ae640c9430e243c7e4e0099ac8dd33d9a10f",
-  "latest_verified_merge_sha": "263444411a034c040e3e042e642cb6755ea585a9",
-  "report_path": "agi/reports/20260821T071407JST.md",
-  "current_work_unit": "Recovered the stale prior execution from latest main only; reconstructed PR230 recursive evidence-frontier, PR244 three-round retention, and PR238 explicit multi-session retention on recovered main; repaired PR245 diagnostic only at the demonstrated no-live-model ordinary-CI test boundary; added independent PR246 four-round retention falsification and stacked PR247 three-learning-session state-only retention. All current external CIs remain incomplete at release, so no unverified head was merged.",
-  "primary_unmerged": {
-    "pr": 230,
-    "branch": "agi/recursive-evidence-frontier-r65",
-    "head_sha": "fc45794040bab2a7dcb40c907fe4316f3b11cf5a",
-    "base_sha": "46e9ae640c9430e243c7e4e0099ac8dd33d9a10f",
-    "ci_run": 32422333224,
-    "ci_status_at_release": "in_progress_pytest",
-    "merge_admissible_after_release_checkpoint": false,
-    "reconstruction_blobs": {
-      "src/agi/recursive_evidence_frontier_growth.py": "b22a0157ba7693358b9c6d67c921298178899a14",
-      "tests/test_recursive_evidence_frontier_growth.py": "5cd9baacea9ba221e7ea15693b72855b33f9c1b4"
-    }
-  },
-  "additional_in_flight": [
-    {
-      "pr": 244,
-      "branch": "agi/generated-cross-round-three-round-r73-post237",
-      "head_sha": "e5c79bda697710296b8f4edf59424437ab901bba",
-      "base_sha": "46e9ae640c9430e243c7e4e0099ac8dd33d9a10f",
-      "ci_run": 32422357396,
-      "ci_status_at_release": "in_progress",
-      "merge_admissible_after_release_checkpoint": false,
-      "reconstruction_blob": "f2b4f83884dd49b8f3cc82d1b02a2c0d1b3e03c1"
-    },
-    {
-      "pr": 238,
-      "branch": "agi/generated-multisession-retention-r72",
-      "head_sha": "6928db9c62e73bee95f1e25f7c52e20124229185",
-      "base_sha": "46e9ae640c9430e243c7e4e0099ac8dd33d9a10f",
-      "ci_run": 32422412770,
-      "ci_status_at_release": "in_progress",
-      "merge_admissible_after_release_checkpoint": false,
-      "reconstruction_blobs": {
-        "src/agi/generated_multisession_functional_retention.py": "7b6213a72e9172146967f21bec6fc10eeb531263",
-        "tests/test_generated_multisession_functional_retention.py": "40f7e51a5b5ccab8360314601ab9775c165d4cc6"
-      }
-    },
-    {
-      "pr": 245,
-      "branch": "agi/observed-schema-binding-r74-diagnostic",
-      "head_sha": "f73fc76539a4fbabc9886e7db4c0d85b47e22da0",
-      "stack_base_pr": 230,
-      "stack_base_head_sha": "fc45794040bab2a7dcb40c907fe4316f3b11cf5a",
-      "ci_run": 32422513640,
-      "ci_status_at_release": "in_progress",
-      "merge_admissible": false,
-      "reconstruction_blobs_after_pr230": {
-        "src/agi/observed_schema_extrapolation.py": "fdb17a30b25f6575bde95e15c43cbe99b0acc298",
-        "tests/test_observed_schema_extrapolation.py": "3c6334ed21e2144c4efaf56795a3210c8d409e47"
-      }
-    },
-    {
-      "pr": 246,
-      "branch": "agi/generated-cross-round-four-round-r75",
-      "head_sha": "3ad285f998c654000d3cfc6851ae61059c931225",
-      "base_sha": "46e9ae640c9430e243c7e4e0099ac8dd33d9a10f",
-      "ci_run": 32422751076,
-      "ci_status_at_release": "in_progress",
-      "merge_admissible_after_release_checkpoint": false,
-      "reconstruction_blob": "13795da1be503f9b2163a24cdb8241d423cb2968"
-    },
-    {
-      "pr": 247,
-      "branch": "agi/generated-multisession-three-learning-r76",
-      "head_sha": "f82a3a5673c163bd2fb089e5dfc2d3cbd0ed90aa",
-      "stack_base_pr": 238,
-      "stack_base_head_sha": "6928db9c62e73bee95f1e25f7c52e20124229185",
-      "ci_run": 32423188917,
-      "ci_status_at_release": "queued",
-      "merge_admissible": false,
-      "reconstruction_blobs_after_pr238": {
-        "src/agi/generated_multisession_functional_retention.py": "fded443d7c2446d7b9bfc69950a5fb38fbaeb261",
-        "tests/test_generated_multisession_three_learning_rounds.py": "3f1e3e226c37f065567df94d53cbf1ac88e45a4b"
-      }
-    }
+  "latest_main_sha_at_start": "eab6631e281b1a7edd4056922ee46f1a225cb37d",
+  "current_work_unit": "Recovered the explicitly released prior lease from repository latest main only. Observed exact prior runs without duplication: PR230 CI 32422333224 cancelled (no semantic conclusion); PR244 CI 32422357396 success; PR238 CI 32422412770 success; PR245 diagnostic CI 32422513640 cancelled; PR246 CI 32422751076 success; PR247 stacked CI 32423188917 success. Because the prior release checkpoint advanced main after all those runs started, passing results are semantic evidence only. Reconstruct PR230 first on this recovery main and require fresh full exact-head CI; independently reconstruct passing PR238/244/246 deltas on this same verified base, with PR247 blocked until PR238 integrates.",
+  "observed_prior_runs": [
+    {"pr":230,"head_sha":"fc45794040bab2a7dcb40c907fe4316f3b11cf5a","ci_run":32422333224,"conclusion":"cancelled","merge_admissible":false},
+    {"pr":244,"head_sha":"e5c79bda697710296b8f4edf59424437ab901bba","ci_run":32422357396,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":238,"head_sha":"6928db9c62e73bee95f1e25f7c52e20124229185","ci_run":32422412770,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":245,"head_sha":"f73fc76539a4fbabc9886e7db4c0d85b47e22da0","ci_run":32422513640,"conclusion":"cancelled","merge_admissible":false},
+    {"pr":246,"head_sha":"3ad285f998c654000d3cfc6851ae61059c931225","ci_run":32422751076,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":247,"head_sha":"f82a3a5673c163bd2fb089e5dfc2d3cbd0ed90aa","ci_run":32423188917,"conclusion":"success","merge_admissible":false,"reason":"stacked on PR238 and pre-recovery-main"}
   ],
   "negative_evidence": [
-    {
-      "pr": 230,
-      "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7",
-      "ci_run": 32330171761,
-      "failure": "385 passed / 1 failed; reversed canonical numeric-character sequence target outside ordinary bounded synthesis"
-    },
-    {
-      "pr": 240,
-      "head_sha": "aeb2ce4bc538d432544f77bc0b84ca159c4b38f8",
-      "ci_run": 32361932655,
-      "failure": "386 passed / 1 failed; fewer than two derived behaviors for chars(reverse(to_string(numeric)))"
-    },
-    {
-      "pr": 230,
-      "head_sha": "e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b",
-      "ci_run": 32367064061,
-      "failure": "386 passed / 1 failed; reproduced optional-reverse derived-behavior boundary"
-    },
-    {
-      "pr": 238,
-      "head_sha": "8407e8989367351d6fe8eed7a28b5d1e8a1e8e86",
-      "ci_run": 32412141094,
-      "failure": "fresh validation cancelled; no semantic conclusion"
-    },
-    {
-      "pr": 245,
-      "head_sha": "d4ce9620444c6e0e2f7093471b146b7c1d04ab9f",
-      "ci_run": 32413435844,
-      "failure": "392 passed / 1 failed; direct end-to-end test constructed live ModelClient in ordinary CI without OPENAI_API_KEY/GITHUB_TOKEN; capability semantics unclassified by that run"
-    },
-    {
-      "workflow_run": 32094156066,
-      "failure_class": "provider_resource_exhaustion",
-      "failure": "Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"
-    }
+    {"pr":230,"head_sha":"315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7","ci_run":32330171761,"failure":"385 passed / 1 failed; reversed canonical numeric-character sequence target outside ordinary bounded synthesis"},
+    {"pr":240,"head_sha":"aeb2ce4bc538d432544f77bc0b84ca159c4b38f8","ci_run":32361932655,"failure":"386 passed / 1 failed; fewer than two derived behaviors for chars(reverse(to_string(numeric)))"},
+    {"pr":230,"head_sha":"e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b","ci_run":32367064061,"failure":"386 passed / 1 failed; reproduced optional-reverse derived-behavior boundary"},
+    {"pr":245,"head_sha":"d4ce9620444c6e0e2f7093471b146b7c1d04ab9f","ci_run":32413435844,"failure":"392 passed / 1 failed; direct end-to-end test constructed live ModelClient in ordinary CI without provider credentials; capability semantics unclassified"},
+    {"workflow_run":32094156066,"failure_class":"provider_resource_exhaustion","failure":"Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"}
   ],
-  "recovered_stale_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260821T050235JST",
-    "last_heartbeat_at": "2026-08-21T05:02:35+09:00",
-    "last_repository_progress_at": "2026-08-21T05:04:07+09:00",
-    "last_external_progress_at": "2026-08-21T06:02:55+09:00",
-    "reason": "running heartbeat, repository progress, and latest known external CI activity all exceeded stale_after_seconds; recovery resumed idempotently from latest main only"
+  "recovered_released_lease": {
+    "execution_id": "o-agi-watchdog-recovery-20260821T065947JST",
+    "released_at": "2026-08-21T07:14:07+09:00",
+    "reason": "prior execution explicitly released after persisting exact in-flight work; recovery resumed idempotently from latest main only"
   },
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "run_id": "run-self-applied-post-pr237-recovery-20260821-065947",
+    "run_id": "run-self-applied-post-release-recovery-20260821-080656",
     "checkpoint_persistence_pending": true,
-    "checkpoint_truthfulness": "native continual self-apply CLI could not be executed through the GitHub connector; no native Run/Episode is claimed for this connector execution",
+    "checkpoint_truthfulness": "native continual self-apply CLI has not been executed through this connector session; no native Run/Episode is claimed",
     "external_claim_admissible": false
   },
   "external_evidence_state": {
@@ -172,6 +66,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe CI runs 32422333224, 32422357396, 32422412770, 32422513640, 32422751076, and 32423188917 without duplicating them. Because this release checkpoint advances main after those runs started, a passing run is semantic evidence only: reconstruct its exact preserved delta on checkpoint latest main and require fresh full exact-head CI before merge. Prioritize PR230; after verified PR230 merge reconstruct PR245 exact source/test blobs and validate direct observed-schema extrapolation. Independently rebuild and validate PR238/244/246 as their results justify; PR247 remains blocked on PR238 merge and must then be reconstructed on post-PR238 verified main. Any failure is retained exactly and only its demonstrated boundary may be repaired.",
+  "next_falsifiable_milestone": "Reconstruct preserved PR230 source/test blobs on the recovery latest main, require fresh full exact-head CI, and merge only an unchanged passing head. In parallel reconstruct the semantically passing PR238/244/246 deltas on the same verified recovery main and require fresh exact-head CI. PR247 remains blocked until PR238 integrates; PR245 remains blocked until PR230 integrates. Preserve any exact failure and repair only its demonstrated boundary.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Released or stale lease may be recovered from repository latest main only. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never prove AGI. Internal evidence cannot satisfy the strict external AGI gate."
 }
