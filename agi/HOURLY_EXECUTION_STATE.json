@@ -2,7 +2,7 @@
   "schema_version": 2,
   "mode": "watchdog_repository_only_same_task_chat",
   "timezone": "Asia/Tokyo",
-  "status": "running",
+  "status": "released",
   "lease_mode": "watchdog_continuation",
   "scheduler_fired_at": "2026-08-20T12:56:16+09:00",
   "time_budget_enabled": false,
@@ -10,8 +10,9 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T12:56:16+09:00",
   "started_at": "2026-08-20T12:56:16+09:00",
-  "heartbeat_at": "2026-08-20T12:56:16+09:00",
-  "last_progress_at": "2026-08-20T12:56:16+09:00",
+  "heartbeat_at": "2026-08-20T13:01:00+09:00",
+  "last_progress_at": "2026-08-20T13:01:00+09:00",
+  "released_at": "2026-08-20T13:01:00+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T125616JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T125616JST",
@@ -26,34 +27,37 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "0985f3964154177dcd7a57c920f99acfe1a23d1b",
+  "latest_main_sha_before_release": "03a1d3764ca107861bbd8fd849102b7b856534cd",
   "recovered_released_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260820T115941JST",
     "released_at": "2026-08-20T12:10:24+09:00",
     "reason": "prior execution released after persisting exact CI continuation; current recovery resumed idempotently from latest main only"
   },
-  "current_work_unit": "PR229 exact head 6f3a1e86f21f443b92313eb9c632a7ecfac0cfb1 has completed fresh full CI 32326756624 with success. Verify the unchanged two-file diff and merge only that exact head; then reconstruct PR230's preserved two-file recursive delta on verified post-PR229 main and require fresh merge-admissible full CI. Prior stacked PR230 CI 32326798604 concluded cancelled and remains diagnostic-only evidence.",
+  "current_work_unit": "PR229 exact head 6f3a1e86f21f443b92313eb9c632a7ecfac0cfb1 passed fresh full CI 32326756624 and merged unchanged as d9c48990bf2416f7a2096e3857bfda385b708599. PR230 was reset/reconstructed directly on that verified main from preserved source/test blobs as exact head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7. Reopened PR230 has fresh full CI 32330171761 in progress; the old stacked diagnostic CI 32326798604 ended cancelled and remains non-merge evidence. PR233's Candidate-ID binding defect and exact repair plan are persisted in agi/CONTINUATION.json.",
+  "release_reason": "The current connector session cannot synchronously remain alive through long-running external full CI. All safe non-conflicting work available before the PR230 result was completed: PR229 was merged, PR230 was reconstructed and fresh CI started, the PR233 defect was reverified against the persisted iterated report, and exact continuation/report state was committed. No overlapping CI or external side effect was duplicated.",
   "recent_completed_units": [
     {"pr": 232, "head_sha": "22f5e68b1d083160d1dbe172572fd7e2758f2ebf", "ci_run": 32307731617, "ci_conclusion": "success", "merge_sha": "ce536f8202030036a0c198ffa125b626c419b74a"},
     {"pr": 231, "head_sha": "1e525453d534198977033dd31f6792ba4e03dbf5", "ci_run": 32306921293, "ci_conclusion": "success", "merge_sha": "ae11e709dc643cc698f5c8686e8abc270fb14270"},
-    {"pr": 234, "head_sha": "b6417d4daae495f68ff582b6fbea683583cf7b2e", "ci_run": 32323618763, "ci_conclusion": "success", "merge_sha": "f26144734d97477791eb85ca36e5689d7ba3a732"}
+    {"pr": 234, "head_sha": "b6417d4daae495f68ff582b6fbea683583cf7b2e", "ci_run": 32323618763, "ci_conclusion": "success", "merge_sha": "f26144734d97477791eb85ca36e5689d7ba3a732"},
+    {"pr": 229, "head_sha": "6f3a1e86f21f443b92313eb9c632a7ecfac0cfb1", "ci_run": 32326756624, "ci_conclusion": "success", "merge_sha": "d9c48990bf2416f7a2096e3857bfda385b708599"}
   ],
-  "unmerged_pr": 229,
-  "unmerged_branch": "agi/evidence-frontier-iterated-expansion-r64",
-  "unmerged_head_sha": "6f3a1e86f21f443b92313eb9c632a7ecfac0cfb1",
-  "unmerged_ci_run": 32326756624,
-  "unmerged_ci_status": "success_exact_head_verified",
+  "unmerged_pr": 230,
+  "unmerged_branch": "agi/recursive-evidence-frontier-r65",
+  "unmerged_head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7",
+  "unmerged_ci_run": 32330171761,
+  "unmerged_ci_status": "in_progress_at_release",
   "additional_in_flight": [
-    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "4c558a347b56368a4dce9b78052f17251fd73936", "base_pr": 229, "ci_run": 32326798604, "ci_status": "cancelled_diagnostic_only", "merge_admissible": false},
-    {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "known_defect": "full campaign reads first four Candidate IDs from recursive report instead of persisted iterated prerequisite"},
+    {"pr": 233, "branch": "agi/observed-schema-extrapolation-r68", "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "known_defect": "first four prerequisite Candidate IDs must come from observed['iterated']; only the fifth comes from recursive['new_candidate_id']"},
     {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
   ],
   "retained_negative_evidence_ref": "agi/CONTINUATION.json",
+  "report_path": "agi/reports/20260820T125900JST.md",
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
     "run_id": "run-self-applied-pr229-recovery-20260820-125616",
     "checkpoint_persistence_pending": true,
-    "checkpoint_truthfulness": "native continual self-apply CLI has not been executed in this connector session; no native Run/Episode is claimed",
+    "checkpoint_truthfulness": "native continual self-apply CLI was not executed in this connector session; repository continuation was persisted directly and no native Run/Episode is claimed",
     "external_claim_admissible": false
   },
   "external_evidence_state": {
@@ -67,6 +71,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Merge only unchanged PR229 head after verified success, reconstruct PR230 exact preserved recursive source/test delta on resulting verified main, require fresh full exact-head CI, and on failure retain exact head/run and repair only the demonstrated recursive-frontier boundary. After PR230 settles, repair PR233 Candidate-ID binding and add direct end-to-end campaign regression before schema-extrapolation integration.",
+  "next_falsifiable_milestone": "First observe PR230 exact-head CI 32330171761 without duplicating it. Merge only unchanged head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7 after success and after verifying the two-file diff. On failure, retain exact head/run and repair only the demonstrated recursive-frontier boundary. After PR230 settles, reconstruct PR233 on verified main, fix the persisted-iterated Candidate-ID binding, add direct end-to-end run_observed_schema_extrapolation coverage, and require fresh full exact-head CI.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
