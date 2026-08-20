@@ -2,21 +2,20 @@
   "schema_version": 2,
   "mode": "watchdog_repository_only_same_task_chat",
   "timezone": "Asia/Tokyo",
-  "status": "released",
+  "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-20T12:56:16+09:00",
+  "scheduler_fired_at": "2026-08-20T14:05:04+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-20T12:56:16+09:00",
-  "started_at": "2026-08-20T12:56:16+09:00",
-  "heartbeat_at": "2026-08-20T13:01:00+09:00",
-  "last_progress_at": "2026-08-20T13:01:00+09:00",
-  "released_at": "2026-08-20T13:01:00+09:00",
+  "actual_started_at": "2026-08-20T14:05:04+09:00",
+  "started_at": "2026-08-20T14:05:04+09:00",
+  "heartbeat_at": "2026-08-20T14:05:04+09:00",
+  "last_progress_at": "2026-08-20T14:05:04+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260820T125616JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260820T125616JST",
-  "active_run_id": "run-self-applied-pr229-recovery-20260820-125616",
+  "execution_id": "o-agi-watchdog-recovery-20260820T140504JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260820T140504JST",
+  "active_run_id": "run-self-applied-pr230-recovery-20260820-140504",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -26,15 +25,13 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "0985f3964154177dcd7a57c920f99acfe1a23d1b",
-  "latest_main_sha_before_release": "03a1d3764ca107861bbd8fd849102b7b856534cd",
+  "latest_main_sha_at_start": "2088f2107af9fbf3f0859ed125e2051a96d370d9",
   "recovered_released_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260820T115941JST",
-    "released_at": "2026-08-20T12:10:24+09:00",
-    "reason": "prior execution released after persisting exact CI continuation; current recovery resumed idempotently from latest main only"
+    "execution_id": "o-agi-watchdog-recovery-20260820T125616JST",
+    "released_at": "2026-08-20T13:01:00+09:00",
+    "reason": "prior execution explicitly released after persisting exact PR230 CI continuation; current recovery resumed idempotently from latest main only"
   },
-  "current_work_unit": "PR229 exact head 6f3a1e86f21f443b92313eb9c632a7ecfac0cfb1 passed fresh full CI 32326756624 and merged unchanged as d9c48990bf2416f7a2096e3857bfda385b708599. PR230 was reset/reconstructed directly on that verified main from preserved source/test blobs as exact head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7. Reopened PR230 has fresh full CI 32330171761 in progress; the old stacked diagnostic CI 32326798604 ended cancelled and remains non-merge evidence. PR233's Candidate-ID binding defect and exact repair plan are persisted in agi/CONTINUATION.json.",
-  "release_reason": "The current connector session cannot synchronously remain alive through long-running external full CI. All safe non-conflicting work available before the PR230 result was completed: PR229 was merged, PR230 was reconstructed and fresh CI started, the PR233 defect was reverified against the persisted iterated report, and exact continuation/report state was committed. No overlapping CI or external side effect was duplicated.",
+  "current_work_unit": "Observed PR230 exact head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7 full CI 32330171761 completed failure: 385 passed / 1 failed. The failing path is the iterated prerequisite, where a sequence->sequence canonical numeric-character target could not be synthesized. Preserve this exact head/run as negative evidence and repair only that demonstrated bounded-synthesis boundary without weakening existing validation.",
   "recent_completed_units": [
     {"pr": 232, "head_sha": "22f5e68b1d083160d1dbe172572fd7e2758f2ebf", "ci_run": 32307731617, "ci_conclusion": "success", "merge_sha": "ce536f8202030036a0c198ffa125b626c419b74a"},
     {"pr": 231, "head_sha": "1e525453d534198977033dd31f6792ba4e03dbf5", "ci_run": 32306921293, "ci_conclusion": "success", "merge_sha": "ae11e709dc643cc698f5c8686e8abc270fb14270"},
@@ -45,19 +42,22 @@
   "unmerged_branch": "agi/recursive-evidence-frontier-r65",
   "unmerged_head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7",
   "unmerged_ci_run": 32330171761,
-  "unmerged_ci_status": "in_progress_at_release",
+  "unmerged_ci_status": "failure_385_passed_1_failed",
   "additional_in_flight": [
     {"pr": 233, "branch": "agi/observed-schema-extrapolation-r68", "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "known_defect": "first four prerequisite Candidate IDs must come from observed['iterated']; only the fifth comes from recursive['new_candidate_id']"},
     {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
   ],
-  "retained_negative_evidence_ref": "agi/CONTINUATION.json",
-  "report_path": "agi/reports/20260820T125900JST.md",
+  "negative_evidence": [
+    {"pr": 230, "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "failure": "385 passed / 1 failed; iterated prerequisite selected a sequence->sequence canonical numeric-character target that ordinary bounded synthesis could not match"},
+    {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "failure": "recursive campaign exposed sequence->numeric digit-length-of-affine-sum behavior that ordinary bounded synthesis could not rediscover"},
+    {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"}
+  ],
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "run_id": "run-self-applied-pr229-recovery-20260820-125616",
+    "run_id": "run-self-applied-pr230-recovery-20260820-140504",
     "checkpoint_persistence_pending": true,
-    "checkpoint_truthfulness": "native continual self-apply CLI was not executed in this connector session; repository continuation was persisted directly and no native Run/Episode is claimed",
+    "checkpoint_truthfulness": "native continual self-apply CLI has not yet been executed in this connector session; no native Run/Episode is claimed until persisted",
     "external_claim_admissible": false
   },
   "external_evidence_state": {
@@ -71,6 +71,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "First observe PR230 exact-head CI 32330171761 without duplicating it. Merge only unchanged head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7 after success and after verifying the two-file diff. On failure, retain exact head/run and repair only the demonstrated recursive-frontier boundary. After PR230 settles, reconstruct PR233 on verified main, fix the persisted-iterated Candidate-ID binding, add direct end-to-end run_observed_schema_extrapolation coverage, and require fresh full exact-head CI.",
+  "next_falsifiable_milestone": "Repair only the newly demonstrated sequence->sequence canonical numeric-character synthesis boundary exposed by PR230 CI 32330171761. Require focused regression coverage plus fresh full exact-head CI on a new PR230 head; merge only an unchanged passing head. If that settles, continue to PR233 reconstruction/binding repair and direct end-to-end schema-extrapolation coverage.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
