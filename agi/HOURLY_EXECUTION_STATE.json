@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T14:05:04+09:00",
   "started_at": "2026-08-20T14:05:04+09:00",
-  "heartbeat_at": "2026-08-20T14:05:04+09:00",
-  "last_progress_at": "2026-08-20T14:05:04+09:00",
+  "heartbeat_at": "2026-08-20T14:13:00+09:00",
+  "last_progress_at": "2026-08-20T14:13:00+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T140504JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T140504JST",
@@ -31,24 +31,24 @@
     "released_at": "2026-08-20T13:01:00+09:00",
     "reason": "prior execution explicitly released after persisting exact PR230 CI continuation; current recovery resumed idempotently from latest main only"
   },
-  "current_work_unit": "Observed PR230 exact head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7 full CI 32330171761 completed failure: 385 passed / 1 failed. The failing path is the iterated prerequisite, where a sequence->sequence canonical numeric-character target could not be synthesized. Preserve this exact head/run as negative evidence and repair only that demonstrated bounded-synthesis boundary without weakening existing validation.",
+  "current_work_unit": "PR230 exact head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7 failed full CI 32330171761 at 385 passed / 1 failed. The exact failure is retained. PR235 head 8506a0702f9d48332a04e0948d002bdfad747fe0 adds a fallback-only sequence->sequence affine numeric-character composer using only already admitted operations and a focused reversed-character regression. Fresh full CI 32334486424 is in progress. Do not merge PR230 or PR235 until the relevant unchanged exact head passes.",
   "recent_completed_units": [
     {"pr": 232, "head_sha": "22f5e68b1d083160d1dbe172572fd7e2758f2ebf", "ci_run": 32307731617, "ci_conclusion": "success", "merge_sha": "ce536f8202030036a0c198ffa125b626c419b74a"},
     {"pr": 231, "head_sha": "1e525453d534198977033dd31f6792ba4e03dbf5", "ci_run": 32306921293, "ci_conclusion": "success", "merge_sha": "ae11e709dc643cc698f5c8686e8abc270fb14270"},
     {"pr": 234, "head_sha": "b6417d4daae495f68ff582b6fbea683583cf7b2e", "ci_run": 32323618763, "ci_conclusion": "success", "merge_sha": "f26144734d97477791eb85ca36e5689d7ba3a732"},
     {"pr": 229, "head_sha": "6f3a1e86f21f443b92313eb9c632a7ecfac0cfb1", "ci_run": 32326756624, "ci_conclusion": "success", "merge_sha": "d9c48990bf2416f7a2096e3857bfda385b708599"}
   ],
-  "unmerged_pr": 230,
-  "unmerged_branch": "agi/recursive-evidence-frontier-r65",
-  "unmerged_head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7",
-  "unmerged_ci_run": 32330171761,
-  "unmerged_ci_status": "failure_385_passed_1_failed",
-  "additional_in_flight": [
-    {"pr": 233, "branch": "agi/observed-schema-extrapolation-r68", "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "known_defect": "first four prerequisite Candidate IDs must come from observed['iterated']; only the fifth comes from recursive['new_candidate_id']"},
-    {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
+  "unmerged_pr": 235,
+  "unmerged_branch": "agi/sequence-affine-char-reverse-r69",
+  "unmerged_head_sha": "8506a0702f9d48332a04e0948d002bdfad747fe0",
+  "unmerged_ci_run": 32334486424,
+  "unmerged_ci_status": "in_progress",
+  "blocked_prs": [
+    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "ci_status": "failure_385_passed_1_failed", "merge_admissible": false, "next": "reconstruct on verified post-PR235 main if PR235 passes"},
+    {"pr": 233, "branch": "agi/observed-schema-extrapolation-r68", "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "known_defect": "first four prerequisite Candidate IDs must come from observed['iterated']; only the fifth comes from recursive['new_candidate_id']"}
   ],
   "negative_evidence": [
-    {"pr": 230, "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "failure": "385 passed / 1 failed; iterated prerequisite selected a sequence->sequence canonical numeric-character target that ordinary bounded synthesis could not match"},
+    {"pr": 230, "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "failure": "385 passed / 1 failed; iterated prerequisite selected a sequence->sequence reversed canonical numeric-character target that ordinary bounded synthesis could not match"},
     {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "failure": "recursive campaign exposed sequence->numeric digit-length-of-affine-sum behavior that ordinary bounded synthesis could not rediscover"},
     {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"}
   ],
@@ -71,6 +71,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair only the newly demonstrated sequence->sequence canonical numeric-character synthesis boundary exposed by PR230 CI 32330171761. Require focused regression coverage plus fresh full exact-head CI on a new PR230 head; merge only an unchanged passing head. If that settles, continue to PR233 reconstruction/binding repair and direct end-to-end schema-extrapolation coverage.",
+  "next_falsifiable_milestone": "Observe PR235 exact-head CI 32334486424 without duplicating it. If unchanged head 8506a0702f9d48332a04e0948d002bdfad747fe0 passes, verify the two-file diff and merge. Then reconstruct PR230's preserved two-file recursive delta on verified post-PR235 main and require fresh full exact-head CI. If PR235 fails, retain the exact head/run and repair only the newly demonstrated boundary.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
