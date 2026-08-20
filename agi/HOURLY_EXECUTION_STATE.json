@@ -2,7 +2,7 @@
   "schema_version": 2,
   "mode": "watchdog_repository_only_same_task_chat",
   "timezone": "Asia/Tokyo",
-  "status": "running",
+  "status": "released",
   "lease_mode": "watchdog_continuation",
   "scheduler_fired_at": "2026-08-20T14:05:04+09:00",
   "time_budget_enabled": false,
@@ -10,8 +10,10 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T14:05:04+09:00",
   "started_at": "2026-08-20T14:05:04+09:00",
-  "heartbeat_at": "2026-08-20T14:16:00+09:00",
-  "last_progress_at": "2026-08-20T14:16:00+09:00",
+  "heartbeat_at": "2026-08-20T14:19:00+09:00",
+  "last_progress_at": "2026-08-20T14:18:33+09:00",
+  "released_at": "2026-08-20T14:19:00+09:00",
+  "release_reason": "Current connector execution cannot synchronously carry three long-running external full-CI jobs to completion. Exact continuation, failed evidence, in-flight heads/runs, dependencies, and next actions were persisted before release. No CI was duplicated and no unverified change was merged.",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T140504JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T140504JST",
@@ -26,19 +28,26 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "2088f2107af9fbf3f0859ed125e2051a96d370d9",
-  "current_work_unit": "PR230 exact head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7 failed full CI 32330171761 at 385 passed / 1 failed and remains retained negative evidence. PR235 exact head 8506a0702f9d48332a04e0948d002bdfad747fe0 is validating a fallback-only reversed affine numeric-character synthesis repair in fresh full CI 32334486424. PR236 exact head afd26eefa83ad20607be034f743524637ff6d09d is a non-merge stacked diagnostic of the preserved recursive milestone above PR235 with CI 32334686916. While those external validations run, PR237 exact head 510b7d90964bfb01c58e83fa5b8cb7c24a0ac2cd independently reconstructs the previously staged two-round crash-recovered generated-skill functional-retention milestone directly on current main; fresh full CI 32334935885 is in progress. No head is merge-admissible until its required exact-head validation passes under the repository freshness rules.",
-  "unmerged_pr": 235,
-  "unmerged_branch": "agi/sequence-affine-char-reverse-r69",
-  "unmerged_head_sha": "8506a0702f9d48332a04e0948d002bdfad747fe0",
-  "unmerged_ci_run": 32334486424,
-  "unmerged_ci_status": "in_progress",
+  "latest_main_sha_before_release": "26013c5d62855b0a0b554efe3e485e47496b56f0",
+  "report_path": "agi/reports/20260820T141700JST.md",
+  "latest_report_pointer": "agi/LATEST_HOURLY_REPORT.json",
+  "current_work_unit": "PR230 exact head 315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7 failed full CI 32330171761 at 385 passed / 1 failed and remains retained negative evidence. PR235 exact head 8506a0702f9d48332a04e0948d002bdfad747fe0 validates a fallback-only reversed affine numeric-character synthesis repair in full CI 32334486424. PR236 exact head afd26eefa83ad20607be034f743524637ff6d09d is a diagnostic-only preserved PR230 stack above PR235 with preliminary CI 32334686916. PR237 exact head 510b7d90964bfb01c58e83fa5b8cb7c24a0ac2cd independently validates two-round crash-recovered generated-skill functional retention on current-main code with full CI 32334935885. All three CI runs were still in progress at release.",
+  "primary_unmerged": {"pr": 235, "branch": "agi/sequence-affine-char-reverse-r69", "head_sha": "8506a0702f9d48332a04e0948d002bdfad747fe0", "ci_run": 32334486424, "ci_status": "in_progress", "merge_admissible": "only_after_fresh_exact_head_success_and_base_freshness_check"},
   "additional_in_flight": [
     {"pr": 236, "branch": "agi/recursive-evidence-frontier-r70-diagnostic", "head_sha": "afd26eefa83ad20607be034f743524637ff6d09d", "ci_run": 32334686916, "ci_status": "in_progress", "merge_admissible": false, "purpose": "preliminary recursive diagnostic only; must be reconstructed after PR235 integration"},
-    {"pr": 237, "branch": "agi/generated-cross-round-functional-retention-r71", "head_sha": "510b7d90964bfb01c58e83fa5b8cb7c24a0ac2cd", "ci_run": 32334935885, "ci_status": "in_progress", "merge_admissible": "only_if_unchanged_exact_head_passes_and_base_freshness_is_revalidated", "purpose": "two distinct crash-recovered generated learning rounds with fresh state-only functional replay, no caller Candidate IDs, no forgetting, and remaining fail-closed gap"},
-    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "ci_status": "failure_385_passed_1_failed", "merge_admissible": false, "next": "reconstruct on verified post-PR235 main"},
+    {"pr": 237, "branch": "agi/generated-cross-round-functional-retention-r71", "head_sha": "510b7d90964bfb01c58e83fa5b8cb7c24a0ac2cd", "ci_run": 32334935885, "ci_status": "in_progress", "merge_admissible": "only_after_unchanged_exact_head_success_and_base_freshness_check", "purpose": "two distinct crash-recovered generated learning rounds with fresh state-only functional replay, no caller Candidate IDs, no forgetting, and a remaining fail-closed gap"},
+    {"pr": 230, "branch": "agi/recursive-evidence-frontier-r65", "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "ci_status": "failure_385_passed_1_failed", "merge_admissible": false, "next": "reconstruct preserved two-file delta on verified post-PR235 main"},
     {"pr": 233, "branch": "agi/observed-schema-extrapolation-r68", "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "known_defect": "first four prerequisite Candidate IDs must come from observed['iterated']; only the fifth comes from recursive['new_candidate_id']"},
     {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
   ],
+  "preserved_reconstruction_blobs": {
+    "pr230_src": "b22a0157ba7693358b9c6d67c921298178899a14",
+    "pr230_test": "5cd9baacea9ba221e7ea15693b72855b33f9c1b4",
+    "pr233_src": "a57b5fecfda0fb9768e205e48f3d812084d8bf0c",
+    "pr233_test": "ab0aa39777a624f20545f1541b2e4e37f8a10459",
+    "pr237_src": "fdffd2caf1c04c00eb5226f9f868acb81b96a53e",
+    "pr237_test": "32ef5ebd330528ac44cf42f2b8904c7493c550d5"
+  },
   "negative_evidence": [
     {"pr": 230, "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7", "ci_run": 32330171761, "failure": "385 passed / 1 failed; iterated prerequisite selected a sequence->sequence reversed canonical numeric-character target that ordinary bounded synthesis could not match"},
     {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "failure": "recursive campaign exposed sequence->numeric digit-length-of-affine-sum behavior that ordinary bounded synthesis could not rediscover"},
@@ -49,7 +58,7 @@
     "policy_path": "agi/SELF_APPLICATION.md",
     "run_id": "run-self-applied-pr230-recovery-20260820-140504",
     "checkpoint_persistence_pending": true,
-    "checkpoint_truthfulness": "native continual self-apply CLI has not yet been executed in this connector session; no native Run/Episode is claimed until persisted",
+    "checkpoint_truthfulness": "native continual self-apply CLI was not executed in this connector session; no native Run/Episode is claimed",
     "external_claim_admissible": false
   },
   "external_evidence_state": {
@@ -63,6 +72,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe PR235 CI 32334486424, PR236 diagnostic CI 32334686916, and independent PR237 CI 32334935885 without duplicating any run. Merge no failed, moved, stale-base, or diagnostic-only head. If PR235 passes, reconstruct its two-file delta against latest main if strict freshness requires it, integrate only a fresh unchanged passing head, then reconstruct PR230 and require fresh full exact-head CI. If PR237 exposes a current-main regression, retain the exact head/run and repair only that demonstrated crash-recovery/retention boundary. If PR237 passes with an admissibly fresh base, merge it and immediately select the next high-value no-forgetting/transfer milestone.",
-  "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
+  "next_falsifiable_milestone": "First observe PR235 CI 32334486424, PR236 diagnostic CI 32334686916, and PR237 CI 32334935885 without duplicating any run. Preserve every failed exact head/run. Merge no moved, stale-base, failed, or diagnostic-only head. If PR235 passes, reconstruct its same two-file repair on latest verified main if base freshness requires it and require fresh full exact-head CI before merge; then reconstruct PR230 from preserved blobs on verified post-PR235 main and require fresh full exact-head CI. If PR237 passes, perform the same strict base-freshness check/reconstruction before merge. After PR230 settles, reconstruct/fix PR233 using the persisted-iterated Candidate-ID binding and direct end-to-end schema-extrapolation regression. Continue immediately to the next high-value falsifiable transfer/no-forgetting/autonomy milestone.",
+  "rule": "Released lease permits the next watchdog to resume from latest main. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never by themselves establish completion. Internal evidence cannot satisfy the strict external AGI gate."
 }
