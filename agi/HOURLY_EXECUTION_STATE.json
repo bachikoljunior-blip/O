@@ -4,17 +4,18 @@
   "timezone": "Asia/Tokyo",
   "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-20T09:04:42+09:00",
+  "scheduler_fired_at": "2026-08-20T10:50:28+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-20T09:04:42+09:00",
-  "heartbeat_at": "2026-08-20T09:21:16+09:00",
-  "last_progress_at": "2026-08-20T09:19:11+09:00",
+  "actual_started_at": "2026-08-20T10:50:28+09:00",
+  "started_at": "2026-08-20T10:50:28+09:00",
+  "heartbeat_at": "2026-08-20T10:50:28+09:00",
+  "last_progress_at": "2026-08-20T10:50:28+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260820T090442JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260820T090442JST",
-  "active_run_id": "run-self-applied-pr229-recovery-20260820-090442",
+  "execution_id": "o-agi-watchdog-recovery-20260820T105028JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260820T105028JST",
+  "active_run_id": "run-self-applied-pr230-recovery-20260820-105028",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -24,16 +25,16 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "69ed88cea0292e0c3dfb39e111fb2ff81b690dd6",
-  "latest_main_sha_before_heartbeat": "39c6f8161e76694543c13cca1de86778e22aec77",
+  "latest_main_sha_at_start": "eaccfb1c8e29407df9f0a1b291e00dbffc5d46db",
+  "latest_main_sha_before_heartbeat": "eaccfb1c8e29407df9f0a1b291e00dbffc5d46db",
   "recovered_stale_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260820T065958JST",
-    "last_heartbeat_at": "2026-08-20T07:14:55+09:00",
-    "last_repository_progress_at": "2026-08-20T07:15:17+09:00",
-    "last_external_progress_at": "2026-08-20T07:38:41+09:00",
-    "reason": "heartbeat, repository progress, and prior in-flight CI completion all exceeded stale threshold; recovered idempotently from latest main only"
+    "execution_id": "o-agi-watchdog-recovery-20260820T090442JST",
+    "last_heartbeat_at": "2026-08-20T09:21:16+09:00",
+    "last_repository_progress_at": "2026-08-20T09:21:32+09:00",
+    "last_external_progress_at": "2026-08-20T09:52:10+09:00",
+    "reason": "running heartbeat, latest-main progress, and all known in-flight workflow activity exceeded stale_after_seconds; recovered idempotently from latest main only"
   },
-  "current_work_unit": "PR229 exact head de863252769cbd23862eb6b3ccc127deaad85f30 is retargeted to main and fresh full CI 32316026589 is in pytest. PR230 exact head aa94fee13e3478ba7820e1a33a7157b478e6345f is a non-mergeable combined diagnostic with CI 32316151375 in pytest; after PR229 integration it must reduce to exactly two recursive files and receive another fresh full CI. In parallel, stacked diagnostic PR233 exact head cb97bbb2a05e68b8f6033541409bf43efb464876 introduces and tests a data-derived same-shape literal-delta extrapolation frontier; CI 32316840236 is in progress and the PR is not merge-admissible before PR229/230 settle.",
+  "current_work_unit": "Recovered stale execution after observing PR229 CI 32316026589 cancelled, PR230 diagnostic CI 32316151375 failed at 383 passed / 1 failed, and PR233 CI 32316840236 cancelled. PR230's retained counterexample is a bounded sequence->numeric target whose exact behavior is length(chars(to_string(a * sum(sequence) + b))); the generic synthesis frontier exhausted without rediscovering that 9-node terminal. Repair only this demonstrated terminal behind the unchanged legacy frontier, add focused fail-closed regression tests, then require fresh full exact-head CI before integration. Revalidate PR229 and reconstruct PR230 only after the repair integrates.",
   "recent_completed_units": [
     {"pr": 232, "head_sha": "22f5e68b1d083160d1dbe172572fd7e2758f2ebf", "ci_run": 32307731617, "ci_conclusion": "success", "merge_sha": "ce536f8202030036a0c198ffa125b626c419b74a"},
     {"pr": 231, "head_sha": "1e525453d534198977033dd31f6792ba4e03dbf5", "ci_run": 32306921293, "ci_conclusion": "success", "merge_sha": "ae11e709dc643cc698f5c8686e8abc270fb14270"}
@@ -42,17 +43,23 @@
   "unmerged_branch": "agi/evidence-frontier-iterated-expansion-r64",
   "unmerged_head_sha": "de863252769cbd23862eb6b3ccc127deaad85f30",
   "unmerged_ci_run": 32316026589,
-  "unmerged_ci_status": "in_progress_pytest",
+  "unmerged_ci_status": "cancelled_requires_fresh_revalidation_after_repair",
   "additional_in_flight": [
-    {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "merge_admissible": false, "purpose": "combined recursive diagnostic"},
-    {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "merge_admissible": false, "purpose": "observed learned-program schema extrapolation diagnostic"},
+    {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "ci_status": "failure", "merge_admissible": false, "purpose": "combined recursive diagnostic; retained sequence-to-numeric synthesis counterexample"},
+    {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "purpose": "observed learned-program schema extrapolation diagnostic"},
     {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
+  ],
+  "negative_evidence": [
+    {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "failure": "383 passed / 1 failed; recursive campaign exposed sequence->numeric digit-length-of-affine-sum target that the unchanged bounded synthesizer could not rediscover"},
+    {"pr": 229, "head_sha": "de863252769cbd23862eb6b3ccc127deaad85f30", "ci_run": 32316026589, "failure": "CI cancelled before semantic conclusion; exact head remains unverified"},
+    {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "failure": "stacked diagnostic CI cancelled; no merge-admissible conclusion"},
+    {"workflow_run": 32094156066, "failure_class": "provider_resource_exhaustion", "failure": "Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"}
   ],
   "retained_negative_evidence_ref": "agi/CONTINUATION.json",
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "run_id": "run-self-applied-pr229-recovery-20260820-090442",
+    "run_id": "run-self-applied-pr230-recovery-20260820-105028",
     "checkpoint_persistence_pending": true,
     "external_claim_admissible": false
   },
@@ -67,6 +74,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe PR229 fresh exact-head CI without duplication; merge only unchanged success. Then require PR230 to reduce to its two-file recursive delta on verified post-PR229 main and pass a new full exact-head CI. Use PR233 only as stacked diagnostic evidence until both dependencies integrate; if its data-derived schema primitive survives, reconstruct a clean two-file/validated campaign delta on the resulting verified main.",
-  "rule": "Fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries are not stop conditions. Internal evidence cannot satisfy the strict external AGI gate."
+  "next_falsifiable_milestone": "Add a bounded demonstration-derived sequence->numeric terminal for length(chars(to_string(a * sum(sequence) + b))) only after the unchanged legacy synthesis frontier is exhausted; prove exact positive reconstruction and nearby non-matching fail-closed behavior, run full exact-head CI, and merge only unchanged success. Then reconstruct/revalidate PR229 and PR230 on the verified repaired main.",
+  "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
