@@ -1,0 +1,139 @@
+name: repair-reverse-char-derived-frontier
+
+on:
+  push:
+    branches:
+      - 'agi/reverse-char-derived-frontier-r73'
+    paths:
+      - '.github/workflows/repair-reverse-char-derived-frontier.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e '.[test]'
+      - name: Apply exact demonstrated frontier repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/agi/crossdomain_failure_derived_target.py')
+          text = path.read_text(encoding='utf-8')
+          old_render = '''    rendered = base.get("arg")
+    if not isinstance(rendered, dict) or rendered.get("op") != "to_string":
+        return []
+    inner = rendered.get("arg")
+'''
+          new_render = '''    rendered = base.get("arg")
+    reverse_rendered = False
+    if isinstance(rendered, dict) and rendered.get("op") == "reverse":
+        rendered = rendered.get("arg")
+        reverse_rendered = True
+    if not isinstance(rendered, dict) or rendered.get("op") != "to_string":
+        return []
+    inner = rendered.get("arg")
+'''
+          old_return = '''    return [
+        {"op": "chars", "arg": {"op": "to_string", "arg": variant}}
+        for variant in variants
+    ]
+'''
+          new_return = '''    expressions: list[dict[str, Any]] = []
+    for variant in variants:
+        rendered_variant: dict[str, Any] = {"op": "to_string", "arg": variant}
+        if reverse_rendered:
+            rendered_variant = {"op": "reverse", "arg": rendered_variant}
+        expressions.append({"op": "chars", "arg": rendered_variant})
+    return expressions
+'''
+          if text.count(old_render) != 1:
+              raise SystemExit('expected exactly one canonical render guard')
+          if text.count(old_return) != 1:
+              raise SystemExit('expected exactly one canonical fallback return')
+          text = text.replace(old_render, new_render, 1).replace(old_return, new_return, 1)
+          path.write_text(text, encoding='utf-8')
+
+          test = Path('tests/test_reverse_sequence_char_derived_frontier.py')
+          test.write_text('''from __future__ import annotations
+
+from agi.acquired_programs import ProgramExample
+from agi.crossdomain_failure_derived_target import (
+    _candidate_expressions,
+    _precommit_schedule,
+    _target_from_expression,
+)
+from agi.heterogeneous_retention_campaign import _bounded_sequence_fold_affine_to_chars
+
+
+def test_reverse_wrapped_sequence_char_frontier_extends_after_legacy_exhaustion() -> None:
+    examples = (
+        ProgramExample([], ["1"]),
+        ProgramExample([1, -1], ["1"]),
+        ProgramExample([2, -3, 1], ["1"]),
+        ProgramExample([-8, 0, 0], ["3", "2", "-"]),
+        ProgramExample([-7, 0, 0], ["0", "2", "-"]),
+        ProgramExample([4], ["3", "1"]),
+    )
+    learned = _bounded_sequence_fold_affine_to_chars(examples=examples, max_nodes=9)
+    assert learned is not None
+    assert learned.expression.get("op") == "chars"
+    assert learned.expression["arg"].get("op") == "reverse"
+
+    program = learned.descriptor()
+    support_inputs = tuple(item.input for item in examples)
+    history_digest = "0a2c3295b8438e9265c49c45da8eebf6a445e57b6b0cd6a3687a4d6a237e1c03"
+    salt = int(history_digest[:8], 16)
+    legacy = []
+    for expression in _candidate_expressions(program, salt):
+        try:
+            target = _target_from_expression(program, expression, support_inputs)
+        except (ValueError, TypeError):
+            continue
+        if int(target["program_nodes"]) <= 9:
+            legacy.append(target)
+    assert len({target["semantic_signature"] for target in legacy}) < 2
+
+    schedule = _precommit_schedule(
+        program,
+        history_digest=history_digest,
+        support_inputs=support_inputs,
+    )
+    assert len(schedule["target_schedule"]) >= 2
+    assert all(int(target["program_nodes"]) <= 9 for target in schedule["target_schedule"])
+    reverse_char_targets = [
+        target
+        for target in schedule["target_schedule"]
+        if target["program"]["expression"].get("op") == "chars"
+        and target["program"]["expression"].get("arg", {}).get("op") == "reverse"
+    ]
+    assert reverse_char_targets
+''', encoding='utf-8')
+          PY
+      - name: Focused falsification
+        run: pytest -q tests/test_reverse_sequence_char_derived_frontier.py tests/test_sequence_char_derived_frontier.py tests/test_heterogeneous_retention_campaign.py
+      - run: python -m compileall -q src
+      - name: Remove controller and commit only repair plus regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/repair-reverse-char-derived-frontier.yml
+          git add src/agi/crossdomain_failure_derived_target.py tests/test_reverse_sequence_char_derived_frontier.py
+          git diff --cached --quiet && { echo 'No repair diff produced.' >&2; exit 1; }
+          git commit -m 'Handle reversed numeric-character derived frontier'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
