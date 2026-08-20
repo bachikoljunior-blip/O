@@ -227,6 +227,84 @@ def _candidate_expressions(base_program: Mapping[str, Any], salt: int) -> list[d
     )
 
 
+def _sequence_numeric_char_fallback_expressions(
+    base_program: Mapping[str, Any],
+    salt: int,
+) -> list[dict[str, Any]]:
+    """Extend only an exhausted learned affine-character frontier without raising its node bound."""
+    if str(base_program.get("output_domain")) != "sequence":
+        return []
+    base = copy.deepcopy(base_program.get("expression"))
+    if not isinstance(base, dict) or base.get("op") != "chars":
+        return []
+    rendered = base.get("arg")
+    if not isinstance(rendered, dict) or rendered.get("op") != "to_string":
+        return []
+    inner = rendered.get("arg")
+    if not isinstance(inner, Mapping):
+        return []
+    try:
+        inner_domain, _nodes, _depth = _infer_expression(
+            inner,
+            input_domain=str(base_program["input_domain"]),
+        )
+    except (ValueError, TypeError):
+        return []
+    if inner_domain != "numeric":
+        return []
+
+    # The retained PR229 counterexample is an acquired affine numeric terminal wrapped by
+    # to_string/chars. Mutate only its already-verified numeric constants so every sibling retains
+    # the same AST size and remains inside the unchanged acquisition family. Do not introduce
+    # generic new literals or increase the global derivation frontier.
+    magnitude = 1 + salt % 3
+    variants: list[dict[str, Any]] = []
+
+    def append_constant_mutations(
+        expression: Mapping[str, Any],
+        path: tuple[str, ...],
+        deltas: Sequence[int],
+    ) -> None:
+        cursor: Any = expression
+        for key in path:
+            if not isinstance(cursor, Mapping):
+                return
+            cursor = cursor.get(key)
+        if (
+            not isinstance(cursor, Mapping)
+            or cursor.get("op") != "const"
+            or cursor.get("domain") != "numeric"
+        ):
+            return
+        value = cursor.get("value")
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return
+        for delta in deltas:
+            mutated = copy.deepcopy(dict(expression))
+            target: Any = mutated
+            for key in path:
+                target = target[key]
+            target["value"] = value + delta
+            variants.append(mutated)
+
+    if inner.get("op") == "add":
+        append_constant_mutations(inner, ("left",), (magnitude, -magnitude))
+        append_constant_mutations(inner, ("right",), (magnitude, -magnitude))
+        for side in ("left", "right"):
+            term = inner.get(side)
+            if isinstance(term, Mapping) and term.get("op") == "mul":
+                append_constant_mutations(inner, (side, "left"), (1, -1))
+                append_constant_mutations(inner, (side, "right"), (1, -1))
+    elif inner.get("op") == "mul":
+        append_constant_mutations(inner, ("left",), (1, -1))
+        append_constant_mutations(inner, ("right",), (1, -1))
+
+    return [
+        {"op": "chars", "arg": {"op": "to_string", "arg": variant}}
+        for variant in variants
+    ]
+
+
 def _precommit_schedule(
     base_program: Mapping[str, Any],
     *,
@@ -238,18 +316,24 @@ def _precommit_schedule(
     salt = int(history_digest[:8], 16)
     targets: list[dict[str, Any]] = []
     seen: set[str] = {base_signature}
-    for expression in _candidate_expressions(base_program, salt):
-        try:
-            target = _target_from_expression(base_program, expression, support_inputs)
-        except (ValueError, TypeError, CrossDomainFailureDerivedTargetError):
-            continue
-        if int(target["program_nodes"]) > 9:
-            continue
-        signature = str(target["semantic_signature"])
-        if signature in seen:
-            continue
-        seen.add(signature)
-        targets.append(target)
+
+    def append_targets(expressions: Sequence[Mapping[str, Any]]) -> None:
+        for expression in expressions:
+            try:
+                target = _target_from_expression(base_program, expression, support_inputs)
+            except (ValueError, TypeError, CrossDomainFailureDerivedTargetError):
+                continue
+            if int(target["program_nodes"]) > 9:
+                continue
+            signature = str(target["semantic_signature"])
+            if signature in seen:
+                continue
+            seen.add(signature)
+            targets.append(target)
+
+    append_targets(_candidate_expressions(base_program, salt))
+    if len(targets) < 2:
+        append_targets(_sequence_numeric_char_fallback_expressions(base_program, salt))
     targets.sort(
         key=lambda item: _digest(
             {
