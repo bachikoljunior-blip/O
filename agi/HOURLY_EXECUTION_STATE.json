@@ -4,18 +4,18 @@
   "timezone": "Asia/Tokyo",
   "status": "running",
   "lease_mode": "watchdog_continuation",
-  "scheduler_fired_at": "2026-08-20T22:02:24+09:00",
+  "scheduler_fired_at": "2026-08-20T23:50:30+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-20T22:02:24+09:00",
-  "started_at": "2026-08-20T22:02:24+09:00",
-  "heartbeat_at": "2026-08-20T22:02:24+09:00",
-  "last_progress_at": "2026-08-20T22:02:24+09:00",
+  "actual_started_at": "2026-08-20T23:50:30+09:00",
+  "started_at": "2026-08-20T23:50:30+09:00",
+  "heartbeat_at": "2026-08-20T23:50:30+09:00",
+  "last_progress_at": "2026-08-20T23:50:30+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-watchdog-recovery-20260820T220224JST",
-  "session_id": "same-task-chat-watchdog-recovery-20260820T220224JST",
-  "active_run_id": "run-self-applied-pr230-reverse-frontier-recovery-20260820-220224",
+  "execution_id": "o-agi-watchdog-recovery-20260820T235030JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260820T235030JST",
+  "active_run_id": "run-self-applied-pr241-merge-pr230-reconstruct-20260820-235030",
   "required_model": "GPT-5.6 Pro",
   "actual_model": "GPT-5.6 Sol",
   "model_verified": true,
@@ -25,14 +25,15 @@
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "4c2ec9032f9839fe8046faae7c86df960f61059c",
-  "current_work_unit": "Recovered stale lease from latest main only after PR230 exact head e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b completed fresh full CI 32367064061 with 386 passed / 1 failed. The retained failure is CrossDomainFailureDerivedTargetError: fewer than two derived behaviors fit unchanged bounds when the learned base is chars(reverse(to_string(numeric))). Repair only the existing sequence numeric-character fallback so it preserves the optional reverse wrapper, add a focused regression, require fresh exact-head full CI, and do not weaken node/runtime/output bounds or fail-closed behavior.",
+  "latest_main_sha_at_start": "41c3173f462f16e57a644ca74979861863af3eb9",
+  "latest_verified_merge_sha": "9a2637690511bf252326156d3aee2c898dee61f3",
+  "current_work_unit": "Recovered stale lease from latest main only. PR241 exact head e3c58f3269fae2c52cd74125aa7056fe239c170b had fresh full CI 32372411284 success on unchanged base 41c3173f462f16e57a644ca74979861863af3eb9 and was merged unchanged as 9a2637690511bf252326156d3aee2c898dee61f3. Next reconstruct preserved PR230 two-file recursive milestone directly on verified post-PR241 main, require fresh exact-head full CI, and preserve all prior failures.",
   "primary_unmerged": {
     "pr": 230,
     "branch": "agi/recursive-evidence-frontier-r65",
     "head_sha": "e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b",
     "ci_run": 32367064061,
-    "ci_status": "failure_386_passed_1_failed",
+    "ci_status": "failure_386_passed_1_failed_pre_pr241",
     "merge_admissible": false
   },
   "negative_evidence": [
@@ -52,16 +53,16 @@
     "pr233_test": "ab0aa39777a624f20545f1541b2e4e37f8a10459"
   },
   "recovered_stale_lease": {
-    "execution_id": "o-agi-watchdog-recovery-20260820T210235JST",
-    "last_heartbeat_at": "2026-08-20T21:02:35+09:00",
-    "last_repository_progress_at": "2026-08-20T21:21:20+09:00",
-    "last_external_ci_progress_at": "2026-08-20T21:33:11+09:00",
-    "reason": "running heartbeat, repository progress, and PR230 CI completion all exceeded stale_after_seconds; no later main progress or in-flight run remained"
+    "execution_id": "o-agi-watchdog-recovery-20260820T220224JST",
+    "last_heartbeat_at": "2026-08-20T22:02:24+09:00",
+    "last_repository_progress_at": "2026-08-20T22:03:52+09:00",
+    "last_external_ci_progress_at": "2026-08-20T22:52:45+09:00",
+    "reason": "running heartbeat, repository progress, and all known external CI completion exceeded stale_after_seconds; no in-flight run remained"
   },
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "run_id": "run-self-applied-pr230-reverse-frontier-recovery-20260820-220224",
+    "run_id": "run-self-applied-pr241-merge-pr230-reconstruct-20260820-235030",
     "checkpoint_persistence_pending": true,
     "checkpoint_truthfulness": "native continual self-apply CLI has not been executed in this connector session; no native Run/Episode is claimed",
     "external_claim_admissible": false
@@ -77,6 +78,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Repair only the demonstrated optional-reverse numeric-character derivation boundary on latest main, add a regression that proves at least two bounded novel derived behaviors for chars(reverse(to_string(numeric))) while preserving the wrapper and unchanged bounds, require fresh full exact-head CI, then reconstruct PR230 on the verified repair and rerun its full recursive milestone. Independently preserve PR237/PR238 and repair PR233 only after PR230 settles.",
+  "next_falsifiable_milestone": "Reconstruct PR230 from its preserved exact two-file semantic delta directly on verified post-PR241 main, require fresh full exact-head CI, merge only an unchanged passing head, and on failure retain the exact head/run and repair only the newly demonstrated recursive-frontier boundary. Preserve PR237/PR238 and defer PR233 binding repair until PR230 settles.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Released or stale lease may be recovered from repository latest main only. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never prove AGI. Internal evidence cannot satisfy the strict external AGI gate."
 }
