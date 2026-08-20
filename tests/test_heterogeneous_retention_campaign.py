@@ -5,6 +5,7 @@ from pathlib import Path
 
 from agi.acquired_programs import ProgramExample
 from agi.heterogeneous_retention_campaign import (
+    _bounded_sequence_fold_affine_to_chars,
     _bounded_sequence_fold_affine_to_string,
     run_heterogeneous_retention_campaign,
 )
@@ -67,6 +68,27 @@ def test_sequence_affine_fallback_composes_reverse_after_to_string() -> None:
 
     assert learned is not None
     assert learned.expression.get("op") == "reverse"
+    assert all(learned.apply(item.input) == item.output for item in examples)
+
+
+def test_sequence_affine_char_fallback_composes_reverse_before_chars() -> None:
+    examples = (
+        ProgramExample([], ["1"]),
+        ProgramExample([1, -1], ["1"]),
+        ProgramExample([2, -3, 1], ["1"]),
+        ProgramExample([-8, 0, 0], ["3", "2", "-"]),
+        ProgramExample([-7, 0, 0], ["0", "2", "-"]),
+        ProgramExample([4], ["3", "1"]),
+    )
+
+    learned = _bounded_sequence_fold_affine_to_chars(
+        examples=examples,
+        max_nodes=9,
+    )
+
+    assert learned is not None
+    assert learned.expression.get("op") == "chars"
+    assert learned.expression["arg"].get("op") == "reverse"
     assert all(learned.apply(item.input) == item.output for item in examples)
 
 
