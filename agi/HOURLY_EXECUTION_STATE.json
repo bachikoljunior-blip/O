@@ -10,8 +10,8 @@
   "hard_stop": null,
   "actual_started_at": "2026-08-20T10:50:28+09:00",
   "started_at": "2026-08-20T10:50:28+09:00",
-  "heartbeat_at": "2026-08-20T11:03:42+09:00",
-  "last_progress_at": "2026-08-20T11:03:42+09:00",
+  "heartbeat_at": "2026-08-20T11:11:29+09:00",
+  "last_progress_at": "2026-08-20T11:11:29+09:00",
   "stale_after_seconds": 900,
   "execution_id": "o-agi-watchdog-recovery-20260820T105028JST",
   "session_id": "same-task-chat-watchdog-recovery-20260820T105028JST",
@@ -26,7 +26,7 @@
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
   "latest_main_sha_at_start": "eaccfb1c8e29407df9f0a1b291e00dbffc5d46db",
-  "latest_main_sha_before_heartbeat": "a46c0736c26c7875cbf501e4a383b8f88a8a9410",
+  "latest_main_sha_before_heartbeat": "54fd6b252cd6b7fa0fbc046902a879e0f07ec565",
   "recovered_stale_lease": {
     "execution_id": "o-agi-watchdog-recovery-20260820T090442JST",
     "last_heartbeat_at": "2026-08-20T09:21:16+09:00",
@@ -34,28 +34,30 @@
     "last_external_progress_at": "2026-08-20T09:52:10+09:00",
     "reason": "running heartbeat, latest-main progress, and all known in-flight workflow activity exceeded stale_after_seconds; recovered idempotently from latest main only"
   },
-  "current_work_unit": "PR 234 repairs only the retained PR 230 sequence->numeric digit-length synthesis counterexample behind the unchanged ordinary frontier. Current exact head 916a9a05d3c03afe90d238f7b98d6efc54fba54e adds the bounded fallback plus positive unseen-input and nearby fail-closed tests; fresh full CI 32322879963 is in progress. Superseded head bdca56726e0d4057c4642a71c986a16343297bd8 has CI 32322825756 in progress but is not merge-admissible because the head moved. While CI runs, exact successor deltas were staged without opening duplicate PRs: PR229 source/test as c73ae777d066af442b2aeba27010132e1cc259d2 on agi/iterated-expansion-post-digit-length-r70, PR230 source/test as 1018400ca003abc9d181cf2b6ef660c0e09ac528 on agi/recursive-frontier-post-digit-length-r71, and PR233 source/test as 7d040caa3d83ef1a453bde1084b88f5433cab03b on agi/observed-schema-post-recursive-r72. These staged branches are not merge-admissible until their predecessors integrate and each receives fresh exact-head validation.",
+  "current_work_unit": "PR 234 repairs only the retained PR 230 sequence->numeric digit-length synthesis counterexample behind the unchanged ordinary frontier. Exact-head analysis found the earlier positive support on head 916a9a05d3c03afe90d238f7b98d6efc54fba54e still admitted three affine offsets (+1,+2,+3) with identical observed digit lengths; that head and CI 32322879963 were therefore superseded before integration. Current exact head b6417d4daae495f68ff582b6fbea683583cf7b2e adds sum=4 support, which uniquely identifies the intended +1 affine family within the bounded fallback search; fresh full CI 32323618763 is in progress. The source fallback remains unchanged: ordinary synthesis first, then sequence->numeric only, existing folds/constants/operators, unchanged max_nodes/resource/safety boundary. Successor staging branches were rebuilt on this exact head without opening duplicate PRs.",
   "recent_completed_units": [
     {"pr": 232, "head_sha": "22f5e68b1d083160d1dbe172572fd7e2758f2ebf", "ci_run": 32307731617, "ci_conclusion": "success", "merge_sha": "ce536f8202030036a0c198ffa125b626c419b74a"},
     {"pr": 231, "head_sha": "1e525453d534198977033dd31f6792ba4e03dbf5", "ci_run": 32306921293, "ci_conclusion": "success", "merge_sha": "ae11e709dc643cc698f5c8686e8abc270fb14270"}
   ],
   "unmerged_pr": 234,
   "unmerged_branch": "agi/sequence-affine-digit-length-r69",
-  "unmerged_head_sha": "916a9a05d3c03afe90d238f7b98d6efc54fba54e",
-  "unmerged_ci_run": 32322879963,
+  "unmerged_head_sha": "b6417d4daae495f68ff582b6fbea683583cf7b2e",
+  "unmerged_ci_run": 32323618763,
   "unmerged_ci_status": "in_progress",
   "additional_in_flight": [
+    {"pr": 234, "head_sha": "916a9a05d3c03afe90d238f7b98d6efc54fba54e", "ci_run": 32322879963, "ci_status": "in_progress_superseded_by_falsification_refinement", "merge_admissible": false},
     {"pr": 234, "head_sha": "bdca56726e0d4057c4642a71c986a16343297bd8", "ci_run": 32322825756, "ci_status": "in_progress_superseded_head", "merge_admissible": false},
     {"pr": 229, "head_sha": "de863252769cbd23862eb6b3ccc127deaad85f30", "ci_run": 32316026589, "ci_status": "cancelled_requires_fresh_revalidation_after_repair", "merge_admissible": false},
-    {"staged_branch": "agi/iterated-expansion-post-digit-length-r70", "head_sha": "c73ae777d066af442b2aeba27010132e1cc259d2", "depends_on": 234, "delta": "exact PR229 source/test blobs only", "merge_admissible": false},
+    {"staged_branch": "agi/iterated-expansion-post-digit-length-r70", "head_sha": "46bc699015ae75fa15b576c800cfcc0b13521aeb", "depends_on": 234, "delta": "current PR234 exact head plus exact PR229 source/test blobs only", "merge_admissible": false},
     {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "ci_status": "failure", "merge_admissible": false, "purpose": "retained recursive sequence-to-numeric synthesis counterexample"},
-    {"staged_branch": "agi/recursive-frontier-post-digit-length-r71", "head_sha": "1018400ca003abc9d181cf2b6ef660c0e09ac528", "depends_on": "PR234 then PR229", "delta": "exact PR230 source/test blobs only", "merge_admissible": false},
+    {"staged_branch": "agi/recursive-frontier-post-digit-length-r71", "head_sha": "159115e9a59a7949e0e2d7f59aac34f3db28c131", "depends_on": "PR234 then PR229", "delta": "exact PR230 source/test blobs only above staged PR229", "merge_admissible": false},
     {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "ci_status": "cancelled", "merge_admissible": false, "purpose": "observed learned-program schema extrapolation diagnostic with known Candidate-ID binding defect"},
-    {"staged_branch": "agi/observed-schema-post-recursive-r72", "head_sha": "7d040caa3d83ef1a453bde1084b88f5433cab03b", "depends_on": "PR234 then PR229 then PR230", "delta": "exact PR233 source/test blobs only; binding repair and end-to-end validation still required", "merge_admissible": false},
+    {"staged_branch": "agi/observed-schema-post-recursive-r72", "head_sha": "734ccc515f8f8b3dca0701a250c22c5810f56ae2", "depends_on": "PR234 then PR229 then PR230", "delta": "exact PR233 source/test blobs only above staged recursive delta; binding repair still required", "merge_admissible": false},
     {"issue": 222, "status": "open", "comments": 0, "purpose": "independent external evaluator coordination"}
   ],
   "negative_evidence": [
     {"pr": 230, "head_sha": "aa94fee13e3478ba7820e1a33a7157b478e6345f", "ci_run": 32316151375, "failure": "383 passed / 1 failed; recursive campaign exposed sequence->numeric digit-length-of-affine-sum target that the unchanged bounded synthesizer could not rediscover"},
+    {"pr": 234, "head_sha": "916a9a05d3c03afe90d238f7b98d6efc54fba54e", "finding": "pre-integration falsification showed the positive support admitted affine offsets +1,+2,+3 with identical digit-length outputs; head was strengthened rather than treated as validated"},
     {"pr": 229, "head_sha": "de863252769cbd23862eb6b3ccc127deaad85f30", "ci_run": 32316026589, "failure": "CI cancelled before semantic conclusion; exact head remains unverified"},
     {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "ci_run": 32316840236, "failure": "stacked diagnostic CI cancelled; no merge-admissible conclusion"},
     {"pr": 233, "head_sha": "cb97bbb2a05e68b8f6033541409bf43efb464876", "failure": "inspection found full campaign reads first four Candidate IDs from recursive report even though those IDs are persisted in the iterated prerequisite report; focused primitive tests do not cover the full campaign"},
@@ -80,6 +82,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Observe PR234 CI 32322879963 for exact head 916a9a05d3c03afe90d238f7b98d6efc54fba54e. Merge only unchanged success; on failure retain exact head/run and repair only the demonstrated digit-length boundary. After PR234 integrates, use staged r70 to require fresh full validation of the exact PR229 delta, then staged r71 for the exact PR230 recursive delta. Only after those settle, repair PR233's Candidate-ID binding from the persisted iterated report and add end-to-end campaign validation before any schema-extrapolation merge.",
+  "next_falsifiable_milestone": "Observe PR234 CI 32323618763 for exact head b6417d4daae495f68ff582b6fbea683583cf7b2e. Merge only unchanged success; on failure retain exact head/run and repair only the demonstrated digit-length boundary. After PR234 integrates, reconstruct/compare staged r70 against verified main and require fresh full validation of the exact PR229 delta, then r71 for PR230. Only after those settle, repair PR233's Candidate-ID binding from the persisted iterated report and validate that boundary before any schema-extrapolation merge.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Stale or released lease may be recovered. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never terminate an active execution. Internal evidence cannot satisfy the strict external AGI gate."
 }
