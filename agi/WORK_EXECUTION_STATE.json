@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T19:57:17.164Z",
-  "last_progress_at": "2026-08-22T19:57:17.164Z",
+  "heartbeat_at": "2026-08-22T20:02:01.934Z",
+  "last_progress_at": "2026-08-22T20:02:01.934Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Security review found and repaired an embedded-marker bypass in PR 257: suffix-only normalization allowed names such as private_key_material and apiTokenValue. Exact branch head 39f5889 now rejects token-boundary and compound-marker disguises; 33 focused tests, compileall, and diff-check pass. Exact-head CI 32595188080 and a fresh final-head local full suite are in progress. Prior 7d86119 CI remains uncancelled superseded evidence. Frozen Root remains unchanged. AGI remains false.",
-    "verified_main_sha": "88a609210089179828aa5293b6bb6c6cfe6a6215",
+    "reason": "PR 257 final public-boundary alignment is published at exact head 8f4278e. Authorization, cookie, private reasoning, scratchpad, and system-prompt marker variants now fail closed alongside key/token/answer/seed secrets. 33 focused tests, compileall, and diff-check pass. Exact-head CI 32595446105 and a fresh final-head local full suite are in progress. All earlier CIs remain uncancelled superseded evidence. Frozen Root unchanged; AGI false.",
+    "verified_main_sha": "b19282e91c877b3e96b57e86b209a0cd1fb4249c",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
   "parallel_execution_coordination": {
@@ -31,7 +31,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "88a609210089179828aa5293b6bb6c6cfe6a6215",
+  "source_main_sha": "b19282e91c877b3e96b57e86b209a0cd1fb4249c",
   "working_branch": "work/external-attestation-detached-signature-v3",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "root",
@@ -44,11 +44,11 @@
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/external-attestation-detached-signature-v3",
-    "snapshot_head_sha": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
+    "snapshot_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
     "pending_work_invocation_id": "invoke-7a98234f8af1c64c638242f4",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7a98234f8af1c64c638242f4/request.json",
     "durability_status": "implementation and exact native continuation are remotely readable on PR 257 head",
-    "next_action": "Observe exact-head CI 32595188080 and final-head local full suite for unchanged 39f5889 without rerun. If successful and conflict-free, submit frozen Root to Task Evaluate, publish its immutable O records, and require another unchanged exact-head CI before merge."
+    "next_action": "Observe exact-head CI 32595446105 and final-head local full suite for unchanged 8f4278e. If successful and conflict-free, submit frozen Root to Task Evaluate, publish immutable O records, and require another unchanged exact-head CI before merge."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -172,14 +172,14 @@
       "pull_request": 257,
       "branch": "work/external-attestation-detached-signature-v3",
       "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
-      "exact_head_sha": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
-      "exact_head_ci_run": 32595188080,
+      "exact_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
+      "exact_head_ci_run": 32595446105,
       "exact_head_ci_status": "in_progress",
       "mergeable": true,
       "mergeable_state": "unstable_pending_checks",
       "changed_files": 56,
-      "focused_regression": "33_passed_including_embedded_secret_marker_bypass",
-      "local_full_suite": "in_progress_final_head_84b45e4_local_equivalent",
+      "focused_regression": "33_passed_final_public_boundary_alignment",
+      "local_full_suite": "in_progress_final_head_12716d4_local_equivalent",
       "compileall": "pass",
       "diff_check": "pass",
       "work_verify": {
@@ -208,10 +208,16 @@
           "ci_run": 32594512530,
           "status": "in_progress_superseded_not_cancelled",
           "reason": "security review found suffix-only secret-marker bypass"
+        },
+        {
+          "head": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
+          "ci_run": 32595188080,
+          "status": "in_progress_superseded_not_cancelled",
+          "reason": "aligned remaining authorization/cookie/private-context markers with Work public boundary"
         }
       ],
-      "remote_source_blob_sha": "7840995542fe1f1b8bdb5d58157050fb15041e0b",
-      "remote_test_blob_sha": "cad7a002135495eb5ec1e78a77f48ce5ba1ce4f3",
+      "remote_source_blob_sha": "088b3d0f0d6c70e04756e7999a3bb3356e7a90ac",
+      "remote_test_blob_sha": "b924260e5b8b29e99d329145a8da975104a74845",
       "superseded_local_test_runs": [
         {
           "head": "d33bef78c1cbce751d127750b3fe6a022674cce7",
@@ -222,12 +228,17 @@
           "head": "7d86119d966bd83df4cfa9092122947682ad6716",
           "status": "interrupted_after_superseded",
           "reason": "process had imported prior source before embedded-marker hardening; continuing would not verify final head"
+        },
+        {
+          "head": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
+          "status": "interrupted_after_superseded",
+          "reason": "process had imported the prior source before final public-boundary alignment"
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T19:57:17.164Z",
-        "exact_head_sha": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
-        "exact_head_ci_run": 32595188080,
+        "at": "2026-08-22T20:02:01.934Z",
+        "exact_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
+        "exact_head_ci_run": 32595446105,
         "exact_head_ci_step": "setup_or_pytest",
         "mergeable": true
       }
