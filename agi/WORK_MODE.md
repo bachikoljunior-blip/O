@@ -29,6 +29,14 @@ When retained observations show that a method is slow, saturated, blocked, non-d
 
 Every open item identifies safe reversible alternative work and a finite reevaluation condition. An open request does not stop the primary run, release the lease, or excuse failure to explore independent work. Root may notify the user, but it continues the best available non-conflicting work while waiting.
 
+## Live user input
+
+`agi/USER_INPUT_INBOX.json` on latest remote `main` is the append-only control plane for user directions that arrive while the primary execution is already alive. It is separate from `agi/USER_REQUEST_QUEUE.json`: the queue carries O-to-user requests, while the inbox carries user-to-O input.
+
+At each safe Root or logical-unit boundary, refresh the inbox from latest remote `main`, compare its revision with the highest acknowledged revision persisted in durable execution state, and ingest any newer active entries. This read does not require a development-writer lease and must not create a second writer. A watchdog restart is not required merely to notice new input. Do not interrupt a frozen semantic invocation mid-call; apply the input at the next safe boundary and preserve exact replay of already-frozen requests.
+
+Inbox entries are directions, constraints, design context, or hypotheses rather than automatic technical truth or AGI evidence. Preserve the user's terminal objective and explicit constraints, but test technical proposals, compare them against alternatives, and reject or revise them when retained evidence favors another route. Persist the highest acknowledged revision and the factual interpretation needed to survive context reset. The current accumulated input includes expected real-world AGI elapsed-time minimization, O replaceability, autonomous strategy/evaluation/exploration/self-improvement/timing, saturation-driven method change, heterogeneous external research search, non-blocking durable user requests, strict claim-gate preservation, falsifiability of user proposals, and recursive situation-dependent Skill-in-Skill context routing.
+
 ## Single-writer lease
 
 `agi/WORK_EXECUTION_STATE.json` is authoritative. A primary owner created by direct user instruction is distinct from a monitor recovery owner. While its `running` heartbeat is within `stale_after_seconds`, the watchdog must suppress itself.
@@ -37,7 +45,7 @@ Malformed state, missing required fields, future-skewed time, an unknown status,
 
 ## Monitor as insurance
 
-The scheduled Work monitor is not an ordinary development loop. It reads latest remote `main`, the Work lease, the exact native Run, open PRs, and exact-head checks. It performs no mutation when the primary owner is live.
+The scheduled Work monitor is not an ordinary development loop. It reads latest remote `main`, the Work lease, the exact native Run, open PRs, and exact-head checks. It performs no development mutation when the primary owner is live. It may still observe the append-only user-input control plane so that a later recovery cannot miss input that arrived during a live run; observation alone never authorizes a second development writer.
 
 If the lease is stale, released, interrupted, or checkpointed and the strict external goal is still unmet, the monitor may classify the run as recovery eligible. Eligibility alone is read-only. Recovery mutation is authorized only by the two-phase protocol implemented in `src/agi/work_mode_monitor.py`:
 
