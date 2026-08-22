@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 5,
+  "revision": 6,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -108,7 +108,26 @@
       ],
       "supersedes": [],
       "source": "user_chat"
+    },
+    {
+      "sequence": 6,
+      "id": "user-direction-secondary-parallel-writer-20260823-v6",
+      "received_at": "2026-08-22T22:59:38.628Z",
+      "kind": "ownership_and_parallel_execution_direction",
+      "status": "active",
+      "summary": "Authorize the ChatGPT Work session as a secondary concurrent development writer alongside the designated Claude primary.",
+      "directives": [
+        "The user's exact words were: 第二ライターになって、並行実行して。 (2026-08-23).",
+        "This explicitly overrides only revision 4's prohibition on the ChatGPT Work session acting as a second writer. The designated Claude session remains primary unless the user later changes that designation.",
+        "The secondary writer may implement, validate, publish, and maintain independent work on its own isolated branch and pull request while the primary continues.",
+        "Avoid destructive collision: do not overwrite the primary branch, native Run, pending invocation, lease, PR head, or unmerged files. Select a non-overlapping falsifiable unit and use a distinct native O Run and idempotency scope.",
+        "Serialize integration to main with exact-head validation and fresh-main conflict checks; never force-push, cancel, rerun, or merge the other writer's work.",
+        "Persist secondary progress durably and rebase or reconstruct on latest main when integration conflict is observed. Parallel execution is intended to reduce elapsed time, not to weaken evidence integrity or truthful AGI reporting.",
+        "The smartphone-first operator constraint in revision 5 remains active."
+      ],
+      "supersedes": [],
+      "source": "user_chat"
     }
   ],
-  "updated_at": "2026-08-22T22:49:22Z"
+  "updated_at": "2026-08-22T22:59:38.628Z"
 }
