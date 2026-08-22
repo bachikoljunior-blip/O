@@ -50,7 +50,7 @@ def _is_forbidden_attestation_secret_key(value: str) -> bool:
     normalized = value.strip().lower().replace("-", "_")
     if normalized in _FORBIDDEN_ATTESTATION_SECRET_KEYS:
         return True
-    return normalized.endswith(
+    if normalized.endswith(
         (
             "_access_token",
             "_answer",
@@ -67,6 +67,28 @@ def _is_forbidden_attestation_secret_key(value: str) -> bool:
             "_seed",
             "_signing_key",
             "_signing_key_hex",
+        )
+    ):
+        return True
+    compact = "".join(character for character in normalized if character.isalnum())
+    return compact.endswith(
+        (
+            "accesstoken",
+            "answer",
+            "apikey",
+            "answers",
+            "authtoken",
+            "credential",
+            "credentials",
+            "password",
+            "privatekey",
+            "privatekeyhex",
+            "secret",
+            "secretkey",
+            "seed",
+            "signingkey",
+            "signingkeyhex",
+            "token",
         )
     )
 
