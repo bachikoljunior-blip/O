@@ -5,7 +5,7 @@ import hashlib
 import json
 import secrets
 import tempfile
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Mapping, MutableMapping, Sequence
@@ -19,6 +19,48 @@ _D = (-121665 * pow(121666, _Q - 2, _Q)) % _Q
 _I = pow(2, (_Q - 1) // 4, _Q)
 _IDENTITY = (0, 1)
 _BASE_Y = (4 * pow(5, _Q - 2, _Q)) % _Q
+_FORBIDDEN_ATTESTATION_SECRET_KEYS = frozenset(
+    {
+        "access_token",
+        "api_key",
+        "answers",
+        "auth_token",
+        "authorization",
+        "bridge_secret",
+        "credential",
+        "credentials",
+        "expected_answer",
+        "hidden_seed",
+        "password",
+        "private_key",
+        "private_key_hex",
+        "secret",
+        "signing_key",
+        "signing_key_hex",
+        "token",
+    }
+)
+
+
+def _is_forbidden_attestation_secret_key(value: str) -> bool:
+    normalized = value.strip().lower().replace("-", "_")
+    if normalized in _FORBIDDEN_ATTESTATION_SECRET_KEYS:
+        return True
+    return normalized.endswith(
+        (
+            "_access_token",
+            "_api_key",
+            "_auth_token",
+            "_credential",
+            "_credentials",
+            "_password",
+            "_private_key",
+            "_private_key_hex",
+            "_secret",
+            "_signing_key",
+            "_signing_key_hex",
+        )
+    )
 
 
 class ExternalEvidenceError(ValueError):
@@ -129,6 +171,21 @@ def sha256_json(value: Any) -> str:
     return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
 
 
+def _forbidden_secret_paths(value: Any, prefix: str = "$") -> tuple[str, ...]:
+    paths: list[str] = []
+    if isinstance(value, Mapping):
+        for key, child in value.items():
+            name = str(key)
+            path = f"{prefix}.{name}"
+            if _is_forbidden_attestation_secret_key(name):
+                paths.append(path)
+            paths.extend(_forbidden_secret_paths(child, path))
+    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        for index, child in enumerate(value):
+            paths.extend(_forbidden_secret_paths(child, f"{prefix}[{index}]"))
+    return tuple(paths)
+
+
 def _is_hex(value: str, bytes_len: int) -> bool:
     if len(value) != bytes_len * 2:
         return False
@@ -156,6 +213,16 @@ def _atomic_write_json(path: Path, value: Mapping[str, Any]) -> None:
     ) as handle:
         json.dump(value, handle, ensure_ascii=False, sort_keys=True, indent=2)
         handle.write("\n")
+        temporary = Path(handle.name)
+    temporary.replace(path)
+
+
+def _atomic_write_bytes(path: Path, value: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "wb", dir=path.parent, prefix=path.name + ".", suffix=".tmp", delete=False
+    ) as handle:
+        handle.write(value)
         temporary = Path(handle.name)
     temporary.replace(path)
 
@@ -391,6 +458,79 @@ class ExternalAttestation:
 
     def attestation_id(self) -> str:
         return sha256_json({"payload": self.payload(), "signature_hex": self.signature_hex})
+
+
+def prepare_external_attestation_payload(value: Mapping[str, Any]) -> tuple[ExternalAttestation, bytes]:
+    """Validate an unsigned result statement and return the exact bytes an evaluator must sign.
+
+    The repository never receives or handles the evaluator's private key.  The input deliberately
+    omits ``signature_hex`` so the unsigned statement cannot be mistaken for accepted evidence.
+    """
+
+    if not all(isinstance(key, str) for key in value):
+        raise ExternalEvidenceError("unsigned attestation field names must be strings")
+    if "signature_hex" in value:
+        raise ExternalEvidenceError("unsigned attestation statement must omit signature_hex")
+    forbidden = _forbidden_secret_paths(value)
+    if forbidden:
+        raise ExternalEvidenceError(
+            "unsigned attestation statement contains forbidden secret fields: "
+            + ", ".join(forbidden)
+        )
+    unknown = sorted(set(value) - set(_ATTESTATION_FIELDS))
+    missing = [field for field in _ATTESTATION_FIELDS if field not in value]
+    if unknown:
+        raise ExternalEvidenceError("unknown unsigned attestation fields: " + ", ".join(unknown))
+    if missing:
+        raise ExternalEvidenceError("missing unsigned attestation fields: " + ", ".join(missing))
+    if type(value["schema_version"]) is not int or type(value["repeat_index"]) is not int:
+        raise ExternalEvidenceError("schema_version and repeat_index must be JSON integers")
+    if type(value["success"]) is not bool:
+        raise ExternalEvidenceError("success must be a JSON boolean")
+    if not isinstance(value["metadata"], Mapping):
+        raise ExternalEvidenceError("metadata must be an object")
+    string_fields = set(_ATTESTATION_FIELDS) - {
+        "schema_version",
+        "success",
+        "repeat_index",
+        "metadata",
+    }
+    non_strings = sorted(field for field in string_fields if not isinstance(value[field], str))
+    if non_strings:
+        raise ExternalEvidenceError(
+            "unsigned attestation string fields have invalid types: " + ", ".join(non_strings)
+        )
+    placeholder = dict(value)
+    placeholder["signature_hex"] = "00" * 64
+    attestation = ExternalAttestation.from_mapping(placeholder)
+    if attestation.payload() != dict(value):
+        raise ExternalEvidenceError(
+            "unsigned attestation statement must already use canonical field values"
+        )
+    return attestation, attestation.payload_bytes()
+
+
+def finalize_external_attestation(
+    value: Mapping[str, Any],
+    *,
+    public_key_hex: str,
+    signature_hex: str,
+) -> ExternalAttestation:
+    """Assemble a signed attestation only after verifying its detached Ed25519 signature.
+
+    Full verifier registration, challenge freshness, held-out disclosure, replay, and request-subject
+    checks remain the responsibility of ``audit_external_ledger``.  This boundary only prevents a
+    malformed or mismatched detached signature from being packaged as an attestation.
+    """
+
+    unsigned, payload = prepare_external_attestation_payload(value)
+    if not _is_hex(public_key_hex, 32):
+        raise ExternalEvidenceError("public_key_hex must be canonical lowercase 32-byte hex")
+    if not _is_hex(signature_hex, 64):
+        raise ExternalEvidenceError("signature_hex must be canonical lowercase 64-byte hex")
+    if not verify_ed25519(bytes.fromhex(public_key_hex), payload, bytes.fromhex(signature_hex)):
+        raise ExternalEvidenceError("detached Ed25519 signature does not match canonical payload")
+    return replace(unsigned, signature_hex=signature_hex)
 
 
 @dataclass(frozen=True)
@@ -666,6 +806,20 @@ def build_parser() -> argparse.ArgumentParser:
     challenge.add_argument("--suite-id", required=True)
     challenge.add_argument("--suite-sha256", required=True)
     challenge.add_argument("--ttl-minutes", type=int, default=60)
+    payload = sub.add_parser(
+        "payload",
+        help="validate an unsigned result statement and emit the exact canonical bytes to sign",
+    )
+    payload.add_argument("statement", type=Path)
+    payload.add_argument("--output", type=Path, required=True)
+    finalize = sub.add_parser(
+        "finalize",
+        help="verify a detached evaluator signature and assemble a signed attestation",
+    )
+    finalize.add_argument("statement", type=Path)
+    finalize.add_argument("--public-key-hex", required=True)
+    finalize.add_argument("--signature-hex", required=True)
+    finalize.add_argument("--output", type=Path, required=True)
     return parser
 
 
@@ -689,6 +843,49 @@ def main() -> None:
         )
         _atomic_write_json(args.ledger, ledger)
         print(json.dumps(asdict(challenge), ensure_ascii=False, indent=2, sort_keys=True))
+        return
+    if args.cmd == "payload":
+        statement = _read_json(args.statement)
+        attestation, payload = prepare_external_attestation_payload(statement)
+        _atomic_write_bytes(args.output, payload)
+        print(
+            json.dumps(
+                {
+                    "algorithm": attestation.signature_algorithm,
+                    "claim_boundary": "unsigned payload only; not external evidence",
+                    "output": str(args.output),
+                    "payload_bytes": len(payload),
+                    "payload_sha256": hashlib.sha256(payload).hexdigest(),
+                },
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    if args.cmd == "finalize":
+        statement = _read_json(args.statement)
+        attestation = finalize_external_attestation(
+            statement,
+            public_key_hex=args.public_key_hex,
+            signature_hex=args.signature_hex,
+        )
+        _atomic_write_json(args.output, asdict(attestation))
+        print(
+            json.dumps(
+                {
+                    "attestation_id": attestation.attestation_id(),
+                    "claim_boundary": (
+                        "signature verified only; ledger audit and strict external claim gate still required"
+                    ),
+                    "output": str(args.output),
+                    "payload_sha256": hashlib.sha256(attestation.payload_bytes()).hexdigest(),
+                },
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+        )
         return
     raise SystemExit(f"unknown command: {args.cmd}")
 

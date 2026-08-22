@@ -1,0 +1,35 @@
+{
+  "claim_boundary": "This unit only removes an operational obstacle for an independent evaluator. Even a valid detached signature is not accepted production evidence until the independent registry, fresh challenge, disclosure, request binding, ledger audit, criterion quorum, and strict claim gate all pass.",
+  "component": "execute",
+  "evidence_needed": [
+    "focused round-trip proves emitted bytes equal ExternalAttestation.payload_bytes()",
+    "mismatched signature, mutated statement, embedded signature, unknown fields, missing fields, noncanonical keys, and forbidden nested secret keys fail closed",
+    "CLI failure produces no output artifact",
+    "CLI and API never accept a private key or mutate verifier registry/ledger",
+    "full relevant regression, compile validation, exact-head remote CI, unchanged-head and main readback before unit PASS"
+  ],
+  "expected_outputs": [
+    "payload command that writes exact canonical public bytes and labels them unsigned/non-evidence",
+    "finalize command that verifies a detached Ed25519 signature and atomically writes a signed attestation only on success",
+    "public API helpers for prepare/finalize with strict statement schema and recursive forbidden-secret-key rejection",
+    "documentation of the external signing workflow and the unchanged claim boundary",
+    "durable native O Run records for Execute then Task Evaluate"
+  ],
+  "goal": "Implement a secret-free detached-signature packaging boundary for ExternalAttestation: emit the exact canonical bytes an independent evaluator signs, accept only an externally generated Ed25519 signature plus public key, fail closed before output on malformed, secret-bearing, or mismatched statements, and preserve ledger audit plus AGI claim false as separate later gates.",
+  "inputs": [
+    "src/agi/external_provenance.py",
+    "tests/test_external_provenance.py",
+    "agi/EXTERNAL_EVIDENCE.md",
+    "ExternalAttestation.payload() canonicalization and existing Ed25519 verification",
+    "evidence/external_ledger.json and evidence/external_verifiers.json as negative evidence only"
+  ],
+  "scope": "agi/external-attestation-detached-signature-packaging",
+  "success_conditions": [
+    "No private/signing key parameter or private material enters the repository process.",
+    "Output bytes are deterministic and exactly those covered by the detached signature.",
+    "Any validation or signature failure leaves the requested output absent or unchanged.",
+    "Finalization alone cannot register a verifier, append ledger evidence, satisfy audit, or set AGI true.",
+    "Exact-head CI and remote readback pass without weakening any strict gate."
+  ],
+  "unit_id": "unit-ffc7b6b38cd9db08fe9f9097"
+}

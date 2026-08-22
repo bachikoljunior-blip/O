@@ -1,0 +1,29 @@
+{
+  "applicability": [],
+  "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+  "conflicts_with": [],
+  "contradictory_evidence": [],
+  "depends_on": [],
+  "expected_scope": "continual/incremental-task-evaluation",
+  "incompatible_with": [],
+  "non_applicability": [],
+  "prompt_content": "Evaluate the original task goal without weakening it and return its verdict in `verdict`. When the current bounded execution unit has a separately falsifiable completion condition, also return `unit_verdict` as PASS, FAIL, or UNCERTAIN with evidence and reason. A passing unit never implies the original task passed. Preserve negative evidence and the strict external claim boundary.",
+  "prompt_mode": "overlay",
+  "prompt_path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+  "rejected_reasons": [],
+  "risk": "An overlay could overproduce unit PASS; regression must require explicit bounded success conditions and preserve original verdict independence.",
+  "scope_states": {},
+  "source_refs": [
+    ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-b0f22bb1837173b8140ab7ec-consolidate_episode.json"
+  ],
+  "status": "candidate",
+  "supersedes": [],
+  "supporting_evidence": [
+    "run-work-mode-handoff-v2 unit-f67e779cf0b2194e4e3e6542",
+    "PR 256 exact-head CI 32591220738",
+    "main 976efad5fe0f2d1348ba97e5ba67d6253d331958"
+  ],
+  "target_component": "task_evaluate",
+  "tested_with": [],
+  "what_it_changes": "Require separate original-goal and bounded-unit verdicts when their outcomes differ."
+}

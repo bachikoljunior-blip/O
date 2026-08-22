@@ -1,0 +1,89 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-22T19:26:00.676997Z",
+  "component": "execute",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-14fde1fdb8eb78956d74ebf2-execute.json",
+  "invocation_id": "invoke-14fde1fdb8eb78956d74ebf2",
+  "output": {
+    "fragment": {
+      "component": "execute",
+      "evidence_refs": [
+        "src/agi/external_provenance.py",
+        "tests/test_external_provenance.py",
+        "agi/EXTERNAL_EVIDENCE.md",
+        "local focused pytest: 29 passed"
+      ],
+      "observations": [
+        "Three isolated files contain the implementation, regression, and evaluator workflow documentation.",
+        "29 focused tests, compileall, and diff validation pass.",
+        "No private key is accepted and no evidence ledger is changed."
+      ],
+      "purpose": "Implement and locally falsify a secret-free detached-signature attestation packaging boundary.",
+      "unresolved": [
+        "Remote exact-head CI, unchanged-head verification, and main readback are required before unit PASS.",
+        "The prior lifecycle merge CI remains in progress and is not evidence for this head.",
+        "All strict independent external production AGI conditions remain unmet."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observations": [
+        "Strict type checks are necessary because JSON booleans are Python integers and could otherwise pass integer validation.",
+        "Comparing the validated payload back to the source statement prevents silent lowercase/type normalization from changing the bytes an evaluator thought it supplied.",
+        "Testing an already-existing output catches destructive failure behavior that an absent-output-only test misses."
+      ]
+    },
+    "result": {
+      "artifacts": [
+        {
+          "changes": [
+            "prepare_external_attestation_payload validates an unsigned strict-schema statement and returns exact canonical payload bytes",
+            "finalize_external_attestation accepts only public_key_hex plus a detached signature and packages only after strict Ed25519 verification",
+            "payload and finalize CLI commands have no private-key, ledger, or registry inputs",
+            "unknown, missing, incorrectly typed, noncanonical, embedded-signature, and recursively secret-bearing fields fail closed",
+            "atomic output writes occur only after all validation and signature verification"
+          ],
+          "path": "src/agi/external_provenance.py"
+        },
+        {
+          "changes": [
+            "exact canonical-byte round trip",
+            "mutated statement and detached-signature mismatch rejection",
+            "nested secret and secret-suffix rejection",
+            "unknown, missing, type-confused, and noncanonical input rejection",
+            "no new output and preservation of existing output on failure",
+            "CLI surface excludes private-key and ledger/registry mutation options"
+          ],
+          "path": "tests/test_external_provenance.py"
+        },
+        {
+          "changes": [
+            "document exact payload preparation, external signing, verified finalization, and unchanged audit/claim boundary"
+          ],
+          "path": "agi/EXTERNAL_EVIDENCE.md"
+        }
+      ],
+      "claim_boundary": "This implements packaging readiness only. Signature verification at finalize is necessary but cannot register independence, pass ledger audit, satisfy per-criterion quorum, or support an AGI claim.",
+      "negative_evidence": [
+        "The implementation is isolated locally and has no remote exact-head CI yet.",
+        "The local full suite is not complete for this implementation head.",
+        "No independent evaluator, challenge result, disclosure, signed production attestation, or verifier quorum has appeared."
+      ],
+      "next": "Publish the three implementation files together with immutable native O Run records on work/external-attestation-detached-signature-v3, run exact-head CI without rerunning unrelated workflows, then Task Evaluate the original goal and this bounded unit separately.",
+      "objective_observations": [
+        "29 focused external provenance, claim, and request tests passed after hardening.",
+        "compileall for source/tests passed and git diff --check passed.",
+        "The prepared payload equals the existing ExternalAttestation.payload_bytes() byte-for-byte.",
+        "A mismatched signature raises before the output path is written or an existing output is replaced.",
+        "No ledger, verifier registry, challenge, disclosure, or AGI claim state is mutated by either new command."
+      ],
+      "scope": "agi/external-attestation-detached-signature-packaging",
+      "status": "implemented_locally_pending_remote_verification",
+      "unit_id": "unit-ffc7b6b38cd9db08fe9f9097"
+    }
+  },
+  "payload_digest": "31aab5e83d6610b7dbd1b8cc",
+  "prompt_path": "prompts/execute.md",
+  "status": "complete"
+}

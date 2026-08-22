@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import sys
 from dataclasses import asdict, replace
 from datetime import UTC, datetime
 
@@ -19,7 +21,11 @@ from agi.external_provenance import (
     _scalar_multiply,
     audit_external_ledger,
     bridge_external_attestation,
+    build_parser,
     issue_challenge,
+    finalize_external_attestation,
+    main as external_evidence_main,
+    prepare_external_attestation_payload,
     verify_ed25519,
     verify_external_attestation,
 )
@@ -96,6 +102,153 @@ def _ledger(attestations, verifier, challenge, disclosures=()):
         "schema_version": 1,
         "verifiers": [asdict(verifier)],
     }
+
+
+def _unsigned_statement(attestation: ExternalAttestation) -> dict:
+    value = asdict(attestation)
+    value.pop("signature_hex")
+    return value
+
+
+def test_secret_free_detached_signature_round_trip_uses_exact_canonical_payload():
+    signed, verifier, _ = _signed_attestation()
+    statement = _unsigned_statement(signed)
+
+    placeholder, payload = prepare_external_attestation_payload(statement)
+    assert payload == signed.payload_bytes()
+    assert placeholder.signature_hex == "00" * 64
+
+    finalized = finalize_external_attestation(
+        statement,
+        public_key_hex=verifier.public_key_hex,
+        signature_hex=signed.signature_hex,
+    )
+    assert finalized == signed
+
+
+def test_detached_signature_packaging_fails_closed_without_mutating_input():
+    signed, verifier, _ = _signed_attestation()
+    statement = _unsigned_statement(signed)
+    original = dict(statement)
+
+    with pytest.raises(ExternalEvidenceError, match="does not match canonical payload"):
+        finalize_external_attestation(
+            {**statement, "result_sha256": "55" * 32},
+            public_key_hex=verifier.public_key_hex,
+            signature_hex=signed.signature_hex,
+        )
+    with pytest.raises(ExternalEvidenceError, match="omit signature_hex"):
+        prepare_external_attestation_payload({**statement, "signature_hex": signed.signature_hex})
+    with pytest.raises(ExternalEvidenceError, match="forbidden secret fields"):
+        prepare_external_attestation_payload({**statement, "private_key_hex": "not-allowed"})
+    with pytest.raises(ExternalEvidenceError, match="forbidden secret fields"):
+        prepare_external_attestation_payload(
+            {**statement, "metadata": {"private_key_hex": "must-stay-outside"}}
+        )
+    with pytest.raises(ExternalEvidenceError, match="forbidden secret fields"):
+        prepare_external_attestation_payload(
+            {**statement, "metadata": {"evaluator-access-token": "must-stay-outside"}}
+        )
+    missing = dict(statement)
+    missing.pop("suite_id")
+    with pytest.raises(ExternalEvidenceError, match="missing unsigned attestation fields: suite_id"):
+        prepare_external_attestation_payload(missing)
+    with pytest.raises(ExternalEvidenceError, match="unknown unsigned attestation fields: extra"):
+        prepare_external_attestation_payload({**statement, "extra": "not-covered"})
+    with pytest.raises(ExternalEvidenceError, match="must already use canonical field values"):
+        prepare_external_attestation_payload(
+            {**statement, "artifact_sha256": "AA" * 32}
+        )
+    with pytest.raises(ExternalEvidenceError, match="must be JSON integers"):
+        prepare_external_attestation_payload({**statement, "repeat_index": True})
+    with pytest.raises(ExternalEvidenceError, match="string fields have invalid types"):
+        prepare_external_attestation_payload({**statement, "suite_id": 7})
+    assert statement == original
+
+
+def test_payload_and_finalize_cli_emit_only_public_verifiable_artifacts(tmp_path, monkeypatch, capsys):
+    signed, verifier, _ = _signed_attestation()
+    statement = _unsigned_statement(signed)
+    statement_path = tmp_path / "result-statement.json"
+    payload_path = tmp_path / "payload.json"
+    attestation_path = tmp_path / "attestation.json"
+    statement_path.write_text(json.dumps(statement), encoding="utf-8")
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["agi-external-evidence", "payload", str(statement_path), "--output", str(payload_path)],
+    )
+    external_evidence_main()
+    payload_report = json.loads(capsys.readouterr().out)
+    assert payload_path.read_bytes() == signed.payload_bytes()
+    assert payload_report["claim_boundary"] == "unsigned payload only; not external evidence"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "agi-external-evidence",
+            "finalize",
+            str(statement_path),
+            "--public-key-hex",
+            verifier.public_key_hex,
+            "--signature-hex",
+            signed.signature_hex,
+            "--output",
+            str(attestation_path),
+        ],
+    )
+    external_evidence_main()
+    final_report = json.loads(capsys.readouterr().out)
+    assert ExternalAttestation.from_mapping(
+        json.loads(attestation_path.read_text(encoding="utf-8"))
+    ) == signed
+    assert final_report["attestation_id"] == signed.attestation_id()
+    assert "private" not in statement_path.read_text(encoding="utf-8").lower()
+
+
+def test_payload_and_finalize_cli_have_no_private_key_or_ledger_mutation_inputs():
+    parser = build_parser()
+    subparsers = parser._subparsers._group_actions[0].choices
+    actions = subparsers["payload"]._actions + subparsers["finalize"]._actions
+    option_strings = {option for action in actions for option in action.option_strings}
+
+    assert "--private-key" not in option_strings
+    assert "--private-key-hex" not in option_strings
+    assert "--signing-key" not in option_strings
+    assert "--ledger" not in option_strings
+    assert "--registry" not in option_strings
+
+
+def test_finalize_cli_does_not_write_on_signature_mismatch(tmp_path, monkeypatch):
+    signed, verifier, _ = _signed_attestation()
+    statement_path = tmp_path / "result-statement.json"
+    output_path = tmp_path / "must-not-exist.json"
+    statement_path.write_text(json.dumps(_unsigned_statement(signed)), encoding="utf-8")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "agi-external-evidence",
+            "finalize",
+            str(statement_path),
+            "--public-key-hex",
+            verifier.public_key_hex,
+            "--signature-hex",
+            "00" * 64,
+            "--output",
+            str(output_path),
+        ],
+    )
+    with pytest.raises(ExternalEvidenceError, match="does not match canonical payload"):
+        external_evidence_main()
+    assert not output_path.exists()
+
+    output_path.write_text("existing-output-must-survive\n", encoding="utf-8")
+    with pytest.raises(ExternalEvidenceError, match="does not match canonical payload"):
+        external_evidence_main()
+    assert output_path.read_text(encoding="utf-8") == "existing-output-must-survive\n"
 
 
 def test_rfc8032_vector_verifies_and_modified_message_fails():
