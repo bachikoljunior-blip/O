@@ -14,6 +14,12 @@ jobs:
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The external-evaluator handoff is intentionally bound to an exact
+          # earlier subject commit.  A depth-1 PR merge checkout cannot
+          # reconstruct that immutable archive, so CI must retain the commit
+          # object it is asserting against.
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'

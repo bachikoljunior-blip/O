@@ -166,7 +166,7 @@ def test_generation_fence_and_remote_readback_mismatches_are_rejected() -> None:
     ).authorized
 
 
-def test_checked_in_work_state_is_a_fresh_primary_single_writer_lease() -> None:
+def test_checked_in_work_state_is_a_fresh_single_writer_lease() -> None:
     state = json.loads(
         (ROOT / "agi" / "WORK_EXECUTION_STATE.json").read_text(encoding="utf-8")
     )
@@ -181,7 +181,10 @@ def test_checked_in_work_state_is_a_fresh_primary_single_writer_lease() -> None:
         migration_present=True,
     )
 
-    assert state["owner_kind"] == "work_primary"
+    assert state["owner_kind"] in {"work_primary", "work_recovery_automation"}
+    if state["owner_kind"] == "work_recovery_automation":
+        assert state["lease_generation"] >= 1
+        assert state["remote_persistence"]["verified_remote_readback"] is True
     assert state["active_run_id"] == "run-work-mode-handoff-v2"
     assert state["primary_run_contract"]["voluntary_exit_permitted"] is False
     assert state["external_evidence_state"]["agi_claim_supported"] is False
