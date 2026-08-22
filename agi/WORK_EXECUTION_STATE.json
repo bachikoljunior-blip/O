@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T19:47:14.725Z",
-  "last_progress_at": "2026-08-22T19:47:14.725Z",
+  "heartbeat_at": "2026-08-22T19:57:17.164Z",
+  "last_progress_at": "2026-08-22T19:57:17.164Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 256 merge CI 32592937235 is now observed successful on all required steps. PR 257 remains exact head 7d86119, mergeable, with exact-head CI 32594512530 and the final local full suite both in pytest with no failure signal. An earlier local full-suite attempt was deliberately interrupted at 16% only because its head was superseded by final secret-name hardening; that cancellation is retained as negative/superseded evidence. Frozen Root invoke-7a98234f8af1c64c638242f4 remains unchanged. AGI remains false.",
-    "verified_main_sha": "fbf273263648580ef0916b4429df4a85ef5b298f",
+    "reason": "Security review found and repaired an embedded-marker bypass in PR 257: suffix-only normalization allowed names such as private_key_material and apiTokenValue. Exact branch head 39f5889 now rejects token-boundary and compound-marker disguises; 33 focused tests, compileall, and diff-check pass. Exact-head CI 32595188080 and a fresh final-head local full suite are in progress. Prior 7d86119 CI remains uncancelled superseded evidence. Frozen Root remains unchanged. AGI remains false.",
+    "verified_main_sha": "88a609210089179828aa5293b6bb6c6cfe6a6215",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
   "parallel_execution_coordination": {
@@ -31,7 +31,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "fbf273263648580ef0916b4429df4a85ef5b298f",
+  "source_main_sha": "88a609210089179828aa5293b6bb6c6cfe6a6215",
   "working_branch": "work/external-attestation-detached-signature-v3",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "root",
@@ -44,11 +44,11 @@
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/external-attestation-detached-signature-v3",
-    "snapshot_head_sha": "7d86119d966bd83df4cfa9092122947682ad6716",
+    "snapshot_head_sha": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
     "pending_work_invocation_id": "invoke-7a98234f8af1c64c638242f4",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7a98234f8af1c64c638242f4/request.json",
     "durability_status": "implementation and exact native continuation are remotely readable on PR 257 head",
-    "next_action": "Observe exact-head CI 32594512530 for unchanged 7d86119 without rerun. If all required steps succeed and PR 257 remains conflict-free, submit frozen Root to Task Evaluate the bounded unit separately from original AGI FAIL, merge only after the frozen evidence boundary, verify main, and continue."
+    "next_action": "Observe exact-head CI 32595188080 and final-head local full suite for unchanged 39f5889 without rerun. If successful and conflict-free, submit frozen Root to Task Evaluate, publish its immutable O records, and require another unchanged exact-head CI before merge."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -172,14 +172,14 @@
       "pull_request": 257,
       "branch": "work/external-attestation-detached-signature-v3",
       "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
-      "exact_head_sha": "7d86119d966bd83df4cfa9092122947682ad6716",
-      "exact_head_ci_run": 32594512530,
-      "exact_head_ci_status": "in_progress_pytest",
+      "exact_head_sha": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
+      "exact_head_ci_run": 32595188080,
+      "exact_head_ci_status": "in_progress",
       "mergeable": true,
       "mergeable_state": "unstable_pending_checks",
       "changed_files": 56,
-      "focused_regression": "29_passed_plus_5_secret_suffix_and_disguised_key_negative_passed",
-      "local_full_suite": "in_progress_final_head_no_failure_signal",
+      "focused_regression": "33_passed_including_embedded_secret_marker_bypass",
+      "local_full_suite": "in_progress_final_head_84b45e4_local_equivalent",
       "compileall": "pass",
       "diff_check": "pass",
       "work_verify": {
@@ -202,22 +202,33 @@
           "ci_run": 32594233281,
           "status": "in_progress_superseded_not_cancelled",
           "reason": "added punctuation/case/camelCase secret-key normalization"
+        },
+        {
+          "head": "7d86119d966bd83df4cfa9092122947682ad6716",
+          "ci_run": 32594512530,
+          "status": "in_progress_superseded_not_cancelled",
+          "reason": "security review found suffix-only secret-marker bypass"
         }
       ],
-      "remote_source_blob_sha": "0401801feb3092e95cd1b91a042efa7b039d32c1",
-      "remote_test_blob_sha": "13ef8075e0b5e8606e679827ac6d0f86b9b0a78f",
+      "remote_source_blob_sha": "7840995542fe1f1b8bdb5d58157050fb15041e0b",
+      "remote_test_blob_sha": "cad7a002135495eb5ec1e78a77f48ce5ba1ce4f3",
       "superseded_local_test_runs": [
         {
           "head": "d33bef78c1cbce751d127750b3fe6a022674cce7",
           "status": "interrupted_at_16_percent",
           "reason": "superseded by final compact secret-name normalization; not a product failure and not rerun"
+        },
+        {
+          "head": "7d86119d966bd83df4cfa9092122947682ad6716",
+          "status": "interrupted_after_superseded",
+          "reason": "process had imported prior source before embedded-marker hardening; continuing would not verify final head"
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T19:47:14.725Z",
-        "exact_head_sha": "7d86119d966bd83df4cfa9092122947682ad6716",
-        "exact_head_ci_run": 32594512530,
-        "exact_head_ci_step": "pytest",
+        "at": "2026-08-22T19:57:17.164Z",
+        "exact_head_sha": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
+        "exact_head_ci_run": 32595188080,
+        "exact_head_ci_step": "setup_or_pytest",
         "mergeable": true
       }
     },
