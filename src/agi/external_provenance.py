@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import secrets
 import tempfile
 from dataclasses import asdict, dataclass, field, replace
@@ -47,7 +48,8 @@ _FORBIDDEN_ATTESTATION_SECRET_KEYS = frozenset(
 
 
 def _is_forbidden_attestation_secret_key(value: str) -> bool:
-    normalized = value.strip().lower().replace("-", "_")
+    camel_separated = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", value.strip())
+    normalized = camel_separated.lower().replace("-", "_")
     if normalized in _FORBIDDEN_ATTESTATION_SECRET_KEYS:
         return True
     if normalized.endswith(
@@ -71,6 +73,38 @@ def _is_forbidden_attestation_secret_key(value: str) -> bool:
     ):
         return True
     compact = "".join(character for character in normalized if character.isalnum())
+    if any(
+        marker in compact
+        for marker in (
+            "accesstoken",
+            "apikey",
+            "apitoken",
+            "authtoken",
+            "bridgesecret",
+            "expectedanswer",
+            "hiddenanswer",
+            "hiddenseed",
+            "privatekey",
+            "secretkey",
+            "signingkey",
+        )
+    ):
+        return True
+    tokens = tuple(token for token in re.split(r"[^a-z0-9]+", normalized) if token)
+    if any(
+        token in {
+            "answer",
+            "answers",
+            "credential",
+            "credentials",
+            "password",
+            "secret",
+            "seed",
+            "token",
+        }
+        for token in tokens
+    ):
+        return True
     return compact.endswith(
         (
             "accesstoken",
