@@ -1,0 +1,356 @@
+from __future__ import annotations
+
+import json
+import shutil
+from pathlib import Path
+
+import pytest
+
+from continual.work_session import (
+    WorkModelClient,
+    WorkModelPending,
+    WorkSession,
+    WorkSessionError,
+    pending_work_invocations,
+    submit_work_response,
+    verify_work_invocations,
+)
+
+
+def _root(tmp_path: Path) -> Path:
+    shutil.copytree(Path("prompts"), tmp_path / "prompts")
+    return tmp_path
+
+
+def _output(component: str, request: dict) -> dict:
+    fragment = {"component": component, "observations": [f"completed {component}"]}
+    if component == "entry":
+        result = {"objective": "finish the bounded Work bridge run"}
+    elif component == "root":
+        snapshot = request["payload"]["snapshot"]
+        if snapshot.get("last_result_ref"):
+            result = {"component": "task_evaluate", "goal": "evaluate the completed unit"}
+        else:
+            result = {"component": "execute", "goal": "execute the bounded unit"}
+    elif component == "execute":
+        result = {"status": "completed", "artifacts": ["work-bridge"]}
+    elif component == "task_evaluate":
+        result = {"verdict": "PASS", "evidence": ["bounded Work bridge completed"]}
+    elif component == "consolidate_episode":
+        result = {"outcome": "PASS", "summary": "all semantic components were externalized"}
+    elif component == "learn":
+        return {
+            "result": {"decision": "NO_CHANGE", "candidates": []},
+            "fragment": fragment,
+        }
+    else:  # pragma: no cover - protects the test fixture from silent expansion
+        raise AssertionError(component)
+    return {
+        "result": result,
+        "local_learn": {"decision": "NO_CHANGE", "candidates": []},
+        "fragment": fragment,
+    }
+
+
+def test_work_start_freezes_without_counting_a_model_error(tmp_path: Path):
+    root = _root(tmp_path)
+    session = WorkSession(root)
+    started = session.start(
+        "exercise every semantic component", run_id="run-work-bridge-test"
+    )
+
+    snapshot = started["snapshot"]
+    assert started["run_id"] == "run-work-bridge-test"
+    assert snapshot["phase"] == "entry_pending"
+    assert snapshot["error_count"] == 0
+    assert "last_error" not in snapshot
+    assert len(started["pending"]) == 1
+    request = started["pending"][0]
+    assert request["component"] == "entry"
+    assert request["executor_binding"] == "current_chatgpt_work_session"
+    assert request["contract"]["private_reasoning_forbidden"] is True
+    assert request["prompt_content"]
+
+    resumed = session.resume("run-work-bridge-test")
+    assert resumed["pending"][0]["invocation_id"] == request["invocation_id"]
+    native_journal_path = next(
+        (root / ".continual" / "runs" / "run-work-bridge-test" / "invocations").glob(
+            "*.json"
+        )
+    )
+    native_journal = json.loads(native_journal_path.read_text(encoding="utf-8"))
+    assert native_journal["status"] == "awaiting_work_model"
+    assert native_journal["attempt"] == 1
+
+
+def test_work_response_is_binding_checked_immutable_and_public(tmp_path: Path):
+    root = _root(tmp_path)
+    session = WorkSession(root, model_identity="work-model")
+    started = session.start("freeze one request")
+    request = started["pending"][0]
+    output = _output("entry", request)
+
+    with pytest.raises(WorkSessionError, match="executor_binding"):
+        submit_work_response(
+            root,
+            request["invocation_id"],
+            output,
+            executor_binding="different-session",
+            model_identity="work-model",
+        )
+
+    with pytest.raises(WorkSessionError, match="model_identity"):
+        submit_work_response(
+            root,
+            request["invocation_id"],
+            output,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="different-model",
+        )
+
+    first = submit_work_response(
+        root,
+        request["invocation_id"],
+        output,
+        executor_binding="current_chatgpt_work_session",
+        model_identity="work-model",
+    )
+    replay = submit_work_response(
+        root,
+        request["invocation_id"],
+        output,
+        executor_binding="current_chatgpt_work_session",
+        model_identity="work-model",
+    )
+    assert replay["response_digest"] == first["response_digest"]
+
+    conflicting = _output("entry", request)
+    conflicting["result"]["objective"] = "different"
+    with pytest.raises(WorkSessionError, match="immutable Work response conflict"):
+        submit_work_response(
+            root,
+            request["invocation_id"],
+            conflicting,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="work-model",
+        )
+
+    private = _output("entry", request)
+    private["fragment"]["chain_of_thought"] = "must never be persisted"
+    other = session.start("a second request")["pending"][-1]
+    with pytest.raises(WorkSessionError, match="forbidden private field"):
+        submit_work_response(
+            root,
+            other["invocation_id"],
+            private,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="work-model",
+        )
+
+    request_path = (
+        root
+        / ".continual"
+        / "work-model"
+        / "invocations"
+        / other["invocation_id"]
+        / "request.json"
+    )
+    tampered_request = json.loads(request_path.read_text(encoding="utf-8"))
+    tampered_request["payload"]["tampered"] = True
+    request_path.write_text(json.dumps(tampered_request), encoding="utf-8")
+    with pytest.raises(WorkSessionError, match="tampered Work request"):
+        pending_work_invocations(root)
+
+
+def test_work_response_digest_detects_persisted_metadata_tampering(tmp_path: Path) -> None:
+    root = _root(tmp_path)
+    session = WorkSession(root, model_identity="work-model")
+    request = session.start("freeze response metadata")["pending"][0]
+    output = _output("entry", request)
+    submit_work_response(
+        root,
+        request["invocation_id"],
+        output,
+        executor_binding="current_chatgpt_work_session",
+        model_identity="work-model",
+    )
+    response_path = (
+        root
+        / ".continual"
+        / "work-model"
+        / "invocations"
+        / request["invocation_id"]
+        / "response.json"
+    )
+    tampered_response = json.loads(response_path.read_text(encoding="utf-8"))
+    tampered_response["model_verified"] = True
+    response_path.write_text(json.dumps(tampered_response), encoding="utf-8")
+
+    with pytest.raises(WorkSessionError, match="immutable Work response conflict"):
+        submit_work_response(
+            root,
+            request["invocation_id"],
+            output,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="work-model",
+        )
+
+
+def test_post_result_candidate_response_replays_with_frozen_evaluator_mode(
+    tmp_path: Path,
+) -> None:
+    root = _root(tmp_path)
+    client = WorkModelClient(
+        root,
+        run_id="run-work-candidate-post-test",
+        executor_binding="current_chatgpt_work_session",
+        model_identity="work-model",
+    )
+    payload = {
+        "mode": "post-result",
+        "candidate": {"candidate_id": "candidate-test-v1"},
+        "execution_unit": {"scope": "test-scope"},
+    }
+
+    with pytest.raises(WorkModelPending) as pending:
+        client.call(
+            "candidate_evaluate",
+            payload,
+            prompt_path="prompts/candidate_evaluate.md",
+        )
+
+    output = {
+        "result": {
+            "decision": "REMAIN_CANDIDATE",
+            "candidate_id": "candidate-test-v1",
+            "scope": "test-scope",
+        },
+        "local_learn": {"decision": "NO_CHANGE", "candidates": []},
+        "fragment": {
+            "component": "candidate_evaluate",
+            "observations": ["post-result evidence is still insufficient"],
+        },
+    }
+    submit_work_response(
+        root,
+        pending.value.invocation_id,
+        output,
+        executor_binding="current_chatgpt_work_session",
+        model_identity="work-model",
+    )
+
+    assert (
+        client.call(
+            "candidate_evaluate",
+            payload,
+            prompt_path="prompts/candidate_evaluate.md",
+        )
+        == output
+    )
+
+
+def test_work_model_drives_native_o_entry_through_learn(tmp_path: Path):
+    root = _root(tmp_path)
+    session = WorkSession(root, model_identity="work-model-under-test")
+    state = session.start("exercise ENTRY Root Execute Task Evaluate Consolidate Episode Learn")
+    run_id = state["run_id"]
+    seen: list[str] = []
+
+    for _ in range(12):
+        pending = pending_work_invocations(root, run_id=run_id)
+        if not pending:
+            break
+        assert len(pending) == 1
+        request = pending[0]
+        component = request["component"]
+        seen.append(component)
+        submit_work_response(
+            root,
+            request["invocation_id"],
+            _output(component, request),
+            executor_binding="current_chatgpt_work_session",
+            model_identity="work-model-under-test",
+        )
+        state = session.resume(run_id)
+        if state["snapshot"]["status"] == "finished":
+            break
+
+    assert state["snapshot"]["status"] == "finished"
+    assert seen == [
+        "entry",
+        "root",
+        "execute",
+        "root",
+        "task_evaluate",
+        "consolidate_episode",
+        "learn",
+    ]
+    episode_id = state["snapshot"]["episode_id"]
+    assert (root / ".continual" / "episodes" / episode_id / "episode.json").is_file()
+    event_text = (root / ".continual" / "runs" / run_id / "events.jsonl").read_text()
+    assert event_text.count('"type": "work_model_pending"') == len(seen)
+    verification = verify_work_invocations(root, run_id=run_id)
+    assert verification["valid"] is True
+    assert verification["requests"] == len(seen)
+    assert verification["responses"] == len(seen)
+    assert verification["pending"] == 0
+
+
+def test_work_model_consolidates_passing_unit_then_continues_unmet_task(tmp_path: Path):
+    root = _root(tmp_path)
+    session = WorkSession(root, model_identity="work-model-under-test")
+    state = session.start("continue an ambitious task after learning each passing unit")
+    run_id = state["run_id"]
+    seen: list[str] = []
+
+    for _ in range(12):
+        pending = pending_work_invocations(root, run_id=run_id)
+        assert len(pending) == 1
+        request = pending[0]
+        component = request["component"]
+        if component == "root" and seen and seen[-1] == "learn":
+            break
+        seen.append(component)
+        response = _output(component, request)
+        if component == "task_evaluate":
+            response["result"] = {
+                "verdict": "FAIL",
+                "unit_verdict": "PASS",
+                "evidence": ["unit passed but original task remains unmet"],
+            }
+        first = submit_work_response(
+            root,
+            request["invocation_id"],
+            response,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="work-model-under-test",
+        )
+        if component in {"consolidate_episode", "learn"}:
+            replay = submit_work_response(
+                root,
+                request["invocation_id"],
+                response,
+                executor_binding="current_chatgpt_work_session",
+                model_identity="work-model-under-test",
+            )
+            assert replay["response_digest"] == first["response_digest"]
+        state = session.resume(run_id)
+
+    assert seen == [
+        "entry",
+        "root",
+        "execute",
+        "root",
+        "task_evaluate",
+        "consolidate_episode",
+        "learn",
+    ]
+    assert state["snapshot"]["status"] == "continue"
+    assert state["snapshot"]["phase"] == "root_pending"
+    pending = pending_work_invocations(root, run_id=run_id)
+    assert len(pending) == 1
+    assert pending[0]["component"] == "root"
+    verification = verify_work_invocations(root, run_id=run_id)
+    assert verification["valid"] is True
+    assert verification["responses"] == len(seen)
+    assert verification["pending"] == 1

@@ -1,0 +1,1 @@
+Migrate O development from Chat mode to a single-writer ChatGPT Work execution, integrate the Work model through every semantic O Engine component, and install a watchdog that only recovers a stopped execution without weakening the strict external AGI evidence gate.
