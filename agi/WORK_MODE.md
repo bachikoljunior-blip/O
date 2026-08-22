@@ -2,7 +2,7 @@
 
 ## Authority and source of truth
 
-The current ChatGPT Work session is the primary development owner. It performs semantic judgment and implementation through the ordinary O Engine. Repository latest `main`, not chat history or unsaved reasoning, is the durable continuation source.
+The current Work session is the primary development owner. In this epoch that owner is a successor Claude Code remote session that took over by direct user instruction after the predecessor Work lease went stale; the model identity is platform-unverified and must stay recorded as such. It performs semantic judgment and implementation through the ordinary O Engine. Repository latest `main`, not chat history or unsaved reasoning, is the durable continuation source.
 
 The model is connected to O through the checked-in `continual work-start`, `work-pending`, `work-submit`, `work-resume`, and `work-verify` path. O retains the Run, immutable component requests and responses, invocation journal, fragments, Local Learn results, Episodes, Candidates, memory, evidence, and continuation. `work-verify` audits every persisted request and response digest, binding, output digest, and component contract, including already-consumed invocations. The Work model identity remains unverified unless the platform provides an independently inspectable identity signal.
 

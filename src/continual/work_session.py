@@ -145,6 +145,11 @@ def _verified_response(
 class WorkModelClient:
     """ModelClient-compatible adapter backed by immutable Work invocation records."""
 
+    # Marks this client as the only provider allowed to complete an invocation
+    # journal left in ``awaiting_work_model``. The Engine refuses to answer such
+    # a frozen Work request with any other (e.g. default API) provider.
+    provides_work_responses = True
+
     def __init__(
         self,
         root: Path,

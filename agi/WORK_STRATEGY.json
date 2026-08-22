@@ -95,18 +95,27 @@
   },
   "current_bottlenecks": [
     {
-      "id": "work_migration_not_on_main",
-      "observation": "The Work-mode lease, handoff, strategy, and native O continuation are not yet published on remote main.",
-      "effect": "The monitor cannot safely resume the primary Work owner from repository truth.",
-      "selected_action": "Finish exact local validation, publish one isolated head, require unchanged exact-head checks, merge, and verify remote readback."
+      "id": "work_migration_merged_needs_safety_followup",
+      "observation": "PR 252 merged the Work-mode migration to main (c2361b81), but three confirmed engine defects and the invalid materialize CI workflow remain on main; PR 254 lands the fixes and the CI repair.",
+      "effect": "Until PR 254 lands, the merged Work bridge has a replay-unstable invocation identity, a model-controlled path traversal, and an unbound-provider resume hazard.",
+      "selected_action": "Observe PR 254 exact-head full CI, merge only an unchanged passing head, verify remote readback, then refresh the fenced primary lease."
     },
     {
       "id": "zero_independent_external_evidence",
       "observation": "The external ledger has zero evaluation requests, challenges, disclosures, attestations, and registered verifiers.",
-      "effect": "No internal capability result can satisfy the user-level completion gate.",
-      "selected_action": "After migration safety is on main, prioritize an independently controlled held-out production-evidence route while continuing reusable capability work."
+      "effect": "No internal capability result can satisfy the user-level completion gate; this, not the internal synthesis method, is the expected-time-limiting factor.",
+      "selected_action": "Shift marginal effort from further internal-capability probes toward external-evidence readiness (mechanically verifiable held-out artifacts and provenance) and keep the user-only independent-evaluator request surfaced so evidence is immediately admissible when a channel exists."
     }
   ],
+  "saturation_assessment": {
+    "observed_at": "2026-08-22T14:45:00Z",
+    "fired_trigger": "same_method_family_dominates_recent_exploration_without_comparative_justification",
+    "observation": "The recent merged/attempted capability units (PR 238 multi-session retention, PR 244 three-round, PR 246 four-round, PR 247 three-learning, PR 248 five-round, PR 249 four-learning, plus the PR 230/233 recursive-frontier and observed-schema line) are dominated by one method family: bounded typed-program synthesis with generated-skill retention probes that vary the round/session count. This is 6/6 same-family in the window of 6 and exceeds the threshold of 4.",
+    "discriminating_conclusion": "Adding more retention-probe variations produces more internal CI-green evidence but does not reduce expected time to the strict external gate, because the gate requires genuinely independent external production evidence and the external ledger throughput is zero. Internal-method variation is gate-irrelevant while no external evaluation channel exists.",
+    "selected_alternative": "Do not merge the near-duplicate retention probes mechanically; integrate at most a representative, non-redundant subset and treat the rest as retained internal evidence. Redirect effort to (a) external-evidence readiness artifacts an independent evaluator could check without trusting this operator, and (b) the user-only evaluator-access request already in the queue. Adopt a materially different internal method only if a scoped comparison shows it lowers expected time to the unchanged gate, not merely to raise internal scores.",
+    "reevaluate_on": "An independent external evaluation channel becomes available, a scoped comparison shows a materially different method lowers expected time to the gate, or the next Root strategy review occurs.",
+    "reevaluate_by": "2026-08-23T14:45:00Z"
+  },
   "deferred_routes": [
     {
       "route": "copilot_live_semantic_validation",
@@ -117,11 +126,11 @@
     }
   ],
   "immediate_sequence": [
-    "Run full latest-code validation and reference commands.",
-    "Complete native Execute and task evaluation without upgrading internal evidence to AGI proof.",
-    "Publish one exact migration head and inspect unchanged exact-head CI.",
-    "Merge only if required checks pass and the head remains unchanged, then verify main readback.",
-    "Refresh the fenced primary lease on main and immediately select the next expected-time-optimal falsifiable O unit."
+    "Observe PR 254 exact-head full CI; merge only an unchanged passing head.",
+    "Verify remote readback and refresh the fenced primary lease on the new main.",
+    "Settle the backlog conservatively: refresh and merge a representative non-redundant subset of the passing retention PRs onto verified main, close diagnostic-only and near-duplicate heads with the recorded saturation rationale, and preserve every exact failure.",
+    "Reconstruct the observed-schema successor (PR 233 line) with the persisted-iterated Candidate-ID binding repair and a direct end-to-end regression before any merge.",
+    "Redirect marginal effort to external-evidence readiness and the user-only independent-evaluator request; do not upgrade internal evidence to AGI proof."
   ],
   "claim_boundary": {
     "agi_claim_supported": false,
@@ -129,5 +138,5 @@
     "strategy_success_is_external_evidence": false
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "updated_at": "2026-08-22T13:07:07Z"
+  "updated_at": "2026-08-22T14:45:00Z"
 }

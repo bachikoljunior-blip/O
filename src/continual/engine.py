@@ -15,6 +15,12 @@ from .store import Store
 from .work_session import WorkModelPending
 
 
+class WorkProviderMismatch(RuntimeError):
+    """Raised when a non-Work provider is asked to complete an invocation whose
+    journal is frozen in ``awaiting_work_model``. Only a Work-model client may
+    answer such a request; any other provider must not fabricate the response."""
+
+
 SEMANTIC_COMPONENTS = {
     "entry": "entry",
     "root": "root",
@@ -35,6 +41,10 @@ _ACTIVE_DEFAULTS = {
     "runner": "python-engine-v2",
 }
 _CANDIDATE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$")
+# A model-proposed unit_id is used as a filesystem path component; keep it to a
+# strict, separator-free allowlist so it can never traverse out of the run
+# directory into protected control files.
+_SAFE_UNIT_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 _LIST_FIELDS = {
     "supporting_evidence",
     "contradictory_evidence",
@@ -109,6 +119,23 @@ class Engine:
             "runner": active.get("runner", "python-engine-v2"),
             "active_components_digest": self.store.stable_digest(active),
         }
+
+    def _run_environment(self, run_id: str) -> dict[str, Any]:
+        """Return the environment frozen in the run snapshot at ``start`` time.
+
+        Preflight/postflight identities are digests over this value. Using the
+        run's frozen environment (rather than a freshly sampled live one, whose
+        ``repository_commit`` moves whenever HEAD advances) keeps every
+        candidate-evaluate invocation id stable across process restarts and
+        commits, so a resumed run replays its frozen Work request instead of
+        minting a new one and re-calling the model.
+        """
+        snapshot = self.store.read_json(self.store.run_dir(run_id) / "snapshot.json", {})
+        if isinstance(snapshot, dict):
+            environment = snapshot.get("environment")
+            if isinstance(environment, dict):
+                return environment
+        return self.environment()
 
     def start(
         self,
@@ -355,6 +382,11 @@ class Engine:
 
         output = journal.get("output") if isinstance(journal, dict) and journal.get("status") == "output_ready" else None
         if isinstance(journal, dict) and journal.get("status") == "awaiting_work_model":
+            if not getattr(self.model, "provides_work_responses", False):
+                raise WorkProviderMismatch(
+                    f"invocation {invocation_id} for run {run_id} is awaiting a Work-model "
+                    "response; refusing to complete it with a non-Work provider"
+                )
             attempt = int(journal.get("attempt", 1))
         else:
             attempt = int(journal.get("attempt", 0)) + 1 if isinstance(journal, dict) else 1
@@ -512,7 +544,7 @@ class Engine:
             "target_component": target,
             "execution_unit": unit,
             "candidate_index": relevant,
-            "environment": self.environment(),
+            "environment": self._run_environment(run_id),
             "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
         }
         preflight_id = f"preflight-{target}-{self.store.stable_digest(payload)}"
@@ -618,7 +650,7 @@ class Engine:
             "pre_application": selection.get("result", selection),
             "candidate": selected,
             "actual_result": actual_result,
-            "environment": self.environment(),
+            "environment": self._run_environment(run_id),
         }
         output, invocation_id = self._call_component_direct(
             run_id,
@@ -737,7 +769,12 @@ class Engine:
         unit = deepcopy(unit)
         unit["component"] = component
         unit_id = unit.get("unit_id")
-        if not isinstance(unit_id, str) or not unit_id:
+        # unit_id is model-controlled and becomes a filesystem path component
+        # (execution-units/<unit_id>.json, artifacts/<unit_id>-result.json), so a
+        # value with separators or ".." could escape the run directory and
+        # overwrite protected control files. Accept only a strict allowlist and
+        # otherwise derive a safe deterministic id.
+        if not isinstance(unit_id, str) or not _SAFE_UNIT_ID.fullmatch(unit_id):
             unit_id = f"unit-{self.store.stable_digest({'revision': snapshot.get('revision'), 'unit': unit})}"
         unit["unit_id"] = unit_id
         self.store.atomic_json(
@@ -941,6 +978,13 @@ class Engine:
                 # Mutating the semantic snapshot here would change the payload digest
                 # on resume and create a different Work invocation instead of replaying
                 # the response for the frozen one.
+                return self.store.snapshot(run_id)
+
+            except WorkProviderMismatch:
+                # A non-Work provider tried to resume a run whose next invocation
+                # is frozen awaiting a Work-model response. Leave the run exactly
+                # as-is (no wrong-provider completion, no error inflation); only a
+                # Work-model client may advance it.
                 return self.store.snapshot(run_id)
 
             except Exception as exc:
