@@ -8,13 +8,13 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T18:23:51.441Z",
-  "last_progress_at": "2026-08-22T18:23:51.441Z",
+  "heartbeat_at": "2026-08-22T18:36:30.142Z",
+  "last_progress_at": "2026-08-22T18:36:30.142Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 255 exact head 36b34d1 passed all required CI in run 32588729634 and merged to main as 5537f10. The strict external request is now durable; merge-commit CI and native O Execute closure remain pending. AGI remains false.",
-    "verified_main_sha": "5537f10bbbfa43a0a730d630c8e47ea8ebd51e24",
-    "recoverable_by": "No recovery while this running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
+    "reason": "Native O exposed a lifecycle defect: an honest original-goal FAIL plus passing incremental unit skipped Consolidate Episode and Learn. PR 256 head 71ee80b implements the two-level verdict lifecycle, passes 20 focused tests, and persists the current immutable Work Run records. Exact-head CI is pending; AGI remains false.",
+    "verified_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
+    "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
   "parallel_execution_coordination": {
     "note_to_parallel_worker": "A parallel ChatGPT Work-mode session (GPT-5.6 Sol) is the user's other active driver on this repository. The user authorized this Claude successor to coordinate with it. To avoid a two-writer collision, only one live writer should mutate the repository at a time; whichever holds a fresh running heartbeat is primary and the other suppresses per the monitor contract.",
@@ -31,11 +31,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "5537f10bbbfa43a0a730d630c8e47ea8ebd51e24",
-  "working_branch": "work/external-evidence-handoff-v3",
+  "source_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
+  "working_branch": "work/incremental-unit-learning-v3",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute",
-  "active_unit_id": "unit-634edce3b0003989312d61aa",
+  "active_component": "root",
+  "active_unit_id": "unit-a259396b52b0682db153cbbe",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 3,
@@ -43,15 +43,17 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "pending_work_invocation_id": "invoke-be8f13c968a7d7715d3de309",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-be8f13c968a7d7715d3de309/request.json",
-    "next_action": "Observe main merge-commit CI run 32590500449 for merge SHA 5537f10 without rerunning. On success, submit Execute invocation invoke-be8f13c968a7d7715d3de309, resume Task Evaluate/Consolidate Episode/Learn/Root through the native O Run, and execute the next highest-value falsifiable unit. AGI remains false."
+    "snapshot_branch": "work/incremental-unit-learning-v3",
+    "snapshot_head_sha": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
+    "pending_work_invocation_id": "invoke-6c6e47682672fae2a10d9cbd",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-6c6e47682672fae2a10d9cbd/request.json",
+    "next_action": "Observe PR 256 exact-head CI without rerunning. If the unchanged head passes and remains conflict-free, merge it, verify main and merge CI, then resume the frozen Root invocation and use the repaired lifecycle to Task Evaluate the unit honestly as original-goal FAIL plus unit PASS, externalize Consolidate Episode and Learn, and return to Root. AGI remains false."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
-    "actual": "claude-fable-5 (session-configured identifier; serving model may differ)",
+    "actual": "chatgpt-work-model-unverified",
     "verified": false,
-    "verification_source": "Claude Code remote session configuration only; no independent platform attestation was observed"
+    "verification_source": "No independently inspectable platform model identity signal was observed."
   },
   "primary_run_contract": {
     "voluntary_exit_permitted": false,
@@ -112,6 +114,17 @@
     "exact_head_ci_completed_at": "2026-08-22T18:22:06.533Z",
     "merge_sha": "5537f10bbbfa43a0a730d630c8e47ea8ebd51e24",
     "merge_ci_status": "in_progress",
-    "merge_ci_run": 32590500449
+    "merge_ci_run": 32590500449,
+    "lifecycle_repair": {
+      "pull_request": 256,
+      "exact_head_sha": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
+      "base_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
+      "exact_head_ci_status": "pending",
+      "focused_tests": "20_passed",
+      "compileall": "pass",
+      "diff_check": "pass",
+      "defect": "overall task verdict and incremental unit verdict were conflated, preventing honest Consolidate Episode and Learn under an unmet ambitious goal",
+      "agi_claim_supported": false
+    }
   }
 }
