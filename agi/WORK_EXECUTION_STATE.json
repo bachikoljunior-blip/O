@@ -8,11 +8,11 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T21:19:20.149Z",
-  "last_progress_at": "2026-08-22T21:19:20.149Z",
+  "heartbeat_at": "2026-08-22T21:25:32.404Z",
+  "last_progress_at": "2026-08-22T21:25:32.404Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 257 remains conflict-free at exact head 2a3ac65 with exact-head CI 32598374443 in progress; prior CI 32597656410 remains retained. Cross-binding Execute local head 441622a adds complete fixed-member challenge/request/subject/runtime/suite/result/key/signature cross-binding, no-follow bounded reads, nonempty artifacts, atomic output cleanup, symlink-traversal rejection, and distinct cryptographic-validity/evaluation-success reporting. Dedicated 28 tests and focused 66 external-evidence tests pass; compileall/diff-check pass. Exact full suite is now running without source changes. Two earlier local full-suite attempts were intentionally interrupted only after adversarial review found real hardening gaps; they are superseded evidence, not success. No independent external production evidence exists; AGI false.",
+    "reason": "PR 257 exact head 2a3ac65 remains in exact-head CI 32598374443 at pytest. Cross-binding adversarial review found and fixed a real full-challenge gap: nonce/suite were signed but validity-window and verifier-policy changes could remain acceptable. Final local head 9aa7689 now requires signed canonical digests of complete challenge.json and verifier.json, rejecting validity-window tampering, independent-group changes, and policy widening. Dedicated 32 and focused 70 tests pass; compileall/diff-check pass. The prior full-suite session was interrupted because it could not verify this corrected source; a new unchanged exact full suite session 3513 is running. No independent external production evidence exists; AGI false.",
     "verified_main_sha": "8c35555a781df027b02dcf2b1f2c44685f70d3c1",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a generation-plus-one state-only CAS with exact readback."
   },
@@ -47,8 +47,8 @@
     "snapshot_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
-    "durability_status": "PR 257 exact head 2a3ac65 is remotely readable and conflict-free with CI in progress; cross-binding implementation is isolated at local exact commit 441622a with exact full regression running",
-    "next_action": "Wait for exact-head CI 32598374443 without rerun or cancellation. If all required checks succeed, head remains 2a3ac65 and mergeable remains true, merge PR 257 and verify main plus merge CI. Continue the unchanged cross-binding full suite; after PR 257 integration publish cross-binding from its exact tested commit through a new fenced branch/PR."
+    "durability_status": "PR 257 exact head 2a3ac65 is remote with CI in progress; cross-binding is isolated at final reviewed local commit 9aa7689 with exact full regression session 3513 running",
+    "next_action": "Wait for PR 257 exact-head CI without rerun/cancel. Merge only on unchanged head, all required success, and mergeable true; verify main and merge CI. Let cross-binding exact full suite finish unchanged, then publish its exact commit after PR 257 integration."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -237,13 +237,13 @@
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T21:19:20.149Z",
+        "at": "2026-08-22T21:25:32.404Z",
         "exact_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
         "exact_head_ci_run": 32598374443,
-        "exact_head_ci_status": "in_progress",
+        "exact_head_ci_status": "in_progress_pytest",
         "mergeable": true,
         "prior_superseded_ci_run": 32597656410,
-        "native_phase": "execute_cross_binding_exact_full_regression_in_progress_local"
+        "native_phase": "execute_final_cross_binding_exact_full_regression_in_progress_local"
       },
       "exact_head_ci_all_required_steps_success": false,
       "task_evaluate": {
@@ -270,13 +270,13 @@
       "observed_at": "2026-08-22T21:02:16.449Z"
     },
     "external_handoff_cross_binding": {
-      "status": "isolated_exact_full_suite_in_progress",
-      "local_exact_commit": "441622aeb65f5f41567ee0689b842f6703ca5e6a",
-      "dedicated_tests": "28_passed",
-      "focused_external_evidence_tests": "66_passed_106.21s",
+      "status": "isolated_final_exact_full_suite_in_progress",
+      "local_exact_commit": "9aa768978187e2b0f8755be3106f6db8353a88c3",
+      "dedicated_tests": "32_passed",
+      "focused_external_evidence_tests": "70_passed_118.40s",
       "compileall": "pass",
       "diff_check": "pass",
-      "exact_full_suite": "in_progress_session_65869_no_failure_signal",
+      "exact_full_suite": "in_progress_session_3513_no_failure_signal",
       "hardening": [
         "fixed canonical public bundle members and challenge schema",
         "request criterion exact subject runtime manifest suite nonce evaluator result payload key and signature cross-binding",
@@ -284,7 +284,9 @@
         "empty system archive and result rejection",
         "atomic output preservation and temp cleanup",
         "lexical/resolved output symlink traversal rejection",
-        "cryptographic validity separated from signed evaluation success"
+        "cryptographic validity separated from signed evaluation success",
+        "signed canonical full challenge digest prevents validity-window and other challenge-field tampering",
+        "signed canonical full verifier digest prevents identity-group, validity, and policy tampering"
       ],
       "superseded_local_full_suites": [
         {
@@ -294,6 +296,10 @@
         {
           "status": "interrupted_after_adversarial_review",
           "reason": "atomic temp cleanup, empty binary rejection, and negative-result reporting needed hardening; implementation was amended before final verification"
+        },
+        {
+          "status": "interrupted_after_adversarial_review",
+          "reason": "full challenge validity fields and verifier policy were not transitively signed; final protocol now binds canonical complete-object digests"
         }
       ],
       "agi_claim_supported": false
