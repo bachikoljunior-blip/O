@@ -853,14 +853,23 @@ class Engine:
                     self.store.atomic_json(rd / artifact_ref, result)
 
                     if component == "task_evaluate":
-                        verdict = result.get("verdict") or result.get("status")
-                        if verdict == "PASS":
+                        task_verdict = result.get("verdict") or result.get("status")
+                        unit_verdict = result.get("unit_verdict")
+                        unit_subfinding = result.get("unit_subfinding")
+                        if unit_verdict is None and isinstance(unit_subfinding, dict):
+                            unit_verdict = unit_subfinding.get("verdict")
+                        # Backward compatibility: a legacy evaluator with one verdict
+                        # evaluates both the current unit and the original task.
+                        unit_verdict = unit_verdict or task_verdict
+                        if unit_verdict == "PASS":
                             self._advance(
                                 run_id,
                                 snapshot,
                                 phase="consolidate_pending",
                                 last_evaluation=result,
                                 last_result_ref=artifact_ref,
+                                task_completion_verdict=task_verdict,
+                                unit_completion_verdict=unit_verdict,
                             )
                         else:
                             self._advance(
@@ -869,6 +878,8 @@ class Engine:
                                 phase="root_pending",
                                 last_evaluation=result,
                                 last_result_ref=artifact_ref,
+                                task_completion_verdict=task_verdict,
+                                unit_completion_verdict=unit_verdict,
                             )
                         continue
 
@@ -961,15 +972,34 @@ class Engine:
                                 "at": self.store.utc_now(),
                             },
                         )
-                    finished = self._advance(
+                    if snapshot.get("task_completion_verdict") == "PASS":
+                        finished = self._advance(
+                            run_id,
+                            snapshot,
+                            status="finished",
+                            phase="finished",
+                            produced_candidates=produced,
+                        )
+                        self.store.append_event(
+                            run_id, {"type": "run_finished", "episode_id": episode_id}
+                        )
+                        return finished
+                    self._advance(
                         run_id,
                         snapshot,
-                        status="finished",
-                        phase="finished",
+                        status="continue",
+                        phase="root_pending",
                         produced_candidates=produced,
                     )
-                    self.store.append_event(run_id, {"type": "run_finished", "episode_id": episode_id})
-                    return finished
+                    self.store.append_event(
+                        run_id,
+                        {
+                            "type": "unit_learned",
+                            "episode_id": episode_id,
+                            "task_verdict": snapshot.get("task_completion_verdict"),
+                        },
+                    )
+                    continue
 
                 raise RuntimeError(f"unknown phase: {phase}")
 
