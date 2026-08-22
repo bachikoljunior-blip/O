@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Mapping, Sequence
 
 from agi.benchmark import AgentState
+from agi.copilot_cli import build_parser as build_copilot_parser
 from agi.cross_run_workspace_retention import run_cross_run_workspace_retention
 from agi.workspace import (
     ReferenceWorkspaceAgent,
@@ -99,3 +101,13 @@ def test_cross_run_retention_rejects_relearning_even_when_outputs_pass():
     assert report["checks"]["no_relearning_or_readoption_events"] is False
     assert report["state_mutation_events"][0]["tool"] == "remember"
     assert report["passed"] is False
+
+
+def test_copilot_cli_exposes_bounded_cross_run_retention_command():
+    args = build_copilot_parser().parse_args(
+        ["run-retention", "--model", "gpt-5.4", "--output-dir", "/tmp/retention"]
+    )
+
+    assert args.cmd == "run-retention"
+    assert args.model == "gpt-5.4"
+    assert args.output_dir == Path("/tmp/retention")
