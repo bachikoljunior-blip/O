@@ -8,13 +8,13 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T20:47:03.351Z",
-  "last_progress_at": "2026-08-22T20:47:03.351Z",
+  "heartbeat_at": "2026-08-22T21:00:41.654Z",
+  "last_progress_at": "2026-08-22T21:00:41.654Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 257 immutable native O cycle published atomically to exact head b164f3c. The prior assessed code head 8f4278e passed CI 32595446105; Task Evaluate retained original AGI FAIL and bounded packaging PASS; Consolidate Episode and Learn completed; Root froze cross-binding Execute invoke-f3f84b7c83c1d48e4962e390. Final exact-head CI 32597656410 queued. Native integrity valid: 34 requests, 33 responses, one pending. AGI false.",
-    "verified_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
-    "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a new generation-plus-one state-only CAS with exact readback."
+    "reason": "PR 257 final immutable-record head b164f3c remains unchanged and CI 32597656410 is still running pytest. GitHub now reports the PR non-mergeable because main advanced only in agi/WORK_EXECUTION_STATE.json after the PR base; compare confirms that is the sole main-side file. Cross-binding Execute implementation is isolated locally with 18 dedicated tests and 56 focused provenance/request/artifact/claim tests passing, compileall and diff-check passing. No AGI evidence observed.",
+    "verified_main_sha": "55c2bf3def342f59f08c1bc8d81a09b3723ad55d",
+    "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a generation-plus-one state-only CAS with exact readback."
   },
   "parallel_execution_coordination": {
     "note_to_parallel_worker": "A parallel ChatGPT Work-mode session (GPT-5.6 Sol) is the user's other active driver on this repository. The user authorized this Claude successor to coordinate with it. To avoid a two-writer collision, only one live writer should mutate the repository at a time; whichever holds a fresh running heartbeat is primary and the other suppresses per the monitor contract.",
@@ -48,7 +48,7 @@
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
     "durability_status": "implementation, bounded Task Evaluate PASS, Consolidate Episode, Learn, Root, and frozen next Execute are remotely readable on PR 257 exact head b164f3c",
-    "next_action": "Wait for exact-head CI 32597656410 without duplicate rerun. If all required checks succeed, head remains unchanged, and PR is conflict-free, merge PR 257; verify main readback and merge CI, then execute unit-89058c1acef29b8e657a946c."
+    "next_action": "Do not merge PR 257 at b164f3c while GitHub reports a conflict. Let CI 32597656410 finish without cancellation, then rebind the PR by a non-force merge commit that preserves the latest main WORK_EXECUTION_STATE, verify the new exact head and rerun required CI. After conflict-free success, merge and publish the separately isolated cross-binding Execute unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -174,9 +174,9 @@
       "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
       "exact_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
       "exact_head_ci_run": 32597656410,
-      "exact_head_ci_status": "queued",
-      "mergeable": true,
-      "mergeable_state": "clean_pending_checks",
+      "exact_head_ci_status": "in_progress_pytest",
+      "mergeable": false,
+      "mergeable_state": "state_only_main_divergence_requires_nonforce_rebind",
       "changed_files": 105,
       "focused_regression": "33_passed_final_public_boundary_alignment",
       "local_full_suite": "in_progress_final_head_12716d4_local_equivalent",
@@ -237,14 +237,15 @@
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T20:47:03.351Z",
+        "at": "2026-08-22T21:00:41.654Z",
         "exact_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
         "exact_head_ci_run": 32597656410,
-        "exact_head_ci_status": "queued",
-        "mergeable": true,
-        "native_phase": "execute_pending"
+        "exact_head_ci_status": "in_progress_pytest",
+        "mergeable": false,
+        "merge_blocker": "main advanced only in agi/WORK_EXECUTION_STATE.json; preserve latest main state in a two-parent merge commit after CI observation",
+        "native_phase": "execute_implementation_isolated_local"
       },
-      "exact_head_ci_all_required_steps_success": true,
+      "exact_head_ci_all_required_steps_success": false,
       "task_evaluate": {
         "original_goal_verdict": "FAIL",
         "unit_verdict": "PASS",
@@ -266,7 +267,7 @@
       "requests": 34,
       "responses": 33,
       "pending": 1,
-      "observed_at": "2026-08-22T20:47:03.351Z"
+      "observed_at": "2026-08-22T21:00:41.654Z"
     }
   }
 }
