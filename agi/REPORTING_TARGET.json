@@ -1,17 +1,17 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "primary_target": {
-    "kind": "same_automation_task_chat",
-    "description": "The same automation/task chat reused for setup, hourly execution, and chronological result reporting.",
+    "kind": "same_work_project_chat",
+    "description": "The current Work project chat used by the primary developer and by monitor recovery reports.",
     "routing_identifier": null,
-    "binding_status": "current_execution_chat",
-    "delivery_requirement": "Post the final report in the same task chat after the repository report is persisted and the lease is released. Do not create a new report chat."
+    "binding_status": "current_work_project_chat",
+    "delivery_requirement": "Post factual progress or recovery reports in this Work project after durable state is persisted. A progress report never releases the primary lease or ends the development loop."
   },
   "context_boundary": {
-    "same_task_chat": true,
+    "same_work_project_chat": true,
     "read_prior_execution_chat_as_work_state": false,
     "import_prior_chat_context_as_continuation": false,
-    "logical_context_reset_each_run": true,
+    "logical_context_reset_on_monitor_recovery": true,
     "continuation_source": "repository_latest_main_only",
     "delivery_is_output_only": true,
     "platform_context_exclusion_verified": false,
@@ -23,8 +23,8 @@
     "persist_before_delivery": true,
     "delivery_failure_must_be_reported_truthfully": true
   },
-  "truthfulness_rule": "The same task chat may display prior messages, but those messages are not work state or evidence. A report counts as delivered only when it is posted in the current task chat after persistence; GitHub persistence alone is fallback storage, not chat delivery.",
+  "truthfulness_rule": "This Work project may display prior messages, but those messages are not durable work state or evidence. A report counts as delivered only when posted here after persistence. Reporting, persistence, and delivery are not completion conditions.",
   "requested_at_utc": "2026-08-16T21:50:31Z",
   "requested_at_jst": "2026-08-17T06:50:31+09:00",
-  "updated_at_utc": "2026-08-16T22:31:00Z"
+  "updated_at_utc": "2026-08-22T13:07:07Z"
 }

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "role": "stopped-primary-insurance-only",
+  "enabled": true,
+  "ordinary_developer": false,
+  "authoritative_state_path": "agi/WORK_EXECUTION_STATE.json",
+  "handoff_path": "agi/WORK_MODE_HANDOFF.json",
+  "strategy_path": "agi/WORK_STRATEGY.json",
+  "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
+  "continuation_source": "repository_latest_main_only",
+  "configured_automation": {
+    "id": "6a87946ca9008191bc432f469283cf6c",
+    "title": "O Work監視・復旧",
+    "schedule": "hourly",
+    "same_work_project_chat": true,
+    "control_plane_observed_enabled": true,
+    "repository_state_is_not_control_plane_proof": true
+  },
+  "liveness_policy": {
+    "fresh_running_owner_action": "suppress_duplicate_read_only",
+    "fresh_current_session_activity_action": "suppress_duplicate_read_only",
+    "stale_after_seconds_source": "agi/WORK_EXECUTION_STATE.json",
+    "future_heartbeat_skew_seconds": 120,
+    "malformed_or_inconsistent_action": "fail_closed_read_only"
+  },
+  "recovery_eligible_statuses": [
+    "stale_running",
+    "released",
+    "interrupted",
+    "checkpointed",
+    "unverified_completion"
+  ],
+  "recovery_authorization": {
+    "eligibility_is_authorization": false,
+    "implementation": "src/agi/work_mode_monitor.py",
+    "first_mutation_scope": [
+      "agi/WORK_EXECUTION_STATE.json"
+    ],
+    "protocol": "two_phase_expected_blob_compare_and_swap_with_remote_readback",
+    "required": [
+      "observed old blob",
+      "lease generation exactly plus one",
+      "unique recovery execution id",
+      "predecessor execution binding",
+      "new opaque fence",
+      "fresh heartbeat",
+      "acquisition commit and blob",
+      "finalization commit and blob",
+      "verified matching remote readback"
+    ],
+    "on_conflict_or_denial": "stop_without_further_mutation"
+  },
+  "resume_policy": {
+    "resume_exact_native_o_run": true,
+    "recreate_frozen_work_invocation": false,
+    "repeat_external_side_effect": false,
+    "continue_until": "strict_external_goal_or_forced_platform_end",
+    "single_milestone_is_exit_condition": false
+  },
+  "completion_policy": {
+    "only_gate": "strict_independent_external_production_evidence",
+    "internal_test_ci_self_evaluation_or_o_integration_sufficient": false,
+    "disable_monitor_only_after_verified_gate": true
+  },
+  "updated_at": "2026-08-22T13:07:07Z"
+}

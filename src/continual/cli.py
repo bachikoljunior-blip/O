@@ -10,6 +10,12 @@ from agi.regression import RegressionPolicy
 from .candidate_regression import record_candidate_regression
 from .engine import Engine
 from .self_application import record_self_application
+from .work_session import (
+    WorkSession,
+    pending_work_invocations,
+    submit_work_response,
+    verify_work_invocations,
+)
 
 
 def _print(value: Any) -> None:
@@ -44,6 +50,35 @@ def build_parser() -> argparse.ArgumentParser:
     feedback.add_argument("episode_id")
     feedback.add_argument("text")
 
+    work_start = sub.add_parser(
+        "work-start",
+        help="Start a native O Run whose semantic provider is the current ChatGPT Work session.",
+    )
+    work_start.add_argument("request")
+    work_start.add_argument("--max-steps", type=int, default=64)
+    work_start.add_argument("--run-id")
+    work_start.add_argument("--executor-binding", default="current_chatgpt_work_session")
+    work_start.add_argument("--model-identity", default="chatgpt-work-model-unverified")
+
+    work_resume = sub.add_parser("work-resume", help="Resume one Work-backed native O Run.")
+    work_resume.add_argument("run_id")
+    work_resume.add_argument("--max-steps", type=int, default=64)
+    work_resume.add_argument("--executor-binding", default="current_chatgpt_work_session")
+    work_resume.add_argument("--model-identity", default="chatgpt-work-model-unverified")
+
+    work_pending = sub.add_parser("work-pending", help="List frozen Work-model requests.")
+    work_pending.add_argument("--run-id")
+
+    work_verify = sub.add_parser("work-verify", help="Verify all persisted Work invocations.")
+    work_verify.add_argument("--run-id")
+
+    work_submit = sub.add_parser("work-submit", help="Submit one immutable Work-model response.")
+    work_submit.add_argument("invocation_id")
+    work_submit.add_argument("--response", type=Path, required=True)
+    work_submit.add_argument("--executor-binding", default="current_chatgpt_work_session")
+    work_submit.add_argument("--model-identity", required=True)
+    work_submit.add_argument("--model-verified", action="store_true")
+
     self_apply = sub.add_parser(
         "self-apply",
         help="Persist one task-chat repository-development result as native O state.",
@@ -73,6 +108,47 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = build_parser().parse_args()
+    if args.cmd == "work-start":
+        session = WorkSession(
+            args.root,
+            executor_binding=args.executor_binding,
+            model_identity=args.model_identity,
+        )
+        _print(session.start(args.request, max_steps=args.max_steps, run_id=args.run_id))
+        return
+
+    if args.cmd == "work-resume":
+        session = WorkSession(
+            args.root,
+            executor_binding=args.executor_binding,
+            model_identity=args.model_identity,
+        )
+        _print(session.resume(args.run_id, max_steps=args.max_steps))
+        return
+
+    if args.cmd == "work-pending":
+        _print({"pending": pending_work_invocations(args.root, run_id=args.run_id)})
+        return
+
+    if args.cmd == "work-verify":
+        _print(verify_work_invocations(args.root, run_id=args.run_id))
+        return
+
+    if args.cmd == "work-submit":
+        raw = json.loads(args.response.read_text(encoding="utf-8"))
+        output = raw.get("output") if isinstance(raw, dict) and "output" in raw else raw
+        _print(
+            submit_work_response(
+                args.root,
+                args.invocation_id,
+                output,
+                executor_binding=args.executor_binding,
+                model_identity=args.model_identity,
+                model_verified=args.model_verified,
+            )
+        )
+        return
+
     if args.cmd == "self-apply":
         record = json.loads(args.record.read_text(encoding="utf-8"))
         _print(record_self_application(args.root, record))
