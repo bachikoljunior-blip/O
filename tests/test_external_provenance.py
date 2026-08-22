@@ -157,7 +157,15 @@ def test_detached_signature_packaging_fails_closed_without_mutating_input():
         prepare_external_attestation_payload(
             {**statement, "metadata": {"suite_seed": "must-stay-outside"}}
         )
-    for disguised_key in ("Private Key", "privateKeyHex", "evaluator.secret-key"):
+    for disguised_key in (
+        "Private Key",
+        "privateKeyHex",
+        "evaluator.secret-key",
+        "private_key_material",
+        "apiTokenValue",
+        "secretValue",
+        "hiddenAnswerDigest",
+    ):
         with pytest.raises(ExternalEvidenceError, match="forbidden secret fields"):
             prepare_external_attestation_payload(
                 {**statement, "metadata": {disguised_key: "must-stay-outside"}}
