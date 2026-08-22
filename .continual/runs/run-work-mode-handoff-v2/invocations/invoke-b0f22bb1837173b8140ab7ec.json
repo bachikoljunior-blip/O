@@ -1,0 +1,128 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-22T19:15:55.016068Z",
+  "component": "consolidate_episode",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-b0f22bb1837173b8140ab7ec-consolidate_episode.json",
+  "invocation_id": "invoke-b0f22bb1837173b8140ab7ec",
+  "output": {
+    "fragment": {
+      "component": "consolidate_episode",
+      "evidence_refs": [
+        "GitHub PR 256",
+        "GitHub workflow 32591220738",
+        "main 976efad5fe0f2d1348ba97e5ba67d6253d331958",
+        "evidence/external_ledger.json",
+        "evidence/external_verifiers.json"
+      ],
+      "inferences": [
+        "Separating task and unit verdicts prevents both false completion and loss of reusable learning.",
+        "Reusable evaluator guidance should enter the Candidate lifecycle rather than modifying a protected active prompt."
+      ],
+      "observations": [
+        "The bounded lifecycle repair passed exact-head CI, merged unchanged, and was read back from main.",
+        "Native O advanced to consolidation while retaining the original AGI FAIL verdict.",
+        "The strict independent external production evidence ledger remains empty of qualifying attestations."
+      ],
+      "purpose": "Consolidate the first honest original-FAIL plus unit-PASS lifecycle episode.",
+      "unresolved": [
+        "External production evidence and verifier quorum remain absent.",
+        "Main merge CI 32592937235 and the local full regression require final observation.",
+        "Detached-signature packaging remains the next proposed Root-selected unit."
+      ]
+    },
+    "local_learn": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+          "expected_scope": "continual/incremental-task-evaluation",
+          "prompt_content": "Evaluate the original task goal without weakening it and return its verdict in `verdict`. When the current bounded execution unit has a separately falsifiable completion condition, also return `unit_verdict` as PASS, FAIL, or UNCERTAIN with evidence and reason. A passing unit never implies the original task passed. Preserve negative evidence and the strict external claim boundary.",
+          "prompt_mode": "overlay",
+          "risk": "An overlay could overproduce unit PASS; regression must require explicit bounded success conditions and preserve original verdict independence.",
+          "status": "candidate",
+          "supporting_evidence": [
+            "run-work-mode-handoff-v2 unit-f67e779cf0b2194e4e3e6542",
+            "PR 256 exact-head CI 32591220738",
+            "main 976efad5fe0f2d1348ba97e5ba67d6253d331958"
+          ],
+          "target_component": "task_evaluate",
+          "what_it_changes": "Require separate original-goal and bounded-unit verdicts when their outcomes differ."
+        }
+      ],
+      "decision": "PROPOSE_CANDIDATE"
+    },
+    "result": {
+      "candidate_decisions": {
+        "pre_application": "USE_ACTIVE because no indexed Candidate targeted lifecycle state transitions",
+        "protected_prompt_policy": "No active prompt was directly edited; any reusable evaluator guidance must be proposed as a Candidate."
+      },
+      "claim_boundary": "This episode proves only the bounded lifecycle behavior. It is internal engineering evidence and must not be counted as strict independent external production AGI evidence.",
+      "episode_type": "bounded_repository_lifecycle_repair",
+      "negative_evidence": [
+        "evidence/external_ledger.json contains only one evaluation request and no challenges, disclosures, or attestations",
+        "evidence/external_verifiers.json contains no registered verifier",
+        "Issue 222 has no independent evaluator reply",
+        "main merge CI 32592937235 was still in progress at evaluation time"
+      ],
+      "next_falsifiable_unit": "At the next Root boundary, select a secret-free detached-signature packaging boundary that emits exact canonical ExternalAttestation bytes, accepts only an externally generated Ed25519 signature, rejects malformed or secret-bearing statements, and leaves the AGI claim false until independent evidence arrives.",
+      "objective": "Repair native O so a passing bounded unit is consolidated and learned even while the original strict real-world AGI goal remains FAIL, then continue to Root.",
+      "objective_evidence": [
+        {
+          "kind": "remote_exact_head_ci",
+          "ref": "https://github.com/bachikoljunior-blip/O/actions/runs/32591220738",
+          "status": "success"
+        },
+        {
+          "kind": "remote_main",
+          "ref": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
+          "status": "readback_verified"
+        },
+        {
+          "kind": "native_o_run",
+          "ref": "run-work-mode-handoff-v2/unit-f67e779cf0b2194e4e3e6542",
+          "status": "original_FAIL_unit_PASS"
+        }
+      ],
+      "searchable_metadata": {
+        "exact_head": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
+        "merge_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
+        "original_verdict": "FAIL",
+        "pr": 256,
+        "scope": "continual/incremental-task-evaluation",
+        "unit_verdict": "PASS"
+      },
+      "sequence": [
+        "Root selected an independently falsifiable lifecycle unit.",
+        "Execute added explicit unit_verdict with nested unit_subfinding compatibility while preserving legacy behavior.",
+        "Task Evaluate retained original-goal verdict FAIL and returned unit_verdict PASS.",
+        "Exact PR head 71ee80b74ff8d30e7fe0a4719edbe331401e76ed passed every required CI step in run 32591220738.",
+        "The unchanged clean head merged to main as 976efad5fe0f2d1348ba97e5ba67d6253d331958 and repaired engine plus frozen Root snapshot were read back.",
+        "The repaired engine advanced this unit to Consolidate Episode without converting internal success into an AGI claim."
+      ],
+      "success_condition_mapping": {
+        "bounded_unit": {
+          "satisfied": [
+            "focused lifecycle and immutable-replay regression passed",
+            "exact-head CI passed",
+            "head remained unchanged and conflict-free",
+            "merge and remote-main blob readback succeeded",
+            "native Task Evaluate recorded original FAIL separately from unit PASS"
+          ],
+          "verdict": "PASS"
+        },
+        "original_real_world_agi_goal": {
+          "unmet": [
+            "no independently controlled hidden or fresh suite-bound challenge",
+            "no registered independent evaluator group",
+            "no signed production attestation for any strict criterion",
+            "no independent evaluator quorum",
+            "platform runtime/model identity remains unverified"
+          ],
+          "verdict": "FAIL"
+        }
+      }
+    }
+  },
+  "payload_digest": "8a059a9d9fa0d703e88dca0d",
+  "prompt_path": "prompts/consolidate_episode.md",
+  "status": "complete"
+}

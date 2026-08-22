@@ -23,6 +23,20 @@ def test_task_evaluator_cannot_invent_verdict():
         validate_component_output("task_evaluate", output({"verdict": "MAYBE"}))
 
 
+def test_task_evaluator_validates_optional_unit_verdict():
+    validate_component_output(
+        "task_evaluate", output({"verdict": "FAIL", "unit_verdict": "PASS"})
+    )
+    validate_component_output(
+        "task_evaluate",
+        output({"verdict": "FAIL", "unit_subfinding": {"verdict": "PASS"}}),
+    )
+    with pytest.raises(ContractError):
+        validate_component_output(
+            "task_evaluate", output({"verdict": "FAIL", "unit_verdict": "MAYBE"})
+        )
+
+
 def test_learn_cannot_recursively_local_learn():
     with pytest.raises(ContractError):
         validate_component_output(

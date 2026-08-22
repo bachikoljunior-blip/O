@@ -1,0 +1,83 @@
+{
+  "component": "task_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-22T18:25:40.689769Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-c73d7d40ef921b6184d5dce7",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "active_component_path": "prompts/task_evaluate.md",
+    "execution_unit": {
+      "component": "task_evaluate",
+      "evaluation_boundary": "PASS only if the request remains exactly bound and unique, all secret-free and strict-policy regressions hold, exact-head CI 32588729634 succeeded on unchanged head 36b34d1, and agi_claim_supported remains false. Merge CI 32590500449 may remain pending but must not be claimed successful.",
+      "evidence_needed": [
+        "Recompute or inspect all three handoff digests and the ledger uniqueness binding",
+        "Confirm the exact-head run succeeded on the unchanged repair head",
+        "Confirm no forbidden secret, evaluator-controlled material, challenge, signature, result, or attestation was added",
+        "Confirm the strict claim still reports false with all six criteria missing",
+        "Preserve merge CI as pending rather than relabeling it success"
+      ],
+      "expected_outputs": [
+        "PASS, FAIL, or UNCERTAIN for only the frozen handoff unit",
+        "Explicit negative-evidence retention for both superseded failing heads",
+        "An explicit separation between operational readiness and independent production AGI evidence",
+        "A continuation that consolidates this unit and then returns to Root instead of ending the primary run"
+      ],
+      "goal": "Independently evaluate whether the completed external-evaluator handoff unit met its frozen exact-commit, secret-free, unique-ledger, exact-head-CI, and false-claim boundary, while treating the still-running merge CI as a separate pending observation.",
+      "inputs": [
+        "The persisted Execute result and exact digest bindings",
+        "The two superseded failed CI results and their exact failure classes",
+        "The repaired exact head 36b34d1 and successful exact-head CI 32588729634",
+        "The merged main commit 5537f10 and currently running merge CI 32590500449",
+        "The clean-but-empty external provenance audit and strict false AGI claim"
+      ],
+      "scope": [
+        ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-634edce3b0003989312d61aa-result.json",
+        "evidence/handoffs/work-recovery-v3",
+        "evidence/external_ledger.json",
+        "evidence/external_verifiers.json",
+        "PR 255 and CI runs 32586856167, 32587964226, 32588729634, 32590500449"
+      ],
+      "unit_id": "unit-a43af0cf0e723a90f01acff9"
+    },
+    "preflight_selection": {
+      "decision": "USE_ACTIVE",
+      "reason": "No candidate targets this component.",
+      "scope": "task_evaluate"
+    },
+    "snapshot": {
+      "continuation_stack": [],
+      "created_at": "2026-08-22T11:41:47.630118Z",
+      "current_component": "task_evaluate",
+      "current_unit": "unit-a43af0cf0e723a90f01acff9",
+      "entry_ref": "artifacts/entry.json",
+      "environment": {
+        "active_components_digest": "3974833d170f43432c948095",
+        "model": "chatgpt-work-model-unverified",
+        "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+        "python": "3.12.13",
+        "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+        "runner": "python-engine-v2"
+      },
+      "error_count": 0,
+      "last_result_ref": "artifacts/unit-634edce3b0003989312d61aa-result.json",
+      "phase": "unit_pending",
+      "revision": 10,
+      "run_id": "run-work-mode-handoff-v2",
+      "status": "continue",
+      "updated_at": "2026-08-22T18:25:40.682714Z"
+    }
+  },
+  "payload_digest": "509e19354d77ee5aeb0df3a4f227d6b173d632f50f25e6dcfd9583729cf969dd",
+  "prompt_content": "# TASK EVALUATE\n\nEvaluate whether the original user task—not merely the most recent unit—satisfies its explicit success conditions. Prefer tests, builds, lint, real files, git state, API results, benchmark reports, independently checkable artifacts, and user-defined acceptance criteria. Self-report and architectural sophistication are not sufficient evidence.\n\nReturn `PASS`, `FAIL`, or `UNCERTAIN`, with evidence provenance and precise repair information. For AGI claims, use the evidence gate in `src/agi/evaluation.py`; a development benchmark pass alone cannot produce PASS for the full AGI goal.\n\nAt the end perform Local Learn on this evaluator execution.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.\n",
+  "prompt_digest": "44821191bfe8c7f063c8195fac6ff15dbf84127dcee7bb0a6f08e5170347d17f",
+  "prompt_path": "prompts/task_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "5c3fe870f56f3330d79fe77fa5e688c5e6b1b88fe60a145e6391ae7a07f7cf80",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}
