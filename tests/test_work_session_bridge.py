@@ -294,3 +294,63 @@ def test_work_model_drives_native_o_entry_through_learn(tmp_path: Path):
     assert verification["requests"] == len(seen)
     assert verification["responses"] == len(seen)
     assert verification["pending"] == 0
+
+
+def test_work_model_consolidates_passing_unit_then_continues_unmet_task(tmp_path: Path):
+    root = _root(tmp_path)
+    session = WorkSession(root, model_identity="work-model-under-test")
+    state = session.start("continue an ambitious task after learning each passing unit")
+    run_id = state["run_id"]
+    seen: list[str] = []
+
+    for _ in range(12):
+        pending = pending_work_invocations(root, run_id=run_id)
+        assert len(pending) == 1
+        request = pending[0]
+        component = request["component"]
+        if component == "root" and seen and seen[-1] == "learn":
+            break
+        seen.append(component)
+        response = _output(component, request)
+        if component == "task_evaluate":
+            response["result"] = {
+                "verdict": "FAIL",
+                "unit_verdict": "PASS",
+                "evidence": ["unit passed but original task remains unmet"],
+            }
+        first = submit_work_response(
+            root,
+            request["invocation_id"],
+            response,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="work-model-under-test",
+        )
+        if component in {"consolidate_episode", "learn"}:
+            replay = submit_work_response(
+                root,
+                request["invocation_id"],
+                response,
+                executor_binding="current_chatgpt_work_session",
+                model_identity="work-model-under-test",
+            )
+            assert replay["response_digest"] == first["response_digest"]
+        state = session.resume(run_id)
+
+    assert seen == [
+        "entry",
+        "root",
+        "execute",
+        "root",
+        "task_evaluate",
+        "consolidate_episode",
+        "learn",
+    ]
+    assert state["snapshot"]["status"] == "continue"
+    assert state["snapshot"]["phase"] == "root_pending"
+    pending = pending_work_invocations(root, run_id=run_id)
+    assert len(pending) == 1
+    assert pending[0]["component"] == "root"
+    verification = verify_work_invocations(root, run_id=run_id)
+    assert verification["valid"] is True
+    assert verification["responses"] == len(seen)
+    assert verification["pending"] == 1

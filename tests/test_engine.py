@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 import continual.engine as engine_module
 
 
@@ -123,6 +125,25 @@ def make_engine(runtime_repo: Path, monkeypatch) -> engine_module.Engine:
     return engine_module.Engine(runtime_repo)
 
 
+class IncrementalUnitModelClient(FakeModelClient):
+    unit_verdict = "PASS"
+
+    def call(self, component: str, payload: dict, prompt_path: str | None = None) -> dict:
+        output = super().call(component, payload, prompt_path)
+        if component == "task_evaluate":
+            output["result"] = {
+                "verdict": "FAIL",
+                "unit_verdict": self.unit_verdict,
+                "evidence": ["original goal unmet", "bounded unit evaluated"],
+            }
+        return output
+
+
+def make_incremental_engine(runtime_repo: Path, monkeypatch) -> engine_module.Engine:
+    monkeypatch.setattr(engine_module, "ModelClient", IncrementalUnitModelClient)
+    return engine_module.Engine(runtime_repo)
+
+
 def test_task_closes_episode_and_learning_loop(runtime_repo: Path, monkeypatch):
     engine = make_engine(runtime_repo, monkeypatch)
     run_id = engine.start("AGIを作って")
@@ -135,6 +156,56 @@ def test_task_closes_episode_and_learning_loop(runtime_repo: Path, monkeypatch):
     )
     assert episode["outcome"] == "development-milestone-completed"
     assert (runtime_repo / ".continual" / "candidates" / "candidate-test-v1" / "prompt.md").exists()
+
+
+def test_passing_unit_under_failed_original_task_consolidates_learns_and_continues(
+    runtime_repo: Path, monkeypatch
+):
+    engine = make_incremental_engine(runtime_repo, monkeypatch)
+    run_id = engine.start("AGIを作って", max_steps=7)
+    snapshot = engine.store.snapshot(run_id)
+
+    semantic_calls = [
+        component
+        for component, _ in engine.model.calls
+        if component != "candidate_evaluate"
+    ]
+    assert semantic_calls == [
+        "entry",
+        "root",
+        "execute",
+        "root",
+        "task_evaluate",
+        "consolidate_episode",
+        "learn",
+    ]
+    assert snapshot["status"] == "continue"
+    assert snapshot["phase"] == "root_pending"
+    assert snapshot["task_completion_verdict"] == "FAIL"
+    assert snapshot["unit_completion_verdict"] == "PASS"
+    events = (runtime_repo / ".continual" / "runs" / run_id / "events.jsonl").read_text()
+    assert '"type": "unit_learned"' in events
+    assert '"type": "run_finished"' not in events
+
+
+@pytest.mark.parametrize("unit_verdict", ["FAIL", "UNCERTAIN"])
+def test_nonpassing_unit_returns_to_root_without_consolidation(
+    runtime_repo: Path, monkeypatch, unit_verdict: str
+):
+    monkeypatch.setattr(IncrementalUnitModelClient, "unit_verdict", unit_verdict)
+    engine = make_incremental_engine(runtime_repo, monkeypatch)
+    run_id = engine.start("AGIを作って", max_steps=5)
+    snapshot = engine.store.snapshot(run_id)
+
+    semantic_calls = [
+        component
+        for component, _ in engine.model.calls
+        if component != "candidate_evaluate"
+    ]
+    assert semantic_calls == ["entry", "root", "execute", "root", "task_evaluate"]
+    assert snapshot["status"] == "continue"
+    assert snapshot["phase"] == "root_pending"
+    assert snapshot["unit_completion_verdict"] == unit_verdict
 
 
 def test_step_budget_checkpoints_without_semantic_failure(runtime_repo: Path, monkeypatch):
