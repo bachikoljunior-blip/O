@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T22:31:19.250Z",
-  "last_progress_at": "2026-08-22T22:31:19.250Z",
+  "heartbeat_at": "2026-08-22T22:35:37.561Z",
+  "last_progress_at": "2026-08-22T22:35:37.561Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Generation-3 fenced owner remains live. Final unchanged local full suite for cross-binding commit 9aa7689 completed successfully: 456 passed in 3813.06s. Exact four-file blobs were reconstructed without changes on latest main 898f6f7 as fresh isolated local branch head 0dd4812; diff-check and compileall pass, dedicated 32 tests pass, and 74-test focused external suite is in progress with no failure signal. No remote branch/PR has been published yet. No independent production evidence exists; AGI false.",
-    "verified_main_sha": "898f6f70b08b845056986c9c95a886f7355a0046",
+    "reason": "Generation-3 fenced owner remains live. Cross-binding PR 258 is published at exact head bacc1a24; all four remote blobs match the frozen tested files. Exact-head workflow 32602836716/job 97103583905 is in progress at pytest. Main user-input inbox advanced to revision 4, designating the prior Claude Code remote session as primary and instructing this recovery owner to finish the in-flight unit to a safe boundary, then release/checkpoint. This input is observed but not applied mid-invocation; Execute remains frozen until exact-head CI/integration/native evaluation completes. No independent production evidence exists; AGI false.",
+    "verified_main_sha": "e4939c635a55d2cc92bcb28ae7c50aa91fb8eb3d",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a generation-plus-one state-only CAS with exact readback."
   },
   "parallel_execution_coordination": {
@@ -39,7 +39,9 @@
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 3,
-    "acknowledged_at": "2026-08-22T14:45:00Z"
+    "acknowledged_at": "2026-08-22T14:45:00Z",
+    "observed_pending_revision": 4,
+    "pending_application_at": "next_safe_native_unit_boundary"
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
@@ -282,7 +284,7 @@
       "observed_at": "2026-08-22T21:02:16.449Z"
     },
     "external_handoff_cross_binding": {
-      "status": "rebased_isolated_local_focused_validation_in_progress",
+      "status": "pr_exact_head_ci_in_progress",
       "local_exact_commit": "9aa768978187e2b0f8755be3106f6db8353a88c3",
       "dedicated_tests": "32_passed",
       "focused_external_evidence_tests": "70_passed_118.40s",
@@ -316,11 +318,12 @@
       ],
       "agi_claim_supported": false,
       "last_observation": {
-        "at": "2026-08-22T22:31:19.250Z",
-        "full_suite": "456_passed_3813.06s",
-        "rebased_local_head": "0dd4812",
-        "remote_publication": false,
-        "focused_rebase_validation": "in_progress_no_failure_signal"
+        "at": "2026-08-22T22:35:37.561Z",
+        "pr": 258,
+        "head": "bacc1a241c64df1744a4247f8ba40a36ef1a241e",
+        "ci_run": 32602836716,
+        "ci_status": "in_progress_pytest",
+        "user_input_revision_4": "observed_defer_application_until_safe_boundary"
       },
       "rebased_main_sha": "898f6f70b08b845056986c9c95a886f7355a0046",
       "rebased_local_exact_commit": "0dd4812",
@@ -333,7 +336,21 @@
       "rebased_dedicated_tests": "32_passed_32.79s",
       "rebased_compileall": "pass",
       "rebased_diff_check": "pass",
-      "rebased_focused_external_tests": "in_progress_74_tests_no_failure_signal"
+      "rebased_focused_external_tests": "74_passed_117.69s",
+      "pull_request": 258,
+      "branch": "work/external-handoff-cross-binding-v2",
+      "base_main_sha_at_publication": "e4939c635a55d2cc92bcb28ae7c50aa91fb8eb3d",
+      "exact_head_sha": "bacc1a241c64df1744a4247f8ba40a36ef1a241e",
+      "exact_head_ci_run": 32602836716,
+      "exact_head_ci_job": 97103583905,
+      "exact_head_ci_status": "in_progress_pytest",
+      "remote_branch_readback_verified": true,
+      "remote_file_blobs": {
+        "documentation": "50d5ca8fce055785395861a26dd02be72f6b3b53",
+        "pyproject": "2fd110c30e6276e7dabf69d3f6f684e804716cb5",
+        "source": "d5b63b9d53187f2b679e31959d21ccf0f8a8f371",
+        "tests": "0213249e84be1a2357d0c072e4e18b7acab8aac5"
+      }
     }
   }
 }
