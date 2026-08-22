@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T19:11:42.994Z",
-  "last_progress_at": "2026-08-22T19:11:42.994Z",
+  "heartbeat_at": "2026-08-22T19:23:54.437Z",
+  "last_progress_at": "2026-08-22T19:23:54.437Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 256 exact head 71ee80b passed every required CI step in run 32591220738, remained unchanged and conflict-free, and merged to main as 976efad. Main engine and frozen Root snapshot were read back; merge CI 32592937235 is in progress. Next: exercise honest FAIL+unit PASS through Consolidate Episode, Learn, and continued Root. AGI remains false.",
-    "verified_main_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
+    "reason": "Native O completed Task Evaluate(original AGI FAIL, lifecycle unit PASS), Consolidate Episode, Learn, and returned to Root without finishing. Root selected detached-signature ExternalAttestation packaging and reached Execute invoke-da36a298428d941594268a33. Hardened isolated prototype is under focused/full validation; PR 256 merge CI 32592937235 remains in progress. AGI remains false.",
+    "verified_main_sha": "153413c5d59e60f32c65bf347a0b5c88fa2c9185",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
   "parallel_execution_coordination": {
@@ -31,11 +31,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
-  "working_branch": "work/incremental-unit-learning-v3",
+  "source_main_sha": "153413c5d59e60f32c65bf347a0b5c88fa2c9185",
+  "working_branch": "work/external-attestation-detached-signature-v3",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "root",
-  "active_unit_id": "unit-a259396b52b0682db153cbbe",
+  "active_component": "execute",
+  "active_unit_id": "unit-ffc7b6b38cd9db08fe9f9097",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 3,
@@ -43,11 +43,12 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "main",
-    "snapshot_head_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
-    "pending_work_invocation_id": "invoke-6c6e47682672fae2a10d9cbd",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-6c6e47682672fae2a10d9cbd/request.json",
-    "next_action": "Resume frozen Root invoke-6c6e47682672fae2a10d9cbd from main 976efad using the repaired engine. Select Task Evaluate for the lifecycle unit; report original AGI goal FAIL and unit PASS if evidence remains valid, then externalize Consolidate Episode and Learn and verify return to Root. Observe merge CI 32592937235 without rerunning. AGI remains false."
+    "snapshot_branch": "fenced_owner_local_pending_publication",
+    "snapshot_head_sha": "f914369d42a74548d420e775afc60333e7a173f3",
+    "pending_work_invocation_id": "invoke-da36a298428d941594268a33",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-da36a298428d941594268a33/request.json",
+    "durability_status": "state checkpoint is on main; new native O records and implementation are isolated locally and must be published on the named branch before remote-only recovery",
+    "next_action": "Finish focused and full regression for detached-signature packaging, submit Execute evidence, publish implementation plus immutable native O records on work/external-attestation-detached-signature-v3, require exact-head CI, then Task Evaluate without weakening the AGI gate. Observe existing merge CI 32592937235 without rerun."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -149,9 +150,42 @@
       "merge_ci_run": 32592937235,
       "merge_ci_status": "in_progress",
       "remote_main_engine_blob_sha": "d45c884b63cc19049b8de3208d9236b4c47d43a3",
-      "remote_main_snapshot_blob_sha": "258bbe3159c62419d6b8d65d9eddc4245fa18576"
+      "remote_main_snapshot_blob_sha": "258bbe3159c62419d6b8d65d9eddc4245fa18576",
+      "native_cycle": {
+        "unit_id": "unit-f67e779cf0b2194e4e3e6542",
+        "original_goal_verdict": "FAIL",
+        "unit_verdict": "PASS",
+        "consolidate_invocation_id": "invoke-73c935f4eb7b6e4856065a1c",
+        "learn_invocation_id": "invoke-ca9ce19b8e027eb78a1d8c2e",
+        "continued_root_invocation_id": "invoke-4d8fc93f59a6f64bf7cc76d6",
+        "continued_to_root": true,
+        "run_finished": false,
+        "candidate_registered": "candidate-task-evaluate-unit-verdict-v1"
+      }
     },
     "merge_ci_completed_observed_at": "2026-08-22T18:53:35.034Z",
-    "merge_ci_all_required_steps_success": true
+    "merge_ci_all_required_steps_success": true,
+    "detached_signature_packaging": {
+      "status": "local_validation_in_progress",
+      "active_unit_id": "unit-ffc7b6b38cd9db08fe9f9097",
+      "execute_invocation_id": "invoke-da36a298428d941594268a33",
+      "changed_files": [
+        "src/agi/external_provenance.py",
+        "tests/test_external_provenance.py",
+        "agi/EXTERNAL_EVIDENCE.md"
+      ],
+      "prior_focused_regression": "28_passed",
+      "hardened_focused_regression": "in_progress_no_failure_signal",
+      "compileall": "pass",
+      "diff_check": "pass",
+      "claim_boundary": "packaging readiness only; ledger audit, evaluator quorum, and strict AGI gate remain unmet"
+    },
+    "native_work_verify": {
+      "valid": true,
+      "requests": 25,
+      "responses": 24,
+      "pending": 1,
+      "observed_at": "2026-08-22T19:23:54.437Z"
+    }
   }
 }
