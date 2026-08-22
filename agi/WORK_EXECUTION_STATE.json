@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T19:09:12.478Z",
-  "last_progress_at": "2026-08-22T18:53:35.034Z",
+  "heartbeat_at": "2026-08-22T19:11:42.994Z",
+  "last_progress_at": "2026-08-22T19:11:42.994Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 255 main merge CI 32590500449 passed pytest, compileall, every validator, and every reference run. PR 256 exact head 71ee80b contains the lifecycle repair and verified native O continuation; its exact-head CI 32591220738 and local full suite remain in progress. AGI remains false.",
-    "verified_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
+    "reason": "PR 256 exact head 71ee80b passed every required CI step in run 32591220738, remained unchanged and conflict-free, and merged to main as 976efad. Main engine and frozen Root snapshot were read back; merge CI 32592937235 is in progress. Next: exercise honest FAIL+unit PASS through Consolidate Episode, Learn, and continued Root. AGI remains false.",
+    "verified_main_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
   "parallel_execution_coordination": {
@@ -31,7 +31,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
+  "source_main_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
   "working_branch": "work/incremental-unit-learning-v3",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "root",
@@ -43,11 +43,11 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/incremental-unit-learning-v3",
-    "snapshot_head_sha": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
+    "snapshot_branch": "main",
+    "snapshot_head_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
     "pending_work_invocation_id": "invoke-6c6e47682672fae2a10d9cbd",
     "pending_request_ref": ".continual/work-model/invocations/invoke-6c6e47682672fae2a10d9cbd/request.json",
-    "next_action": "Observe PR 256 exact-head CI run 32591220738 for unchanged head 71ee80b without rerunning. If it passes and remains conflict-free, merge, verify main and merge CI, then resume frozen Root invoke-6c6e47682672fae2a10d9cbd and exercise the repaired Task Evaluate -> Consolidate Episode -> Learn -> Root cycle with original-goal FAIL plus unit PASS. AGI remains false."
+    "next_action": "Resume frozen Root invoke-6c6e47682672fae2a10d9cbd from main 976efad using the repaired engine. Select Task Evaluate for the lifecycle unit; report original AGI goal FAIL and unit PASS if evidence remains valid, then externalize Consolidate Episode and Learn and verify return to Root. Observe merge CI 32592937235 without rerunning. AGI remains false."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -119,7 +119,7 @@
       "pull_request": 256,
       "exact_head_sha": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
       "base_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
-      "exact_head_ci_status": "in_progress",
+      "exact_head_ci_status": "success",
       "focused_tests": "20_passed",
       "compileall": "pass",
       "diff_check": "pass",
@@ -142,7 +142,14 @@
         "local_full_suite_status": "in_progress_no_failure_signal",
         "prior_main_merge_ci_run": 32590500449,
         "prior_main_merge_ci_status": "success"
-      }
+      },
+      "exact_head_ci_all_required_steps_success": true,
+      "merged": true,
+      "merge_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
+      "merge_ci_run": 32592937235,
+      "merge_ci_status": "in_progress",
+      "remote_main_engine_blob_sha": "d45c884b63cc19049b8de3208d9236b4c47d43a3",
+      "remote_main_snapshot_blob_sha": "258bbe3159c62419d6b8d65d9eddc4245fa18576"
     },
     "merge_ci_completed_observed_at": "2026-08-22T18:53:35.034Z",
     "merge_ci_all_required_steps_success": true
