@@ -8,11 +8,11 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T17:37:31Z",
-  "last_progress_at": "2026-08-22T17:37:31Z",
+  "heartbeat_at": "2026-08-22T17:46:55Z",
+  "last_progress_at": "2026-08-22T17:46:55Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Generation-3 recovery remains active. PR 255 is reconciled onto current main with lease state excluded from its diff; exact-head CI 32587964226 and the local full suite remain in pytest with no observed failure.",
+    "reason": "Generation-3 recovery retained failed CI 32586856167 as negative evidence: depth-1 checkout omitted the exact subject commit and a state regression rejected the valid recovery owner kind. Both demonstrated defects are repaired at PR 255 head 36b34d1; 10 focused tests pass and new exact-head CI is queued.",
     "verified_main_sha": "f5f983604f8b7f4bb6ca4e8fc8f2523f7b88239f",
     "recoverable_by": "No recovery while this running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
@@ -31,7 +31,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "295e97b72450ce370a855d2d14ec146e9a4c3111",
+  "source_main_sha": "383277b89c1afe225fea0b872d5a924bfe201c43",
   "working_branch": "work/external-evidence-handoff-v3",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
@@ -45,7 +45,7 @@
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "pending_work_invocation_id": "invoke-be8f13c968a7d7715d3de309",
     "pending_request_ref": ".continual/work-model/invocations/invoke-be8f13c968a7d7715d3de309/request.json",
-    "next_action": "Observe PR 255 exact-head CI run 32587964226 without rerunning. Merge only if head remains 64a382f390d91a32444ec4f5e737ee05b06bb5b4, all required checks succeed, main is unchanged or safely mergeable, and there is no conflicting writer. Then submit Execute result and continue the native O Run. AGI remains false."
+    "next_action": "Observe PR 255 exact-head CI run 32588729634 without rerunning. Merge only if head remains 36b34d1e38e3d2a0cf0771ae5bb70bba50d2a544, all required checks succeed, the latest main is safely mergeable, and there is no conflicting writer. Then submit Execute result and continue the native O Run. AGI remains false."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -81,12 +81,29 @@
   },
   "publication": {
     "pull_request": 255,
-    "exact_head_sha": "64a382f390d91a32444ec4f5e737ee05b06bb5b4",
-    "exact_head_ci_run": 32587964226,
-    "exact_head_ci_status": "in_progress",
+    "exact_head_sha": "36b34d1e38e3d2a0cf0771ae5bb70bba50d2a544",
+    "exact_head_ci_run": 32588729634,
+    "exact_head_ci_status": "queued",
     "remote_branch_readback_verified": true,
     "request_sha256": "2583352beea7765617606ed39985a0f7e79c45d0256982b7ad4eb4063586505d",
     "local_full_suite_status": "in_progress_no_failure_observed",
-    "superseded_diagnostic_ci_run": 32586856167
+    "superseded_diagnostic_ci_run": 32586856167,
+    "superseded_diagnostic_ci_runs": [
+      {
+        "run": 32586856167,
+        "head": "52e99c8bf40066bd0467ce9adcdef223f80b66e2",
+        "conclusion": "failure",
+        "failures": [
+          "shallow checkout could not resolve subject commit f5f9836",
+          "test hardcoded owner_kind=work_primary and rejected valid work_recovery_automation"
+        ]
+      },
+      {
+        "run": 32587964226,
+        "head": "64a382f390d91a32444ec4f5e737ee05b06bb5b4",
+        "conclusion": "superseded_in_progress"
+      }
+    ],
+    "focused_repair_tests": "10_passed"
   }
 }
