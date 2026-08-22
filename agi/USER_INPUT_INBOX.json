@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 7,
+  "revision": 8,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -140,7 +140,20 @@
       ],
       "supersedes": [],
       "source": "user_chat"
+    },
+    {
+      "sequence": 8,
+      "id": "external-context-state-freshness-20260823-v8",
+      "received_at": "2026-08-22T23:28:58Z",
+      "kind": "external_context_observation",
+      "status": "active",
+      "summary": "A long-running autonomous system can become structurally misaligned when durable control context, live external state, and actual execution progress advance on different clocks.",
+      "directives": [
+        "External context: recent execution exposed a general failure mode, not merely a stale PR or missed inbox revision. Durable plans, continuation records, heartbeats, user-input acknowledgements, repository state, CI/PR state, and actual tool execution can change on different clocks. If the system treats any one persisted snapshot as current without checking whether the world has advanced, it can repeatedly reason from obsolete context, redo finished work, miss new constraints, or keep pursuing a plan whose premises no longer hold. Conversely, forcing every event into one giant always-current context can create contention and context overload. Treat freshness, provenance, invalidation, reconciliation, and decision-time context selection across these asynchronous sources as a structural correctness and performance problem. Investigate whether O can reliably know what information is authoritative for the decision being made, detect when assumptions or plans have gone stale, incorporate newly relevant information without unnecessary global interruption, and learn from recurring context-synchronization failures. If this materially affects expected elapsed time to AGI, address and falsifiably evaluate the underlying mechanism rather than patching individual stale states."
+      ],
+      "supersedes": [],
+      "source": "user_chat"
     }
   ],
-  "updated_at": "2026-08-22T23:13:53Z"
+  "updated_at": "2026-08-22T23:28:58Z"
 }
