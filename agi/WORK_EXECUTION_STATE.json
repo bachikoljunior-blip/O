@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T20:14:00.249Z",
-  "last_progress_at": "2026-08-22T20:14:00.249Z",
+  "heartbeat_at": "2026-08-22T20:25:51.899Z",
+  "last_progress_at": "2026-08-22T20:25:51.899Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Final PR 257 head 8f4278e remains unchanged and mergeable; exact-head CI 32595446105 and the clean local final-head suite are both still in pytest with no failure or cancellation signal. Frozen Root and strict false AGI boundary remain unchanged.",
-    "verified_main_sha": "bd011add432497122d6624c86eeebcd2fb08cfd4",
+    "reason": "Final PR 257 head 8f4278e remains unchanged; full PR recomputation reports mergeable=true. Exact-head CI 32595446105 and local suite remain in pytest without failure. Superseded head 7d86119 CI 32594512530 completed all required steps successfully but is not merge evidence. Frozen Root unchanged; AGI false.",
+    "verified_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
   "parallel_execution_coordination": {
@@ -31,7 +31,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "bd011add432497122d6624c86eeebcd2fb08cfd4",
+  "source_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
   "working_branch": "work/external-attestation-detached-signature-v3",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "root",
@@ -206,8 +206,9 @@
         {
           "head": "7d86119d966bd83df4cfa9092122947682ad6716",
           "ci_run": 32594512530,
-          "status": "in_progress_superseded_not_cancelled",
-          "reason": "security review found suffix-only secret-marker bypass"
+          "status": "success_superseded_not_merge_evidence",
+          "reason": "security review found suffix-only secret-marker bypass",
+          "completed_all_required_steps": true
         },
         {
           "head": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
@@ -236,7 +237,7 @@
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T20:14:00.249Z",
+        "at": "2026-08-22T20:25:51.899Z",
         "exact_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
         "exact_head_ci_run": 32595446105,
         "exact_head_ci_step": "Run pytest -q",
