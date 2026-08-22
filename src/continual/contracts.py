@@ -78,6 +78,14 @@ def validate_component_output(
         verdict = result.get("verdict") or result.get("status")
         if verdict not in TASK_VERDICTS:
             errors.append(f"task_evaluate verdict must be one of {sorted(TASK_VERDICTS)}")
+        unit_verdict = result.get("unit_verdict")
+        unit_subfinding = result.get("unit_subfinding")
+        if unit_verdict is None and isinstance(unit_subfinding, dict):
+            unit_verdict = unit_subfinding.get("verdict")
+        if unit_verdict is not None and unit_verdict not in TASK_VERDICTS:
+            errors.append(
+                f"task_evaluate unit_verdict must be one of {sorted(TASK_VERDICTS)}"
+            )
 
     if component == "candidate_evaluate":
         mode = evaluator_mode or "pre-application"

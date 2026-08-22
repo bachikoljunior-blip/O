@@ -1,0 +1,65 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-b7d5c36deda098550cd08967",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        "agi/CONTINUATION.json",
+        "agi/HOURLY_EXECUTION_STATE.json",
+        ".continual/runs/run-work-mode-handoff-v2/snapshot.json"
+      ],
+      "observations": [
+        "The code path is locally verified but the remote-readable Work contract and lease do not exist yet.",
+        "Task evaluation would be premature before durable state and broader validation."
+      ],
+      "purpose": "Select the next unmet falsifiable migration unit.",
+      "unresolved": [
+        "Work migration state must be written and validated.",
+        "Exact-head CI is still unavailable."
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "reason": "The next unit follows existing durable-state and fail-closed policies; no prompt change is supported."
+    },
+    "result": {
+      "component": "execute",
+      "evaluation_boundary": "Do not evaluate the migration milestone as PASS until durable files and local validation exist; exact-head CI remains a separate required publication check.",
+      "expected_outputs": [
+        "One explicit Work primary-owner contract and one monitor-only recovery contract",
+        "A fresh primary Work lease bound to the native O Run with AGI claim false",
+        "Updated continuation and autonomy state pointing to Work-mode O execution",
+        "Tracked native run and Work invocation evidence",
+        "JSON validation plus relevant and broader local test results"
+      ],
+      "goal": "Persist and verify the Work-mode migration contract, primary lease, monitor policy, exact native-run handoff, and updated durable continuation without changing the strict AGI claim boundary.",
+      "inputs": [
+        "The completed local Work bridge and recovery classifier unit",
+        "Current AGENTS watchdog and self-application rules",
+        "Existing stale Chat-mode continuation and lease records",
+        "The active native O Run and its immutable Work invocation records"
+      ],
+      "scope": [
+        "AGENTS.md",
+        ".gitignore",
+        "agi/WORK_MODE.md",
+        "agi/WORK_MODE_HANDOFF.json",
+        "agi/WORK_MODE_MONITOR.json",
+        "agi/WORK_EXECUTION_STATE.json",
+        "agi/CONTINUATION.json",
+        "agi/AUTONOMY_STATE.json",
+        "agi/REPORTING_TARGET.json",
+        ".continual/runs/run-work-mode-handoff-v2",
+        ".continual/work-model/invocations"
+      ]
+    }
+  },
+  "output_digest": "8b9afd925df5f31b18774179fccea49df4a856c7b9b583217fd248af77439353",
+  "received_at": "2026-08-22T11:46:27.289468Z",
+  "request_digest": "d7f11be9ee512c9e19c48b1fa5fd239c7bf416e72d3f4b0c9c549a2e81cc8ff0",
+  "response_digest": "94d4b4b913582ce808f3cf1fa9648cd6cd8d7250e8807bfe03a13933260b074e",
+  "schema_version": 1
+}

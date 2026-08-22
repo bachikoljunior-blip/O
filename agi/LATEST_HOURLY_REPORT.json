@@ -1,26 +1,29 @@
 {
   "schema_version": 1,
-  "status": "released_with_six_validation_runs_inflight_or_queued",
+  "status": "user_directed_handoff_pr254_safety_followup_in_flight",
   "primary_target": "same_task_chat",
-  "last_report_path": "agi/reports/20260821T071407JST.md",
-  "last_session_id": "same-task-chat-watchdog-recovery-20260821T065947JST",
-  "last_execution_id": "o-agi-watchdog-recovery-20260821T065947JST",
+  "last_report_path": "agi/reports/20260822T234900JST.md",
+  "last_session_id": "claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn",
+  "last_execution_id": "work-primary-handoff-20260822T224400JST",
   "task_chat_reused": true,
   "logical_context_reset": true,
   "prior_execution_chat_context_used": false,
   "continuation_source": "repository_latest_main_only",
+  "handoff_instruction": "実行を引き継いで達成するまで進めて",
+  "model_verified": false,
+  "model_note": "actual_model claude-fable-5 (session-configured identifier; serving model may differ); no independent platform attestation observed",
   "merged_prs_this_execution": [],
-  "primary_unmerged_pr": 230,
-  "primary_unmerged_head_sha": "fc45794040bab2a7dcb40c907fe4316f3b11cf5a",
-  "primary_unmerged_ci_run": 32422333224,
-  "additional_in_flight": [
-    {"pr":244,"head_sha":"e5c79bda697710296b8f4edf59424437ab901bba","ci_run":32422357396,"status":"in_progress"},
-    {"pr":238,"head_sha":"6928db9c62e73bee95f1e25f7c52e20124229185","ci_run":32422412770,"status":"in_progress"},
-    {"pr":245,"head_sha":"f73fc76539a4fbabc9886e7db4c0d85b47e22da0","ci_run":32422513640,"status":"in_progress","merge_admissible":false},
-    {"pr":246,"head_sha":"3ad285f998c654000d3cfc6851ae61059c931225","ci_run":32422751076,"status":"in_progress"},
-    {"pr":247,"head_sha":"f82a3a5673c163bd2fb089e5dfc2d3cbd0ed90aa","ci_run":32423188917,"status":"queued","merge_admissible":false}
+  "merged_by_account_owner_during_execution": [
+    {"pr": 252, "merge_sha": "c2361b81f716db637368f4f4337f10195bbdaf20", "exact_head_ci_run": 32577024780, "note": "Work-mode migration merged to main by the owner while this handoff was active."}
   ],
-  "checkpoint_freshness_rule": "This release checkpoint advances main after all listed runs started. Observe those exact runs without duplication; any pass is semantic evidence only until the exact preserved delta is reconstructed on checkpoint latest main and passes fresh full exact-head CI.",
-  "exact_next_action": "Observe PR230 CI 32422333224 first without rerun. On success reconstruct its preserved exact two-file delta on checkpoint latest main and require fresh full CI before merge; on failure retain exact head/run and repair only the demonstrated recursive-frontier boundary. Then reconstruct PR245 exact source/test blobs on verified post-PR230 main. In parallel observe PR238/244/246 and PR247 without duplication; rebuild passing deltas on then-current verified main, with PR247 blocked until PR238 integrates.",
-  "claim_boundary": "Strict independent external production evidence gate has not passed; evaluation requests, challenges, disclosures, attestations, and registered independent verifiers remain zero. Verified AGI remains unproven."
+  "primary_in_flight_pr": 254,
+  "primary_in_flight_head_sha": "30eca1187845981c674aec2c7ab2911b8d9af187",
+  "primary_in_flight_purpose": "Engine safety hardening (replay-stable invocation identity, unit_id path-traversal allowlist, awaiting_work_model provider guard) + CI control-plane repair (remove invalid materialize workflow, raise test timeout 45->75) + control-plane reconciliation + method-saturation record, rebased onto post-#252 main.",
+  "retention_backlog_deferred": {
+    "passing_but_deferred": [238, 244, 246, 247, 248, 249, 251],
+    "diagnostic_only_or_cancelled": [230, 245, 250],
+    "policy": "Per agi/WORK_STRATEGY.json saturation_assessment: after PR 254 lands, integrate at most a representative non-redundant subset on fresh exact-head CI, close diagnostic-only/near-duplicate heads with recorded rationale, preserve every exact failure, and redirect marginal effort to external-evidence readiness."
+  },
+  "exact_next_action": "Observe PR 254 exact-head full CI (test.yml at the corrected 75-minute timeout) without duplicating runs; merge only an unchanged passing head; verify remote readback and refresh the fenced lease; then settle the backlog conservatively and prioritize external-evidence readiness and the user-only independent-evaluator request.",
+  "claim_boundary": "Strict independent external production evidence gate has not passed; evaluation requests, challenges, disclosures, attestations, and registered independent verifiers remain zero. Verified AGI remains unproven; no internal test, CI result, PR merge, or milestone is admissible proof."
 }
