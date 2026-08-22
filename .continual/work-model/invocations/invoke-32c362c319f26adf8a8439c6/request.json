@@ -1,0 +1,120 @@
+{
+  "component": "task_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-22T19:12:14.994020Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-32c362c319f26adf8a8439c6",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "active_component_path": "prompts/task_evaluate.md",
+    "execution_unit": {
+      "component": "task_evaluate",
+      "evidence_needed": [
+        "Confirm the original AGI task remains FAIL or UNCERTAIN under the strict independent external production evidence gate.",
+        "Confirm the lifecycle repair unit itself is PASS only if the focused regressions, immutable Work verification, exact-head CI, unchanged head, clean merge, and main readback all hold.",
+        "Return distinct original-task verdict and unit verdict without weakening either boundary."
+      ],
+      "expected_outputs": [
+        "An original-task verdict with all external-gate deficits retained.",
+        "A separate unit_verdict for the bounded lifecycle repair.",
+        "Precise evidence provenance and remaining repair/next-unit information."
+      ],
+      "goal": "Evaluate the incremental lifecycle-repair unit separately from the still-unmet original AGI goal, using the unchanged merged head and exact CI evidence.",
+      "inputs": [
+        "PR 256 exact head 71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
+        "Exact-head CI run 32591220738 with every required step successful",
+        "Merge SHA 976efad5fe0f2d1348ba97e5ba67d6253d331958 and remote engine/snapshot readback",
+        "Remote-head work-verify: 19 requests, 18 responses, one pending, valid=true"
+      ],
+      "scope": "continual/incremental-task-evaluation",
+      "unit_id": "unit-f67e779cf0b2194e4e3e6542"
+    },
+    "preflight_selection": {
+      "decision": "USE_ACTIVE",
+      "reason": "No candidate targets this component.",
+      "scope": "task_evaluate"
+    },
+    "snapshot": {
+      "continuation_stack": [],
+      "created_at": "2026-08-22T11:41:47.630118Z",
+      "current_component": "task_evaluate",
+      "current_unit": "unit-f67e779cf0b2194e4e3e6542",
+      "entry_ref": "artifacts/entry.json",
+      "environment": {
+        "active_components_digest": "3974833d170f43432c948095",
+        "model": "chatgpt-work-model-unverified",
+        "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+        "python": "3.12.13",
+        "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+        "runner": "python-engine-v2"
+      },
+      "error_count": 0,
+      "last_evaluation": {
+        "claim_boundary": "The handoff unit passed as internal readiness, but the original AGI task fails because the strict independent external production evidence gate has not passed.",
+        "evaluated_goal": "Real-world AGI verified by the strict independent external production evidence gate.",
+        "evidence": [
+          {
+            "finding": "The source artifact, public runtime manifest, and strict request are bound by canonical digests; the ledger contains exactly one evaluation request.",
+            "source": "evidence/handoffs/work-recovery-v3 and evidence/external_ledger.json"
+          },
+          {
+            "finding": "The unchanged repaired head passed pytest, compileall, all suite validators, protocol validation, and reference runs before merge.",
+            "source": "GitHub PR 255 exact head 36b34d1 and workflow 32588729634"
+          },
+          {
+            "finding": "Both superseded heads failed only the retained shallow-history and recovery-owner assertion defects; neither failure was erased or rerun as if successful.",
+            "source": "GitHub workflows 32586856167 and 32587964226"
+          },
+          {
+            "finding": "There are zero challenges, disclosures, signed attestations, or registered independent verifiers.",
+            "source": "evidence/external_ledger.json and evidence/external_verifiers.json"
+          },
+          {
+            "finding": "agi_claim_supported=false; breadth, transfer, autonomy, continual_learning, self_improvement, and robustness are all missing.",
+            "source": "strict external claim evaluation"
+          },
+          {
+            "finding": "Merge CI is in progress and is not counted as successful evidence.",
+            "source": "GitHub main workflow 32590500449"
+          }
+        ],
+        "repair": {
+          "do_not_repair": "Do not weaken the gate or add repository-authored attestations.",
+          "external_dependency": "An independent evaluator and production runtime-access route remains necessary; keep that request durable and non-blocking while reversible readiness work continues.",
+          "next_falsifiable_unit": "Provide a secret-free detached-signature packaging boundary that emits exact canonical ExternalAttestation payload bytes, rejects secret-bearing or malformed result statements, verifies externally generated Ed25519 signatures without receiving a private key, and leaves ledger audit and AGI claim false until independent evidence arrives."
+        },
+        "unit_subfinding": {
+          "reason": "The exact-commit external handoff met its frozen internal readiness boundary, but that unit is not the original AGI success condition.",
+          "unit_id": "unit-634edce3b0003989312d61aa",
+          "verdict": "PASS"
+        },
+        "unmet_conditions": [
+          "No independently controlled hidden suite or fresh suite-bound challenge exists.",
+          "No independent evaluator public key or independent evaluator group is registered.",
+          "No signed production attestation exists for any required criterion.",
+          "The strict two-independent-group quorum is unmet for every criterion.",
+          "The runtime identity remains platform-unverified and no independent production environment has observed it."
+        ],
+        "verdict": "FAIL"
+      },
+      "last_result_ref": "artifacts/unit-a259396b52b0682db153cbbe-result.json",
+      "phase": "unit_pending",
+      "revision": 14,
+      "run_id": "run-work-mode-handoff-v2",
+      "status": "continue",
+      "updated_at": "2026-08-22T19:12:14.985720Z"
+    }
+  },
+  "payload_digest": "b6056379ac80c195be12c0989ef591a8b254de3f4261f1ed8e957889f23c7cab",
+  "prompt_content": "# TASK EVALUATE\n\nEvaluate whether the original user task—not merely the most recent unit—satisfies its explicit success conditions. Prefer tests, builds, lint, real files, git state, API results, benchmark reports, independently checkable artifacts, and user-defined acceptance criteria. Self-report and architectural sophistication are not sufficient evidence.\n\nReturn `PASS`, `FAIL`, or `UNCERTAIN`, with evidence provenance and precise repair information. For AGI claims, use the evidence gate in `src/agi/evaluation.py`; a development benchmark pass alone cannot produce PASS for the full AGI goal.\n\nAt the end perform Local Learn on this evaluator execution.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.\n",
+  "prompt_digest": "44821191bfe8c7f063c8195fac6ff15dbf84127dcee7bb0a6f08e5170347d17f",
+  "prompt_path": "prompts/task_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "89c6bb2e78807e745852fc599394051b62d4f1c624aa358803a4571b109c2a8a",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}
