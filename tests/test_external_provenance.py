@@ -163,8 +163,16 @@ def test_detached_signature_packaging_fails_closed_without_mutating_input():
         "evaluator.secret-key",
         "private_key_material",
         "apiTokenValue",
+        "authorizationHeader",
+        "bearerValue",
+        "chainOfThoughtNotes",
+        "hiddenReasoningTrace",
+        "rawSystemPromptText",
+        "scratchpadText",
         "secretValue",
+        "sessionCookie",
         "hiddenAnswerDigest",
+        "systemPromptCopy",
     ):
         with pytest.raises(ExternalEvidenceError, match="forbidden secret fields"):
             prepare_external_attestation_payload(
