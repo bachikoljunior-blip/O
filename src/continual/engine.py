@@ -12,6 +12,7 @@ from typing import Any
 from .contracts import ContractError, validate_component_output
 from .openai_client import ModelClient
 from .store import Store
+from .work_session import WorkModelPending
 
 
 SEMANTIC_COMPONENTS = {
@@ -52,11 +53,13 @@ _LIST_FIELDS = {
 @dataclass
 class Engine:
     root: Path
+    model: Any | None = None
 
     def __post_init__(self) -> None:
         self.root = self.root.resolve()
         self.store = Store(self.root)
-        self.model = ModelClient(self.root)
+        if self.model is None:
+            self.model = ModelClient(self.root)
 
     @property
     def candidate_index_path(self) -> Path:
@@ -107,10 +110,18 @@ class Engine:
             "active_components_digest": self.store.stable_digest(active),
         }
 
-    def start(self, request: str, *, max_steps: int = 64) -> str:
+    def start(
+        self,
+        request: str,
+        *,
+        max_steps: int = 64,
+        run_id: str | None = None,
+    ) -> str:
         if not isinstance(request, str) or not request.strip():
             raise ValueError("request must be a non-empty string")
-        run_id = self.store.new_id("run")
+        run_id = run_id or self.store.new_id("run")
+        if not re.fullmatch(r"run-[A-Za-z0-9._-]{6,128}", run_id):
+            raise ValueError("invalid run_id")
         rd = self.store.run_dir(run_id)
         rd.mkdir(parents=True, exist_ok=False)
         self.store.atomic_text(rd / "request.md", request)
@@ -343,7 +354,10 @@ class Engine:
             return output, invocation_id
 
         output = journal.get("output") if isinstance(journal, dict) and journal.get("status") == "output_ready" else None
-        attempt = int(journal.get("attempt", 0)) + 1 if isinstance(journal, dict) else 1
+        if isinstance(journal, dict) and journal.get("status") == "awaiting_work_model":
+            attempt = int(journal.get("attempt", 1))
+        else:
+            attempt = int(journal.get("attempt", 0)) + 1 if isinstance(journal, dict) else 1
         if output is None:
             self.store.atomic_json(
                 path,
@@ -360,6 +374,37 @@ class Engine:
             try:
                 output = self.model.call(component, payload, prompt_path=prompt_path)
                 validate_component_output(component, output, evaluator_mode=evaluator_mode)
+            except WorkModelPending as pending:
+                self.store.atomic_json(
+                    path,
+                    {
+                        "invocation_id": invocation_id,
+                        "component": component,
+                        "prompt_path": prompt_path,
+                        "payload_digest": self.store.stable_digest(payload),
+                        "status": "awaiting_work_model",
+                        "attempt": attempt,
+                        "work_invocation_id": pending.invocation_id,
+                        "work_request_ref": pending.request_ref,
+                        "work_request_digest": pending.request_digest,
+                        "started_at": (
+                            journal.get("started_at")
+                            if isinstance(journal, dict)
+                            else self.store.utc_now()
+                        ),
+                    },
+                )
+                if not isinstance(journal, dict) or journal.get("status") != "awaiting_work_model":
+                    self.store.append_event(
+                        run_id,
+                        {
+                            "type": "work_model_pending",
+                            "component": component,
+                            "invocation_id": invocation_id,
+                            "work_invocation_id": pending.invocation_id,
+                        },
+                    )
+                raise
             except ContractError as first_error:
                 repair_payload = dict(payload)
                 repair_payload["contract_repair"] = {
@@ -651,6 +696,8 @@ class Engine:
         new_value.update(changes)
         new_value["expected_revision"] = snapshot.get("revision", 0)
         new_value.pop("last_error", None)
+        new_value.pop("checkpoint_reason", None)
+        new_value.pop("pending_work_model", None)
         return self.store.write_snapshot(run_id, new_value)
 
     def _episode_catalog(self, limit: int = 50) -> list[dict[str, Any]]:
@@ -823,6 +870,7 @@ class Engine:
                             "preflight_refs": [
                                 path.relative_to(self.root).as_posix()
                                 for path in sorted((rd / "preflight").glob("*.json"))
+                                if not path.name.startswith("preflight-consolidate_episode-")
                             ],
                             "candidate_trial_refs": [
                                 path.relative_to(self.root).as_posix()
@@ -887,6 +935,13 @@ class Engine:
                     return finished
 
                 raise RuntimeError(f"unknown phase: {phase}")
+
+            except WorkModelPending:
+                # The native invocation journal already freezes the exact request.
+                # Mutating the semantic snapshot here would change the payload digest
+                # on resume and create a different Work invocation instead of replaying
+                # the response for the frozen one.
+                return self.store.snapshot(run_id)
 
             except Exception as exc:
                 self.store.append_event(
