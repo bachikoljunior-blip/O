@@ -8,11 +8,11 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T21:25:32.404Z",
-  "last_progress_at": "2026-08-22T21:25:32.404Z",
+  "heartbeat_at": "2026-08-22T21:35:43.897Z",
+  "last_progress_at": "2026-08-22T21:35:43.897Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 257 exact head 2a3ac65 remains in exact-head CI 32598374443 at pytest. Cross-binding adversarial review found and fixed a real full-challenge gap: nonce/suite were signed but validity-window and verifier-policy changes could remain acceptable. Final local head 9aa7689 now requires signed canonical digests of complete challenge.json and verifier.json, rejecting validity-window tampering, independent-group changes, and policy widening. Dedicated 32 and focused 70 tests pass; compileall/diff-check pass. The prior full-suite session was interrupted because it could not verify this corrected source; a new unchanged exact full suite session 3513 is running. No independent external production evidence exists; AGI false.",
+    "reason": "PR 257 final exact head 2a3ac65 passed workflow 32598374443 with every required step successful, was read twice as unchanged/open/mergeable, and merged to main 3bc72f4. Main readback preserved generation-3 lease/fence, source blob 088b3d0, test blob b924260, and native pending Execute unit-89058c1. Prior immutable-head CI 32597656410 also completed success but remains superseded evidence. Cross-binding final local exact head 9aa7689 remains unchanged; dedicated 32 and focused 70 tests pass and exact full suite session 3513 is in progress past 15%. No independent production evidence exists; AGI false.",
     "verified_main_sha": "8c35555a781df027b02dcf2b1f2c44685f70d3c1",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a generation-plus-one state-only CAS with exact readback."
   },
@@ -31,8 +31,8 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
-  "working_branch": "work/external-attestation-detached-signature-v3",
+  "source_main_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
+  "working_branch": "work/external-handoff-cross-binding-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
   "active_unit_id": "unit-89058c1acef29b8e657a946c",
@@ -43,12 +43,12 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/external-attestation-detached-signature-v3",
-    "snapshot_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
+    "snapshot_branch": "main",
+    "snapshot_head_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
-    "durability_status": "PR 257 exact head 2a3ac65 is remote with CI in progress; cross-binding is isolated at final reviewed local commit 9aa7689 with exact full regression session 3513 running",
-    "next_action": "Wait for PR 257 exact-head CI without rerun/cancel. Merge only on unchanged head, all required success, and mergeable true; verify main and merge CI. Let cross-binding exact full suite finish unchanged, then publish its exact commit after PR 257 integration."
+    "durability_status": "PR 257 is merged and its native pending Execute is on main 3bc72f4; cross-binding implementation remains isolated at local exact head 9aa7689 with exact full regression running",
+    "next_action": "Verify whether a merge-commit workflow is created for main 3bc72f4 without manual rerun. Let cross-binding exact full suite finish unchanged; then publish exact tested files from 9aa7689 on a fresh isolated branch based on latest main, require exact-head CI, and only then submit the frozen native Execute response."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -168,15 +168,15 @@
     "merge_ci_completed_observed_at": "2026-08-22T18:53:35.034Z",
     "merge_ci_all_required_steps_success": true,
     "detached_signature_packaging": {
-      "status": "final_immutable_record_head_ci_queued",
+      "status": "merged_exact_head_ci_success",
       "pull_request": 257,
       "branch": "work/external-attestation-detached-signature-v3",
       "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
       "exact_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
       "exact_head_ci_run": 32598374443,
-      "exact_head_ci_status": "in_progress",
+      "exact_head_ci_status": "success",
       "mergeable": true,
-      "mergeable_state": "clean_exact_head_observed",
+      "mergeable_state": "clean_before_merge",
       "changed_files": 105,
       "focused_regression": "33_passed_final_public_boundary_alignment",
       "local_full_suite": "424_passed_3661.75s_terminal_redundant_internal_only",
@@ -237,15 +237,17 @@
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T21:25:32.404Z",
+        "at": "2026-08-22T21:35:43.897Z",
         "exact_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
         "exact_head_ci_run": 32598374443,
-        "exact_head_ci_status": "in_progress_pytest",
+        "exact_head_ci_status": "success_all_required_steps",
         "mergeable": true,
+        "merged_main_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
         "prior_superseded_ci_run": 32597656410,
-        "native_phase": "execute_final_cross_binding_exact_full_regression_in_progress_local"
+        "prior_superseded_ci_status": "success_not_merge_evidence",
+        "native_phase": "execute_cross_binding_exact_full_regression_in_progress_local"
       },
-      "exact_head_ci_all_required_steps_success": false,
+      "exact_head_ci_all_required_steps_success": true,
       "task_evaluate": {
         "original_goal_verdict": "FAIL",
         "unit_verdict": "PASS",
@@ -260,6 +262,16 @@
         "learn_completed": true,
         "next_unit_id": "unit-89058c1acef29b8e657a946c",
         "pending_execute_invocation_id": "invoke-f3f84b7c83c1d48e4962e390"
+      },
+      "merge_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
+      "main_readback": {
+        "observed_at": "2026-08-22T21:35:43.897Z",
+        "lease_blob_sha": "f0a811dd9057ff435303284b97117d3859b29d79",
+        "source_blob_sha": "088b3d0f0d6c70e04756e7999a3bb3356e7a90ac",
+        "test_blob_sha": "b924260e5b8b29e99d329145a8da975104a74845",
+        "snapshot_blob_sha": "da06a40c6fe163c80d564b198d1e44c23ec9c9f7",
+        "pending_unit_id": "unit-89058c1acef29b8e657a946c",
+        "matched": true
       }
     },
     "native_work_verify": {
@@ -276,7 +288,7 @@
       "focused_external_evidence_tests": "70_passed_118.40s",
       "compileall": "pass",
       "diff_check": "pass",
-      "exact_full_suite": "in_progress_session_3513_no_failure_signal",
+      "exact_full_suite": "in_progress_session_3513_past_15_percent_no_failure_signal",
       "hardening": [
         "fixed canonical public bundle members and challenge schema",
         "request criterion exact subject runtime manifest suite nonce evaluator result payload key and signature cross-binding",
