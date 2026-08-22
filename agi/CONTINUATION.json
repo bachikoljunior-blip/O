@@ -3,7 +3,7 @@
   "user_goal": "Build and externally verify AGI as quickly as possible without weakening the evidence gate.",
   "status": "in_progress",
   "execution_mode": "work_mode_o_engine_single_writer_with_monitor_insurance",
-  "active_system_definition": "The current Work model executes every semantic O Engine component through immutable Work invocation records while O retains the Run, contracts, journal, Episodes, Candidates, memory, evidence, and continuation. This integrated system remains unfinished and externally unverified.",
+  "active_system_definition": "The current successor Work session drives the O Engine through immutable Work invocation records while O retains the Run, contracts, journal, Episodes, Candidates, memory, evidence, and continuation. The checked-in run has externalized ENTRY, Root, candidate-evaluate, and Execute invocations; the remaining semantic components are bridge-supported but not yet exercised. This integrated system remains unfinished and externally unverified.",
   "execution_policy_path": "agi/WORK_MODE.md",
   "work_handoff_path": "agi/WORK_MODE_HANDOFF.json",
   "work_monitor_path": "agi/WORK_MODE_MONITOR.json",
@@ -22,17 +22,30 @@
     {"pr": 234, "head_sha": "b6417d4daae495f68ff582b6fbea683583cf7b2e", "exact_head_ci_run": 32323618763, "merge_sha": "f26144734d97477791eb85ca36e5689d7ba3a732"},
     {"pr": 229, "head_sha": "6f3a1e86f21f443b92313eb9c632a7ecfac0cfb1", "exact_head_ci_run": 32326756624, "merge_sha": "d9c48990bf2416f7a2096e3857bfda385b708599"}
   ],
-  "current_milestone": {
+  "migration_merged": {
     "title": "Migrate the primary developer to Work mode through the native O Engine",
-    "branch": "work/work-mode-handoff-v2",
-    "base_sha": "f914369d42a74548d420e775afc60333e7a173f3",
-    "head_sha": null,
-    "pull_request": null,
-    "exact_head_ci": null,
+    "pull_request": 252,
+    "merge_sha": "c2361b81f716db637368f4f4337f10195bbdaf20",
+    "exact_head_ci_run": 32577024780,
+    "note": "Merged to main by the account owner after an inbox-test-robustness fix passed exact-head CI. AGI claim remains false."
+  },
+  "current_milestone": {
+    "title": "Harden the merged Work-mode engine and repair the CI control plane (post-252 follow-up)",
+    "branch": "claude/execution-handoff-completion-mtwgqr",
+    "base_sha": "c2361b81f716db637368f4f4337f10195bbdaf20",
+    "head_sha": "pending_push_of_reconciliation_commit",
+    "pull_request": 254,
+    "exact_head_ci": "pending_after_push",
     "native_run_id": "run-work-mode-handoff-v2",
     "active_unit_id": "unit-6ca357218da14d4c3243d3c3",
-    "local_validation": "401-test pre-queue baseline passed; final modified worktree passed 26 focused tests and requires exact-head CI",
-    "falsifiable_goal": "Persist and publish a credential-independent Work-to-O semantic bridge plus a fail-closed single-writer recovery contract, require exact-head CI, and leave the strict external AGI claim false."
+    "review_fixes": [
+      "engine.py _preflight/_postflight digest the run's frozen snapshot environment so candidate-evaluate invocation identity is stable across restarts and commits (replay invariant)",
+      "engine._schedule_unit constrains the model-controlled unit_id to a separator-free allowlist, closing a path traversal that could overwrite the protected active-prompt pointer",
+      "engine._call_component_direct refuses to complete an awaiting_work_model invocation with a non-Work provider (WorkProviderMismatch)"
+    ],
+    "ci_control_plane_repair": "Removes the invalid materialize-sequence-affine-char-repair workflow (zero-job failure on every push, still present on main) and its trigger json, and raises test.yml timeout-minutes 45 -> 75.",
+    "local_validation": "post-fix focused suite green on the new base including new work-safety regression tests; full exact-head CI required before merge",
+    "falsifiable_goal": "Land the three confirmed engine-defect fixes with regression tests and the CI control-plane repair on exact-head full CI, and leave the strict external AGI claim false."
   },
   "diagnostic_stacks": [
     {
@@ -116,13 +129,12 @@
     "Issue 222 remains the independent-evaluator coordination point with zero external replies. Obtain genuinely independent signed production trials across breadth, transfer, autonomy, continual learning, self-improvement, robustness, and required evaluator quorum before any AGI claim."
   ],
   "next_actions": [
-    "Rank the next unit and method family by expected elapsed-time reduction and decision-changing evidence under agi/WORK_STRATEGY.json; preserve the unchanged external gate and do not privilege O without comparative evidence.",
-    "Review agi/USER_REQUEST_QUEUE.json, surface due requests, and continue the listed safe alternative work without waiting.",
-    "Validate every Work migration JSON file and the checked-in Work lease policy.",
-    "Run relevant tests and then the broadest feasible repository test suite without relabeling internal success as external evidence.",
-    "Update the exact native O continuation, commit and publish the migration branch, and inspect exact-head checks without duplicating existing effects.",
-    "Merge no failed, moved, stale-base, or diagnostic-only head. Preserve all exact failures.",
-    "After the Work migration integrates, Root must select the next falsifiable capability or external-evidence unit and continue the same user-level objective.",
+    "Observe PR 254 exact-head full CI (test.yml at the corrected 75-minute timeout) without duplicating runs; merge only an unchanged passing head.",
+    "After PR 254 lands, verify remote readback, refresh the fenced primary lease, and reconcile open PR/CI state against the new verified main.",
+    "Settle the retention/observed-schema backlog conservatively per agi/WORK_STRATEGY.json saturation_assessment: refresh and merge at most a representative non-redundant subset of the passing retention PRs (238/244/246/248/251 then 247 then 249) on fresh exact-head CI, close diagnostic-only heads (245/250) and near-duplicate heads with the recorded rationale, and preserve every exact failure.",
+    "Rerun PR 230 under the corrected timeout; merge only an unchanged passing head, else retain the exact failure and repair only its demonstrated boundary.",
+    "Reconstruct the PR 233 observed-schema successor on verified main with the persisted-iterated Candidate-ID binding repair and a direct end-to-end regression before merge.",
+    "Redirect marginal effort from further internal retention probes toward external-evidence readiness and the user-only independent-evaluator request in agi/USER_REQUEST_QUEUE.json; continue safe reversible work without waiting.",
     "Do not retrigger Copilot live campaigns while monthly quota exhaustion remains the observed provider block.",
     "Keep AGI claim false until the strict independent production evidence gate passes."
   ],
@@ -148,5 +160,5 @@
     "external_claim_admissible": false,
     "reason": "The current repository-development task is running through the native O Engine and immutable Work invocation records."
   },
-  "updated_utc": "2026-08-22T13:07:07Z"
+  "updated_utc": "2026-08-22T14:45:00Z"
 }
