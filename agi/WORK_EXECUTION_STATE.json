@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T19:34:34.218Z",
-  "last_progress_at": "2026-08-22T19:34:34.218Z",
+  "heartbeat_at": "2026-08-22T19:37:20.000Z",
+  "last_progress_at": "2026-08-22T19:37:20.000Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Detached-signature packaging is published on PR 257 at exact head 04cbe5a with 29 focused tests, compileall, diff-check, remote branch readback, and native work-verify valid. Exact-head CI 32594072687 and local full suite are in progress; frozen Root invoke-7a98234f8af1c64c638242f4 waits for objective evidence before Task Evaluate. PR 256 merge CI 32592937235 remains in progress. AGI remains false.",
-    "verified_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
+    "reason": "PR 257 was hardened after publication to reject hidden_answers, suite_seed, answer/seed suffixes, and secret-key variants recursively. New exact head d33bef7 passed 5 focused negative tests plus compile/diff checks; exact-head CI 32594233281 is in progress. Prior head 04cbe5a and CI 32594072687 are superseded and retained without cancellation. Frozen Root remains invoke-7a98234f8af1c64c638242f4. AGI remains false.",
+    "verified_main_sha": "09cd3408a88a5fc441c4609428ed27ad9cf1b28c",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
   "parallel_execution_coordination": {
@@ -31,7 +31,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
+  "source_main_sha": "09cd3408a88a5fc441c4609428ed27ad9cf1b28c",
   "working_branch": "work/external-attestation-detached-signature-v3",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "root",
@@ -44,11 +44,11 @@
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/external-attestation-detached-signature-v3",
-    "snapshot_head_sha": "04cbe5a0fbfd593667a57e0e9fb803a2800dbacf",
+    "snapshot_head_sha": "d33bef78c1cbce751d127750b3fe6a022674cce7",
     "pending_work_invocation_id": "invoke-7a98234f8af1c64c638242f4",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7a98234f8af1c64c638242f4/request.json",
     "durability_status": "implementation and exact native continuation are remotely readable on PR 257 head",
-    "next_action": "Observe exact-head CI 32594072687 without rerun. If all required steps succeed, head is unchanged, and PR remains conflict-free, submit frozen Root to select Task Evaluate, evaluate original AGI FAIL separately from bounded unit, merge only after the frozen boundary, read back main, and continue the same O Run."
+    "next_action": "Observe exact-head CI 32594233281 for unchanged d33bef7 without rerun. If all required steps succeed and PR 257 remains conflict-free, submit frozen Root to Task Evaluate the bounded unit separately from original AGI FAIL, merge only after that frozen evidence boundary, verify main, and continue."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -170,13 +170,13 @@
       "pull_request": 257,
       "branch": "work/external-attestation-detached-signature-v3",
       "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
-      "exact_head_sha": "04cbe5a0fbfd593667a57e0e9fb803a2800dbacf",
-      "exact_head_ci_run": 32594072687,
+      "exact_head_sha": "d33bef78c1cbce751d127750b3fe6a022674cce7",
+      "exact_head_ci_run": 32594233281,
       "exact_head_ci_status": "in_progress",
       "mergeable": true,
       "mergeable_state": "unstable_pending_checks",
       "changed_files": 56,
-      "focused_regression": "29_passed",
+      "focused_regression": "29_passed_plus_5_secret_suffix_negative_passed",
       "local_full_suite": "in_progress",
       "compileall": "pass",
       "diff_check": "pass",
@@ -187,7 +187,17 @@
         "pending": 1
       },
       "remote_snapshot_blob_sha": "ac286b549a4a43520d178a592ca31eaefae603c2",
-      "claim_boundary": "packaging readiness only; ledger audit, evaluator quorum, and strict AGI gate remain unmet"
+      "claim_boundary": "packaging readiness only; ledger audit, evaluator quorum, and strict AGI gate remain unmet",
+      "superseded_heads": [
+        {
+          "head": "04cbe5a0fbfd593667a57e0e9fb803a2800dbacf",
+          "ci_run": 32594072687,
+          "status": "in_progress_superseded_not_cancelled",
+          "reason": "post-publication review added stricter hidden-answer and suite-seed rejection"
+        }
+      ],
+      "remote_source_blob_sha": "c1085da533b26020209fe23b562ddb69c1ee0dad",
+      "remote_test_blob_sha": "ff6718b449c9c26e4e51a4738d3d03c50541019e"
     },
     "native_work_verify": {
       "valid": true,
