@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T21:00:41.654Z",
-  "last_progress_at": "2026-08-22T21:00:41.654Z",
+  "heartbeat_at": "2026-08-22T21:02:16.449Z",
+  "last_progress_at": "2026-08-22T21:02:16.449Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 257 final immutable-record head b164f3c remains unchanged and CI 32597656410 is still running pytest. GitHub now reports the PR non-mergeable because main advanced only in agi/WORK_EXECUTION_STATE.json after the PR base; compare confirms that is the sole main-side file. Cross-binding Execute implementation is isolated locally with 18 dedicated tests and 56 focused provenance/request/artifact/claim tests passing, compileall and diff-check passing. No AGI evidence observed.",
-    "verified_main_sha": "55c2bf3def342f59f08c1bc8d81a09b3723ad55d",
+    "reason": "PR 257 state-only conflict was resolved without force by exact two-parent commit 2a3ac65, preserving main state blob cf063c4. Remote PR readback confirms head 2a3ac65 and mergeable=true. New exact-head CI 32598374443 is in progress. Prior CI 32597656410 was not cancelled and is retained as superseded evidence. Cross-binding Execute remains isolated locally: 18 dedicated and 56 focused tests pass; AGI evidence remains absent.",
+    "verified_main_sha": "f9da048c66b590432fe8b89e2371e96cce02d3e3",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a generation-plus-one state-only CAS with exact readback."
   },
   "parallel_execution_coordination": {
@@ -44,11 +44,11 @@
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/external-attestation-detached-signature-v3",
-    "snapshot_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
+    "snapshot_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
-    "durability_status": "implementation, bounded Task Evaluate PASS, Consolidate Episode, Learn, Root, and frozen next Execute are remotely readable on PR 257 exact head b164f3c",
-    "next_action": "Do not merge PR 257 at b164f3c while GitHub reports a conflict. Let CI 32597656410 finish without cancellation, then rebind the PR by a non-force merge commit that preserves the latest main WORK_EXECUTION_STATE, verify the new exact head and rerun required CI. After conflict-free success, merge and publish the separately isolated cross-binding Execute unit."
+    "durability_status": "PR 257 immutable native records are remotely readable at conflict-free exact head 2a3ac65; latest main state was preserved as the second parent; cross-binding implementation is still isolated local work",
+    "next_action": "Wait for exact-head CI 32598374443 without duplicate rerun. Continue isolated cross-binding validation. If all required checks succeed, PR head remains 2a3ac65, and mergeable remains true, merge PR 257 and verify main plus merge CI before publishing the next unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -172,11 +172,11 @@
       "pull_request": 257,
       "branch": "work/external-attestation-detached-signature-v3",
       "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
-      "exact_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
-      "exact_head_ci_run": 32597656410,
-      "exact_head_ci_status": "in_progress_pytest",
-      "mergeable": false,
-      "mergeable_state": "state_only_main_divergence_requires_nonforce_rebind",
+      "exact_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
+      "exact_head_ci_run": 32598374443,
+      "exact_head_ci_status": "in_progress",
+      "mergeable": true,
+      "mergeable_state": "clean_after_state_only_two_parent_rebind",
       "changed_files": 105,
       "focused_regression": "33_passed_final_public_boundary_alignment",
       "local_full_suite": "in_progress_final_head_12716d4_local_equivalent",
@@ -237,12 +237,12 @@
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T21:00:41.654Z",
-        "exact_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
-        "exact_head_ci_run": 32597656410,
-        "exact_head_ci_status": "in_progress_pytest",
-        "mergeable": false,
-        "merge_blocker": "main advanced only in agi/WORK_EXECUTION_STATE.json; preserve latest main state in a two-parent merge commit after CI observation",
+        "at": "2026-08-22T21:02:16.449Z",
+        "exact_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
+        "exact_head_ci_run": 32598374443,
+        "exact_head_ci_status": "in_progress",
+        "mergeable": true,
+        "prior_superseded_ci_run": 32597656410,
         "native_phase": "execute_implementation_isolated_local"
       },
       "exact_head_ci_all_required_steps_success": false,
@@ -267,7 +267,7 @@
       "requests": 34,
       "responses": 33,
       "pending": 1,
-      "observed_at": "2026-08-22T21:00:41.654Z"
+      "observed_at": "2026-08-22T21:02:16.449Z"
     }
   }
 }
