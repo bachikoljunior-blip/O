@@ -8,13 +8,13 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T19:23:54.437Z",
-  "last_progress_at": "2026-08-22T19:23:54.437Z",
+  "heartbeat_at": "2026-08-22T21:00:41.654Z",
+  "last_progress_at": "2026-08-22T21:00:41.654Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Native O completed Task Evaluate(original AGI FAIL, lifecycle unit PASS), Consolidate Episode, Learn, and returned to Root without finishing. Root selected detached-signature ExternalAttestation packaging and reached Execute invoke-da36a298428d941594268a33. Hardened isolated prototype is under focused/full validation; PR 256 merge CI 32592937235 remains in progress. AGI remains false.",
-    "verified_main_sha": "153413c5d59e60f32c65bf347a0b5c88fa2c9185",
-    "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
+    "reason": "PR 257 final immutable-record head b164f3c remains unchanged and CI 32597656410 is still running pytest. GitHub now reports the PR non-mergeable because main advanced only in agi/WORK_EXECUTION_STATE.json after the PR base; compare confirms that is the sole main-side file. Cross-binding Execute implementation is isolated locally with 18 dedicated tests and 56 focused provenance/request/artifact/claim tests passing, compileall and diff-check passing. No AGI evidence observed.",
+    "verified_main_sha": "55c2bf3def342f59f08c1bc8d81a09b3723ad55d",
+    "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a generation-plus-one state-only CAS with exact readback."
   },
   "parallel_execution_coordination": {
     "note_to_parallel_worker": "A parallel ChatGPT Work-mode session (GPT-5.6 Sol) is the user's other active driver on this repository. The user authorized this Claude successor to coordinate with it. To avoid a two-writer collision, only one live writer should mutate the repository at a time; whichever holds a fresh running heartbeat is primary and the other suppresses per the monitor contract.",
@@ -31,11 +31,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "153413c5d59e60f32c65bf347a0b5c88fa2c9185",
+  "source_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
   "working_branch": "work/external-attestation-detached-signature-v3",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
-  "active_unit_id": "unit-ffc7b6b38cd9db08fe9f9097",
+  "active_unit_id": "unit-89058c1acef29b8e657a946c",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 3,
@@ -43,12 +43,12 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "fenced_owner_local_pending_publication",
-    "snapshot_head_sha": "f914369d42a74548d420e775afc60333e7a173f3",
-    "pending_work_invocation_id": "invoke-da36a298428d941594268a33",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-da36a298428d941594268a33/request.json",
-    "durability_status": "state checkpoint is on main; new native O records and implementation are isolated locally and must be published on the named branch before remote-only recovery",
-    "next_action": "Finish focused and full regression for detached-signature packaging, submit Execute evidence, publish implementation plus immutable native O records on work/external-attestation-detached-signature-v3, require exact-head CI, then Task Evaluate without weakening the AGI gate. Observe existing merge CI 32592937235 without rerun."
+    "snapshot_branch": "work/external-attestation-detached-signature-v3",
+    "snapshot_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
+    "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
+    "durability_status": "implementation, bounded Task Evaluate PASS, Consolidate Episode, Learn, Root, and frozen next Execute are remotely readable on PR 257 exact head b164f3c",
+    "next_action": "Do not merge PR 257 at b164f3c while GitHub reports a conflict. Let CI 32597656410 finish without cancellation, then rebind the PR by a non-force merge commit that preserves the latest main WORK_EXECUTION_STATE, verify the new exact head and rerun required CI. After conflict-free success, merge and publish the separately isolated cross-binding Execute unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -148,7 +148,7 @@
       "merged": true,
       "merge_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
       "merge_ci_run": 32592937235,
-      "merge_ci_status": "in_progress",
+      "merge_ci_status": "success",
       "remote_main_engine_blob_sha": "d45c884b63cc19049b8de3208d9236b4c47d43a3",
       "remote_main_snapshot_blob_sha": "258bbe3159c62419d6b8d65d9eddc4245fa18576",
       "native_cycle": {
@@ -161,31 +161,113 @@
         "continued_to_root": true,
         "run_finished": false,
         "candidate_registered": "candidate-task-evaluate-unit-verdict-v1"
-      }
+      },
+      "merge_ci_all_required_steps_success": true,
+      "merge_ci_completed_observed_at": "2026-08-22T19:47:14.725Z"
     },
     "merge_ci_completed_observed_at": "2026-08-22T18:53:35.034Z",
     "merge_ci_all_required_steps_success": true,
     "detached_signature_packaging": {
-      "status": "local_validation_in_progress",
-      "active_unit_id": "unit-ffc7b6b38cd9db08fe9f9097",
-      "execute_invocation_id": "invoke-da36a298428d941594268a33",
-      "changed_files": [
-        "src/agi/external_provenance.py",
-        "tests/test_external_provenance.py",
-        "agi/EXTERNAL_EVIDENCE.md"
-      ],
-      "prior_focused_regression": "28_passed",
-      "hardened_focused_regression": "in_progress_no_failure_signal",
+      "status": "final_immutable_record_head_ci_queued",
+      "pull_request": 257,
+      "branch": "work/external-attestation-detached-signature-v3",
+      "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
+      "exact_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
+      "exact_head_ci_run": 32597656410,
+      "exact_head_ci_status": "in_progress_pytest",
+      "mergeable": false,
+      "mergeable_state": "state_only_main_divergence_requires_nonforce_rebind",
+      "changed_files": 105,
+      "focused_regression": "33_passed_final_public_boundary_alignment",
+      "local_full_suite": "in_progress_final_head_12716d4_local_equivalent",
       "compileall": "pass",
       "diff_check": "pass",
-      "claim_boundary": "packaging readiness only; ledger audit, evaluator quorum, and strict AGI gate remain unmet"
+      "work_verify": {
+        "valid": true,
+        "requests": 34,
+        "responses": 33,
+        "pending": 1
+      },
+      "remote_snapshot_blob_sha": "ac286b549a4a43520d178a592ca31eaefae603c2",
+      "claim_boundary": "packaging readiness only; ledger audit, evaluator quorum, and strict AGI gate remain unmet",
+      "superseded_heads": [
+        {
+          "head": "04cbe5a0fbfd593667a57e0e9fb803a2800dbacf",
+          "ci_run": 32594072687,
+          "status": "in_progress_superseded_not_cancelled",
+          "reason": "added hidden-answer and suite-seed rejection"
+        },
+        {
+          "head": "d33bef78c1cbce751d127750b3fe6a022674cce7",
+          "ci_run": 32594233281,
+          "status": "in_progress_superseded_not_cancelled",
+          "reason": "added punctuation/case/camelCase secret-key normalization"
+        },
+        {
+          "head": "7d86119d966bd83df4cfa9092122947682ad6716",
+          "ci_run": 32594512530,
+          "status": "success_superseded_not_merge_evidence",
+          "reason": "security review found suffix-only secret-marker bypass",
+          "completed_all_required_steps": true
+        },
+        {
+          "head": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
+          "ci_run": 32595188080,
+          "status": "in_progress_superseded_not_cancelled",
+          "reason": "aligned remaining authorization/cookie/private-context markers with Work public boundary"
+        }
+      ],
+      "remote_source_blob_sha": "088b3d0f0d6c70e04756e7999a3bb3356e7a90ac",
+      "remote_test_blob_sha": "b924260e5b8b29e99d329145a8da975104a74845",
+      "superseded_local_test_runs": [
+        {
+          "head": "d33bef78c1cbce751d127750b3fe6a022674cce7",
+          "status": "interrupted_at_16_percent",
+          "reason": "superseded by final compact secret-name normalization; not a product failure and not rerun"
+        },
+        {
+          "head": "7d86119d966bd83df4cfa9092122947682ad6716",
+          "status": "interrupted_after_superseded",
+          "reason": "process had imported prior source before embedded-marker hardening; continuing would not verify final head"
+        },
+        {
+          "head": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
+          "status": "interrupted_after_superseded",
+          "reason": "process had imported the prior source before final public-boundary alignment"
+        }
+      ],
+      "last_observation": {
+        "at": "2026-08-22T21:00:41.654Z",
+        "exact_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
+        "exact_head_ci_run": 32597656410,
+        "exact_head_ci_status": "in_progress_pytest",
+        "mergeable": false,
+        "merge_blocker": "main advanced only in agi/WORK_EXECUTION_STATE.json; preserve latest main state in a two-parent merge commit after CI observation",
+        "native_phase": "execute_implementation_isolated_local"
+      },
+      "exact_head_ci_all_required_steps_success": false,
+      "task_evaluate": {
+        "original_goal_verdict": "FAIL",
+        "unit_verdict": "PASS",
+        "unit_id": "unit-d6ca097a96508ff17caf456b",
+        "candidate_trial": "remain_candidate_pending_deterministic_activation_gate"
+      },
+      "native_cycle": {
+        "original_goal_verdict": "FAIL",
+        "unit_verdict": "PASS",
+        "unit_id": "unit-d6ca097a96508ff17caf456b",
+        "consolidate_completed": true,
+        "learn_completed": true,
+        "next_unit_id": "unit-89058c1acef29b8e657a946c",
+        "pending_execute_invocation_id": "invoke-f3f84b7c83c1d48e4962e390"
+      }
     },
     "native_work_verify": {
       "valid": true,
-      "requests": 25,
-      "responses": 24,
+      "requests": 34,
+      "responses": 33,
       "pending": 1,
-      "observed_at": "2026-08-22T19:23:54.437Z"
+      "observed_at": "2026-08-22T21:00:41.654Z"
     }
   }
 }
