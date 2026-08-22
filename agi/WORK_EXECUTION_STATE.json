@@ -8,11 +8,11 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T17:28:01Z",
-  "last_progress_at": "2026-08-22T17:28:01Z",
+  "heartbeat_at": "2026-08-22T17:31:14Z",
+  "last_progress_at": "2026-08-22T17:31:14Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Generation-3 recovery remains active. PR 255 exact head is unchanged; GitHub CI and the independent local full suite are both still running pytest with no observed failure.",
+    "reason": "Generation-3 recovery reconciled PR 255 with the current heartbeat-only main. The new head is conflict-free and preserves the external-evaluator handoff while excluding lease state from the PR diff.",
     "verified_main_sha": "f5f983604f8b7f4bb6ca4e8fc8f2523f7b88239f",
     "recoverable_by": "No recovery while this running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
@@ -31,7 +31,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "617b0bc21ee7915853832c0042f0c9f33f38b7be",
+  "source_main_sha": "cc3497b6fefee7b982218e2034f42e4e255ff155",
   "working_branch": "work/external-evidence-handoff-v3",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
@@ -45,7 +45,7 @@
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "pending_work_invocation_id": "invoke-be8f13c968a7d7715d3de309",
     "pending_request_ref": ".continual/work-model/invocations/invoke-be8f13c968a7d7715d3de309/request.json",
-    "next_action": "Observe PR 255 exact-head CI run 32586856167 without rerunning. Merge only if head remains 52e99c8bf40066bd0467ce9adcdef223f80b66e2, all required checks succeed, main is unchanged or safely mergeable, and there is no conflicting writer. Then submit Execute result and continue the native O Run. AGI remains false."
+    "next_action": "Observe PR 255 exact-head CI run 32587964226 without rerunning. Merge only if head remains 64a382f390d91a32444ec4f5e737ee05b06bb5b4, all required checks succeed, main is unchanged or safely mergeable, and there is no conflicting writer. Then submit Execute result and continue the native O Run. AGI remains false."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -81,11 +81,12 @@
   },
   "publication": {
     "pull_request": 255,
-    "exact_head_sha": "52e99c8bf40066bd0467ce9adcdef223f80b66e2",
-    "exact_head_ci_run": 32586856167,
-    "exact_head_ci_status": "in_progress_pytest",
+    "exact_head_sha": "64a382f390d91a32444ec4f5e737ee05b06bb5b4",
+    "exact_head_ci_run": 32587964226,
+    "exact_head_ci_status": "in_progress",
     "remote_branch_readback_verified": true,
     "request_sha256": "2583352beea7765617606ed39985a0f7e79c45d0256982b7ad4eb4063586505d",
-    "local_full_suite_status": "in_progress_no_failure_observed"
+    "local_full_suite_status": "in_progress_no_failure_observed",
+    "superseded_diagnostic_ci_run": 32586856167
   }
 }
