@@ -2,168 +2,57 @@
   "schema_version": 2,
   "mode": "watchdog_repository_only_same_task_chat",
   "timezone": "Asia/Tokyo",
-  "status": "released_superseded_by_work_lease",
-  "legacy_after_work_migration": true,
-  "authoritative_lease_path": "agi/WORK_EXECUTION_STATE.json",
-  "superseded_note": "PR 252 placed the Work-mode migration on main (c2361b81), so agi/WORK_EXECUTION_STATE.json is the single authoritative running lease and this legacy Chat-mode lease is historical (may_recover_or_write: false). It was the operative single-writer record only while the Work-mode files were absent from main.",
-  "lease_mode": "user_directed_handoff_continuation",
-  "scheduler_fired_at": "2026-08-22T22:42:00+09:00",
+  "status": "running",
+  "lease_mode": "watchdog_continuation",
+  "scheduler_fired_at": "2026-08-21T08:06:56+09:00",
   "time_budget_enabled": false,
   "soft_stop": null,
   "hard_stop": null,
-  "actual_started_at": "2026-08-22T22:44:00+09:00",
-  "started_at": "2026-08-22T22:44:00+09:00",
-  "heartbeat_at": "2026-08-22T22:55:00+09:00",
-  "last_progress_at": "2026-08-22T22:55:00+09:00",
+  "actual_started_at": "2026-08-21T08:06:56+09:00",
+  "started_at": "2026-08-21T08:06:56+09:00",
+  "heartbeat_at": "2026-08-21T08:06:56+09:00",
+  "last_progress_at": "2026-08-21T08:06:56+09:00",
   "stale_after_seconds": 900,
-  "execution_id": "o-agi-user-handoff-20260822T224400JST",
-  "session_id": "claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn",
-  "active_run_id": "run-user-handoff-continuation-20260822-224400",
+  "execution_id": "o-agi-watchdog-recovery-20260821T080656JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260821T080656JST",
+  "active_run_id": "run-self-applied-post-release-recovery-20260821-080656",
   "required_model": "GPT-5.6 Pro",
-  "required_model_is_preferred_not_blocking": true,
-  "actual_model": "claude-fable-5 (session-configured identifier; serving model may differ)",
-  "model_verified": false,
-  "model_verification_source": "Claude Code remote session configuration only; no independent platform attestation was observed, so verified stays false",
+  "actual_model": "GPT-5.6 Sol",
+  "model_verified": true,
+  "model_verification_source": "platform runtime system identity",
   "logical_context_reset": true,
   "prior_execution_chat_context_used": false,
   "continuation_source": "repository_latest_main_only",
   "repository_state_loaded": true,
   "platform_context_exclusion_verified": false,
-  "latest_main_sha_at_start": "ad86a03ffec9c65d6acecc9d99a06deb1fe1c1cf",
-  "handoff": {
-    "kind": "direct_user_instruction",
-    "instruction": "実行を引き継いで達成するまで進めて",
-    "superseded_work_lease": {
-      "execution_id": "work-primary-20260822T204147JST",
-      "lease_path_on_branch": "agi/WORK_EXECUTION_STATE.json@work/work-mode-handoff-v2",
-      "last_heartbeat_at": "2026-08-22T13:07:07Z",
-      "observed_stale_by_own_rule": true,
-      "note": "Work-mode migration PR 252 is unmerged, so the Work lease exists only on its branch; the legacy lease on main remains the operative single-writer record until PR 252 integrates."
-    },
-    "superseded_legacy_lease": {
-      "execution_id": "o-agi-watchdog-recovery-20260821T080656JST",
-      "last_heartbeat_at": "2026-08-21T08:06:56+09:00",
-      "observed_stale_by_own_rule": true
-    }
-  },
-  "user_input_inbox": {
-    "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 3,
-    "acknowledged_at": "2026-08-22T22:55:00+09:00",
-    "application_note": "All three active entries ingested. Applied to execution policy: expected-elapsed-time minimization with unchanged strict external gate and no privileged numeric horizon (revision 3 clarification), autonomous evidence-driven unit selection, saturation-driven method change (CI-timeout treadmill identified and being repaired), non-blocking user-request queue, Skill-in-Skill recursive context routing recorded as design context."
-  },
-  "current_work_unit": "Recovered from user-directed handoff on latest main f6b61435 only. Observed exact prior runs without duplication: PR252 head 1d613eb5 full CI 32576568645 in progress; PR238 head 70bee383 CI 32427439250 success; PR244 head 2cea4a87 CI 32427454402 success; PR246 head 6955415b CI 32427475162 success; PR247 head 4ef749d3 CI 32427541009 success (stacked on PR238); PR248 head e59eafd1 CI 32427614027 success; PR249 head 4070e792 CI 32427669700 success (stacked on PR247); PR251 head 70515b2d CI 32428476614 success; PR230 head 7482bdf7 CI 32427412377 cancelled at the 45-minute workflow timeout (second consecutive timeout cancellation; earlier delta head db0f0887 passed full CI 32412266402); PR245/PR250 diagnostic-only. Root-caused two structural blockers: (1) .github/workflows/materialize-sequence-affine-char-repair.yml is invalid YAML (literal block de-indent at the embedded python raw string), producing a zero-job failure run on every push to every branch since its introduction; its one-shot r60 purpose is already integrated on main. (2) test.yml timeout-minutes 45 is below the current full-suite duration for the PR230 recursive-frontier tree, causing repeated timeout cancellations that drove the reconstruction treadmill. Executing: validate and merge PR252 on exact-head CI success; remove the broken workflow and raise the CI timeout via PR from claude/execution-handoff-completion-mtwgqr; then refresh and merge the passing retention PRs in dependency order, then PR230 under the corrected timeout, then reconstruct the PR233 observed-schema successor with the Candidate-ID binding repair.",
+  "latest_main_sha_at_start": "eab6631e281b1a7edd4056922ee46f1a225cb37d",
+  "current_work_unit": "Recovered the explicitly released prior lease from repository latest main only. Observed exact prior runs without duplication: PR230 CI 32422333224 cancelled (no semantic conclusion); PR244 CI 32422357396 success; PR238 CI 32422412770 success; PR245 diagnostic CI 32422513640 cancelled; PR246 CI 32422751076 success; PR247 stacked CI 32423188917 success. Because the prior release checkpoint advanced main after all those runs started, passing results are semantic evidence only. Reconstruct PR230 first on this recovery main and require fresh full exact-head CI; independently reconstruct passing PR238/244/246 deltas on this same verified base, with PR247 blocked until PR238 integrates.",
   "observed_prior_runs": [
-    {
-      "pr": 252,
-      "head_sha": "1d613eb5f6f9b073af05591a9d536ef86822f250",
-      "ci_run": 32576568645,
-      "conclusion": "in_progress",
-      "merge_admissible": "pending_ci"
-    },
-    {
-      "pr": 230,
-      "head_sha": "7482bdf7f11b13c45d0cb2d5f8ea73f9ee04a639",
-      "ci_run": 32427412377,
-      "conclusion": "cancelled_at_45min_timeout",
-      "merge_admissible": false
-    },
-    {
-      "pr": 238,
-      "head_sha": "70bee383767dcb71496c715a72ec01e9ee6c16de",
-      "ci_run": 32427439250,
-      "conclusion": "success",
-      "merge_admissible": "after_base_refresh_or_state_only_assessment"
-    },
-    {
-      "pr": 244,
-      "head_sha": "2cea4a871b62c82da794b50c971392c208df6923",
-      "ci_run": 32427454402,
-      "conclusion": "success",
-      "merge_admissible": "after_base_refresh_or_state_only_assessment"
-    },
-    {
-      "pr": 246,
-      "head_sha": "6955415bf028c75db50066ecdbe7f466b77cddf3",
-      "ci_run": 32427475162,
-      "conclusion": "success",
-      "merge_admissible": "after_base_refresh_or_state_only_assessment"
-    },
-    {
-      "pr": 247,
-      "head_sha": "4ef749d39a6339312b1577731e9dcc722444f4f7",
-      "ci_run": 32427541009,
-      "conclusion": "success",
-      "merge_admissible": "blocked_until_pr238_integrates"
-    },
-    {
-      "pr": 248,
-      "head_sha": "e59eafd1c8757c86f3fba4b133f011f241b2676e",
-      "ci_run": 32427614027,
-      "conclusion": "success",
-      "merge_admissible": "after_base_refresh_or_state_only_assessment"
-    },
-    {
-      "pr": 249,
-      "head_sha": "4070e792b1f04f668a64ca6b356cbbbda875c5a7",
-      "ci_run": 32427669700,
-      "conclusion": "success",
-      "merge_admissible": "blocked_until_pr247_integrates"
-    },
-    {
-      "pr": 251,
-      "head_sha": "70515b2d56f768860f70c18ec144c6d5ceb9d3c6",
-      "ci_run": 32428476614,
-      "conclusion": "success",
-      "merge_admissible": "after_base_refresh_or_state_only_assessment"
-    },
-    {
-      "pr": 245,
-      "head_sha": "a097ab1bec813355dfff449bc3fc4d49b3073ecf",
-      "conclusion": "diagnostic_only",
-      "merge_admissible": false
-    },
-    {
-      "pr": 250,
-      "head_sha": "3f74ccd8a5e5e9595b9c7ba347190b74acf58f5f",
-      "ci_run": 32428154220,
-      "conclusion": "cancelled",
-      "merge_admissible": false
-    },
-    {
-      "pr": 253,
-      "head_sha": "a033fee7b8d778558b710fa053ba7bf81e29bb33",
-      "conclusion": "draft_user_context_note",
-      "merge_admissible": "left_to_author_draft_state"
-    }
+    {"pr":230,"head_sha":"fc45794040bab2a7dcb40c907fe4316f3b11cf5a","ci_run":32422333224,"conclusion":"cancelled","merge_admissible":false},
+    {"pr":244,"head_sha":"e5c79bda697710296b8f4edf59424437ab901bba","ci_run":32422357396,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":238,"head_sha":"6928db9c62e73bee95f1e25f7c52e20124229185","ci_run":32422412770,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":245,"head_sha":"f73fc76539a4fbabc9886e7db4c0d85b47e22da0","ci_run":32422513640,"conclusion":"cancelled","merge_admissible":false},
+    {"pr":246,"head_sha":"3ad285f998c654000d3cfc6851ae61059c931225","ci_run":32422751076,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":247,"head_sha":"f82a3a5673c163bd2fb089e5dfc2d3cbd0ed90aa","ci_run":32423188917,"conclusion":"success","merge_admissible":false,"reason":"stacked on PR238 and pre-recovery-main"}
   ],
   "negative_evidence": [
-    {
-      "workflow": ".github/workflows/materialize-sequence-affine-char-repair.yml",
-      "finding": "Invalid YAML since introduction: the run block literal is broken by 4-space-indented python raw-string content below the 10-space block indentation, so GitHub records a zero-job failure run for every push on every branch (runs 161-218 observed all failing in 0s). Its one-shot r60 repair purpose is already integrated on main (tests/test_sequence_affine_char_sequence_synthesis.py and the acquired_programs affine fallback exist)."
-    },
-    {
-      "workflow": ".github/workflows/test.yml",
-      "finding": "timeout-minutes 45 is below the full-suite duration of the PR230 recursive-frontier tree; runs 32427412377 and 32422333224 were cancelled at ~45-46 minutes, so those cancellations are duration artifacts, not semantic failures."
-    },
-    {
-      "pr": 230,
-      "head_sha": "315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7",
-      "ci_run": 32330171761,
-      "failure": "385 passed / 1 failed; reversed canonical numeric-character sequence target outside ordinary bounded synthesis (retained)"
-    },
-    {
-      "workflow_run": 32094156066,
-      "failure_class": "provider_resource_exhaustion",
-      "failure": "Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"
-    }
+    {"pr":230,"head_sha":"315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7","ci_run":32330171761,"failure":"385 passed / 1 failed; reversed canonical numeric-character sequence target outside ordinary bounded synthesis"},
+    {"pr":240,"head_sha":"aeb2ce4bc538d432544f77bc0b84ca159c4b38f8","ci_run":32361932655,"failure":"386 passed / 1 failed; fewer than two derived behaviors for chars(reverse(to_string(numeric)))"},
+    {"pr":230,"head_sha":"e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b","ci_run":32367064061,"failure":"386 passed / 1 failed; reproduced optional-reverse derived-behavior boundary"},
+    {"pr":245,"head_sha":"d4ce9620444c6e0e2f7093471b146b7c1d04ab9f","ci_run":32413435844,"failure":"392 passed / 1 failed; direct end-to-end test constructed live ModelClient in ordinary CI without provider credentials; capability semantics unclassified"},
+    {"workflow_run":32094156066,"failure_class":"provider_resource_exhaustion","failure":"Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"}
   ],
+  "recovered_released_lease": {
+    "execution_id": "o-agi-watchdog-recovery-20260821T065947JST",
+    "released_at": "2026-08-21T07:14:07+09:00",
+    "reason": "prior execution explicitly released after persisting exact in-flight work; recovery resumed idempotently from latest main only"
+  },
   "self_application": {
     "enabled": true,
     "policy_path": "agi/SELF_APPLICATION.md",
-    "run_id": "run-user-handoff-continuation-20260822-224400",
+    "run_id": "run-self-applied-post-release-recovery-20260821-080656",
     "checkpoint_persistence_pending": true,
-    "checkpoint_truthfulness": "native continual self-apply CLI has not been executed in this session yet; no native Run/Episode is claimed",
+    "checkpoint_truthfulness": "native continual self-apply CLI has not been executed through this connector session; no native Run/Episode is claimed",
     "external_claim_admissible": false
   },
   "external_evidence_state": {
@@ -177,6 +66,6 @@
     "coordination_issue_comments": 0,
     "agi_claim_supported": false
   },
-  "next_falsifiable_milestone": "Merge PR252 only on exact-head full-CI success; integrate the workflow repair (remove invalid materialize workflow, raise test timeout) through a reviewed PR from claude/execution-handoff-completion-mtwgqr; refresh the passing retention PRs against post-merge main and merge each only on fresh exact-head CI success in dependency order 238/244/246/248/251 then 247 then 249; rerun PR230 under the corrected timeout and merge only an unchanged passing head; then reconstruct the PR233 observed-schema extrapolation with the persisted-iterated Candidate-ID binding repair and end-to-end regression.",
+  "next_falsifiable_milestone": "Reconstruct preserved PR230 source/test blobs on the recovery latest main, require fresh full exact-head CI, and merge only an unchanged passing head. In parallel reconstruct the semantically passing PR238/244/246 deltas on the same verified recovery main and require fresh exact-head CI. PR247 remains blocked until PR238 integrates; PR245 remains blocked until PR230 integrates. Preserve any exact failure and repair only its demonstrated boundary.",
   "rule": "A fresh running heartbeat suppresses duplicate work. Released or stale lease may be recovered from repository latest main only. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never prove AGI. Internal evidence cannot satisfy the strict external AGI gate."
 }
