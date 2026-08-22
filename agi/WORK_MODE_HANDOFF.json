@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "migration_id": "work-mode-handoff-v2",
+  "status": "merged_with_safety_followup_in_flight",
+  "source_main_sha": "f914369d42a74548d420e775afc60333e7a173f3",
+  "working_branch": "work/work-mode-handoff-v2",
+  "authoritative_when_present_on_main": true,
+  "strategy_path": "agi/WORK_STRATEGY.json",
+  "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
+  "legacy_chat_mode": {
+    "execution_policy_path": "agi/STANDALONE_HOURLY_AUTOMATION.md",
+    "lease_path": "agi/HOURLY_EXECUTION_STATE.json",
+    "status": "historical_after_work_migration",
+    "may_recover_or_write": false
+  },
+  "primary_owner": {
+    "kind": "work_primary",
+    "execution_id": "work-primary-handoff-20260822T224400JST",
+    "predecessor_execution_id": "work-primary-20260822T204147JST",
+    "lease_path": "agi/WORK_EXECUTION_STATE.json",
+    "authorization": "direct_user_instruction_execution_handoff_in_successor_session",
+    "voluntary_exit_permitted_before_external_goal": false
+  },
+  "native_o_run": {
+    "run_id": "run-work-mode-handoff-v2",
+    "snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
+    "request_ref": ".continual/runs/run-work-mode-handoff-v2/request.md",
+    "work_invocation_root": ".continual/work-model/invocations",
+    "executor_binding": "current_claude_code_remote_session",
+    "model_identity": "claude-fable-5-session-configured-unverified",
+    "model_verified": false,
+    "semantic_components": [
+      "entry",
+      "root",
+      "execute",
+      "task_evaluate",
+      "consolidate_episode",
+      "learn"
+    ],
+    "semantic_components_note": "The list above is the set of O Engine components the Work bridge can drive. The checked-in run has actually externalized only entry, root, candidate_evaluate (the pre-application evaluator), and execute invocations so far; task_evaluate, consolidate_episode, and learn have not yet been exercised in this run.",
+    "observed_invocations": ["entry", "root", "candidate_evaluate", "execute"]
+  },
+  "resume_protocol": {
+    "inspect": "continual --root . work-pending --run-id run-work-mode-handoff-v2",
+    "verify": "continual --root . work-verify --run-id run-work-mode-handoff-v2",
+    "resume": "continual --root . work-resume run-work-mode-handoff-v2 --model-identity claude-fable-5-session-configured-unverified",
+    "response_binding_required": true,
+    "hidden_reasoning_persistence_forbidden": true,
+    "secrets_forbidden": true
+  },
+  "implemented_artifacts": [
+    "src/continual/work_session.py",
+    "src/continual/engine.py",
+    "src/continual/cli.py",
+    "src/agi/work_mode_monitor.py",
+    "src/agi/user_request_queue.py",
+    "agi/WORK_STRATEGY.json",
+    "agi/USER_REQUEST_QUEUE.json",
+    "tests/test_work_session_bridge.py",
+    "tests/test_work_mode_monitor.py",
+    "tests/test_user_request_queue.py"
+  ],
+  "validation": {
+    "focused_command": "python -m pytest -q tests/test_user_request_queue.py tests/test_work_mode_monitor.py tests/test_work_session_bridge.py tests/test_engine.py tests/test_contracts.py",
+    "focused_result": "26 passed",
+    "full_local_baseline": "401 passed in 3028.46s before the user-request-queue delta; exact-head CI is required for the final modified head",
+    "exact_head_ci": "pending_publication",
+    "strict_external_production_evidence": "not_observed"
+  },
+  "publication": {
+    "migration_pull_request": 252,
+    "migration_merged_main_sha": "c2361b81f716db637368f4f4337f10195bbdaf20",
+    "migration_exact_head_ci": 32577024780,
+    "safety_followup_pull_request": 254,
+    "safety_followup_exact_head_ci": "pending_after_push",
+    "note": "PR 252 merged the migration to main. PR 254 (this successor session) lands the engine safety fixes and CI control-plane repair; its merged_main_sha is recorded after its exact-head CI passes."
+  },
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "work_mode_integration_is_external_agi_evidence": false,
+    "internal_tests_or_ci_can_complete_goal": false
+  },
+  "updated_at": "2026-08-22T14:45:00Z"
+}
