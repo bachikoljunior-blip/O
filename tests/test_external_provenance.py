@@ -149,6 +149,14 @@ def test_detached_signature_packaging_fails_closed_without_mutating_input():
         prepare_external_attestation_payload(
             {**statement, "metadata": {"evaluator-access-token": "must-stay-outside"}}
         )
+    with pytest.raises(ExternalEvidenceError, match="forbidden secret fields"):
+        prepare_external_attestation_payload(
+            {**statement, "metadata": {"hidden_answers": ["must-stay-outside"]}}
+        )
+    with pytest.raises(ExternalEvidenceError, match="forbidden secret fields"):
+        prepare_external_attestation_payload(
+            {**statement, "metadata": {"suite_seed": "must-stay-outside"}}
+        )
     missing = dict(statement)
     missing.pop("suite_id")
     with pytest.raises(ExternalEvidenceError, match="missing unsigned attestation fields: suite_id"):

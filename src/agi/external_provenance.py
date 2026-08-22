@@ -23,6 +23,7 @@ _FORBIDDEN_ATTESTATION_SECRET_KEYS = frozenset(
     {
         "access_token",
         "api_key",
+        "answer",
         "answers",
         "auth_token",
         "authorization",
@@ -30,10 +31,13 @@ _FORBIDDEN_ATTESTATION_SECRET_KEYS = frozenset(
         "credential",
         "credentials",
         "expected_answer",
+        "expected_answers",
         "hidden_seed",
         "password",
         "private_key",
         "private_key_hex",
+        "secret_key",
+        "seed",
         "secret",
         "signing_key",
         "signing_key_hex",
@@ -49,6 +53,8 @@ def _is_forbidden_attestation_secret_key(value: str) -> bool:
     return normalized.endswith(
         (
             "_access_token",
+            "_answer",
+            "_answers",
             "_api_key",
             "_auth_token",
             "_credential",
@@ -57,6 +63,8 @@ def _is_forbidden_attestation_secret_key(value: str) -> bool:
             "_private_key",
             "_private_key_hex",
             "_secret",
+            "_secret_key",
+            "_seed",
             "_signing_key",
             "_signing_key_hex",
         )
