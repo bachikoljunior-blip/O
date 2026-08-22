@@ -163,6 +163,6 @@ def unapplied_user_inputs(
         )
     return [
         dict(entry)
-        for entry in value["entries"]
+        for entry in sorted(value["entries"], key=lambda entry: entry["sequence"])
         if entry["sequence"] > after_revision and entry["status"] == "active"
     ]
