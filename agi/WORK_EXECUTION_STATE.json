@@ -8,8 +8,8 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T18:36:30.142Z",
-  "last_progress_at": "2026-08-22T18:36:30.142Z",
+  "heartbeat_at": "2026-08-22T18:37:12.309Z",
+  "last_progress_at": "2026-08-22T18:37:12.309Z",
   "stale_after_seconds": 900,
   "checkpoint": {
     "reason": "Native O exposed a lifecycle defect: an honest original-goal FAIL plus passing incremental unit skipped Consolidate Episode and Learn. PR 256 head 71ee80b implements the two-level verdict lifecycle, passes 20 focused tests, and persists the current immutable Work Run records. Exact-head CI is pending; AGI remains false.",
@@ -47,7 +47,7 @@
     "snapshot_head_sha": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
     "pending_work_invocation_id": "invoke-6c6e47682672fae2a10d9cbd",
     "pending_request_ref": ".continual/work-model/invocations/invoke-6c6e47682672fae2a10d9cbd/request.json",
-    "next_action": "Observe PR 256 exact-head CI without rerunning. If the unchanged head passes and remains conflict-free, merge it, verify main and merge CI, then resume the frozen Root invocation and use the repaired lifecycle to Task Evaluate the unit honestly as original-goal FAIL plus unit PASS, externalize Consolidate Episode and Learn, and return to Root. AGI remains false."
+    "next_action": "Observe PR 256 exact-head CI run 32591220738 for unchanged head 71ee80b without rerunning. If it passes and remains conflict-free, merge, verify main and merge CI, then resume frozen Root invoke-6c6e47682672fae2a10d9cbd and exercise the repaired Task Evaluate -> Consolidate Episode -> Learn -> Root cycle with original-goal FAIL plus unit PASS. AGI remains false."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -119,12 +119,14 @@
       "pull_request": 256,
       "exact_head_sha": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
       "base_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
-      "exact_head_ci_status": "pending",
+      "exact_head_ci_status": "in_progress",
       "focused_tests": "20_passed",
       "compileall": "pass",
       "diff_check": "pass",
       "defect": "overall task verdict and incremental unit verdict were conflated, preventing honest Consolidate Episode and Learn under an unmet ambitious goal",
-      "agi_claim_supported": false
+      "agi_claim_supported": false,
+      "exact_head_ci_run": 32591220738,
+      "superseded_ci_run": 32591130611
     }
   }
 }
