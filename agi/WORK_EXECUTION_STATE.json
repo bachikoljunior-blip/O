@@ -8,12 +8,12 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T22:35:37.561Z",
-  "last_progress_at": "2026-08-22T22:35:37.561Z",
+  "heartbeat_at": "2026-08-22T22:45:41.753Z",
+  "last_progress_at": "2026-08-22T22:45:41.753Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Generation-3 fenced owner remains live. Cross-binding PR 258 is published at exact head bacc1a24; all four remote blobs match the frozen tested files. Exact-head workflow 32602836716/job 97103583905 is in progress at pytest. Main user-input inbox advanced to revision 4, designating the prior Claude Code remote session as primary and instructing this recovery owner to finish the in-flight unit to a safe boundary, then release/checkpoint. This input is observed but not applied mid-invocation; Execute remains frozen until exact-head CI/integration/native evaluation completes. No independent production evidence exists; AGI false.",
-    "verified_main_sha": "e4939c635a55d2cc92bcb28ae7c50aa91fb8eb3d",
+    "reason": "Generation-3 fenced owner remains live while finishing the revision-4-authorized in-flight unit boundary. PR 258 exact head bacc1a24 remains unchanged and workflow 32602836716/job 97103583905 is in progress at pytest. Local full 456, rebased dedicated 32, rebased focused 74, compileall, diff-check, remote four-blob readback, and native work-verify are successful. Inbox revision 4 is observed and will be acknowledged/applied after CI-bound unit completion, followed by lease release/checkpoint to the designated primary. No AGI claim is made.",
+    "verified_main_sha": "ae96878292beb1dc8142100fd16245272f8ac6de",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a generation-plus-one state-only CAS with exact readback."
   },
   "parallel_execution_coordination": {
@@ -318,12 +318,13 @@
       ],
       "agi_claim_supported": false,
       "last_observation": {
-        "at": "2026-08-22T22:35:37.561Z",
+        "at": "2026-08-22T22:45:41.753Z",
         "pr": 258,
         "head": "bacc1a241c64df1744a4247f8ba40a36ef1a241e",
         "ci_run": 32602836716,
         "ci_status": "in_progress_pytest",
-        "user_input_revision_4": "observed_defer_application_until_safe_boundary"
+        "native_work_verify": "valid_34_requests_33_responses_1_pending",
+        "handoff_after_boundary": true
       },
       "rebased_main_sha": "898f6f70b08b845056986c9c95a886f7355a0046",
       "rebased_local_exact_commit": "0dd4812",
@@ -350,6 +351,12 @@
         "pyproject": "2fd110c30e6276e7dabf69d3f6f684e804716cb5",
         "source": "d5b63b9d53187f2b679e31959d21ccf0f8a8f371",
         "tests": "0213249e84be1a2357d0c072e4e18b7acab8aac5"
+      },
+      "native_work_verify": {
+        "valid": true,
+        "requests": 34,
+        "responses": 33,
+        "pending": 1
       }
     }
   }
