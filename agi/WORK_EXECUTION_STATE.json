@@ -8,11 +8,11 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T20:40:51.008Z",
-  "last_progress_at": "2026-08-22T20:40:51.008Z",
+  "heartbeat_at": "2026-08-22T20:47:03.351Z",
+  "last_progress_at": "2026-08-22T20:47:03.351Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "PR 257 final assessed code head 8f4278e exact-head CI 32595446105 passed every required step. Native O Task Evaluate recorded original AGI FAIL and bounded detached-signature packaging unit PASS, then advanced through scoped Candidate post-evaluation to Consolidate Episode. Native integrity valid: 30 requests, 29 responses, one pending. Immutable O records remain local pending publication; local duplicate full suite remains in progress and uncounted. AGI false.",
+    "reason": "PR 257 immutable native O cycle published atomically to exact head b164f3c. The prior assessed code head 8f4278e passed CI 32595446105; Task Evaluate retained original AGI FAIL and bounded packaging PASS; Consolidate Episode and Learn completed; Root froze cross-binding Execute invoke-f3f84b7c83c1d48e4962e390. Final exact-head CI 32597656410 queued. Native integrity valid: 34 requests, 33 responses, one pending. AGI false.",
     "verified_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
     "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a new generation-plus-one state-only CAS with exact readback."
   },
@@ -34,8 +34,8 @@
   "source_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
   "working_branch": "work/external-attestation-detached-signature-v3",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "consolidate_episode",
-  "active_unit_id": "unit-d6ca097a96508ff17caf456b",
+  "active_component": "execute",
+  "active_unit_id": "unit-89058c1acef29b8e657a946c",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 3,
@@ -44,11 +44,11 @@
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/external-attestation-detached-signature-v3",
-    "snapshot_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
-    "pending_work_invocation_id": "invoke-c22fdc6cf97127121b244a6e",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-c22fdc6cf97127121b244a6e/request.json",
-    "durability_status": "final implementation is remotely readable at PR 257 head 8f4278e; newer Task Evaluate, Candidate trial, and Consolidate-pending native O records are local and must be published before merge",
-    "next_action": "Submit Consolidate Episode and Learn, return to Root, publish all immutable native O records atomically to PR 257, require new unchanged exact-head CI, then merge if conflict-free."
+    "snapshot_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
+    "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
+    "durability_status": "implementation, bounded Task Evaluate PASS, Consolidate Episode, Learn, Root, and frozen next Execute are remotely readable on PR 257 exact head b164f3c",
+    "next_action": "Wait for exact-head CI 32597656410 without duplicate rerun. If all required checks succeed, head remains unchanged, and PR is conflict-free, merge PR 257; verify main readback and merge CI, then execute unit-89058c1acef29b8e657a946c."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -168,24 +168,24 @@
     "merge_ci_completed_observed_at": "2026-08-22T18:53:35.034Z",
     "merge_ci_all_required_steps_success": true,
     "detached_signature_packaging": {
-      "status": "bounded_unit_pass_native_consolidation_pending",
+      "status": "final_immutable_record_head_ci_queued",
       "pull_request": 257,
       "branch": "work/external-attestation-detached-signature-v3",
       "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
-      "exact_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
-      "exact_head_ci_run": 32595446105,
-      "exact_head_ci_status": "success",
+      "exact_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
+      "exact_head_ci_run": 32597656410,
+      "exact_head_ci_status": "queued",
       "mergeable": true,
-      "mergeable_state": "unstable_pending_checks",
-      "changed_files": 56,
+      "mergeable_state": "clean_pending_checks",
+      "changed_files": 105,
       "focused_regression": "33_passed_final_public_boundary_alignment",
       "local_full_suite": "in_progress_final_head_12716d4_local_equivalent",
       "compileall": "pass",
       "diff_check": "pass",
       "work_verify": {
         "valid": true,
-        "requests": 30,
-        "responses": 29,
+        "requests": 34,
+        "responses": 33,
         "pending": 1
       },
       "remote_snapshot_blob_sha": "ac286b549a4a43520d178a592ca31eaefae603c2",
@@ -237,12 +237,12 @@
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T20:40:51.008Z",
-        "exact_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
-        "exact_head_ci_run": 32595446105,
-        "exact_head_ci_status": "success_all_required_steps",
+        "at": "2026-08-22T20:47:03.351Z",
+        "exact_head_sha": "b164f3c54edb44c8d3bfd4e19fbd2b09e25957a6",
+        "exact_head_ci_run": 32597656410,
+        "exact_head_ci_status": "queued",
         "mergeable": true,
-        "native_phase": "consolidate_pending"
+        "native_phase": "execute_pending"
       },
       "exact_head_ci_all_required_steps_success": true,
       "task_evaluate": {
@@ -250,14 +250,23 @@
         "unit_verdict": "PASS",
         "unit_id": "unit-d6ca097a96508ff17caf456b",
         "candidate_trial": "remain_candidate_pending_deterministic_activation_gate"
+      },
+      "native_cycle": {
+        "original_goal_verdict": "FAIL",
+        "unit_verdict": "PASS",
+        "unit_id": "unit-d6ca097a96508ff17caf456b",
+        "consolidate_completed": true,
+        "learn_completed": true,
+        "next_unit_id": "unit-89058c1acef29b8e657a946c",
+        "pending_execute_invocation_id": "invoke-f3f84b7c83c1d48e4962e390"
       }
     },
     "native_work_verify": {
       "valid": true,
-      "requests": 30,
-      "responses": 29,
+      "requests": 34,
+      "responses": 33,
       "pending": 1,
-      "observed_at": "2026-08-22T20:40:51.008Z"
+      "observed_at": "2026-08-22T20:47:03.351Z"
     }
   }
 }
