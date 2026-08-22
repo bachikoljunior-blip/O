@@ -12,6 +12,13 @@ from typing import Any
 from .contracts import ContractError, validate_component_output
 from .openai_client import ModelClient
 from .store import Store
+from .work_session import WorkModelPending
+
+
+class WorkProviderMismatch(RuntimeError):
+    """Raised when a non-Work provider is asked to complete an invocation whose
+    journal is frozen in ``awaiting_work_model``. Only a Work-model client may
+    answer such a request; any other provider must not fabricate the response."""
 
 
 SEMANTIC_COMPONENTS = {
@@ -34,6 +41,10 @@ _ACTIVE_DEFAULTS = {
     "runner": "python-engine-v2",
 }
 _CANDIDATE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$")
+# A model-proposed unit_id is used as a filesystem path component; keep it to a
+# strict, separator-free allowlist so it can never traverse out of the run
+# directory into protected control files.
+_SAFE_UNIT_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 _LIST_FIELDS = {
     "supporting_evidence",
     "contradictory_evidence",
@@ -52,11 +63,13 @@ _LIST_FIELDS = {
 @dataclass
 class Engine:
     root: Path
+    model: Any | None = None
 
     def __post_init__(self) -> None:
         self.root = self.root.resolve()
         self.store = Store(self.root)
-        self.model = ModelClient(self.root)
+        if self.model is None:
+            self.model = ModelClient(self.root)
 
     @property
     def candidate_index_path(self) -> Path:
@@ -107,10 +120,35 @@ class Engine:
             "active_components_digest": self.store.stable_digest(active),
         }
 
-    def start(self, request: str, *, max_steps: int = 64) -> str:
+    def _run_environment(self, run_id: str) -> dict[str, Any]:
+        """Return the environment frozen in the run snapshot at ``start`` time.
+
+        Preflight/postflight identities are digests over this value. Using the
+        run's frozen environment (rather than a freshly sampled live one, whose
+        ``repository_commit`` moves whenever HEAD advances) keeps every
+        candidate-evaluate invocation id stable across process restarts and
+        commits, so a resumed run replays its frozen Work request instead of
+        minting a new one and re-calling the model.
+        """
+        snapshot = self.store.read_json(self.store.run_dir(run_id) / "snapshot.json", {})
+        if isinstance(snapshot, dict):
+            environment = snapshot.get("environment")
+            if isinstance(environment, dict):
+                return environment
+        return self.environment()
+
+    def start(
+        self,
+        request: str,
+        *,
+        max_steps: int = 64,
+        run_id: str | None = None,
+    ) -> str:
         if not isinstance(request, str) or not request.strip():
             raise ValueError("request must be a non-empty string")
-        run_id = self.store.new_id("run")
+        run_id = run_id or self.store.new_id("run")
+        if not re.fullmatch(r"run-[A-Za-z0-9._-]{6,128}", run_id):
+            raise ValueError("invalid run_id")
         rd = self.store.run_dir(run_id)
         rd.mkdir(parents=True, exist_ok=False)
         self.store.atomic_text(rd / "request.md", request)
@@ -343,7 +381,15 @@ class Engine:
             return output, invocation_id
 
         output = journal.get("output") if isinstance(journal, dict) and journal.get("status") == "output_ready" else None
-        attempt = int(journal.get("attempt", 0)) + 1 if isinstance(journal, dict) else 1
+        if isinstance(journal, dict) and journal.get("status") == "awaiting_work_model":
+            if not getattr(self.model, "provides_work_responses", False):
+                raise WorkProviderMismatch(
+                    f"invocation {invocation_id} for run {run_id} is awaiting a Work-model "
+                    "response; refusing to complete it with a non-Work provider"
+                )
+            attempt = int(journal.get("attempt", 1))
+        else:
+            attempt = int(journal.get("attempt", 0)) + 1 if isinstance(journal, dict) else 1
         if output is None:
             self.store.atomic_json(
                 path,
@@ -360,6 +406,37 @@ class Engine:
             try:
                 output = self.model.call(component, payload, prompt_path=prompt_path)
                 validate_component_output(component, output, evaluator_mode=evaluator_mode)
+            except WorkModelPending as pending:
+                self.store.atomic_json(
+                    path,
+                    {
+                        "invocation_id": invocation_id,
+                        "component": component,
+                        "prompt_path": prompt_path,
+                        "payload_digest": self.store.stable_digest(payload),
+                        "status": "awaiting_work_model",
+                        "attempt": attempt,
+                        "work_invocation_id": pending.invocation_id,
+                        "work_request_ref": pending.request_ref,
+                        "work_request_digest": pending.request_digest,
+                        "started_at": (
+                            journal.get("started_at")
+                            if isinstance(journal, dict)
+                            else self.store.utc_now()
+                        ),
+                    },
+                )
+                if not isinstance(journal, dict) or journal.get("status") != "awaiting_work_model":
+                    self.store.append_event(
+                        run_id,
+                        {
+                            "type": "work_model_pending",
+                            "component": component,
+                            "invocation_id": invocation_id,
+                            "work_invocation_id": pending.invocation_id,
+                        },
+                    )
+                raise
             except ContractError as first_error:
                 repair_payload = dict(payload)
                 repair_payload["contract_repair"] = {
@@ -467,7 +544,7 @@ class Engine:
             "target_component": target,
             "execution_unit": unit,
             "candidate_index": relevant,
-            "environment": self.environment(),
+            "environment": self._run_environment(run_id),
             "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
         }
         preflight_id = f"preflight-{target}-{self.store.stable_digest(payload)}"
@@ -573,7 +650,7 @@ class Engine:
             "pre_application": selection.get("result", selection),
             "candidate": selected,
             "actual_result": actual_result,
-            "environment": self.environment(),
+            "environment": self._run_environment(run_id),
         }
         output, invocation_id = self._call_component_direct(
             run_id,
@@ -651,6 +728,8 @@ class Engine:
         new_value.update(changes)
         new_value["expected_revision"] = snapshot.get("revision", 0)
         new_value.pop("last_error", None)
+        new_value.pop("checkpoint_reason", None)
+        new_value.pop("pending_work_model", None)
         return self.store.write_snapshot(run_id, new_value)
 
     def _episode_catalog(self, limit: int = 50) -> list[dict[str, Any]]:
@@ -690,7 +769,12 @@ class Engine:
         unit = deepcopy(unit)
         unit["component"] = component
         unit_id = unit.get("unit_id")
-        if not isinstance(unit_id, str) or not unit_id:
+        # unit_id is model-controlled and becomes a filesystem path component
+        # (execution-units/<unit_id>.json, artifacts/<unit_id>-result.json), so a
+        # value with separators or ".." could escape the run directory and
+        # overwrite protected control files. Accept only a strict allowlist and
+        # otherwise derive a safe deterministic id.
+        if not isinstance(unit_id, str) or not _SAFE_UNIT_ID.fullmatch(unit_id):
             unit_id = f"unit-{self.store.stable_digest({'revision': snapshot.get('revision'), 'unit': unit})}"
         unit["unit_id"] = unit_id
         self.store.atomic_json(
@@ -769,14 +853,23 @@ class Engine:
                     self.store.atomic_json(rd / artifact_ref, result)
 
                     if component == "task_evaluate":
-                        verdict = result.get("verdict") or result.get("status")
-                        if verdict == "PASS":
+                        task_verdict = result.get("verdict") or result.get("status")
+                        unit_verdict = result.get("unit_verdict")
+                        unit_subfinding = result.get("unit_subfinding")
+                        if unit_verdict is None and isinstance(unit_subfinding, dict):
+                            unit_verdict = unit_subfinding.get("verdict")
+                        # Backward compatibility: a legacy evaluator with one verdict
+                        # evaluates both the current unit and the original task.
+                        unit_verdict = unit_verdict or task_verdict
+                        if unit_verdict == "PASS":
                             self._advance(
                                 run_id,
                                 snapshot,
                                 phase="consolidate_pending",
                                 last_evaluation=result,
                                 last_result_ref=artifact_ref,
+                                task_completion_verdict=task_verdict,
+                                unit_completion_verdict=unit_verdict,
                             )
                         else:
                             self._advance(
@@ -785,6 +878,8 @@ class Engine:
                                 phase="root_pending",
                                 last_evaluation=result,
                                 last_result_ref=artifact_ref,
+                                task_completion_verdict=task_verdict,
+                                unit_completion_verdict=unit_verdict,
                             )
                         continue
 
@@ -823,6 +918,7 @@ class Engine:
                             "preflight_refs": [
                                 path.relative_to(self.root).as_posix()
                                 for path in sorted((rd / "preflight").glob("*.json"))
+                                if not path.name.startswith("preflight-consolidate_episode-")
                             ],
                             "candidate_trial_refs": [
                                 path.relative_to(self.root).as_posix()
@@ -876,17 +972,50 @@ class Engine:
                                 "at": self.store.utc_now(),
                             },
                         )
-                    finished = self._advance(
+                    if snapshot.get("task_completion_verdict") == "PASS":
+                        finished = self._advance(
+                            run_id,
+                            snapshot,
+                            status="finished",
+                            phase="finished",
+                            produced_candidates=produced,
+                        )
+                        self.store.append_event(
+                            run_id, {"type": "run_finished", "episode_id": episode_id}
+                        )
+                        return finished
+                    self._advance(
                         run_id,
                         snapshot,
-                        status="finished",
-                        phase="finished",
+                        status="continue",
+                        phase="root_pending",
                         produced_candidates=produced,
                     )
-                    self.store.append_event(run_id, {"type": "run_finished", "episode_id": episode_id})
-                    return finished
+                    self.store.append_event(
+                        run_id,
+                        {
+                            "type": "unit_learned",
+                            "episode_id": episode_id,
+                            "task_verdict": snapshot.get("task_completion_verdict"),
+                        },
+                    )
+                    continue
 
                 raise RuntimeError(f"unknown phase: {phase}")
+
+            except WorkModelPending:
+                # The native invocation journal already freezes the exact request.
+                # Mutating the semantic snapshot here would change the payload digest
+                # on resume and create a different Work invocation instead of replaying
+                # the response for the frozen one.
+                return self.store.snapshot(run_id)
+
+            except WorkProviderMismatch:
+                # A non-Work provider tried to resume a run whose next invocation
+                # is frozen awaiting a Work-model response. Leave the run exactly
+                # as-is (no wrong-provider completion, no error inflation); only a
+                # Work-model client may advance it.
+                return self.store.snapshot(run_id)
 
             except Exception as exc:
                 self.store.append_event(

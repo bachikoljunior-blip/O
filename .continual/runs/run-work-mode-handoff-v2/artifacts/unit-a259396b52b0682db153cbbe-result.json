@@ -1,0 +1,30 @@
+{
+  "artifact": {
+    "base_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
+    "branch": "work/incremental-unit-learning-v3",
+    "files": [
+      "src/continual/contracts.py",
+      "src/continual/engine.py",
+      "tests/test_contracts.py",
+      "tests/test_engine.py",
+      "tests/test_work_session_bridge.py"
+    ],
+    "pull_request": 256,
+    "remote_head_sha": "56b15b6da763509dfff0ddf49ea4169690f82ebc"
+  },
+  "claim_boundary": "This is internal lifecycle integration evidence only. The strict independent external production evidence gate remains unmet and AGI remains false.",
+  "observations": [
+    "The engine now derives an independently validated unit verdict, retaining legacy single-verdict behavior.",
+    "A passing unit routes through Consolidate Episode and Learn; post-task Learn finishes only when the original-task verdict is PASS and otherwise returns to Root with status continue.",
+    "Unit FAIL and UNCERTAIN return directly to Root without consolidation.",
+    "Protected active prompts were not modified."
+  ],
+  "status": "implemented_pending_exact_head_ci",
+  "validation": {
+    "command": "PYTHONPATH=src pytest -q tests/test_contracts.py tests/test_engine.py tests/test_work_session_bridge.py",
+    "compileall": "pass",
+    "diff_check": "pass",
+    "exact_head_ci": "pending",
+    "focused": "20 passed in 4.18s"
+  }
+}
