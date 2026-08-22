@@ -1,0 +1,50 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-22T23:15:19.805364Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-secondary-v1/fragments/invoke-936b87391a8546ca77225455-candidate_evaluate.json",
+  "invocation_id": "invoke-936b87391a8546ca77225455",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "mode": "pre-application",
+      "observations": [
+        "No Candidate affects this exact publication unit.",
+        "Baseline publication contracts remain active."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "reason": "No Candidate applicability or evaluation-policy change is supported."
+    },
+    "result": {
+      "baseline_need": "Use the existing journaled branch-publication and pull-request contracts as the baseline.",
+      "decision": "NOT_APPLICABLE",
+      "evaluated_candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "decision": "NOT_APPLICABLE",
+          "reason": "Capability-benchmark execution is outside this publication unit."
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "decision": "NOT_APPLICABLE",
+          "reason": "The unit publishes already-produced state and does not select or summarize a new implementation context."
+        }
+      ],
+      "evidence_to_collect": [
+        "fresh-main and primary-PR overlap comparison",
+        "idempotency record before remote mutation",
+        "exact secondary branch head and pull-request readback",
+        "exact-head CI state"
+      ],
+      "reason": "No Execute Candidate in the supplied index governs branch publication, GitHub idempotency, native-state persistence, or concurrent-writer isolation for this exact unit.",
+      "rollback": "If overlap or readback mismatch appears, stop the side effect and retain the observed negative evidence without retrying ambiguously.",
+      "scope": "secondary/context-skill-routing/v1-publication"
+    }
+  },
+  "payload_digest": "d5d3c09dcab68d6b5f2ac294",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}
