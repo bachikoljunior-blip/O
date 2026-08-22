@@ -2,19 +2,25 @@
   "candidate_actions": [
     {
       "action": "retain",
-      "applicability": "continual/incremental-task-evaluation",
+      "applicability": "continual/incremental-task-evaluation with an explicit bounded unit independent of the original goal",
       "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
-      "non_applicability": "Do not apply to tasks without an explicitly bounded and separately falsifiable unit.",
-      "rollback_condition": "Reject or scope-narrow if regression shows inflated unit PASS, original-verdict coupling, or any weakened external claim boundary.",
-      "status": "candidate"
+      "missing_evidence": "Separate deterministic protected-baseline verdict matrix with persisted VERIFIED_FOR_SCOPE measurements",
+      "non_applicability": "Tasks lacking separately falsifiable unit success conditions",
+      "rollback_condition": "Reject or narrow if the matrix finds original/unit coupling, inflated unit PASS, omitted negative evidence, or claim-boundary weakening.",
+      "status": "candidate",
+      "supporting_evidence": [
+        "PR 256 lifecycle regression and native original-FAIL/unit-PASS cycle",
+        "PR 257 scoped trial preserved original FAIL, unit PASS, negative evidence, and strict claim boundary"
+      ]
     }
   ],
   "decision": "NO_CHANGE",
-  "next": "Return to Root because the original task verdict is FAIL; select the detached-signature external-attestation packaging unit without claiming AGI.",
-  "reason": "Consolidate Episode already registered candidate-task-evaluate-unit-verdict-v1 with the narrow applicable scope, supporting evidence, and explicit overproduction risk. Creating another Candidate here would duplicate it.",
+  "next": "Return to Root, publish this immutable episode cycle to PR 257, require new exact-head CI before merge, then select the cross-bound external handoff validator while the strict AGI gate remains false.",
+  "reason": "The episode supplies one successful scoped trial of the existing task-evaluate unit-verdict Candidate, but the required deterministic protected-baseline activation gate is absent. The next handoff cross-binding unit is implementation work, not sufficient evidence for a new generalized prompt Candidate.",
   "retained_learning": [
-    "Original-goal verdict and bounded-unit verdict must be independent fields when their success conditions differ.",
-    "A unit PASS permits consolidation and learning but never completes an original task whose verdict remains FAIL.",
-    "A protected active prompt is not edited directly; the proposed overlay remains a reversible Candidate pending scope-specific regression."
+    "Detached signature packaging can reduce evaluator friction without receiving private key material or manufacturing independent evidence.",
+    "A live Candidate trial is evidence for continued testing, not activation authority.",
+    "After packaging is available, the highest-value reversible unit is machine-checkable cross-binding of the complete external handoff rather than more repository-authored attestations.",
+    "Original-goal FAIL plus bounded-unit PASS must continue through Consolidate Episode and Learn back to Root."
   ]
 }

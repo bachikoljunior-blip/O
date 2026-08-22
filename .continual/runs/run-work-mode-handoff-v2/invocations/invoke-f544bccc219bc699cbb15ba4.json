@@ -1,0 +1,50 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-22T20:40:02.259390Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-f544bccc219bc699cbb15ba4-candidate_evaluate.json",
+  "invocation_id": "invoke-f544bccc219bc699cbb15ba4",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "mode": "post-result",
+      "observations": [
+        "The candidate preserved the original FAIL and strict claim boundary while allowing a bounded unit PASS.",
+        "No contradictory evidence appeared in this trial."
+      ],
+      "purpose": "Judge the scoped unit-verdict overlay from actual Task Evaluate evidence.",
+      "unresolved": [
+        "VERIFIED_FOR_SCOPE evidence from a separate deterministic protected-baseline regression gate is absent."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "reason": "Retain the existing narrow candidate; do not duplicate or activate it without the required deterministic gate."
+    },
+    "result": {
+      "actual_result": {
+        "claim_boundary_preserved": true,
+        "negative_evidence_preserved": true,
+        "original_completion_inferred": false,
+        "original_verdict": "FAIL",
+        "unit_verdict": "PASS"
+      },
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [],
+      "decision": "REMAIN_CANDIDATE",
+      "next_evidence": "Run a deterministic protected-baseline matrix covering original PASS/FAIL/UNCERTAIN crossed with absent/PASS/FAIL/UNCERTAIN unit verdicts, reject any claim-boundary weakening, and measure output-contract validity before proposing activation.",
+      "reason": "The scoped trial behaved correctly, but one live trial is insufficient for activation and no separate deterministic protected-baseline regression gate has yet persisted VERIFIED_FOR_SCOPE evidence.",
+      "rollback": "Keep the protected active Task Evaluate prompt unchanged.",
+      "scope": "continual/incremental-task-evaluation",
+      "supporting_evidence": [
+        "The trial emitted independent original and unit verdicts.",
+        "Every strict external-gate deficit remained explicit.",
+        "The bounded PASS was tied to exact-head, blob, focused-test, and native integrity evidence."
+      ]
+    }
+  },
+  "payload_digest": "0f5ddbe3e72d7deedffc5a86",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}
