@@ -8,13 +8,13 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T16:54:01Z",
-  "last_progress_at": "2026-08-22T16:54:01Z",
+  "heartbeat_at": "2026-08-22T17:05:08Z",
+  "last_progress_at": "2026-08-22T17:05:08Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Scheduled recovery acquired after the generation-2 primary explicitly checkpointed and no newer matching-owner commit, PR, workflow, tool activity, or heartbeat appeared beyond stale_after_seconds. This is recovery, not completion; verified AGI remains unproven.",
-    "verified_main_sha": "55340fb1ba84ac5ac01ad43eb3c6e1398c562519",
-    "recoverable_by": "Only this fenced generation-3 owner after two-phase GitHub Contents CAS readback authorization; all other writers must suppress while the heartbeat is fresh."
+    "reason": "Generation-3 recovery is actively executing the native O Run. The prior migration publication unit was closed with verified PR 252/254 evidence; the current unit has prepared a reproducible strict external-evaluator handoff and passed 39 focused tests.",
+    "verified_main_sha": "f5f983604f8b7f4bb6ca4e8fc8f2523f7b88239f",
+    "recoverable_by": "No recovery while this running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
   },
   "parallel_execution_coordination": {
     "note_to_parallel_worker": "A parallel ChatGPT Work-mode session (GPT-5.6 Sol) is the user's other active driver on this repository. The user authorized this Claude successor to coordinate with it. To avoid a two-writer collision, only one live writer should mutate the repository at a time; whichever holds a fresh running heartbeat is primary and the other suppresses per the monitor contract.",
@@ -31,11 +31,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "55340fb1ba84ac5ac01ad43eb3c6e1398c562519",
-  "working_branch": "main",
-  "active_run_id": "run-work-mode-recovery-v3",
+  "source_main_sha": "f5f983604f8b7f4bb6ca4e8fc8f2523f7b88239f",
+  "working_branch": "work/external-evidence-handoff-v3",
+  "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
-  "active_unit_id": "unit-6ca357218da14d4c3243d3c3",
+  "active_unit_id": "unit-634edce3b0003989312d61aa",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 3,
@@ -43,9 +43,9 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "pending_work_invocation_id": "invoke-a72e3db0935bccef7bf57cde",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-a72e3db0935bccef7bf57cde/request.json",
-    "next_action": "After verified two-phase CAS authorization, resume the native O Run from this exact invocation, confirm merged PR 254 CI 32583538810 as successful, then prioritize external-evidence readiness and the independent-evaluator request over saturated near-duplicate retention work."
+    "pending_work_invocation_id": "invoke-be8f13c968a7d7715d3de309",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-be8f13c968a7d7715d3de309/request.json",
+    "next_action": "Publish the prepared exact-commit external-evaluator handoff once on work/external-evidence-handoff-v3, create or reuse one PR, verify exact-head CI, merge only an unchanged passing head, then submit the Execute result and continue through O. The strict AGI gate remains false."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
