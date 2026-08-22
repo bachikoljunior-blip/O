@@ -8,13 +8,13 @@
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T20:25:51.899Z",
-  "last_progress_at": "2026-08-22T20:25:51.899Z",
+  "heartbeat_at": "2026-08-22T20:40:51.008Z",
+  "last_progress_at": "2026-08-22T20:40:51.008Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Final PR 257 head 8f4278e remains unchanged; full PR recomputation reports mergeable=true. Exact-head CI 32595446105 and local suite remain in pytest without failure. Superseded head 7d86119 CI 32594512530 completed all required steps successfully but is not merge evidence. Frozen Root unchanged; AGI false.",
+    "reason": "PR 257 final assessed code head 8f4278e exact-head CI 32595446105 passed every required step. Native O Task Evaluate recorded original AGI FAIL and bounded detached-signature packaging unit PASS, then advanced through scoped Candidate post-evaluation to Consolidate Episode. Native integrity valid: 30 requests, 29 responses, one pending. Immutable O records remain local pending publication; local duplicate full suite remains in progress and uncounted. AGI false.",
     "verified_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
-    "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. On physical interruption, recover only after expiry and a new generation-plus-one two-phase CAS."
+    "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a new generation-plus-one state-only CAS with exact readback."
   },
   "parallel_execution_coordination": {
     "note_to_parallel_worker": "A parallel ChatGPT Work-mode session (GPT-5.6 Sol) is the user's other active driver on this repository. The user authorized this Claude successor to coordinate with it. To avoid a two-writer collision, only one live writer should mutate the repository at a time; whichever holds a fresh running heartbeat is primary and the other suppresses per the monitor contract.",
@@ -34,8 +34,8 @@
   "source_main_sha": "1eb4d71d2311e2b0602aecc211056acc05882b86",
   "working_branch": "work/external-attestation-detached-signature-v3",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "root",
-  "active_unit_id": "unit-ffc7b6b38cd9db08fe9f9097",
+  "active_component": "consolidate_episode",
+  "active_unit_id": "unit-d6ca097a96508ff17caf456b",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 3,
@@ -45,10 +45,10 @@
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/external-attestation-detached-signature-v3",
     "snapshot_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
-    "pending_work_invocation_id": "invoke-7a98234f8af1c64c638242f4",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-7a98234f8af1c64c638242f4/request.json",
-    "durability_status": "implementation and exact native continuation are remotely readable on PR 257 head",
-    "next_action": "Observe exact-head CI 32595446105 and final-head local full suite for unchanged 8f4278e. If successful and conflict-free, submit frozen Root to Task Evaluate, publish immutable O records, and require another unchanged exact-head CI before merge."
+    "pending_work_invocation_id": "invoke-c22fdc6cf97127121b244a6e",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-c22fdc6cf97127121b244a6e/request.json",
+    "durability_status": "final implementation is remotely readable at PR 257 head 8f4278e; newer Task Evaluate, Candidate trial, and Consolidate-pending native O records are local and must be published before merge",
+    "next_action": "Submit Consolidate Episode and Learn, return to Root, publish all immutable native O records atomically to PR 257, require new unchanged exact-head CI, then merge if conflict-free."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -168,13 +168,13 @@
     "merge_ci_completed_observed_at": "2026-08-22T18:53:35.034Z",
     "merge_ci_all_required_steps_success": true,
     "detached_signature_packaging": {
-      "status": "exact_head_ci_in_progress",
+      "status": "bounded_unit_pass_native_consolidation_pending",
       "pull_request": 257,
       "branch": "work/external-attestation-detached-signature-v3",
       "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
       "exact_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
       "exact_head_ci_run": 32595446105,
-      "exact_head_ci_status": "in_progress_pytest",
+      "exact_head_ci_status": "success",
       "mergeable": true,
       "mergeable_state": "unstable_pending_checks",
       "changed_files": 56,
@@ -184,8 +184,8 @@
       "diff_check": "pass",
       "work_verify": {
         "valid": true,
-        "requests": 26,
-        "responses": 25,
+        "requests": 30,
+        "responses": 29,
         "pending": 1
       },
       "remote_snapshot_blob_sha": "ac286b549a4a43520d178a592ca31eaefae603c2",
@@ -237,19 +237,27 @@
         }
       ],
       "last_observation": {
-        "at": "2026-08-22T20:25:51.899Z",
+        "at": "2026-08-22T20:40:51.008Z",
         "exact_head_sha": "8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23",
         "exact_head_ci_run": 32595446105,
-        "exact_head_ci_step": "Run pytest -q",
-        "mergeable": true
+        "exact_head_ci_status": "success_all_required_steps",
+        "mergeable": true,
+        "native_phase": "consolidate_pending"
+      },
+      "exact_head_ci_all_required_steps_success": true,
+      "task_evaluate": {
+        "original_goal_verdict": "FAIL",
+        "unit_verdict": "PASS",
+        "unit_id": "unit-d6ca097a96508ff17caf456b",
+        "candidate_trial": "remain_candidate_pending_deterministic_activation_gate"
       }
     },
     "native_work_verify": {
       "valid": true,
-      "requests": 26,
-      "responses": 25,
+      "requests": 30,
+      "responses": 29,
       "pending": 1,
-      "observed_at": "2026-08-22T19:34:34.218Z"
+      "observed_at": "2026-08-22T20:40:51.008Z"
     }
   }
 }
