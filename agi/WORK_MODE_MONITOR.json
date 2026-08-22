@@ -7,6 +7,7 @@
   "handoff_path": "agi/WORK_MODE_HANDOFF.json",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
+  "user_input_inbox_path": "agi/USER_INPUT_INBOX.json",
   "continuation_source": "repository_latest_main_only",
   "configured_automation": {
     "id": "6a87946ca9008191bc432f469283cf6c",
@@ -17,11 +18,19 @@
     "repository_state_is_not_control_plane_proof": true
   },
   "liveness_policy": {
-    "fresh_running_owner_action": "suppress_duplicate_read_only",
-    "fresh_current_session_activity_action": "suppress_duplicate_read_only",
+    "fresh_running_owner_action": "suppress_duplicate_development_writer_but_observe_user_input_control_plane_read_only",
+    "fresh_current_session_activity_action": "suppress_duplicate_development_writer_but_observe_user_input_control_plane_read_only",
     "stale_after_seconds_source": "agi/WORK_EXECUTION_STATE.json",
     "future_heartbeat_skew_seconds": 120,
     "malformed_or_inconsistent_action": "fail_closed_read_only"
+  },
+  "user_input_policy": {
+    "refresh_from_latest_remote_main_each_monitor_run": true,
+    "monitor_may_apply_to_live_primary_state": false,
+    "monitor_may_create_second_development_writer": false,
+    "recovery_must_preserve_unacknowledged_input": true,
+    "primary_should_ingest_at_safe_root_or_logical_unit_boundary": true,
+    "watchdog_restart_required_to_notice_input": false
   },
   "recovery_eligible_statuses": [
     "stale_running",
@@ -55,12 +64,13 @@
     "recreate_frozen_work_invocation": false,
     "repeat_external_side_effect": false,
     "continue_until": "strict_external_goal_or_forced_platform_end",
-    "single_milestone_is_exit_condition": false
+    "single_milestone_is_exit_condition": false,
+    "ingest_unacknowledged_user_input_before_selecting_next_safe_unit": true
   },
   "completion_policy": {
     "only_gate": "strict_independent_external_production_evidence",
     "internal_test_ci_self_evaluation_or_o_integration_sufficient": false,
     "disable_monitor_only_after_verified_gate": true
   },
-  "updated_at": "2026-08-22T13:07:07Z"
+  "updated_at": "2026-08-22T13:41:45Z"
 }
