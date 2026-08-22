@@ -1,20 +1,20 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "running",
+  "status": "checkpointed",
   "owner_kind": "work_recovery_automation",
   "execution_id": "work-recovery-20260823T015401JST",
   "predecessor_execution_id": "work-primary-handoff-20260822T224400JST",
   "lease_generation": 3,
   "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
   "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T22:45:41.753Z",
-  "last_progress_at": "2026-08-22T22:45:41.753Z",
+  "heartbeat_at": "2026-08-22T22:56:18.161Z",
+  "last_progress_at": "2026-08-22T22:56:18.161Z",
   "stale_after_seconds": 900,
   "checkpoint": {
-    "reason": "Generation-3 fenced owner remains live while finishing the revision-4-authorized in-flight unit boundary. PR 258 exact head bacc1a24 remains unchanged and workflow 32602836716/job 97103583905 is in progress at pytest. Local full 456, rebased dedicated 32, rebased focused 74, compileall, diff-check, remote four-blob readback, and native work-verify are successful. Inbox revision 4 is observed and will be acknowledged/applied after CI-bound unit completion, followed by lease release/checkpoint to the designated primary. No AGI claim is made.",
-    "verified_main_sha": "ae96878292beb1dc8142100fd16245272f8ac6de",
-    "recoverable_by": "No recovery while this generation-3 running heartbeat is fresh. If physically interrupted, recover only after expiry and a generation-plus-one state-only CAS with exact readback."
+    "reason": "User direction revision 4 was applied at the safe publication boundary. Cross-binding is published as PR 258 at exact head bacc1a241c64df1744a4247f8ba40a36ef1a241e. Exact-head workflow 32602836716/job 97103583905 remains in progress at pytest; PR was observed open, head unchanged, and currently not mergeable, so no merge, rerun, or native Execute submission was performed. Verification already completed: exact local full suite 456 passed; rebased dedicated 32 passed; rebased focused external-evidence tests 74 passed; compileall, diff-check, remote four-blob readback, and native work-verify (34 requests, 33 responses, 1 pending) passed. This generation-3 writer now checkpoints and will not perform further main mutations. AGI is not claimed.",
+    "verified_main_sha": "7bb44bc790f453e3e8aa16f5c5b131dcac0f716c",
+    "recoverable_by": "Designated primary claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn may continue only after acquiring a generation-4 successor lease through a WORK_EXECUTION_STATE-only expected-blob CAS and exact remote readback. Other sessions remain parallel read-only/non-main writers."
   },
   "parallel_execution_coordination": {
     "note_to_parallel_worker": "A parallel ChatGPT Work-mode session (GPT-5.6 Sol) is the user's other active driver on this repository. The user authorized this Claude successor to coordinate with it. To avoid a two-writer collision, only one live writer should mutate the repository at a time; whichever holds a fresh running heartbeat is primary and the other suppresses per the monitor contract.",
@@ -32,25 +32,29 @@
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
-  "working_branch": "work/external-handoff-cross-binding-v1",
+  "working_branch": "work/external-handoff-cross-binding-v2",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
   "active_unit_id": "unit-89058c1acef29b8e657a946c",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 3,
-    "acknowledged_at": "2026-08-22T14:45:00Z",
-    "observed_pending_revision": 4,
-    "pending_application_at": "next_safe_native_unit_boundary"
+    "highest_acknowledged_revision": 4,
+    "acknowledged_at": "2026-08-22T22:56:18.161Z",
+    "application_status": "applied_at_safe_cross_binding_publication_boundary"
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
+    "snapshot_head_sha": "7bb44bc790f453e3e8aa16f5c5b131dcac0f716c",
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
-    "durability_status": "PR 257 is merged and its native pending Execute is on main 3bc72f4; cross-binding implementation remains isolated at local exact head 9aa7689 with exact full regression running",
-    "next_action": "Verify whether a merge-commit workflow is created for main 3bc72f4 without manual rerun. Let cross-binding exact full suite finish unchanged; then publish exact tested files from 9aa7689 on a fresh isolated branch based on latest main, require exact-head CI, and only then submit the frozen native Execute response."
+    "publication_pr": 258,
+    "publication_branch": "work/external-handoff-cross-binding-v2",
+    "publication_exact_head_sha": "bacc1a241c64df1744a4247f8ba40a36ef1a241e",
+    "exact_head_ci_run": 32602836716,
+    "exact_head_ci_job": 97103583905,
+    "durability_status": "Cross-binding safely published; generation-3 writer checkpointed before merge while exact-head CI remains in progress and PR is currently not mergeable.",
+    "next_action": "Designated primary must first acquire generation 4 by state-only expected-blob CAS/readback. Then observe workflow 32602836716 against unchanged head bacc1a241c64df1744a4247f8ba40a36ef1a241e. If all required checks succeed and the PR becomes mergeable with unchanged head, merge using expected head, verify latest main, then complete the pending native Execute response followed by Task Evaluate, Consolidate Episode, and Learn. Preserve any CI failure or merge-conflict evidence exactly; do not rerun or overwrite another writer."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -77,7 +81,9 @@
     "result_blob_sha": "ac206f0c257a0fdf286abc6f9e148d80b33b31fb",
     "finalize_expected_blob_sha": "ac206f0c257a0fdf286abc6f9e148d80b33b31fb",
     "readback_of_commit_sha": "7cb19aea2f3f13fb439ade9a00e3671de0f83668",
-    "verified_remote_readback": true
+    "verified_remote_readback": true,
+    "checkpoint_expected_blob_sha": "18c455f4ebd94a6d2823b3c10eaff3ca7e7c3c61",
+    "checkpoint_verified_remote_readback": false
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -284,7 +290,7 @@
       "observed_at": "2026-08-22T21:02:16.449Z"
     },
     "external_handoff_cross_binding": {
-      "status": "pr_exact_head_ci_in_progress",
+      "status": "checkpointed_to_designated_primary_exact_ci_in_progress",
       "local_exact_commit": "9aa768978187e2b0f8755be3106f6db8353a88c3",
       "dedicated_tests": "32_passed",
       "focused_external_evidence_tests": "70_passed_118.40s",
@@ -352,12 +358,20 @@
         "source": "d5b63b9d53187f2b679e31959d21ccf0f8a8f371",
         "tests": "0213249e84be1a2357d0c072e4e18b7acab8aac5"
       },
-      "native_work_verify": {
-        "valid": true,
-        "requests": 34,
-        "responses": 33,
-        "pending": 1
-      }
+      "native_work_verify": "valid_34_requests_33_responses_1_pending",
+      "pr_mergeable_observed": false,
+      "handoff_checkpointed_at": "2026-08-22T22:56:18.161Z",
+      "no_merge_or_native_submit_before_handoff": true
     }
+  },
+  "designated_primary_handoff": {
+    "status": "checkpointed_for_designated_primary",
+    "designated_primary_kind": "claude_code_remote_session",
+    "designated_primary_id": "claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn",
+    "requested_by_user_revision": 4,
+    "checkpointed_at": "2026-08-22T22:56:18.161Z",
+    "predecessor_generation": 3,
+    "required_successor_generation": 4,
+    "second_main_writer_forbidden": true
   }
 }
