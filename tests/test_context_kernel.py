@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from copy import deepcopy
@@ -28,6 +29,10 @@ from continual.work_effects import (
     prepare_work_effect,
 )
 from continual.work_session import WorkModelClient, WorkModelPending, WorkSessionError
+from continual.work_source_observation import (
+    prepare_work_source_observation,
+    record_work_source_observation_receipt,
+)
 
 
 RUN_ID = "run-context-kernel-test"
@@ -39,6 +44,25 @@ def _write_json(path: Path, value: object) -> None:
         json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _blob_sha(path: Path) -> str:
+    raw = path.read_bytes()
+    return hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()  # noqa: S324
+
+
+def _persisted_request_boundary(root: Path) -> dict[str, bytes]:
+    bases = (
+        root / ".continual" / "runs" / RUN_ID / "invocations",
+        root / ".continual" / "work-model" / "invocations",
+    )
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for base in bases
+        if base.exists()
+        for path in sorted(base.rglob("*"))
+        if path.is_file()
+    }
 
 
 def _root(tmp_path: Path) -> tuple[Path, dict]:
@@ -268,6 +292,56 @@ def _client(root: Path) -> WorkModelClient:
         executor_binding="context-kernel-test-session",
         model_identity="context-kernel-test-model",
     )
+
+
+def _enable_authoritative_policy(root: Path) -> tuple[dict, str]:
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = Store(root).utc_now()
+    state["authoritative_source_observation_policy"] = {
+        "required": True,
+        "repository_full_name": "example/context-test",
+        "ref": "main",
+        "max_age_seconds": 300,
+        "executor_binding": "context-kernel-test-session",
+    }
+    _write_json(state_path, state)
+    return state, _blob_sha(state_path)
+
+
+def _record_authoritative_receipt(root: Path) -> tuple[dict, dict]:
+    state, blob = _enable_authoritative_policy(root)
+    request = prepare_work_source_observation(
+        root,
+        run_id=RUN_ID,
+        state=state,
+        state_blob_sha=blob,
+        expected_commit_sha="a" * 40,
+        model_identity="context-kernel-test-model",
+    )
+    store = Store(root)
+    receipt = record_work_source_observation_receipt(
+        root,
+        run_id=RUN_ID,
+        observation_id=request["observation_id"],
+        request_digest=request["request_digest"],
+        executor_binding="context-kernel-test-session",
+        model_identity="context-kernel-test-model",
+        commit_sha="a" * 40,
+        blob_sha=blob,
+        projection={
+            "status": state["status"],
+            "owner_kind": state["owner_kind"],
+            "execution_id": state["execution_id"],
+            "lease_generation": state["lease_generation"],
+            "fence_token_digest": store.stable_digest(
+                state["fence_token"], length=64
+            ),
+            "heartbeat_at": state["heartbeat_at"],
+        },
+        observed_at=store.utc_now(),
+    )
+    return request, receipt
 
 
 def _freeze_root(client: WorkModelClient, snapshot: dict) -> tuple[dict, bytes]:
@@ -555,20 +629,7 @@ def test_unready_source_rejects_before_native_or_work_request_mutation(
     client = _client(root)
     engine = Engine(root, model=client)
 
-    def persisted_boundary() -> dict[str, bytes]:
-        bases = (
-            root / ".continual" / "runs" / RUN_ID / "invocations",
-            root / ".continual" / "work-model" / "invocations",
-        )
-        return {
-            path.relative_to(root).as_posix(): path.read_bytes()
-            for base in bases
-            if base.exists()
-            for path in sorted(base.rglob("*"))
-            if path.is_file()
-        }
-
-    before = persisted_boundary()
+    before = _persisted_request_boundary(root)
     with pytest.raises(WorkSessionError, match=match):
         engine._call_component_direct(
             RUN_ID,
@@ -576,7 +637,104 @@ def test_unready_source_rejects_before_native_or_work_request_mutation(
             {"snapshot": deepcopy(snapshot), "last_result": {"verdict": "FAIL"}},
             prompt_path="prompts/root.md",
         )
-    assert persisted_boundary() == before
+    assert _persisted_request_boundary(root) == before
+
+
+def test_required_authoritative_observation_rejects_atomically_when_missing(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    _enable_authoritative_policy(root)
+    engine = Engine(root, model=_client(root))
+    before = _persisted_request_boundary(root)
+
+    with pytest.raises(
+        WorkSessionError,
+        match="authoritative Work source observation failed.*matching fresh",
+    ):
+        engine._call_component_direct(
+            RUN_ID,
+            "root",
+            {"snapshot": deepcopy(snapshot), "last_result": {"verdict": "FAIL"}},
+            prompt_path="prompts/root.md",
+        )
+
+    assert _persisted_request_boundary(root) == before
+
+
+def test_precommitted_authoritative_observation_binds_frozen_manifest(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    request, receipt = _record_authoritative_receipt(root)
+
+    frozen, _ = _freeze_root(_client(root), snapshot)
+    source = frozen["payload"]["decision_context"]["sources"][0]
+    bound = source["projection"]["authoritative_source_observation"]
+
+    assert bound["observation_id"] == request["observation_id"]
+    assert bound["request_digest"] == request["request_digest"]
+    assert bound["receipt_digest"] == receipt["receipt_digest"]
+    assert source["version"].endswith(
+        f";remote-receipt:{receipt['receipt_digest']}"
+    )
+    assert source["freshness"]["authoritative_observation"] == bound
+    assert bound["claim_scope"].endswith("not_linearizable_latest_proof")
+
+
+def test_authoritative_receipt_does_not_authorize_advanced_state_bytes(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    _record_authoritative_receipt(root)
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = (
+        datetime.now(UTC) + timedelta(seconds=1)
+    ).isoformat()
+    _write_json(state_path, state)
+    engine = Engine(root, model=_client(root))
+    before = _persisted_request_boundary(root)
+
+    with pytest.raises(WorkSessionError, match="matching fresh"):
+        engine._call_component_direct(
+            RUN_ID,
+            "root",
+            {"snapshot": deepcopy(snapshot), "last_result": {"verdict": "FAIL"}},
+            prompt_path="prompts/root.md",
+        )
+
+    assert _persisted_request_boundary(root) == before
+
+
+def test_bound_receipt_replay_never_revalidates_advanced_authority(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    _record_authoritative_receipt(root)
+    client = _client(root)
+    payload = {"snapshot": deepcopy(snapshot), "unit": {"scope": "test"}}
+    with pytest.raises(WorkModelPending) as first:
+        client.call("execute", payload, prompt_path="prompts/execute.md")
+    request_path = root / first.value.request_ref
+    frozen_bytes = request_path.read_bytes()
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = "2000-01-01T00:00:00Z"
+    _write_json(state_path, state)
+
+    with pytest.raises(WorkModelPending) as resumed:
+        client.resume_bound(
+            "execute",
+            payload,
+            prompt_path="prompts/execute.md",
+            invocation_id=first.value.invocation_id,
+            request_ref=first.value.request_ref,
+            request_digest=first.value.request_digest,
+        )
+
+    assert request_path.read_bytes() == frozen_bytes
+    assert resumed.value.invocation_id == first.value.invocation_id
 
 
 def test_bound_replay_does_not_revalidate_later_stale_source(tmp_path: Path) -> None:

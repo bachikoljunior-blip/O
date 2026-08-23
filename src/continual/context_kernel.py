@@ -16,6 +16,10 @@ from .effective_directives import (
     compile_effective_directives,
 )
 from .store import Store
+from .work_source_observation import (
+    WorkSourceObservationError,
+    verify_work_source_observation,
+)
 
 
 class ContextKernelError(ValueError):
@@ -346,10 +350,23 @@ def build_decision_context(
     state, state_identity = _load_source(
         root, store, "work_execution_state", _CONTROL_PATHS["work_execution_state"]
     )
+    request_clock = store.utc_now()
     source_readiness = validate_mandatory_work_source_freshness(
         state,
-        observed_at=store.utc_now(),
+        observed_at=request_clock,
     )
+    try:
+        authority_observation = verify_work_source_observation(
+            root,
+            run_id=run_id,
+            state=state,
+            state_blob_sha=state_identity["git_blob_sha"],
+            now=request_clock,
+        )
+    except WorkSourceObservationError as exc:
+        raise ContextKernelError(
+            f"authoritative Work source observation failed: {exc}"
+        ) from exc
     inbox, inbox_identity = _load_source(
         root, store, "user_input_inbox", _CONTROL_PATHS["user_input_inbox"]
     )
@@ -466,6 +483,10 @@ def build_decision_context(
             "normal_completion_condition"
         ),
     }
+    if authority_observation is not None:
+        state_projection["authoritative_source_observation"] = deepcopy(
+            authority_observation
+        )
     inbox_projection = {
         "revision": inbox_revision,
         "highest_acknowledged_revision": acknowledged,
@@ -522,7 +543,15 @@ def build_decision_context(
     sources = [
         _source_record(
             state_identity,
-            version=f"generation:{generation};execution:{execution_id};heartbeat:{heartbeat_at}",
+            version=(
+                f"generation:{generation};execution:{execution_id};"
+                f"heartbeat:{heartbeat_at}"
+                + (
+                    f";remote-receipt:{authority_observation['receipt_digest']}"
+                    if authority_observation is not None
+                    else ""
+                )
+            ),
             observed_at=heartbeat_at,
             projection=state_projection,
             include_reason="Bind every semantic decision to the sole writer, fence, inbox cursor, publication rule, and completion authority.",
@@ -545,6 +574,15 @@ def build_decision_context(
                 "stale_after_seconds": stale_after,
                 "max_future_skew_seconds": max_future_skew,
                 "recheck_at_effect_or_recovery_boundary": True,
+                **(
+                    {
+                        "authoritative_observation": deepcopy(
+                            authority_observation
+                        )
+                    }
+                    if authority_observation is not None
+                    else {}
+                ),
             },
         ),
         _source_record(

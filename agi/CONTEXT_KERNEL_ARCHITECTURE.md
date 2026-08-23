@@ -229,6 +229,26 @@ caller observed the latest remote branch or that an unseen authoritative
 revision does not exist. Provenance-bound remote observation remains a separate
 Context Kernel unit.
 
+## Eighth vertical slice: authoritative Work-source observation
+
+When `authoritative_source_observation_policy` is enabled, local readiness is
+necessary but no longer sufficient for minting a new semantic request. The
+operator must first persist an immutable observation request that binds the
+repository, `main`, expected immutable commit and exact Work-state blob,
+public authority projection, executor, model identity, and maximum age. Only
+after that precommit may a GitHub connector read be recorded as a cross-bound
+receipt. The Context Kernel recomputes both record digests and rejects missing,
+stale, future-skewed, tampered, wrong-commit, wrong-blob, wrong-executor, or
+wrong-authority evidence before either request boundary changes.
+
+Every accepted receipt is included in the frozen Work-state projection and
+source clock. A later heartbeat or state-byte change therefore requires a new
+precommitted observation; it cannot inherit authority from an older receipt.
+Existing bound replay remains immutable and does not re-read or reinterpret
+the source. The receipt proves a timestamped observation of one immutable
+commit/blob only. It is not a linearizable proof that no later main update
+exists, not a capability result, and not AGI or completion evidence.
+
 ## Migration sequence
 
 1. Root-only mandatory manifest, audit and fail-closed validation. **Implemented.**
@@ -252,9 +272,11 @@ Context Kernel unit.
    through PR 281; genuine fresh-selector observations remain pending.**
 7. Reject unusable mandatory Work authority before a new semantic request or
    native invocation journal mutates, without revalidating immutable replay.
-   **Implemented locally; exact-head publication remains pending.**
+   **Exact-head verified, merged through PR 282, and read back.**
 8. Bind request construction to a provenance-verified authoritative source
    observation rather than treating local freshness as latest-remote proof.
+   **Implemented locally with an explicit prepare/record operator path and
+   atomic failure coverage; exact-head publication remains pending.**
 9. Compact the event ledger into reproducible projections while retaining the
    events and digests needed for audit and reconstruction.
 

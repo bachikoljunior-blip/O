@@ -1,0 +1,86 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-4655d86ed1822e04416fa785",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
+        "src/continual/context_observations.py",
+        "src/continual/context_kernel.py",
+        "https://github.com/bachikoljunior-blip/O/pull/282"
+      ],
+      "observations": [
+        "Local lease freshness is now guarded before request mutation.",
+        "A precommitted connector receipt must precede the next semantic freeze to avoid the existing observation chicken-and-egg dependency."
+      ],
+      "purpose": "Select the smallest next unit that closes the explicit latest-remote observation gap without overstating its evidence.",
+      "unresolved": [
+        "provider-independent attestation or linearizable remote-read guarantees",
+        "fresh behavioral outcome evidence",
+        "the user's upper-level objective"
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "observations": [
+        "PR 282 closes local-source usability but intentionally leaves remote observation unproven.",
+        "The existing context-observation format already supplies immutable commit/blob, request/receipt identity, digest, and max-age primitives but is coupled to an already frozen Execute request.",
+        "The missing bridge is a pre-semantic observation handshake bound to the current Work authority and exact local blob."
+      ],
+      "reason": "The next unit is a bounded architecture implementation, not evidence for changing a Candidate or active prompt."
+    },
+    "result": {
+      "component": "execute",
+      "evidence_needed": [
+        "an immutable observation request identifies repository, main resolution commit, Work-state path, expected blob, current execution/generation/fence digest, and maximum age before the connector read occurs",
+        "a connector receipt cross-binds the request, immutable commit, exact remote blob, observed_at, executor identity, and a bounded public projection without secrets",
+        "new semantic request construction accepts only when the verified receipt's blob equals the exact local Work-state blob and its projected owner/execution/generation/fence/status match the local source",
+        "missing, stale, future-skewed, tampered, wrong-commit, wrong-blob, wrong-authority, and replayed-prior-heartbeat receipts fail before native invocation or Work request mutation",
+        "a latest-main heartbeat change invalidates the prior receipt, while an already frozen semantic request remains immutable and replayable",
+        "tests explicitly state that an operator connector receipt is provenance-bound observation evidence, not cryptographic proof that no concurrent main update occurred after observed_at"
+      ],
+      "expected_outputs": [
+        "a reusable authoritative Work-source observation request/receipt verifier",
+        "a pre-freeze Context Kernel binding from the exact local Work state identity to that verified receipt",
+        "an operator-facing preparation/recording path that can be driven by the GitHub connector before work-resume without creating a semantic request first",
+        "atomic no-mutation tests for every rejected receipt class, a valid-control path, heartbeat invalidation, and immutable bound replay",
+        "architecture, strategy, continuation, and native O records with an explicit observation claim boundary",
+        "isolated exact-head publication and main integration only after all gates pass"
+      ],
+      "failure_conditions": [
+        "the receipt can be created after request or journal mutation",
+        "the receipt is self-asserted without a precommitted observation request or immutable commit/blob identity",
+        "a valid receipt for an older state blob survives a heartbeat or authority-source change",
+        "bound replay is revalidated or rewritten",
+        "latest-main observation is overstated as linearizability, capability evidence, AGI evidence, or completion"
+      ],
+      "goal": "Add a fail-closed pre-freeze authoritative-source observation binding so a new semantic request can use mandatory Work state only when an O-verifiable connector receipt proves that the exact local state blob was read from an immutable latest-main commit within the allowed observation age.",
+      "inputs": [
+        "src/continual/context_observations.py request/receipt/digest/freshness primitives",
+        "src/continual/context_kernel.py mandatory Work source loading and pre-freeze readiness validation",
+        "src/continual/work_session.py preflight_call and request construction",
+        "src/continual/engine.py pre-mutation preflight boundary",
+        "the connector-observed main state blob c9f6943aa8844f8dbb8d482b49d6d3d39215ba5e at commit 59b429f4f286c3477b49f40399b93c2077012b02",
+        "tests/test_context_observations.py, tests/test_context_kernel.py, and tests/test_work_session_bridge.py"
+      ],
+      "parent_continuation": "After Execute, Task Evaluate the precommit ordering, immutable commit/blob and authority cross-binding, two independent freshness clocks, all atomic rejection paths, CI, expected-head merge, exact readback, and claim boundary. Consolidate and Learn, then return to Root for the next independent Context Kernel or behavioral-evidence unit.",
+      "rollback": "Retain the merged local-source readiness barrier from PR 282. Revert the remote-observation requirement if it cannot preserve immutable replay or creates authority changes; fail closed and keep the observation receipt as non-authorizing audit evidence.",
+      "scope": "context-kernel/pre-freeze-authoritative-work-state-observation-v1",
+      "success_conditions": [
+        "the next new semantic request cannot be frozen from merely fresh local Work bytes lacking a matching recent remote observation receipt",
+        "a connector-observed immutable commit/blob receipt matching the exact local state enables normal request construction without changing lease authority",
+        "every rejected observation state is atomic at both native and Work request boundaries",
+        "receipt freshness and local lease freshness are independently enforced",
+        "generation 6 remains the sole writer and inbox revision 15 remains effective"
+      ]
+    }
+  },
+  "output_digest": "54e9d3191cc45a889f5301efec8cc2a81f7ac2183456d59c9fd42011c4ea875c",
+  "received_at": "2026-08-23T20:53:23.993760Z",
+  "request_digest": "41932ee1eae5c04738fcb7a6887f9c43ea7404c7a5226225045e92f17f5c5f86",
+  "response_digest": "d1a31b36bc83e366b7a4f8afbf1dd908fac5b319d288224ba7aec8e57bf884b4",
+  "schema_version": 1
+}
