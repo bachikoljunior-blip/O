@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T12:21:44.172Z",
-  "last_progress_at": "2026-08-23T12:21:44.172Z",
+  "heartbeat_at": "2026-08-23T12:32:10.787Z",
+  "last_progress_at": "2026-08-23T12:32:10.787Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -21,11 +21,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "4239c1c4747831c4a7064fc35bff485d13b921c6",
-  "working_branch": "work/context-routing-heldout-harness-v1",
+  "source_main_sha": "feefc6836eccfbef56269b21be31e5b0398bf9ad",
+  "working_branch": "work/post-routing-integration-cycle-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
-  "active_unit_id": "unit-24e1807c3c65cd90d50be3eb",
+  "active_unit_id": "unit-f06051defa0312907f5f28ab",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 14,
@@ -41,12 +41,12 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/context-routing-heldout-harness-v1",
-    "snapshot_head_sha": "7ba0fda631e9bc947695cc7d17a1f12b0bcf55f1",
-    "pending_work_invocation_id": "invoke-66af21513bffe4e758237708",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-66af21513bffe4e758237708/request.json",
-    "durability_status": "PR 274 exact head 7ba0fda6 passed workflow 32637070506 and merged with expected-head protection to main edf76a27. Eight key source/test/experiment/native blobs read back exactly. PR 273 was already merged to main 3417809d.",
-    "next_action": "Submit Execute invoke-66af21513bffe4e758237708 using the actual PR 273/274 CI, merge, and readback evidence; then continue the native O lifecycle through Task Evaluate, Consolidate Episode, Learn, and the next Root unit."
+    "snapshot_branch": "work/post-routing-integration-cycle-v1",
+    "snapshot_head_sha": "feefc6836eccfbef56269b21be31e5b0398bf9ad",
+    "pending_work_invocation_id": "invoke-2d54e82d54d0de9244f95889",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-2d54e82d54d0de9244f95889/request.json",
+    "durability_status": "PR 273 and PR 274 integrations are verified on main. The native lifecycle recording their actual evidence completed Execute, Candidate Evaluate, Task Evaluate, Consolidate Episode, Learn, and Root locally; one same-owner Execute publication request is pending.",
+    "next_action": "Validate the exact native tree, persist a branch-publication idempotency record, publish an isolated exact head, require all sharded CI jobs and aggregate, then merge/read back only under unchanged-head and conflict-free conditions."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -214,6 +214,15 @@
         "tests/test_work_effect_dispatch.py": "348dc81920e94a1e461a5e65d75cd0ff33c9c930",
         "tests/test_work_effect_reconciliation.py": "0d3f431726840d27e806844c6d89984e050a812a"
       }
+    },
+    "post_routing_native_lifecycle": {
+      "branch": "work/post-routing-integration-cycle-v1",
+      "pull_request": null,
+      "head_sha": null,
+      "expected_main_parent": "feefc6836eccfbef56269b21be31e5b0398bf9ad",
+      "status": "local_validation_pending",
+      "pending_execute": "invoke-2d54e82d54d0de9244f95889",
+      "claim_boundary": "Internal Work lifecycle durability only; bounded publication PASS and routing INSUFFICIENT_EVIDENCE remain distinct from the unmet user-level objective."
     }
   }
 }
