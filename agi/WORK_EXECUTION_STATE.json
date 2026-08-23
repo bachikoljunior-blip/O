@@ -8,8 +8,8 @@
   "lease_generation": 4,
   "fence_token": "work-primary-fence-v4-9c37e5a1b6d2480f3e7a5c19",
   "started_at": "2026-08-22T23:16:42Z",
-  "heartbeat_at": "2026-08-23T00:40:00Z",
-  "last_progress_at": "2026-08-23T00:40:00Z",
+  "heartbeat_at": "2026-08-23T01:13:00Z",
+  "last_progress_at": "2026-08-23T01:13:00Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "direct_primary_work_instruction",
@@ -28,9 +28,9 @@
   "active_unit_id": "unit-89058c1acef29b8e657a946c",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 9,
-    "acknowledged_at": "2026-08-23T00:33:00Z",
-    "application_note": "Revisions 4-9 ingested. 4-6: gate not user-set; Claude primary; smartphone-first; ChatGPT authorized secondary. 7-9: context-conditioning observations from the secondary (long-lived context can suppress reachable hypotheses; clocks desync between durable state and live state; context selection is recursively conditioned) - design context for the Skill-in-Skill routing work, no immediate behavior change."
+    "highest_acknowledged_revision": 10,
+    "acknowledged_at": "2026-08-23T01:13:00Z",
+    "application_note": "Revisions 4-10 ingested. 4-6: gate not user-set; Claude primary; smartphone-first; ChatGPT authorized secondary. 7-10: context-conditioning observations from the secondary (suppressed hypotheses under long-lived context; clock desync; recursive context selection; constraints present in context do not reliably control later actions) - design context for Skill-in-Skill routing, no immediate behavior change."
   },
   "parallel_execution_coordination": {
     "primary": "This Claude Code remote session (generation-4 lease holder).",
@@ -44,7 +44,7 @@
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
     "durability_status": "Backlog settlement 6/6 complete: PR 251 (10f03fe), 246 (213e760), 244 (0629bcb), 238 (f1df027), 248 (d20ec94), and 230 (f46b5bc, first full-suite completion in 48min under the corrected 75min cap) all merged on green fresh exact-head CI. Transient red-main window explained and closed: 22:56-23:20 the checkpointed gen-3 lease failed the fresh-primary pin test (fixed by the gen-4 acquisition), and 23:44-00:00 the secondary's inbox schema churn broke the inbox pin tests (self-repaired by 7f882e1 restore); every merge decision was based on exact-head PR CI runs whose trees predate the breakage and were green. Current main is locally verified consistent; merge-push run for f46b5bc is in progress as final confirmation.",
-    "next_action": "Observe PR 247 re-refreshed CI (transient-inbox failure repaired by re-merge of restored main) and PR 245 CI on head 2376ed2 (the exact two-file observed-schema delta on verified post-230 main, satisfying its integration boundary); merge each on green unchanged head. Then retarget/refresh 249 (after 247) and 250 (after 245). Confirm main merge-push run for f46b5bc is green. Then open a native O Run (executor current_claude_code_remote_session) for the next semantic development unit so primary development also runs through the Work bridge."
+    "next_action": "Observe PR 245 CI 32607076987 (head 2376ed2, started 00:08, in progress at 64min under the 75min cap) and PR 247 CI 32607999744 (head eff0101, refreshed 00:29 after the transient-inbox repair); merge each on green unchanged head. Then retarget/refresh 249 (after 247) and 250 (after 245). Then submit the frozen native Execute response invoke-8027c964 from actual outcomes and answer Task Evaluate / Consolidate Episode / Learn as they freeze."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
