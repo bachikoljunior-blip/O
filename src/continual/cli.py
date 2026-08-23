@@ -16,6 +16,10 @@ from .work_session import (
     submit_work_response,
     verify_work_invocations,
 )
+from .work_source_observation import (
+    prepare_work_source_observation,
+    record_work_source_observation_receipt,
+)
 
 
 def _print(value: Any) -> None:
@@ -78,6 +82,29 @@ def build_parser() -> argparse.ArgumentParser:
     work_submit.add_argument("--executor-binding", default="current_chatgpt_work_session")
     work_submit.add_argument("--model-identity", required=True)
     work_submit.add_argument("--model-verified", action="store_true")
+
+    source_prepare = sub.add_parser(
+        "work-source-observation-prepare",
+        help="Precommit one mandatory Work-state connector observation.",
+    )
+    source_prepare.add_argument("run_id")
+    source_prepare.add_argument("--state-blob-sha", required=True)
+    source_prepare.add_argument("--expected-commit-sha", required=True)
+    source_prepare.add_argument("--model-identity", required=True)
+
+    source_record = sub.add_parser(
+        "work-source-observation-record",
+        help="Record one connector receipt for a precommitted Work-state observation.",
+    )
+    source_record.add_argument("run_id")
+    source_record.add_argument("observation_id")
+    source_record.add_argument("--request-digest", required=True)
+    source_record.add_argument("--commit-sha", required=True)
+    source_record.add_argument("--blob-sha", required=True)
+    source_record.add_argument("--projection", type=Path, required=True)
+    source_record.add_argument("--observed-at", required=True)
+    source_record.add_argument("--executor-binding", required=True)
+    source_record.add_argument("--model-identity", required=True)
 
     self_apply = sub.add_parser(
         "self-apply",
@@ -145,6 +172,42 @@ def main() -> None:
                 executor_binding=args.executor_binding,
                 model_identity=args.model_identity,
                 model_verified=args.model_verified,
+            )
+        )
+        return
+
+    if args.cmd == "work-source-observation-prepare":
+        state = json.loads(
+            (args.root / "agi" / "WORK_EXECUTION_STATE.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        _print(
+            prepare_work_source_observation(
+                args.root,
+                run_id=args.run_id,
+                state=state,
+                state_blob_sha=args.state_blob_sha,
+                expected_commit_sha=args.expected_commit_sha,
+                model_identity=args.model_identity,
+            )
+        )
+        return
+
+    if args.cmd == "work-source-observation-record":
+        projection = json.loads(args.projection.read_text(encoding="utf-8"))
+        _print(
+            record_work_source_observation_receipt(
+                args.root,
+                run_id=args.run_id,
+                observation_id=args.observation_id,
+                request_digest=args.request_digest,
+                executor_binding=args.executor_binding,
+                model_identity=args.model_identity,
+                commit_sha=args.commit_sha,
+                blob_sha=args.blob_sha,
+                projection=projection,
+                observed_at=args.observed_at,
             )
         )
         return
