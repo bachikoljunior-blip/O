@@ -254,6 +254,14 @@ def compile_effective_directives(
     for atom_id in sorted(atoms):
         visit(atom_id)
 
+    for atom_id, target_ids in graph.items():
+        atom = atoms[atom_id]
+        for target_id in target_ids:
+            if atom["precedence"] <= atoms[target_id]["precedence"]:
+                raise EffectiveDirectiveError(
+                    f"directive atom {atom_id} supersede precedence must increase"
+                )
+
     superseded_by: dict[str, str] = {}
     for atom_id, targets in graph.items():
         for target_id in targets:

@@ -151,6 +151,13 @@ def test_compiler_rejects_missing_unknown_and_cyclic_supersedes() -> None:
     with pytest.raises(EffectiveDirectiveError, match="supersedes unknown atom"):
         _compile(inbox, unknown_target, state, strategy)
 
+    non_increasing = deepcopy(ledger)
+    _atom(non_increasing, "r7-context-conditioning-observation")["supersedes"] = [
+        "r8-context-freshness-observation"
+    ]
+    with pytest.raises(EffectiveDirectiveError, match="precedence must increase"):
+        _compile(inbox, non_increasing, state, strategy)
+
     cyclic = deepcopy(ledger)
     _atom(cyclic, "r4-primary-executor")["supersedes"] = ["r6-primary-executor"]
     with pytest.raises(EffectiveDirectiveError, match="supersede cycle"):
