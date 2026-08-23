@@ -8,8 +8,8 @@
   "lease_generation": 4,
   "fence_token": "work-primary-fence-v4-9c37e5a1b6d2480f3e7a5c19",
   "started_at": "2026-08-22T23:16:42Z",
-  "heartbeat_at": "2026-08-23T03:09:00Z",
-  "last_progress_at": "2026-08-23T03:09:00Z",
+  "heartbeat_at": "2026-08-23T03:40:00Z",
+  "last_progress_at": "2026-08-23T03:40:00Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "direct_primary_work_instruction",
@@ -44,7 +44,7 @@
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
     "durability_status": "BACKLOG FULLY SETTLED. Merged on green fresh exact-head CI with unchanged heads: PR 251 (10f03fe), 246 (213e760), 244 (0629bcb), 238 (f1df027), 248 (d20ec94), 230 (f46b5bc), 258 (006002e), 247 (f0aa93b, run 32607999744), 249 (b2e8093, run 32611268930), 245 (dfdbca2, run 32611394647 on re-scoped head 553b46b). PR 250 closed with retained premise-falsification evidence (comment 5383921000): its design requires the first observed-schema stage to learn a Candidate, and the merged 245 diagnostic proves that stage fails closed on the current chain (no same-shape literal variation among deterministically reconstructible learned programs; recursive selection hash-seed dependent - full root cause in PR 245 body, fix commit 553b46b, and module docstring).",
-    "next_action": "Confirm the push-event CI run on main tip dfdbca2 is green (~04:15 conclusion), then submit the frozen native Execute response invoke-8027c964 from the actual outcomes above (including the honest deviation: 250 was closed as premise-falsified rather than merged) and answer Task Evaluate / Consolidate Episode / Learn as they freeze; persist the run records to main. Follow-up unit queued for Root selection next cycle: deterministic bounded-synthesis search (hash-seed independence) in the solver used by _attempt; read-only analysis of the non-determinism site may proceed meanwhile."
+    "next_action": "Confirm the push-event CI run on main tip dfdbca2 is green (~04:15 conclusion), then submit the frozen native Execute response invoke-8027c964 from the actual outcomes above (including the honest deviation: 250 was closed as premise-falsified rather than merged) and answer Task Evaluate / Consolidate Episode / Learn as they freeze; persist the run records to main. MECHANISM CORRECTION (adversarially verified read-only sweep, 11 agents, 5 candidate sites refuted, 2 confirmed): the recursive-target lottery is NOT hash-seed dependence in the solver; it is per-process entropy leaking through the digest layer - evidence_frontier_iterated_expansion.py:399 digests a report embedding uuid4 fresh_engine_run_ids (src/continual/store.py:26-27) and a timestamp-tainted trial snapshot, and recursive_evidence_frontier_growth.py:61,72 folds that unstable digest into history_digest, which salts support-input rotation, variant-constant selection (int(digest[:8],16)), and schedule sort order, so the first-two-unsupported scan picks different targets every run (violating its own stable-semantics docstring; compliant contrast: evidence_derived_target_synthesis.py:45-70). PR 245 body corrected in place; commit 553b46b message left as historical record. Follow-up unit redefined for Root selection next cycle: bind _recursive_history_commitment to stable behavior semantics only (learned programs + support examples, not whole run reports), correcting the hash-seed wording in module/test docstrings in the same change."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
