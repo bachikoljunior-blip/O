@@ -233,6 +233,7 @@ def verify_checkpoint_experiment_provenance(
     validated = validate_checkpoint_experiment(value)
     protocol_digest = checkpoint_protocol_digest(validated)
     seen_invocations: set[str] = set()
+    shared_executor_model: tuple[str, str, bool] | None = None
     for observation in validated["observations"]:
         task_id = observation["task_id"]
         arm = observation["arm"]
@@ -269,6 +270,17 @@ def verify_checkpoint_experiment_provenance(
                 }
                 if dict(native) != exact_native:
                     raise ValueError("native invocation binding does not match the journal")
+                observed_executor_model = (
+                    str(native["executor_binding"]),
+                    str(native["model_identity"]),
+                    bool(native["model_verified"]),
+                )
+                if shared_executor_model is None:
+                    shared_executor_model = observed_executor_model
+                elif observed_executor_model != shared_executor_model:
+                    raise ValueError(
+                        "all checkpoint attempts must use one executor/model binding"
+                    )
                 expected_step = {
                     **receipt_contract,
                     "invocation_index": index,

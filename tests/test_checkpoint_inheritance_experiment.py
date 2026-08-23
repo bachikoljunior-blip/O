@@ -47,6 +47,7 @@ def _native_attempt(
     task_id: str,
     arm: str,
     attempt: dict,
+    model_identity: str = "work-model-under-test",
 ) -> dict:
     if not (root / "prompts").exists():
         shutil.copytree(ROOT / "prompts", root / "prompts")
@@ -67,7 +68,7 @@ def _native_attempt(
             root,
             run_id=f"run-{attempt['candidate_id']}-{index}",
             executor_binding="checkpoint-test-session",
-            model_identity="work-model-under-test",
+            model_identity=model_identity,
         )
         payload = {
             "checkpoint_experiment_attempt": step_contract,
@@ -93,7 +94,7 @@ def _native_attempt(
                 },
             },
             executor_binding="checkpoint-test-session",
-            model_identity="work-model-under-test",
+            model_identity=model_identity,
         )
         request = json.loads(
             (
@@ -127,6 +128,7 @@ def _complete_measurement(
     *,
     treatment_invocations: int = 1,
     treatment_seconds: float = 4.0,
+    treatment_model_identity: str = "work-model-under-test",
 ) -> dict:
     value = _experiment()
     observations = []
@@ -177,6 +179,7 @@ def _complete_measurement(
                         task_id=task_id,
                         arm="sibling_checkpoint",
                         attempt=attempt,
+                        model_identity=treatment_model_identity,
                     )
                     for attempt in treatments
                 ],
@@ -272,4 +275,13 @@ def test_complete_measurement_requires_verified_native_provenance(tmp_path: Path
         "response_digest"
     ] = "0" * 64
     with pytest.raises(ValueError, match="binding does not match"):
+        verify_checkpoint_experiment_provenance(tmp_path, value)
+
+
+def test_measurement_rejects_cross_arm_model_binding_changes(tmp_path: Path) -> None:
+    value = _complete_measurement(
+        tmp_path,
+        treatment_model_identity="different-work-model",
+    )
+    with pytest.raises(ValueError, match="one executor/model binding"):
         verify_checkpoint_experiment_provenance(tmp_path, value)
