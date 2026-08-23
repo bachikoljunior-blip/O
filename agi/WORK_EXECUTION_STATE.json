@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-23T23:47:42.281Z",
-  "last_progress_at": "2026-08-23T23:47:42.281Z",
+  "heartbeat_at": "2026-08-23T23:50:34.676Z",
+  "last_progress_at": "2026-08-23T23:50:34.676Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -44,8 +44,8 @@
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
     "pending_work_invocation_id": "invoke-8b60149d0f43ed11e19ac34b",
     "pending_request_ref": ".continual/work-model/invocations/invoke-8b60149d0f43ed11e19ac34b/request.json",
-    "durability_status": "PR 284 exact head e0d4c18f6261cf131d80ef5dcee8b77a3e638c09 tree 83d4bc65c4444bd392e253b505e19ae8e01758b6 is published from the exact state-only precommit; its 41-path set was reverified and exact-head CI 32673271943 has shards 1, 2, and 3 succeeded while shard 0 remains in progress.",
-    "next_action": "Require PR 284 exact-head CI success and unchanged conflict-free head, merge/read back all 41 blobs, then enable and live-exercise the precommitted PR 283 run/jobs receipt before answering the frozen Execute."
+    "durability_status": "PR 284 exact head e0d4c18f6261cf131d80ef5dcee8b77a3e638c09 tree 83d4bc65c4444bd392e253b505e19ae8e01758b6 passed workflow 32673271943 (four shards plus aggregate), merged as 579f6dfc35670f720169da8a39cfb0033828f738, and all 41 reviewed blobs matched on main.",
+    "next_action": "Enable the exact PR 283 CI source policy in state, precommit the observation before connector reads, record and verify the live run/jobs receipt, then answer the frozen Execute and continue the O lifecycle."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -478,14 +478,45 @@
     "max_age_seconds": 300,
     "executor_binding": "current_chatgpt_work_session"
   },
+  "ci_source_observation_policy": {
+    "required": true,
+    "repository_full_name": "bachikoljunior-blip/O",
+    "exact_head_sha": "8234151332ade162d679b30ef17b122ccf01ddb9",
+    "workflow_run_id": 32667061602,
+    "workflow_id": 335420036,
+    "required_jobs": [
+      {
+        "id": 97262030780,
+        "name": "pytest shard 0 of 4"
+      },
+      {
+        "id": 97262030960,
+        "name": "pytest shard 1 of 4"
+      },
+      {
+        "id": 97262030878,
+        "name": "pytest shard 2 of 4"
+      },
+      {
+        "id": 97262030808,
+        "name": "pytest shard 3 of 4"
+      },
+      {
+        "id": 97266128393,
+        "name": "test"
+      }
+    ],
+    "max_age_seconds": 900,
+    "executor_binding": "current_chatgpt_work_session"
+  },
   "ci_source_observation": {
-    "status": "publication_precommit_pending_remote_cas",
+    "status": "merged_readback_verified_policy_activation_pending_cas",
     "active_unit_id": "unit-7cf565548d637cbe981ed313",
     "pending_invocation": "invoke-8b60149d0f43ed11e19ac34b",
     "source_run": 32667061602,
     "source_head": "8234151332ade162d679b30ef17b122ccf01ddb9",
     "claim_boundary": "A GitHub Actions receipt is internal engineering provenance, not independent production capability, AGI, or completion.",
-    "observed_at": "2026-08-23T23:15:21.257Z",
+    "observed_at": "2026-08-23T23:50:34.676Z",
     "publication_precommit": {
       "effect_id": "publish-ci-source-observation-v1",
       "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen6:ci-source-observation:v1",
@@ -496,7 +527,58 @@
       "local_result_tree": "b95d1a8f961cf99a874e534d5b528304a99568ba",
       "changed_path_list_sha256": "50754c250b617dadfe96929a63f3508fe5c7c9ead22c36f9fb3570330f82fde4",
       "prepared_at": "2026-08-23T23:15:21.257Z",
-      "rule": "No branch, remote commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback."
-    }
+      "rule": "No branch, remote commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback.",
+      "remote_commit": "e0d4c18f6261cf131d80ef5dcee8b77a3e638c09",
+      "remote_tree": "83d4bc65c4444bd392e253b505e19ae8e01758b6",
+      "pull_request": 284,
+      "workflow_run": 32673271943,
+      "exact_head_ci_result": "four pytest shards and dependent aggregate succeeded",
+      "merge_sha": "579f6dfc35670f720169da8a39cfb0033828f738",
+      "verified_remote_readback": true,
+      "reviewed_blob_count": 41
+    },
+    "readback_blobs": {
+      ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-2ee8bb6346713211f8457d54-result.json": "81f6837f4590563fc412742777dbe511d4c51605",
+      ".continual/runs/run-work-mode-handoff-v2/candidate-trials/invoke-215ae80777a66dd81d2c7055.json": "1039d0622d6a8260e246cdf1625b1a85fb3f6c1c",
+      ".continual/runs/run-work-mode-handoff-v2/events.jsonl": "08f74ea9bcc4ca91599c6d662a7c64cc7bbe2d25",
+      ".continual/runs/run-work-mode-handoff-v2/execution-units/unit-7cf565548d637cbe981ed313.json": "a05c0239dc4d81370e8c138a189b13bb929c6543",
+      ".continual/runs/run-work-mode-handoff-v2/external-effects/publish-ci-source-observation-v1.json": "4c2d98183322c5115eaaf3910f3bd16c24fe314d",
+      ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-215ae80777a66dd81d2c7055-candidate_evaluate.json": "54d366e4503072da80bd35943edf6937b4fc908d",
+      ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-78baa38cd3605151fc936270-candidate_evaluate.json": "3602491558f6ca425157e88781a06701210b8d26",
+      ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-d5dce5f0a8dbfcb2def2f13a-root.json": "01dfe8150b3f1414bd319ddff63e600775365ea0",
+      ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-eee3032eff5e5d1c018bf5a4-execute.json": "2b85d95e2c4feb675f50ac4c375a1d627a5fcd0c",
+      ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-215ae80777a66dd81d2c7055.json": "b1e83b2cf9229dfe83f0572876d25f2562fc811b",
+      ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-78baa38cd3605151fc936270.json": "2b145847575cd67f1a32246096ee816b4005cb23",
+      ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-b598bc921df7a32b525ba91e.json": "cb942573e5bc9629452017f6626b1b9f9655eca3",
+      ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-d5dce5f0a8dbfcb2def2f13a.json": "14c89f9f8bcdf1768033a2f06ee890ac6f51e47d",
+      ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-eee3032eff5e5d1c018bf5a4.json": "393baad19ae585658898942f3e48376cf373b153",
+      ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-215ae80777a66dd81d2c7055-candidate_evaluate.json": "53b2dcc5be6e5a6eb0c0c2e773e2f7c3c573d520",
+      ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-78baa38cd3605151fc936270-candidate_evaluate.json": "3708074b2436744642966b2ce8337ccf66a70bf1",
+      ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-d5dce5f0a8dbfcb2def2f13a-root.json": "58ba34f1c46ec2f752307a3c8be0e5b0fb33cc81",
+      ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-eee3032eff5e5d1c018bf5a4-execute.json": "38bf938447f9485f0ea7e22555a4a8f0f864b5fc",
+      ".continual/runs/run-work-mode-handoff-v2/preflight/preflight-execute-525dc9e4583005df37d15cbc.json": "7596e7de175019a2cf42ed4a38d163b23444b488",
+      ".continual/runs/run-work-mode-handoff-v2/preflight/preflight-root-608babcab1db11d83dcb3345.json": "2e71b2658901b5021e133e52e6e51397da022b8e",
+      ".continual/runs/run-work-mode-handoff-v2/snapshot.json": "6c9909f93e2817cce7f5ca7051f41a734462d37b",
+      ".continual/runs/run-work-mode-handoff-v2/work-source-observations/work-state-f7d8ebb44fbc4a48a473c518/receipt.json": "678f5e606c831f2b44ff6b669a15c71c17d68d10",
+      ".continual/runs/run-work-mode-handoff-v2/work-source-observations/work-state-f7d8ebb44fbc4a48a473c518/request.json": "967425c16286ae63fa3eefe6e7026426ffd1ce06",
+      ".continual/work-model/invocations/invoke-288c21127d55329a6d00fcf4/response.json": "70505fd2017fe92c4b7d9b11da2d546273e210c3",
+      ".continual/work-model/invocations/invoke-8b60149d0f43ed11e19ac34b/request.json": "d2d6e51650710b0d6bbaa684bff44599d8fc3ae9",
+      ".continual/work-model/invocations/invoke-a1da1d243c29b6059a08c1c8/request.json": "3bdd8a30866bc695f49fc9ace797705c14125364",
+      ".continual/work-model/invocations/invoke-a1da1d243c29b6059a08c1c8/response.json": "0187fa2fd6215e32e72c0eecef0d6c6a264533df",
+      ".continual/work-model/invocations/invoke-cf6b8b1587a1fcf7fd1c964d/request.json": "c68372480854759790cbd34d462f8f8ccf494fa3",
+      ".continual/work-model/invocations/invoke-cf6b8b1587a1fcf7fd1c964d/response.json": "8589aac5bd5876662c468040ffa4a44159b001cf",
+      ".continual/work-model/invocations/invoke-e90f3495dac646ae011343e4/request.json": "2488b227b431534baee34e93660ea9415bbd516c",
+      ".continual/work-model/invocations/invoke-e90f3495dac646ae011343e4/response.json": "d404fa553d371eb72041c52802335a18247a9237",
+      "agi/AUTONOMY_STATE.json": "345fa59ed80d5e040e30ace81f17f0bb65608e5d",
+      "agi/CONTEXT_KERNEL_ARCHITECTURE.md": "deeb7f42721a58937aca5284b8919405f1a8f658",
+      "agi/CONTINUATION.json": "2a76209ec0e0eaeca639ff45aef204ec6d409eae",
+      "agi/WORK_MODE_HANDOFF.json": "282e9d5f70d0743b012b7a684db99e93b512e86f",
+      "agi/WORK_STRATEGY.json": "a84cb9f65ed59d6940c86ebbcb811bc82f297db8",
+      "src/continual/ci_source_observation.py": "bce754d94386ddc1a835a56fb1bc2ff2175b67a8",
+      "src/continual/cli.py": "0eb3a836443cc43bfa331dfe34e00aa496ac2013",
+      "src/continual/context_kernel.py": "4621b19869de3dac7391a1fbca86842c06d63416",
+      "tests/test_ci_source_observation.py": "7321ffe55f5dfefb34bf1e861b9927c997797e8a",
+      "tests/test_context_kernel.py": "c2dad3629fff45119e7517e8cda609e4626cdfd8"
+}
   }
 }
