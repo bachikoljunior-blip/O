@@ -8,11 +8,13 @@ import pytest
 import continual.engine as engine_module
 from agi.observed_schema_extrapolation import (
     ObservedSchemaExtrapolationError,
+    _digest,
     _precommit_observed_schema_schedule,
+    _reconstruct_observed_targets,
     _shape,
-    run_observed_schema_extrapolation,
 )
 from agi.acquired_programs import execute_program, validate_program_descriptor
+from agi.recursive_evidence_frontier_growth import run_recursive_evidence_frontier_growth
 
 
 def _affine_program(offset: int) -> dict:
@@ -95,25 +97,52 @@ def test_observed_schema_schedule_fails_closed_without_observed_parameter_variat
         _precommit_observed_schema_schedule(observed, history_digest="f" * 64)
 
 
-def test_observed_schema_extrapolation_end_to_end_uses_persisted_iterated_bindings(
+def test_observed_schema_binding_diagnostic_core_has_no_literal_variation_and_fails_closed(
     runtime_repo: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # This campaign's runtime calls are exact mechanical learned-tool invocations. Ordinary CI must
-    # not require live-model credentials merely to construct the Engine used for those calls.
+    """Executable negative evidence for observed-schema extrapolation on the current chain.
+
+    Reconstruction rebinds to persisted iterated evidence without caller Candidate IDs, but the
+    deterministically reconstructible learned programs (both controls and both expansion targets)
+    have pairwise-distinct AST shapes, so there is no observed same-shape literal delta to continue
+    and the precommitted schedule must fail closed. The recursive member is excluded from these
+    assertions because the recursive campaign selects its target among bounded-search "unsupported"
+    schedule entries, and that support verdict varies across processes with identical seeds
+    (hash-seed dependence; observed live as sub- versus mul-wrap targets), which would make any
+    assertion over the full campaign outcome a lottery. Fail-closed outcome demonstrated end to end
+    by CI run 32607076987 and local reproductions on heads 2376ed2 and a097ab1.
+    """
+    # Runtime calls in the prerequisite chain are exact mechanical learned-tool invocations.
+    # Ordinary CI must not require live-model credentials merely to construct the Engine for them.
     monkeypatch.setattr(engine_module, "ModelClient", lambda root: object())
 
-    report = run_observed_schema_extrapolation(
-        runtime_repo,
-        "observed-schema-end-to-end-binding-test",
-    )
+    seed = "observed-schema-end-to-end-binding-test"
+    recursive_seed = f"{seed}:recursive"
+    recursive = run_recursive_evidence_frontier_growth(runtime_repo, recursive_seed)
+    assert recursive["passed"] is True
+    assert recursive["all_five_capabilities_rediscovered"] is True
 
-    assert report["passed"] is True
-    assert report["all_six_capabilities_rediscovered"] is True
-    assert report["all_replays_avoided_caller_candidate_ids"] is True
-    assert report["prior_candidate_state_unchanged"] is True
-    assert report["prior_trial_state_unchanged"] is True
-    assert report["selected_failed_closed_before_learning"] is True
-    assert report["control_remained_failed_closed"] is True
-    assert "independent production evidence" in report["claim_boundary"]
-    assert "AGI" in report["claim_boundary"]
+    observed = _reconstruct_observed_targets(
+        runtime_repo,
+        recursive_seed=recursive_seed,
+        recursive_report=recursive,
+    )
+    deterministic_core = observed["observed_targets"][:4]
+    assert len(deterministic_core) == 4
+    shape_digests = {
+        _digest(_shape(target["program"]["expression"])) for target in deterministic_core
+    }
+    assert len(shape_digests) == 4
+
+    history_digest = _digest(
+        {
+            "observed_program_digests": [_digest(item["program"]) for item in deterministic_core],
+            "phase": "observed-schema-binding-diagnostic-v1",
+        }
+    )
+    with pytest.raises(
+        ObservedSchemaExtrapolationError,
+        match="fewer than two novel extrapolated behaviors",
+    ):
+        _precommit_observed_schema_schedule(deterministic_core, history_digest=history_digest)

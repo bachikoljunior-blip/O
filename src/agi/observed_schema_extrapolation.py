@@ -399,6 +399,15 @@ def run_observed_schema_extrapolation(root: Path, seed: str) -> dict[str, Any]:
 
     This still uses repository-authored extrapolation, synthesis, regression and scoring and therefore
     remains internal bounded development evidence rather than independent evidence or an AGI claim.
+
+    Diagnostic status (2026-08-23): the currently persisted capability chain exposes no pair of
+    same-shape learned programs with differing numeric literals among its deterministically
+    reconstructible members, so this campaign fails closed at schedule construction (CI run
+    32607076987; reproduced locally on heads 2376ed2 and a097ab1). The recursive prerequisite's
+    target selection among unsupported schedule entries additionally varies across processes with
+    identical seeds (hash-seed dependence in bounded synthesis search), so full-campaign outcomes
+    over the recursive member are not reproducible. The campaign body is retained unchanged for a
+    future chain state that truthfully contains observed same-shape literal variation.
     """
     if not isinstance(seed, str) or not seed.strip():
         raise ValueError("seed must be non-empty")
