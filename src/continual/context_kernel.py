@@ -6,6 +6,10 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping
 
+from .effective_directives import (
+    EffectiveDirectiveError,
+    compile_effective_directives,
+)
 from .store import Store
 
 
@@ -16,6 +20,7 @@ class ContextKernelError(ValueError):
 _CONTROL_PATHS = {
     "work_execution_state": Path("agi/WORK_EXECUTION_STATE.json"),
     "user_input_inbox": Path("agi/USER_INPUT_INBOX.json"),
+    "effective_user_directives": Path("agi/USER_DIRECTIVE_EVENTS.json"),
     "work_strategy": Path("agi/WORK_STRATEGY.json"),
 }
 
@@ -263,6 +268,12 @@ def build_root_decision_context(
     inbox, inbox_identity = _load_source(
         root, store, "user_input_inbox", _CONTROL_PATHS["user_input_inbox"]
     )
+    directive_ledger, directive_ledger_identity = _load_source(
+        root,
+        store,
+        "effective_user_directives",
+        _CONTROL_PATHS["effective_user_directives"],
+    )
     strategy, strategy_identity = _load_source(
         root, store, "work_strategy", _CONTROL_PATHS["work_strategy"]
     )
@@ -313,6 +324,22 @@ def build_root_decision_context(
     strategy_updated_at = _required_text(
         strategy.get("updated_at"), "strategy.updated_at"
     )
+    try:
+        effective_directives = compile_effective_directives(
+            inbox,
+            directive_ledger,
+            state=state,
+            strategy=strategy,
+            store=store,
+        )
+    except EffectiveDirectiveError as exc:
+        raise ContextKernelError(
+            f"effective directive compilation failed: {exc}"
+        ) from exc
+    interpreted_at = _required_text(
+        directive_ledger.get("source", {}).get("interpreted_at"),
+        "directive ledger.source.interpreted_at",
+    )
     if snapshot.get("run_id") != run_id or supplied_snapshot.get("run_id") != run_id:
         raise ContextKernelError("native snapshot run_id mismatch")
     snapshot_revision = _required_int(snapshot.get("revision"), "snapshot.revision")
@@ -352,9 +379,13 @@ def build_root_decision_context(
         "unacknowledged_entries": unacknowledged,
         "latest_active_direction": latest_direction,
         "supersede_resolution": {
-            "mode": "canonical_state_interpretation_plus_raw_relationships",
-            "canonical_interpretation": inbox_state.get("application_note"),
-            "warning": "Entry-level supersedes may be partial; do not delete unaffected directives.",
+            "mode": "typed_atom_level_effective_policy",
+            "effective_policy_digest": effective_directives[
+                "effective_policy_digest"
+            ],
+            "ledger_locator": _CONTROL_PATHS[
+                "effective_user_directives"
+            ].as_posix(),
         },
     }
     strategy_projection = {
@@ -424,6 +455,39 @@ def build_root_decision_context(
             freshness={"kind": "append_only_revision", "latest_revision": inbox_revision},
         ),
         _source_record(
+            directive_ledger_identity,
+            version=(
+                f"revision:{inbox_revision};policy:"
+                f"{effective_directives['effective_policy_digest']}"
+            ),
+            observed_at=interpreted_at,
+            projection=effective_directives,
+            include_reason="Compile exact user-input bytes into O-owned typed effective policy without runtime free-text supersede inference.",
+            selected_fields=list(effective_directives),
+            excluded_fields=[
+                "raw directive text (retained in authoritative inbox)",
+                "superseded atom values (ids and superseders retained)",
+                "unreviewed outer-session interpretation",
+            ],
+            invalidates_on=[
+                "inbox source revision or digest change",
+                "interpretation ledger content change",
+                "atom source binding change",
+                "effective policy digest change",
+                "runtime authority contradiction",
+            ],
+            depends_on=[
+                "user_input_inbox.content_digest",
+                "work_execution_state.result_publication_policy",
+                "work_strategy.execution_rules",
+            ],
+            freshness={
+                "kind": "source_bound_interpretation",
+                "source_revision": inbox_revision,
+                "interpreted_at": interpreted_at,
+            },
+        ),
+        _source_record(
             strategy_identity,
             version=f"updated_at:{strategy_updated_at}",
             observed_at=strategy_updated_at,
@@ -442,7 +506,7 @@ def build_root_decision_context(
                 "context-management policy change",
                 "content digest change",
             ],
-            depends_on=["user_input_inbox.supersede_resolution"],
+            depends_on=["effective_user_directives.effective_policy_digest"],
             freshness={"kind": "content_version", "updated_at": strategy_updated_at},
         ),
         _source_record(

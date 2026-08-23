@@ -54,8 +54,11 @@ risk.
 The outer session acts as O's observation and effect executor. A fact learned
 only in untracked outer context is not allowed to affect an O decision until it
 is represented by a canonical source update or an O observation receipt. Every
-new Root request binds mandatory lease, inbox, strategy, and native-run source
-clocks through a deterministic `DecisionContextManifest`. Missing,
+new Root request binds mandatory lease, inbox, O-owned typed effective
+directives, strategy, and native-run source clocks through a deterministic
+`DecisionContextManifest`. The typed directive ledger is cross-bound to the
+exact inbox bytes and resolves partial supersedes at atom scope; runtime code
+does not infer revocation semantics from free text. Missing,
 contradictory, or outer-injected mandatory context fails closed. A frozen
 pending request keeps its exact manifest for replay; new source revisions apply
 at the next safe boundary and create a new request identity.

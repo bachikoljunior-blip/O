@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "migration_id": "work-mode-handoff-v2",
-  "status": "generation_5_primary_active_reconciled_revision_15_context_kernel",
-  "source_main_sha": "d7d9df73db7a055296b34c28fb247808df076e4d",
-  "working_branch": "work/o-context-kernel-root-manifest-v1",
+  "status": "generation_6_recovery_primary_typed_directive_publication_pending",
+  "source_main_sha": "46844781f4b859c2baa7e86a4debba80ea8722fa",
+  "working_branch": "work/recovery-20260823t151235z-7f8d3b12",
   "authoritative_when_present_on_main": true,
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
@@ -14,13 +14,13 @@
     "may_recover_or_write": false
   },
   "primary_owner": {
-    "kind": "work_primary",
-    "execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
-    "predecessor_execution_id": "work-primary-claude-20260823T081642JST",
-    "lease_generation": 5,
-    "fence_authority": "verified_two_phase_recovery_then_user_designated_primary",
+    "kind": "work_recovery_automation",
+    "execution_id": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62",
+    "predecessor_execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
+    "lease_generation": 6,
+    "fence_authority": "verified_two_phase_stale_recovery",
     "lease_path": "agi/WORK_EXECUTION_STATE.json",
-    "authorization": "inbox_revision_13_designates_chatgpt_primary; revision_14 reconciles canonical authority; revision_15 adds O-centered context control without changing ownership",
+    "authorization": "generation-5 heartbeat and same-owner activity exceeded the 900-second stale limit; generation 6 acquired and finalized the lease through expected-blob CAS with exact readback; inbox revisions 13 through 15 remain effective",
     "voluntary_exit_permitted_before_user_objective": false
   },
   "native_o_run": {
@@ -39,7 +39,7 @@
       "consolidate_episode",
       "learn"
     ],
-    "semantic_components_note": "The Work bridge supports the listed components. Generation 5 owns the native run. Root invoke-344455ae7a59ec86e4fa5d20 ingested revision 15 and selected Context Kernel unit unit-4d9f1592acf97a44ee8afdd6; Execute invoke-6a8a4f0eb8a3f1e5791e560f is pending. Claude-bound orphaned invocations must not be answered.",
+    "semantic_components_note": "The Work bridge supports the listed components. Generation 6 owns the native run. The Root-manifest Execute invoke-6a8a4f0eb8a3f1e5791e560f is complete; a later Root selected typed-directive unit unit-6ede224742497483a58cbb35, whose Execute invoke-55255fe17d8e25f39a039bcf remains pending until publication evidence exists. Claude-bound orphaned invocations must not be answered.",
     "observed_invocations": [
       "entry",
       "root",
@@ -62,6 +62,8 @@
     "src/agi/work_mode_monitor.py",
     "src/agi/user_request_queue.py",
     "src/continual/context_kernel.py",
+    "src/continual/effective_directives.py",
+    "agi/USER_DIRECTIVE_EVENTS.json",
     "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
     "agi/WORK_STRATEGY.json",
     "agi/USER_REQUEST_QUEUE.json",
@@ -72,9 +74,9 @@
   ],
   "validation": {
     "focused_command": "See exact PR descriptions for the scoped validation commands.",
-    "focused_result": "14 Context Kernel and Work bridge tests passed locally. These are internal results.",
-    "full_local_baseline": "Broader regression and exact-head GitHub CI are required before merge.",
-    "exact_head_ci": "Context Kernel branch is not yet published; no remote result is inferred.",
+    "focused_result": "101 protected tests passed locally. These are internal results.",
+    "full_local_baseline": "compileall, 810 JSON documents, work-verify 94/93/1 valid, and diff check passed.",
+    "exact_head_ci": "Typed-directive branch is not yet published; no remote result is inferred.",
     "independent_real_world_evidence": "not_observed"
   },
   "publication": {
@@ -84,7 +86,7 @@
     "stacked_provenance_pull_request": null,
     "reconstructed_predecessor_result_pull_request": null,
     "integration_rule": "isolated branch -> exact-head CI -> unchanged passing conflict-free head -> main merge",
-    "note": "The Context Kernel Root-manifest result is local and unmerged. It must pass exact-head CI on an isolated PR before expected-head integration and main readback."
+    "note": "The Root Context Kernel manifest is merged and read back through PR 276. The typed effective-directive extension remains local and must pass exact-head CI on an isolated PR before expected-head integration and main readback."
   },
   "claim_boundary": {
     "agi_claim_supported": false,
@@ -92,11 +94,11 @@
     "internal_tests_or_ci_can_complete_goal": false,
     "repository_strict_gate_is_user_completion_condition": false
   },
-  "updated_at": "2026-08-23T13:32:10.798Z",
+  "updated_at": "2026-08-23T15:35:25Z",
   "user_input": {
     "inbox_path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 15,
-    "effective_authority": "Generation-5 ChatGPT is the sole primary/main integrator; Claude is stopped. Isolated parallel contributors are allowed but are not a second main writer.",
+    "effective_authority": "Generation-6 ChatGPT recovery owner is the sole primary/main integrator under its verified fence; Claude remains stopped. Isolated parallel contributors are allowed but are not a second main writer.",
     "completion_authority": "The user's actual upper-level objective or explicit stop; repository-authored strict gates are optional verification mechanisms.",
     "context_direction": "O owns the decision-control plane over source references and receipts; raw systems retain authority and copy-all internalization is rejected."
   }
