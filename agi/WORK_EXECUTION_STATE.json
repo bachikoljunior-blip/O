@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T11:27:28.686Z",
-  "last_progress_at": "2026-08-23T11:27:28.686Z",
+  "heartbeat_at": "2026-08-23T11:31:43.701Z",
+  "last_progress_at": "2026-08-23T11:31:43.701Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -24,8 +24,8 @@
   "source_main_sha": "4239c1c4747831c4a7064fc35bff485d13b921c6",
   "working_branch": "work/context-routing-heldout-harness-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "root",
-  "active_unit_id": "unit-b4c7b74b36030110a224af0f",
+  "active_component": "execute",
+  "active_unit_id": "unit-24e1807c3c65cd90d50be3eb",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 14,
@@ -35,18 +35,18 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "Generation-5 exact pending Root invoke-d8844cf241e7370e84cb7561 follows a truthful routing-measurement FAIL: the harness author saw hidden labels, no plan or scored observation was persisted, the harness remains inactive, and Work verification is 73 requests / 72 responses / 1 pending / valid.",
+    "pending_native_execute": "Generation-5 Execute invoke-66af21513bffe4e758237708 is publishing the answered-history resume guard and truthful routing-negative lifecycle. PR 274 moved non-force to exact head f59c4a8b with tree 4272fe39 exactly matching local validation; workflow 32636746263 is queued.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
-    "effect_recovery_stack": "PR 273 exact head 0d21dc3e7026c297e0c8441056f348e727f711ea reconstructs typed dispatch, provider-neutral reconciliation, and fail-closed adjudication above merged PR 261. Remote tree equals locally validated tree; 30 focused tests, compileall, and diff check passed; workflow 32634954576 is in progress."
+    "effect_recovery_stack": "PR 273 exact head 0d21dc3e passed workflow 32634954576 (four shards and aggregate), but is currently conflicted with main. Do not merge that stale base; reconcile by an additive merge commit and require a new exact-head workflow."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/context-routing-heldout-harness-v1",
-    "snapshot_head_sha": "b99cbc7fda84f1c88d36463960bfb493487ea5c3",
-    "pending_work_invocation_id": "invoke-d8844cf241e7370e84cb7561",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-d8844cf241e7370e84cb7561/request.json",
-    "durability_status": "Remote branch b99cbc7f contains the frozen harness. Local generation-5 records now truthfully reject the contaminated held-out measurement, preserve zero observations, and fix resume selection to ignore older fully verified answered awaiting journals while still rejecting multiple unanswered requests; focused validation passed 39 tests. These new local records are not yet remote-durable.",
-    "next_action": "Answer Root with one isolated publication unit, commit the answered-history resume guard plus exact native lifecycle, move existing PR 274 to the new exact head without force, require four-shard exact-head CI, and merge only unchanged conflict-free success."
+    "snapshot_head_sha": "f59c4a8b17e04cf11e2e16fb21fb19a0b231afc7",
+    "pending_work_invocation_id": "invoke-66af21513bffe4e758237708",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-66af21513bffe4e758237708/request.json",
+    "durability_status": "PR 274 branch head f59c4a8b is remote-durable. Its tree 4272fe39 exactly equals local commit fa922e9; the head is one fast-forward commit above b99cbc7f and includes the persisted idempotency record, resume guard fix, 39-test regression, and contamination-preserving native records. Work verification at publication was 75/74/1 valid.",
+    "next_action": "Wait for exact-head workflow 32636746263 on f59c4a8b. In parallel reconcile successful-but-conflicted PR 273 with current main using a non-force additive merge commit, then require a fresh exact-head workflow. Merge only unchanged, conflict-free successful heads with exact main readback."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -99,8 +99,8 @@
       "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
       "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)"
     ],
-    "pending_invocation": "invoke-d8844cf241e7370e84cb7561 (Root after held-out routing measurement was rejected for author contamination)",
-    "note": "The current executor preserved the held-out boundary: no selection plan or measured observation was created after hidden-label exposure. Exact local Work verification is 73/72/1 valid; remote publication is pending."
+    "pending_invocation": "invoke-66af21513bffe4e758237708 (Execute exact publication and integration gates)",
+    "note": "The generation-5 native records through the new Execute request are remote-durable on PR 274 exact head f59c4a8b; response remains pending until exact-head CI and integration gates conclude."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
   "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
@@ -159,10 +159,12 @@
   "in_flight_integrations": {
     "held_out_context_routing": {
       "branch": "work/context-routing-heldout-harness-v1",
-      "head_sha": "b99cbc7fda84f1c88d36463960bfb493487ea5c3",
-      "exact_tree_sha": "7e7103bb0788cb28c9e86e324675098057955e1d",
-      "status": "local_resume_guard_and_native_records_ready_for_new_exact_head",
-      "local_validation": "39 focused tests passed; compileall and diff check passed before the final native records; full revalidation pending before publication",
+      "pull_request": 274,
+      "head_sha": "f59c4a8b17e04cf11e2e16fb21fb19a0b231afc7",
+      "exact_tree_sha": "4272fe39ee802742c103d229c900b90a0a85a9fd",
+      "workflow_run": 32636746263,
+      "status": "exact_head_ci_queued",
+      "local_validation": "39 focused tests passed; compileall, 494 JSON documents, work-verify 75/74/1 valid, and diff check passed",
       "checked_in_verdict": "INSUFFICIENT_EVIDENCE",
       "observations": 0
     },
@@ -170,7 +172,7 @@
       "pull_request": 273,
       "exact_head_sha": "0d21dc3e7026c297e0c8441056f348e727f711ea",
       "workflow_run": 32634954576,
-      "status": "in_progress"
+      "status": "exact_head_ci_success_but_conflicted_with_main_reconciliation_required"
     }
   }
 }
