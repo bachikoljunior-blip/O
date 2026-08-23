@@ -8,15 +8,15 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-23T15:12:35Z",
-  "last_progress_at": "2026-08-23T15:12:35Z",
+  "heartbeat_at": "2026-08-23T15:15:34Z",
+  "last_progress_at": "2026-08-23T15:15:34Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "fenced_monitor_recovery_phase1_verified",
+    "kind": "fenced_monitor_recovery_verified",
     "instruction": "Insurance recovery after generation-5 heartbeat and same-owner activity both exceeded stale_after_seconds; phase-1 expected-blob CAS must be read back exactly before any further mutation.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation-6 phase-1 commit 36764d20a414fc23b1a4fef535d23eadbd616ad8 and blob d5cf519189d02abadce3861499516b8d9a774513 read back exactly; final authorization awaits phase-2 readback."
+    "note": "Generation-6 phase-1 and phase-2 expected-blob CAS commits/blobs were read back exactly. This owner is the sole authorized main writer."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -33,7 +33,7 @@
     "application_note": "Revision 15 ingested at safe Root invoke-344455ae7a59ec86e4fa5d20. It adds O-centered context-control direction and no ownership supersede. O selected an authoritative-source-referenced DecisionContextManifest/Event-Ledger architecture over copying all raw external data into O. Revision 14 remains effective: generation 5 is the sole primary/main integrator and validated results publish through isolated exact-head CI."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation-6 recovery owner work-recovery-20260823T151235Z-7f8d3b125a9c4e62; phase-1 readback verified, final authorization awaits phase-2 readback.",
+    "primary": "Generation-6 recovery owner work-recovery-20260823T151235Z-7f8d3b125a9c4e62; two-phase remote readback verified.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
     "pending_native_execute": "Resume only invoke-6a8a4f0eb8a3f1e5791e560f after authorization under its recorded executor binding.",
     "predecessor": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58 generation 5; heartbeat 2026-08-23T05:18:00Z superseded only after stale classification and CAS."
@@ -71,9 +71,9 @@
     "expected_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
     "result_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
     "result_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
-    "finalization_commit_sha": null,
-    "finalization_blob_sha": null,
-    "note": "Generation-6 phase-1 commit/blob read back exactly; phase-2 finalization commit/blob await final readback."
+    "finalization_commit_sha": "f75473cd7d00d52141dde88a581060e9a9bc255a",
+    "finalization_blob_sha": "41663f85097d04017c7d16309301d97ca671a216",
+    "note": "Generation-6 phase-1 acquisition and phase-2 finalization commits/blobs read back exactly."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -107,7 +107,7 @@
   "finalize_expected_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
   "readback_of_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
   "verified_remote_readback": true,
-  "acquisition_phase": "phase2_finalization_pending_readback",
+  "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-23T15:12:35Z",
     "observed_main_sha": "a80047bbb0c398fe2bdf665e79944442836c4187",
