@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T10:42:25.362Z",
-  "last_progress_at": "2026-08-23T10:34:01.725Z",
+  "heartbeat_at": "2026-08-23T10:53:13.487Z",
+  "last_progress_at": "2026-08-23T10:53:13.487Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -21,7 +21,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "65857f480a84c55d77a62d6d3eb528e862dd81e0",
+  "source_main_sha": "4a31007c8b5ef21940ec4d1c9757cd12d87caafb",
   "working_branch": "work/native-ci-sharding-cycle-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "root",
@@ -35,8 +35,9 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "PR 271 exact head 023273a4a65b15f05317d2cdc52845f6bc919f43 remains unchanged: shards 0, 2, and 3 succeeded; shard 1 is running. PR 272 exact head c6bdb662a084a896564d8f5a671b157ba31cc59e remains unchanged: shards 0 and 3 succeeded; shards 1 and 2 are running. Exact remote-head merge-tree proofs against latest main are conflict-free.",
-    "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
+    "pending_native_execute": "PR 271 head 023273a4a65b15f05317d2cdc52845f6bc919f43: shards 0/2/3 success, shard 1 running. PR 272 head c6bdb662a084a896564d8f5a671b157ba31cc59e: shards 0/1/3 success, shard 2 running. Heads unchanged.",
+    "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
+    "effect_recovery_stack": "PR 273 exact head 0d21dc3e7026c297e0c8441056f348e727f711ea reconstructs typed dispatch, provider-neutral reconciliation, and fail-closed adjudication above merged PR 261. Remote tree equals locally validated tree; 30 focused tests, compileall, and diff check passed; workflow 32634954576 queued."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
@@ -45,7 +46,7 @@
     "pending_work_invocation_id": "invoke-7ce263e8f2b55bae063d677a",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ce263e8f2b55bae063d677a/request.json",
     "durability_status": "Actual generation-5 cycle is remotely durable in PR 271 exact head 023273a4a65b15f05317d2cdc52845f6bc919f43. Its 68-file tree b3caf67a151d16420cab1fac7b2ec3ac81b65a5e exactly matches the locally validated tree. Work verification reports 65 requests, 64 responses, one exact pending Root, valid=true. Exact-head sharded CI is pending.",
-    "next_action": "Await the remaining exact-head shards and aggregate jobs for PR 271/272. Merge only unchanged all-success heads with fresh merge-tree/readback. Then resume pending Root invoke-7ce263e8f2b55bae063d677a from the main-durable native cycle."
+    "next_action": "Finish exact-head workflows for PR 271/272 and merge unchanged conflict-free heads with readback; then resume pending Root invoke-7ce263e8f2b55bae063d677a from main. Observe PR 273 independently and integrate only after its own unchanged all-success exact-head CI."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
