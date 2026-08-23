@@ -8,44 +8,44 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T06:39:06Z",
-  "last_progress_at": "2026-08-23T06:39:06Z",
+  "heartbeat_at": "2026-08-23T08:02:24.518Z",
+  "last_progress_at": "2026-08-23T08:02:24.518Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "fenced_monitor_recovery_verified",
-    "instruction": "User-authorized insurance recovery after confirmed stale primary; generation-5 two-phase expected-blob CAS, exact remote readback, and checked-in authorizer all succeeded.",
+    "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
+    "instruction": "Generation-5 recovery passed the two-phase expected-blob CAS/readback contract and is additionally the user-designated ChatGPT Work primary under inbox revision 13.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 5 is the sole fenced main writer. Inbox revision 12 is incorporated at a safe Task Evaluate boundary; other branches and writers remain untouched."
+    "note": "Inbox revision 13 supersedes only the Claude-primary ownership portion of revision 4. Claude is stopped as executor; its identity-bound orphaned invocations must not be answered by this owner."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "1e2ceeb86825af9f883d561071b4f231bdd1f6fc",
+  "source_main_sha": "5b3aaff01d4b463b8713510fd5ba9fb84bbb8024",
   "working_branch": "work/recovery-20260823t061400z-ee2d66ce",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "candidate_evaluate",
   "active_unit_id": "unit-7248d09ab66196abd19984f1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 12,
-    "acknowledged_at": "2026-08-23T06:24:58Z",
-    "application_note": "Revisions 4-12 ingested. Revision 12 is applied behaviorally: after the external-handoff cross-binding unit, the next Root-selected unit must compare one independently demonstrated scientist-agent closed loop (hypothesis, experiment, evaluation, result inheritance) against O and adopt a minimal reversible change only when it has a falsifiable expected-time advantage."
+    "highest_acknowledged_revision": 13,
+    "acknowledged_at": "2026-08-23T08:02:24.518Z",
+    "application_note": "Revisions through 13 ingested at the safe boundary after PR 263 merged. Revision 13 designates this ChatGPT Work generation-5 owner as primary, stops Claude execution, preserves revision 4's non-ownership content, and leaves Claude-bound invoke-8df7f125196d62755cbfa8c2 orphaned by handover."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation-5 recovery owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; two-phase remote readback verified and checked-in recovery authorizer returned authorized=true.",
-    "secondary": "Existing isolated secondary branches/PRs remain untouched; main integration stays serialized. No predecessor or other writer branch, PR, workflow, or identity-bound native Run is mutated.",
-    "pending_native_execute": "Scientist-agent comparison completed through Task Evaluate, Consolidate Episode, and Learn. Root selected bounded checkpoint-inheritance experiment; pre-Execute Candidate Evaluate invoke-79e58a32ec4058ee08b32357 is pending.",
+    "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
+    "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
+    "pending_native_execute": "PR 263 merged after exact-head CI success. The durable native snapshot remains at pre-Execute Candidate Evaluate invoke-79e58a32ec4058ee08b32357; resume from that merged checkpoint, then publish validated checkpoint-inheritance experiment results through an isolated PR and unchanged-head CI.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/recovery-20260823t061400z-ee2d66ce",
-    "snapshot_head_sha": "536407444dd16ae706583aa1df5903af82d61149",
+    "snapshot_branch": "main",
+    "snapshot_head_sha": "5b3aaff01d4b463b8713510fd5ba9fb84bbb8024",
     "pending_work_invocation_id": "invoke-79e58a32ec4058ee08b32357",
     "pending_request_ref": ".continual/work-model/invocations/invoke-79e58a32ec4058ee08b32357/request.json",
-    "durability_status": "PR 263 publishes the exact native recovery records and scientist-agent comparison at head 536407444dd16ae706583aa1df5903af82d61149. Tree 6984556d6cb20935b1fbdebf4f2a01e2da9e0354 matches local commit tree exactly. GitHub Actions run 32623454534 is in progress; PR is conflict-free.",
-    "next_action": "Observe exact-head CI for PR 263. If successful and head unchanged, merge. Then resume invoke-79e58a32ec4058ee08b32357 and implement the sandbox-only matched checkpoint-inheritance experiment without sibling main writers."
+    "durability_status": "PR 263 exact head 536407444dd16ae706583aa1df5903af82d61149 passed workflow 32623454534 unchanged and merged to main as 5b3aaff01d4b463b8713510fd5ba9fb84bbb8024. This is the latest fully durable native checkpoint.",
+    "next_action": "Resume durable pending Candidate Evaluate invoke-79e58a32ec4058ee08b32357, complete the sandbox-only matched checkpoint-inheritance experiment, mechanically validate it, then publish it on an isolated branch and merge only after exact-head CI succeeds with an unchanged head."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -55,7 +55,7 @@
   },
   "primary_run_contract": {
     "voluntary_exit_permitted": false,
-    "normal_completion_condition": "user_level_objective_met_with_truthful_reporting; the automation-constructed strict external gate is not the user's completion criterion (inbox entry 4) and remains available only as an optional verification tool",
+    "normal_completion_condition": "user_level_objective_met_with_truthful_reporting_or_explicit_user_stop; the automation-constructed strict independent external production evidence gate is optional verification machinery, not a user-set completion or monitor-stop criterion",
     "single_test_commit_pr_ci_merge_report_or_milestone_is_exit_condition": false,
     "forced_end_action": "persist_exact_continuation_and_mark_interrupted_or_checkpointed"
   },
@@ -94,7 +94,7 @@
       "invoke-1c8852ca06beb4ca5f6f1710 (candidate_evaluate post-result)"
     ],
     "pending_invocation": "invoke-79e58a32ec4058ee08b32357 (candidate_evaluate pre-Execute)",
-    "note": "Comparison cycle completed with upper-goal FAIL and bounded-unit PASS. Root selected the matched checkpoint-inheritance experiment; PR 263 exact-head CI is in progress. No AGI claim is supported."
+    "note": "PR 263 merged after exact-head CI success. Durable resume point is pre-Execute Candidate Evaluate invoke-79e58a32ec4058ee08b32357. Inbox revision 13 is acknowledged; Claude-bound orphaned invocations remain unanswered. No AGI claim is supported."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
   "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
@@ -113,5 +113,16 @@
     "latest_non_owner_main_activity_at": "2026-08-23T05:32:23Z",
     "unacknowledged_inbox_revision": 12,
     "classification": "recover_stale"
+  },
+  "result_publication_policy": {
+    "destination": "main",
+    "rule": "Validated execution results are published on an isolated branch, checked at an exact unchanged head, and merged to main. Heartbeat/lease acknowledgements may use state-only expected-blob CAS updates on main.",
+    "excludes": [
+      "unverified_partial_results_as_success",
+      "foreign_writer_overwrite",
+      "identity_bound_invocation_replay_by_another_executor",
+      "force_push"
+    ],
+    "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z"
   }
 }
