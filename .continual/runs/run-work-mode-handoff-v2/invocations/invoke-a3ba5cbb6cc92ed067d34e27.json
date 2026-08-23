@@ -1,0 +1,52 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-23T06:31:24.597796Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-a3ba5cbb6cc92ed067d34e27-candidate_evaluate.json",
+  "invocation_id": "invoke-a3ba5cbb6cc92ed067d34e27",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "observations": [
+        "The Candidate applies exactly to Task Evaluate and does not alter the comparison artifact."
+      ],
+      "purpose": "Trial separate verdicts on a passing comparison that explicitly withholds adoption.",
+      "unresolved": [
+        "Deterministic protected-baseline activation remains separate."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observations": [
+        "This is a discriminating trial because the unit can PASS with an EXPERIMENT_REQUIRED result rather than an implementation success."
+      ]
+    },
+    "result": {
+      "baseline_need": "Preserve the active evaluator's upper-goal verdict and add the Candidate's separate unit_verdict only.",
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "conflicts": [],
+      "decision": "TRIAL_CANDIDATE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "frozen rubric completeness",
+        "primary-source traceability",
+        "focused validation result",
+        "implementation_authorized=false",
+        "upper-goal FAIL independent from bounded-unit verdict"
+      ],
+      "mode": "pre-application",
+      "reason": "This unit has an independently falsifiable bounded outcome distinct from the user-level goal: the comparison can pass while the predicted mechanism remains unmeasured and the upper objective remains unmet.",
+      "regression_checks": [
+        "A bounded PASS cannot change the original verdict.",
+        "EXPERIMENT_REQUIRED cannot be reported as ADOPT_MINIMAL_CHANGE.",
+        "Negative evidence and the unmeasured advantage remain explicit."
+      ],
+      "rollback": "Discard the overlay output if it conflates verdicts or omits negative evidence.",
+      "scope": "agi/scientist-agent-external-baseline-comparison"
+    }
+  },
+  "payload_digest": "dafc6e7056d9cab6191f1823",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

@@ -1,0 +1,271 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-23T06:20:30.322360Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-81d3289487e456ffdd92b998",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-c6c462472386c57b124d",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/campaign-authoring",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-c6c462472386c57b124d/prompt.md",
+          "scope_states": {},
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/repository-development": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "schema_version": 2
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "execute",
+        "evidence_needed": [
+          "One valid complete bundle succeeds without private-key input or ledger mutation",
+          "Every request, challenge, subject, runtime, suite, criterion, nonce, evaluator identity, result, payload, public-key, and signature mismatch fails closed",
+          "Missing, duplicate, unknown, noncanonical, type-confused, path-escaping, symlinked, or secret-bearing bundle members fail closed",
+          "Failed validation creates no output and preserves an existing output",
+          "Focused regression, full regression, compile validation, exact-head CI, unchanged-head readback, and native invocation integrity",
+          "The strict AGI claim remains false absent independent production attestations and evaluator quorum"
+        ],
+        "expected_outputs": [
+          "A documented CLI command that validates a complete external handoff bundle in one shot and emits a verified, non-ledger-mutating attestation package",
+          "A canonical cross-binding schema with explicit digests and identities and no secret/private fields",
+          "Regression tests for the valid path and each mismatch/atomicity/traversal/secret boundary",
+          "An exact evidence map distinguishing internal handoff readiness from independent external AGI evidence"
+        ],
+        "goal": "Implement and falsify a secret-free one-command external handoff bundle validator that cross-binds every evaluator-controlled and repository-controlled artifact before any evidence-ledger mutation.",
+        "inputs": [
+          "Existing strict evaluation request and its canonical request digest",
+          "Canonical challenge statement with suite digest, criterion, nonce, subject commit, and runtime manifest digest",
+          "Public runtime manifest and reproducible source artifact",
+          "Externally prepared result statement, detached Ed25519 signature, and expected evaluator public key",
+          "Existing detached-signature prepare/finalize functions and strict audit/claim boundary"
+        ],
+        "parent_continuation": "The original real-world AGI goal remains active with verdict FAIL. After this bounded unit is evaluated, consolidate and learn, then return to Root unless the strict independent external production evidence gate has actually passed.",
+        "scope": "agi/external-handoff-cross-binding",
+        "unit_id": "unit-89058c1acef29b8e657a946c"
+      },
+      "snapshot": {
+        "continuation_stack": [],
+        "created_at": "2026-08-22T11:41:47.630118Z",
+        "current_component": "execute",
+        "current_unit": "unit-89058c1acef29b8e657a946c",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+          "runner": "python-engine-v2"
+        },
+        "episode_id": "episode-work-mode-handoff-v2",
+        "error_count": 0,
+        "last_evaluation": {
+          "candidate_trial": {
+            "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+            "outcome": "SUPPORTED_FOR_SCOPE",
+            "reason": "The scoped overlay preserved original verdict FAIL, emitted bounded unit PASS independently, retained negative evidence, and did not weaken the external claim boundary. Activation remains a separate deterministic decision."
+          },
+          "claim_boundary": "Detached-signature packaging passed as an internal bounded unit. The original AGI task remains FAIL because no independently controlled production challenge, qualifying signed attestation, registered evaluator quorum, or externally verified runtime identity exists.",
+          "evaluated_goal": "Real-world AGI verified by the strict independent external production evidence gate.",
+          "evidence": [
+            {
+              "finding": "The unchanged assessed head completed pytest, compileall, validators, protocol validation, and all reference runs successfully.",
+              "source": "GitHub PR 257 head 8f4278e5ed7e8696ed8826112f9a9d41b1f5ed23 and workflow 32595446105"
+            },
+            {
+              "finding": "src/agi/external_provenance.py matched blob 088b3d0f0d6c70e04756e7999a3bb3356e7a90ac and tests/test_external_provenance.py matched blob b924260e5b8b29e99d329145a8da975104a74845.",
+              "source": "GitHub remote blob readback"
+            },
+            {
+              "finding": "33 external provenance, claim, CLI, and request tests passed, including exact canonical bytes, detached-signature mismatch rejection, recursive forbidden-field rejection, and atomic no-write behavior.",
+              "source": "Focused local regression suite"
+            },
+            {
+              "finding": "All immutable request/response digests, executor bindings, and component contracts were valid immediately before this Task Evaluate response.",
+              "source": "run-work-mode-handoff-v2 continual work-verify"
+            },
+            {
+              "finding": "The redundant local full suite is still in progress and is explicitly not counted as completed evidence; exact-head GitHub CI supplies the completed full regression for this assessed code head.",
+              "source": "Local duplicate full regression session"
+            },
+            {
+              "finding": "The ledger has one strict evaluation request but zero challenges, disclosures, signed production attestations, and registered independent verifiers.",
+              "source": "evidence/external_ledger.json and evidence/external_verifiers.json"
+            }
+          ],
+          "negative_evidence": [
+            "Exact-head CI, repository tests, signature verification, review readiness, and any later merge are internal engineering evidence only.",
+            "No repository-authored artifact can substitute for independent production evidence.",
+            "The incomplete local duplicate full suite is not a failure and is not a completed success."
+          ],
+          "repair": {
+            "do_not_repair": "Do not weaken the gate, fabricate a verifier, register repository-controlled evidence as independent, or infer AGI from unit PASS.",
+            "next_falsifiable_unit": "Create and validate one secret-free external handoff bundle that cross-binds the strict evaluation request, canonical challenge statement, runtime manifest, result statement, detached signature, and expected evaluator public key in one machine-checkable command; reject any digest, identity, criterion, suite, or nonce mismatch before ledger mutation."
+          },
+          "unit_subfinding": {
+            "reason": "The detached-signature packaging boundary met its frozen internal implementation and exact-head verification conditions without taking a private key or mutating external evidence state. This bounded PASS does not imply original-task success.",
+            "unit_id": "unit-d6ca097a96508ff17caf456b",
+            "verdict": "PASS"
+          },
+          "unit_verdict": "PASS",
+          "unmet_conditions": [
+            "No independently controlled hidden or fresh suite-bound production challenge exists.",
+            "No independent evaluator group or public key is registered.",
+            "No qualifying signed production attestation exists for breadth, transfer, autonomy, continual learning, self-improvement, or robustness.",
+            "The required independent evaluator quorum is unmet for every criterion.",
+            "The model and runtime identity remain platform-unverified."
+          ],
+          "verdict": "FAIL"
+        },
+        "last_result_ref": "artifacts/unit-d6ca097a96508ff17caf456b-result.json",
+        "phase": "unit_pending",
+        "produced_candidates": [],
+        "revision": 24,
+        "run_id": "run-work-mode-handoff-v2",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "PASS",
+        "updated_at": "2026-08-22T20:42:59.735611Z"
+      }
+    },
+    "mode": "pre-application",
+    "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
+    "run_id": "run-work-mode-handoff-v2",
+    "target_component": "execute"
+  },
+  "payload_digest": "5cfe918279af63a1f36711728e5b8e39883756408fda5fbdddc9b11d069f2a91",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "fd30c75ba899d089adb6d742f741c258e6efb10568e5c63e72d43ecf8eb5f86d",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}
