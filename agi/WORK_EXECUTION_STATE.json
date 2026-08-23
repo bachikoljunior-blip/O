@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-23T21:54:04.061Z",
-  "last_progress_at": "2026-08-23T21:54:04.061Z",
+  "heartbeat_at": "2026-08-23T21:58:39.782Z",
+  "last_progress_at": "2026-08-23T21:58:39.782Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -22,10 +22,10 @@
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "59b429f4f286c3477b49f40399b93c2077012b02",
-  "working_branch": "work/recovery-gen6-authoritative-source-observation-v1",
+  "working_branch": "work/recovery-gen6-ci-observation-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
-  "active_unit_id": "unit-2ee8bb6346713211f8457d54",
+  "active_unit_id": "unit-7cf565548d637cbe981ed313",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 15,
@@ -42,10 +42,10 @@
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
-    "pending_work_invocation_id": "invoke-288c21127d55329a6d00fcf4",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-288c21127d55329a6d00fcf4/request.json",
-    "durability_status": "PR 283 merged after exact-head CI; all 41 reviewed blobs were read back exactly. Live source-observation policy activation and one actual precommitted connector receipt remain next.",
-    "next_action": "Enable the authoritative source observation policy by state-only CAS, precommit an immutable observation request, perform the exact GitHub connector read, record the cross-bound receipt, then answer the frozen Execute and resume O."
+    "pending_work_invocation_id": "invoke-8b60149d0f43ed11e19ac34b",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-8b60149d0f43ed11e19ac34b/request.json",
+    "durability_status": "PR 283 merged and read back; live Work-state policy and receipt exercised. O selected and froze the decision-relevant CI observation unit.",
+    "next_action": "Implement a precommitted exact-head GitHub Actions run/jobs receipt with fail-closed topology and conclusion verification; do not answer the frozen Execute until actual connector exercise, validation, exact-head publication, merge, and readback complete."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -98,7 +98,7 @@
       "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
       "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)"
     ],
-    "pending_invocation": "invoke-288c21127d55329a6d00fcf4 (Execute authoritative Work-state observation binding, unit-2ee8bb6346713211f8457d54)",
+    "pending_invocation": "invoke-8b60149d0f43ed11e19ac34b (Execute decision-relevant CI observation, unit-7cf565548d637cbe981ed313)",
     "note": "Generation 6 completed PR 281 publication and exact readback, submitted Execute invoke-0890 exactly once, discovered that a newly frozen Root request bound a Work heartbeat already older than stale_after_seconds, selected the bounded pre-freeze freshness repair at Root, trialed the scoped context-hygiene Candidate, and froze Execute invoke-b912c756."
   },
   "expected_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
@@ -383,7 +383,7 @@
     "verified_remote_readback": true
   },
   "authoritative_source_observation": {
-    "status": "policy_activation_cas_pending_readback",
+    "status": "live_receipt_exercised_execute_frozen",
     "active_unit_id": "unit-2ee8bb6346713211f8457d54",
     "pending_invocation": "invoke-288c21127d55329a6d00fcf4",
     "control_main_commit": "59b429f4f286c3477b49f40399b93c2077012b02",
@@ -409,7 +409,7 @@
     "pull_request": 283,
     "exact_head_sha": "8234151332ade162d679b30ef17b122ccf01ddb9",
     "workflow_run": 32667061602,
-    "observed_at": "2026-08-23T21:54:04.061Z",
+    "observed_at": "2026-08-23T21:58:39.782Z",
     "local_validation": "116 protected tests passed; 939 JSON documents validated; compileall and diff check passed; work-verify 113/112/1 valid",
     "exact_head_tree_sha": "313a3923a75a90bfddbf7da26e188bf34f51f1e2",
     "exact_head_ci_result": "four pytest shards and dependent aggregate succeeded",
@@ -458,6 +458,17 @@
       "src/continual/work_source_observation.py": "355eefb6774bc755428192054bbf78900fcb5797",
       "tests/test_context_kernel.py": "65efea7ee4883775c1f29bbef8a3887ed6812324",
       "tests/test_work_source_observation.py": "3e63c5771043c84e39481ba170ab1733cb461ddc"
+    },
+    "live_receipt": {
+      "observation_id": "work-state-f7d8ebb44fbc4a48a473c518",
+      "request_digest": "852ba51d3ed3a4bb4cb8566f75e67d07ff25fdcdbe660a926f6fcc11ddf6055e",
+      "receipt_digest": "cc74caad373595ce6e8151001a46111e4b135048612a067a699d13b19ef39bfd",
+      "expected_commit_sha": "f02aa9fc6c8ae04611cb42b6e3250a429f159448",
+      "expected_blob_sha": "46cbd5dc1c25180722240899cad98a1ec902560a",
+      "requested_at": "2026-08-23T21:54:50.461959Z",
+      "observed_at": "2026-08-23T21:55:08.835Z",
+      "execute_request": "invoke-8b60149d0f43ed11e19ac34b",
+      "exact_bound": true
     }
   },
   "authoritative_source_observation_policy": {
@@ -466,5 +477,14 @@
     "ref": "main",
     "max_age_seconds": 300,
     "executor_binding": "current_chatgpt_work_session"
+  },
+  "ci_source_observation": {
+    "status": "execute_frozen",
+    "active_unit_id": "unit-7cf565548d637cbe981ed313",
+    "pending_invocation": "invoke-8b60149d0f43ed11e19ac34b",
+    "source_run": 32667061602,
+    "source_head": "8234151332ade162d679b30ef17b122ccf01ddb9",
+    "claim_boundary": "A GitHub Actions receipt is internal engineering provenance, not independent production capability, AGI, or completion.",
+    "observed_at": "2026-08-23T21:58:39.782Z"
   }
 }
