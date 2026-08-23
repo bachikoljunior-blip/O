@@ -1,21 +1,73 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 from statistics import median
 from typing import Any, Mapping
 
+from continual.work_session import verified_work_invocation
+
 
 ARMS = {"single_lineage": 1, "sibling_checkpoint": 3}
 VERDICTS = {"INSUFFICIENT_EVIDENCE", "ADOPT_SCOPED_CANDIDATE", "REJECT_MECHANISM"}
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_INVOCATION_ID = re.compile(r"^invoke-[0-9a-f]{24}$")
+_ATTEMPT_FIELDS = {
+    "candidate_id",
+    "score",
+    "model_invocations",
+    "wall_time_seconds",
+    "retained",
+    "capability_retained",
+    "replay_digest",
+    "replay_verified",
+    "protected_regressions_passed",
+    "external_effects",
+}
+_NATIVE_FIELDS = {
+    "invocation_id",
+    "run_id",
+    "request_digest",
+    "response_digest",
+    "executor_binding",
+    "model_identity",
+    "model_verified",
+}
 
 
 def _nonempty(value: Any, label: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{label} must be a non-empty string")
     return value
+
+
+def checkpoint_protocol_digest(value: Mapping[str, Any]) -> str:
+    """Return the frozen protocol digest, excluding observations and decision."""
+
+    frozen = {
+        field: value.get(field)
+        for field in (
+            "schema_version",
+            "mechanism",
+            "frozen_before_measurement",
+            "matched_tasks",
+            "arms",
+            "scorer",
+            "safety",
+            "claim_boundary",
+        )
+    }
+    encoded = json.dumps(
+        frozen,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def validate_checkpoint_experiment(value: Mapping[str, Any]) -> dict[str, Any]:
@@ -103,6 +155,8 @@ def validate_checkpoint_experiment(value: Mapping[str, Any]) -> dict[str, Any]:
             if not isinstance(attempt, Mapping):
                 raise ValueError("attempts must be objects")
             prefix = f"observations[{index}].attempts[{attempt_index}]"
+            if set(attempt) != _ATTEMPT_FIELDS | {"native_invocations"}:
+                raise ValueError("attempt fields must exactly match the frozen evidence schema")
             _nonempty(attempt.get("candidate_id"), f"{prefix}.candidate_id")
             _nonempty(attempt.get("replay_digest"), f"{prefix}.replay_digest")
             score = attempt.get("score")
@@ -120,6 +174,27 @@ def validate_checkpoint_experiment(value: Mapping[str, Any]) -> dict[str, Any]:
                 raise ValueError("every attempt must pass exact replay")
             if attempt.get("protected_regressions_passed") is not True:
                 raise ValueError("every attempt must pass protected regressions")
+            native_invocations = attempt.get("native_invocations")
+            if (
+                not isinstance(native_invocations, list)
+                or len(native_invocations) != invocations
+            ):
+                raise ValueError("model_invocations must equal exact native Work records")
+            for native_index, native in enumerate(native_invocations):
+                if not isinstance(native, Mapping) or set(native) != _NATIVE_FIELDS:
+                    raise ValueError("every model invocation must bind one native Work record")
+                if not _INVOCATION_ID.fullmatch(str(native.get("invocation_id", ""))):
+                    raise ValueError("native invocation_id is invalid")
+                for field in ("run_id", "executor_binding", "model_identity"):
+                    _nonempty(
+                        native.get(field),
+                        f"{prefix}.native_invocations[{native_index}].{field}",
+                    )
+                for field in ("request_digest", "response_digest"):
+                    if not _SHA256.fullmatch(str(native.get(field, ""))):
+                        raise ValueError(f"native {field} must be lowercase SHA-256")
+                if not isinstance(native.get("model_verified"), bool):
+                    raise ValueError("native model_verified must be boolean")
         if sum(attempt.get("retained") is True for attempt in attempts) != 1:
             raise ValueError("each observation must retain exactly one attempt")
         groups[(task_id, arm)].append(observation)
@@ -149,7 +224,83 @@ def validate_checkpoint_experiment(value: Mapping[str, Any]) -> dict[str, Any]:
     return deepcopy(dict(value))
 
 
-def evaluate_checkpoint_experiment(value: Mapping[str, Any]) -> dict[str, Any]:
+def verify_checkpoint_experiment_provenance(
+    root: Path,
+    value: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Bind every measured attempt to a verified immutable native Work record."""
+
+    validated = validate_checkpoint_experiment(value)
+    protocol_digest = checkpoint_protocol_digest(validated)
+    seen_invocations: set[str] = set()
+    for observation in validated["observations"]:
+        task_id = observation["task_id"]
+        arm = observation["arm"]
+        for attempt in observation["attempts"]:
+            native_invocations = attempt["native_invocations"]
+            receipt_contract = {
+                "protocol_digest": protocol_digest,
+                "task_id": task_id,
+                "arm": arm,
+                "candidate_id": attempt["candidate_id"],
+            }
+            expected_receipt = {
+                **receipt_contract,
+                **{field: attempt[field] for field in sorted(_ATTEMPT_FIELDS)},
+            }
+            for index, native in enumerate(native_invocations, start=1):
+                invocation_id = native["invocation_id"]
+                if invocation_id in seen_invocations:
+                    raise ValueError("native Work invocations cannot be reused across attempts")
+                seen_invocations.add(invocation_id)
+                record = verified_work_invocation(root, invocation_id)
+                request = record["request"]
+                response = record["response"]
+                if request.get("component") != "execute":
+                    raise ValueError("checkpoint attempts must be native Execute invocations")
+                exact_native = {
+                    "invocation_id": invocation_id,
+                    "run_id": request.get("run_id"),
+                    "request_digest": request.get("request_digest"),
+                    "response_digest": response.get("response_digest"),
+                    "executor_binding": request.get("executor_binding"),
+                    "model_identity": request.get("model_identity"),
+                    "model_verified": response.get("model_verified"),
+                }
+                if dict(native) != exact_native:
+                    raise ValueError("native invocation binding does not match the journal")
+                expected_step = {
+                    **receipt_contract,
+                    "invocation_index": index,
+                    "invocation_count": len(native_invocations),
+                }
+                payload = request.get("payload")
+                if not isinstance(payload, Mapping) or payload.get(
+                    "checkpoint_experiment_attempt"
+                ) != expected_step:
+                    raise ValueError("native request was not frozen for this exact attempt step")
+                output = record["output"]
+                result = output.get("result") if isinstance(output, Mapping) else None
+                if not isinstance(result, Mapping) or result.get(
+                    "checkpoint_experiment_step"
+                ) != expected_step:
+                    raise ValueError("native response does not bind the recorded attempt step")
+                is_final = index == len(native_invocations)
+                if (
+                    is_final
+                    and result.get("checkpoint_experiment_attempt") != expected_receipt
+                ):
+                    raise ValueError("final native response does not bind the attempt receipt")
+                if not is_final and "checkpoint_experiment_attempt" in result:
+                    raise ValueError("only the final native response may bind the attempt receipt")
+    return validated
+
+
+def evaluate_checkpoint_experiment(
+    value: Mapping[str, Any],
+    *,
+    root: Path | None = None,
+) -> dict[str, Any]:
     validated = validate_checkpoint_experiment(value)
     observations = validated["observations"]
     if len(observations) != len(validated["matched_tasks"]) * len(ARMS):
@@ -158,6 +309,9 @@ def evaluate_checkpoint_experiment(value: Mapping[str, Any]) -> dict[str, Any]:
             "implementation_authorized": False,
             "reason": "Both arms must be recorded for all three matched tasks.",
         }
+    if root is None:
+        raise ValueError("complete measurements require native Work provenance verification")
+    validated = verify_checkpoint_experiment_provenance(root, validated)
 
     metrics: dict[str, dict[str, list[float]]] = {
         arm: {"model_invocations": [], "wall_time_seconds": []} for arm in ARMS
