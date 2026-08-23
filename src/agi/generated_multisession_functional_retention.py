@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import tempfile
+from contextlib import ExitStack
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -12,7 +13,6 @@ from agi.autonomous_heterogeneous_goal_exhaustion import (
     run_autonomous_heterogeneous_goal_exhaustion,
 )
 from agi.generated_cross_round_functional_retention import (
-    GeneratedCrossRoundRetentionError,
     _assert_snapshot,
     _run_recovered_child,
     _snapshot,
@@ -91,15 +91,13 @@ def run_generated_multisession_functional_retention(
     *,
     seeds: Sequence[str],
 ) -> dict[str, Any]:
-    """Accumulate generated skills across state-only process boundaries and replay both fresh.
+    """Accumulate generated skills across repeated state-only learning-session boundaries.
 
-    The source root first materializes only the fixed heterogeneous prerequisite. Session 1 receives
-    Candidate/system state only and performs one crash-recovered generated learning round. Session 2 is
-    a fresh state-only reconstruction of Session 1, verifies byte/trial identity, and performs a second
-    distinct crash-recovered generated learning round. Session 3 is another fresh state-only
-    reconstruction and must rediscover both learned Candidates without caller Candidate IDs, solve both
-    held-back challenges, retain earlier Candidate/trial bytes exactly, and leave at least one observed
-    generated gap fail-closed.
+    The source root first materializes only the fixed heterogeneous prerequisite. Each supplied seed is
+    then learned in its own fresh Candidate/system-only reconstruction of the immediately preceding
+    session. After every learning session, one additional fresh state-only session must rediscover every
+    learned Candidate without caller Candidate IDs, solve all held-back challenges, retain Candidate/trial
+    bytes exactly, and leave at least one observed generated gap fail-closed.
 
     This is repository-authored bounded continual-learning evidence. It does not establish independent
     production generality or AGI.
@@ -109,9 +107,9 @@ def run_generated_multisession_functional_retention(
     if not isinstance(seeds, Sequence) or isinstance(seeds, (str, bytes)):
         raise ValueError("seeds must be a sequence of strings")
     seed_values = [str(seed) for seed in seeds]
-    if len(seed_values) != 2 or any(not seed.strip() for seed in seed_values):
-        raise ValueError("exactly two non-empty seeds are required")
-    if len(set(seed_values)) != 2:
+    if len(seed_values) < 2 or any(not seed.strip() for seed in seed_values):
+        raise ValueError("at least two non-empty seeds are required")
+    if len(set(seed_values)) != len(seed_values):
         raise ValueError("seeds must be distinct")
 
     root = root.resolve()
@@ -126,150 +124,140 @@ def run_generated_multisession_functional_retention(
     source_tree, source_trials = _snapshot(root, source_ids)
     rounds: list[dict[str, Any]] = []
     session_transfer_checks: list[dict[str, Any]] = []
+    replays: list[dict[str, Any]] = []
+    remaining_fail_closed: list[dict[str, str]] = []
 
-    with tempfile.TemporaryDirectory(prefix="agi-generated-multisession-1-") as first_tmp:
-        session1 = Path(first_tmp).resolve()
-        _copy_persistent_state(root, session1)
-        _assert_snapshot(
-            session1,
-            source_ids,
-            source_tree,
-            source_trials,
-            label="generated multisession session 1 reconstruction",
-        )
-        first = _run_recovered_child(
-            session1,
-            campaign_id=f"{campaign_id}-r01",
-            seed=seed_values[0],
-        )
-        first_id = str(first["candidate_id"])
-        first_ids = _all_candidate_ids(session1)
-        if sorted(set(first_ids) - set(source_ids)) != [first_id]:
-            raise GeneratedMultiSessionRetentionError(
-                "session 1 did not add exactly its generated Candidate"
+    with ExitStack() as stack:
+        previous_root = root
+        previous_ids = source_ids
+        previous_tree = source_tree
+        previous_trials = source_trials
+
+        for index, seed in enumerate(seed_values, start=1):
+            temporary = stack.enter_context(
+                tempfile.TemporaryDirectory(prefix=f"agi-generated-multisession-{index}-")
             )
-        _assert_snapshot(
-            session1,
-            source_ids,
-            source_tree,
-            source_trials,
-            label="generated multisession session 1 learning",
-        )
-        first_tree, first_trials = _snapshot(session1, first_ids)
-        first["pre_candidate_count"] = len(source_ids)
-        first["post_candidate_count"] = len(first_ids)
-        rounds.append(first)
+            session = Path(temporary).resolve()
+            _copy_persistent_state(previous_root, session)
+            transferred_tree, transferred_trials = _snapshot(session, previous_ids)
 
-        with tempfile.TemporaryDirectory(prefix="agi-generated-multisession-2-") as second_tmp:
-            session2 = Path(second_tmp).resolve()
-            _copy_persistent_state(session1, session2)
-            session2_tree, session2_trials = _snapshot(session2, first_ids)
-            session_transfer_checks.append(
-                {
-                    "from_session": 1,
-                    "to_session": 2,
-                    "candidate_bytes_identical": session2_tree == first_tree,
-                    "trial_ledgers_identical": session2_trials == first_trials,
+            if index == 1:
+                if transferred_tree != source_tree or transferred_trials != source_trials:
+                    raise GeneratedMultiSessionRetentionError(
+                        "session 1 state-only reconstruction changed durable capability state"
+                    )
+            else:
+                transfer = {
+                    "from_session": index - 1,
+                    "to_session": index,
+                    "candidate_bytes_identical": transferred_tree == previous_tree,
+                    "trial_ledgers_identical": transferred_trials == previous_trials,
                     "runs_copied": False,
                     "episodes_copied": False,
                     "evidence_copied": False,
                 }
-            )
-            if session2_tree != first_tree or session2_trials != first_trials:
-                raise GeneratedMultiSessionRetentionError(
-                    "session 2 state-only reconstruction changed durable capability state"
-                )
+                session_transfer_checks.append(transfer)
+                if not transfer["candidate_bytes_identical"] or not transfer["trial_ledgers_identical"]:
+                    raise GeneratedMultiSessionRetentionError(
+                        f"session {index} state-only reconstruction changed durable capability state"
+                    )
 
-            second = _run_recovered_child(
-                session2,
-                campaign_id=f"{campaign_id}-r02",
-                seed=seed_values[1],
+            child = _run_recovered_child(
+                session,
+                campaign_id=f"{campaign_id}-r{index:02d}",
+                seed=seed,
             )
-            second_id = str(second["candidate_id"])
-            second_ids = _all_candidate_ids(session2)
-            if sorted(set(second_ids) - set(first_ids)) != [second_id]:
+            candidate_id = str(child["candidate_id"])
+            current_ids = _all_candidate_ids(session)
+            if sorted(set(current_ids) - set(previous_ids)) != [candidate_id]:
                 raise GeneratedMultiSessionRetentionError(
-                    "session 2 did not add exactly its generated Candidate"
+                    f"session {index} did not add exactly its generated Candidate"
                 )
-            if first_id == second_id:
+            if candidate_id in {str(item["candidate_id"]) for item in rounds}:
                 raise GeneratedMultiSessionRetentionError(
                     "successive sessions reused a Candidate identity"
                 )
             _assert_snapshot(
-                session2,
-                first_ids,
-                first_tree,
-                first_trials,
-                label="generated multisession session 2 learning",
+                session,
+                previous_ids,
+                previous_tree,
+                previous_trials,
+                label=f"generated multisession session {index} learning",
             )
-            second_tree, second_trials = _snapshot(session2, second_ids)
-            second["pre_candidate_count"] = len(first_ids)
-            second["post_candidate_count"] = len(second_ids)
-            rounds.append(second)
+            current_tree, current_trials = _snapshot(session, current_ids)
+            child["pre_candidate_count"] = len(previous_ids)
+            child["post_candidate_count"] = len(current_ids)
+            rounds.append(child)
 
-            with tempfile.TemporaryDirectory(prefix="agi-generated-multisession-3-") as third_tmp:
-                session3 = Path(third_tmp).resolve()
-                _copy_persistent_state(session2, session3)
-                third_tree, third_trials = _snapshot(session3, second_ids)
-                session_transfer_checks.append(
-                    {
-                        "from_session": 2,
-                        "to_session": 3,
-                        "candidate_bytes_identical": third_tree == second_tree,
-                        "trial_ledgers_identical": third_trials == second_trials,
-                        "runs_copied": False,
-                        "episodes_copied": False,
-                        "evidence_copied": False,
-                    }
+            previous_root = session
+            previous_ids = current_ids
+            previous_tree = current_tree
+            previous_trials = current_trials
+
+        replay_index = len(seed_values) + 1
+        replay_tmp = stack.enter_context(
+            tempfile.TemporaryDirectory(prefix=f"agi-generated-multisession-{replay_index}-")
+        )
+        replay_root = Path(replay_tmp).resolve()
+        _copy_persistent_state(previous_root, replay_root)
+        replay_tree, replay_trials = _snapshot(replay_root, previous_ids)
+        final_transfer = {
+            "from_session": len(seed_values),
+            "to_session": replay_index,
+            "candidate_bytes_identical": replay_tree == previous_tree,
+            "trial_ledgers_identical": replay_trials == previous_trials,
+            "runs_copied": False,
+            "episodes_copied": False,
+            "evidence_copied": False,
+        }
+        session_transfer_checks.append(final_transfer)
+        if not final_transfer["candidate_bytes_identical"] or not final_transfer["trial_ledgers_identical"]:
+            raise GeneratedMultiSessionRetentionError(
+                "final replay reconstruction changed durable capability state"
+            )
+
+        replays = [
+            _replay_without_candidate_ids(
+                replay_root,
+                seed=seed,
+                selected_goal=str(item["selected_goal"]),
+                candidate_id=str(item["candidate_id"]),
+            )
+            for seed, item in zip(seed_values, rounds, strict=True)
+        ]
+
+        for seed, item in zip(seed_values, rounds, strict=True):
+            classification = _classify_goals(replay_root, _generated_goal_specs(seed))
+            if any(
+                entry.get("candidate_ids_supplied_by_caller") is True
+                for entry in classification
+            ):
+                raise GeneratedMultiSessionRetentionError(
+                    "fresh session classification relied on caller Candidate IDs"
                 )
-                if third_tree != second_tree or third_trials != second_trials:
-                    raise GeneratedMultiSessionRetentionError(
-                        "session 3 state-only reconstruction changed durable capability state"
-                    )
-
-                replays = [
-                    _replay_without_candidate_ids(
-                        session3,
-                        seed=seed,
-                        selected_goal=str(item["selected_goal"]),
-                        candidate_id=str(item["candidate_id"]),
-                    )
-                    for seed, item in zip(seed_values, rounds, strict=True)
-                ]
-
-                remaining_fail_closed: list[dict[str, str]] = []
-                for seed, item in zip(seed_values, rounds, strict=True):
-                    classification = _classify_goals(session3, _generated_goal_specs(seed))
-                    if any(
-                        entry.get("candidate_ids_supplied_by_caller") is True
-                        for entry in classification
-                    ):
-                        raise GeneratedMultiSessionRetentionError(
-                            "fresh session classification relied on caller Candidate IDs"
-                        )
-                    by_goal = {str(entry["goal"]): entry for entry in classification}
-                    selected_goal = str(item["selected_goal"])
-                    if selected_goal not in by_goal or not by_goal[selected_goal]["supported"]:
-                        raise GeneratedMultiSessionRetentionError(
-                            "fresh session classification lost a learned generated goal"
-                        )
-                    for goal in item["initial_unsupported_goals"]:
-                        name = str(goal)
-                        if name != selected_goal and not by_goal[name]["supported"]:
-                            remaining_fail_closed.append(
-                                {"seed_commitment": _digest(seed), "goal": name}
-                            )
-                if not remaining_fail_closed:
-                    raise GeneratedMultiSessionRetentionError(
-                        "two-session learning unexpectedly eliminated every observed gap"
-                    )
-                _assert_snapshot(
-                    session3,
-                    second_ids,
-                    second_tree,
-                    second_trials,
-                    label="generated multisession fresh replay",
+            by_goal = {str(entry["goal"]): entry for entry in classification}
+            selected_goal = str(item["selected_goal"])
+            if selected_goal not in by_goal or not by_goal[selected_goal]["supported"]:
+                raise GeneratedMultiSessionRetentionError(
+                    "fresh session classification lost a learned generated goal"
                 )
+            for goal in item["initial_unsupported_goals"]:
+                name = str(goal)
+                if name != selected_goal and not by_goal[name]["supported"]:
+                    remaining_fail_closed.append(
+                        {"seed_commitment": _digest(seed), "goal": name}
+                    )
+        if not remaining_fail_closed:
+            raise GeneratedMultiSessionRetentionError(
+                "multi-session learning unexpectedly eliminated every observed gap"
+            )
+        _assert_snapshot(
+            replay_root,
+            previous_ids,
+            previous_tree,
+            previous_trials,
+            label="generated multisession fresh replay",
+        )
 
     _assert_snapshot(
         root,
@@ -285,8 +273,8 @@ def run_generated_multisession_functional_retention(
         "campaign_kind": "generated-multisession-functional-retention-v1",
         "passed": True,
         "seed_commitments": [_digest(seed) for seed in seed_values],
-        "state_only_restart_count": 3,
-        "learning_session_count": 2,
+        "state_only_restart_count": len(seed_values) + 1,
+        "learning_session_count": len(seed_values),
         "rounds": rounds,
         "learned_candidate_ids": [str(item["candidate_id"]) for item in rounds],
         "session_transfer_checks": session_transfer_checks,
@@ -299,7 +287,7 @@ def run_generated_multisession_functional_retention(
             for item in rounds
         ),
         "fresh_session_replays": replays,
-        "all_learned_skills_functionally_replayed": len(replays) == 2,
+        "all_learned_skills_functionally_replayed": len(replays) == len(rounds),
         "all_replays_avoided_caller_candidate_ids": all(
             item["caller_supplied_candidate_ids"] is False for item in replays
         ),
@@ -312,11 +300,12 @@ def run_generated_multisession_functional_retention(
         "prior_evidence_copied_between_sessions": False,
         "live_model_invocation_required": False,
         "claim_boundary": (
-            "Internal bounded multi-session continual-learning evidence only. Two generated skills are "
+            "Internal bounded multi-session continual-learning evidence only. Generated skills are "
             "learned in separate Candidate/system-only reconstructed sessions with crash reconciliation, "
-            "then rediscovered in a third fresh session without caller Candidate IDs. Task families, "
-            "generator, synthesis, regression, scoring, crash injection, and evaluator remain "
-            "repository-authored. This is not independent production evidence and does not establish AGI."
+            "then all are rediscovered in one additional fresh session without caller Candidate IDs. "
+            "Task families, generator, synthesis, regression, scoring, crash injection, and evaluator "
+            "remain repository-authored. This is not independent production evidence and does not "
+            "establish AGI."
         ),
     }
     required = (
