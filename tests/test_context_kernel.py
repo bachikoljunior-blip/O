@@ -31,10 +31,20 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
     inbox = {
         "schema_version": 1,
         "revision": 1,
+        "policy": {
+            "append_only_semantics": True,
+            "development_writer_lease_required_to_read": False,
+            "development_writer_lease_required_to_append": False,
+            "append_requires_expected_revision": True,
+            "secrets_allowed": False,
+            "apply_only_at_safe_semantic_boundaries": True,
+            "user_input_is_not_automatic_proof": True,
+        },
         "entries": [
             {
                 "sequence": 1,
                 "id": "direction-context-v1",
+                "received_at": "2026-08-23T00:00:00Z",
                 "kind": "user_direction",
                 "status": "active",
                 "summary": "Put decision context under O control.",
@@ -42,6 +52,7 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
                     "An outside-known constraint must not silently disappear from O."
                 ],
                 "supersedes": [],
+                "source": "test",
             }
         ],
         "updated_at": "2026-08-23T00:00:00Z",
@@ -65,22 +76,88 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
         "result_publication_policy": {
             "destination": "main",
             "rule": "isolated branch then exact-head CI",
+            "excludes": ["force_push"],
         },
         "primary_run_contract": {
-            "normal_completion_condition": "actual user objective or explicit stop"
+            "normal_completion_condition": "user_level_objective_met or explicit_user_stop; strict gate is optional verification machinery"
         },
     }
     strategy = {
         "schema_version": 1,
         "optimization_objective": "Minimize elapsed time to the actual objective.",
-        "execution_rules": {"single_writer": True},
+        "execution_rules": {
+            "validated_execution_results_destination": "main",
+            "main_integration_rule": "isolated branch -> exact-head CI -> merge",
+        },
         "claim_boundary": {"agi_claim_supported": False},
         "immediate_sequence": ["Build the Root manifest slice."],
         "context_management": {
-            "decision_authority": "O Engine",
+            "decision_authority": "O Engine owns decision context.",
             "raw_authority": "source systems",
         },
         "updated_at": "2026-08-23T00:00:02Z",
+    }
+    store = Store(tmp_path)
+    entry = inbox["entries"][0]
+    ledger = {
+        "schema_version": 1,
+        "source": {
+            "path": "agi/USER_INPUT_INBOX.json",
+            "revision": 1,
+            "content_digest": store.stable_digest(inbox, length=64),
+            "interpreted_at": "2026-08-23T00:00:00Z",
+        },
+        "atoms": [
+            {
+                "atom_id": atom_id,
+                "source_entry_id": entry["id"],
+                "source_entry_digest": store.stable_digest(entry, length=64),
+                "source_directive_indices": [0],
+                "slot": slot,
+                "cardinality": cardinality,
+                "value": value,
+                "precedence": 1,
+                "supersedes": [],
+            }
+            for atom_id, slot, cardinality, value in [
+                (
+                    "test-primary",
+                    "execution.primary",
+                    "single",
+                    "chatgpt_work_primary",
+                ),
+                (
+                    "test-main-writer",
+                    "execution.main_writer",
+                    "single",
+                    "single_fenced_primary",
+                ),
+                (
+                    "test-publication",
+                    "publication.mode",
+                    "single",
+                    "isolated_exact_head_ci_then_serial_main",
+                ),
+                (
+                    "test-completion",
+                    "completion.condition",
+                    "single",
+                    "user_objective_or_explicit_stop",
+                ),
+                (
+                    "test-context-authority",
+                    "context.decision_authority",
+                    "single",
+                    "O Engine",
+                ),
+                (
+                    "test-context-constraint",
+                    "context.constraints",
+                    "many",
+                    "outside_constraint_must_be_ingested",
+                ),
+            ]
+        ],
     }
     snapshot = {
         "run_id": RUN_ID,
@@ -95,6 +172,7 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
         "updated_at": "2026-08-23T00:00:03Z",
     }
     _write_json(tmp_path / "agi" / "USER_INPUT_INBOX.json", inbox)
+    _write_json(tmp_path / "agi" / "USER_DIRECTIVE_EVENTS.json", ledger)
     _write_json(tmp_path / "agi" / "WORK_EXECUTION_STATE.json", state)
     _write_json(tmp_path / "agi" / "WORK_STRATEGY.json", strategy)
     _write_json(
@@ -138,6 +216,7 @@ def test_root_manifest_is_deterministic_minimal_and_o_owned(tmp_path: Path) -> N
     assert [source["source_id"] for source in manifest["sources"]] == [
         "work_execution_state",
         "user_input_inbox",
+        "effective_user_directives",
         "work_strategy",
         "native_run_snapshot",
     ]
@@ -237,14 +316,37 @@ def test_frozen_request_survives_source_advance_and_next_root_changes(
         {
             "sequence": 2,
             "id": "direction-revocation-v2",
+            "received_at": "2026-08-23T00:01:00Z",
             "kind": "user_direction",
             "status": "active",
             "summary": "Bind destructive effects to current revocations.",
             "directives": [outside_only],
             "supersedes": [],
+            "source": "test",
         }
     )
     _write_json(inbox_path, inbox)
+    ledger_path = root / "agi" / "USER_DIRECTIVE_EVENTS.json"
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    ledger["source"]["revision"] = 2
+    ledger["source"]["content_digest"] = Store(root).stable_digest(inbox, length=64)
+    ledger["source"]["interpreted_at"] = "2026-08-23T00:01:00Z"
+    ledger["atoms"].append(
+        {
+            "atom_id": "test-effect-revocation",
+            "source_entry_id": "direction-revocation-v2",
+            "source_entry_digest": Store(root).stable_digest(
+                inbox["entries"][1], length=64
+            ),
+            "source_directive_indices": [0],
+            "slot": "effect.revocation",
+            "cardinality": "many",
+            "value": "fresh_revocation_check",
+            "precedence": 2,
+            "supersedes": [],
+        }
+    )
+    _write_json(ledger_path, ledger)
 
     second, _ = _freeze_root(client, snapshot)
     assert first_path.read_bytes() == first_bytes

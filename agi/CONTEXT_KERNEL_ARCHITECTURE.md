@@ -71,7 +71,7 @@ Optional L1+ content can use recursive situation-dependent routing. The
 manifest records both the selected branches and exclusions so omission becomes
 observable and falsifiable.
 
-## First vertical slice
+## First vertical slice: Root source manifest
 
 `src/continual/context_kernel.py` constructs a Root-only manifest from the
 checked-in Work lease, user-input inbox, strategy, and native Run snapshot.
@@ -85,16 +85,41 @@ and native continuation while recording omitted fields and reasons. A frozen
 pending request never changes; a source-clock change creates a new manifest and
 request identity at the next Root.
 
-This slice improves omission visibility and replay binding. It does **not** yet
-prove that context changes useful behavior, guarantee remote-main freshness,
-compile partial supersedes into a typed effective policy, or protect effects at
-dispatch. Those remain explicit negative evidence.
+This slice improves omission visibility and replay binding.
+
+## Second vertical slice: typed effective directives
+
+`agi/USER_INPUT_INBOX.json` remains the authoritative append-only record of
+what the user supplied. `agi/USER_DIRECTIVE_EVENTS.json` is O's reviewed,
+source-bound interpretation ledger. Each typed atom records an exact source
+entry digest, directive indices, a policy slot, cardinality, value, precedence,
+and atom-level supersede targets. `src/continual/effective_directives.py`
+validates that every active source directive is covered, rejects unknown or
+changed source bytes, detects supersede cycles and exclusive-slot conflicts,
+and reconciles critical ownership, publication, completion, and context
+authority with the current lease and strategy.
+
+This split is deliberate: runtime code does not infer partial supersede
+semantics from prose, and the interpretation ledger cannot silently become raw
+user authority because every atom is cross-bound to the inbox. The compiled
+projection contains effective atoms, superseded atom ids, and a stable policy
+digest rather than copying the raw directive corpus into each Root. The
+projection is a mandatory manifest source, so an inbox change without a
+matching reviewed interpretation fails closed at the next Root while an
+already frozen request remains replay-stable.
+
+This slice still does **not** prove useful behavioral improvement, guarantee
+remote-main freshness, create external observation receipts, extend manifests
+to every semantic component, or protect effects at dispatch. Those remain
+explicit negative evidence.
 
 ## Migration sequence
 
-1. Root-only mandatory manifest, audit and fail-closed validation.
+1. Root-only mandatory manifest, audit and fail-closed validation. **Implemented.**
 2. Typed inbox-to-O events and an effective-directive compiler that handles
-   partial supersedes without deleting unaffected constraints.
+   partial supersedes without deleting unaffected constraints. **Implemented
+   for the current revision-15 control source; exact-head publication and
+   broader behavioral evidence remain required.**
 3. Observation activities and receipts for GitHub, CI, providers, tools, and
    external research; no outside fact affects judgment before ingestion.
 4. Manifests for Execute, Task Evaluate, Consolidate, and Learn.
