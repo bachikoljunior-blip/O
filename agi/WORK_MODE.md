@@ -2,7 +2,7 @@
 
 ## Authority and source of truth
 
-The current Work session is the primary development owner. In this epoch that owner is a successor Claude Code remote session that took over by direct user instruction after the predecessor Work lease went stale; the model identity is platform-unverified and must stay recorded as such. It performs semantic judgment and implementation through the ordinary O Engine. Repository latest `main`, not chat history or unsaved reasoning, is the durable continuation source.
+The current Work session is the primary development owner. In this epoch that owner is the generation-5 ChatGPT Work session identified in `agi/WORK_EXECUTION_STATE.json`: it first acquired the stale lease through the fenced two-phase recovery protocol and was then explicitly designated primary by inbox revision 13. The Claude predecessor is stopped as executor, and its identity-bound orphaned invocations must not be answered by the successor. The active model identity is platform-unverified and must stay recorded as such. Repository latest `main`, not chat history or unsaved reasoning, is the durable continuation source.
 
 The model is connected to O through the checked-in `continual work-start`, `work-pending`, `work-submit`, `work-resume`, and `work-verify` path. O retains the Run, immutable component requests and responses, invocation journal, fragments, Local Learn results, Episodes, Candidates, memory, evidence, and continuation. `work-verify` audits every persisted request and response digest, binding, output digest, and component contract, including already-consumed invocations. The Work model identity remains unverified unless the platform provides an independently inspectable identity signal.
 
@@ -13,15 +13,16 @@ The model is connected to O through the checked-in `continual work-start`, `work
 3. Resume the exact pending Work invocation with `continual work-pending` and `continual work-resume`; never recreate a frozen request merely because a process restarted.
 4. Execute one falsifiable unit, record objective observations and negative evidence, then evaluate it through O.
 5. If the user-level external goal is still unmet, Root immediately selects the next falsifiable unit. A test, commit, PR, CI result, merge, report, checkpoint, or one milestone is not an exit condition.
-6. Refresh the primary heartbeat and exact continuation while work is active.
+6. Publish validated execution results from an isolated branch through exact-head CI and merge only an unchanged passing head; state-only heartbeat and inbox acknowledgements use expected-blob CAS on `main`.
+7. Refresh the primary heartbeat and exact continuation while work is active.
 
-The primary run may stop normally only after the strict independent external production evidence gate has actually passed and the verified evidence has been persisted. If the platform or process forces an end first, persist the exact continuation and mark the lease `interrupted` or `checkpointed`; that is recovery state, not completion.
+The primary run may stop normally only when the user's actual upper-level objective is truthfully satisfied or the user explicitly stops it. The repository-authored strict independent external production evidence gate remains available as conservative verification machinery, but it is not the user's completion criterion or the monitor-stop condition. If the platform or process forces an end first, persist the exact continuation and mark the lease `interrupted` or `checkpointed`; that is recovery state, not completion.
 
 ## Expected-time strategy
 
-`agi/WORK_STRATEGY.json` is the durable, falsifiable strategy contract. Root selects work by expected reduction in defensible elapsed time to real-world AGI under the unchanged strict external gate, probability of producing decision-changing evidence, information value, dependency latency, reuse, and protected-regression risk. O is a replaceable means, not the terminal objective. Root may change, replace, or abandon O when a scoped comparison favors a materially different safe route. Held-out mechanical evidence and genuinely independent production evidence outrank self-evaluation and architecture claims.
+`agi/WORK_STRATEGY.json` is the durable, falsifiable strategy contract. Root selects work by expected reduction in defensible elapsed time to real-world AGI, probability of producing decision-changing evidence, information value, dependency latency, reuse, and protected-regression risk. O and any repository-authored gate are replaceable means, not the terminal objective. Root may change, replace, or abandon O when a scoped comparison favors a materially different safe route. Held-out mechanical evidence and genuinely independent production evidence outrank self-evaluation and architecture claims.
 
-When retained observations show that a method is slow, saturated, blocked, non-discriminating, or overrepresented in the recent exploration window, Root changes method or searches heterogeneous information instead of repeating it. A deferral must record an observed reason, the work selected instead, a finite `reevaluate_on` condition, and `reevaluate_by`; every Root cycle checks those conditions. The strategy itself is not presumed correct and must be revised when its measured consequences increase expected completion time. No optimization may weaken the gate, admit self-evaluation as proof, compromise evidence integrity, or create a second writer.
+When retained observations show that a method is slow, saturated, blocked, non-discriminating, or overrepresented in the recent exploration window, Root changes method or searches heterogeneous information instead of repeating it. A deferral must record an observed reason, the work selected instead, a finite `reevaluate_on` condition, and `reevaluate_by`; every Root cycle checks those conditions. The strategy itself is not presumed correct and must be revised when its measured consequences increase expected completion time. No optimization may lower the user's achievement standard, admit self-evaluation as proof, compromise evidence integrity, or create a second main writer.
 
 ## Durable user requests
 
@@ -47,7 +48,7 @@ Malformed state, missing required fields, future-skewed time, an unknown status,
 
 The scheduled Work monitor is not an ordinary development loop. It reads latest remote `main`, the Work lease, the exact native Run, open PRs, and exact-head checks. It performs no development mutation when the primary owner is live. It may still observe the append-only user-input control plane so that a later recovery cannot miss input that arrived during a live run; observation alone never authorizes a second development writer.
 
-If the lease is stale, released, interrupted, or checkpointed and the strict external goal is still unmet, the monitor may classify the run as recovery eligible. Eligibility alone is read-only. Recovery mutation is authorized only by the two-phase protocol implemented in `src/agi/work_mode_monitor.py`:
+If the lease is stale, released, interrupted, or checkpointed and the user's upper-level objective is still unmet, the monitor may classify the run as recovery eligible. Eligibility alone is read-only. Recovery mutation is authorized only by the two-phase protocol implemented in `src/agi/work_mode_monitor.py`:
 
 1. state-only expected-blob compare-and-swap with generation exactly `+1`, a unique recovery execution id, predecessor binding, and a new opaque fence;
 2. remote readback of that acquisition;
@@ -58,4 +59,4 @@ Only the fenced recovery owner may then resume the native O Run. External effect
 
 ## Claim boundary
 
-Work integration, internal tests, native O execution, self-evaluation, repository CI, Candidate promotion, and long uninterrupted operation are internal development evidence only. They do not prove AGI. Until genuinely independent signed production evidence passes every required gate with the required independent evaluator quorum and no unresolved admissible failure or contamination, `agi_claim_supported` remains `false` and development continues.
+Work integration, internal tests, native O execution, self-evaluation, repository CI, Candidate promotion, and long uninterrupted operation are internal development evidence only. They do not prove AGI. A truthful AGI claim requires adequate independent real-world evidence and no known decisive contradiction; a repository-authored gate may help test that claim but cannot define the user's completion condition by itself. Until that claim is supportable, `agi_claim_supported` remains `false` and development continues.

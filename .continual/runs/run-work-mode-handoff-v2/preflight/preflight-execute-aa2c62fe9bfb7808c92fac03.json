@@ -1,0 +1,40 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "evidence_refs": [
+      ".continual/candidates/index.json",
+      "agi/SCIENTIST_AGENT_BASELINE.json"
+    ],
+    "observations": [
+      "The existing Candidates target other execution families or Task Evaluate."
+    ],
+    "purpose": "Prevent unrelated overlays from contaminating the matched checkpoint-inheritance experiment.",
+    "unresolved": []
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "observation": "The exact experiment scope has no relevant indexed Candidate."
+  },
+  "result": {
+    "baseline_need": "Use the active Execute prompt and the frozen single-lineage control.",
+    "candidate_id": null,
+    "conflicts": [],
+    "decision": "NOT_APPLICABLE",
+    "dependencies": [],
+    "evidence_to_collect": [
+      "frozen tasks, scorer, budgets, and retained-capability criteria",
+      "single-lineage and three-sibling traces",
+      "exact replay and protected regression results",
+      "model-invocation and wall-time measurements"
+    ],
+    "reason": "No indexed Execute Candidate targets sandboxed sibling checkpoint inheritance, matched-control measurement, or single-writer effect isolation. Existing live-campaign and capability overlays would confound the frozen experiment.",
+    "regression_checks": [
+      "siblings cannot write main or emit non-idempotent external effects",
+      "no adoption decision before matched measurements",
+      "upper-goal claim boundary remains unchanged"
+    ],
+    "rollback": "Discard the experimental harness and retain single-lineage execution if measurement or isolation fails.",
+    "scope": "agi/bounded-checkpoint-inheritance-experiment"
+  }
+}

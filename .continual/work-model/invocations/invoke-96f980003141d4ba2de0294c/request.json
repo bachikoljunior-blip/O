@@ -1,0 +1,275 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-23T08:04:23.448591Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-96f980003141d4ba2de0294c",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-c6c462472386c57b124d",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/campaign-authoring",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-c6c462472386c57b124d/prompt.md",
+          "scope_states": {},
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/repository-development": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "schema_version": 2
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "execute",
+        "expected_outputs": [
+          "six unique task-arm observations backed by recorded native runs",
+          "exact replay and protected-regression results for every attempt",
+          "mechanically recomputed median invocation and wall-time metrics",
+          "ADOPT_SCOPED_CANDIDATE or REJECT_MECHANISM with implementation_authorized remaining false"
+        ],
+        "failure_conditions": [
+          "Any missing or incomparable observation, replay instability, protected regression, external effect, main write, or inability to verify a measurement source."
+        ],
+        "goal": "Record comparable native-run observations for both frozen arms on all three matched tasks, then evaluate the precommitted non-worsening rule without allowing sibling main writes or non-idempotent external effects.",
+        "inputs": [
+          "agi/CHECKPOINT_INHERITANCE_EXPERIMENT.json",
+          "src/agi/checkpoint_inheritance_experiment.py",
+          "the current model and executor binding for every attempt"
+        ],
+        "rollback": "Retain single-lineage execution and preserve the exact negative evidence; do not activate checkpoint inheritance.",
+        "success_conditions": [
+          "Every frozen task has one control observation and one treatment observation.",
+          "All attempts use comparable budgets, the same model identity, the frozen scorer, and no production effects.",
+          "The evaluator recomputes the verdict from recorded observations and every protected check passes."
+        ],
+        "unit_id": "unit-checkpoint-observations-v1"
+      },
+      "snapshot": {
+        "continuation_stack": [
+          {
+            "continuation": "After Task Evaluate, consolidate and learn. If the bounded unit passes, Root should select the smallest sandboxed matched experiment for checkpoint inheritance; main remains single-writer and implementation remains inactive until evidence supports it.",
+            "parent_unit_id": "unit-85bfcc10eb003a178e261658",
+            "result_ref": "artifacts/unit-85bfcc10eb003a178e261658-result.json"
+          },
+          {
+            "continuation": "Publish the verified harness and this native boundary to main through exact-head CI. Then run only the frozen child measurement unit; if genuine comparable native measurements cannot be obtained, return INSUFFICIENT_EVIDENCE or REJECT_MECHANISM rather than fabricating observations.",
+            "parent_unit_id": "unit-7248d09ab66196abd19984f1",
+            "result_ref": "artifacts/unit-7248d09ab66196abd19984f1-result.json"
+          }
+        ],
+        "created_at": "2026-08-22T11:41:47.630118Z",
+        "current_component": "execute",
+        "current_unit": "unit-checkpoint-observations-v1",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+          "runner": "python-engine-v2"
+        },
+        "episode_id": "episode-work-mode-handoff-v2",
+        "error_count": 0,
+        "last_evaluation": {
+          "candidate_trial": {
+            "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+            "outcome": "SUPPORTED_FOR_SCOPE",
+            "reason": "The overlay kept original FAIL independent from bounded PASS and preserved EXPERIMENT_REQUIRED negative evidence."
+          },
+          "claim_boundary": "The comparison unit passed; the user-level objective remains unmet and no AGI claim is supported.",
+          "evaluated_goal": "Minimize defensible expected elapsed time to the user's real-world AGI objective while preserving truthful evidence boundaries.",
+          "evidence": [
+            {
+              "finding": "All six frozen comparison dimensions are populated, external source claims are classified, and the decision keeps implementation_authorized false.",
+              "source": "agi/SCIENTIST_AGENT_BASELINE.json"
+            },
+            {
+              "finding": "The validator rejects missing rubric dimensions, unsupported claims, unmeasured adoption, experiment-required implementation authority, and claim-boundary promotion.",
+              "source": "tests/test_scientist_agent_baseline.py"
+            },
+            {
+              "finding": "14 scientist-baseline and Work-bridge tests passed in 1.34 seconds; compileall and diff validation passed.",
+              "source": "focused local test run"
+            },
+            {
+              "finding": "Primary peer-reviewed report supports staged tree search, best-checkpoint inheritance, reviewer ensembling, and the externally reviewed one-of-three workshop outcome, with manual filtering and failures explicitly retained.",
+              "source": "https://www.nature.com/articles/s41586-026-10265-5"
+            },
+            {
+              "finding": "Official implementation documents bounded parallel search and sandbox risks.",
+              "source": "https://github.com/SakanaAI/AI-Scientist-v2"
+            }
+          ],
+          "negative_evidence": [
+            "One of three workshop submissions passed; two did not, and the baseline authors report common idea, implementation, rigor, figure, and citation failures.",
+            "The baseline workloads and costs are unmatched to O, so no quantitative expected-time superiority is established.",
+            "Internal artifact validation and tests do not constitute AGI evidence."
+          ],
+          "repair": {
+            "do_not_repair": "Do not import the full AI Scientist-v2 stack, start paid GPU/model runs, or activate parallel checkpoint inheritance before matched measurements.",
+            "next_falsifiable_unit": "Implement only a sandboxed matched-experiment harness for bounded_stage_checkpoint_inheritance: three sibling hypotheses, one deterministic scorer, best passing checkpoint carried forward, no main writes from siblings; compare three matched units against the retained single-lineage baseline.",
+            "success_metric": "Lower median model invocations or wall time per retained capability with stable exact replay and no protected-regression or side-effect regression."
+          },
+          "unit_subfinding": {
+            "reason": "The bounded unit used a frozen rubric, primary-source traces, exact O code references, an explicit EXPERIMENT_REQUIRED outcome, a falsifier and rollback, and mechanical tests that reject speculative adoption or claim promotion.",
+            "unit_id": "unit-ca2035ad1d994eb163038968",
+            "verdict": "PASS"
+          },
+          "unit_verdict": "PASS",
+          "unmet_conditions": [
+            "The checkpoint-inheritance expected-time advantage is not measured on matched O units.",
+            "No bounded sibling-frontier experiment has run under O's protected regression and single-writer constraints.",
+            "No external evidence establishes that O or the current system satisfies the user's AGI objective.",
+            "The Work model and runtime identity remain externally unverified."
+          ],
+          "verdict": "FAIL"
+        },
+        "last_result_ref": "artifacts/unit-ca2035ad1d994eb163038968-result.json",
+        "phase": "unit_pending",
+        "produced_candidates": [],
+        "revision": 36,
+        "run_id": "run-work-mode-handoff-v2",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "PASS",
+        "updated_at": "2026-08-23T08:04:23.434749Z"
+      }
+    },
+    "mode": "pre-application",
+    "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
+    "run_id": "run-work-mode-handoff-v2",
+    "target_component": "execute"
+  },
+  "payload_digest": "433f0aa435494ddbe3e68146190c82acdfc11205694cd0f93c8a623e26bc78f6",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "f58898cf97021a48e70631d3085bb96be459a335b2e2ebd14eee705d61c75972",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}

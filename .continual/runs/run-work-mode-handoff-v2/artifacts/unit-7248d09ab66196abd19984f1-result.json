@@ -1,0 +1,45 @@
+{
+  "artifacts": [
+    "agi/CHECKPOINT_INHERITANCE_EXPERIMENT.json",
+    "src/agi/checkpoint_inheritance_experiment.py",
+    "tests/test_checkpoint_inheritance_experiment.py"
+  ],
+  "child_execution_unit": {
+    "component": "execute",
+    "expected_outputs": [
+      "six unique task-arm observations backed by recorded native runs",
+      "exact replay and protected-regression results for every attempt",
+      "mechanically recomputed median invocation and wall-time metrics",
+      "ADOPT_SCOPED_CANDIDATE or REJECT_MECHANISM with implementation_authorized remaining false"
+    ],
+    "failure_conditions": [
+      "Any missing or incomparable observation, replay instability, protected regression, external effect, main write, or inability to verify a measurement source."
+    ],
+    "goal": "Record comparable native-run observations for both frozen arms on all three matched tasks, then evaluate the precommitted non-worsening rule without allowing sibling main writes or non-idempotent external effects.",
+    "inputs": [
+      "agi/CHECKPOINT_INHERITANCE_EXPERIMENT.json",
+      "src/agi/checkpoint_inheritance_experiment.py",
+      "the current model and executor binding for every attempt"
+    ],
+    "rollback": "Retain single-lineage execution and preserve the exact negative evidence; do not activate checkpoint inheritance.",
+    "success_conditions": [
+      "Every frozen task has one control observation and one treatment observation.",
+      "All attempts use comparable budgets, the same model identity, the frozen scorer, and no production effects.",
+      "The evaluator recomputes the verdict from recorded observations and every protected check passes."
+    ],
+    "unit_id": "unit-checkpoint-observations-v1"
+  },
+  "continuation": "Publish the verified harness and this native boundary to main through exact-head CI. Then run only the frozen child measurement unit; if genuine comparable native measurements cannot be obtained, return INSUFFICIENT_EVIDENCE or REJECT_MECHANISM rather than fabricating observations.",
+  "negative_evidence": [
+    "No recorded native model observations exist for either experimental arm.",
+    "The harness cannot establish an expected-time advantage or authorize implementation.",
+    "Synthetic test fixtures validate decision logic but are explicitly inadmissible as experiment or AGI evidence."
+  ],
+  "observations": [
+    "The protocol freezes exactly three matched non-production tasks, a width-one control, a width-three checkpoint-inheritance treatment, deterministic scoring, and a non-worsening adoption rule before measurement.",
+    "The validator fails closed on main writes, external effects, missing exact replay, protected-regression failures, incomplete task-arm coverage, and claim-boundary promotion.",
+    "Twenty-one focused checkpoint, scientist-baseline, and Work-bridge tests passed in 0.78 seconds."
+  ],
+  "status": "child_unit_required",
+  "unit_id": "unit-7248d09ab66196abd19984f1"
+}

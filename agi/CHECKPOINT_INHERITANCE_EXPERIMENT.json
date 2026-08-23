@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "status": "HARNESS_READY",
+  "mechanism": "bounded_stage_checkpoint_inheritance",
+  "frozen_before_measurement": true,
+  "matched_tasks": [
+    {
+      "task_id": "research-unit-a",
+      "objective": "Produce a mechanically scored hypothesis and bounded experiment plan from a held-out research prompt.",
+      "evaluator": "deterministic_task_metric_v1",
+      "production_effects_allowed": false
+    },
+    {
+      "task_id": "research-unit-b",
+      "objective": "Repair a held-out falsifiable research plan after one negative experimental observation.",
+      "evaluator": "deterministic_task_metric_v1",
+      "production_effects_allowed": false
+    },
+    {
+      "task_id": "research-unit-c",
+      "objective": "Select a retained result from conflicting held-out experimental traces.",
+      "evaluator": "deterministic_task_metric_v1",
+      "production_effects_allowed": false
+    }
+  ],
+  "arms": {
+    "single_lineage": {
+      "width": 1,
+      "checkpoint_inheritance": false,
+      "main_write_allowed": false
+    },
+    "sibling_checkpoint": {
+      "width": 3,
+      "checkpoint_inheritance": true,
+      "selection": "highest deterministic score; candidate_id ascending breaks exact ties",
+      "main_write_allowed": false
+    }
+  },
+  "scorer": {
+    "name": "deterministic_task_metric_v1",
+    "deterministic": true,
+    "primary_metric": "model_invocations_per_retained_capability",
+    "secondary_metric": "wall_time_seconds_per_retained_capability",
+    "selection_overhead_seconds": 0.0,
+    "advantage_rule": "At least one median metric improves and neither worsens; exact replay and safety must pass."
+  },
+  "safety": {
+    "sandbox_required": true,
+    "main_writers_per_arm": 0,
+    "non_idempotent_external_effects_allowed": false,
+    "protected_regressions_must_pass": true,
+    "exact_replay_required": true
+  },
+  "observations": [],
+  "decision": {
+    "verdict": "INSUFFICIENT_EVIDENCE",
+    "reason": "The harness and frozen protocol are ready, but no matched native model observations have been recorded.",
+    "implementation_authorized": false,
+    "next_action": "Record both arms on all three held-out tasks with the same model, budgets, scorer, and sandbox; then run the fail-closed evaluator."
+  },
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "harness_is_capability_evidence": false,
+    "synthetic_test_data_is_experiment_evidence": false
+  }
+}

@@ -79,6 +79,8 @@ def evaluate_watchdog_lease(
     now: datetime | str,
     max_future_heartbeat_skew_seconds: int = 120,
     verified_goal: bool = False,
+    user_objective_met: bool = False,
+    explicit_user_stop: bool = False,
 ) -> WatchdogLeaseDecision:
     """Classify whether a watchdog may safely recover a repository execution lease.
 
@@ -94,15 +96,20 @@ def evaluate_watchdog_lease(
     lease.
 
     A lease string that claims ``verified_agi`` or ``goal_complete`` is not sufficient to stop recovery.
-    The caller must separately validate the repository's strict external claim gate and pass
-    ``verified_goal=True``. Without that independent result, an apparent completion marker is treated as
-    recoverable so a stale or corrupted repository field cannot silently terminate AGI development.
+    A separately verified repository gate is evidence but is not user completion authority. Only
+    ``user_objective_met=True`` or ``explicit_user_stop=True`` stops recovery; otherwise an apparent
+    completion marker remains recoverable.
     """
 
     if not isinstance(state, Mapping):
         raise WatchdogLeaseError("watchdog state must be an object")
-    if not isinstance(verified_goal, bool):
-        raise WatchdogLeaseError("verified_goal must be boolean")
+    for field, value in (
+        ("verified_goal", verified_goal),
+        ("user_objective_met", user_objective_met),
+        ("explicit_user_stop", explicit_user_stop),
+    ):
+        if not isinstance(value, bool):
+            raise WatchdogLeaseError(f"{field} must be boolean")
     if (
         not isinstance(max_future_heartbeat_skew_seconds, int)
         or isinstance(max_future_heartbeat_skew_seconds, bool)
@@ -127,6 +134,29 @@ def evaluate_watchdog_lease(
         )
     status = status_raw.strip().lower()
     policy_compliant = _policy_compliant(state)
+
+    if explicit_user_stop:
+        return WatchdogLeaseDecision(
+            action="user_stopped",
+            reason="the user explicitly stopped the execution",
+            status=status,
+            heartbeat_at=_optional_text(state, "heartbeat_at"),
+            heartbeat_age_seconds=None,
+            stale_after_seconds=_optional_int(state, "stale_after_seconds"),
+            policy_compliant=policy_compliant,
+            safe_to_mutate=False,
+        )
+    if user_objective_met:
+        return WatchdogLeaseDecision(
+            action="goal_complete",
+            reason="the user's actual upper-level objective was independently established as met",
+            status=status,
+            heartbeat_at=_optional_text(state, "heartbeat_at"),
+            heartbeat_age_seconds=None,
+            stale_after_seconds=_optional_int(state, "stale_after_seconds"),
+            policy_compliant=policy_compliant,
+            safe_to_mutate=False,
+        )
 
     if status == "running":
         try:
@@ -191,20 +221,9 @@ def evaluate_watchdog_lease(
         )
 
     if status in {"verified_agi", "goal_complete"}:
-        if verified_goal:
-            return WatchdogLeaseDecision(
-                action="goal_complete",
-                reason="lease completion marker is backed by separately verified strict external AGI evidence",
-                status=status,
-                heartbeat_at=_optional_text(state, "heartbeat_at"),
-                heartbeat_age_seconds=None,
-                stale_after_seconds=_optional_int(state, "stale_after_seconds"),
-                policy_compliant=policy_compliant,
-                safe_to_mutate=False,
-            )
         return WatchdogLeaseDecision(
             action="recover_unverified_completion",
-            reason="lease claims goal completion but no separately verified external AGI gate result was supplied",
+            reason="lease claims completion but neither the user's objective nor an explicit user stop was supplied",
             status=status,
             heartbeat_at=_optional_text(state, "heartbeat_at"),
             heartbeat_age_seconds=None,
