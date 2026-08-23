@@ -142,6 +142,35 @@ def _verified_response(
     return response, deepcopy(output)
 
 
+def verified_work_invocation(root: Path, invocation_id: str) -> dict[str, Any]:
+    """Read and fully verify one completed immutable Work invocation.
+
+    This is the public, fail-closed boundary for consumers that need to bind
+    downstream evidence to the native Work request/response journal.  It
+    deliberately reuses the same digest, executor/model binding, public-output,
+    and component-contract checks used during normal replay.
+    """
+
+    if not _INVOCATION_ID.fullmatch(invocation_id):
+        raise WorkSessionError("invalid Work invocation_id")
+    root = root.resolve()
+    store = Store(root)
+    directory = store.base / "work-model" / "invocations" / invocation_id
+    request_path = directory / "request.json"
+    response_path = directory / "response.json"
+    if not request_path.is_file():
+        raise WorkSessionError(f"Work request does not exist: {invocation_id}")
+    if not response_path.is_file():
+        raise WorkSessionError(f"Work response does not exist: {invocation_id}")
+    request = _verified_request(store, request_path)
+    response, output = _verified_response(store, request, response_path)
+    return {
+        "request": deepcopy(request),
+        "response": deepcopy(response),
+        "output": output,
+    }
+
+
 class WorkModelClient:
     """ModelClient-compatible adapter backed by immutable Work invocation records."""
 

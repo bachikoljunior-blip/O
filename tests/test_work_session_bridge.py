@@ -13,6 +13,7 @@ from continual.work_session import (
     WorkSessionError,
     pending_work_invocations,
     submit_work_response,
+    verified_work_invocation,
     verify_work_invocations,
 )
 
@@ -123,6 +124,10 @@ def test_work_response_is_binding_checked_immutable_and_public(tmp_path: Path):
         model_identity="work-model",
     )
     assert replay["response_digest"] == first["response_digest"]
+    verified = verified_work_invocation(root, request["invocation_id"])
+    assert verified["request"]["request_digest"] == request["request_digest"]
+    assert verified["response"]["response_digest"] == first["response_digest"]
+    assert verified["output"] == output
 
     conflicting = _output("entry", request)
     conflicting["result"]["objective"] = "different"
