@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T09:25:04.000Z",
-  "last_progress_at": "2026-08-23T09:25:04.000Z",
+  "heartbeat_at": "2026-08-23T09:33:18.000Z",
+  "last_progress_at": "2026-08-23T09:33:18.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -35,7 +35,7 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "PR 264 exact head 16e8971455a819099aa1ab68a88f0a982750390b passed workflow 32627670204 unchanged and merged as 96a85c681807d7ab0f51558b805095160dd7406a; six key main blobs read back equal. PR 265 is the stacked provenance successor and must pass unchanged exact-head CI and fresh conflict check before merge. PRs 266-270 remain under CI.",
+    "pending_native_execute": "PR 265 differs from post-264 main in four provenance files and is conflict-free; exact CI remains in progress. A disposable rehearsal on verified main submitted the prepared INSUFFICIENT_EVIDENCE Execute response, resumed to one Root request, and work-verify reported 56 requests/55 responses/1 pending valid; no rehearsal artifact was published. PR 270 shards 1 and 2 succeeded in 407.72s and 482.28s; shards 0 and 3 continue.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
   },
   "exact_continuation": {
@@ -44,8 +44,8 @@
     "snapshot_head_sha": "96a85c681807d7ab0f51558b805095160dd7406a",
     "pending_work_invocation_id": "invoke-6caa1ba04023a73bb2a478c3",
     "pending_request_ref": ".continual/work-model/invocations/invoke-6caa1ba04023a73bb2a478c3/request.json",
-    "durability_status": "PR 264 is verified on main at merge 96a85c681807d7ab0f51558b805095160dd7406a. Experiment, implementation, native snapshot, pending request, WORK_MODE, and CONTINUATION blobs match the successful exact head. The pending ChatGPT-bound Execute request remains unanswered.",
-    "next_action": "Observe PR 265 exact-head CI; merge only unchanged successful conflict-free head and verify main. Then submit the truthful INSUFFICIENT_EVIDENCE response for invoke-6caa1ba04023a73bb2a478c3, resume native O, and continue the next semantic component. In parallel, continue PRs 266-270 and combined regression checks."
+    "durability_status": "PR 264 remains verified on main. Its exact pytest baseline was 485 passed in 4064.00s. The actual pending request on main is still unanswered. Rehearsal proved the response contract and transition to Root without modifying main. Root response for the bounded CI-sharding experiment is contract-valid and held locally until the real invocation exists.",
+    "next_action": "Maintain heartbeat; merge PR 265 only after unchanged exact-head success and fresh conflict check. Then execute the verified pending response on a latest-main isolated branch, resume native O, answer Root with the observed CI-sharding unit, and publish through fresh exact-head CI. Continue PR 270 matrix and combined full regression."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
