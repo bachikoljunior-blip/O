@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-23T16:30:30.590Z",
-  "last_progress_at": "2026-08-23T16:30:30.590Z",
+  "heartbeat_at": "2026-08-23T16:39:49.398Z",
+  "last_progress_at": "2026-08-23T16:39:49.398Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -22,7 +22,7 @@
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "4f7a949aea930fb9626f29f138c734045ddcd5c5",
-  "working_branch": "work/recovery-gen6-post277",
+  "working_branch": "work/recovery-gen6-observation-receipt-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
   "active_unit_id": "unit-41b5614c179bff0e4c3d5224",
@@ -40,12 +40,12 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/recovery-gen6-post277",
-    "snapshot_head_sha": "4f7a949aea930fb9626f29f138c734045ddcd5c5",
+    "snapshot_branch": "work/recovery-gen6-observation-receipt-v1",
+    "snapshot_head_sha": "ab473185dfd896a673e4dd20bc1838ea646e6e06",
     "pending_work_invocation_id": "invoke-04f7f52c89211dfad9fced5f",
     "pending_request_ref": ".continual/work-model/invocations/invoke-04f7f52c89211dfad9fced5f/request.json",
-    "durability_status": "PR 277 is merged and read back. Native O completed that Execute, returned to Root, and selected unit-41b5614c179bff0e4c3d5224. Local implementation of O-requested GitHub observation requests, immutable receipts, ledger verification, and Root manifest ingestion has 15 focused tests passing; actual connected-source receipt and broader publication remain pending.",
-    "next_action": "Persist the frozen observation request before the connector read; perform the exact GitHub read; record and verify its bounded receipt; finish protected tests and publish through isolated exact-head CI."
+    "durability_status": "PR 278 published at exact head ab473185dfd896a673e4dd20bc1838ea646e6e06 and reviewed tree b18ca37ab4162277dad632a6850834f8655197f2; workflow 32652335658 is queued.",
+    "next_action": "Require unchanged exact-head PR 278 CI success, fresh conflict-free comparison, expected-head merge, and exact main blob readback; then answer Execute invoke-04f7f52c89211dfad9fced5f and continue native O lifecycle."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -268,12 +268,17 @@
       "verified_remote_readback": true
     },
     "context_observation_receipts": {
-      "branch": "work/recovery-gen6-post277",
-      "status": "local_implementation_15_focused_tests_passed_actual_receipt_pending",
-      "unit_id": "unit-41b5614c179bff0e4c3d5224",
-      "pending_invocation": "invoke-04f7f52c89211dfad9fced5f",
-      "claim_boundary": "Internal context-control infrastructure only; not behavioral, independent production, AGI, or user-objective evidence.",
-      "observed_at": "2026-08-23T16:30:30.590Z"
+      "branch": "work/recovery-gen6-observation-receipt-v1",
+      "pull_request": 278,
+      "head_sha": "ab473185dfd896a673e4dd20bc1838ea646e6e06",
+      "exact_tree_sha": "b18ca37ab4162277dad632a6850834f8655197f2",
+      "workflow_run": 32652335658,
+      "status": "exact_head_ci_queued",
+      "local_validation": "101 protected tests passed; compileall, 843 JSON documents, work-verify 97/96/1 valid, staged diff check passed",
+      "actual_observation_request_digest": "90b36c8df361fa5505bc4ea887f40543bc74c9724139604b0a60735a0e8e721d",
+      "actual_observation_receipt_digest": "db8f8e5dadb2485597182c0df537ca96d508a3dd5c8d2d12c1661b3ba6e5bca3",
+      "claim_boundary": "Internal request/receipt context-control evidence only; connector readback is operator-path evidence, not independent behavioral or AGI evidence.",
+      "observed_at": "2026-08-23T16:39:49.398Z"
     }
   },
   "pending_user_input": {
