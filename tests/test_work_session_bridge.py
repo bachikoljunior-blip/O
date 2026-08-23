@@ -141,6 +141,63 @@ def test_work_resume_rejects_identity_mismatch_before_any_native_mutation(
     assert verify_work_invocations(root, run_id=run_id)["requests"] == 2
 
 
+def test_work_resume_ignores_older_answered_awaiting_journal(
+    tmp_path: Path,
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-work-recovered-history"
+    session = WorkSession(
+        root,
+        executor_binding="session-a",
+        model_identity="model-a",
+    )
+    started = session.start("preserve one reconstructed history entry", run_id=run_id)
+    entry_request = started["pending"][0]
+    entry_journal_path = next(
+        (root / ".continual" / "runs" / run_id / "invocations").glob("*.json")
+    )
+    historical_awaiting = json.loads(entry_journal_path.read_text(encoding="utf-8"))
+    submit_work_response(
+        root,
+        entry_request["invocation_id"],
+        _output("entry", entry_request),
+        executor_binding="session-a",
+        model_identity="model-a",
+    )
+    resumed = session.resume(run_id)
+    root_request = resumed["pending"][0]
+
+    # Recreate the exact durable shape left by a prior fenced recovery: an older
+    # native journal is still marked awaiting, but its immutable response exists.
+    historical_awaiting["invocation_id"] = "invoke-000000000000000000000000"
+    historical_path = entry_journal_path.parent / "invoke-000000000000000000000000.json"
+    historical_path.write_text(
+        json.dumps(historical_awaiting, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    submit_work_response(
+        root,
+        root_request["invocation_id"],
+        _output("root", root_request),
+        executor_binding="session-a",
+        model_identity="model-a",
+    )
+
+    with pytest.raises(WorkSessionError, match="executor_binding"):
+        WorkSession(
+            root,
+            executor_binding="session-b",
+            model_identity="model-a",
+        ).resume(run_id)
+
+    resumed = session.resume(run_id)
+    assert resumed["pending"][0]["component"] == "execute"
+    assert resumed["pending"][0]["executor_binding"] == "session-a"
+    assert json.loads(historical_path.read_text(encoding="utf-8"))["status"] == (
+        "awaiting_work_model"
+    )
+
+
 def test_work_response_is_binding_checked_immutable_and_public(tmp_path: Path):
     root = _root(tmp_path)
     session = WorkSession(root, model_identity="work-model")

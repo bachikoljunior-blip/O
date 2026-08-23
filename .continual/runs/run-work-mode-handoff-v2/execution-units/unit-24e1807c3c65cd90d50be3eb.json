@@ -1,0 +1,45 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "all Work invocations verify with exactly one current pending Root before submission and no identity drift",
+    "focused Work bridge plus recursive-routing tests pass on the full local tree",
+    "compileall, JSON parsing, and git diff check pass",
+    "the local commit tree exactly matches the GitHub-created remote commit tree",
+    "PR 274 moves without force from b99cbc7f to the new exact head",
+    "four pytest shards and their dependent aggregate run against the unchanged new head",
+    "fresh conflict-free main comparison immediately before any merge"
+  ],
+  "expected_outputs": [
+    "one new exact PR 274 head with tree-verified source, test, and native records",
+    "a fresh exact-head workflow and per-job conclusions",
+    "safe main merge and exact readback only if every gate passes",
+    "otherwise a durable pending or checkpointed continuation with the exact blocker"
+  ],
+  "failure_conditions": [
+    "state owner, generation, fence, or inbox acknowledgement changes",
+    "remote branch head changes unexpectedly",
+    "local and remote commit trees differ",
+    "any exact-head shard or aggregate fails or is cancelled",
+    "PR is conflicted or main changes after the final conflict proof",
+    "any contamination finding is removed or relabeled as routing evidence"
+  ],
+  "goal": "Publish the verified answered-history resume guard and exact contamination-preserving native lifecycle on the existing recursive-routing branch, then require an unchanged exact-head four-shard CI result before any main integration.",
+  "inputs": [
+    "existing PR 274 and remote head b99cbc7fda84f1c88d36463960bfb493487ea5c3",
+    "src/continual/work_session.py answered-awaiting history fix",
+    "tests/test_work_session_bridge.py regression for older answered awaiting journals",
+    "run-work-mode-handoff-v2 exact Execute, Candidate Evaluate, Task Evaluate, and Root records",
+    "generation-5 state/fence and inbox revision 14 acknowledgement"
+  ],
+  "parent_continuation": "After publication and integration, consolidate the contamination and resume-guard lessons if the native state permits; otherwise return to Root with the exact negative evidence and select the next independent falsifiable unit.",
+  "rollback": "Leave b99cbc7f and its harness intact, keep recursive routing inactive, do not merge a failed or conflicted head, and checkpoint the exact new local commit or blocker.",
+  "scope": "work/context-routing-heldout-native-publication-v2",
+  "success_conditions": [
+    "older fully verified answered awaiting journals no longer block resume",
+    "multiple unanswered requests and identity mismatches still fail closed",
+    "the routing experiment remains HARNESS_READY with zero observations, INSUFFICIENT_EVIDENCE, and no activation",
+    "all exact-head CI jobs succeed and the PR head is unchanged",
+    "main readback exactly matches reviewed source, tests, experiment, and native records after safe merge"
+  ],
+  "unit_id": "unit-24e1807c3c65cd90d50be3eb"
+}
