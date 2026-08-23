@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T11:32:32.938Z",
-  "last_progress_at": "2026-08-23T11:32:32.938Z",
+  "heartbeat_at": "2026-08-23T11:34:37.123Z",
+  "last_progress_at": "2026-08-23T11:34:37.123Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -37,7 +37,7 @@
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
     "pending_native_execute": "Generation-5 Execute invoke-66af21513bffe4e758237708 is publishing the answered-history resume guard and truthful routing-negative lifecycle. PR 274 moved non-force to exact head f59c4a8b with tree 4272fe39 exactly matching local validation; workflow 32636746263 is queued.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
-    "effect_recovery_stack": "PR 273 exact head 0d21dc3e passed workflow 32634954576 (four shards and aggregate), but is currently conflicted with main. Do not merge that stale base; reconcile by an additive merge commit and require a new exact-head workflow."
+    "effect_recovery_stack": "PR 273 was reconciled non-force by merge commit 9b05425c with current main parent 5871c922. Tree 76c2ba48 equals local git merge-tree and retains exactly the six source/test additions. New workflow 32636912049 is queued."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
@@ -46,7 +46,7 @@
     "pending_work_invocation_id": "invoke-66af21513bffe4e758237708",
     "pending_request_ref": ".continual/work-model/invocations/invoke-66af21513bffe4e758237708/request.json",
     "durability_status": "PR 274 branch head f59c4a8b is remote-durable. Its tree 4272fe39 exactly equals local commit fa922e9; the head is one fast-forward commit above b99cbc7f and includes the persisted idempotency record, resume guard fix, 39-test regression, and contamination-preserving native records. Work verification at publication was 75/74/1 valid.",
-    "next_action": "Wait for exact-head workflow 32636746263 on f59c4a8b. In parallel reconcile successful-but-conflicted PR 273 with current main using a non-force additive merge commit, then require a fresh exact-head workflow. Merge only unchanged, conflict-free successful heads with exact main readback."
+    "next_action": "Poll exact-head workflows 32636746263 (PR 274 f59c4a8b) and 32636912049 (PR 273 9b05425c). Merge each only if all four shards and aggregate succeed, the expected head is unchanged, and a fresh main comparison remains conflict-free; verify exact main blobs after each merge."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -170,9 +170,9 @@
     },
     "effect_recovery_stack": {
       "pull_request": 273,
-      "exact_head_sha": "0d21dc3e7026c297e0c8441056f348e727f711ea",
-      "workflow_run": 32634954576,
-      "status": "exact_head_ci_success_but_conflicted_with_main_reconciliation_required",
+      "exact_head_sha": "9b05425c3daf2dc43ecee835fb7c181ab2ba6198",
+      "workflow_run": 32636912049,
+      "status": "reconciled_exact_head_ci_queued",
       "reconciliation": {
         "effect_id": "reconcile-pr273-current-main-v1",
         "idempotency_key": "bachikoljunior-blip/O:pr273:0d21dc3e7026c297e0c8441056f348e727f711ea:current-main:additive-merge-v1",
@@ -180,10 +180,15 @@
         "expected_main_head": "3779a4debed548e6ce3cb4a27105a828649b11f8",
         "force_push_permitted": false,
         "tree_rule": "latest main plus exactly the six verified added source/test blobs from exact head 0d21dc3e",
-        "status": "prepared_durable",
+        "status": "published_non_force_verified",
         "merge_after_reconciliation": false,
-        "next": "Create one merge commit with parent 0d21dc3e and additional parent the exact latest main, verify tree and non-force branch update, then require a fresh exact-head four-shard workflow."
-      }
+        "next": "Wait for workflow 32636912049; merge only unchanged head 9b05425c after all four shards and aggregate succeed and a fresh main comparison is clean.",
+        "actual_main_parent": "5871c922535f2573f9566dc7aa472cc2cdf5f631",
+        "actual_merge_commit": "9b05425c3daf2dc43ecee835fb7c181ab2ba6198",
+        "actual_tree": "76c2ba488b356911d382b6547b7f60052885d2b4",
+        "new_workflow_run": 32636912049
+      },
+      "exact_tree_sha": "76c2ba488b356911d382b6547b7f60052885d2b4"
     }
   }
 }
