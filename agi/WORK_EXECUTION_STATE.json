@@ -3,20 +3,20 @@
   "mode": "work_o_engine_single_writer",
   "status": "running",
   "owner_kind": "work_recovery_automation",
-  "execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
-  "predecessor_execution_id": "work-primary-claude-20260823T081642JST",
-  "lease_generation": 5,
-  "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
-  "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T14:56:44.370Z",
-  "last_progress_at": "2026-08-23T14:56:44.370Z",
+  "execution_id": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62",
+  "predecessor_execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
+  "lease_generation": 6,
+  "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
+  "started_at": "2026-08-23T15:12:35Z",
+  "heartbeat_at": "2026-08-23T15:12:35Z",
+  "last_progress_at": "2026-08-23T15:12:35Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
-    "instruction": "Generation-5 recovery passed the two-phase expected-blob CAS/readback contract and is additionally the user-designated ChatGPT Work primary under inbox revision 13.",
+    "kind": "fenced_monitor_recovery_phase1_pending_readback",
+    "instruction": "Insurance recovery after generation-5 heartbeat and same-owner activity both exceeded stale_after_seconds; phase-1 expected-blob CAS must be read back exactly before any further mutation.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Inbox revision 13 supersedes only the Claude-primary ownership portion of revision 4. Claude is stopped as executor; its identity-bound orphaned invocations must not be answered by this owner."
+    "note": "No development mutation is authorized until phase-1 and phase-2 exact remote readbacks complete."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -33,11 +33,10 @@
     "application_note": "Revision 15 ingested at safe Root invoke-344455ae7a59ec86e4fa5d20. It adds O-centered context-control direction and no ownership supersede. O selected an authoritative-source-referenced DecisionContextManifest/Event-Ledger architecture over copying all raw external data into O. Revision 14 remains effective: generation 5 is the sole primary/main integrator and validated results publish through isolated exact-head CI."
   },
   "parallel_execution_coordination": {
-    "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
-    "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "Execute invoke-6a8a4f0eb8a3f1e5791e560f remains the sole pending same-owner request. PR 276 exact head 1cfe60536abc14f2f69a4d8e6b1dd597ee203368 passed workflow 32643674156, merged with expected-head protection to main 4e4108808f229c71a19058d4bbd67f9b720a3cac, and all 11 reviewed blobs read back exactly.",
-    "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
-    "effect_recovery_stack": "PR 273 exact head 9b05425c passed workflow 32636912049 and merged with expected-head protection to main 3417809d; all six source/test blobs read back exactly."
+    "primary": "Pending generation-6 fenced recovery owner work-recovery-20260823T151235Z-7f8d3b125a9c4e62; not authorized until exact two-phase readback completes.",
+    "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
+    "pending_native_execute": "Resume only invoke-6a8a4f0eb8a3f1e5791e560f after authorization under its recorded executor binding.",
+    "predecessor": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58 generation 5; heartbeat 2026-08-23T05:18:00Z superseded only after stale classification and CAS."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
@@ -67,14 +66,14 @@
     "recovery_eligibility_is_mutation_authority": false
   },
   "remote_persistence": {
-    "published_on_main": true,
-    "verified_remote_readback": true,
-    "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
-    "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
-    "result_blob_sha": "dd0d3727a278272a9b128639d67a2d79faa31278",
-    "finalization_commit_sha": "51b05dd525108b58eea21dd509d7e5116243b74f",
-    "finalization_blob_sha": "3b80de71f03408f93d29d76e171d9eead1bbceae",
-    "note": "Generation-5 phase-1 acquisition and phase-2 finalization commits/blobs read back exactly; checked-in authorize_work_mode_recovery returned authorized=true."
+    "published_on_main": false,
+    "verified_remote_readback": false,
+    "expected_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
+    "result_commit_sha": null,
+    "result_blob_sha": null,
+    "finalization_commit_sha": null,
+    "finalization_blob_sha": null,
+    "note": "Generation-6 phase-1 acquisition payload; exact result commit/blob are recorded by phase-2 only after readback."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -102,22 +101,21 @@
     "pending_invocation": "invoke-6a8a4f0eb8a3f1e5791e560f (Execute Context Kernel Root manifest; PR 276 exact head 1cfe60536abc14f2f69a4d8e6b1dd597ee203368, workflow 32643674156)",
     "note": "Revision 15 was ingested by same-owner Root invoke-344455ae7a59ec86e4fa5d20 without retroactively changing earlier frozen requests. The selected Execute unit is unit-4d9f1592acf97a44ee8afdd6."
   },
-  "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
-  "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
-  "result_blob_sha": "dd0d3727a278272a9b128639d67a2d79faa31278",
-  "finalize_expected_blob_sha": "dd0d3727a278272a9b128639d67a2d79faa31278",
-  "readback_of_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
-  "verified_remote_readback": true,
-  "acquisition_phase": "authorized_running",
+  "expected_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
+  "result_commit_sha": null,
+  "result_blob_sha": null,
+  "finalize_expected_blob_sha": null,
+  "readback_of_commit_sha": null,
+  "verified_remote_readback": false,
+  "acquisition_phase": "phase1_pending_remote_readback",
   "recovery_observation": {
-    "observed_at": "2026-08-23T06:14:00Z",
-    "observed_main_sha": "1e2ceeb86825af9f883d561071b4f231bdd1f6fc",
-    "observed_state_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
-    "predecessor_heartbeat_at": "2026-08-23T05:18:00Z",
+    "observed_at": "2026-08-23T15:12:35Z",
+    "observed_main_sha": "a80047bbb0c398fe2bdf665e79944442836c4187",
+    "observed_state_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
+    "predecessor_heartbeat_at": "2026-08-23T14:56:44.370Z",
     "predecessor_stale_after_seconds": 900,
-    "latest_same_owner_activity_at": "2026-08-23T05:18:36Z",
-    "latest_non_owner_main_activity_at": "2026-08-23T05:32:23Z",
-    "unacknowledged_inbox_revision": 12,
+    "latest_same_owner_activity_at": "2026-08-23T14:56:46Z",
+    "unacknowledged_inbox_revision": null,
     "classification": "recover_stale"
   },
   "result_publication_policy": {
