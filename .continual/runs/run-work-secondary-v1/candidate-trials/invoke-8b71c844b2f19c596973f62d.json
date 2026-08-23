@@ -1,0 +1,34 @@
+{
+  "fragment": {
+    "claim_boundary": "Candidate retention is internal process evidence only.",
+    "component": "candidate_evaluate",
+    "mode": "post-result",
+    "observations": [
+      "The scoped trial behaved correctly.",
+      "Activation evidence remains absent."
+    ]
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "reason": "Retaining the existing Candidate and additional scope evidence is sufficient."
+  },
+  "result": {
+    "activation_recommendation": false,
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "contradictory_evidence": [
+      "Exact-head CI is nonterminal.",
+      "No deterministic activation matrix has run.",
+      "The Candidate remains evaluated by the same model session."
+    ],
+    "decision": "REMAIN_CANDIDATE",
+    "reason": "The trial correctly preserved original FAIL, bounded publication PASS, pending CI, primary noninterference, and the strict claim boundary. However, this is another model-mediated observation; no deterministic protected-baseline activation gate has recomputed and persisted VERIFIED_FOR_SCOPE measurements.",
+    "rollback": "Reject or narrow if later trials omit nonterminal CI, conflate publication with capability, or weaken original-goal independence.",
+    "scope": "secondary/context-skill-routing/v1-publication",
+    "supporting_evidence": [
+      "Original verdict FAIL and unit_verdict PASS were both emitted.",
+      "Workflow in-progress status was preserved as contradictory evidence.",
+      "The unit PASS was limited to idempotent isolated publication."
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "A fresh main fetch and changed-file comparison showing no overlap with primary work",
+    "A durable invocation-journal/idempotency record for the intended branch and PR publication",
+    "A remote secondary branch whose exact head equals the locally published head",
+    "A single isolated pull request targeting main and excluding primary-owned state",
+    "Exact-head CI association or an explicit pending/failed result without rerunning or cancelling primary workflows"
+  ],
+  "expected_outputs": [
+    "Committed native O Run, invocation, Episode, Candidate-trial, and publication-intent records",
+    "Remote branch work/secondary-parallel-writer-v1 with verified exact head",
+    "One non-draft secondary pull request and its URL/head SHA",
+    "Publication evidence retained for the next Task Evaluate cycle"
+  ],
+  "falsification_boundaries": [
+    "Stop publication if latest main or PR 258 now overlaps the implementation files.",
+    "Stop after any remote branch or PR readback mismatch instead of retrying an ambiguous side effect.",
+    "Do not merge, force-push, rerun, cancel, update, or comment on PR 258.",
+    "Do not claim exact-head CI success until the check suite reports success for the unchanged secondary head."
+  ],
+  "goal": "Persist this secondary native O cycle and publish only the isolated secondary branch and pull request, with fresh-main overlap checks, an idempotency record, exact remote-head readback, and no mutation of primary PR 258 or its lease/run.",
+  "inputs": [
+    "Local implementation commit c09b65b2f5dab901dcc835c7079ecbef24e47e83",
+    "Native run-work-secondary-v1 records and episode-work-secondary-v1",
+    "Latest remote main SHA and current PR 258 changed-file/head state",
+    "GitHub branch and pull-request readback"
+  ],
+  "parent_continuation": "After publication evidence is available, return to Task Evaluate; original genuine-AGI objective remains FAIL regardless of this bounded publication unit.",
+  "scope": "secondary/context-skill-routing/v1-publication",
+  "unit_id": "unit-1b22f8b1083df727ed9a257e"
+}

@@ -1,0 +1,45 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-22T23:57:07.109266Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-c5dfbdec746b2e069284c380-candidate_evaluate.json",
+  "invocation_id": "invoke-c5dfbdec746b2e069284c380",
+  "output": {
+    "fragment": {
+      "claim_boundary": "Correct evaluator behavior in an internal trial is not AGI evidence.",
+      "component": "candidate_evaluate",
+      "mode": "post-result",
+      "observations": [
+        "The scoped trial behaved correctly.",
+        "Independent activation evidence remains absent."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "reason": "Retaining the existing Candidate avoids self-activation and duplicate evaluator overlays."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [
+        "Only one trial was performed for this scope",
+        "Candidate activation was not mechanically recomputed",
+        "No VERIFIED_FOR_SCOPE record exists",
+        "The original objective still has zero qualifying external evidence"
+      ],
+      "decision": "REMAIN_CANDIDATE",
+      "reason": "The trial correctly retained original FAIL, bounded PASS, exact internal evidence, and the empty independent-evidence set. This supports continued candidacy but does not supply the separate deterministic protected-baseline activation matrix or VERIFIED_FOR_SCOPE record.",
+      "rollback": "Reject or narrow this Candidate if a later trial hides contradictory evidence, converts unit PASS into original PASS, or weakens the strict claim boundary.",
+      "scope": "agi/external-handoff-cross-binding",
+      "supporting_evidence": [
+        "Original and bounded verdicts remained independent",
+        "Unchanged-head CI and merge were scoped only to the bounded unit",
+        "External evidence absence and unverified model identity remained explicit",
+        "Repair actions preserved the unresolved original objective"
+      ]
+    }
+  },
+  "payload_digest": "c6aa29fb053f4d7a7f35dc6e",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

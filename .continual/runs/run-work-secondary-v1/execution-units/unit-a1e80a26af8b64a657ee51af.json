@@ -1,0 +1,25 @@
+{
+  "component": "execute",
+  "expected_outputs": [
+    "A small source module defining validated Skill nodes, lazy loading, externally supplied situation-dependent selection, recursive traversal, cycle detection, and explicit node/depth/context budgets",
+    "A trace proving that only selected branches were loaded/materialized",
+    "Focused tests covering deep recursion, multi-child selection, unselected-branch non-loading, cycles, unknown children, invalid selector outputs, and budget fail-closed behavior",
+    "No changes to PR 258 files, the primary lease, or run-work-mode-handoff-v2"
+  ],
+  "falsification": "The unit fails if any unselected child is loaded, if traversal silently truncates or loops, if the library chooses semantic relevance itself, if the same child is materialized ambiguously, or if focused/protected tests regress.",
+  "goal": "Implement and mechanically validate a lazy recursive Skill-in-Skill context router whose semantic child selection is supplied by the active model/caller, not hard-coded in Python.",
+  "inputs_and_evidence_needed": [
+    "USER_INPUT_INBOX revision 6 and its retained Skill-in-Skill directives from revisions 1-2",
+    "AGENTS rule that semantic judgment stays in active prompts or scoped Candidates",
+    "PR 253 changed-file scope (documentation only)",
+    "PR 258 changed-file exclusion set",
+    "Existing repository path-safety and bounded-search conventions"
+  ],
+  "parent_continuation": {
+    "after_unit": "Run Task Evaluate on the exact implementation/test evidence, then continue to another non-overlapping unit if the user-level goal remains unmet.",
+    "ambitious_goal_remains_open": true
+  },
+  "scope": "secondary/context-skill-routing/v1",
+  "unit_id": "unit-a1e80a26af8b64a657ee51af",
+  "why_this_unit": "PR 253 records only the user's design note, current main has no reusable implementation, and the primary's PR 258 changes disjoint external-handoff files. A bounded lazy router converts the user's recursive context-routing idea into a testable capability while preserving semantic judgment in active prompts/selectors."
+}
