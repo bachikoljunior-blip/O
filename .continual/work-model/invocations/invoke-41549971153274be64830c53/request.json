@@ -1,0 +1,460 @@
+{
+  "component": "learn",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-23T05:12:50.430790Z",
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-41549971153274be64830c53",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "payload": {
+    "active_component_path": "prompts/learn.md",
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/repository-development": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "continual/incremental-task-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+          "scope_states": {
+            "agi/backlog-integration": "NEED_MORE_EVIDENCE",
+            "continual/incremental-task-evaluation": "REMAIN_CANDIDATE"
+          },
+          "status": "candidate",
+          "target_component": "task_evaluate"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "notes": "Candidate adoption is scoped, evidence-driven, reversible, and evaluated immediately before affected units.",
+      "schema_version": 2
+    },
+    "current_episode": {
+      "candidate_decisions": {
+        "post_result": [
+          "NEED_MORE_EVIDENCE for candidate-task-evaluate-unit-verdict-v1 with one positive trial persisted at candidate-trials/invoke-e49d74abef5b9cfde613405a.json"
+        ],
+        "pre_application": [
+          "USE_ACTIVE (execute unit; seven candidates inapplicable)",
+          "TRIAL_CANDIDATE candidate-task-evaluate-unit-verdict-v1 (task_evaluate unit)"
+        ]
+      },
+      "environment": {
+        "engine": "python-engine-v2 on Linux-6.18.44-fc-v21, Python 3.11.15, snapshot commit 72ce3f0, active_components_digest 3974833d170f43432c948095",
+        "executor": "claude-code-remote session as generation-4 primary lease holder (executor_binding current_claude_code_remote_session; model claude-fable-5-session-configured-unverified, identity unverified by any independent attestation)"
+      },
+      "episode_title": "Backlog settlement with in-flight root-cause repair, evidenced closure, and first dual-verdict evaluation trial",
+      "evidence_classes": {
+        "external": "GitHub Actions run conclusions, merge SHAs, PR/closure records - independently checkable",
+        "inference": "The intra-goal precedence adjudication of the PR 250 deviation (root-cause clause governs the merge clause when the premise is falsified)",
+        "internal_analysis": "Adversarially verified non-determinism sweep (11 agents, 5 candidate sites refuted, 2 confirmed) - internal tooling output, corroborated by direct code reading of the confirmed sites",
+        "model_self_report": "Work response narratives beyond the cited artifacts; treated as claims only where not externally corroborated",
+        "observation": "Local test reproductions (identical failure on 2376ed2 and a097ab1; 4/4 pass in 317s post-fix; 81s four-session test), pin-test runs, file-level code reading",
+        "user_feedback": "None received during this episode"
+      },
+      "failures_and_repairs": [
+        {
+          "failure": "PR 245 CI red (run 32607076987), latent since the delta's authoring; no prior CI run on the PR ever completed",
+          "repair": "Root-caused at the demonstrated boundary; end-to-end test re-scoped to the deterministic fail-closed diagnostic; module body retained; merged on green"
+        },
+        {
+          "failure": "Wrong mechanism attribution (hash-seed dependence) recorded in durable records",
+          "repair": "Corrected in PR 245 body and continuation state after the verified sweep; commit message 553b46b left as historical record; docstring corrections assigned to the follow-up unit"
+        },
+        {
+          "failure": "work-resume executed without binding flags froze duplicate Execute request invoke-32c679e1 under the secondary's default identity",
+          "repair": "Correct-binding resume matched the answered invocation and advanced the engine; orphan documented as not-to-be-answered; CLI hardening (require explicit binding) queued"
+        }
+      ],
+      "run_id": "run-claude-primary-continuation-20260823",
+      "searchable_metadata": {
+        "ci_runs": [
+          32607076987,
+          32607999744,
+          32611268930,
+          32611394647,
+          32613846076,
+          32614408835
+        ],
+        "key_shas": [
+          "f0aa93b",
+          "b2e8093",
+          "dfdbca2",
+          "553b46b",
+          "2376ed2",
+          "a097ab1",
+          "759fca8",
+          "eff0101"
+        ],
+        "keywords": [
+          "backlog-integration",
+          "exact-head-ci",
+          "root-cause",
+          "observed-schema",
+          "fail-closed",
+          "premise-falsification",
+          "per-process-entropy",
+          "history-commitment",
+          "dual-verdict",
+          "candidate-trial",
+          "orphaned-invocation",
+          "executor-binding"
+        ],
+        "prs": [
+          230,
+          238,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          258
+        ]
+      },
+      "sequence": [
+        {
+          "component": "entry",
+          "invocation": "invoke-0bfd3de5f042f55f66868f50",
+          "step": 1,
+          "summary": "Normalized the primary continuation objective: settle backlog integrations then select the next capability unit; separated the open user-level end goal from the falsifiable backlog milestone; recorded single-writer, smartphone-first, and truthful-reporting constraints."
+        },
+        {
+          "component": "root",
+          "invocation": "invoke-a9569c88120c9311d19feedb",
+          "step": 2,
+          "summary": "Selected exactly one unit: backlog-integration execute (unit-08e5e71d6d2e996c315bdbe8) under the expected-time strategy; saturation assessment barred new same-family retention probes."
+        },
+        {
+          "component": "candidate_evaluate",
+          "decision": "USE_ACTIVE",
+          "invocation": "invoke-6a4d8b2335bc33610e707c70",
+          "mode": "pre-application",
+          "step": 3,
+          "summary": "All seven indexed execute candidates target synthesis/decomposition strategy; inapplicable to a serialized CI-observation and merge unit."
+        },
+        {
+          "component": "execute",
+          "invocation": "invoke-8027c964540c001952b35c1f",
+          "step": 4,
+          "summary": "Settled the backlog: PR 247 merged f0aa93b (CI 32607999744 green, head eff0101 unchanged); PR 249 retargeted, refreshed, merged b2e8093 (CI 32611268930 green, head 759fca8); PR 245 red run 32607076987 root-caused as a real deterministic premise failure, repaired minimally by re-scoping the end-to-end test to the deterministic fail-closed diagnostic (fix 553b46b), merged dfdbca2 (CI 32611394647 green); PR 250 closed un-merged with retained premise-falsification evidence (comment 5383921000) as a recorded, justified deviation; main push suite green on both tips (32613846076, 32614408835). Post-merge correction: the non-determinism first attributed to hash-seed dependence was re-established by an adversarially verified sweep as a per-process entropy leak (uuid4 run ids and timestamped trial bytes entering the iterated report digest at evidence_frontier_iterated_expansion.py:399, folded into the history commitment at recursive_evidence_frontier_growth.py:61,72); PR 245 body and continuation state corrected."
+        },
+        {
+          "component": "root",
+          "invocation": "invoke-c71cc9bfc1c1ed9156f6b708",
+          "step": 5,
+          "summary": "Selected task_evaluate for the completed unit; deferred the next capability unit (stable-semantics history commitment) to the post-Learn Root call; documented the orphaned duplicate Execute request invoke-32c679e1d5e70470a41d26cf created by an unflagged work-resume under the secondary writer's default binding - not to be answered by either writer."
+        },
+        {
+          "component": "candidate_evaluate",
+          "decision": "TRIAL_CANDIDATE",
+          "invocation": "invoke-873fc6334095f762ed524e4a",
+          "mode": "pre-application",
+          "step": 6,
+          "summary": "First applicable-candidate match of the run: trialed candidate-task-evaluate-unit-verdict-v1 (dual-verdict overlay) on the evaluation unit; low risk, evidence plan and rollback recorded."
+        },
+        {
+          "component": "task_evaluate",
+          "invocation": "invoke-169fa311d23f8eea8447b43e",
+          "step": 7,
+          "summary": "Under the trialed overlay: original task honestly FAIL (next capability unit unimplemented; user-level end goal open; AGI evidence gate unchanged with agi_claim_supported=false); bounded unit PASS with the PR 250 deviation adjudicated inside unit_verdict via the goal's own root-cause-first precedence; evidence provenance external and independently checkable.",
+          "verdicts": {
+            "unit_verdict": "PASS",
+            "verdict": "FAIL"
+          }
+        },
+        {
+          "component": "candidate_evaluate",
+          "decision": "NEED_MORE_EVIDENCE",
+          "invocation": "invoke-ab5a4d0c81233dbdb087cc5c",
+          "mode": "post-result",
+          "step": 8,
+          "summary": "Single positive trial, zero contradictions; activation not proposed at n=1; promotion path remains the deterministic protected-baseline regression gate; discriminating future trial shapes identified (FAIL/UNCERTAIN units, child continuations)."
+        }
+      ],
+      "side_effect_states": [
+        {
+          "effect": "GitHub merges of PRs 247, 249, 245",
+          "state": "verified against external state (merged flags, merge SHAs, green run conclusions)"
+        },
+        {
+          "effect": "PR 250 closure with evidence comment",
+          "state": "verified (closed state; comment 5383921000)"
+        },
+        {
+          "effect": "PR 245 body/title updates including the post-merge mechanism correction",
+          "state": "verified (PR body readback)"
+        },
+        {
+          "effect": "Main state commits (heartbeats 9974ab6, e3ce790, 4b4679b, 872212b and merge tips)",
+          "state": "verified by push readback; pin tests run locally before every state-only push"
+        },
+        {
+          "effect": "Orphaned Work request invoke-32c679e1 (immutable, secondary-bound)",
+          "state": "UNRESOLVED by design - documented as not-to-be-answered; deletion impossible under append-only store"
+        }
+      ],
+      "success_condition_mapping": [
+        {
+          "condition": "PR 247 merged on green fresh exact-head CI with unchanged head",
+          "evidence": "merge f0aa93b; run 32607999744",
+          "evidence_class": "external",
+          "state": "MET"
+        },
+        {
+          "condition": "PR 245 merged on green fresh exact-head CI on its post-#230 refreshed head",
+          "evidence": "red run 32607076987 root-caused; fix 553b46b; merge dfdbca2; run 32611394647",
+          "evidence_class": "external",
+          "state": "MET after repair"
+        },
+        {
+          "condition": "PRs 249 and 250 retargeted, refreshed, merged in dependency order",
+          "evidence": "merge b2e8093 with run 32611268930; closure comment 5383921000",
+          "evidence_class": "external",
+          "state": "MET for 249; DEVIATION for 250 (closed with evidence, adjudicated in unit_verdict)"
+        },
+        {
+          "condition": "Main merge-push CI green on the resulting tip",
+          "evidence": "runs 32613846076 (b2e8093) and 32614408835 (dfdbca2)",
+          "evidence_class": "external",
+          "state": "MET"
+        },
+        {
+          "condition": "Next capability unit selected by Root with expected-time rationale",
+          "evidence": "Root response invoke-c71cc9bf",
+          "evidence_class": "observation",
+          "state": "PARTIAL - unit defined and queued with rationale in Root step 5; formal selection deferred to the post-Learn Root call"
+        }
+      ],
+      "unknowns": [
+        "Whether the four deterministically reconstructible core members are stable across all Python builds and platforms (stable across two local runs and consistent with CI; not exhaustively proven)",
+        "Whether the secondary writer has observed the orphaned invocation documentation (its own pending invoke-f3f84b7c on run-work-mode-handoff-v2 remains unanswered at consolidation time)"
+      ],
+      "unresolved_end_goals": [
+        "User-level end goal open: shorten expected real-world elapsed time toward genuine AGI with truthful reporting; no independent production evidence exists (agi_claim_supported=false, strict_gate_passed=false)",
+        "Next capability unit unimplemented: bind _recursive_history_commitment to stable behavior semantics (fix the verified per-process entropy leak) with docstring corrections",
+        "candidate-task-evaluate-unit-verdict-v1 needs additional discriminating trials before any activation proposal",
+        "CLI hardening: explicit --executor-binding requirement for work-resume/work-submit"
+      ]
+    },
+    "episode_catalog": [
+      {
+        "episode_id": "episode-work-mode-handoff-v2",
+        "outcome": null,
+        "path": ".continual/episodes/episode-work-mode-handoff-v2/episode.json",
+        "tags": [],
+        "task": "Provide a secret-free detached-signature packaging boundary that lowers independent evaluator handoff friction while preserving an unmodified strict external AGI evidence gate."
+      },
+      {
+        "episode_id": "episode-self-applied-strict-claim-quorum-20260818-005902",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-strict-claim-quorum-20260818-005902/episode.json",
+        "tags": [],
+        "task": "Harden the strict external AGI claim path after PR 146 so a weakened evaluator quorum cannot be presented through the production CLI as a valid strict claim configuration."
+      },
+      {
+        "episode_id": "episode-self-applied-runtime-system-manifest-20260818-015624",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-runtime-system-manifest-20260818-015624/episode.json",
+        "tags": [],
+        "task": "Bind strict external AGI evaluation to the public runtime identity actually intended for evaluation, not only to tracked source."
+      },
+      {
+        "episode_id": "episode-self-applied-pr211-recovery-20260819-055716",
+        "outcome": "checkpointed-in-progress",
+        "path": ".continual/episodes/episode-self-applied-pr211-recovery-20260819-055716/episode.json",
+        "tags": [],
+        "task": "Continue unfinished AGI development from latest durable repository state without duplicating a live execution or weakening verification gates."
+      },
+      {
+        "episode_id": "episode-self-applied-pr210-recovery-20260819-045814",
+        "outcome": "completed-work-unit-with-unmet-user-goal",
+        "path": ".continual/episodes/episode-self-applied-pr210-recovery-20260819-045814/episode.json",
+        "tags": [],
+        "task": "Resume unfinished AGI development from repository latest main only, avoiding duplicate execution and preserving exact evidence."
+      },
+      {
+        "episode_id": "episode-self-applied-live-provider-migration-recovery-20260818-035519",
+        "outcome": "completed_with_live_retry_pending",
+        "path": ".continual/episodes/episode-self-applied-live-provider-migration-recovery-20260818-035519/episode.json",
+        "tags": [],
+        "task": "Continue O AGI development from latest main without duplicate execution; recover stale work and move the live genuine-model path to the next falsifiable state."
+      },
+      {
+        "episode_id": "episode-self-applied-external-source-artifact-20260818-010834",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-external-source-artifact-20260818-010834/episode.json",
+        "tags": [],
+        "task": "Replace the opaque manual source-artifact hash step in the strict external evaluator handoff with a reproducible artifact derived from an exact Git commit."
+      },
+      {
+        "episode_id": "episode-self-applied-external-request-attestation-binding-20260818-001204",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-external-request-attestation-binding-20260818-001204/episode.json",
+        "tags": [],
+        "task": "Recover the stale AGI development execution from latest main, persist the already validated PR 146 request-bound external claim hardening as native O state, and continue without weakening the strict external evidence gate."
+      },
+      {
+        "episode_id": "episode-self-applied-cross-context-memory-20260817-224246",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-cross-context-memory-20260817-224246/episode.json",
+        "tags": [],
+        "task": "Continue the unfinished AGI program from latest main and repository-persisted state only. Treat O development itself as an O self-application work unit, preserve negative evidence, merge only validated exact heads, and keep the strict independent external evidence gate unchanged."
+      },
+      {
+        "episode_id": "episode-self-applied-adaptive-depth-recovery-20260818-220121",
+        "outcome": "checkpointed_with_pr202_validation_in_progress",
+        "path": ".continual/episodes/episode-self-applied-adaptive-depth-recovery-20260818-220121/episode.json",
+        "tags": [],
+        "task": "Continue unfinished AGI development from latest repository main without duplicate execution."
+      },
+      {
+        "episode_id": "episode-self-application-agi-20260817-215824-recovery",
+        "outcome": "completed_self_application_integration",
+        "path": ".continual/episodes/episode-self-application-agi-20260817-215824-recovery/episode.json",
+        "tags": [],
+        "task": "最短で検証可能なAGIを作って。最新mainと永続状態から継続し、Oの開発自体をOの実行・学習対象へ最小変更で統合する。このタスクチャットのモデルが実行段階を担い、O互換のRun、Episode、Candidate、証拠へ保存する。通常開発では性能を優先し、汚染が疑われる境界では論理リセットまたはfresh/独立実行を用いる。厳格な独立外部証拠gateは弱めず、通過するまで未完成として開発を継続する。"
+      },
+      {
+        "episode_id": "episode-prod-agi-20260816-1609",
+        "outcome": "not-completed",
+        "path": ".continual/episodes/episode-prod-agi-20260816-1609/episode.json",
+        "tags": [],
+        "task": "AGIを作って"
+      },
+      {
+        "episode_id": "episode-claude-primary-continuation-20260823",
+        "outcome": null,
+        "path": ".continual/episodes/episode-claude-primary-continuation-20260823/episode.json",
+        "tags": [],
+        "task": null
+      }
+    ],
+    "episode_id": "episode-claude-primary-continuation-20260823",
+    "mode": "post-task",
+    "preflight_selection": {
+      "decision": "USE_ACTIVE",
+      "reason": "No candidate targets this component.",
+      "scope": "learn"
+    }
+  },
+  "payload_digest": "d61efe62d282ea3ba170858d817291867ddedade837470683ea5ddbc95f69138",
+  "prompt_content": "# LEARN\n\nYou are Post-Task Learn. Read only the relevant parts of the current, recent, similar, and long-term Episode catalog. Generalize only when evidence supports it.\n\nYou may propose, merge, split, supersede, archive, or reject Candidates affecting skills, Root, ENTRY, Execute, evaluators, Learn, episode/context formats, runner, model selection, or Candidate operations. Check relevant existing Candidates and rejected history enough to avoid obvious duplicates. Preserve applicability, non-applicability, dependencies, conflicts, costs, risks, evidence, and rollback conditions.\n\n`NO_CHANGE` is a successful outcome. Learn itself must never return `local_learn`; its observations go directly in `fragment`.\n\nReturn one JSON object only with keys `result` and `fragment`.\n",
+  "prompt_digest": "ac0e9c6efa1c04d4b5e8ca2d8201e9243fbe88ab2baf0cf039dc6f445fbd2266",
+  "prompt_path": "prompts/learn.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "1b39835d91736a8e79953a9ad73e207d7cb043f38c74cc536c0b00d5222097e5",
+  "run_id": "run-claude-primary-continuation-20260823",
+  "schema_version": 1
+}

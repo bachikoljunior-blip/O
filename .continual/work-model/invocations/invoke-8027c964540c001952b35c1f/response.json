@@ -1,0 +1,75 @@
+{
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-8027c964540c001952b35c1f",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "execute",
+      "evidence_refs": [
+        "agi/WORK_EXECUTION_STATE.json",
+        ".continual/work-model/invocations/invoke-8027c964540c001952b35c1f/request.json"
+      ],
+      "observations": [
+        "PR 247 merged f0aa93b (CI 32607999744 green, head eff0101 unchanged); PR 249 merged b2e8093 (CI 32611268930 green, head 759fca8 unchanged) - multisession retention family 238->247->249 fully integrated",
+        "PR 245 red run 32607076987 root-caused as a real deterministic premise failure (five reconstructed observed targets, five distinct AST shapes, zero same-shape literal deltas) and merged dfdbca2 after re-scoping the end-to-end test to the deterministic fail-closed diagnostic (fix 553b46b, CI 32611394647 green)",
+        "PR 250 closed un-merged with premise-falsification evidence (comment 5383921000) - recorded as a justified deviation from the unit goal",
+        "Main push runs green on both merge tips (32613846076 on b2e8093; 32614408835 on dfdbca2)",
+        "Recursive-member non-determinism mechanism corrected from hash-seed dependence to a per-process entropy leak through the digest layer (evidence_frontier_iterated_expansion.py:399 into recursive_evidence_frontier_growth.py:61,72), adversarially verified; follow-up unit: bind _recursive_history_commitment to stable behavior semantics only"
+      ],
+      "purpose": "Backlog integration unit: settle PRs 247, 245, 249, 250 against verified main",
+      "unresolved": []
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Three direct integration-procedure observations, none indicating an execute-prompt change: (1) the exact-head green-CI plus unchanged-head verification protocol held across three merges and one closure with no unsafe integration; (2) when a sibling diagnostic falsifies a stacked PR's premise, closing it with exact retained evidence dominates refreshing it, saving a full CI cycle while staying truthful; (3) mechanism attributions for observed non-determinism must be verified against code before being persisted in durable records - the initial hash-seed attribution was wrong and had to be corrected across PR body and continuation state, at the cost of an extra correction pass."
+    },
+    "result": {
+      "deviations": [
+        {
+          "actual": "closed un-merged with retained premise-falsification evidence (closure comment 5383921000)",
+          "item": "PR 250",
+          "justification": "PR 250's milestone requires the first observed-schema stage to learn a Candidate. The PR 245 root-cause proved that stage fails closed deterministically on the current chain (no same-shape literal variation among the deterministically reconstructible learned programs), so a refresh plus a ~65-minute CI cycle could only re-demonstrate a failure already proven twice locally. Closing with exact retained evidence was the minimal-expected-time truthful outcome; the design may return when the chain truthfully exposes observed same-shape literal variation.",
+          "planned": "retarget to main, refresh, and merge on green fresh exact-head CI"
+        }
+      ],
+      "goal_met": true,
+      "integrations": [
+        {
+          "ci": "run 32607999744 success on unchanged exact head eff0101ba7dbb8a675971a0edc9779565ba266e0",
+          "merge_sha": "f0aa93bdf938b018b73bfbe075b77e12de4daf1b",
+          "outcome": "merged",
+          "pr": 247
+        },
+        {
+          "ci": "run 32611394647 success (71.5min) on unchanged exact head 553b46bb111f05656edb78053cfde7bb3c48e11d",
+          "merge_sha": "dfdbca22f11e265538ce7ad732bb1d3c4a0e2e71",
+          "outcome": "merged after root-cause repair at the demonstrated boundary",
+          "pr": 245,
+          "red_run_root_cause": "Run 32607076987 (head 2376ed2) was a real deterministic failure, reproduced locally on 2376ed2 and pre-merge a097ab1: the five reconstructed observed targets carry five pairwise-distinct AST shapes, so the observed-schema campaign's premise (numeric-literal deltas between same-shape learned programs) has zero applicable pairs and schedule construction fails closed. The recursive member's identity additionally varies across processes at identical seed and tree. Repair 553b46b re-scoped the end-to-end test to the deterministic fail-closed diagnostic over the four reconstructible core members, retaining the module body and recording the finding in its docstring; synthetic unit tests unchanged."
+        },
+        {
+          "ci": "run 32611268930 success on unchanged exact head 759fca814fc7cf590a930fd97cf878422d0813a1, after retarget to main and refresh onto post-#247 main with local validation (single-test delta passed in 81s)",
+          "merge_sha": "b2e80932106800eed1320143a51a350e950fddac",
+          "outcome": "merged",
+          "pr": 249
+        },
+        {
+          "evidence": "closure comment 5383921000 referencing the merged PR 245 diagnostic dfdbca2 and CI run 32611394647; exact head 3f74ccd8a5e5e9595b9c7ba347190b74acf58f5f retained",
+          "outcome": "closed with evidence, not merged (see deviations)",
+          "pr": 250
+        }
+      ],
+      "main_confirmation": "Push-event full-suite runs green on both resulting merge tips: run 32613846076 success on b2e8093 and run 32614408835 success on final tip dfdbca2.",
+      "post_merge_correction": "The initial attribution of the recursive-member non-determinism to hash-seed dependence in the bounded synthesis search was wrong and has been corrected in the durable records (PR 245 body; continuation state). An adversarially verified read-only code sweep (11 agents; 5 candidate sites refuted, 2 confirmed) established the actual mechanism: per-process entropy (uuid4-derived fresh_engine_run_ids via src/continual/store.py:26-27, plus wall-clock-timestamped trial ledger bytes) enters the iterated-expansion report digest at src/agi/evidence_frontier_iterated_expansion.py:399, and src/agi/recursive_evidence_frontier_growth.py:61,72 folds that unstable digest into the history commitment, which salts support-input rotation, variant-constant selection, and schedule ordering, so the first-two-unsupported scan selects different targets on every run. This violates the commitment's own stable-semantics docstring; the compliant contrast is src/agi/evidence_derived_target_synthesis.py:45-70. Commit message 553b46b retains the superseded wording as a historical record; module/test docstring corrections are assigned to the follow-up unit that fixes the mechanism.",
+      "scope": "agi/backlog-integration",
+      "unit_id": "unit-08e5e71d6d2e996c315bdbe8"
+    }
+  },
+  "output_digest": "7b0b9a7448fa2fe9903bf43644131b6273f3895953eb725d66da02a1665b2242",
+  "received_at": "2026-08-23T05:03:48.463915Z",
+  "request_digest": "d4ce387daab7c013d5df91c16552f8db914735b201d181bf34ba813e0e1eb024",
+  "response_digest": "a1e1ed2fa9c939da1ac4d57fe2693f5ee2b4801b1bc946ae1fe651a1789ad2ca",
+  "schema_version": 1
+}

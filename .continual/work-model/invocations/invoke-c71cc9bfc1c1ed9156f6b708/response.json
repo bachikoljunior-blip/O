@@ -1,0 +1,49 @@
+{
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-c71cc9bfc1c1ed9156f6b708",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        "artifacts/unit-08e5e71d6d2e996c315bdbe8-result.json",
+        ".continual/work-model/invocations/invoke-8027c964540c001952b35c1f/response.json"
+      ],
+      "observations": [
+        "Execute result persisted at artifacts/unit-08e5e71d6d2e996c315bdbe8-result.json with goal_met true and one justified deviation (PR 250 closed as premise-falsified)",
+        "All cited evidence is externally verifiable: three merges on green exact-head CI, two green main push runs, one evidenced closure",
+        "Orphaned chatgpt-bound duplicate Execute request invoke-32c679e1 exists from an unflagged work-resume; documented, not to be answered"
+      ],
+      "purpose": "Select the next unit after the backlog-integration Execute result",
+      "unresolved": [
+        "Task Evaluate verdict for the backlog-integration milestone"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Two direct observations from this Root context's supplied state, neither indicating a root-prompt change: (1) the pending list contains an orphaned duplicate Execute request invoke-32c679e1d5e70470a41d26cf frozen under the secondary writer's identity because the work-resume CLI defaults executor_binding to current_chatgpt_work_session when the flag is omitted - the invocation-id digest includes the binding, so the engine could not match the already-answered claude-bound invocation and froze a new request; the orphan must not be answered by either writer and a CLI hardening unit (require explicit binding, no default) is a candidate for a later Root selection. (2) The unit result records a justified deviation (PR 250 closed with evidence instead of merged), which the selected task_evaluate unit must adjudicate rather than silently accept."
+    },
+    "result": {
+      "component": "task_evaluate",
+      "expected_outputs": [
+        "verdict PASS/FAIL/UNCERTAIN for the backlog-integration milestone with the PR 250 closed-not-merged deviation explicitly adjudicated against the milestone's substance",
+        "explicit confirmation that the user-level end goal is not marked complete by this milestone"
+      ],
+      "goal": "Evaluate the completed backlog-integration unit (unit-08e5e71d6d2e996c315bdbe8) against the ENTRY milestone success conditions, weighing the recorded PR 250 deviation: verify from the persisted result and the cited external evidence (merge SHAs f0aa93b/b2e8093/dfdbca2, CI runs 32607999744/32611268930/32611394647, main push runs 32613846076/32614408835, closure comment 5383921000) whether the milestone 'all open backlog PRs merged on green fresh exact-head CI against verified main, with any red root-caused and repaired only at its demonstrated boundary' is met in substance, and return PASS, FAIL, or UNCERTAIN with the deviation explicitly adjudicated. Do not evaluate the user-level end goal, which remains open.",
+      "inputs": [
+        "artifacts/unit-08e5e71d6d2e996c315bdbe8-result.json",
+        "artifacts/entry.json",
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "rationale": "Expected-time ranking: the unit's evidence is complete and externally verifiable now, so evaluation is the cheapest next step and unblocks Consolidate and Learn; selecting new capability work before evaluating the finished unit would leave the episode unconsolidated and its procedural learnings unpersisted. The next capability unit (binding the recursive history commitment to stable behavior semantics, fixing the verified per-process entropy leak at evidence_frontier_iterated_expansion.py:399 / recursive_evidence_frontier_growth.py:61,72) is deliberately deferred to the Root call after this episode's Learn completes.",
+      "scope": "agi/backlog-integration"
+    }
+  },
+  "output_digest": "6e8991995cf8262322f150b417922ef53b78f7ca1c5b8439c5afde750996d8a5",
+  "received_at": "2026-08-23T05:07:06.659151Z",
+  "request_digest": "d1dcbbb81416d02d697463609ff0ca0fd15c7a59252905caf90beaca86398a45",
+  "response_digest": "9b63c90d8ff6542a6f8535b86bb1d73572f755f784f96cf583d4285f4d04570c",
+  "schema_version": 1
+}

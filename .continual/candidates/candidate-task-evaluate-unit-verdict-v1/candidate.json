@@ -13,6 +13,7 @@
   "rejected_reasons": [],
   "risk": "An overlay could overproduce unit PASS; regression must require explicit bounded success conditions and preserve original verdict independence.",
   "scope_states": {
+    "agi/backlog-integration": "NEED_MORE_EVIDENCE",
     "continual/incremental-task-evaluation": "REMAIN_CANDIDATE"
   },
   "source_refs": [
@@ -23,7 +24,16 @@
   "supporting_evidence": [
     "run-work-mode-handoff-v2 unit-f67e779cf0b2194e4e3e6542",
     "PR 256 exact-head CI 32591220738",
-    "main 976efad5fe0f2d1348ba97e5ba67d6253d331958"
+    "main 976efad5fe0f2d1348ba97e5ba67d6253d331958",
+    {
+      "at": "2026-08-23T05:11:03.809201Z",
+      "evidence": [
+        "Trial output: dual verdicts present and non-conflated (verdict FAIL / unit_verdict PASS), each with independent evidence provenance",
+        "Deviation adjudication placed inside unit_verdict_reason as the overlay intends, not absorbed into the task verdict",
+        "Claim boundary text preserved: PASS unit_verdict explicitly marked as not AGI evidence"
+      ],
+      "scope": "agi/backlog-integration"
+    }
   ],
   "target_component": "task_evaluate",
   "tested_with": [],

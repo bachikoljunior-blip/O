@@ -1,0 +1,91 @@
+{
+  "component": "task_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-23T05:08:30.671809Z",
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-169fa311d23f8eea8447b43e",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "payload": {
+    "active_component_path": "prompts/task_evaluate.md",
+    "candidate": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "expected_scope": "continual/incremental-task-evaluation",
+      "prompt_mode": "overlay"
+    },
+    "execution_unit": {
+      "component": "task_evaluate",
+      "expected_outputs": [
+        "verdict PASS/FAIL/UNCERTAIN for the backlog-integration milestone with the PR 250 closed-not-merged deviation explicitly adjudicated against the milestone's substance",
+        "explicit confirmation that the user-level end goal is not marked complete by this milestone"
+      ],
+      "goal": "Evaluate the completed backlog-integration unit (unit-08e5e71d6d2e996c315bdbe8) against the ENTRY milestone success conditions, weighing the recorded PR 250 deviation: verify from the persisted result and the cited external evidence (merge SHAs f0aa93b/b2e8093/dfdbca2, CI runs 32607999744/32611268930/32611394647, main push runs 32613846076/32614408835, closure comment 5383921000) whether the milestone 'all open backlog PRs merged on green fresh exact-head CI against verified main, with any red root-caused and repaired only at its demonstrated boundary' is met in substance, and return PASS, FAIL, or UNCERTAIN with the deviation explicitly adjudicated. Do not evaluate the user-level end goal, which remains open.",
+      "inputs": [
+        "artifacts/unit-08e5e71d6d2e996c315bdbe8-result.json",
+        "artifacts/entry.json",
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "rationale": "Expected-time ranking: the unit's evidence is complete and externally verifiable now, so evaluation is the cheapest next step and unblocks Consolidate and Learn; selecting new capability work before evaluating the finished unit would leave the episode unconsolidated and its procedural learnings unpersisted. The next capability unit (binding the recursive history commitment to stable behavior semantics, fixing the verified per-process entropy leak at evidence_frontier_iterated_expansion.py:399 / recursive_evidence_frontier_growth.py:61,72) is deliberately deferred to the Root call after this episode's Learn completes.",
+      "scope": "agi/backlog-integration",
+      "unit_id": "unit-c66a42d1bd9f47eb4fa95658"
+    },
+    "preflight_selection": {
+      "applicability": "APPLICABLE - target_component task_evaluate matches; no depends_on, no conflicts_with; candidate status is candidate with REMAIN_CANDIDATE in its own expected scope continual/incremental-task-evaluation, so this trial is scoped to the current unit only and confers no promotion",
+      "baseline_needed": false,
+      "baseline_reason": "The overlay strictly adds a field (unit_verdict) and a non-conflation rule to the active evaluation contract; the active-prompt behavior is recoverable from prior episodes' evaluation records, so a fresh baseline run would add cost without discriminating value.",
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "decision": "TRIAL_CANDIDATE",
+      "evidence_to_collect": [
+        "The task_evaluate response contains both verdict (original task goal, expected: not passed / still open) and unit_verdict (backlog-integration milestone) with evidence and reason",
+        "The PR 250 closed-not-merged deviation is explicitly adjudicated inside unit_verdict rather than silently absorbed",
+        "No weakening of the original goal or the external claim boundary appears in the evaluation text"
+      ],
+      "reason": "This is the first indexed candidate whose target shape exactly matches the upcoming component instance: the selected task_evaluate unit must adjudicate a bounded unit milestone (backlog integration, with a recorded deviation) separately from the open user-level end goal, and the candidate overlay prescribes precisely that dual structure - an original-goal verdict plus a separately falsifiable unit_verdict, with the explicit rule that a passing unit never implies the original task passed. Trialing it on this unit is low risk (evaluation-only component, no external side effects, no state mutation beyond the evaluation record) and collects the first discriminating evidence for this candidate.",
+      "regression_checks": [
+        "Evaluation must preserve negative evidence references exactly (red run 32607076987 and the closure record)",
+        "Evaluation must not mark the user-level end goal complete"
+      ],
+      "risk_dimensions": {
+        "failure_risk": "low - worst case is a malformed dual verdict, caught at post-result",
+        "latency_tokens": "negligible overlay size",
+        "quality": "upside - enforces milestone/end-goal separation this unit already requires",
+        "tool_external_cost": "none - no external calls in evaluation"
+      },
+      "rollback": "The candidate remains status candidate; scope_states unchanged by a pre-application trial. If the trial output conflates verdicts or weakens the goal, record FAIL evidence against the candidate at post-result and evaluate with the active prompt's contract instead.",
+      "scope": "agi/backlog-integration"
+    },
+    "snapshot": {
+      "continuation_stack": [],
+      "created_at": "2026-08-23T00:34:34.029935Z",
+      "current_component": "task_evaluate",
+      "current_unit": "unit-c66a42d1bd9f47eb4fa95658",
+      "entry_ref": "artifacts/entry.json",
+      "environment": {
+        "active_components_digest": "3974833d170f43432c948095",
+        "model": "claude-fable-5-session-configured-unverified",
+        "os": "Linux-6.18.44-fc-v21-x86_64-with-glibc2.39",
+        "python": "3.11.15",
+        "repository_commit": "72ce3f0ccc9f255acd49a6aa61eec3c6dc82f4ff",
+        "runner": "python-engine-v2"
+      },
+      "error_count": 0,
+      "last_result_ref": "artifacts/unit-08e5e71d6d2e996c315bdbe8-result.json",
+      "phase": "unit_pending",
+      "revision": 4,
+      "run_id": "run-claude-primary-continuation-20260823",
+      "status": "continue",
+      "updated_at": "2026-08-23T05:07:07.693562Z"
+    }
+  },
+  "payload_digest": "92ec868c0a3fe335257eb6ababc2827a85133d57b66ac8d0b4e2cf7d39935926",
+  "prompt_content": "# TASK EVALUATE\n\nEvaluate whether the original user task—not merely the most recent unit—satisfies its explicit success conditions. Prefer tests, builds, lint, real files, git state, API results, benchmark reports, independently checkable artifacts, and user-defined acceptance criteria. Self-report and architectural sophistication are not sufficient evidence.\n\nReturn `PASS`, `FAIL`, or `UNCERTAIN`, with evidence provenance and precise repair information. For AGI claims, use the evidence gate in `src/agi/evaluation.py`; a development benchmark pass alone cannot produce PASS for the full AGI goal.\n\nAt the end perform Local Learn on this evaluator execution.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.\n\n# Scoped Candidate overlay\n\nCandidate ID: candidate-task-evaluate-unit-verdict-v1\n\nEvaluate the original task goal without weakening it and return its verdict in `verdict`. When the current bounded execution unit has a separately falsifiable completion condition, also return `unit_verdict` as PASS, FAIL, or UNCERTAIN with evidence and reason. A passing unit never implies the original task passed. Preserve negative evidence and the strict external claim boundary.\n",
+  "prompt_digest": "2d9d11b17f47a342bdd5834e01ea25746687232e6aa5ed14828c80a443d61230",
+  "prompt_path": ".continual/runs/run-claude-primary-continuation-20260823/effective-prompts/task_evaluate-candidate-task-evaluate-unit-verdict-v1-9f238610290182cd90e407d4.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "1a39177c8b492203d3a717b66fd14d39f81b0092322fcc7d654498b1a71ddfe0",
+  "run_id": "run-claude-primary-continuation-20260823",
+  "schema_version": 1
+}

@@ -1,0 +1,72 @@
+{
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-41549971153274be64830c53",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "learn",
+      "evidence_refs": [
+        ".continual/runs/run-claude-primary-continuation-20260823/artifacts/unit-08e5e71d6d2e996c315bdbe8-result.json",
+        ".continual/runs/run-claude-primary-continuation-20260823/candidate-trials/invoke-e49d74abef5b9cfde613405a.json",
+        ".continual/candidates/index.json"
+      ],
+      "observations": [
+        "One generalizable rule met the evidence bar: selection commitments must bind to stable behavior semantics - supported by a verified violation, a compliant in-repo contrast, a live divergence, and a concrete downstream cost (an end-to-end test permanently narrowed); proposed as candidate-stable-semantics-commitment-v1 after a duplicate check against the full index",
+        "The dual-verdict evaluation candidate accumulated its first positive trial and remains a candidate pending discriminating trials",
+        "Single-instance findings (goal phrasing for integration units, CLI binding default) were kept as observations and queued units, not Candidates - generalizing from one instance would exceed the evidence",
+        "Episode catalog check: no earlier episode in the supplied catalog records a determinism rule for commitments, consistent with the duplicate check"
+      ],
+      "purpose": "Post-task learning over episode-claude-primary-continuation-20260823",
+      "unresolved": []
+    },
+    "result": {
+      "candidate_operations": [
+        {
+          "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+          "operation": "KEEP_CANDIDATE",
+          "reason": "Post-result evidence from this episode (one positive trial, zero contradictions, NEED_MORE_EVIDENCE in agi/backlog-integration) is already merged into the candidate record; continue trialing on future task_evaluate units, prioritizing the discriminating shapes this trial could not exercise (FAIL/UNCERTAIN unit outcomes, child-unit continuations), then route through the deterministic protected-baseline regression gate."
+        }
+      ],
+      "decision": "PROPOSE_CANDIDATES",
+      "no_other_changes": "NO_CHANGE for skills, Root, ENTRY, evaluators, Learn, episode/context formats, runner, model selection, and all remaining candidates. Two further episode findings are deliberately left as queued execution units rather than Candidates, because they are code repairs with single-instance evidence, not generalizable prompt rules: (1) bind _recursive_history_commitment to stable behavior semantics (the concrete fix the proposed candidate generalizes), and (2) require an explicit --executor-binding on work-resume/work-submit after the orphaned duplicate request invoke-32c679e1 demonstrated the default-binding hazard.",
+      "proposed_candidates": [
+        {
+          "applicability": [
+            "Execute units that create or modify campaign schedules, commitments, salts, or selection orderings under src/agi/",
+            "Repair units for existing non-deterministic selection paths"
+          ],
+          "candidate_id": "candidate-stable-semantics-commitment-v1",
+          "conflicts_with": [],
+          "costs": "One extra deterministic re-run per authored commitment during trials; negligible prompt overhead.",
+          "depends_on": [],
+          "duplicate_check": "Checked all eight candidates in the supplied index: none target commitment/salt construction or determinism (closest are execute-targeted campaign candidates for live-model migration, stage isolation, request observability, benchmark suites, workspace, and context hygiene - all orthogonal). No rejected-history entry in the index covers this rule.",
+          "expected_scope": "agi/campaign-authoring",
+          "non_applicability": [
+            "Integration/merge units with no schedule or commitment authorship (e.g., the backlog-integration unit of this episode)",
+            "Evaluation, consolidation, and Learn components",
+            "Audit-only digests never consumed by selection or truncation (per-run report digests may keep run ids if nothing decisional reads them)"
+          ],
+          "prompt_content": "When an execution unit authors or modifies a precommitted schedule, history commitment, salt, or any ordering that later selects targets or truncates search, derive that value only from stable behavior semantics: program descriptors, support examples, domains, and digest-ranked schedule content. Never fold whole run reports, engine run ids, trial-ledger bytes, timestamps, or other per-process values into such a commitment; a reproducibility check (two fresh processes, identical seed and tree, identical selection) is part of the unit's evidence. The compliant in-repo pattern is evidence_derived_target_synthesis.py; the violation pattern to avoid is folding a full evidence report digest into a selection salt.",
+          "prompt_mode": "overlay",
+          "risk": "An over-broad reading could forbid legitimate audit digests or force sorting costs onto hot paths; the rule therefore binds only values consumed by selection, ordering, or truncation, and the reproducibility check bounds the trial cost to one duplicate process run per authored commitment.",
+          "rollback_conditions": "Reject for scope if a trial shows the rule blocks a commitment that is genuinely per-run by design (none known), or if the reproducibility check proves too expensive relative to unit runtime on two consecutive trials.",
+          "supersedes": [],
+          "supporting_evidence": [
+            "Live divergence: two identical-seed, identical-tree runs of run_recursive_evidence_frontier_growth selected different recursive targets (sub- vs mul-wrap), recorded in this episode and in merged PR 245's corrected body",
+            "Adversarially verified sweep (11 agents; 5 candidate sites refuted, 2 confirmed): evidence_frontier_iterated_expansion.py:399 digests a report embedding uuid4 fresh_engine_run_ids (src/continual/store.py:26-27) and timestamp-tainted trial bytes; recursive_evidence_frontier_growth.py:61,72 folds that digest into history_digest, which salts support-input rotation, variant-constant selection, and schedule ordering consumed by a first-two-unsupported scan",
+            "Compliant in-repo contrast: evidence_derived_target_synthesis.py:45-70 explicitly forbids salting target selection with a whole evidence digest",
+            "Consequence evidence: the instability forced PR 245's end-to-end test to exclude the recursive member from assertions entirely (fix 553b46b, merged dfdbca2 on green run 32611394647)"
+          ],
+          "target_component": "execute",
+          "what_it_changes": "Adds a binding rule for execute units that author selection commitments: salts and orderings must be functions of stable behavior semantics only, with a two-process reproducibility check as required evidence."
+        }
+      ]
+    }
+  },
+  "output_digest": "53408246680f1c161ee407218005d0268d1977fcd791c04b8aedc7d0d4ec8849",
+  "received_at": "2026-08-23T05:14:10.300980Z",
+  "request_digest": "1b39835d91736a8e79953a9ad73e207d7cb043f38c74cc536c0b00d5222097e5",
+  "response_digest": "134b8620dea5b7ecc84707fbaa26cf5626d821eda5d15016f56eb904dd604014",
+  "schema_version": 1
+}

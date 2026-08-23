@@ -1,0 +1,130 @@
+{
+  "component": "root",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-23T05:05:46.839227Z",
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-c71cc9bfc1c1ed9156f6b708",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "payload": {
+    "active_component_path": "prompts/root.md",
+    "continuation_stack": [],
+    "entry": {
+      "constraints": [
+        "Single-writer discipline: serialized main integration; never mutate the secondary writer's branches, runs, or pending invocations",
+        "Smartphone-first operator constraint (inbox entry 5): no terminal steps required of the user, no secrets in chat or durable state, no spend without explicit bounded approval",
+        "Truthful reporting: internal tests, CI, merges, and milestones are never AGI evidence; preserve negative evidence exactly"
+      ],
+      "end_goal": "The user-level objective: shorten expected real-world elapsed time toward genuine AGI with truthful reporting; the automation-constructed strict external gate is an optional verification tool, not the completion criterion (inbox entry 4).",
+      "immediate_blockers": [
+        "PR 247 and PR 245 fresh CI runs are still in progress; merges wait on their conclusions",
+        "Main merge-push run for f46b5bc is still confirming the post-restore tree"
+      ],
+      "next_falsifiable_milestone": "All open backlog PRs (247, 245, then 249 and 250) merged on green fresh exact-head CI against verified main, with any red root-caused and repaired only at its demonstrated boundary.",
+      "objective": "Continue primary O development as the designated Claude primary: settle the remaining backlog integrations, then select and implement the next falsifiable capability unit.",
+      "state_root_needs": "Open-PR table with heads and CI run ids (247: re-refreshed after the transient inbox breakage; 245: head 2376ed2 on post-#230 main; 249 blocked on 247; 250 blocked on 245), current main tip, agi/WORK_STRATEGY.json saturation assessment, and inbox revisions 4-9 acknowledgments.",
+      "success_conditions": [
+        {
+          "condition": "PR 247 merged on green fresh exact-head CI with unchanged head",
+          "evidence": "GitHub merge SHA plus the passing CI run id recorded in continuation state"
+        },
+        {
+          "condition": "PR 245 merged on green fresh exact-head CI on its post-#230 refreshed head",
+          "evidence": "GitHub merge SHA plus the passing CI run id; its integration boundary (exact two-file delta on verified post-#230 main) satisfied"
+        },
+        {
+          "condition": "PRs 249 and 250 retargeted to main, refreshed, and merged on green fresh exact-head CI in dependency order",
+          "evidence": "GitHub merge SHAs plus passing CI run ids"
+        },
+        {
+          "condition": "Main merge-push CI green on the resulting tip",
+          "evidence": "Passing push-event workflow run on the final main SHA"
+        },
+        {
+          "condition": "Next capability unit selected by Root with an expected-time rationale under agi/WORK_STRATEGY.json",
+          "evidence": "Root output persisted in this Run with the selected unit and rationale"
+        }
+      ]
+    },
+    "last_evaluation": null,
+    "last_result": {
+      "deviations": [
+        {
+          "actual": "closed un-merged with retained premise-falsification evidence (closure comment 5383921000)",
+          "item": "PR 250",
+          "justification": "PR 250's milestone requires the first observed-schema stage to learn a Candidate. The PR 245 root-cause proved that stage fails closed deterministically on the current chain (no same-shape literal variation among the deterministically reconstructible learned programs), so a refresh plus a ~65-minute CI cycle could only re-demonstrate a failure already proven twice locally. Closing with exact retained evidence was the minimal-expected-time truthful outcome; the design may return when the chain truthfully exposes observed same-shape literal variation.",
+          "planned": "retarget to main, refresh, and merge on green fresh exact-head CI"
+        }
+      ],
+      "goal_met": true,
+      "integrations": [
+        {
+          "ci": "run 32607999744 success on unchanged exact head eff0101ba7dbb8a675971a0edc9779565ba266e0",
+          "merge_sha": "f0aa93bdf938b018b73bfbe075b77e12de4daf1b",
+          "outcome": "merged",
+          "pr": 247
+        },
+        {
+          "ci": "run 32611394647 success (71.5min) on unchanged exact head 553b46bb111f05656edb78053cfde7bb3c48e11d",
+          "merge_sha": "dfdbca22f11e265538ce7ad732bb1d3c4a0e2e71",
+          "outcome": "merged after root-cause repair at the demonstrated boundary",
+          "pr": 245,
+          "red_run_root_cause": "Run 32607076987 (head 2376ed2) was a real deterministic failure, reproduced locally on 2376ed2 and pre-merge a097ab1: the five reconstructed observed targets carry five pairwise-distinct AST shapes, so the observed-schema campaign's premise (numeric-literal deltas between same-shape learned programs) has zero applicable pairs and schedule construction fails closed. The recursive member's identity additionally varies across processes at identical seed and tree. Repair 553b46b re-scoped the end-to-end test to the deterministic fail-closed diagnostic over the four reconstructible core members, retaining the module body and recording the finding in its docstring; synthetic unit tests unchanged."
+        },
+        {
+          "ci": "run 32611268930 success on unchanged exact head 759fca814fc7cf590a930fd97cf878422d0813a1, after retarget to main and refresh onto post-#247 main with local validation (single-test delta passed in 81s)",
+          "merge_sha": "b2e80932106800eed1320143a51a350e950fddac",
+          "outcome": "merged",
+          "pr": 249
+        },
+        {
+          "evidence": "closure comment 5383921000 referencing the merged PR 245 diagnostic dfdbca2 and CI run 32611394647; exact head 3f74ccd8a5e5e9595b9c7ba347190b74acf58f5f retained",
+          "outcome": "closed with evidence, not merged (see deviations)",
+          "pr": 250
+        }
+      ],
+      "main_confirmation": "Push-event full-suite runs green on both resulting merge tips: run 32613846076 success on b2e8093 and run 32614408835 success on final tip dfdbca2.",
+      "post_merge_correction": "The initial attribution of the recursive-member non-determinism to hash-seed dependence in the bounded synthesis search was wrong and has been corrected in the durable records (PR 245 body; continuation state). An adversarially verified read-only code sweep (11 agents; 5 candidate sites refuted, 2 confirmed) established the actual mechanism: per-process entropy (uuid4-derived fresh_engine_run_ids via src/continual/store.py:26-27, plus wall-clock-timestamped trial ledger bytes) enters the iterated-expansion report digest at src/agi/evidence_frontier_iterated_expansion.py:399, and src/agi/recursive_evidence_frontier_growth.py:61,72 folds that unstable digest into the history commitment, which salts support-input rotation, variant-constant selection, and schedule ordering, so the first-two-unsupported scan selects different targets on every run. This violates the commitment's own stable-semantics docstring; the compliant contrast is src/agi/evidence_derived_target_synthesis.py:45-70. Commit message 553b46b retains the superseded wording as a historical record; module/test docstring corrections are assigned to the follow-up unit that fixes the mechanism.",
+      "scope": "agi/backlog-integration",
+      "unit_id": "unit-08e5e71d6d2e996c315bdbe8"
+    },
+    "preflight_selection": {
+      "decision": "USE_ACTIVE",
+      "reason": "No candidate targets this component.",
+      "scope": "root"
+    },
+    "snapshot": {
+      "continuation_stack": [],
+      "created_at": "2026-08-23T00:34:34.029935Z",
+      "current_component": "execute",
+      "current_unit": "unit-08e5e71d6d2e996c315bdbe8",
+      "entry_ref": "artifacts/entry.json",
+      "environment": {
+        "active_components_digest": "3974833d170f43432c948095",
+        "model": "claude-fable-5-session-configured-unverified",
+        "os": "Linux-6.18.44-fc-v21-x86_64-with-glibc2.39",
+        "python": "3.11.15",
+        "repository_commit": "72ce3f0ccc9f255acd49a6aa61eec3c6dc82f4ff",
+        "runner": "python-engine-v2"
+      },
+      "error_count": 0,
+      "last_result_ref": "artifacts/unit-08e5e71d6d2e996c315bdbe8-result.json",
+      "phase": "root_pending",
+      "revision": 3,
+      "run_id": "run-claude-primary-continuation-20260823",
+      "status": "continue",
+      "updated_at": "2026-08-23T05:05:46.834863Z"
+    }
+  },
+  "payload_digest": "53ba2d383c2136aa5b1900644411ebd317332994cfb02fdff3e49595afdfe9ee",
+  "prompt_content": "# ROOT\n\nYou are a fresh Root context. Use only the supplied persistent state and references. Select exactly one next semantic execution unit and stop.\n\nThe unit must be concrete, falsifiable, and small enough to evaluate. Choose `execute` for work, `task_evaluate` only when evidence is ready, and repair work after FAIL or UNCERTAIN. Do not mark an ambitious user goal complete merely because one prototype milestone succeeded. Preserve parent continuation explicitly when scheduling a child unit.\n\nReturn `result.component`, a non-empty `result.goal`, scope, inputs/evidence needed, and expected outputs. At the end perform Local Learn while this Root context still exists.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.\n",
+  "prompt_digest": "de8b4016af22e18276d84ac00769eaed027cb7d999fa1a21f15ef60099b17c0e",
+  "prompt_path": "prompts/root.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "d1dcbbb81416d02d697463609ff0ca0fd15c7a59252905caf90beaca86398a45",
+  "run_id": "run-claude-primary-continuation-20260823",
+  "schema_version": 1
+}
