@@ -29,6 +29,10 @@ _CONTROL_PATHS = {
     "external_observations": Path("agi/CONTEXT_OBSERVATION_LEDGER.json"),
 }
 
+SEMANTIC_CONTEXT_COMPONENTS = frozenset(
+    {"root", "execute", "task_evaluate", "consolidate_episode", "learn"}
+)
+
 
 def _required_mapping(value: Any, label: str) -> dict[str, Any]:
     if not isinstance(value, Mapping):
@@ -186,6 +190,7 @@ def verify_decision_context_manifest(
     manifest: Mapping[str, Any],
     *,
     store: Store,
+    expected_component: str | None = None,
 ) -> dict[str, Any]:
     value = _required_mapping(manifest, "decision_context")
     supplied = value.pop("manifest_digest", None)
@@ -194,6 +199,11 @@ def verify_decision_context_manifest(
     expected = store.stable_digest(value, length=64)
     if supplied != expected:
         raise ContextKernelError("decision context manifest digest mismatch")
+    component = _required_text(value.get("component"), "decision_context.component")
+    if component not in SEMANTIC_CONTEXT_COMPONENTS:
+        raise ContextKernelError("unsupported decision context component")
+    if expected_component is not None and component != expected_component:
+        raise ContextKernelError("decision context component binding mismatch")
     sources = value.get("sources")
     if not isinstance(sources, list) or not sources:
         raise ContextKernelError("decision context sources must be non-empty")
@@ -239,14 +249,15 @@ def verify_decision_context_manifest(
     return value
 
 
-def build_root_decision_context(
+def build_decision_context(
     root: Path,
     *,
     run_id: str,
+    component: str,
     payload_snapshot: Mapping[str, Any],
     store: Store | None = None,
 ) -> dict[str, Any] | None:
-    """Build O's immutable Root decision-control projection.
+    """Build O's immutable semantic-component decision-control projection.
 
     Generic Work bridge users without any AGI control-plane files remain valid.
     Once any control source is present, however, the Context Kernel is enabled
@@ -255,6 +266,8 @@ def build_root_decision_context(
 
     root = root.resolve()
     store = store or Store(root)
+    if component not in SEMANTIC_CONTEXT_COMPONENTS:
+        raise ContextKernelError(f"unsupported decision context component: {component}")
     present = {
         source_id: (root / path).is_file()
         for source_id, path in _CONTROL_PATHS.items()
@@ -297,7 +310,7 @@ def build_root_decision_context(
     if state.get("mode") != "work_o_engine_single_writer":
         raise ContextKernelError("unsupported work execution state mode")
     if state.get("status") != "running":
-        raise ContextKernelError("Root decision context requires a running Work lease")
+        raise ContextKernelError("decision context requires a running Work lease")
     execution_id = _required_text(state.get("execution_id"), "state.execution_id")
     owner_kind = _required_text(state.get("owner_kind"), "state.owner_kind")
     generation = _required_int(
@@ -309,7 +322,7 @@ def build_root_decision_context(
         state.get("stale_after_seconds"), "state.stale_after_seconds", minimum=1
     )
     if state.get("active_run_id") != run_id:
-        raise ContextKernelError("Work lease active_run_id does not match Root run")
+        raise ContextKernelError("Work lease active_run_id does not match decision run")
     inbox_state = _required_mapping(
         state.get("user_input_inbox"), "state.user_input_inbox"
     )
@@ -450,7 +463,7 @@ def build_root_decision_context(
             version=f"generation:{generation};execution:{execution_id};heartbeat:{heartbeat_at}",
             observed_at=heartbeat_at,
             projection=state_projection,
-            include_reason="Bind every Root decision to the sole writer, fence, inbox cursor, publication rule, and completion authority.",
+            include_reason="Bind every semantic decision to the sole writer, fence, inbox cursor, publication rule, and completion authority.",
             selected_fields=list(state_projection),
             excluded_fields=[
                 "full historical integration detail",
@@ -476,7 +489,7 @@ def build_root_decision_context(
             version=f"revision:{inbox_revision}",
             observed_at=_required_text(inbox.get("updated_at"), "inbox.updated_at"),
             projection=inbox_projection,
-            include_reason="Prevent a live user direction known outside O from disappearing at the next Root decision boundary.",
+            include_reason="Prevent a live user direction known outside O from disappearing at the next semantic decision boundary.",
             selected_fields=list(inbox_projection),
             excluded_fields=[
                 "full directives for acknowledged non-latest entries (catalog and canonical interpretation retained)",
@@ -556,7 +569,7 @@ def build_root_decision_context(
                 entry["observed_at"] for entry in verified_observations
             ),
             projection=observation_projection,
-            include_reason="Allow external facts to affect Root only after an O-requested, request-bound, mechanically verified receipt is ingested.",
+            include_reason="Allow external facts to affect a semantic decision only after an O-requested, request-bound, mechanically verified receipt is ingested.",
             selected_fields=list(observation_projection),
             excluded_fields=[
                 "raw connector responses",
@@ -599,7 +612,7 @@ def build_root_decision_context(
     manifest = {
         "schema_version": 1,
         "kernel": "o-decision-context-control-plane-v1",
-        "component": "root",
+        "component": component,
         "run_id": run_id,
         "policy": {
             "raw_authority_location": "authoritative source systems",
@@ -638,4 +651,26 @@ def build_root_decision_context(
         },
     }
     manifest["manifest_digest"] = store.stable_digest(manifest, length=64)
-    return verify_decision_context_manifest(manifest, store=store)
+    return verify_decision_context_manifest(
+        manifest,
+        store=store,
+        expected_component=component,
+    )
+
+
+def build_root_decision_context(
+    root: Path,
+    *,
+    run_id: str,
+    payload_snapshot: Mapping[str, Any],
+    store: Store | None = None,
+) -> dict[str, Any] | None:
+    """Compatibility wrapper for callers that explicitly construct Root context."""
+
+    return build_decision_context(
+        root,
+        run_id=run_id,
+        component="root",
+        payload_snapshot=payload_snapshot,
+        store=store,
+    )

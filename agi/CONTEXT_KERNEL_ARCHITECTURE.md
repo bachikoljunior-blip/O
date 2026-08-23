@@ -73,7 +73,7 @@ observable and falsifiable.
 
 ## First vertical slice: Root source manifest
 
-`src/continual/context_kernel.py` constructs a Root-only manifest from the
+`src/continual/context_kernel.py` initially constructed a Root-only manifest from the
 checked-in Work lease, user-input inbox, strategy, and native Run snapshot.
 Once any AGI control source exists, all mandatory sources must exist and agree.
 The bridge refuses an outer-provided competing manifest. It freezes O's
@@ -83,7 +83,7 @@ The slice deliberately does not copy all raw files. It projects current
 authority, the inbox catalog and latest direction, strategy objective/rules,
 and native continuation while recording omitted fields and reasons. A frozen
 pending request never changes; a source-clock change creates a new manifest and
-request identity at the next Root.
+request identity at the next semantic boundary.
 
 This slice improves omission visibility and replay binding.
 
@@ -109,9 +109,8 @@ matching reviewed interpretation fails closed at the next Root while an
 already frozen request remains replay-stable.
 
 This slice still does **not** prove useful behavioral improvement, guarantee
-remote-main freshness, create external observation receipts, extend manifests
-to every semantic component, or protect effects at dispatch. Those remain
-explicit negative evidence.
+remote-main freshness, create external observation receipts, or protect effects
+at dispatch. Those remain explicit negative evidence.
 
 ## Third vertical slice: O-requested external observations
 
@@ -136,6 +135,27 @@ Work state at an exact commit. Its evidence class is explicitly
 receipt path, not independent attestation, useful behavioral improvement, or
 complete external-source coverage.
 
+## Fourth vertical slice: semantic-component manifests
+
+`build_decision_context` constructs the same mandatory, source-clock-bound
+projection for Root, Execute, Task Evaluate, Consolidate Episode, and Learn.
+The component name is part of the manifest digest, payload digest, Work request
+digest, and invocation identity. `build_root_decision_context` remains as a
+compatibility wrapper.
+
+`WorkModelClient` rejects an outer-provided `decision_context` at every covered
+semantic boundary. Newly minted requests in an enabled Context Kernel must
+build their manifest from the durable native snapshot and all mandatory
+sources. Replay remains journal-authoritative: a pending request keeps its
+original manifest bytes after a source-clock advance, while the next request
+gets a different identity. Frozen historical requests without a manifest are
+not retroactively rewritten.
+
+This slice establishes uniform internal provenance and replay binding. It does
+not yet recheck critical revocations immediately before an external effect,
+cover Entry or Candidate Evaluate, demonstrate better task behavior, or provide
+independent production evidence.
+
 ## Migration sequence
 
 1. Root-only mandatory manifest, audit and fail-closed validation. **Implemented.**
@@ -147,7 +167,9 @@ complete external-source coverage.
    external research; no outside fact affects judgment before ingestion.
    **Implemented for one exact public GitHub file read; other source kinds and
    behavioral evidence remain pending.**
-4. Manifests for Execute, Task Evaluate, Consolidate, and Learn.
+4. Manifests for Execute, Task Evaluate, Consolidate, and Learn. **Implemented
+   locally for all five covered semantic components; exact-head publication
+   evidence remains pending.**
 5. Bind plan and effect authorization to manifests; recheck critical source
    clocks and revocations immediately before dispatch.
 6. Route optional context recursively and learn routing only from held-out
@@ -159,7 +181,7 @@ complete external-source coverage.
 
 The architecture fails or needs revision if any of these occur:
 
-- an active user constraint can be omitted from a new Root without a recorded
+- an active user constraint can be omitted from a new semantic request without a recorded
   source or exclusion decision;
 - a changed source silently reuses a decision manifest;
 - a frozen request changes during replay;

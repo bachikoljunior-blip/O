@@ -6,7 +6,12 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping
 
-from .context_kernel import ContextKernelError, build_root_decision_context
+from .context_kernel import (
+    SEMANTIC_CONTEXT_COMPONENTS,
+    ContextKernelError,
+    build_decision_context,
+    verify_decision_context_manifest,
+)
 from .contracts import validate_component_output
 from .store import Store
 
@@ -97,6 +102,19 @@ def _verified_request(store: Store, request_path: Path) -> dict[str, Any]:
         volatile_fields=("created_at",),
     ):
         raise WorkSessionError(f"tampered Work request: {invocation_id}")
+    component = request.get("component")
+    payload = request.get("payload")
+    if isinstance(payload, Mapping) and "decision_context" in payload:
+        if not isinstance(component, str):
+            raise WorkSessionError("Work request component is malformed")
+        try:
+            verify_decision_context_manifest(
+                payload["decision_context"],
+                store=store,
+                expected_component=component,
+            )
+        except ContextKernelError as exc:
+            raise WorkSessionError(f"invalid frozen decision context: {exc}") from exc
     return request
 
 
@@ -209,15 +227,16 @@ class WorkModelClient:
         prompt_path: str,
     ) -> tuple[str, dict[str, Any]]:
         effective_payload = deepcopy(payload)
-        if component == "root":
+        if component in SEMANTIC_CONTEXT_COMPONENTS:
             if "decision_context" in effective_payload:
                 raise WorkSessionError(
-                    "Root payload may not inject an outer decision_context"
+                    f"{component} payload may not inject an outer decision_context"
                 )
             try:
-                decision_context = build_root_decision_context(
+                decision_context = build_decision_context(
                     self.root,
                     run_id=self.run_id,
+                    component=component,
                     payload_snapshot=effective_payload.get("snapshot", {}),
                     store=self.store,
                 )
@@ -309,10 +328,10 @@ class WorkModelClient:
     ) -> dict[str, Any]:
         """Resume the exact immutable Work request named by the native journal.
 
-        A pending Root request may outlive a heartbeat or inbox update. Rebuilding
+        A pending semantic request may outlive a heartbeat or inbox update. Rebuilding
         its Context Kernel manifest would mint a second Work request for the same
         native invocation. The native journal is therefore the sole resume
-        authority: source-clock changes affect the next Root boundary, not the
+        authority: source-clock changes affect the next semantic boundary, not the
         already-frozen request.
         """
 
@@ -342,7 +361,7 @@ class WorkModelClient:
         if not isinstance(frozen_payload, Mapping):
             raise WorkSessionError("bound Work request payload is malformed")
         outer_payload = deepcopy(dict(frozen_payload))
-        if component == "root":
+        if component in SEMANTIC_CONTEXT_COMPONENTS:
             outer_payload.pop("decision_context", None)
         if self.store.stable_digest(outer_payload, length=64) != self.store.stable_digest(
             payload, length=64

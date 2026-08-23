@@ -453,6 +453,10 @@ def test_work_model_drives_native_o_entry_through_learn(tmp_path: Path):
         request = pending[0]
         component = request["component"]
         seen.append(component)
+        if component == "learn":
+            assert request["payload"]["snapshot"]["phase"] == (
+                "post_task_learn_pending"
+            )
         submit_work_response(
             root,
             request["invocation_id"],
