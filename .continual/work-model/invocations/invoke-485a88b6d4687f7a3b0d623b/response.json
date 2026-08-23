@@ -1,0 +1,81 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-485a88b6d4687f7a3b0d623b",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        "src/continual/context_kernel.py",
+        "src/continual/work_session.py",
+        "tests/test_context_kernel.py",
+        "tests/test_work_session_bridge.py",
+        ".continual/work-model/invocations/invoke-485a88b6d4687f7a3b0d623b/request.json"
+      ],
+      "observations": [
+        "The Root request creation time and its mandatory Work heartbeat exceed the declared 900-second freshness window.",
+        "Existing dispatch-time revalidation protects effects but does not prevent a stale source from shaping and freezing an earlier semantic request."
+      ],
+      "purpose": "Select the next bounded Context Kernel repair from a stale mandatory source clock visible inside O's own frozen Root request.",
+      "unresolved": [
+        "authoritative latest-main observation receipt at pre-freeze time",
+        "genuine fresh-selector behavioral evidence",
+        "independent production capability evidence",
+        "the user's upper-level objective"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "The supplied Root request is self-evidently bound to a Work heartbeat more than two hours older than its creation time despite a 900-second freshness policy. O therefore still permits a stale mandatory source to control a new semantic decision. The smallest falsifiable repair is a pre-freeze fail-closed barrier; it must explicitly avoid overclaiming remote-latest discovery."
+    },
+    "result": {
+      "component": "execute",
+      "evidence_needed": [
+        "a deterministic pre-freeze validator checks running status, heartbeat timestamp, stale_after_seconds, bounded future skew, execution id, generation, and fence presence before semantic request bytes or invocation-journal pending state are written",
+        "stale, future-skewed, released, malformed, and missing authority states fail before any native or Work-model request mutation",
+        "a fresh same-authority heartbeat passes without changing semantic ownership or inventing a new generation",
+        "the existing immutable replay path for an already frozen request remains valid and is not retroactively rewritten by a later heartbeat",
+        "tests distinguish detecting an already stale local canonical source from proving that no newer remote source exists",
+        "focused and protected regressions, journal verification, exact-head CI, expected-head merge, and exact main readback"
+      ],
+      "expected_outputs": [
+        "a reusable mandatory-source freshness validator in the Context Kernel",
+        "pre-freeze invocation from the Work request construction path",
+        "atomic no-mutation tests for every rejected lease state and a fresh-state control",
+        "architecture and continuation updates that record the remaining authoritative-source refresh limitation",
+        "isolated exact-head publication and integration only if every validation gate passes"
+      ],
+      "failure_conditions": [
+        "the check occurs only after request or journal mutation",
+        "heartbeat renewal changes execution authority or invalidates an already frozen replay request",
+        "the validator silently accepts unparsable, timezone-naive, future-skewed, expired, released, or missing lease fields",
+        "tests simulate freshness by weakening stale_after_seconds or bypassing the production request path",
+        "the implementation reports source freshness as proof that latest remote main was observed or that the upper objective is complete"
+      ],
+      "goal": "Implement a fail-closed pre-freeze source-readiness barrier so O refuses to create or persist a new semantic Work request when its mandatory Work lease source is already stale, future-skewed, non-running, malformed, or inconsistent with the request creation clock.",
+      "inputs": [
+        "src/continual/context_kernel.py DecisionContextManifest builder and verifier",
+        "src/continual/work_session.py request-freeze path",
+        "tests/test_context_kernel.py and tests/test_work_session_bridge.py protected request-mutation boundaries",
+        "the supplied Root manifest whose Work heartbeat version is 2026-08-23T17:22:28.270Z while this Root request was created at 2026-08-23T20:03:19.374785Z with stale_after_seconds 900"
+      ],
+      "parent_continuation": "After Execute, return through O's lifecycle and preserve the observation that freshness validation alone cannot discover an unseen newer authoritative revision. At the next Root, select the smallest mechanism that binds an authoritative source observation/readback receipt into request construction or another independent high-information unit; do not stop at internal CI.",
+      "rollback": "Retain the existing immutable DecisionContextManifest and dispatch-time revalidation. Revert the pre-freeze barrier if it mutates frozen requests, rejects a valid fresh same-authority source, or conflates liveness with authority identity.",
+      "scope": "context-kernel/pre-freeze-mandatory-source-freshness-v1",
+      "success_conditions": [
+        "the exact stale Work source visible in this Root request would be rejected before a new semantic request is persisted",
+        "all rejected source states leave native invocation and Work-model request files byte-for-byte unchanged",
+        "fresh source state preserves current successful Work request creation and immutable replay behavior",
+        "the unit does not claim that a local freshness check can discover an unseen newer remote main revision",
+        "generation 6 remains the sole writer and inbox revision 15 remains effective"
+      ]
+    }
+  },
+  "output_digest": "54f25269dbefa3b0479dea613ba7ba5fbf52ff1cf98cfd068ad79acfc6215aaa",
+  "received_at": "2026-08-23T20:04:45.529666Z",
+  "request_digest": "6a6b2047372cdf0580964b0ac35b33cb24a0f9f9f1d640861d0b83e8c4b9d39c",
+  "response_digest": "473cc50e5ca6db5f6b49359156ec155fce07ff0b2e7e0cc8321756ab0119a89d",
+  "schema_version": 1
+}

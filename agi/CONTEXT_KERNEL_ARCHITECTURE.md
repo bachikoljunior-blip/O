@@ -210,6 +210,25 @@ rejectable. Its implementation tests use a synthetic qualified identity only;
 they are not genuine held-out observations. The checked-in experiment therefore
 still has zero observations and no scoped or global activation.
 
+## Seventh vertical slice: pre-freeze mandatory-source readiness
+
+A semantic request must not be minted from a mandatory Work authority that is
+already unusable at the request-creation clock. Before a new native invocation
+journal or Work-model request is written, the Context Kernel now requires a
+running lease, non-empty owner, execution and fence identities, a positive
+generation and staleness window, a timezone-aware heartbeat, and bounded age
+and future skew. Stale, future-skewed, released, malformed, or incomplete state
+fails without changing either request boundary.
+
+This check applies only to construction of a new semantic request. An existing
+pending request remains immutable and journal-authoritative: replay does not
+reinterpret its bytes against a later heartbeat. The readiness result also has
+a deliberately narrow claim boundary. It proves only that the local mandatory
+source bytes were usable at construction time; it does not prove that the
+caller observed the latest remote branch or that an unseen authoritative
+revision does not exist. Provenance-bound remote observation remains a separate
+Context Kernel unit.
+
 ## Migration sequence
 
 1. Root-only mandatory manifest, audit and fail-closed validation. **Implemented.**
@@ -229,10 +248,14 @@ still has zero observations and no scoped or global activation.
    exact-head verified, merged through PR 280, and read back.**
 6. Route optional context recursively and learn routing only from held-out
    behavioral evidence, with mandatory context outside that learner's control.
-   **The label-separated, qualification-bound receipt rendezvous is implemented
-   locally; genuine fresh-selector observations and publication evidence remain
-   pending.**
-7. Compact the event ledger into reproducible projections while retaining the
+   **The label-separated, qualification-bound receipt rendezvous is merged
+   through PR 281; genuine fresh-selector observations remain pending.**
+7. Reject unusable mandatory Work authority before a new semantic request or
+   native invocation journal mutates, without revalidating immutable replay.
+   **Implemented locally; exact-head publication remains pending.**
+8. Bind request construction to a provenance-verified authoritative source
+   observation rather than treating local freshness as latest-remote proof.
+9. Compact the event ledger into reproducible projections while retaining the
    events and digests needed for audit and reconstruction.
 
 ## Falsification criteria

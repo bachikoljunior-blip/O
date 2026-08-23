@@ -53,6 +53,68 @@ def _required_int(value: Any, label: str, *, minimum: int = 0) -> int:
     return value
 
 
+def _utc_timestamp(value: Any, label: str) -> datetime:
+    text = _required_text(value, label)
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ContextKernelError(f"{label} must be an ISO-8601 timestamp") from exc
+    if parsed.tzinfo is None:
+        raise ContextKernelError(f"{label} must include a timezone")
+    return parsed.astimezone(UTC)
+
+
+def validate_mandatory_work_source_freshness(
+    state: Mapping[str, Any],
+    *,
+    observed_at: str,
+) -> dict[str, Any]:
+    """Fail closed when the local mandatory Work authority is not request-ready.
+
+    This validates the exact source bytes available to request construction.  It
+    intentionally does not claim that the caller observed the latest remote
+    source revision; authoritative remote observation is a separate boundary.
+    """
+
+    exact = _required_mapping(state, "state")
+    status = _required_text(exact.get("status"), "state.status")
+    if status != "running":
+        raise ContextKernelError("decision context requires a running Work lease")
+    owner_kind = _required_text(exact.get("owner_kind"), "state.owner_kind")
+    execution_id = _required_text(exact.get("execution_id"), "state.execution_id")
+    generation = _required_int(
+        exact.get("lease_generation"), "state.lease_generation", minimum=1
+    )
+    fence = _required_text(exact.get("fence_token"), "state.fence_token")
+    stale_after = _required_int(
+        exact.get("stale_after_seconds"), "state.stale_after_seconds", minimum=1
+    )
+    max_future_skew = _required_int(
+        exact.get("max_future_skew_seconds", 120),
+        "state.max_future_skew_seconds",
+    )
+    heartbeat = _utc_timestamp(exact.get("heartbeat_at"), "state.heartbeat_at")
+    now = _utc_timestamp(observed_at, "request creation time")
+    age = (now - heartbeat).total_seconds()
+    if age > stale_after:
+        raise ContextKernelError("decision context Work heartbeat is stale")
+    if age < -max_future_skew:
+        raise ContextKernelError("decision context Work heartbeat is future-skewed")
+    return {
+        "status": status,
+        "owner_kind": owner_kind,
+        "execution_id": execution_id,
+        "lease_generation": generation,
+        "fence_token": fence,
+        "heartbeat_at": heartbeat.isoformat().replace("+00:00", "Z"),
+        "stale_after_seconds": stale_after,
+        "max_future_skew_seconds": max_future_skew,
+        "observed_at": now.isoformat().replace("+00:00", "Z"),
+        "age_seconds": age,
+        "source_scope": "local_bytes_only_not_remote_revision_proof",
+    }
+
+
 def _git_blob_sha(content: bytes) -> str:
     header = f"blob {len(content)}\0".encode("ascii")
     return hashlib.sha1(header + content).hexdigest()  # noqa: S324 - Git object ID
@@ -284,6 +346,10 @@ def build_decision_context(
     state, state_identity = _load_source(
         root, store, "work_execution_state", _CONTROL_PATHS["work_execution_state"]
     )
+    source_readiness = validate_mandatory_work_source_freshness(
+        state,
+        observed_at=store.utc_now(),
+    )
     inbox, inbox_identity = _load_source(
         root, store, "user_input_inbox", _CONTROL_PATHS["user_input_inbox"]
     )
@@ -310,22 +376,13 @@ def build_decision_context(
 
     if state.get("mode") != "work_o_engine_single_writer":
         raise ContextKernelError("unsupported work execution state mode")
-    if state.get("status") != "running":
-        raise ContextKernelError("decision context requires a running Work lease")
-    execution_id = _required_text(state.get("execution_id"), "state.execution_id")
-    owner_kind = _required_text(state.get("owner_kind"), "state.owner_kind")
-    generation = _required_int(
-        state.get("lease_generation"), "state.lease_generation", minimum=1
-    )
-    fence = _required_text(state.get("fence_token"), "state.fence_token")
+    execution_id = source_readiness["execution_id"]
+    owner_kind = source_readiness["owner_kind"]
+    generation = source_readiness["lease_generation"]
+    fence = source_readiness["fence_token"]
     heartbeat_at = _required_text(state.get("heartbeat_at"), "state.heartbeat_at")
-    stale_after = _required_int(
-        state.get("stale_after_seconds"), "state.stale_after_seconds", minimum=1
-    )
-    max_future_skew = _required_int(
-        state.get("max_future_skew_seconds", 120),
-        "state.max_future_skew_seconds",
-    )
+    stale_after = source_readiness["stale_after_seconds"]
+    max_future_skew = source_readiness["max_future_skew_seconds"]
     if state.get("active_run_id") != run_id:
         raise ContextKernelError("Work lease active_run_id does not match decision run")
     inbox_state = _required_mapping(
@@ -689,17 +746,6 @@ def _source_by_id(
         if isinstance(value, Mapping) and value.get("source_id") == source_id:
             return deepcopy(dict(value))
     raise ContextKernelError(f"decision context is missing source: {source_id}")
-
-
-def _utc_timestamp(value: Any, label: str) -> datetime:
-    text = _required_text(value, label)
-    try:
-        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
-    except ValueError as exc:
-        raise ContextKernelError(f"{label} must be an ISO-8601 timestamp") from exc
-    if parsed.tzinfo is None:
-        raise ContextKernelError(f"{label} must include a timezone")
-    return parsed.astimezone(UTC)
 
 
 def build_effect_dispatch_context(
