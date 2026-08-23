@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T10:42:25.362Z",
-  "last_progress_at": "2026-08-23T10:34:01.725Z",
+  "heartbeat_at": "2026-08-23T11:32:32.938Z",
+  "last_progress_at": "2026-08-23T11:32:32.938Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -21,11 +21,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "65857f480a84c55d77a62d6d3eb528e862dd81e0",
-  "working_branch": "work/native-ci-sharding-cycle-v1",
+  "source_main_sha": "4239c1c4747831c4a7064fc35bff485d13b921c6",
+  "working_branch": "work/context-routing-heldout-harness-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "root",
-  "active_unit_id": "unit-bd506fdfba35a0949b170257",
+  "active_component": "execute",
+  "active_unit_id": "unit-24e1807c3c65cd90d50be3eb",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 14,
@@ -35,17 +35,18 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "PR 271 exact head 023273a4a65b15f05317d2cdc52845f6bc919f43 remains unchanged: shards 0, 2, and 3 succeeded; shard 1 is running. PR 272 exact head c6bdb662a084a896564d8f5a671b157ba31cc59e remains unchanged: shards 0 and 3 succeeded; shards 1 and 2 are running. Exact remote-head merge-tree proofs against latest main are conflict-free.",
-    "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
+    "pending_native_execute": "Generation-5 Execute invoke-66af21513bffe4e758237708 is publishing the answered-history resume guard and truthful routing-negative lifecycle. PR 274 moved non-force to exact head f59c4a8b with tree 4272fe39 exactly matching local validation; workflow 32636746263 is queued.",
+    "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
+    "effect_recovery_stack": "PR 273 exact head 0d21dc3e passed workflow 32634954576 (four shards and aggregate), but is currently conflicted with main. Do not merge that stale base; reconcile by an additive merge commit and require a new exact-head workflow."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/native-ci-sharding-cycle-v1",
-    "snapshot_head_sha": "023273a4a65b15f05317d2cdc52845f6bc919f43",
-    "pending_work_invocation_id": "invoke-7ce263e8f2b55bae063d677a",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-7ce263e8f2b55bae063d677a/request.json",
-    "durability_status": "Actual generation-5 cycle is remotely durable in PR 271 exact head 023273a4a65b15f05317d2cdc52845f6bc919f43. Its 68-file tree b3caf67a151d16420cab1fac7b2ec3ac81b65a5e exactly matches the locally validated tree. Work verification reports 65 requests, 64 responses, one exact pending Root, valid=true. Exact-head sharded CI is pending.",
-    "next_action": "Await the remaining exact-head shards and aggregate jobs for PR 271/272. Merge only unchanged all-success heads with fresh merge-tree/readback. Then resume pending Root invoke-7ce263e8f2b55bae063d677a from the main-durable native cycle."
+    "snapshot_branch": "work/context-routing-heldout-harness-v1",
+    "snapshot_head_sha": "f59c4a8b17e04cf11e2e16fb21fb19a0b231afc7",
+    "pending_work_invocation_id": "invoke-66af21513bffe4e758237708",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-66af21513bffe4e758237708/request.json",
+    "durability_status": "PR 274 branch head f59c4a8b is remote-durable. Its tree 4272fe39 exactly equals local commit fa922e9; the head is one fast-forward commit above b99cbc7f and includes the persisted idempotency record, resume guard fix, 39-test regression, and contamination-preserving native records. Work verification at publication was 75/74/1 valid.",
+    "next_action": "Wait for exact-head workflow 32636746263 on f59c4a8b. In parallel reconcile successful-but-conflicted PR 273 with current main using a non-force additive merge commit, then require a fresh exact-head workflow. Merge only unchanged, conflict-free successful heads with exact main readback."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -94,10 +95,12 @@
       "invoke-1c8852ca06beb4ca5f6f1710 (candidate_evaluate post-result)",
       "invoke-79e58a32ec4058ee08b32357 (candidate_evaluate child preflight)",
       "invoke-840d2f0a8f5e2132fbef5d99 (execute froze verified harness and scheduled child)",
-      "invoke-96f980003141d4ba2de0294c (candidate_evaluate child measurement preflight)"
+      "invoke-96f980003141d4ba2de0294c (candidate_evaluate child measurement preflight)",
+      "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
+      "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)"
     ],
-    "pending_invocation": "invoke-7ce263e8f2b55bae063d677a (root after completed generation-5 CI-sharding cycle)",
-    "note": "Actual cycle is locally durable on isolated commit 6f044d1 and pending publication. Work verification is valid at 65 requests, 64 responses, one pending. No foreign identity-bound invocation was answered."
+    "pending_invocation": "invoke-66af21513bffe4e758237708 (Execute exact publication and integration gates)",
+    "note": "The generation-5 native records through the new Execute request are remote-durable on PR 274 exact head f59c4a8b; response remains pending until exact-head CI and integration gates conclude."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
   "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
@@ -129,22 +132,22 @@
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z"
   },
   "recent_main_integration": {
-    "pull_request": 268,
-    "exact_head_sha": "a372483505167fde64cd8558bc3b72c69b99fd04",
-    "exact_head_ci_run": 32629602574,
-    "exact_head_ci_result": "501 passed in 4389.54s",
-    "merge_sha": "818d6434854490efd0319818787d7cde7649f23e",
+    "pull_request": 272,
+    "exact_head_sha": "c6bdb662a084a896564d8f5a671b157ba31cc59e",
+    "exact_head_ci_run": 32633554610,
+    "exact_head_ci_result": "four pytest shards and aggregate succeeded",
+    "merge_sha": "bc636ff2b7857c795a45ab85cd63f53ee299020a",
     "verified_remote_readback": true,
-    "claim_boundary": "Deterministic recursive context-routing infrastructure only; no measured end-to-end benefit or AGI evidence."
+    "claim_boundary": "Internal Work resume/fencing safety only; not AGI evidence."
   },
   "recent_publication": {
-    "pull_request": 271,
-    "branch": "work/native-ci-sharding-cycle-v1",
-    "exact_head_sha": "023273a4a65b15f05317d2cdc52845f6bc919f43",
-    "exact_tree_sha": "b3caf67a151d16420cab1fac7b2ec3ac81b65a5e",
+    "pull_request": 272,
+    "branch": "work/resume-identity-guard-v3",
+    "exact_head_sha": "c6bdb662a084a896564d8f5a671b157ba31cc59e",
     "verified_remote_readback": true,
-    "exact_head_ci": "pending",
-    "claim_boundary": "Internal native O and CI-development evidence only; not AGI evidence."
+    "exact_head_ci": "success: workflow 32633554610",
+    "merge_sha": "bc636ff2b7857c795a45ab85cd63f53ee299020a",
+    "claim_boundary": "Internal resume/fencing safety only; not AGI evidence."
   },
   "local_combined_regression": {
     "result": "515 passed",
@@ -154,20 +157,33 @@
     "claim_boundary": "Internal regression evidence only."
   },
   "in_flight_integrations": {
-    "native_cycle": {
-      "pull_request": 271,
-      "exact_head_sha": "023273a4a65b15f05317d2cdc52845f6bc919f43",
-      "workflow_run": 32633031509,
-      "status": "in_progress"
+    "held_out_context_routing": {
+      "branch": "work/context-routing-heldout-harness-v1",
+      "pull_request": 274,
+      "head_sha": "f59c4a8b17e04cf11e2e16fb21fb19a0b231afc7",
+      "exact_tree_sha": "4272fe39ee802742c103d229c900b90a0a85a9fd",
+      "workflow_run": 32636746263,
+      "status": "exact_head_ci_queued",
+      "local_validation": "39 focused tests passed; compileall, 494 JSON documents, work-verify 75/74/1 valid, and diff check passed",
+      "checked_in_verdict": "INSUFFICIENT_EVIDENCE",
+      "observations": 0
     },
-    "resume_identity_guard": {
-      "predecessor_pull_request": 269,
-      "predecessor_workflow_run": 32629965808,
-      "predecessor_result": "cancelled_at_74_percent_no_semantic_conclusion",
-      "pull_request": 272,
-      "exact_head_sha": "c6bdb662a084a896564d8f5a671b157ba31cc59e",
-      "exact_head_ci": "pending",
-      "local_combined_regression": "515 passed in 2913.11s"
+    "effect_recovery_stack": {
+      "pull_request": 273,
+      "exact_head_sha": "0d21dc3e7026c297e0c8441056f348e727f711ea",
+      "workflow_run": 32634954576,
+      "status": "exact_head_ci_success_but_conflicted_with_main_reconciliation_required",
+      "reconciliation": {
+        "effect_id": "reconcile-pr273-current-main-v1",
+        "idempotency_key": "bachikoljunior-blip/O:pr273:0d21dc3e7026c297e0c8441056f348e727f711ea:current-main:additive-merge-v1",
+        "expected_pr_head": "0d21dc3e7026c297e0c8441056f348e727f711ea",
+        "expected_main_head": "3779a4debed548e6ce3cb4a27105a828649b11f8",
+        "force_push_permitted": false,
+        "tree_rule": "latest main plus exactly the six verified added source/test blobs from exact head 0d21dc3e",
+        "status": "prepared_durable",
+        "merge_after_reconciliation": false,
+        "next": "Create one merge commit with parent 0d21dc3e and additional parent the exact latest main, verify tree and non-force branch update, then require a fresh exact-head four-shard workflow."
+      }
     }
   }
 }
