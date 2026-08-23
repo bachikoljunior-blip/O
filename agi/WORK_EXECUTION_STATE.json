@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T08:02:24.518Z",
-  "last_progress_at": "2026-08-23T08:02:24.518Z",
+  "heartbeat_at": "2026-08-23T08:13:41.112Z",
+  "last_progress_at": "2026-08-23T08:13:41.112Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -21,11 +21,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "5b3aaff01d4b463b8713510fd5ba9fb84bbb8024",
-  "working_branch": "work/recovery-20260823t061400z-ee2d66ce",
+  "source_main_sha": "56f7570d110a2f039b94c7e45dcf15dd0a22d89d",
+  "working_branch": "work/checkpoint-inheritance-harness-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "candidate_evaluate",
-  "active_unit_id": "unit-7248d09ab66196abd19984f1",
+  "active_component": "execute",
+  "active_unit_id": "unit-checkpoint-observations-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 13,
@@ -35,17 +35,17 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "PR 263 merged after exact-head CI success. The durable native snapshot remains at pre-Execute Candidate Evaluate invoke-79e58a32ec4058ee08b32357; resume from that merged checkpoint, then publish validated checkpoint-inheritance experiment results through an isolated PR and unchanged-head CI.",
+    "pending_native_execute": "PR 264 publishes the verified harness and exact native child boundary at head 16e8971455a819099aa1ab68a88f0a982750390b. Exact-head workflow 32627670204 is in progress; one ChatGPT-bound Execute invocation is pending.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "main",
-    "snapshot_head_sha": "5b3aaff01d4b463b8713510fd5ba9fb84bbb8024",
-    "pending_work_invocation_id": "invoke-79e58a32ec4058ee08b32357",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-79e58a32ec4058ee08b32357/request.json",
-    "durability_status": "PR 263 exact head 536407444dd16ae706583aa1df5903af82d61149 passed workflow 32623454534 unchanged and merged to main as 5b3aaff01d4b463b8713510fd5ba9fb84bbb8024. This is the latest fully durable native checkpoint.",
-    "next_action": "Resume durable pending Candidate Evaluate invoke-79e58a32ec4058ee08b32357, complete the sandbox-only matched checkpoint-inheritance experiment, mechanically validate it, then publish it on an isolated branch and merge only after exact-head CI succeeds with an unchanged head."
+    "snapshot_branch": "work/checkpoint-inheritance-harness-v1",
+    "snapshot_head_sha": "16e8971455a819099aa1ab68a88f0a982750390b",
+    "pending_work_invocation_id": "invoke-6caa1ba04023a73bb2a478c3",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-6caa1ba04023a73bb2a478c3/request.json",
+    "durability_status": "PR 264 remotely publishes the exact verified local tree 7ce24089ff069be48a56505501368361381d3d68 at head 16e8971455a819099aa1ab68a88f0a982750390b. Workflow 32627670204 is in progress and PR is conflict-free.",
+    "next_action": "Observe PR 264 exact-head CI. Merge only if all required checks succeed, the head remains 16e8971455a819099aa1ab68a88f0a982750390b, and the PR remains conflict-free; then verify main readback before executing pending invoke-6caa1ba04023a73bb2a478c3."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -91,10 +91,13 @@
       "invoke-9ccf40df11cc6f1d718522e0 (root)",
       "invoke-c67f4d2ca0c3f90372892a15 (candidate_evaluate pre-application)",
       "invoke-db09246b90d250f42cca472c (task_evaluate)",
-      "invoke-1c8852ca06beb4ca5f6f1710 (candidate_evaluate post-result)"
+      "invoke-1c8852ca06beb4ca5f6f1710 (candidate_evaluate post-result)",
+      "invoke-79e58a32ec4058ee08b32357 (candidate_evaluate child preflight)",
+      "invoke-840d2f0a8f5e2132fbef5d99 (execute froze verified harness and scheduled child)",
+      "invoke-96f980003141d4ba2de0294c (candidate_evaluate child measurement preflight)"
     ],
-    "pending_invocation": "invoke-79e58a32ec4058ee08b32357 (candidate_evaluate pre-Execute)",
-    "note": "PR 263 merged after exact-head CI success. Durable resume point is pre-Execute Candidate Evaluate invoke-79e58a32ec4058ee08b32357. Inbox revision 13 is acknowledged; Claude-bound orphaned invocations remain unanswered. No AGI claim is supported."
+    "pending_invocation": "invoke-6caa1ba04023a73bb2a478c3 (execute child matched observations)",
+    "note": "PR 264 exact-head CI is in progress. The harness is verified but unmeasured; implementation remains unauthorized. Inbox revision 13 remains acknowledged and Claude-bound invocations remain unanswered."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
   "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
