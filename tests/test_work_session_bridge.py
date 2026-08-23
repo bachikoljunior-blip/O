@@ -83,6 +83,63 @@ def test_work_start_freezes_without_counting_a_model_error(tmp_path: Path):
     assert native_journal["attempt"] == 1
 
 
+def test_work_resume_rejects_identity_mismatch_before_any_native_mutation(
+    tmp_path: Path,
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-work-resume-identity-guard"
+    session = WorkSession(
+        root,
+        executor_binding="session-a",
+        model_identity="model-a",
+    )
+    started = session.start("freeze one identity-bound request", run_id=run_id)
+    request = started["pending"][0]
+
+    def persisted_bytes() -> dict[str, bytes]:
+        bases = (
+            root / ".continual" / "runs" / run_id,
+            root / ".continual" / "work-model" / "invocations",
+        )
+        return {
+            path.relative_to(root).as_posix(): path.read_bytes()
+            for base in bases
+            for path in sorted(base.rglob("*"))
+            if path.is_file()
+        }
+
+    before = persisted_bytes()
+    with pytest.raises(WorkSessionError, match="executor_binding"):
+        WorkSession(
+            root,
+            executor_binding="session-b",
+            model_identity="model-a",
+        ).resume(run_id)
+    assert persisted_bytes() == before
+
+    with pytest.raises(WorkSessionError, match="model_identity"):
+        WorkSession(
+            root,
+            executor_binding="session-a",
+            model_identity="model-b",
+        ).resume(run_id)
+    assert persisted_bytes() == before
+
+    submit_work_response(
+        root,
+        request["invocation_id"],
+        _output("entry", request),
+        executor_binding="session-a",
+        model_identity="model-a",
+    )
+    resumed = session.resume(run_id)
+    assert len(resumed["pending"]) == 1
+    assert resumed["pending"][0]["component"] == "root"
+    assert resumed["pending"][0]["executor_binding"] == "session-a"
+    assert resumed["pending"][0]["model_identity"] == "model-a"
+    assert verify_work_invocations(root, run_id=run_id)["requests"] == 2
+
+
 def test_work_response_is_binding_checked_immutable_and_public(tmp_path: Path):
     root = _root(tmp_path)
     session = WorkSession(root, model_identity="work-model")

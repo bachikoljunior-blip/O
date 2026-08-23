@@ -279,6 +279,76 @@ class WorkSession:
             ),
         )
 
+    def _assert_resume_identity(self, run_id: str) -> None:
+        """Bind a resume to the exact Work request already frozen by the run.
+
+        The Work invocation id includes the executor binding.  Without this
+        preflight, resuming an ``awaiting_work_model`` native invocation under
+        a different binding can mint a second request for the same component
+        instead of consuming the request recorded in the native journal.
+        Read the journal and immutable request before constructing/running the
+        Engine so a mismatch has no native or Work-model side effects.
+        """
+
+        journal_root = self.store.run_dir(run_id) / "invocations"
+        if not journal_root.exists():
+            return
+        work_root = (
+            self.root / ".continual" / "work-model" / "invocations"
+        ).resolve()
+        awaiting: list[dict[str, Any]] = []
+        for journal_path in sorted(journal_root.glob("*.json")):
+            journal = self.store.read_json(journal_path, None)
+            if not isinstance(journal, dict):
+                raise WorkSessionError(
+                    f"malformed native invocation journal: {journal_path.name}"
+                )
+            if journal.get("status") != "awaiting_work_model":
+                continue
+            invocation_id = journal.get("work_invocation_id")
+            request_ref = journal.get("work_request_ref")
+            request_digest = journal.get("work_request_digest")
+            if (
+                not isinstance(invocation_id, str)
+                or not _INVOCATION_ID.fullmatch(invocation_id)
+                or not isinstance(request_ref, str)
+                or not request_ref
+                or not isinstance(request_digest, str)
+                or not request_digest
+            ):
+                raise WorkSessionError(
+                    f"malformed pending Work identity: {journal_path.name}"
+                )
+            request_path = (self.root / request_ref).resolve()
+            expected_path = work_root / invocation_id / "request.json"
+            if request_path != expected_path:
+                raise WorkSessionError(
+                    f"pending Work request_ref mismatch: {journal_path.name}"
+                )
+            request = _verified_request(self.store, request_path)
+            if (
+                request.get("run_id") != run_id
+                or request.get("invocation_id") != invocation_id
+                or request.get("request_digest") != request_digest
+                or request.get("component") != journal.get("component")
+            ):
+                raise WorkSessionError(
+                    f"pending Work request identity mismatch: {journal_path.name}"
+                )
+            awaiting.append(request)
+
+        if len(awaiting) > 1:
+            raise WorkSessionError("multiple pending Work requests for one native run")
+        if not awaiting:
+            return
+        request = awaiting[0]
+        if request.get("executor_binding") != self.executor_binding:
+            raise WorkSessionError(
+                "executor_binding does not match pending Work request"
+            )
+        if request.get("model_identity") != self.model_identity:
+            raise WorkSessionError("model_identity does not match pending Work request")
+
     def start(
         self,
         request: str,
@@ -296,6 +366,7 @@ class WorkSession:
         }
 
     def resume(self, run_id: str, *, max_steps: int = 64) -> dict[str, Any]:
+        self._assert_resume_identity(run_id)
         engine = self._engine(run_id)
         snapshot = engine.resume(run_id, max_steps=max_steps)
         return {
