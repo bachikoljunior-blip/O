@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T12:32:10.787Z",
-  "last_progress_at": "2026-08-23T12:32:10.787Z",
+  "heartbeat_at": "2026-08-23T12:43:13.922Z",
+  "last_progress_at": "2026-08-23T12:43:13.922Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -35,7 +35,7 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "Generation-5 Execute invoke-66af21513bffe4e758237708 remains pending only until its immutable response is created. PR 273 and PR 274 are both merged to main with exact-head CI success and verified readback.",
+    "pending_native_execute": "Generation-5 Execute invoke-2d54e82d54d0de9244f95889 is the sole pending same-owner request. PR 275 exact head 66e36c36 is in exact-head CI; four pytest shards are in progress. No stopped-Claude invocation is answered.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
     "effect_recovery_stack": "PR 273 exact head 9b05425c passed workflow 32636912049 and merged with expected-head protection to main 3417809d; all six source/test blobs read back exactly."
   },
@@ -45,8 +45,8 @@
     "snapshot_head_sha": "feefc6836eccfbef56269b21be31e5b0398bf9ad",
     "pending_work_invocation_id": "invoke-2d54e82d54d0de9244f95889",
     "pending_request_ref": ".continual/work-model/invocations/invoke-2d54e82d54d0de9244f95889/request.json",
-    "durability_status": "PR 273 and PR 274 integrations are verified on main. The native lifecycle recording their actual evidence completed Execute, Candidate Evaluate, Task Evaluate, Consolidate Episode, Learn, and Root locally; one same-owner Execute publication request is pending.",
-    "next_action": "Validate the exact native tree, persist a branch-publication idempotency record, publish an isolated exact head, require all sharded CI jobs and aggregate, then merge/read back only under unchanged-head and conflict-free conditions."
+    "durability_status": "PR 275 publishes the verified generation-5 native lifecycle at exact head 66e36c36 with exact local/remote tree 632804ba. Workflow 32639887224 has all four pytest shards in progress; merge and readback remain pending.",
+    "next_action": "Wait for all four exact-head pytest shards and dependent aggregate. Merge only unchanged head 66e36c36 after a fresh conflict-free latest-main proof, then read back reviewed native blobs exactly and answer Execute truthfully."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -99,8 +99,8 @@
       "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
       "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)"
     ],
-    "pending_invocation": "invoke-66af21513bffe4e758237708 (Execute exact publication and integration gates)",
-    "note": "The generation-5 native records through the new Execute request are remote-durable on PR 274 exact head f59c4a8b; response remains pending until exact-head CI and integration gates conclude."
+    "pending_invocation": "invoke-2d54e82d54d0de9244f95889 (Execute exact PR 275 publication, CI, merge, and readback gates)",
+    "note": "Generation-5 native records through the current Execute request are remote-durable on PR 275 exact head 66e36c36. The response remains pending until exact-head CI and integration gates conclude."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
   "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
@@ -217,12 +217,14 @@
     },
     "post_routing_native_lifecycle": {
       "branch": "work/post-routing-integration-cycle-v1",
-      "pull_request": null,
-      "head_sha": null,
-      "expected_main_parent": "feefc6836eccfbef56269b21be31e5b0398bf9ad",
-      "status": "local_validation_pending",
-      "pending_execute": "invoke-2d54e82d54d0de9244f95889",
-      "claim_boundary": "Internal Work lifecycle durability only; bounded publication PASS and routing INSUFFICIENT_EVIDENCE remain distinct from the unmet user-level objective."
+      "pull_request": 275,
+      "head_sha": "66e36c36b2c3df51e29c9b54619b8de97d5525fa",
+      "exact_tree_sha": "632804baef33c9d470a8b5f8bc1e51854528fbc6",
+      "workflow_run": 32639887224,
+      "status": "four_pytest_shards_in_progress",
+      "observed_at": "2026-08-23T12:43:13.922Z",
+      "local_validation": "work-verify 83/82/1 valid; 40 focused tests passed; compileall, 736 JSON documents, and diff check passed",
+      "claim_boundary": "Internal Work execution-integrity evidence only; routing remains INSUFFICIENT_EVIDENCE with zero observations and no activation; user-level objective remains unmet."
     }
   }
 }
