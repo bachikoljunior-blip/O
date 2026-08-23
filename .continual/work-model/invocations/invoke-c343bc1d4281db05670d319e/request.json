@@ -1,0 +1,365 @@
+{
+  "component": "learn",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-23T12:26:30.130265Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-c343bc1d4281db05670d319e",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "active_component_path": "prompts/learn.md",
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-c6c462472386c57b124d",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/campaign-authoring",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-c6c462472386c57b124d/prompt.md",
+          "scope_states": {},
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/repository-development": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "continual/incremental-task-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+          "scope_states": {
+            "agi/backlog-integration": "NEED_MORE_EVIDENCE",
+            "continual/incremental-task-evaluation": "PROPOSE_ACTIVATION"
+          },
+          "status": "candidate",
+          "target_component": "task_evaluate"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "notes": "Candidate adoption is scoped, evidence-driven, reversible, and evaluated immediately before affected units.",
+      "schema_version": 2
+    },
+    "current_episode": {
+      "candidate_decisions": {
+        "post_result": "PROPOSE_ACTIVATION based on actual non-conflated verdicts",
+        "pre_application": "TRIAL_CANDIDATE for candidate-task-evaluate-unit-verdict-v1 on the exact Task Evaluate unit",
+        "promotion": "not performed; deterministic protected-baseline scoped regression remains required"
+      },
+      "claim_boundary": "This episode proves exact publication integrity and bounded Work engine safety only. It does not prove recursive routing capability, independent production capability, AGI, or user-level completion.",
+      "episode_type": "exact_head_publication_and_evidence_boundary",
+      "inferences": [
+        "Exact-head CI plus expected-head merge fencing and post-merge blob readback is a reusable publication boundary for long-running Work execution.",
+        "Historical answered awaiting journals should remain immutable recovery history; only unanswered requests create duplicate-response risk.",
+        "Verdict separation is reusable because it preserves local learning without turning a bounded PASS into capability or user-level completion.",
+        "Further work on the contaminated selector would have low information value until an independent execution boundary exists; Root should choose a different independent unit or a genuinely blinded route."
+      ],
+      "negative_evidence": [
+        "The current executor authored and saw the routing hidden labels.",
+        "No protocol-bound selection plan or two-replay report is admissible.",
+        "CI and repository integration validate engineering behavior only.",
+        "Independent evaluator access and secure live-provider capacity remain unresolved non-blocking environment requests.",
+        "No AGI claim is supported."
+      ],
+      "next_falsifiable_unit": "After Learn and a fresh inbox/strategy review at Root, select the highest-information independent unit that does not reuse the contaminated routing selector; prefer a provider-independent scientist-agent baseline comparison or action-time constraint-control experiment unless a genuinely blinded executor route has become available.",
+      "objective": "Publish two validated Work execution result stacks to main, repair answered-history resume behavior without weakening fail-closed identity checks, and preserve the distinction between internal engineering success and unmeasured capability evidence.",
+      "objective_evidence": [
+        {
+          "kind": "remote_exact_head_ci",
+          "ref": "https://github.com/bachikoljunior-blip/O/actions/runs/32636912049",
+          "status": "success_four_shards_and_aggregate"
+        },
+        {
+          "kind": "remote_main",
+          "ref": "3417809d8af9b861e0964846c9a43b589317c24b",
+          "status": "six_reviewed_blobs_readback_verified"
+        },
+        {
+          "kind": "remote_exact_head_ci",
+          "ref": "https://github.com/bachikoljunior-blip/O/actions/runs/32637070506",
+          "status": "success_four_shards_and_aggregate"
+        },
+        {
+          "kind": "remote_main",
+          "ref": "edf76a275906991c35a3625526f8bc9d3e66e1ae",
+          "status": "eight_reviewed_blobs_readback_verified"
+        },
+        {
+          "kind": "native_o_run",
+          "ref": "run-work-mode-handoff-v2/unit-da56aa619f9b401039431982",
+          "status": "original_FAIL_unit_PASS_routing_INSUFFICIENT_EVIDENCE"
+        }
+      ],
+      "searchable_metadata": {
+        "execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
+        "inbox_revision": 14,
+        "lease_generation": 5,
+        "original_verdict": "FAIL",
+        "pr_273_head": "9b05425c3daf2dc43ecee835fb7c181ab2ba6198",
+        "pr_273_merge": "3417809d8af9b861e0964846c9a43b589317c24b",
+        "pr_274_head": "7ba0fda631e9bc947695cc7d17a1f12b0bcf55f1",
+        "pr_274_merge": "edf76a275906991c35a3625526f8bc9d3e66e1ae",
+        "routing_verdict": "INSUFFICIENT_EVIDENCE",
+        "run_id": "run-work-mode-handoff-v2",
+        "unit_verdict": "PASS"
+      },
+      "sequence": [
+        "The generation-5 primary retained the same fence and acknowledged inbox revision 14 while two isolated PR heads were evaluated.",
+        "PR 273 was reconciled non-force onto current main, passed workflow 32636912049 with four pytest shards and aggregate, merged with expected-head protection as 3417809d, and all six reviewed blobs read back exactly.",
+        "PR 274 published the answered-history resume guard, explicit multiple-unanswered regression, routing harness, and contamination-preserving native records; exact head 7ba0fda6 passed workflow 32637070506 with four shards and aggregate.",
+        "A fresh merge-tree against main after PR 273 was conflict-free, PR 274 merged with expected-head protection as edf76a27, and eight key reviewed blobs read back exactly.",
+        "Execute recorded the real CI, merge, and readback evidence while retaining routing INSUFFICIENT_EVIDENCE and zero observations.",
+        "Task Evaluate returned bounded unit PASS, routing INSUFFICIENT_EVIDENCE, and original-goal FAIL as separate findings.",
+        "Post-result Candidate Evaluate proposed the verdict-separation Candidate for a separate deterministic scoped regression gate but performed no promotion."
+      ],
+      "success_condition_mapping": {
+        "bounded_publication_unit": {
+          "satisfied": [
+            "exact heads remained unchanged",
+            "both workflows passed four pytest shards and aggregate",
+            "fresh latest-main merge-tree proofs were conflict-free",
+            "both merges used expected-head protection",
+            "reviewed main blobs read back exactly",
+            "multiple-unanswered and identity-drift behavior remains fail-closed"
+          ],
+          "verdict": "PASS"
+        },
+        "original_real_world_objective": {
+          "unmet": [
+            "no independent production capability evidence",
+            "no adequate evaluator or attestor result",
+            "serving model identity remains externally unverified",
+            "the user's real-world AGI objective has not been achieved or demonstrated"
+          ],
+          "verdict": "FAIL"
+        },
+        "recursive_routing_capability": {
+          "unmet": [
+            "no genuinely blinded selector execution",
+            "zero admissible observations",
+            "all behavioral thresholds remain unmeasured",
+            "global activation remains disabled"
+          ],
+          "verdict": "INSUFFICIENT_EVIDENCE"
+        }
+      },
+      "unresolved": [
+        "publish this new native response chain and updated snapshot through another exact-head CI cycle",
+        "run the deterministic protected-baseline gate before any scoped Candidate activation",
+        "obtain genuinely independent behavioral evidence rather than internal implementation evidence",
+        "reevaluate the open independent-evaluator and live-provider requests at their finite boundary",
+        "continue toward the still-unmet user-level objective"
+      ]
+    },
+    "episode_catalog": [
+      {
+        "episode_id": "episode-work-mode-handoff-v2",
+        "outcome": null,
+        "path": ".continual/episodes/episode-work-mode-handoff-v2/episode.json",
+        "tags": [],
+        "task": "Publish two validated Work execution result stacks to main, repair answered-history resume behavior without weakening fail-closed identity checks, and preserve the distinction between internal engineering success and unmeasured capability evidence."
+      },
+      {
+        "episode_id": "episode-self-applied-strict-claim-quorum-20260818-005902",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-strict-claim-quorum-20260818-005902/episode.json",
+        "tags": [],
+        "task": "Harden the strict external AGI claim path after PR 146 so a weakened evaluator quorum cannot be presented through the production CLI as a valid strict claim configuration."
+      },
+      {
+        "episode_id": "episode-self-applied-runtime-system-manifest-20260818-015624",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-runtime-system-manifest-20260818-015624/episode.json",
+        "tags": [],
+        "task": "Bind strict external AGI evaluation to the public runtime identity actually intended for evaluation, not only to tracked source."
+      },
+      {
+        "episode_id": "episode-self-applied-pr211-recovery-20260819-055716",
+        "outcome": "checkpointed-in-progress",
+        "path": ".continual/episodes/episode-self-applied-pr211-recovery-20260819-055716/episode.json",
+        "tags": [],
+        "task": "Continue unfinished AGI development from latest durable repository state without duplicating a live execution or weakening verification gates."
+      },
+      {
+        "episode_id": "episode-self-applied-pr210-recovery-20260819-045814",
+        "outcome": "completed-work-unit-with-unmet-user-goal",
+        "path": ".continual/episodes/episode-self-applied-pr210-recovery-20260819-045814/episode.json",
+        "tags": [],
+        "task": "Resume unfinished AGI development from repository latest main only, avoiding duplicate execution and preserving exact evidence."
+      },
+      {
+        "episode_id": "episode-self-applied-live-provider-migration-recovery-20260818-035519",
+        "outcome": "completed_with_live_retry_pending",
+        "path": ".continual/episodes/episode-self-applied-live-provider-migration-recovery-20260818-035519/episode.json",
+        "tags": [],
+        "task": "Continue O AGI development from latest main without duplicate execution; recover stale work and move the live genuine-model path to the next falsifiable state."
+      },
+      {
+        "episode_id": "episode-self-applied-external-source-artifact-20260818-010834",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-external-source-artifact-20260818-010834/episode.json",
+        "tags": [],
+        "task": "Replace the opaque manual source-artifact hash step in the strict external evaluator handoff with a reproducible artifact derived from an exact Git commit."
+      },
+      {
+        "episode_id": "episode-self-applied-external-request-attestation-binding-20260818-001204",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-external-request-attestation-binding-20260818-001204/episode.json",
+        "tags": [],
+        "task": "Recover the stale AGI development execution from latest main, persist the already validated PR 146 request-bound external claim hardening as native O state, and continue without weakening the strict external evidence gate."
+      },
+      {
+        "episode_id": "episode-self-applied-cross-context-memory-20260817-224246",
+        "outcome": "completed",
+        "path": ".continual/episodes/episode-self-applied-cross-context-memory-20260817-224246/episode.json",
+        "tags": [],
+        "task": "Continue the unfinished AGI program from latest main and repository-persisted state only. Treat O development itself as an O self-application work unit, preserve negative evidence, merge only validated exact heads, and keep the strict independent external evidence gate unchanged."
+      },
+      {
+        "episode_id": "episode-self-applied-adaptive-depth-recovery-20260818-220121",
+        "outcome": "checkpointed_with_pr202_validation_in_progress",
+        "path": ".continual/episodes/episode-self-applied-adaptive-depth-recovery-20260818-220121/episode.json",
+        "tags": [],
+        "task": "Continue unfinished AGI development from latest repository main without duplicate execution."
+      },
+      {
+        "episode_id": "episode-self-application-agi-20260817-215824-recovery",
+        "outcome": "completed_self_application_integration",
+        "path": ".continual/episodes/episode-self-application-agi-20260817-215824-recovery/episode.json",
+        "tags": [],
+        "task": "最短で検証可能なAGIを作って。最新mainと永続状態から継続し、Oの開発自体をOの実行・学習対象へ最小変更で統合する。このタスクチャットのモデルが実行段階を担い、O互換のRun、Episode、Candidate、証拠へ保存する。通常開発では性能を優先し、汚染が疑われる境界では論理リセットまたはfresh/独立実行を用いる。厳格な独立外部証拠gateは弱めず、通過するまで未完成として開発を継続する。"
+      },
+      {
+        "episode_id": "episode-prod-agi-20260816-1609",
+        "outcome": "not-completed",
+        "path": ".continual/episodes/episode-prod-agi-20260816-1609/episode.json",
+        "tags": [],
+        "task": "AGIを作って"
+      }
+    ],
+    "episode_id": "episode-work-mode-handoff-v2",
+    "mode": "post-task",
+    "preflight_selection": {
+      "decision": "USE_ACTIVE",
+      "reason": "No candidate targets this component.",
+      "scope": "learn"
+    }
+  },
+  "payload_digest": "76c6d5c16630911d0191eb77e6be5552a7f703be6ba91512d2b1f76827a3181e",
+  "prompt_content": "# LEARN\n\nYou are Post-Task Learn. Read only the relevant parts of the current, recent, similar, and long-term Episode catalog. Generalize only when evidence supports it.\n\nYou may propose, merge, split, supersede, archive, or reject Candidates affecting skills, Root, ENTRY, Execute, evaluators, Learn, episode/context formats, runner, model selection, or Candidate operations. Check relevant existing Candidates and rejected history enough to avoid obvious duplicates. Preserve applicability, non-applicability, dependencies, conflicts, costs, risks, evidence, and rollback conditions.\n\n`NO_CHANGE` is a successful outcome. Learn itself must never return `local_learn`; its observations go directly in `fragment`.\n\nReturn one JSON object only with keys `result` and `fragment`.\n",
+  "prompt_digest": "ac0e9c6efa1c04d4b5e8ca2d8201e9243fbe88ab2baf0cf039dc6f445fbd2266",
+  "prompt_path": "prompts/learn.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "6674a85871748b0845eb55d4f0f07380c71a02de42f678bc9bf906f7ee381607",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}

@@ -1,0 +1,48 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "evidence_refs": [
+      ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+      ".continual/work-model/invocations/invoke-66af21513bffe4e758237708/response.json",
+      "agi/CONTEXT_ROUTING_EXPERIMENT.json"
+    ],
+    "observations": [
+      "The Candidate targets Task Evaluate and the exact need for a unit-level subfinding.",
+      "A prior scoped trial preserved contamination and user-level negative evidence.",
+      "No deterministic protected-baseline activation record is present."
+    ],
+    "purpose": "Select a scoped trial that keeps three verdict layers separate during the exact publication evaluation.",
+    "unresolved": [
+      "post-result evidence is still needed before any activation proposal",
+      "the user-level objective remains unmet"
+    ]
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "observation": "A verdict-separation overlay is useful only when it preserves the protected baseline and remains scoped until actual result evidence is reviewed."
+  },
+  "result": {
+    "baseline_need": "Use the active Task Evaluate contract as the protected baseline and trial only the Candidate overlay for this exact unit.",
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "conflicts": [],
+    "decision": "TRIAL_CANDIDATE",
+    "dependencies": [],
+    "evidence_to_collect": [
+      "exact PR 273 and PR 274 workflow, merge, and main-readback facts",
+      "a bounded unit verdict independent of the user-level verdict",
+      "continued zero-observation and no-activation routing status",
+      "no promotion of CI or integration into AGI or routing evidence"
+    ],
+    "global_activation_authorized": false,
+    "reason": "The upcoming Task Evaluate must explicitly separate the bounded publication verdict from the user-level objective and the unmeasured routing claim. This Candidate targets exactly that distinction and its prior scoped trial preserved the same evidence boundary, but it is not globally verified or activated.",
+    "regression_checks": [
+      "bounded publication PASS does not change user-level FAIL",
+      "agi_claim_supported remains false",
+      "routing remains INSUFFICIENT_EVIDENCE with zero observations",
+      "all contradictory and contamination evidence is preserved"
+    ],
+    "rollback": "If the overlay conflates the bounded and user-level verdicts or weakens any evidence boundary, reject it for this scope and use the active Task Evaluate contract alone.",
+    "scope": "work/context-routing-heldout-native-publication-evaluation-v2"
+  }
+}
