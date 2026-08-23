@@ -17,6 +17,22 @@ from .context_routing_experiment import (
 
 
 _DIGEST = re.compile(r"^[0-9a-f]{64}$")
+_RECEIPT_FIELDS = {
+    "schema_version",
+    "kind",
+    "rendezvous_id",
+    "case_id",
+    "selector_executor_binding",
+    "source_request_digest",
+    "protocol_digest",
+    "selector_request_digest",
+    "sealed_scorer_digest",
+    "qualification_digest",
+    "plan_digest",
+    "measured_artifact_digest",
+    "observation",
+    "receipt_digest",
+}
 
 
 def _canonical_digest(value: Any) -> str:
@@ -49,6 +65,36 @@ def _with_digest(value: Mapping[str, Any], field: str) -> dict[str, Any]:
 
 def _without_digest(value: Mapping[str, Any], field: str) -> dict[str, Any]:
     return {key: deepcopy(item) for key, item in value.items() if key != field}
+
+
+def _validate_receipt_envelope(receipt: Mapping[str, Any]) -> dict[str, Any]:
+    if not isinstance(receipt, Mapping) or set(receipt) != _RECEIPT_FIELDS:
+        raise ValueError("observation receipt has an unexpected schema")
+    if receipt.get("schema_version") != 1:
+        raise ValueError("observation receipt schema_version must be 1")
+    if receipt.get("kind") != "context_routing_observation_receipt":
+        raise ValueError("observation receipt kind is invalid")
+    _text(receipt.get("rendezvous_id"), "receipt rendezvous_id")
+    _text(receipt.get("case_id"), "receipt case_id")
+    _text(receipt.get("selector_executor_binding"), "receipt executor binding")
+    for field in (
+        "source_request_digest",
+        "protocol_digest",
+        "selector_request_digest",
+        "sealed_scorer_digest",
+        "qualification_digest",
+        "plan_digest",
+        "measured_artifact_digest",
+        "receipt_digest",
+    ):
+        _sha256(receipt.get(field), f"receipt {field}")
+    if not isinstance(receipt.get("observation"), Mapping):
+        raise ValueError("receipt observation must be an object")
+    if receipt.get("receipt_digest") != _canonical_digest(
+        _without_digest(receipt, "receipt_digest")
+    ):
+        raise ValueError("observation receipt digest mismatch")
+    return deepcopy(dict(receipt))
 
 
 def build_context_routing_rendezvous(
@@ -342,19 +388,33 @@ def append_context_routing_observation_receipts(
     combined = [deepcopy(dict(item)) for item in existing]
     seen: set[str] = set()
     seen_cases: set[tuple[str, str]] = set()
+    cohort: tuple[str, ...] | None = None
     for receipt in [*existing, *additions]:
-        if not isinstance(receipt, Mapping):
-            raise ValueError("observation receipt must be an object")
-        digest = receipt.get("receipt_digest")
-        _sha256(digest, "receipt_digest")
-        if digest != _canonical_digest(_without_digest(receipt, "receipt_digest")):
-            raise ValueError("observation receipt digest mismatch")
+        validated = _validate_receipt_envelope(receipt)
+        digest = validated["receipt_digest"]
         case_key = (
-            _text(receipt.get("rendezvous_id"), "receipt rendezvous_id"),
-            _text(receipt.get("case_id"), "receipt case_id"),
+            validated["rendezvous_id"],
+            validated["case_id"],
         )
         if digest in seen or case_key in seen_cases:
             raise ValueError("duplicate observation receipt")
+        receipt_cohort = tuple(
+            validated[field]
+            for field in (
+                "rendezvous_id",
+                "selector_executor_binding",
+                "source_request_digest",
+                "protocol_digest",
+                "selector_request_digest",
+                "sealed_scorer_digest",
+                "qualification_digest",
+                "plan_digest",
+                "measured_artifact_digest",
+            )
+        )
+        if cohort is not None and receipt_cohort != cohort:
+            raise ValueError("observation receipt cohort mismatch")
+        cohort = receipt_cohort
         seen.add(str(digest))
         seen_cases.add(case_key)
     combined.extend(deepcopy(dict(item)) for item in additions)
@@ -385,30 +445,7 @@ def aggregate_context_routing_observation_receipts(
     seen_receipts: set[str] = set()
     plan_digests: set[str] = set()
     for receipt in receipts:
-        if not isinstance(receipt, Mapping):
-            raise ValueError("observation receipt must be an object")
-        expected_fields = {
-            "schema_version",
-            "kind",
-            "rendezvous_id",
-            "case_id",
-            "selector_executor_binding",
-            "source_request_digest",
-            "protocol_digest",
-            "selector_request_digest",
-            "sealed_scorer_digest",
-            "qualification_digest",
-            "plan_digest",
-            "measured_artifact_digest",
-            "observation",
-            "receipt_digest",
-        }
-        if set(receipt) != expected_fields:
-            raise ValueError("observation receipt has an unexpected schema")
-        if receipt.get("receipt_digest") != _canonical_digest(
-            _without_digest(receipt, "receipt_digest")
-        ):
-            raise ValueError("observation receipt digest mismatch")
+        receipt = _validate_receipt_envelope(receipt)
         bindings = {
             "schema_version": 1,
             "kind": "context_routing_observation_receipt",

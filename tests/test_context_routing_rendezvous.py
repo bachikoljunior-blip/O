@@ -305,6 +305,31 @@ def test_receipt_tamper_duplicate_and_append_atomicity_fail_closed(
         append_context_routing_observation_receipts(existing, [receipts[0]])
     assert existing == before
 
+    malformed = deepcopy(receipts[1])
+    malformed["unexpected"] = True
+    with pytest.raises(ValueError, match="unexpected schema"):
+        append_context_routing_observation_receipts(existing, [malformed])
+    assert existing == before
+
+    mixed = deepcopy(receipts[1])
+    mixed["source_request_digest"] = "3" * 64
+    mixed_without_digest = {
+        key: value for key, value in mixed.items() if key != "receipt_digest"
+    }
+    import hashlib
+
+    mixed["receipt_digest"] = hashlib.sha256(
+        json.dumps(
+            mixed_without_digest,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+    with pytest.raises(ValueError, match="cohort mismatch"):
+        append_context_routing_observation_receipts(existing, [mixed])
+    assert existing == before
+
 
 def test_post_relabeling_invalidates_rendezvous_and_receipts(tmp_path: Path) -> None:
     value = _experiment()
