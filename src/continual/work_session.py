@@ -297,6 +297,64 @@ class WorkModelClient:
         _, output = _verified_response(self.store, existing or request, response_path)
         return output
 
+    def resume_bound(
+        self,
+        component: str,
+        payload: dict[str, Any],
+        *,
+        prompt_path: str,
+        invocation_id: str,
+        request_ref: str,
+        request_digest: str,
+    ) -> dict[str, Any]:
+        """Resume the exact immutable Work request named by the native journal.
+
+        A pending Root request may outlive a heartbeat or inbox update. Rebuilding
+        its Context Kernel manifest would mint a second Work request for the same
+        native invocation. The native journal is therefore the sole resume
+        authority: source-clock changes affect the next Root boundary, not the
+        already-frozen request.
+        """
+
+        if not isinstance(invocation_id, str) or not _INVOCATION_ID.fullmatch(
+            invocation_id
+        ):
+            raise WorkSessionError("invalid bound Work invocation_id")
+        if not isinstance(request_ref, str) or not request_ref:
+            raise WorkSessionError("invalid bound Work request_ref")
+        if not isinstance(request_digest, str) or not request_digest:
+            raise WorkSessionError("invalid bound Work request_digest")
+        request_path = (self.root / request_ref).resolve()
+        expected_path = self.invocation_root / invocation_id / "request.json"
+        if request_path != expected_path:
+            raise WorkSessionError("bound Work request_ref mismatch")
+        request = _verified_request(self.store, request_path)
+        if (
+            request.get("request_digest") != request_digest
+            or request.get("run_id") != self.run_id
+            or request.get("component") != component
+            or request.get("prompt_path") != prompt_path
+            or request.get("executor_binding") != self.executor_binding
+            or request.get("model_identity") != self.model
+        ):
+            raise WorkSessionError("bound Work request identity mismatch")
+        frozen_payload = request.get("payload")
+        if not isinstance(frozen_payload, Mapping):
+            raise WorkSessionError("bound Work request payload is malformed")
+        outer_payload = deepcopy(dict(frozen_payload))
+        if component == "root":
+            outer_payload.pop("decision_context", None)
+        if self.store.stable_digest(outer_payload, length=64) != self.store.stable_digest(
+            payload, length=64
+        ):
+            raise WorkSessionError("bound Work outer payload mismatch")
+
+        response_path = request_path.parent / "response.json"
+        if not response_path.is_file():
+            raise WorkModelPending(invocation_id, request_ref, request_digest)
+        _, output = _verified_response(self.store, request, response_path)
+        return output
+
 
 class WorkSession:
     """Run the ordinary O Engine with the current ChatGPT Work model as provider."""

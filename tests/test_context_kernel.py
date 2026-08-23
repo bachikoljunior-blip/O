@@ -265,6 +265,34 @@ def test_frozen_request_survives_source_advance_and_next_root_changes(
     )
 
 
+def test_bound_resume_keeps_exact_pending_root_after_source_advance(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    client = _client(root)
+    payload = {"snapshot": deepcopy(snapshot), "last_result": {"verdict": "FAIL"}}
+    with pytest.raises(WorkModelPending) as first:
+        client.call("root", payload, prompt_path="prompts/root.md")
+
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = "2026-08-23T00:05:00Z"
+    _write_json(state_path, state)
+
+    with pytest.raises(WorkModelPending) as resumed:
+        client.resume_bound(
+            "root",
+            payload,
+            prompt_path="prompts/root.md",
+            invocation_id=first.value.invocation_id,
+            request_ref=first.value.request_ref,
+            request_digest=first.value.request_digest,
+        )
+    assert resumed.value.invocation_id == first.value.invocation_id
+    assert resumed.value.request_digest == first.value.request_digest
+    assert len(list(client.invocation_root.glob("*/request.json"))) == 1
+
+
 def test_outer_payload_cannot_inject_a_competing_decision_context(
     tmp_path: Path,
 ) -> None:
