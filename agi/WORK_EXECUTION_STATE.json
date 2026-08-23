@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T10:15:23.846Z",
-  "last_progress_at": "2026-08-23T10:15:23.846Z",
+  "heartbeat_at": "2026-08-23T10:22:12.654Z",
+  "last_progress_at": "2026-08-23T10:22:12.654Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-7ce263e8f2b55bae063d677a",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ce263e8f2b55bae063d677a/request.json",
     "durability_status": "Actual generation-5 cycle is remotely durable in PR 271 exact head 023273a4a65b15f05317d2cdc52845f6bc919f43. Its 68-file tree b3caf67a151d16420cab1fac7b2ec3ac81b65a5e exactly matches the locally validated tree. Work verification reports 65 requests, 64 responses, one exact pending Root, valid=true. Exact-head sharded CI is pending.",
-    "next_action": "Observe PR 271 exact-head sharded CI, require unchanged head and fresh-main conflict check, merge only if safe, verify all remote records on main, then resume invoke-7ce263e8f2b55bae063d677a."
+    "next_action": "Observe exact-head sharded CI for PR 271 and PR 272. Merge only unchanged passing conflict-free heads with readback. Then persist the native cycle on main and resume exact pending Root invoke-7ce263e8f2b55bae063d677a using the prepared held-out recursive-context routing unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -152,5 +152,22 @@
     "completed": true,
     "scope": "combined latest-main candidate integration regression",
     "claim_boundary": "Internal regression evidence only."
+  },
+  "in_flight_integrations": {
+    "native_cycle": {
+      "pull_request": 271,
+      "exact_head_sha": "023273a4a65b15f05317d2cdc52845f6bc919f43",
+      "workflow_run": 32633031509,
+      "status": "in_progress"
+    },
+    "resume_identity_guard": {
+      "predecessor_pull_request": 269,
+      "predecessor_workflow_run": 32629965808,
+      "predecessor_result": "cancelled_at_74_percent_no_semantic_conclusion",
+      "pull_request": 272,
+      "exact_head_sha": "c6bdb662a084a896564d8f5a671b157ba31cc59e",
+      "exact_head_ci": "pending",
+      "local_combined_regression": "515 passed in 2913.11s"
+    }
   }
 }
