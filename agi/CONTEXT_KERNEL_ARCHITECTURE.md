@@ -113,6 +113,29 @@ remote-main freshness, create external observation receipts, extend manifests
 to every semantic component, or protect effects at dispatch. Those remain
 explicit negative evidence.
 
+## Third vertical slice: O-requested external observations
+
+`src/continual/context_observations.py` separates read-only observation from
+effect authorization. O first freezes a bounded observation request under the
+current native Execute journal. The outer executor may then return only the
+selected public fields, exact immutable source version, status, unknowns, and
+evidence class. The receipt is immutable and cross-bound to the Work request,
+executor, model, GitHub repository/path/commit, field set, and freshness rule.
+
+`agi/CONTEXT_OBSERVATION_LEDGER.json` contains only projections derived from
+verified request/receipt pairs. The Context Kernel re-verifies those pairs
+before admitting the ledger to a later Root manifest. Unsolicited outer facts,
+changed request or source identity, tampered results, conflicting replay,
+future skew, and stale max-age receipts fail closed. An observation bound to an
+immutable commit remains a historical source-version fact; it is not silently
+promoted to "latest main."
+
+The first checked-in receipt is one connected-GitHub read of the generation-6
+Work state at an exact commit. Its evidence class is explicitly
+`operator_connector_readback`: this demonstrates the O request-to-connector-
+receipt path, not independent attestation, useful behavioral improvement, or
+complete external-source coverage.
+
 ## Migration sequence
 
 1. Root-only mandatory manifest, audit and fail-closed validation. **Implemented.**
@@ -122,6 +145,8 @@ explicit negative evidence.
    broader behavioral evidence remain required.**
 3. Observation activities and receipts for GitHub, CI, providers, tools, and
    external research; no outside fact affects judgment before ingestion.
+   **Implemented for one exact public GitHub file read; other source kinds and
+   behavioral evidence remain pending.**
 4. Manifests for Execute, Task Evaluate, Consolidate, and Learn.
 5. Bind plan and effect authorization to manifests; recheck critical source
    clocks and revocations immediately before dispatch.
