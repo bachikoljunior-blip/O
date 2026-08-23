@@ -1,0 +1,41 @@
+{
+  "claim_boundary": "A successful experiment would only justify a scoped execution strategy change; it would not establish AGI.",
+  "component": "execute",
+  "continuation": "Publish the completed comparison and native records first. Then implement the sandbox harness on the isolated branch, run matched controls and treatments, and evaluate without promoting the upper goal.",
+  "evidence_needed": [
+    "Frozen matched tasks, scorer, budgets, and retained-capability criteria",
+    "Single-lineage control traces and three-sibling treatment traces",
+    "Exact replay, protected regression, and side-effect isolation results",
+    "Median model-invocation and wall-time measurements"
+  ],
+  "goal": "Measure whether bounded best-checkpoint inheritance reduces elapsed effort per retained capability versus the retained single-lineage baseline without creating another main writer.",
+  "priority_reason": "This is the smallest reversible unit that can falsify the only promising external mechanism identified by the frozen comparison.",
+  "selected_scope": "agi/bounded-checkpoint-inheritance-experiment",
+  "selected_unit": {
+    "expected_outputs": [
+      "sandbox-only experiment harness",
+      "three sibling traces per task",
+      "deterministic score and retained checkpoint",
+      "single-lineage control measurements",
+      "falsifier and rollback decision"
+    ],
+    "failure_conditions": [
+      "No measured improvement, unstable replay, protected regression, side-effect regression, or incomparable workloads."
+    ],
+    "goal": "Measure whether bounded best-checkpoint inheritance reduces elapsed effort per retained capability versus the retained single-lineage baseline without creating another main writer.",
+    "inputs": [
+      "agi/SCIENTIST_AGENT_BASELINE.json",
+      "three matched non-production research tasks",
+      "existing protected regression and exact replay paths"
+    ],
+    "rollback": "Keep checkpoint inheritance inactive and retain single-lineage execution.",
+    "success_conditions": [
+      "No sibling process can write main or emit non-idempotent external effects.",
+      "Inputs, scorer, budgets, and retained-capability criteria are frozen before measurement.",
+      "Exact replay is stable and protected regressions remain green.",
+      "Median model invocations or wall time per retained capability improves over the matched single-lineage control."
+    ],
+    "unit_id": "unit-bounded-checkpoint-inheritance-v1"
+  },
+  "unit_id": "unit-7248d09ab66196abd19984f1"
+}

@@ -1,0 +1,36 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "evidence_refs": [
+      ".continual/work-model/invocations/invoke-db09246b90d250f42cca472c/response.json",
+      ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json"
+    ],
+    "observations": [
+      "The actual output met every pre-application regression check with no observed contradiction."
+    ],
+    "purpose": "Evaluate the dual-verdict Candidate from actual Task Evaluate output.",
+    "unresolved": [
+      "Separate deterministic activation gate has not yet run."
+    ]
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "observation": "Repeated cross-unit evidence now supports proposing scoped activation, but the evaluator itself does not perform promotion."
+  },
+  "result": {
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "contradictory_evidence": [],
+    "decision": "PROPOSE_ACTIVATION",
+    "reason": "The actual result preserved original-goal FAIL and bounded unit PASS as independent verdicts, retained negative evidence and unmet conditions, and explicitly denied any AGI inference. Together with prior supporting trials, this supports a scoped activation proposal, subject to the separate deterministic protected-baseline gate.",
+    "required_activation_gate": "Recompute the protected baseline regression and persist VERIFIED_FOR_SCOPE before any scoped status change.",
+    "rollback": "Keep the Candidate inactive if the deterministic gate detects weakened original verdicts, missing negative evidence, or unit/task conflation.",
+    "scope": "continual/incremental-task-evaluation",
+    "supporting_evidence": [
+      "actual Task Evaluate verdict FAIL and unit_verdict PASS are non-conflated",
+      "bounded PASS is mapped to exact external and local evidence",
+      "original unmet conditions and claim boundary are preserved",
+      "prior supporting trials show the same behavior on different units"
+    ]
+  }
+}
