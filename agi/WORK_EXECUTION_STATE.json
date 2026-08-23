@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T09:43:51.926Z",
-  "last_progress_at": "2026-08-23T09:43:51.926Z",
+  "heartbeat_at": "2026-08-23T09:51:25.762Z",
+  "last_progress_at": "2026-08-23T09:51:25.762Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -21,7 +21,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "96a85c681807d7ab0f51558b805095160dd7406a",
+  "source_main_sha": "2257797b66ece744a3835f6f8ea72259d5ba2000",
   "working_branch": "work/checkpoint-provenance-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
@@ -35,17 +35,17 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "PRs 265-270 remain on unchanged exact heads with exact CI in progress. Latest-main synthetic ordered integration is conflict-free. PR 270 shards 1 and 2 are successful; shards 0 and 3 and its aggregate gate remain pending. Full combined local regression continues without a reported failure.",
+    "pending_native_execute": "PR 270 is merged and read back. Four shards and aggregate succeeded; observed end-to-end job span was ~25m17s versus the 67m44s unsharded pytest baseline. PRs 265-269 remain in exact-head CI. A synthetic latest-main+PR265 rehearsal produced a valid pending CI-sharding Execute without publishing artifacts.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "92a322c48acedf1643252b7b2d071c8e8e22c5d3",
+    "snapshot_head_sha": "2257797b66ece744a3835f6f8ea72259d5ba2000",
     "pending_work_invocation_id": "invoke-6caa1ba04023a73bb2a478c3",
     "pending_request_ref": ".continual/work-model/invocations/invoke-6caa1ba04023a73bb2a478c3/request.json",
-    "durability_status": "PR 264 is verified on main. PRs 265-270 remain open on unchanged exact heads with CI in progress. A latest-main synthetic ordered merge of all six heads completed conflict-free as local validation commit 0d2890d589111b7d4bd0b302b5470ff43cc6226c (17 changed files, diff-check clean). The actual pending native Execute request remains unanswered; the prepared response was rehearsed only.",
-    "next_action": "Maintain heartbeat; observe exact-head CI for PRs 265-270. Merge each only after unchanged success and a fresh conflict-free PR read. Merge PR 265 before executing the pending native response; then resume the real native lifecycle on a fresh latest-main isolated branch."
+    "durability_status": "PR 270 exact head passed four exhaustive pytest shards (122+122+121+121=486) and the aggregate gate, then merged as 2257797b66ece744a3835f6f8ea72259d5ba2000 with exact blob readback. End-to-end job evidence ran from 09:23:09.817Z to 09:48:27.106Z (~1517.29s), versus the retained unsharded pytest baseline 4064.00s. PRs 265-269 remain open on unchanged exact heads with CI in progress. PR265-provenance rehearsal remains local-only and valid through the next Execute boundary.",
+    "next_action": "Observe PR 265 exact-head CI; merge only after unchanged success and fresh mergeable=true. Then execute the pending native response on a fresh latest-main isolated branch, resume through Root and candidate preflight to the CI-sharding Execute, record the completed PR 270 evidence, and publish the native lifecycle through exact-head CI."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -129,11 +129,11 @@
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z"
   },
   "recent_main_integration": {
-    "pull_request": 264,
-    "exact_head_sha": "16e8971455a819099aa1ab68a88f0a982750390b",
-    "exact_head_ci_run": 32627670204,
-    "merge_sha": "96a85c681807d7ab0f51558b805095160dd7406a",
+    "pull_request": 270,
+    "exact_head_sha": "3d51e7bbe350319418023721439e48348c758093",
+    "exact_head_ci_run": 32630847871,
+    "merge_sha": "2257797b66ece744a3835f6f8ea72259d5ba2000",
     "verified_remote_readback": true,
-    "claim_boundary": "Fail-closed checkpoint harness and control-plane reconciliation only; zero matched observations, implementation unauthorized, not AGI evidence."
+    "claim_boundary": "CI feedback-latency engineering only; four exact pytest shards and aggregate succeeded. This is not capability or AGI evidence."
   }
 }
