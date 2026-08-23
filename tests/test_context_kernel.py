@@ -11,6 +11,7 @@ from continual.context_kernel import (
     ContextKernelError,
     verify_decision_context_manifest,
 )
+from continual.context_observations import observation_ledger_entry
 from continual.store import Store
 from continual.work_session import WorkModelClient, WorkModelPending, WorkSessionError
 
@@ -178,6 +179,71 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
     _write_json(
         tmp_path / ".continual" / "runs" / RUN_ID / "snapshot.json", snapshot
     )
+    observation_id = "observation-test-main-state"
+    observation_dir = (
+        tmp_path
+        / ".continual"
+        / "runs"
+        / RUN_ID
+        / "context-observations"
+        / observation_id
+    )
+    request = {
+        "schema_version": 1,
+        "record_type": "context_observation_request",
+        "run_id": RUN_ID,
+        "observation_id": observation_id,
+        "invocation_id": "invoke-context-test",
+        "work_request_digest": "frozen-work-request-digest",
+        "executor_binding": "context-kernel-test-session",
+        "model_identity": "context-kernel-test-model",
+        "source": {
+            "kind": "github_file",
+            "repository_full_name": "example/context-test",
+            "path": "agi/WORK_EXECUTION_STATE.json",
+            "ref": "1" * 40,
+            "expected_commit_sha": "1" * 40,
+        },
+        "selected_fields": ["status"],
+        "freshness": {
+            "kind": "immutable_version",
+            "invalidates_on": ["commit identity mismatch"],
+        },
+        "evidence_class": "operator_connector_readback",
+        "operation": "read",
+    }
+    request["request_digest"] = store.stable_digest(request, length=64)
+    request["requested_at"] = "2026-08-23T00:00:02Z"
+    receipt = {
+        "schema_version": 1,
+        "record_type": "context_observation_receipt",
+        "run_id": RUN_ID,
+        "observation_id": observation_id,
+        "request_digest": request["request_digest"],
+        "executor_binding": request["executor_binding"],
+        "model_identity": request["model_identity"],
+        "source": deepcopy(request["source"]),
+        "source_version": {"commit_sha": "1" * 40, "blob_sha": "2" * 40},
+        "projection": {"status": "running"},
+        "status": "succeeded",
+        "unknowns": [],
+        "evidence_class": "operator_connector_readback",
+    }
+    receipt["receipt_digest"] = store.stable_digest(receipt, length=64)
+    receipt["observed_at"] = "2026-08-23T00:00:02Z"
+    _write_json(observation_dir / "request.json", request)
+    _write_json(observation_dir / "receipt.json", receipt)
+    ledger_entry = observation_ledger_entry(
+        tmp_path,
+        run_id=RUN_ID,
+        observation_id=observation_id,
+        source_id="github_test_work_state",
+    )
+    ledger_entry["run_id"] = RUN_ID
+    _write_json(
+        tmp_path / "agi" / "CONTEXT_OBSERVATION_LEDGER.json",
+        {"schema_version": 1, "entries": [ledger_entry]},
+    )
     return tmp_path, snapshot
 
 
@@ -218,6 +284,7 @@ def test_root_manifest_is_deterministic_minimal_and_o_owned(tmp_path: Path) -> N
         "user_input_inbox",
         "effective_user_directives",
         "work_strategy",
+        "external_observations",
         "native_run_snapshot",
     ]
     request_text = json.dumps(request, ensure_ascii=False)

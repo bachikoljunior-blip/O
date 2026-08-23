@@ -6,6 +6,10 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping
 
+from .context_observations import (
+    ContextObservationError,
+    verify_context_observation_ledger,
+)
 from .effective_directives import (
     EffectiveDirectiveError,
     compile_effective_directives,
@@ -22,6 +26,7 @@ _CONTROL_PATHS = {
     "user_input_inbox": Path("agi/USER_INPUT_INBOX.json"),
     "effective_user_directives": Path("agi/USER_DIRECTIVE_EVENTS.json"),
     "work_strategy": Path("agi/WORK_STRATEGY.json"),
+    "external_observations": Path("agi/CONTEXT_OBSERVATION_LEDGER.json"),
 }
 
 
@@ -277,6 +282,12 @@ def build_root_decision_context(
     strategy, strategy_identity = _load_source(
         root, store, "work_strategy", _CONTROL_PATHS["work_strategy"]
     )
+    observation_ledger, observation_ledger_identity = _load_source(
+        root,
+        store,
+        "external_observations",
+        _CONTROL_PATHS["external_observations"],
+    )
     snapshot_path = Path(".continual") / "runs" / run_id / "snapshot.json"
     snapshot, snapshot_identity = _load_source(
         root, store, "native_run_snapshot", snapshot_path
@@ -335,6 +346,14 @@ def build_root_decision_context(
     except EffectiveDirectiveError as exc:
         raise ContextKernelError(
             f"effective directive compilation failed: {exc}"
+        ) from exc
+    try:
+        verified_observations = verify_context_observation_ledger(
+            root, observation_ledger
+        )
+    except ContextObservationError as exc:
+        raise ContextKernelError(
+            f"external observation verification failed: {exc}"
         ) from exc
     interpreted_at = _required_text(
         directive_ledger.get("source", {}).get("interpreted_at"),
@@ -405,6 +424,24 @@ def build_root_decision_context(
         "task_completion_verdict": snapshot.get("task_completion_verdict"),
         "unit_completion_verdict": snapshot.get("unit_completion_verdict"),
         "last_result_ref": snapshot.get("last_result_ref"),
+    }
+    observation_projection = {
+        "entries": [
+            {
+                "source_id": entry["source_id"],
+                "observation_id": entry["observation_id"],
+                "request_digest": entry["request_digest"],
+                "receipt_digest": entry["receipt_digest"],
+                "authoritative_locator": entry["authoritative_locator"],
+                "source_version": deepcopy(entry["source_version"]),
+                "observed_at": entry["observed_at"],
+                "freshness": deepcopy(entry["freshness"]),
+                "projection": deepcopy(entry["projection"]),
+                "evidence_class": entry["evidence_class"],
+                "unknowns": deepcopy(entry["unknowns"]),
+            }
+            for entry in verified_observations
+        ]
     }
 
     sources = [
@@ -508,6 +545,35 @@ def build_root_decision_context(
             ],
             depends_on=["effective_user_directives.effective_policy_digest"],
             freshness={"kind": "content_version", "updated_at": strategy_updated_at},
+        ),
+        _source_record(
+            observation_ledger_identity,
+            version=(
+                "receipts:"
+                + store.stable_digest(observation_projection, length=64)
+            ),
+            observed_at=max(
+                entry["observed_at"] for entry in verified_observations
+            ),
+            projection=observation_projection,
+            include_reason="Allow external facts to affect Root only after an O-requested, request-bound, mechanically verified receipt is ingested.",
+            selected_fields=list(observation_projection),
+            excluded_fields=[
+                "raw connector responses",
+                "unrequested outer-session facts",
+                "secret-bearing or unbounded provider payloads",
+            ],
+            invalidates_on=[
+                "observation ledger content change",
+                "request or receipt digest change",
+                "source version change",
+                "freshness or invalidation policy change",
+            ],
+            depends_on=["native_run_snapshot.current_unit"],
+            freshness={
+                "kind": "verified_receipt_set",
+                "entry_count": len(verified_observations),
+            },
         ),
         _source_record(
             snapshot_identity,
