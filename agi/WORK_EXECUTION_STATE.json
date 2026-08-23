@@ -12,11 +12,11 @@
   "last_progress_at": "2026-08-23T15:12:35Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "fenced_monitor_recovery_phase1_pending_readback",
+    "kind": "fenced_monitor_recovery_phase1_verified",
     "instruction": "Insurance recovery after generation-5 heartbeat and same-owner activity both exceeded stale_after_seconds; phase-1 expected-blob CAS must be read back exactly before any further mutation.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "No development mutation is authorized until phase-1 and phase-2 exact remote readbacks complete."
+    "note": "Generation-6 phase-1 commit 36764d20a414fc23b1a4fef535d23eadbd616ad8 and blob d5cf519189d02abadce3861499516b8d9a774513 read back exactly; final authorization awaits phase-2 readback."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -33,7 +33,7 @@
     "application_note": "Revision 15 ingested at safe Root invoke-344455ae7a59ec86e4fa5d20. It adds O-centered context-control direction and no ownership supersede. O selected an authoritative-source-referenced DecisionContextManifest/Event-Ledger architecture over copying all raw external data into O. Revision 14 remains effective: generation 5 is the sole primary/main integrator and validated results publish through isolated exact-head CI."
   },
   "parallel_execution_coordination": {
-    "primary": "Pending generation-6 fenced recovery owner work-recovery-20260823T151235Z-7f8d3b125a9c4e62; not authorized until exact two-phase readback completes.",
+    "primary": "Generation-6 recovery owner work-recovery-20260823T151235Z-7f8d3b125a9c4e62; phase-1 readback verified, final authorization awaits phase-2 readback.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
     "pending_native_execute": "Resume only invoke-6a8a4f0eb8a3f1e5791e560f after authorization under its recorded executor binding.",
     "predecessor": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58 generation 5; heartbeat 2026-08-23T05:18:00Z superseded only after stale classification and CAS."
@@ -66,14 +66,14 @@
     "recovery_eligibility_is_mutation_authority": false
   },
   "remote_persistence": {
-    "published_on_main": false,
-    "verified_remote_readback": false,
+    "published_on_main": true,
+    "verified_remote_readback": true,
     "expected_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
-    "result_commit_sha": null,
-    "result_blob_sha": null,
+    "result_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
+    "result_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
     "finalization_commit_sha": null,
     "finalization_blob_sha": null,
-    "note": "Generation-6 phase-1 acquisition payload; exact result commit/blob are recorded by phase-2 only after readback."
+    "note": "Generation-6 phase-1 commit/blob read back exactly; phase-2 finalization commit/blob await final readback."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -102,12 +102,12 @@
     "note": "Revision 15 was ingested by same-owner Root invoke-344455ae7a59ec86e4fa5d20 without retroactively changing earlier frozen requests. The selected Execute unit is unit-4d9f1592acf97a44ee8afdd6."
   },
   "expected_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
-  "acquisition_phase": "phase1_pending_remote_readback",
+  "result_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
+  "result_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
+  "finalize_expected_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
+  "readback_of_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
+  "verified_remote_readback": true,
+  "acquisition_phase": "phase2_finalization_pending_readback",
   "recovery_observation": {
     "observed_at": "2026-08-23T15:12:35Z",
     "observed_main_sha": "a80047bbb0c398fe2bdf665e79944442836c4187",
