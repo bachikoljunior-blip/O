@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-23T17:14:53.965Z",
-  "last_progress_at": "2026-08-23T17:14:53.965Z",
+  "heartbeat_at": "2026-08-23T17:22:28.270Z",
+  "last_progress_at": "2026-08-23T17:22:28.270Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -21,8 +21,8 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "4f7a949aea930fb9626f29f138c734045ddcd5c5",
-  "working_branch": "work/recovery-gen6-observation-receipt-v1",
+  "source_main_sha": "f949e9eb6029bdb15421307497bf4cfecdba45f8",
+  "working_branch": "main",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
   "active_unit_id": "unit-41b5614c179bff0e4c3d5224",
@@ -40,12 +40,12 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/recovery-gen6-observation-receipt-v1",
-    "snapshot_head_sha": "a628e3feea57025cf8e0701c6d5854a7763a93e4",
+    "snapshot_branch": "main",
+    "snapshot_head_sha": "f949e9eb6029bdb15421307497bf4cfecdba45f8",
     "pending_work_invocation_id": "invoke-04f7f52c89211dfad9fced5f",
     "pending_request_ref": ".continual/work-model/invocations/invoke-04f7f52c89211dfad9fced5f/request.json",
-    "durability_status": "PR 278 exact head a628e3feea57025cf8e0701c6d5854a7763a93e4 remains unchanged; workflow 32652613245 has shards 0-2 succeeded and long shard 3 in progress.",
-    "next_action": "Require unchanged exact-head PR 278 CI success, fresh conflict-free comparison, expected-head merge, and exact main blob readback; then answer Execute invoke-04f7f52c89211dfad9fced5f and continue native O lifecycle."
+    "durability_status": "PR 278 exact head a628e3feea57025cf8e0701c6d5854a7763a93e4 tree 37135ffb86b4d0350cf205f0bc7e9a75c59e913c passed workflow 32652613245 (four pytest shards plus aggregate), merged conflict-free as f949e9eb6029bdb15421307497bf4cfecdba45f8, and all 35 reviewed blobs matched exact-head blobs on the merge commit.",
+    "next_action": "Answer frozen Execute invoke-04f7f52c89211dfad9fced5f with exact PR 278 evidence and negative evidence; resume Task Evaluate, Consolidate Episode, Learn, and the next Root without claiming the user objective complete."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -130,29 +130,20 @@
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z"
   },
   "recent_main_integration": {
-    "pull_request": 277,
-    "exact_head_sha": "05617b717becc0b93b98b75e978c9cbc06cc1656",
-    "exact_head_tree_sha": "5de3d16b55e9e1e7f7a1bc516963a910a814f0fa",
-    "exact_head_ci_run": 32649580946,
+    "pull_request": 278,
+    "exact_head_sha": "a628e3feea57025cf8e0701c6d5854a7763a93e4",
+    "exact_head_tree_sha": "37135ffb86b4d0350cf205f0bc7e9a75c59e913c",
+    "exact_head_ci_run": 32652613245,
     "exact_head_ci_result": "four pytest shards and dependent aggregate succeeded",
-    "merge_sha": "2ffd6231d41177b85b72348d443bae3722bb691e",
+    "merge_sha": "f949e9eb6029bdb15421307497bf4cfecdba45f8",
     "verified_remote_readback": true,
+    "reviewed_blob_count": 35,
     "readback_blobs": {
-      "src/continual/effective_directives.py": "1af29b3a4a085a3c9e38e20ff9a3ae193411ffaa",
-      "src/continual/context_kernel.py": "6e490a9cb2bd534dc680655b8ad316f82bc28836",
-      "tests/test_effective_directives.py": "a863dd6dfbbc95c89fe7eff126992340cca51b11",
-      "tests/test_context_kernel.py": "dc391ce221cd21d42e933592b9a16065711927da",
-      "agi/USER_DIRECTIVE_EVENTS.json": "c2570cfad14fb363d417ac4d1671f0b27a94de25",
-      "agi/WORK_STRATEGY.json": "e51161f4228bf94154a488a9877a977bf5833778",
-      "agi/CONTEXT_KERNEL_ARCHITECTURE.md": "73683908d1107ae52e420b068ea6531c9d87f368",
-      "agi/CONTINUATION.json": "2d96d496ef05e866473d08cccc0fa1ee8d592256",
-      "agi/AUTONOMY_STATE.json": "793028baa37d0ea20e1604f54de4bb044c6e5c56",
-      "agi/WORK_MODE_HANDOFF.json": "813c693007f78899c48c8009d6e38cf1e3a25b6a",
-      ".continual/runs/run-work-mode-handoff-v2/snapshot.json": "1c6d40293fd0ddbd43ea22d19c9764ffe59cc954",
-      ".continual/work-model/invocations/invoke-55255fe17d8e25f39a039bcf/request.json": "0dc166743554f473f37be653a4da6c51c407ddbb",
-      ".continual/runs/run-work-mode-handoff-v2/external-effects/publish-effective-directives-v1.json": "f31856a19ccc30b17fd6860f564569b819eb121a"
+      "src/continual/context_observations.py": "64c93d8c2b3f177a126a7bb32660ec29e4ea9c0f",
+      "agi/CONTEXT_OBSERVATION_LEDGER.json": "f40468b7f3746a864da511518979f47450450350",
+      "tests/test_context_observations.py": "8b9b0075ae77b51f60548e22d7af4cec696ebaba"
     },
-    "claim_boundary": "Typed partial-supersede compilation and deterministic Root projection are internal context-control evidence. They do not establish useful external behavioral improvement, complete context control, AGI, or the user objective."
+    "claim_boundary": "Request-bound connector observation infrastructure and repository integration are internal context-control evidence. They do not establish independent behavioral improvement, complete context control, AGI, or the user objective."
   },
   "recent_publication": {
     "pull_request": 272,
@@ -273,12 +264,16 @@
       "head_sha": "a628e3feea57025cf8e0701c6d5854a7763a93e4",
       "exact_tree_sha": "37135ffb86b4d0350cf205f0bc7e9a75c59e913c",
       "workflow_run": 32652613245,
-      "status": "exact_head_ci_shards_0_1_2_succeeded_3_in_progress",
+      "status": "merged_to_main_all_35_reviewed_blobs_verified",
       "local_validation": "101 protected tests passed including timestamp tamper rejection; compileall, 844 JSON documents, work-verify 97/96/1 valid, diff check passed",
       "actual_observation_request_digest": "44b1678ec91bdb26517f24f924c6b3d734cccf5a1a70b0d0916a55826846ae0c",
       "actual_observation_receipt_digest": "d1564688364f969454888f5c78f20615cfcc36f8d20d5e94b9d0f1324c283885",
       "claim_boundary": "Internal request/receipt context-control evidence only; connector readback is operator-path evidence, not independent behavioral or AGI evidence.",
-      "observed_at": "2026-08-23T17:14:53.965Z"
+      "observed_at": "2026-08-23T17:22:28.270Z",
+      "merge_sha": "f949e9eb6029bdb15421307497bf4cfecdba45f8",
+      "exact_head_ci_result": "workflow 32652613245: four pytest shards and aggregate succeeded",
+      "verified_remote_readback": true,
+      "reviewed_blob_count": 35
     }
   },
   "pending_user_input": {
