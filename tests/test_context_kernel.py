@@ -151,6 +151,14 @@ def test_root_manifest_is_deterministic_minimal_and_o_owned(tmp_path: Path) -> N
     with pytest.raises(ContextKernelError, match="manifest digest mismatch"):
         verify_decision_context_manifest(tampered, store=Store(root))
 
+    inconsistent = deepcopy(manifest)
+    inconsistent["source_clock"]["work_execution_state"]["version"] = "other"
+    body = deepcopy(inconsistent)
+    body.pop("manifest_digest")
+    inconsistent["manifest_digest"] = Store(root).stable_digest(body, length=64)
+    with pytest.raises(ContextKernelError, match="source clock binding mismatch"):
+        verify_decision_context_manifest(inconsistent, store=Store(root))
+
     replay, after = _freeze_root(client, snapshot)
     assert replay["invocation_id"] == request["invocation_id"]
     assert replay["request_digest"] == request["request_digest"]
@@ -198,6 +206,17 @@ def test_root_manifest_fails_closed_on_inbox_binding_disagreement(
 
     with pytest.raises(WorkSessionError, match="inbox blob binding mismatch"):
         _freeze_root(_client(root), snapshot)
+
+
+def test_root_manifest_rejects_outer_snapshot_with_matching_version(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    injected = deepcopy(snapshot)
+    injected["phase"] = "completed"
+
+    with pytest.raises(WorkSessionError, match="exact durable run snapshot"):
+        _freeze_root(_client(root), injected)
 
 
 def test_frozen_request_survives_source_advance_and_next_root_changes(

@@ -198,9 +198,33 @@ def verify_decision_context_manifest(
         raise ContextKernelError(
             "decision context mandatory_source_ids must be non-empty text"
         )
+    if len(set(mandatory)) != len(mandatory):
+        raise ContextKernelError(
+            "decision context mandatory_source_ids must be unique"
+        )
     required = set(mandatory)
     if set(source_ids) != required:
         raise ContextKernelError("decision context mandatory source set mismatch")
+    source_clock = _required_mapping(
+        value.get("source_clock"), "decision_context.source_clock"
+    )
+    if set(source_clock) != required:
+        raise ContextKernelError("decision context source clock set mismatch")
+    for source in sources:
+        source_id = source["source_id"]
+        clock = _required_mapping(
+            source_clock.get(source_id),
+            f"decision_context.source_clock.{source_id}",
+        )
+        expected_clock = {
+            "version": source.get("version"),
+            "content_digest": source.get("content_digest"),
+            "git_blob_sha": source.get("git_blob_sha"),
+        }
+        if clock != expected_clock:
+            raise ContextKernelError(
+                f"decision context source clock binding mismatch: {source_id}"
+            )
     value["manifest_digest"] = supplied
     return value
 
@@ -299,6 +323,13 @@ def build_root_decision_context(
     )
     if supplied_snapshot.get("updated_at") != snapshot_updated_at:
         raise ContextKernelError("payload snapshot timestamp is not the durable run timestamp")
+    if (
+        store.stable_digest(supplied_snapshot, length=64)
+        != snapshot_identity["content_digest"]
+    ):
+        raise ContextKernelError(
+            "payload snapshot content is not the exact durable run snapshot"
+        )
 
     state_projection = {
         "status": state["status"],
