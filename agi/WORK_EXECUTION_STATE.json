@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T10:58:46.916Z",
-  "last_progress_at": "2026-08-23T10:58:46.916Z",
+  "heartbeat_at": "2026-08-23T11:05:00.151Z",
+  "last_progress_at": "2026-08-23T11:05:00.151Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -21,11 +21,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "f1510548c278a2d35e2abcac11bc303ce872b688",
-  "working_branch": "work/native-ci-sharding-cycle-v1",
+  "source_main_sha": "bc636ff2b7857c795a45ab85cd63f53ee299020a",
+  "working_branch": "work/context-routing-heldout-harness-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "root",
-  "active_unit_id": "unit-bd506fdfba35a0949b170257",
+  "active_component": "execute",
+  "active_unit_id": "unit-b9e109e2f146deb1deb9f3ff",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 14,
@@ -35,18 +35,18 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "PR 271 exact head 023273a4a65b15f05317d2cdc52845f6bc919f43 passed workflow 32633031509, merged as f1510548c278a2d35e2abcac11bc303ce872b688, and all 68 changed paths read back exactly on main. Native Work verification is 65 requests / 64 responses / 1 pending, valid=true.",
+    "pending_native_execute": "Generation-5 Root and Candidate Evaluate completed on the exact native run. Remote branch work/context-routing-heldout-harness-v1 head 43e6832f476787c2410efb83bfe2d460be1223e0 is exactly one commit ahead of main bc636ff2b7857c795a45ab85cd63f53ee299020a, its tree exactly equals the locally verified tree, and Work verification is valid at 67 requests / 66 responses / 1 pending Execute.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
-    "effect_recovery_stack": "PR 273 exact head 0d21dc3e7026c297e0c8441056f348e727f711ea reconstructs typed dispatch, provider-neutral reconciliation, and fail-closed adjudication above merged PR 261. Remote tree equals locally validated tree; 30 focused tests, compileall, and diff check passed; workflow 32634954576 queued."
+    "effect_recovery_stack": "PR 273 exact head 0d21dc3e7026c297e0c8441056f348e727f711ea reconstructs typed dispatch, provider-neutral reconciliation, and fail-closed adjudication above merged PR 261. Remote tree equals locally validated tree; 30 focused tests, compileall, and diff check passed; workflow 32634954576 is in progress."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "main",
-    "snapshot_head_sha": "f1510548c278a2d35e2abcac11bc303ce872b688",
-    "pending_work_invocation_id": "invoke-7ce263e8f2b55bae063d677a",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-7ce263e8f2b55bae063d677a/request.json",
-    "durability_status": "The actual generation-5 cycle is main-durable via PR 271 merge f1510548c278a2d35e2abcac11bc303ce872b688. All 68 reviewed paths equal the exact head, Work verification is valid at 65/64/1, and pending Root invoke-7ce263e8f2b55bae063d677a is exact.",
-    "next_action": "Resume exact pending Root invoke-7ce263e8f2b55bae063d677a from latest main, freeze the held-out recursive-context routing harness before measurement, and continue the native lifecycle. Independently finish PR 272 and PR 273 exact-head gates."
+    "snapshot_branch": "work/context-routing-heldout-harness-v1",
+    "snapshot_head_sha": "43e6832f476787c2410efb83bfe2d460be1223e0",
+    "pending_work_invocation_id": "invoke-4a4980bc937aed6e2e55d25f",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-4a4980bc937aed6e2e55d25f/request.json",
+    "durability_status": "The exact generation-5 native continuation is remote-durable on isolated branch work/context-routing-heldout-harness-v1. Its head is one commit ahead / zero behind base bc636ff2, its tree equals local commit 41f2a95, the 15-path compare is exact, and Work verification is valid at 67 requests / 66 responses / 1 pending Execute.",
+    "next_action": "Implement the already-frozen held-out recursive context-routing harness without observing routing outputs, validate it, then answer exact pending Execute invoke-4a4980bc937aed6e2e55d25f and continue the native lifecycle. Independently finish PR 273 only after unchanged exact-head CI and a fresh conflict check."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -95,10 +95,12 @@
       "invoke-1c8852ca06beb4ca5f6f1710 (candidate_evaluate post-result)",
       "invoke-79e58a32ec4058ee08b32357 (candidate_evaluate child preflight)",
       "invoke-840d2f0a8f5e2132fbef5d99 (execute froze verified harness and scheduled child)",
-      "invoke-96f980003141d4ba2de0294c (candidate_evaluate child measurement preflight)"
+      "invoke-96f980003141d4ba2de0294c (candidate_evaluate child measurement preflight)",
+      "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
+      "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)"
     ],
-    "pending_invocation": "invoke-7ce263e8f2b55bae063d677a (root after completed generation-5 CI-sharding cycle)",
-    "note": "Actual cycle is locally durable on isolated commit 6f044d1 and pending publication. Work verification is valid at 65 requests, 64 responses, one pending. No foreign identity-bound invocation was answered."
+    "pending_invocation": "invoke-4a4980bc937aed6e2e55d25f (Execute held-out recursive context-routing harness)",
+    "note": "Root invoke-7ce263e8f2b55bae063d677a and Candidate Evaluate invoke-67acf113c0261229cadcb5fb were answered by the same generation-5 executor/model binding. Exact pending Execute is remote-durable on head 43e6832f; no foreign identity-bound invocation was answered."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
   "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
@@ -130,22 +132,22 @@
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z"
   },
   "recent_main_integration": {
-    "pull_request": 268,
-    "exact_head_sha": "a372483505167fde64cd8558bc3b72c69b99fd04",
-    "exact_head_ci_run": 32629602574,
-    "exact_head_ci_result": "501 passed in 4389.54s",
-    "merge_sha": "818d6434854490efd0319818787d7cde7649f23e",
+    "pull_request": 272,
+    "exact_head_sha": "c6bdb662a084a896564d8f5a671b157ba31cc59e",
+    "exact_head_ci_run": 32633554610,
+    "exact_head_ci_result": "four pytest shards and aggregate succeeded",
+    "merge_sha": "bc636ff2b7857c795a45ab85cd63f53ee299020a",
     "verified_remote_readback": true,
-    "claim_boundary": "Deterministic recursive context-routing infrastructure only; no measured end-to-end benefit or AGI evidence."
+    "claim_boundary": "Internal Work resume/fencing safety only; not AGI evidence."
   },
   "recent_publication": {
-    "pull_request": 271,
-    "branch": "work/native-ci-sharding-cycle-v1",
-    "exact_head_sha": "023273a4a65b15f05317d2cdc52845f6bc919f43",
-    "exact_tree_sha": "b3caf67a151d16420cab1fac7b2ec3ac81b65a5e",
+    "pull_request": 272,
+    "branch": "work/resume-identity-guard-v3",
+    "exact_head_sha": "c6bdb662a084a896564d8f5a671b157ba31cc59e",
     "verified_remote_readback": true,
-    "exact_head_ci": "pending",
-    "claim_boundary": "Internal native O and CI-development evidence only; not AGI evidence."
+    "exact_head_ci": "success: workflow 32633554610",
+    "merge_sha": "bc636ff2b7857c795a45ab85cd63f53ee299020a",
+    "claim_boundary": "Internal resume/fencing safety only; not AGI evidence."
   },
   "local_combined_regression": {
     "result": "515 passed",
@@ -155,20 +157,16 @@
     "claim_boundary": "Internal regression evidence only."
   },
   "in_flight_integrations": {
-    "native_cycle": {
-      "pull_request": 271,
-      "exact_head_sha": "023273a4a65b15f05317d2cdc52845f6bc919f43",
-      "workflow_run": 32633031509,
-      "status": "in_progress"
+    "held_out_context_routing": {
+      "branch": "work/context-routing-heldout-harness-v1",
+      "head_sha": "43e6832f476787c2410efb83bfe2d460be1223e0",
+      "status": "remote_durable_execute_pending"
     },
-    "resume_identity_guard": {
-      "predecessor_pull_request": 269,
-      "predecessor_workflow_run": 32629965808,
-      "predecessor_result": "cancelled_at_74_percent_no_semantic_conclusion",
-      "pull_request": 272,
-      "exact_head_sha": "c6bdb662a084a896564d8f5a671b157ba31cc59e",
-      "exact_head_ci": "pending",
-      "local_combined_regression": "515 passed in 2913.11s"
+    "effect_recovery_stack": {
+      "pull_request": 273,
+      "exact_head_sha": "0d21dc3e7026c297e0c8441056f348e727f711ea",
+      "workflow_run": 32634954576,
+      "status": "in_progress"
     }
   }
 }
