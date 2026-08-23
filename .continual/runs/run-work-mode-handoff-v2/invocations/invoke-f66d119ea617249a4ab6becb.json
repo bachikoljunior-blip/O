@@ -1,0 +1,64 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-22T11:46:29.471075Z",
+  "component": "root",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-f66d119ea617249a4ab6becb-root.json",
+  "invocation_id": "invoke-f66d119ea617249a4ab6becb",
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        "agi/CONTINUATION.json",
+        "agi/HOURLY_EXECUTION_STATE.json",
+        ".continual/runs/run-work-mode-handoff-v2/snapshot.json"
+      ],
+      "observations": [
+        "The code path is locally verified but the remote-readable Work contract and lease do not exist yet.",
+        "Task evaluation would be premature before durable state and broader validation."
+      ],
+      "purpose": "Select the next unmet falsifiable migration unit.",
+      "unresolved": [
+        "Work migration state must be written and validated.",
+        "Exact-head CI is still unavailable."
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "reason": "The next unit follows existing durable-state and fail-closed policies; no prompt change is supported."
+    },
+    "result": {
+      "component": "execute",
+      "evaluation_boundary": "Do not evaluate the migration milestone as PASS until durable files and local validation exist; exact-head CI remains a separate required publication check.",
+      "expected_outputs": [
+        "One explicit Work primary-owner contract and one monitor-only recovery contract",
+        "A fresh primary Work lease bound to the native O Run with AGI claim false",
+        "Updated continuation and autonomy state pointing to Work-mode O execution",
+        "Tracked native run and Work invocation evidence",
+        "JSON validation plus relevant and broader local test results"
+      ],
+      "goal": "Persist and verify the Work-mode migration contract, primary lease, monitor policy, exact native-run handoff, and updated durable continuation without changing the strict AGI claim boundary.",
+      "inputs": [
+        "The completed local Work bridge and recovery classifier unit",
+        "Current AGENTS watchdog and self-application rules",
+        "Existing stale Chat-mode continuation and lease records",
+        "The active native O Run and its immutable Work invocation records"
+      ],
+      "scope": [
+        "AGENTS.md",
+        ".gitignore",
+        "agi/WORK_MODE.md",
+        "agi/WORK_MODE_HANDOFF.json",
+        "agi/WORK_MODE_MONITOR.json",
+        "agi/WORK_EXECUTION_STATE.json",
+        "agi/CONTINUATION.json",
+        "agi/AUTONOMY_STATE.json",
+        "agi/REPORTING_TARGET.json",
+        ".continual/runs/run-work-mode-handoff-v2",
+        ".continual/work-model/invocations"
+      ]
+    }
+  },
+  "payload_digest": "349879a6264dfc713c1ad765",
+  "prompt_path": "prompts/root.md",
+  "status": "complete"
+}
