@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "migration_id": "work-mode-handoff-v2",
-  "status": "merged_with_safety_followup_in_flight",
-  "source_main_sha": "f914369d42a74548d420e775afc60333e7a173f3",
-  "working_branch": "work/work-mode-handoff-v2",
+  "status": "generation_5_primary_active_reconciled_revision_14",
+  "source_main_sha": "042d6adc85a43a093c8252cca8eedd67b5afc3e0",
+  "working_branch": "work/checkpoint-inheritance-harness-v1",
   "authoritative_when_present_on_main": true,
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
@@ -15,19 +15,21 @@
   },
   "primary_owner": {
     "kind": "work_primary",
-    "execution_id": "work-primary-handoff-20260822T224400JST",
-    "predecessor_execution_id": "work-primary-20260822T204147JST",
+    "execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
+    "predecessor_execution_id": "work-primary-claude-20260823T081642JST",
+    "lease_generation": 5,
+    "fence_authority": "verified_two_phase_recovery_then_user_designated_primary",
     "lease_path": "agi/WORK_EXECUTION_STATE.json",
-    "authorization": "direct_user_instruction_execution_handoff_in_successor_session",
-    "voluntary_exit_permitted_before_external_goal": false
+    "authorization": "inbox_revision_13_designates_chatgpt_primary; revision_14_reconciles_canonical_authority",
+    "voluntary_exit_permitted_before_user_objective": false
   },
   "native_o_run": {
     "run_id": "run-work-mode-handoff-v2",
     "snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "request_ref": ".continual/runs/run-work-mode-handoff-v2/request.md",
     "work_invocation_root": ".continual/work-model/invocations",
-    "executor_binding": "current_claude_code_remote_session",
-    "model_identity": "claude-fable-5-session-configured-unverified",
+    "executor_binding": "current_chatgpt_work_session",
+    "model_identity": "chatgpt-work-model-unverified",
     "model_verified": false,
     "semantic_components": [
       "entry",
@@ -37,13 +39,18 @@
       "consolidate_episode",
       "learn"
     ],
-    "semantic_components_note": "The list above is the set of O Engine components the Work bridge can drive. The checked-in run has actually externalized only entry, root, candidate_evaluate (the pre-application evaluator), and execute invocations so far; task_evaluate, consolidate_episode, and learn have not yet been exercised in this run.",
-    "observed_invocations": ["entry", "root", "candidate_evaluate", "execute"]
+    "semantic_components_note": "The Work bridge supports the listed components. Generation 5 owns the checked-in native run; one ChatGPT-bound Execute request remains pending on PR 264. Claude-bound orphaned invocations must not be answered.",
+    "observed_invocations": [
+      "entry",
+      "root",
+      "candidate_evaluate",
+      "execute"
+    ]
   },
   "resume_protocol": {
     "inspect": "continual --root . work-pending --run-id run-work-mode-handoff-v2",
     "verify": "continual --root . work-verify --run-id run-work-mode-handoff-v2",
-    "resume": "continual --root . work-resume run-work-mode-handoff-v2 --model-identity claude-fable-5-session-configured-unverified",
+    "resume": "continual --root . work-resume run-work-mode-handoff-v2 --model-identity chatgpt-work-model-unverified",
     "response_binding_required": true,
     "hidden_reasoning_persistence_forbidden": true,
     "secrets_forbidden": true
@@ -61,24 +68,32 @@
     "tests/test_user_request_queue.py"
   ],
   "validation": {
-    "focused_command": "python -m pytest -q tests/test_user_request_queue.py tests/test_work_mode_monitor.py tests/test_work_session_bridge.py tests/test_engine.py tests/test_contracts.py",
-    "focused_result": "26 passed",
-    "full_local_baseline": "401 passed in 3028.46s before the user-request-queue delta; exact-head CI is required for the final modified head",
-    "exact_head_ci": "pending_publication",
-    "strict_external_production_evidence": "not_observed"
+    "focused_command": "See exact PR descriptions for the scoped validation commands.",
+    "focused_result": "PR 264: 39 focused tests; PR 265: 41 focused tests; PR 266: 9 protected tests. These are local internal results.",
+    "full_local_baseline": "Exact-head GitHub CI is required independently for each current head before merge.",
+    "exact_head_ci": "PR 264 run 32627670204, PR 265 run 32629109462, and PR 266 run 32628995348 are in progress.",
+    "independent_real_world_evidence": "not_observed"
   },
   "publication": {
     "migration_pull_request": 252,
     "migration_merged_main_sha": "c2361b81f716db637368f4f4337f10195bbdaf20",
-    "migration_exact_head_ci": 32577024780,
-    "safety_followup_pull_request": 254,
-    "safety_followup_exact_head_ci": "pending_after_push",
-    "note": "PR 252 merged the migration to main. PR 254 (this successor session) lands the engine safety fixes and CI control-plane repair; its merged_main_sha is recorded after its exact-head CI passes."
+    "current_primary_pull_request": 264,
+    "stacked_provenance_pull_request": 265,
+    "reconstructed_predecessor_result_pull_request": 266,
+    "integration_rule": "isolated branch -> exact-head CI -> unchanged passing conflict-free head -> main merge",
+    "note": "PR 264 publishes the checkpoint harness and authority policy. PR 265 must follow PR 264. PR 266 is an independently reconstructed useful predecessor delta. No pending result is treated as merged or successful."
   },
   "claim_boundary": {
     "agi_claim_supported": false,
     "work_mode_integration_is_external_agi_evidence": false,
-    "internal_tests_or_ci_can_complete_goal": false
+    "internal_tests_or_ci_can_complete_goal": false,
+    "repository_strict_gate_is_user_completion_condition": false
   },
-  "updated_at": "2026-08-22T14:45:00Z"
+  "updated_at": "2026-08-23T08:47:39.265Z",
+  "user_input": {
+    "inbox_path": "agi/USER_INPUT_INBOX.json",
+    "highest_acknowledged_revision": 14,
+    "effective_authority": "Generation-5 ChatGPT is the sole primary/main integrator; Claude is stopped. Isolated parallel contributors are allowed but are not a second main writer.",
+    "completion_authority": "The user's actual upper-level objective or explicit stop; repository-authored strict gates are optional verification mechanisms."
+  }
 }
