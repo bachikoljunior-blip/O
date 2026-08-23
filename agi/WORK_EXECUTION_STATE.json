@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-23T21:00:41.367Z",
-  "last_progress_at": "2026-08-23T21:00:41.367Z",
+  "heartbeat_at": "2026-08-23T21:12:53.147Z",
+  "last_progress_at": "2026-08-23T21:12:53.147Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -22,7 +22,7 @@
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "59b429f4f286c3477b49f40399b93c2077012b02",
-  "working_branch": "work/recovery-gen6-pre-freeze-source-readiness-v1",
+  "working_branch": "work/recovery-gen6-authoritative-source-observation-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
   "active_unit_id": "unit-2ee8bb6346713211f8457d54",
@@ -383,11 +383,23 @@
     "verified_remote_readback": true
   },
   "authoritative_source_observation": {
-    "status": "execute_frozen_implementation_active",
+    "status": "publication_precommit_ready",
     "active_unit_id": "unit-2ee8bb6346713211f8457d54",
     "pending_invocation": "invoke-288c21127d55329a6d00fcf4",
     "control_main_commit": "59b429f4f286c3477b49f40399b93c2077012b02",
     "control_state_blob": "c9f6943aa8844f8dbb8d482b49d6d3d39215ba5e",
-    "claim_boundary": "A timestamped connector receipt can bind an observed immutable commit/blob; it cannot prove linearizable absence of a concurrent later update or behavioral capability."
+    "claim_boundary": "A timestamped connector receipt can bind an observed immutable commit/blob; it cannot prove linearizable absence of a concurrent later update or behavioral capability.",
+    "publication_precommit": {
+      "effect_id": "publish-authoritative-work-source-observation-v1",
+      "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen6:authoritative-work-source-observation:v1",
+      "branch": "work/recovery-gen6-authoritative-source-observation-v1",
+      "base_main_commit": "3e68301dc508bb1c4e78c3dc0b9f13a7069ec1c2",
+      "expected_state_blob": "1c32c049468dbf0356c018a248fb8273a73dccda",
+      "local_result_commit": "f0efc79d429215d80ef122f9755f1c3c78d9549a",
+      "local_result_tree": "37dc0c358b642c4a80475f0dcd35817e00f4fcf6",
+      "changed_path_list_sha256": "ed3f6a4ac7960dc33fff4481a41367303aa5607b18763c58ae8edd4e3a22176b",
+      "prepared_at": "2026-08-23T21:12:05.203Z",
+      "rule": "No branch, commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback."
+    }
   }
 }
