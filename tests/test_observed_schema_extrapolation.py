@@ -107,11 +107,15 @@ def test_observed_schema_binding_diagnostic_core_has_no_literal_variation_and_fa
     deterministically reconstructible learned programs (both controls and both expansion targets)
     have pairwise-distinct AST shapes, so there is no observed same-shape literal delta to continue
     and the precommitted schedule must fail closed. The recursive member is excluded from these
-    assertions because the recursive campaign selects its target among bounded-search "unsupported"
-    schedule entries, and that support verdict varies across processes with identical seeds
-    (hash-seed dependence; observed live as sub- versus mul-wrap targets), which would make any
-    assertion over the full campaign outcome a lottery. Fail-closed outcome demonstrated end to end
-    by CI run 32607076987 and local reproductions on heads 2376ed2 and a097ab1.
+    assertions because, under the v1 history commitment, its selection varied across processes with
+    identical seeds (observed live as sub- versus mul-wrap targets). The verified mechanism was
+    per-process entropy - uuid4 engine run ids and timestamped trial bytes in the iterated report
+    digest, folded into the commitment that salts rotation, mutation constants, and schedule order -
+    not hash-seed dependence as this docstring previously stated. The v2 commitment binds only
+    stable behavior semantics and restores deterministic selection; the exclusion here is kept as a
+    conservative scope choice so the diagnostic's assertions stay independent of the recursive
+    member's identity. Fail-closed outcome demonstrated end to end by CI run 32607076987 and local
+    reproductions on heads 2376ed2 and a097ab1.
     """
     # Runtime calls in the prerequisite chain are exact mechanical learned-tool invocations.
     # Ordinary CI must not require live-model credentials merely to construct the Engine for them.

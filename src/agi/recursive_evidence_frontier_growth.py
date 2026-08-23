@@ -56,9 +56,25 @@ def _recursive_history_commitment(
     iterated_report: Mapping[str, Any],
     learned_target: Mapping[str, Any],
 ) -> str:
-    """Bind another growth step only to stable persisted behavior semantics."""
+    """Bind another growth step only to stable persisted behavior semantics.
+
+    The v1 commitment folded in the whole iterated report digest, whose input embeds
+    per-process values (uuid4 engine run ids from the behavior replays and timestamped
+    trial-ledger bytes in the transactional snapshot), so identical seeds and trees
+    produced different commitments on every process run. Because this commitment salts
+    support-input rotation, variant-constant selection, and the schedule ordering that a
+    first-two-unsupported scan consumes, target selection was a per-process lottery.
+    v2 binds only fields that are pure functions of behavior semantics: the campaign
+    seed, the learned capability identities, the expansion semantic signatures, and the
+    learned target's own program and signature.
+    """
     required = {
-        "iterated_digest": iterated_report.get("digest"),
+        "iterated_seed": iterated_report.get("seed"),
+        "iterated_campaign_kind": iterated_report.get("campaign_kind"),
+        "first_candidate_id": iterated_report.get("first_candidate_id"),
+        "second_candidate_id": iterated_report.get("second_candidate_id"),
+        "first_expansion_candidate_id": iterated_report.get("first_expansion_candidate_id"),
+        "second_expansion_candidate_id": iterated_report.get("second_expansion_candidate_id"),
         "second_expansion_semantic_signature": iterated_report.get(
             "second_expansion_semantic_signature"
         ),
@@ -69,7 +85,7 @@ def _recursive_history_commitment(
         raise RecursiveEvidenceFrontierGrowthError(
             "iterated evidence lacks stable recursive-growth commitments"
         )
-    return _digest({**required, "phase": "recursive-evidence-frontier-history-v1"})
+    return _digest({**required, "phase": "recursive-evidence-frontier-history-v2"})
 
 
 def run_recursive_evidence_frontier_growth(root: Path, seed: str) -> dict[str, Any]:
