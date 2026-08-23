@@ -7,6 +7,10 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping
 
+from .context_kernel import (
+    ContextKernelError,
+    build_effect_dispatch_context,
+)
 from .store import Store
 from .work_session import (
     _INVOCATION_ID,
@@ -203,6 +207,24 @@ def _active_execute_request(
     return request
 
 
+def _dispatch_context(
+    root: Path,
+    *,
+    request: Mapping[str, Any],
+    action: Mapping[str, Any],
+    store: Store,
+) -> dict[str, Any] | None:
+    try:
+        return build_effect_dispatch_context(
+            root,
+            request=request,
+            action=action,
+            store=store,
+        )
+    except ContextKernelError as exc:
+        raise WorkEffectError(str(exc)) from exc
+
+
 def prepare_work_effect(
     root: Path,
     *,
@@ -237,6 +259,12 @@ def prepare_work_effect(
         model_identity=model_identity,
     )
     store = Store(root)
+    dispatch_context = _dispatch_context(
+        root,
+        request=request,
+        action=exact_action,
+        store=store,
+    )
     body = {
         "schema_version": 1,
         "record_type": "effect_plan",
@@ -249,6 +277,11 @@ def prepare_work_effect(
         "action_digest": store.stable_digest(exact_action, length=64),
         "action": exact_action,
     }
+    if dispatch_context is not None:
+        body["dispatch_context"] = dispatch_context
+        body["dispatch_context_digest"] = dispatch_context[
+            "dispatch_context_digest"
+        ]
     body["plan_digest"] = store.stable_digest(body, length=64)
     body["prepared_at"] = store.utc_now()
     return _create_or_replay(
@@ -318,6 +351,23 @@ def authorize_work_effect(
     action_digest = store.stable_digest(exact_action, length=64)
     if plan.get("action_digest") != action_digest or plan.get("action") != exact_action:
         raise WorkEffectError("action does not match prepared effect plan")
+    dispatch_context = _dispatch_context(
+        root,
+        request=request,
+        action=exact_action,
+        store=store,
+    )
+    if dispatch_context is None:
+        if plan.get("dispatch_context") is not None or plan.get(
+            "dispatch_context_digest"
+        ) is not None:
+            raise WorkEffectError("effect dispatch context mismatch")
+    elif (
+        plan.get("dispatch_context") != dispatch_context
+        or plan.get("dispatch_context_digest")
+        != dispatch_context["dispatch_context_digest"]
+    ):
+        raise WorkEffectError("effect dispatch context changed since preparation")
 
     body = {
         "schema_version": 1,
@@ -336,6 +386,10 @@ def authorize_work_effect(
             length=64,
         ),
     }
+    if dispatch_context is not None:
+        body["dispatch_context_digest"] = dispatch_context[
+            "dispatch_context_digest"
+        ]
     body["authorization_digest"] = store.stable_digest(body, length=64)
     body["authorized_at"] = store.utc_now()
     return _create_or_replay(
@@ -452,6 +506,8 @@ def verify_work_effect(
             or authorization.get("run_id") != run_id
             or authorization.get("effect_id") != effect_id
             or authorization.get("action_digest") != plan.get("action_digest")
+            or authorization.get("dispatch_context_digest")
+            != plan.get("dispatch_context_digest")
         ):
             raise WorkEffectError("effect authorization identity mismatch")
         status = "authorized"
@@ -491,6 +547,11 @@ def verify_work_effect(
             authorization.get("idempotency_key")
             if authorization is not None
             else None
+        ),
+        "dispatch_context_digest": (
+            authorization.get("dispatch_context_digest")
+            if authorization is not None
+            else plan.get("dispatch_context_digest")
         ),
         "result": deepcopy(receipt.get("result")) if receipt is not None else None,
         "receipt_digest": (

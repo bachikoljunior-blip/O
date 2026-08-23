@@ -151,10 +151,39 @@ original manifest bytes after a source-clock advance, while the next request
 gets a different identity. Frozen historical requests without a manifest are
 not retroactively rewritten.
 
-This slice establishes uniform internal provenance and replay binding. It does
-not yet recheck critical revocations immediately before an external effect,
-cover Entry or Candidate Evaluate, demonstrate better task behavior, or provide
-independent production evidence.
+This slice establishes uniform internal provenance and replay binding. It was
+published at exact head `c9825254d9a5a39a4fd98361f294ea05fa0c526a`, passed
+all four pytest shards plus the dependent aggregate in workflow `32655413461`,
+and merged through PR 279 as `fecc6e6d052c5d49d2d29bba4469797403c6aaad`.
+All 32 reviewed blobs were read back byte-for-byte. It does not cover Entry or
+Candidate Evaluate, demonstrate better task behavior, or provide independent
+production evidence.
+
+## Fifth vertical slice: dispatch-time critical revocation
+
+Every newly prepared control-plane Work effect derives a bounded dispatch
+context from the exact Execute `DecisionContextManifest`, semantic request,
+action digest, current lease authority, user-control sources, effective policy,
+and publication constraints. The effect plan, authorization, and typed
+capability cross-bind that projection by digest. Raw fence tokens, secrets, and
+unbounded source payloads are not copied into effect records.
+
+The stable authority projection deliberately excludes the volatile heartbeat
+timestamp. Immediately before a dispatch claim or provider callback, the
+Context Kernel verifies that status, owner, execution, generation, fence digest,
+active Run, acknowledged inbox revision, current source digests, effective
+policy, and action constraints still match. Heartbeat liveness is checked
+separately, so a fresh same-authority heartbeat renewal is accepted while a
+stale or future-skewed heartbeat fails closed. A failed recheck creates neither
+a dispatch claim nor a provider call.
+
+Completed exact replay remains journal-authoritative and side-effect-free even
+if control state changes later. This is necessary because replaying an already
+recorded result is not a new external authorization. The local pre-dispatch
+recheck does not eliminate the final claim-to-callback micro-race or substitute
+for provider-side idempotency and revocation enforcement; those remain explicit
+system boundaries. This slice is implemented locally and publication evidence
+is pending.
 
 ## Migration sequence
 
@@ -167,11 +196,12 @@ independent production evidence.
    external research; no outside fact affects judgment before ingestion.
    **Implemented for one exact public GitHub file read; other source kinds and
    behavioral evidence remain pending.**
-4. Manifests for Execute, Task Evaluate, Consolidate, and Learn. **Implemented
-   locally for all five covered semantic components; exact-head publication
-   evidence remains pending.**
+4. Manifests for Execute, Task Evaluate, Consolidate, and Learn. **Implemented,
+   exact-head verified, merged through PR 279, and read back for all five
+   covered semantic components.**
 5. Bind plan and effect authorization to manifests; recheck critical source
-   clocks and revocations immediately before dispatch.
+   clocks and revocations immediately before dispatch. **Implemented locally;
+   exact-head publication evidence remains pending.**
 6. Route optional context recursively and learn routing only from held-out
    behavioral evidence, with mandatory context outside that learner's control.
 7. Compact the event ledger into reproducible projections while retaining the

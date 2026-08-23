@@ -8,7 +8,9 @@ from typing import Any, Callable, Mapping
 from .store import Store
 from .work_effects import (
     WorkEffectError,
+    _active_execute_request,
     _create_or_replay,
+    _dispatch_context,
     _effect_dir,
     _read_record,
     _validated_action,
@@ -37,6 +39,7 @@ class AuthorizedWorkEffect:
     executor_binding: str
     model_identity: str
     action: Mapping[str, Any]
+    dispatch_context_digest: str | None
     authorization_digest: str
     idempotency_key: str
 
@@ -69,6 +72,7 @@ def _verified_state_and_plan(
         "executor_binding": plan.get("executor_binding"),
         "model_identity": plan.get("model_identity"),
         "action": plan.get("action"),
+        "dispatch_context_digest": plan.get("dispatch_context_digest"),
         "authorization_digest": state.get("authorization_digest"),
         "idempotency_key": state.get("idempotency_key"),
     }
@@ -80,6 +84,7 @@ def _verified_state_and_plan(
         "executor_binding": authorization.executor_binding,
         "model_identity": authorization.model_identity,
         "action": dict(authorization.action),
+        "dispatch_context_digest": authorization.dispatch_context_digest,
         "authorization_digest": authorization.authorization_digest,
         "idempotency_key": authorization.idempotency_key,
     }
@@ -140,6 +145,7 @@ def load_authorized_work_effect(
         executor_binding=executor_binding,
         model_identity=model_identity,
         action=state["action"],
+        dispatch_context_digest=state.get("dispatch_context_digest"),
         authorization_digest=authorization["authorization_digest"],
         idempotency_key=authorization["idempotency_key"],
     )
@@ -166,7 +172,7 @@ def dispatch_work_effect(
     if not callable(callback):
         raise WorkEffectError("callback must be callable")
     root = root.resolve()
-    state, _ = _verified_state_and_plan(root, authorization)
+    state, plan = _verified_state_and_plan(root, authorization)
     if state["status"] == "completed":
         return {
             "dispatched": False,
@@ -196,6 +202,30 @@ def dispatch_work_effect(
         or exact.get("idempotency_key") != authorization.idempotency_key
     ):
         raise WorkEffectError("typed authorization identity mismatch")
+
+    request = _active_execute_request(
+        root,
+        run_id=authorization.run_id,
+        invocation_id=authorization.invocation_id,
+        executor_binding=authorization.executor_binding,
+        model_identity=authorization.model_identity,
+    )
+    current_dispatch_context = _dispatch_context(
+        root,
+        request=request,
+        action=authorization.action,
+        store=Store(root),
+    )
+    current_dispatch_digest = (
+        current_dispatch_context.get("dispatch_context_digest")
+        if current_dispatch_context is not None
+        else None
+    )
+    if (
+        current_dispatch_digest != authorization.dispatch_context_digest
+        or current_dispatch_context != plan.get("dispatch_context")
+    ):
+        raise WorkEffectError("effect dispatch context changed after authorization")
 
     store = Store(root)
     claim = {

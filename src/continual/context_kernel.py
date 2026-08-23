@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from copy import deepcopy
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -321,6 +322,10 @@ def build_decision_context(
     stale_after = _required_int(
         state.get("stale_after_seconds"), "state.stale_after_seconds", minimum=1
     )
+    max_future_skew = _required_int(
+        state.get("max_future_skew_seconds", 120),
+        "state.max_future_skew_seconds",
+    )
     if state.get("active_run_id") != run_id:
         raise ContextKernelError("Work lease active_run_id does not match decision run")
     inbox_state = _required_mapping(
@@ -481,6 +486,7 @@ def build_decision_context(
             freshness={
                 "kind": "lease_heartbeat",
                 "stale_after_seconds": stale_after,
+                "max_future_skew_seconds": max_future_skew,
                 "recheck_at_effect_or_recovery_boundary": True,
             },
         ),
@@ -674,3 +680,221 @@ def build_root_decision_context(
         payload_snapshot=payload_snapshot,
         store=store,
     )
+
+
+def _source_by_id(
+    manifest: Mapping[str, Any], source_id: str
+) -> dict[str, Any]:
+    for value in manifest.get("sources", []):
+        if isinstance(value, Mapping) and value.get("source_id") == source_id:
+            return deepcopy(dict(value))
+    raise ContextKernelError(f"decision context is missing source: {source_id}")
+
+
+def _utc_timestamp(value: Any, label: str) -> datetime:
+    text = _required_text(value, label)
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ContextKernelError(f"{label} must be an ISO-8601 timestamp") from exc
+    if parsed.tzinfo is None:
+        raise ContextKernelError(f"{label} must include a timezone")
+    return parsed.astimezone(UTC)
+
+
+def build_effect_dispatch_context(
+    root: Path,
+    *,
+    request: Mapping[str, Any],
+    action: Mapping[str, Any],
+    store: Store | None = None,
+) -> dict[str, Any] | None:
+    """Build the stable critical context that must still hold at dispatch.
+
+    Non-control-plane requests without a decision manifest keep their legacy
+    behavior. Once any control source exists, an Execute request without the
+    manifest cannot authorize a new effect; frozen history is not rewritten.
+    A manifest-bearing Execute request is revalidated against the
+    authoritative control files. Volatile heartbeat identity is
+    intentionally excluded from the returned digest: its liveness is checked
+    independently, while generation, execution, fence, status, user policy,
+    strategy constraints, request, manifest, and action identity remain exact.
+    """
+
+    root = root.resolve()
+    store = store or Store(root)
+    exact_request = _required_mapping(request, "request")
+    payload = _required_mapping(exact_request.get("payload"), "request.payload")
+    raw_manifest = payload.get("decision_context")
+    if raw_manifest is None:
+        if any((root / path).is_file() for path in _CONTROL_PATHS.values()):
+            raise ContextKernelError(
+                "control-plane effect requires an Execute decision context"
+            )
+        return None
+    manifest = verify_decision_context_manifest(
+        _required_mapping(raw_manifest, "request decision_context"),
+        store=store,
+        expected_component="execute",
+    )
+    run_id = _required_text(exact_request.get("run_id"), "request.run_id")
+    if manifest.get("run_id") != run_id:
+        raise ContextKernelError("dispatch manifest run_id mismatch")
+
+    state, _ = _load_source(
+        root, store, "work_execution_state", _CONTROL_PATHS["work_execution_state"]
+    )
+    inbox, inbox_identity = _load_source(
+        root, store, "user_input_inbox", _CONTROL_PATHS["user_input_inbox"]
+    )
+    ledger, ledger_identity = _load_source(
+        root,
+        store,
+        "effective_user_directives",
+        _CONTROL_PATHS["effective_user_directives"],
+    )
+    strategy, strategy_identity = _load_source(
+        root, store, "work_strategy", _CONTROL_PATHS["work_strategy"]
+    )
+
+    state_source = _source_by_id(manifest, "work_execution_state")
+    inbox_source = _source_by_id(manifest, "user_input_inbox")
+    directives_source = _source_by_id(manifest, "effective_user_directives")
+    strategy_source = _source_by_id(manifest, "work_strategy")
+    state_projection = _required_mapping(
+        state_source.get("projection"), "manifest work state projection"
+    )
+
+    status = _required_text(state.get("status"), "state.status")
+    if status != "running":
+        raise ContextKernelError("effect dispatch requires a running Work lease")
+    execution_id = _required_text(state.get("execution_id"), "state.execution_id")
+    owner_kind = _required_text(state.get("owner_kind"), "state.owner_kind")
+    generation = _required_int(
+        state.get("lease_generation"), "state.lease_generation", minimum=1
+    )
+    fence = _required_text(state.get("fence_token"), "state.fence_token")
+    if state.get("active_run_id") != run_id:
+        raise ContextKernelError("effect dispatch active run mismatch")
+    inbox_state = _required_mapping(
+        state.get("user_input_inbox"), "state.user_input_inbox"
+    )
+    acknowledged = _required_int(
+        inbox_state.get("highest_acknowledged_revision"),
+        "state highest acknowledged inbox revision",
+    )
+    inbox_revision = _required_int(inbox.get("revision"), "inbox.revision")
+    if acknowledged != inbox_revision:
+        raise ContextKernelError("effect dispatch has unacknowledged user input")
+
+    stable_authority = {
+        "status": status,
+        "owner_kind": owner_kind,
+        "execution_id": execution_id,
+        "lease_generation": generation,
+        "fence_token_digest": store.stable_digest(fence, length=64),
+        "active_run_id": run_id,
+        "highest_acknowledged_inbox_revision": acknowledged,
+    }
+    for key, value in stable_authority.items():
+        if state_projection.get(key) != value:
+            raise ContextKernelError(
+                f"effect dispatch authority changed since semantic decision: {key}"
+            )
+    if state_projection.get("result_publication_policy") != state.get(
+        "result_publication_policy"
+    ):
+        raise ContextKernelError(
+            "effect dispatch publication constraint changed since semantic decision"
+        )
+
+    stale_after = _required_int(
+        state.get("stale_after_seconds"), "state.stale_after_seconds", minimum=1
+    )
+    max_future_skew = _required_int(
+        state.get("max_future_skew_seconds", 120),
+        "state.max_future_skew_seconds",
+    )
+    manifest_freshness = _required_mapping(
+        state_source.get("freshness"), "manifest work state freshness"
+    )
+    if manifest_freshness.get("stale_after_seconds") != stale_after:
+        raise ContextKernelError(
+            "effect dispatch heartbeat policy changed since semantic decision"
+        )
+    if manifest_freshness.get("max_future_skew_seconds", 120) != max_future_skew:
+        raise ContextKernelError(
+            "effect dispatch heartbeat policy changed since semantic decision"
+        )
+    heartbeat = _utc_timestamp(state.get("heartbeat_at"), "state.heartbeat_at")
+    now = _utc_timestamp(store.utc_now(), "current time")
+    age = (now - heartbeat).total_seconds()
+    if age > stale_after:
+        raise ContextKernelError("effect dispatch Work heartbeat is stale")
+    if age < -max_future_skew:
+        raise ContextKernelError("effect dispatch Work heartbeat is future-skewed")
+
+    if inbox_source.get("content_digest") != inbox_identity["content_digest"]:
+        raise ContextKernelError("effect dispatch user input changed")
+    if directives_source.get("content_digest") != ledger_identity["content_digest"]:
+        raise ContextKernelError("effect dispatch directive ledger changed")
+    if strategy_source.get("content_digest") != strategy_identity["content_digest"]:
+        raise ContextKernelError("effect dispatch strategy constraints changed")
+    try:
+        effective = compile_effective_directives(
+            inbox,
+            ledger,
+            state=state,
+            strategy=strategy,
+            store=store,
+        )
+    except EffectiveDirectiveError as exc:
+        raise ContextKernelError(
+            f"effect dispatch directive compilation failed: {exc}"
+        ) from exc
+    directives_projection = _required_mapping(
+        directives_source.get("projection"),
+        "manifest effective directive projection",
+    )
+    if (
+        directives_projection.get("effective_policy_digest")
+        != effective["effective_policy_digest"]
+    ):
+        raise ContextKernelError("effect dispatch effective policy changed")
+
+    exact_action = _required_mapping(action, "effect action")
+    context = {
+        "schema_version": 1,
+        "record_type": "effect_dispatch_context",
+        "run_id": run_id,
+        "invocation_id": _required_text(
+            exact_request.get("invocation_id"), "request.invocation_id"
+        ),
+        "request_digest": _required_text(
+            exact_request.get("request_digest"), "request.request_digest"
+        ),
+        "decision_context_manifest_digest": manifest["manifest_digest"],
+        "stable_authority": stable_authority,
+        "heartbeat_policy": {
+            "stale_after_seconds": stale_after,
+            "max_future_skew_seconds": max_future_skew,
+        },
+        "user_control": {
+            "inbox_revision": inbox_revision,
+            "inbox_content_digest": inbox_identity["content_digest"],
+            "directive_ledger_content_digest": ledger_identity["content_digest"],
+            "effective_policy_digest": effective["effective_policy_digest"],
+        },
+        "action_constraints": {
+            "strategy_content_digest": strategy_identity["content_digest"],
+            "execution_rules_digest": store.stable_digest(
+                strategy.get("execution_rules", {}), length=64
+            ),
+            "publication_policy_digest": store.stable_digest(
+                state.get("result_publication_policy", {}), length=64
+            ),
+            "action_digest": store.stable_digest(exact_action, length=64),
+        },
+    }
+    context["dispatch_context_digest"] = store.stable_digest(context, length=64)
+    return context

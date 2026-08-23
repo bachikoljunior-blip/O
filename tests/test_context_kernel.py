@@ -10,10 +10,20 @@ import pytest
 from continual.context_kernel import (
     ContextKernelError,
     SEMANTIC_CONTEXT_COMPONENTS,
+    build_effect_dispatch_context,
     verify_decision_context_manifest,
 )
 from continual.context_observations import observation_ledger_entry
 from continual.store import Store
+from continual.work_effect_dispatch import (
+    dispatch_work_effect,
+    load_authorized_work_effect,
+)
+from continual.work_effects import (
+    WorkEffectError,
+    authorize_work_effect,
+    prepare_work_effect,
+)
 from continual.work_session import WorkModelClient, WorkModelPending, WorkSessionError
 
 
@@ -283,6 +293,75 @@ def _freeze_component(
         )
     path = client.invocation_root / pending.value.invocation_id / "request.json"
     return json.loads(path.read_text(encoding="utf-8")), path
+
+
+def _effect_action(path: str = "guarded.txt") -> dict:
+    return {
+        "kind": "github_update_file",
+        "target": {
+            "repository": "owner/repo",
+            "branch": "work/context-guard",
+            "path": path,
+        },
+        "parameters": {
+            "expected_blob_sha": "a" * 40,
+            "content_digest": "b" * 64,
+        },
+    }
+
+
+def _context_authorized_effect(
+    root: Path, snapshot: dict, *, effect_id: str
+):
+    request, request_path = _freeze_component(
+        _client(root), snapshot, "execute"
+    )
+    _write_json(
+        root
+        / ".continual"
+        / "runs"
+        / RUN_ID
+        / "invocations"
+        / "invoke-native-effect-test.json",
+        {
+            "status": "awaiting_work_model",
+            "component": "execute",
+            "work_invocation_id": request["invocation_id"],
+            "work_request_ref": request_path.relative_to(root).as_posix(),
+            "work_request_digest": request["request_digest"],
+        },
+    )
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = Store(root).utc_now()
+    _write_json(state_path, state)
+    plan = prepare_work_effect(
+        root,
+        run_id=RUN_ID,
+        effect_id=effect_id,
+        invocation_id=request["invocation_id"],
+        action=_effect_action(),
+        executor_binding="context-kernel-test-session",
+        model_identity="context-kernel-test-model",
+    )
+    authorization = authorize_work_effect(
+        root,
+        run_id=RUN_ID,
+        effect_id=effect_id,
+        invocation_id=request["invocation_id"],
+        request_digest=request["request_digest"],
+        action=_effect_action(),
+        executor_binding="context-kernel-test-session",
+        model_identity="context-kernel-test-model",
+    )
+    typed = load_authorized_work_effect(
+        root,
+        run_id=RUN_ID,
+        effect_id=effect_id,
+        executor_binding="context-kernel-test-session",
+        model_identity="context-kernel-test-model",
+    )
+    return request, plan, authorization, typed
 
 
 def test_root_manifest_is_deterministic_minimal_and_o_owned(tmp_path: Path) -> None:
@@ -576,3 +655,184 @@ def test_bound_resume_keeps_exact_pending_semantic_request_after_source_advance(
     assert request_path.read_bytes() == frozen_bytes
     assert resumed.value.invocation_id == first.value.invocation_id
     assert resumed.value.request_digest == first.value.request_digest
+
+
+def test_effect_dispatch_context_binds_manifest_and_allows_heartbeat_refresh(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    request, plan, authorization, typed = _context_authorized_effect(
+        root, snapshot, effect_id="context-bound-v1"
+    )
+    manifest = request["payload"]["decision_context"]
+    context = plan["dispatch_context"]
+    assert context["decision_context_manifest_digest"] == manifest["manifest_digest"]
+    assert context["action_constraints"]["action_digest"] == plan["action_digest"]
+    assert context["dispatch_context_digest"] == authorization[
+        "dispatch_context_digest"
+    ]
+    assert typed.dispatch_context_digest == context["dispatch_context_digest"]
+    persisted = json.dumps(plan, ensure_ascii=False)
+    assert "opaque-fence-must-not-be-copied" not in persisted
+    assert context["stable_authority"]["fence_token_digest"]
+
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = Store(root).utc_now()
+    _write_json(state_path, state)
+    calls: list[dict] = []
+    result = dispatch_work_effect(
+        root,
+        authorization=typed,
+        callback=lambda envelope: calls.append(envelope)
+        or {"verified_readback": True},
+    )
+    assert result["dispatched"] is True
+    assert len(calls) == 1
+
+
+def test_control_plane_effect_without_execute_manifest_fails_closed(
+    tmp_path: Path,
+) -> None:
+    root, _ = _root(tmp_path)
+    with pytest.raises(ContextKernelError, match="requires an Execute decision context"):
+        build_effect_dispatch_context(
+            root,
+            request={
+                "run_id": RUN_ID,
+                "invocation_id": "invoke-legacy-effect",
+                "request_digest": "f" * 64,
+                "payload": {"snapshot": {"run_id": RUN_ID}},
+            },
+            action=_effect_action(),
+        )
+
+
+@pytest.mark.parametrize(
+    ("source", "mutation", "match"),
+    [
+        (
+            "state",
+            lambda value: value.__setitem__("status", "released"),
+            "running Work lease",
+        ),
+        (
+            "state",
+            lambda value: value.__setitem__("lease_generation", 4),
+            "authority changed",
+        ),
+        (
+            "state",
+            lambda value: value.__setitem__("fence_token", "replacement-fence"),
+            "authority changed",
+        ),
+        (
+            "state",
+            lambda value: value.__setitem__(
+                "heartbeat_at", "2000-01-01T00:00:00Z"
+            ),
+            "heartbeat is stale",
+        ),
+        (
+            "state",
+            lambda value: value.__setitem__(
+                "heartbeat_at", "2999-01-01T00:00:00Z"
+            ),
+            "heartbeat is future-skewed",
+        ),
+        (
+            "state",
+            lambda value: value.__setitem__("max_future_skew_seconds", 3600),
+            "heartbeat policy changed",
+        ),
+        (
+            "state",
+            lambda value: value["result_publication_policy"].__setitem__(
+                "rule", "changed publication constraint"
+            ),
+            "publication constraint changed",
+        ),
+        (
+            "inbox",
+            lambda value: value.__setitem__("updated_at", "2026-08-23T00:05:00Z"),
+            "user input changed",
+        ),
+        (
+            "ledger",
+            lambda value: value.__setitem__("updated_at", "2026-08-23T00:06:00Z"),
+            "directive ledger changed",
+        ),
+        (
+            "strategy",
+            lambda value: value["execution_rules"].__setitem__(
+                "main_integration_rule", "changed constraint"
+            ),
+            "strategy constraints changed",
+        ),
+    ],
+)
+def test_effect_dispatch_rechecks_critical_sources_before_claim_or_callback(
+    tmp_path: Path,
+    source: str,
+    mutation,
+    match: str,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    _, _, _, typed = _context_authorized_effect(
+        root, snapshot, effect_id="revoked-before-dispatch-v1"
+    )
+    paths = {
+        "state": root / "agi" / "WORK_EXECUTION_STATE.json",
+        "inbox": root / "agi" / "USER_INPUT_INBOX.json",
+        "ledger": root / "agi" / "USER_DIRECTIVE_EVENTS.json",
+        "strategy": root / "agi" / "WORK_STRATEGY.json",
+    }
+    path = paths[source]
+    value = json.loads(path.read_text(encoding="utf-8"))
+    mutation(value)
+    _write_json(path, value)
+    calls = 0
+
+    def provider(_: dict) -> dict:
+        nonlocal calls
+        calls += 1
+        return {"verified_readback": True}
+
+    with pytest.raises(WorkEffectError, match=match):
+        dispatch_work_effect(root, authorization=typed, callback=provider)
+    assert calls == 0
+    assert not (
+        root
+        / ".continual"
+        / "runs"
+        / RUN_ID
+        / "external-effects"
+        / "revoked-before-dispatch-v1"
+        / "dispatch.json"
+    ).exists()
+
+
+def test_completed_context_bound_effect_replay_never_rechecks_or_redispatches(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    _, _, _, typed = _context_authorized_effect(
+        root, snapshot, effect_id="completed-context-bound-v1"
+    )
+    calls = 0
+
+    def provider(_: dict) -> dict:
+        nonlocal calls
+        calls += 1
+        return {"verified_readback": True}
+
+    first = dispatch_work_effect(root, authorization=typed, callback=provider)
+    assert calls == 1
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["status"] = "released"
+    _write_json(state_path, state)
+    replay = dispatch_work_effect(root, authorization=typed, callback=provider)
+    assert replay["replayed"] is True
+    assert replay["receipt_digest"] == first["receipt_digest"]
+    assert calls == 1
