@@ -84,6 +84,31 @@ def test_work_start_freezes_without_counting_a_model_error(tmp_path: Path):
     assert native_journal["attempt"] == 1
 
 
+def test_engine_resume_consumes_the_native_bound_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-work-bound-resume"
+    session = WorkSession(root, model_identity="bound-resume-model")
+    started = session.start("consume the exact frozen request", run_id=run_id)
+    request = started["pending"][0]
+    submit_work_response(
+        root,
+        request["invocation_id"],
+        _output("entry", request),
+        executor_binding="current_chatgpt_work_session",
+        model_identity="bound-resume-model",
+    )
+
+    def reject_rebuild(*args: object, **kwargs: object) -> object:
+        raise AssertionError("resume rebuilt a Work request instead of using its binding")
+
+    monkeypatch.setattr(WorkModelClient, "call", reject_rebuild)
+    resumed = session.resume(run_id, max_steps=1)
+    assert resumed["snapshot"]["phase"] == "root_pending"
+    assert resumed["snapshot"]["error_count"] == 0
+
+
 def test_work_resume_rejects_identity_mismatch_before_any_native_mutation(
     tmp_path: Path,
 ) -> None:

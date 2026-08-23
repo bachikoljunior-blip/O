@@ -404,7 +404,21 @@ class Engine:
                 },
             )
             try:
-                output = self.model.call(component, payload, prompt_path=prompt_path)
+                if (
+                    isinstance(journal, dict)
+                    and journal.get("status") == "awaiting_work_model"
+                    and callable(getattr(self.model, "resume_bound", None))
+                ):
+                    output = self.model.resume_bound(
+                        component,
+                        payload,
+                        prompt_path=prompt_path,
+                        invocation_id=journal.get("work_invocation_id"),
+                        request_ref=journal.get("work_request_ref"),
+                        request_digest=journal.get("work_request_digest"),
+                    )
+                else:
+                    output = self.model.call(component, payload, prompt_path=prompt_path)
                 validate_component_output(component, output, evaluator_mode=evaluator_mode)
             except WorkModelPending as pending:
                 self.store.atomic_json(

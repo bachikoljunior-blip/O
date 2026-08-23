@@ -38,6 +38,37 @@ At each safe Root or logical-unit boundary, refresh the inbox from latest remote
 
 Inbox entries are directions, constraints, design context, or hypotheses rather than automatic technical truth or AGI evidence. Preserve the user's terminal objective and explicit constraints, but test technical proposals, compare them against alternatives, and reject or revise them when retained evidence favors another route. Persist the highest acknowledged revision and the factual interpretation needed to survive context reset. The current accumulated input includes expected real-world AGI elapsed-time minimization, O replaceability, autonomous strategy/evaluation/exploration/self-improvement/timing, saturation-driven method change, heterogeneous external research search, non-blocking durable user requests, strict claim-gate preservation, falsifiability of user proposals, and recursive situation-dependent Skill-in-Skill context routing.
 
+## O-owned decision context
+
+Inbox revision 15 adds a structural requirement: context known by the outer Work
+session must not silently disappear from the semantic context used by O. The
+selected architecture is recorded in `agi/CONTEXT_KERNEL_ARCHITECTURE.md`.
+O owns the decision-control plane—observation history, source clocks,
+provenance, effective constraints, inclusion and exclusion decisions,
+freshness, invalidation, immutable decision projections, and context-bound
+effect authorization. GitHub, CI, providers, files, and other systems retain
+authority for the raw facts they produce. Copying every payload into O is not
+the design: it would create competing stale authority, overload, and secret
+risk.
+
+The outer session acts as O's observation and effect executor. A fact learned
+only in untracked outer context is not allowed to affect an O decision until it
+is represented by a canonical source update or an O observation receipt. Every
+new Root request binds mandatory lease, inbox, strategy, and native-run source
+clocks through a deterministic `DecisionContextManifest`. Missing,
+contradictory, or outer-injected mandatory context fails closed. A frozen
+pending request keeps its exact manifest for replay; new source revisions apply
+at the next safe boundary and create a new request identity.
+
+Mandatory control context is outside optional learned routing. Recursive
+situation-dependent routing may select additional context only after objective,
+effective user constraints, lease/fence, continuation, source clocks,
+contradictions, and safety/revocation context are fixed. Plans and external
+effects must eventually bind the manifest that justified them and recheck
+critical revocations immediately before dispatch. Until that later stack and
+behavioral outcome tests exist, the Root-only slice is incomplete engineering
+evidence rather than proof that the context problem is solved.
+
 ## Single-writer lease
 
 `agi/WORK_EXECUTION_STATE.json` is authoritative. A primary owner created by direct user instruction is distinct from a monitor recovery owner. While its `running` heartbeat is within `stale_after_seconds`, the watchdog must suppress itself.

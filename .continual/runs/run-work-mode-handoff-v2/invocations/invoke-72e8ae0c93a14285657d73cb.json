@@ -1,0 +1,55 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-23T13:20:23.046552Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-72e8ae0c93a14285657d73cb-candidate_evaluate.json",
+  "invocation_id": "invoke-72e8ae0c93a14285657d73cb",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/work-model/invocations/invoke-ef2785fe26512b965bfe26f4/response.json",
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json"
+      ],
+      "observations": [
+        "The actual output satisfied every scoped trial regression check.",
+        "No evidence-boundary weakening or verdict conflation was observed.",
+        "No activation or protected prompt mutation was performed."
+      ],
+      "purpose": "Evaluate the verdict-separation Candidate from the actual PR 275 Task Evaluate result.",
+      "unresolved": [
+        "the separate deterministic activation gate",
+        "Root ingestion of revision 15",
+        "the user-level objective"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "This trial adds another real bounded-PASS/original-FAIL example, but evidence accumulation and protected prompt activation remain distinct operations."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [
+        "No deterministic protected-baseline regression record has persisted VERIFIED_FOR_SCOPE, so this evaluator cannot activate the Candidate."
+      ],
+      "decision": "PROPOSE_ACTIVATION",
+      "global_activation_authorized": false,
+      "promotion_performed": false,
+      "reason": "The actual Task Evaluate output met every pre-application regression check: bounded publication PASS, routing INSUFFICIENT_EVIDENCE, and user-level FAIL were independently justified; negative evidence and revision-15 deferral were retained; no CI or O-internal result was promoted to AGI evidence.",
+      "regression_gate_required": true,
+      "rollback": "Keep the Candidate inactive unless the separate deterministic protected-baseline matrix verifies verdict independence, explicit bounded success conditions, and negative-evidence preservation.",
+      "scope": "continual/incremental-task-evaluation",
+      "supporting_evidence": [
+        "unit_verdict PASS cites journal validity, exact-head CI, conflict proof, expected-head merge, and exact readback facts",
+        "routing_verdict remains INSUFFICIENT_EVIDENCE with zero observations and no activation",
+        "user-level verdict and verdict remain FAIL",
+        "agi_claim_supported and global activation remain false",
+        "revision 15 remains explicitly pending for the next Root rather than retroactively changing the frozen unit"
+      ]
+    }
+  },
+  "payload_digest": "c9a623b3f8eb16a306388ea6",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

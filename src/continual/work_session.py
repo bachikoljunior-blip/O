@@ -6,6 +6,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping
 
+from .context_kernel import ContextKernelError, build_root_decision_context
 from .contracts import validate_component_output
 from .store import Store
 
@@ -207,11 +208,28 @@ class WorkModelClient:
         payload: dict[str, Any],
         prompt_path: str,
     ) -> tuple[str, dict[str, Any]]:
+        effective_payload = deepcopy(payload)
+        if component == "root":
+            if "decision_context" in effective_payload:
+                raise WorkSessionError(
+                    "Root payload may not inject an outer decision_context"
+                )
+            try:
+                decision_context = build_root_decision_context(
+                    self.root,
+                    run_id=self.run_id,
+                    payload_snapshot=effective_payload.get("snapshot", {}),
+                    store=self.store,
+                )
+            except ContextKernelError as exc:
+                raise WorkSessionError(f"Context Kernel failed closed: {exc}") from exc
+            if decision_context is not None:
+                effective_payload["decision_context"] = decision_context
         prompt = (self.root / prompt_path).resolve()
         if prompt != self.root and self.root not in prompt.parents:
             raise WorkSessionError("prompt_path escapes repository")
         prompt_content = prompt.read_text(encoding="utf-8")
-        payload_digest = self.store.stable_digest(payload, length=64)
+        payload_digest = self.store.stable_digest(effective_payload, length=64)
         prompt_digest = self.store.stable_digest(prompt_content, length=64)
         invocation_id = "invoke-" + self.store.stable_digest(
             {
@@ -235,7 +253,7 @@ class WorkModelClient:
             "prompt_digest": prompt_digest,
             "prompt_content": prompt_content,
             "payload_digest": payload_digest,
-            "payload": deepcopy(payload),
+            "payload": effective_payload,
             "contract": {
                 "response_shape": "component output with result, fragment, and local_learn except Learn",
                 "private_reasoning_forbidden": True,
@@ -277,6 +295,64 @@ class WorkModelClient:
         if response is None:
             raise WorkModelPending(invocation_id, request_ref, request["request_digest"])
         _, output = _verified_response(self.store, existing or request, response_path)
+        return output
+
+    def resume_bound(
+        self,
+        component: str,
+        payload: dict[str, Any],
+        *,
+        prompt_path: str,
+        invocation_id: str,
+        request_ref: str,
+        request_digest: str,
+    ) -> dict[str, Any]:
+        """Resume the exact immutable Work request named by the native journal.
+
+        A pending Root request may outlive a heartbeat or inbox update. Rebuilding
+        its Context Kernel manifest would mint a second Work request for the same
+        native invocation. The native journal is therefore the sole resume
+        authority: source-clock changes affect the next Root boundary, not the
+        already-frozen request.
+        """
+
+        if not isinstance(invocation_id, str) or not _INVOCATION_ID.fullmatch(
+            invocation_id
+        ):
+            raise WorkSessionError("invalid bound Work invocation_id")
+        if not isinstance(request_ref, str) or not request_ref:
+            raise WorkSessionError("invalid bound Work request_ref")
+        if not isinstance(request_digest, str) or not request_digest:
+            raise WorkSessionError("invalid bound Work request_digest")
+        request_path = (self.root / request_ref).resolve()
+        expected_path = self.invocation_root / invocation_id / "request.json"
+        if request_path != expected_path:
+            raise WorkSessionError("bound Work request_ref mismatch")
+        request = _verified_request(self.store, request_path)
+        if (
+            request.get("request_digest") != request_digest
+            or request.get("run_id") != self.run_id
+            or request.get("component") != component
+            or request.get("prompt_path") != prompt_path
+            or request.get("executor_binding") != self.executor_binding
+            or request.get("model_identity") != self.model
+        ):
+            raise WorkSessionError("bound Work request identity mismatch")
+        frozen_payload = request.get("payload")
+        if not isinstance(frozen_payload, Mapping):
+            raise WorkSessionError("bound Work request payload is malformed")
+        outer_payload = deepcopy(dict(frozen_payload))
+        if component == "root":
+            outer_payload.pop("decision_context", None)
+        if self.store.stable_digest(outer_payload, length=64) != self.store.stable_digest(
+            payload, length=64
+        ):
+            raise WorkSessionError("bound Work outer payload mismatch")
+
+        response_path = request_path.parent / "response.json"
+        if not response_path.is_file():
+            raise WorkModelPending(invocation_id, request_ref, request_digest)
+        _, output = _verified_response(self.store, request, response_path)
         return output
 
 

@@ -58,6 +58,26 @@
     "main_integration_rule": "isolated branch -> exact-head CI -> unchanged passing head -> merge",
     "state_only_control_plane_updates": "expected-blob CAS on main"
   },
+  "context_management": {
+    "source_user_input_revision": 15,
+    "decision_authority": "O Engine owns the observation ledger, source clocks, decision projections, inclusion and exclusion decisions, invalidation, and context-bound action authorization.",
+    "raw_source_authority": "GitHub, CI, providers, files, and other source systems remain authoritative for the raw facts they produce; O stores provenance-bound references, projections, and receipts rather than copying everything.",
+    "outer_session_role": "Execute O-requested observations and effects and return receipts. Untracked outer-session memory is not decision authority.",
+    "mandatory_control_context": [
+      "terminal_objective_and_effective_user_constraints",
+      "lease_owner_generation_fence_and_completion_authority",
+      "user_input_inbox_cursor_and_unresolved_revisions",
+      "native_run_unit_phase_and_continuation",
+      "source_clocks_contradictions_freshness_and_invalidation",
+      "safety_and_effect_revocation_constraints"
+    ],
+    "optional_context_policy": "Route recursively by situation only after mandatory control context is fixed; record selected and excluded branches with reasons.",
+    "frozen_request_rule": "A pending semantic request retains its exact manifest for replay. Source-clock changes affect the next safe semantic boundary and mint a new request identity.",
+    "effect_rule": "Bind plans and authorizations to the decision manifest, and recheck critical lease, revocation, and action-constraint sources immediately before dispatch.",
+    "copy_all_raw_context": false,
+    "architecture_path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
+    "current_stage": "root_manifest_vertical_slice"
+  },
   "method_change_triggers": [
     {
       "trigger": "same_failure_class_without_new_discriminating_observation",
@@ -129,11 +149,11 @@
     }
   ],
   "immediate_sequence": [
-    "Publish the checkpoint-inheritance harness and exact native child invocation through exact-head CI; merge only an unchanged passing head.",
-    "Record both frozen arms on all three matched tasks only when native provenance, comparable budgets, replay, and side-effect isolation are mechanically verifiable.",
-    "Adopt only a scoped reversible Candidate if the precommitted metrics improve without worsening and all protected checks pass; otherwise reject and retain single-lineage execution.",
-    "Review PR 262 as the stopped Claude predecessor's shared result without answering any Claude-bound invocation or bypassing fresh-main CI.",
-    "Continue heterogeneous external-evidence readiness and user-request processing without treating internal tests or the repository-authored strict gate as completion."
+    "Implement and behaviorally test the Root-only O-owned DecisionContextManifest with mandatory inbox, lease, strategy, and native-run source clocks.",
+    "Publish the vertical slice only through isolated exact-head CI, unchanged-head merge, and exact main readback; retain omission, remote-freshness, and effect-dispatch gaps as negative evidence.",
+    "Compile inbox entries and partial supersedes into typed O events/effective directives so user control no longer depends on outer narration.",
+    "Add O observation activities and receipts for GitHub, CI, provider, tool, and research facts, then extend manifests across Execute/Evaluate/Consolidate/Learn.",
+    "Bind plans and external effects to the justifying manifest and recheck critical revocations at dispatch; evaluate useful behavioral/outcome change rather than storage or verbal recall."
   ],
   "claim_boundary": {
     "agi_claim_supported": false,
@@ -143,5 +163,5 @@
     "strategy_success_is_external_evidence": false
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "updated_at": "2026-08-23T08:06:35Z"
+  "updated_at": "2026-08-23T13:32:10.798Z"
 }
