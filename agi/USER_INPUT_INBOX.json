@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 6,
+  "revision": 9,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -127,7 +127,46 @@
       ],
       "supersedes": [],
       "source": "user_chat"
+    },
+    {
+      "sequence": 7,
+      "id": "external-context-conditioning-observation-20260823-v7",
+      "received_at": "2026-08-22T23:13:53Z",
+      "kind": "external_context_observation",
+      "status": "active",
+      "summary": "Long-lived accumulated context can suppress important hypotheses that the same base model could generate under different context.",
+      "directives": [
+        "External context: even with the same base model, the hypotheses and strategies generated can change substantially with context. In a long-running O execution, conditioning on its own history, existing design, successes, failures, and current strategy may make some important ideas that the base model is capable of generating less reachable. The same accumulated context may also make this bias itself difficult to notice from inside that context. If this possibility materially affects expected elapsed time to AGI, investigate, falsify, and address it autonomously."
+      ],
+      "supersedes": [],
+      "source": "user_chat"
+    },
+    {
+      "sequence": 8,
+      "id": "external-context-state-freshness-20260823-v8",
+      "received_at": "2026-08-22T23:28:58Z",
+      "kind": "external_context_observation",
+      "status": "active",
+      "summary": "A long-running autonomous system can become structurally misaligned when durable control context, live external state, and actual execution progress advance on different clocks.",
+      "directives": [
+        "External context: recent execution exposed a general failure mode, not merely a stale PR or missed inbox revision. Durable plans, continuation records, heartbeats, user-input acknowledgements, repository state, CI/PR state, and actual tool execution can change on different clocks. If the system treats any one persisted snapshot as current without checking whether the world has advanced, it can repeatedly reason from obsolete context, redo finished work, miss new constraints, or keep pursuing a plan whose premises no longer hold. Conversely, forcing every event into one giant always-current context can create contention and context overload. Treat freshness, provenance, invalidation, reconciliation, and decision-time context selection across these asynchronous sources as a structural correctness and performance problem. Investigate whether O can reliably know what information is authoritative for the decision being made, detect when assumptions or plans have gone stale, incorporate newly relevant information without unnecessary global interruption, and learn from recurring context-synchronization failures. If this materially affects expected elapsed time to AGI, address and falsifiably evaluate the underlying mechanism rather than patching individual stale states."
+      ],
+      "supersedes": [],
+      "source": "user_chat"
+    },
+    {
+      "sequence": 9,
+      "id": "external-context-selection-recursion-20260823-v9",
+      "received_at": "2026-08-22T23:43:58Z",
+      "kind": "external_context_observation",
+      "status": "active",
+      "summary": "Context selection is consequential and recursively conditioned by prior context selection.",
+      "directives": [
+        "External context: in long-running execution, the choice of what enters the current context can itself change the resulting judgment, and that context-selection decision is itself conditioned by the contexts selected before it."
+      ],
+      "supersedes": [],
+      "source": "user_chat"
     }
   ],
-  "updated_at": "2026-08-22T22:59:38.628Z"
+  "updated_at": "2026-08-22T23:43:58Z"
 }

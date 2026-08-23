@@ -7,6 +7,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 
 _SKILL_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 class ContextRoutingError(RuntimeError):
@@ -48,6 +49,9 @@ class SkillNode:
     skill_id: str
     content: str
     children: tuple[SkillReference, ...] = ()
+    source_ref: str | None = None
+    content_sha256: str | None = None
+    manifest_sha256: str | None = None
 
     def __post_init__(self) -> None:
         _validated_skill_id(self.skill_id)
@@ -58,6 +62,14 @@ class SkillNode:
         child_ids = [child.skill_id for child in children]
         if len(set(child_ids)) != len(child_ids):
             raise ValueError("children must not contain duplicate skill_id values")
+        if self.source_ref is not None:
+            _bounded_nonempty_text(self.source_ref, "source_ref", maximum=4096)
+        for field in ("content_sha256", "manifest_sha256"):
+            value = getattr(self, field)
+            if value is not None and (
+                not isinstance(value, str) or not _SHA256.fullmatch(value)
+            ):
+                raise ValueError(f"{field} must be a lowercase SHA-256 hex digest")
         object.__setattr__(self, "children", children)
 
 
@@ -80,6 +92,9 @@ class MaterializedContext:
     depth: int
     path: tuple[str, ...]
     content: str
+    source_ref: str | None = None
+    content_sha256: str | None = None
+    manifest_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -105,6 +120,9 @@ class ContextRoutingResult:
                     "depth": item.depth,
                     "path": list(item.path),
                     "content": item.content,
+                    "source_ref": item.source_ref,
+                    "content_sha256": item.content_sha256,
+                    "manifest_sha256": item.manifest_sha256,
                 }
                 for item in self.materialized
             ],
@@ -267,6 +285,9 @@ class RecursiveContextRouter:
                 depth=depth,
                 path=path,
                 content=node.content,
+                source_ref=node.source_ref,
+                content_sha256=node.content_sha256,
+                manifest_sha256=node.manifest_sha256,
             )
             materialized.append(item)
             trace.append(
@@ -277,6 +298,9 @@ class RecursiveContextRouter:
                     "depth": depth,
                     "path": list(path),
                     "context_chars": len(node.content),
+                    "source_ref": node.source_ref,
+                    "content_sha256": node.content_sha256,
+                    "manifest_sha256": node.manifest_sha256,
                 }
             )
 

@@ -1,70 +1,60 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "checkpointed",
-  "owner_kind": "work_recovery_automation",
-  "execution_id": "work-recovery-20260823T015401JST",
-  "predecessor_execution_id": "work-primary-handoff-20260822T224400JST",
-  "lease_generation": 3,
-  "fence_token": "work-recovery-fence-v3-012f0c5e7d22d7382389fe87",
-  "started_at": "2026-08-22T16:54:01Z",
-  "heartbeat_at": "2026-08-22T22:56:18.161Z",
-  "last_progress_at": "2026-08-22T22:56:18.161Z",
+  "status": "running",
+  "owner_kind": "work_primary",
+  "execution_id": "work-primary-claude-20260823T081642JST",
+  "predecessor_execution_id": "work-recovery-20260823T015401JST",
+  "lease_generation": 4,
+  "fence_token": "work-primary-fence-v4-9c37e5a1b6d2480f3e7a5c19",
+  "started_at": "2026-08-22T23:16:42Z",
+  "heartbeat_at": "2026-08-23T00:07:00Z",
+  "last_progress_at": "2026-08-23T00:07:00Z",
   "stale_after_seconds": 900,
-  "checkpoint": {
-    "reason": "User direction revision 4 was applied at the safe publication boundary. Cross-binding is published as PR 258 at exact head bacc1a241c64df1744a4247f8ba40a36ef1a241e. Exact-head workflow 32602836716/job 97103583905 remains in progress at pytest; PR was observed open, head unchanged, and currently not mergeable, so no merge, rerun, or native Execute submission was performed. Verification already completed: exact local full suite 456 passed; rebased dedicated 32 passed; rebased focused external-evidence tests 74 passed; compileall, diff-check, remote four-blob readback, and native work-verify (34 requests, 33 responses, 1 pending) passed. This generation-3 writer now checkpoints and will not perform further main mutations. AGI is not claimed.",
-    "verified_main_sha": "7bb44bc790f453e3e8aa16f5c5b131dcac0f716c",
-    "recoverable_by": "Designated primary claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn may continue only after acquiring a generation-4 successor lease through a WORK_EXECUTION_STATE-only expected-blob CAS and exact remote readback. Other sessions remain parallel read-only/non-main writers."
-  },
-  "parallel_execution_coordination": {
-    "note_to_parallel_worker": "A parallel ChatGPT Work-mode session (GPT-5.6 Sol) is the user's other active driver on this repository. The user authorized this Claude successor to coordinate with it. To avoid a two-writer collision, only one live writer should mutate the repository at a time; whichever holds a fresh running heartbeat is primary and the other suppresses per the monitor contract.",
-    "already_done_do_not_redo": "PR 252 (migration) and PR 254 (engine safety fixes + CI repair) are merged on main at b0528b1. The three confirmed engine defects (replay-stable candidate-evaluate identity, unit_id path-traversal allowlist, awaiting_work_model provider guard) are fixed with regression tests; the invalid materialize workflow is removed and the test timeout raised to 75. Do not reintroduce these or re-review them.",
-    "recommended_next": "Follow agi/WORK_STRATEGY.json saturation_assessment: the recent capability work is method-family-saturated (bounded-synthesis retention probes) and gate-irrelevant while the external ledger is empty. Prefer external-evidence readiness and the user-only independent-evaluator request over merging more near-duplicate retention PRs. If settling the backlog, integrate at most a representative non-redundant subset on fresh exact-head CI, close diagnostic-only heads (245/250), and preserve every exact failure."
-  },
   "authorization": {
-    "kind": "scheduled_monitor_recovery",
-    "instruction": "Resume only after confirmed checkpoint/stoppage using expected-blob CAS and verified remote readback.",
-    "recovery_cas_required_for_this_initial_owner": true,
+    "kind": "direct_primary_work_instruction",
+    "instruction": "実行を引き継いで達成するまで進めて / 並行実行して、あなたが主実行 (user chat; recorded as inbox entries 4 and 6)",
+    "recovery_cas_required_for_this_initial_owner": false,
     "recovery_cas_required_for_successors": true,
-    "note": "Phase 1 state-only acquisition was read back exactly at commit 7cb19ae/blob ac206f0. Phase 2 records the proof; development mutation remains forbidden until the phase-2 commit and blob are read back exactly."
+    "note": "The user designated this Claude Code remote session (claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn) as primary executor (inbox entry 4). The generation-3 recovery owner applied that direction, finished its publication boundary (PR 258 published at exact head bacc1a24 with CI then in progress), and checkpointed at 2026-08-22T22:56:18Z naming this session as the designated successor. Acquisition follows that clean checkpoint, not a usurpation of a live writer."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
-  "working_branch": "work/external-handoff-cross-binding-v2",
+  "source_main_sha": "2935322427043faf49dbc2369ef8ced44f0457da",
+  "working_branch": "claude/execution-handoff-completion-mtwgqr",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
   "active_unit_id": "unit-89058c1acef29b8e657a946c",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 4,
-    "acknowledged_at": "2026-08-22T22:56:18.161Z",
-    "application_status": "applied_at_safe_cross_binding_publication_boundary"
+    "highest_acknowledged_revision": 6,
+    "acknowledged_at": "2026-08-22T23:16:42Z",
+    "application_note": "Revisions 4-6 ingested: the strict external evidence gate is automation-constructed and not the user's completion criterion (truthful reporting unchanged); this Claude session is the designated primary; the operator has only a smartphone, so no terminal steps, no secrets in chat, and no spend without explicit bounded approval; the ChatGPT Work session is authorized as a secondary concurrent writer on isolated branches with serialized main integration."
+  },
+  "parallel_execution_coordination": {
+    "primary": "This Claude Code remote session (generation-4 lease holder).",
+    "secondary": "The ChatGPT Work session is an authorized secondary concurrent writer per inbox entry 6: independent falsifiable units on isolated branches and PRs, distinct native O Run and idempotency scope, no mutation of the primary's branch, native Run, pending invocations, lease, or PR heads. Integration to main stays serialized with exact-head validation; neither writer force-pushes, cancels, reruns, or merges the other's work.",
+    "pending_native_execute": "Frozen Work request invoke-f3f84b7c83c1d48e4962e390 is identity-bound to executor_binding current_chatgpt_work_session / model chatgpt-work-model-unverified, so only that session can truthfully submit its response. The primary will not impersonate that binding; the secondary writer should submit it at its next safe boundary, after which Task Evaluate, Consolidate Episode, and Learn proceed on run-work-mode-handoff-v2."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "7bb44bc790f453e3e8aa16f5c5b131dcac0f716c",
+    "snapshot_head_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
-    "publication_pr": 258,
-    "publication_branch": "work/external-handoff-cross-binding-v2",
-    "publication_exact_head_sha": "bacc1a241c64df1744a4247f8ba40a36ef1a241e",
-    "exact_head_ci_run": 32602836716,
-    "exact_head_ci_job": 97103583905,
-    "durability_status": "Cross-binding safely published; generation-3 writer checkpointed before merge while exact-head CI remains in progress and PR is currently not mergeable.",
-    "next_action": "Designated primary must first acquire generation 4 by state-only expected-blob CAS/readback. Then observe workflow 32602836716 against unchanged head bacc1a241c64df1744a4247f8ba40a36ef1a241e. If all required checks succeed and the PR becomes mergeable with unchanged head, merge using expected head, verify latest main, then complete the pending native Execute response followed by Task Evaluate, Consolidate Episode, and Learn. Preserve any CI failure or merge-conflict evidence exactly; do not rerun or overwrite another writer."
+    "durability_status": "Backlog settlement 5/6 complete: PR 251 (10f03fe), PR 246 (213e760), PR 244 (0629bcb), PR 238 (f1df027), PR 248 (d20ec94) merged on green fresh exact-head CI against post-#258 main. PR 230 fresh CI 32604883835 (head 1bf82a8) and retargeted PR 247 fresh CI 32606401162 (head fe6b7a5) remain in progress under the 75-minute cap.",
+    "next_action": "Observe PR 230 CI 32604883835 and PR 247 CI 32606401162; merge each only on green with unchanged head. After 247 merges, retarget PR 249 to main and refresh; after 230 merges, retarget 245 then 250. Then open a native O Run (executor current_claude_code_remote_session) for the observed-schema successor reconstruction so primary development also runs through the Work bridge."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
-    "actual": "chatgpt-work-model-unverified",
+    "actual": "claude-fable-5 (session-configured identifier; serving model may differ)",
     "verified": false,
-    "verification_source": "No independently inspectable platform model identity signal was observed."
+    "verification_source": "Claude Code remote session configuration only; no independent platform attestation was observed"
   },
   "primary_run_contract": {
     "voluntary_exit_permitted": false,
-    "normal_completion_condition": "strict_independent_external_production_evidence_gate_passed",
+    "normal_completion_condition": "user_level_objective_met_with_truthful_reporting; the automation-constructed strict external gate is not the user's completion criterion (inbox entry 4) and remains available only as an optional verification tool",
     "single_test_commit_pr_ci_merge_report_or_milestone_is_exit_condition": false,
     "forced_end_action": "persist_exact_continuation_and_mark_interrupted_or_checkpointed"
   },
@@ -76,302 +66,14 @@
   },
   "remote_persistence": {
     "published_on_main": true,
-    "expected_blob_sha": "a7765b5ae0f0e9fe82249b0a3a41b3164024ddce",
-    "result_commit_sha": "7cb19aea2f3f13fb439ade9a00e3671de0f83668",
-    "result_blob_sha": "ac206f0c257a0fdf286abc6f9e148d80b33b31fb",
-    "finalize_expected_blob_sha": "ac206f0c257a0fdf286abc6f9e148d80b33b31fb",
-    "readback_of_commit_sha": "7cb19aea2f3f13fb439ade9a00e3671de0f83668",
     "verified_remote_readback": true,
-    "checkpoint_expected_blob_sha": "18c455f4ebd94a6d2823b3c10eaff3ca7e7c3c61",
-    "checkpoint_verified_remote_readback": false
+    "result_commit_sha": "5ba689f",
+    "result_blob_sha": null,
+    "note": "Generation-4 acquisition commit 5ba689f was pushed and read back exactly from origin/main."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
     "strict_gate_passed": false,
     "independent_production_evidence_observed": false
-  },
-  "publication": {
-    "pull_request": 255,
-    "exact_head_sha": "36b34d1e38e3d2a0cf0771ae5bb70bba50d2a544",
-    "exact_head_ci_run": 32588729634,
-    "exact_head_ci_status": "success",
-    "remote_branch_readback_verified": true,
-    "request_sha256": "2583352beea7765617606ed39985a0f7e79c45d0256982b7ad4eb4063586505d",
-    "local_full_suite_status": "413_passed_1_expected_precollection_old_owner_assertion_failure",
-    "superseded_diagnostic_ci_run": 32586856167,
-    "superseded_diagnostic_ci_runs": [
-      {
-        "run": 32586856167,
-        "head": "52e99c8bf40066bd0467ce9adcdef223f80b66e2",
-        "conclusion": "failure",
-        "failures": [
-          "shallow checkout could not resolve subject commit f5f9836",
-          "test hardcoded owner_kind=work_primary and rejected valid work_recovery_automation"
-        ]
-      },
-      {
-        "run": 32587964226,
-        "head": "64a382f390d91a32444ec4f5e737ee05b06bb5b4",
-        "conclusion": "failure",
-        "failures": [
-          "shallow checkout could not resolve subject commit f5f9836",
-          "test hardcoded owner_kind=work_primary and rejected valid work_recovery_automation"
-        ]
-      }
-    ],
-    "focused_repair_tests": "10_passed",
-    "exact_head_ci_completed_at": "2026-08-22T18:22:06.533Z",
-    "merge_sha": "5537f10bbbfa43a0a730d630c8e47ea8ebd51e24",
-    "merge_ci_status": "success",
-    "merge_ci_run": 32590500449,
-    "lifecycle_repair": {
-      "pull_request": 256,
-      "exact_head_sha": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed",
-      "base_main_sha": "25a20f2928f6cc3a14362b4b0757aa9ee0ed73cc",
-      "exact_head_ci_status": "success",
-      "focused_tests": "20_passed",
-      "compileall": "pass",
-      "diff_check": "pass",
-      "defect": "overall task verdict and incremental unit verdict were conflated, preventing honest Consolidate Episode and Learn under an unmet ambitious goal",
-      "agi_claim_supported": false,
-      "exact_head_ci_run": 32591220738,
-      "superseded_ci_run": 32591130611,
-      "work_verify": {
-        "valid": true,
-        "requests": 19,
-        "responses": 18,
-        "pending": 1,
-        "verified_remote_head_sha": "71ee80b74ff8d30e7fe0a4719edbe331401e76ed"
-      },
-      "last_observation": {
-        "at": "2026-08-22T19:09:12.478Z",
-        "exact_head_ci_status": "in_progress",
-        "exact_head_ci_step": "pytest",
-        "exact_head_ci_elapsed_note": "more_than_32_minutes_but_within_75_minute_timeout",
-        "local_full_suite_status": "in_progress_no_failure_signal",
-        "prior_main_merge_ci_run": 32590500449,
-        "prior_main_merge_ci_status": "success"
-      },
-      "exact_head_ci_all_required_steps_success": true,
-      "merged": true,
-      "merge_sha": "976efad5fe0f2d1348ba97e5ba67d6253d331958",
-      "merge_ci_run": 32592937235,
-      "merge_ci_status": "success",
-      "remote_main_engine_blob_sha": "d45c884b63cc19049b8de3208d9236b4c47d43a3",
-      "remote_main_snapshot_blob_sha": "258bbe3159c62419d6b8d65d9eddc4245fa18576",
-      "native_cycle": {
-        "unit_id": "unit-f67e779cf0b2194e4e3e6542",
-        "original_goal_verdict": "FAIL",
-        "unit_verdict": "PASS",
-        "consolidate_invocation_id": "invoke-73c935f4eb7b6e4856065a1c",
-        "learn_invocation_id": "invoke-ca9ce19b8e027eb78a1d8c2e",
-        "continued_root_invocation_id": "invoke-4d8fc93f59a6f64bf7cc76d6",
-        "continued_to_root": true,
-        "run_finished": false,
-        "candidate_registered": "candidate-task-evaluate-unit-verdict-v1"
-      },
-      "merge_ci_all_required_steps_success": true,
-      "merge_ci_completed_observed_at": "2026-08-22T19:47:14.725Z"
-    },
-    "merge_ci_completed_observed_at": "2026-08-22T18:53:35.034Z",
-    "merge_ci_all_required_steps_success": true,
-    "detached_signature_packaging": {
-      "status": "merged_exact_head_ci_success",
-      "pull_request": 257,
-      "branch": "work/external-attestation-detached-signature-v3",
-      "base_main_sha": "f9054a8eac0d16ae783c610483e671a012d98a51",
-      "exact_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
-      "exact_head_ci_run": 32598374443,
-      "exact_head_ci_status": "success",
-      "mergeable": true,
-      "mergeable_state": "clean_before_merge",
-      "changed_files": 105,
-      "focused_regression": "33_passed_final_public_boundary_alignment",
-      "local_full_suite": "424_passed_3661.75s_terminal_redundant_internal_only",
-      "compileall": "pass",
-      "diff_check": "pass",
-      "work_verify": {
-        "valid": true,
-        "requests": 34,
-        "responses": 33,
-        "pending": 1
-      },
-      "remote_snapshot_blob_sha": "ac286b549a4a43520d178a592ca31eaefae603c2",
-      "claim_boundary": "packaging readiness only; ledger audit, evaluator quorum, and strict AGI gate remain unmet",
-      "superseded_heads": [
-        {
-          "head": "04cbe5a0fbfd593667a57e0e9fb803a2800dbacf",
-          "ci_run": 32594072687,
-          "status": "in_progress_superseded_not_cancelled",
-          "reason": "added hidden-answer and suite-seed rejection"
-        },
-        {
-          "head": "d33bef78c1cbce751d127750b3fe6a022674cce7",
-          "ci_run": 32594233281,
-          "status": "in_progress_superseded_not_cancelled",
-          "reason": "added punctuation/case/camelCase secret-key normalization"
-        },
-        {
-          "head": "7d86119d966bd83df4cfa9092122947682ad6716",
-          "ci_run": 32594512530,
-          "status": "success_superseded_not_merge_evidence",
-          "reason": "security review found suffix-only secret-marker bypass",
-          "completed_all_required_steps": true
-        },
-        {
-          "head": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
-          "ci_run": 32595188080,
-          "status": "in_progress_superseded_not_cancelled",
-          "reason": "aligned remaining authorization/cookie/private-context markers with Work public boundary"
-        }
-      ],
-      "remote_source_blob_sha": "088b3d0f0d6c70e04756e7999a3bb3356e7a90ac",
-      "remote_test_blob_sha": "b924260e5b8b29e99d329145a8da975104a74845",
-      "superseded_local_test_runs": [
-        {
-          "head": "d33bef78c1cbce751d127750b3fe6a022674cce7",
-          "status": "interrupted_at_16_percent",
-          "reason": "superseded by final compact secret-name normalization; not a product failure and not rerun"
-        },
-        {
-          "head": "7d86119d966bd83df4cfa9092122947682ad6716",
-          "status": "interrupted_after_superseded",
-          "reason": "process had imported prior source before embedded-marker hardening; continuing would not verify final head"
-        },
-        {
-          "head": "39f5889354e6a831ecdb723d9d67fd6d2ad65710",
-          "status": "interrupted_after_superseded",
-          "reason": "process had imported the prior source before final public-boundary alignment"
-        }
-      ],
-      "last_observation": {
-        "at": "2026-08-22T21:35:43.897Z",
-        "exact_head_sha": "2a3ac65048202097dac84e9aa2d37e9f80228fcd",
-        "exact_head_ci_run": 32598374443,
-        "exact_head_ci_status": "success_all_required_steps",
-        "mergeable": true,
-        "merged_main_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
-        "prior_superseded_ci_run": 32597656410,
-        "prior_superseded_ci_status": "success_not_merge_evidence",
-        "native_phase": "execute_cross_binding_exact_full_regression_in_progress_local"
-      },
-      "exact_head_ci_all_required_steps_success": true,
-      "task_evaluate": {
-        "original_goal_verdict": "FAIL",
-        "unit_verdict": "PASS",
-        "unit_id": "unit-d6ca097a96508ff17caf456b",
-        "candidate_trial": "remain_candidate_pending_deterministic_activation_gate"
-      },
-      "native_cycle": {
-        "original_goal_verdict": "FAIL",
-        "unit_verdict": "PASS",
-        "unit_id": "unit-d6ca097a96508ff17caf456b",
-        "consolidate_completed": true,
-        "learn_completed": true,
-        "next_unit_id": "unit-89058c1acef29b8e657a946c",
-        "pending_execute_invocation_id": "invoke-f3f84b7c83c1d48e4962e390"
-      },
-      "merge_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
-      "main_readback": {
-        "observed_at": "2026-08-22T21:35:43.897Z",
-        "lease_blob_sha": "f0a811dd9057ff435303284b97117d3859b29d79",
-        "source_blob_sha": "088b3d0f0d6c70e04756e7999a3bb3356e7a90ac",
-        "test_blob_sha": "b924260e5b8b29e99d329145a8da975104a74845",
-        "snapshot_blob_sha": "da06a40c6fe163c80d564b198d1e44c23ec9c9f7",
-        "pending_unit_id": "unit-89058c1acef29b8e657a946c",
-        "matched": true
-      }
-    },
-    "native_work_verify": {
-      "valid": true,
-      "requests": 34,
-      "responses": 33,
-      "pending": 1,
-      "observed_at": "2026-08-22T21:02:16.449Z"
-    },
-    "external_handoff_cross_binding": {
-      "status": "checkpointed_to_designated_primary_exact_ci_in_progress",
-      "local_exact_commit": "9aa768978187e2b0f8755be3106f6db8353a88c3",
-      "dedicated_tests": "32_passed",
-      "focused_external_evidence_tests": "70_passed_118.40s",
-      "compileall": "pass",
-      "diff_check": "pass",
-      "exact_full_suite": "456_passed_3813.06s_exact_local_commit_9aa7689",
-      "hardening": [
-        "fixed canonical public bundle members and challenge schema",
-        "request criterion exact subject runtime manifest suite nonce evaluator result payload key and signature cross-binding",
-        "bounded no-follow reads and symlink/non-file rejection",
-        "empty system archive and result rejection",
-        "atomic output preservation and temp cleanup",
-        "lexical/resolved output symlink traversal rejection",
-        "cryptographic validity separated from signed evaluation success",
-        "signed canonical full challenge digest prevents validity-window and other challenge-field tampering",
-        "signed canonical full verifier digest prevents identity-group, validity, and policy tampering"
-      ],
-      "superseded_local_full_suites": [
-        {
-          "status": "interrupted_after_adversarial_review",
-          "reason": "output symlink path could replace a bundle member; implementation was hardened before final verification"
-        },
-        {
-          "status": "interrupted_after_adversarial_review",
-          "reason": "atomic temp cleanup, empty binary rejection, and negative-result reporting needed hardening; implementation was amended before final verification"
-        },
-        {
-          "status": "interrupted_after_adversarial_review",
-          "reason": "full challenge validity fields and verifier policy were not transitively signed; final protocol now binds canonical complete-object digests"
-        }
-      ],
-      "agi_claim_supported": false,
-      "last_observation": {
-        "at": "2026-08-22T22:45:41.753Z",
-        "pr": 258,
-        "head": "bacc1a241c64df1744a4247f8ba40a36ef1a241e",
-        "ci_run": 32602836716,
-        "ci_status": "in_progress_pytest",
-        "native_work_verify": "valid_34_requests_33_responses_1_pending",
-        "handoff_after_boundary": true
-      },
-      "rebased_main_sha": "898f6f70b08b845056986c9c95a886f7355a0046",
-      "rebased_local_exact_commit": "0dd4812",
-      "rebased_file_blobs": {
-        "documentation": "50d5ca8fce055785395861a26dd02be72f6b3b53",
-        "pyproject": "2fd110c30e6276e7dabf69d3f6f684e804716cb5",
-        "source": "d5b63b9d53187f2b679e31959d21ccf0f8a8f371",
-        "tests": "0213249e84be1a2357d0c072e4e18b7acab8aac5"
-      },
-      "rebased_dedicated_tests": "32_passed_32.79s",
-      "rebased_compileall": "pass",
-      "rebased_diff_check": "pass",
-      "rebased_focused_external_tests": "74_passed_117.69s",
-      "pull_request": 258,
-      "branch": "work/external-handoff-cross-binding-v2",
-      "base_main_sha_at_publication": "e4939c635a55d2cc92bcb28ae7c50aa91fb8eb3d",
-      "exact_head_sha": "bacc1a241c64df1744a4247f8ba40a36ef1a241e",
-      "exact_head_ci_run": 32602836716,
-      "exact_head_ci_job": 97103583905,
-      "exact_head_ci_status": "in_progress_pytest",
-      "remote_branch_readback_verified": true,
-      "remote_file_blobs": {
-        "documentation": "50d5ca8fce055785395861a26dd02be72f6b3b53",
-        "pyproject": "2fd110c30e6276e7dabf69d3f6f684e804716cb5",
-        "source": "d5b63b9d53187f2b679e31959d21ccf0f8a8f371",
-        "tests": "0213249e84be1a2357d0c072e4e18b7acab8aac5"
-      },
-      "native_work_verify": "valid_34_requests_33_responses_1_pending",
-      "pr_mergeable_observed": false,
-      "handoff_checkpointed_at": "2026-08-22T22:56:18.161Z",
-      "no_merge_or_native_submit_before_handoff": true
-    }
-  },
-  "designated_primary_handoff": {
-    "status": "checkpointed_for_designated_primary",
-    "designated_primary_kind": "claude_code_remote_session",
-    "designated_primary_id": "claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn",
-    "requested_by_user_revision": 4,
-    "checkpointed_at": "2026-08-22T22:56:18.161Z",
-    "predecessor_generation": 3,
-    "required_successor_generation": 4,
-    "second_main_writer_forbidden": true
   }
 }
