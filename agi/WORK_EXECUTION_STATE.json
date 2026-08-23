@@ -2,27 +2,27 @@
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
   "status": "running",
-  "owner_kind": "work_primary",
-  "execution_id": "work-primary-claude-20260823T081642JST",
-  "predecessor_execution_id": "work-recovery-20260823T015401JST",
-  "lease_generation": 4,
-  "fence_token": "work-primary-fence-v4-9c37e5a1b6d2480f3e7a5c19",
-  "started_at": "2026-08-22T23:16:42Z",
-  "heartbeat_at": "2026-08-23T05:18:00Z",
-  "last_progress_at": "2026-08-23T05:18:00Z",
+  "owner_kind": "work_recovery_automation",
+  "execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
+  "predecessor_execution_id": "work-primary-claude-20260823T081642JST",
+  "lease_generation": 5,
+  "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
+  "started_at": "2026-08-23T06:14:00Z",
+  "heartbeat_at": "2026-08-23T06:14:00Z",
+  "last_progress_at": "2026-08-23T06:14:00Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "direct_primary_work_instruction",
-    "instruction": "実行を引き継いで達成するまで進めて / 並行実行して、あなたが主実行 (user chat; recorded as inbox entries 4 and 6)",
-    "recovery_cas_required_for_this_initial_owner": false,
+    "kind": "fenced_monitor_recovery_pending_two_phase_readback",
+    "instruction": "User-authorized insurance recovery after stale primary; mutation remains limited to lease acquisition until exact two-phase remote readback authorization.",
+    "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "The user designated this Claude Code remote session (claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn) as primary executor (inbox entry 4). The generation-3 recovery owner applied that direction, finished its publication boundary (PR 258 published at exact head bacc1a24 with CI then in progress), and checkpointed at 2026-08-22T22:56:18Z naming this session as the designated successor. Acquisition follows that clean checkpoint, not a usurpation of a live writer."
+    "note": "Observed predecessor work-primary-claude-20260823T081642JST generation 4 stale with no same-owner activity; preserve unacknowledged inbox revision 12 before next safe unit."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "2935322427043faf49dbc2369ef8ced44f0457da",
-  "working_branch": "claude/execution-handoff-completion-mtwgqr",
+  "source_main_sha": "1e2ceeb86825af9f883d561071b4f231bdd1f6fc",
+  "working_branch": "work/recovery-20260823t061400z-ee2d66ce",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
   "active_unit_id": "unit-89058c1acef29b8e657a946c",
@@ -33,9 +33,10 @@
     "application_note": "Revisions 4-11 ingested. 4-6: gate not user-set; Claude primary; smartphone-first; ChatGPT authorized secondary. 7-11: context-conditioning observations (suppressed hypotheses under long-lived context; clock desync; recursive context selection; constraints present in context do not reliably control later actions; integration judged by behavioral change, not storage/recall). Behavioral application of 10-11 in this cycle: the primary itself exhibited entry 10's pattern (omitted --executor-binding despite the constraint being in context, creating orphaned request invoke-32c679e1), and the recorded response is structural rather than contextual - a queued CLI-hardening unit making the binding explicit and required."
   },
   "parallel_execution_coordination": {
-    "primary": "This Claude Code remote session (generation-4 lease holder).",
-    "secondary": "The ChatGPT Work session is an authorized secondary concurrent writer per inbox entry 6: independent falsifiable units on isolated branches and PRs, distinct native O Run and idempotency scope, no mutation of the primary's branch, native Run, pending invocations, lease, or PR heads. Integration to main stays serialized with exact-head validation; neither writer force-pushes, cancels, reruns, or merges the other's work.",
-    "pending_native_execute": "Frozen Work request invoke-f3f84b7c83c1d48e4962e390 is identity-bound to executor_binding current_chatgpt_work_session / model chatgpt-work-model-unverified, so only that session can truthfully submit its response. The primary will not impersonate that binding; the secondary writer should submit it at its next safe boundary, after which Task Evaluate, Consolidate Episode, and Learn proceed on run-work-mode-handoff-v2."
+    "primary": "Pending fenced generation-5 Work recovery owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; not authorized until two-phase readback completes.",
+    "secondary": "Existing isolated secondary branches/PRs remain untouched; integration to main stays serialized and no other writer branch, PR, workflow, or native Run may be mutated.",
+    "pending_native_execute": "Frozen Work request invoke-f3f84b7c83c1d48e4962e390 is identity-bound to executor_binding current_chatgpt_work_session / model chatgpt-work-model-unverified, so only that session can truthfully submit its response. The primary will not impersonate that binding; the secondary writer should submit it at its next safe boundary, after which Task Evaluate, Consolidate Episode, and Learn proceed on run-work-mode-handoff-v2.",
+    "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
@@ -48,9 +49,9 @@
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
-    "actual": "claude-fable-5 (session-configured identifier; serving model may differ)",
+    "actual": "OpenAI Codex Work session (automation runtime)",
     "verified": false,
-    "verification_source": "Claude Code remote session configuration only; no independent platform attestation was observed"
+    "verification_source": "runtime role only; no independent platform model attestation observed"
   },
   "primary_run_contract": {
     "voluntary_exit_permitted": false,
@@ -65,11 +66,14 @@
     "recovery_eligibility_is_mutation_authority": false
   },
   "remote_persistence": {
-    "published_on_main": true,
-    "verified_remote_readback": true,
-    "result_commit_sha": "5ba689f",
+    "published_on_main": false,
+    "verified_remote_readback": false,
+    "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
+    "result_commit_sha": null,
     "result_blob_sha": null,
-    "note": "Generation-4 acquisition commit 5ba689f was pushed and read back exactly from origin/main."
+    "finalization_commit_sha": null,
+    "finalization_blob_sha": null,
+    "note": "Phase-1 acquisition payload; exact commit/blob are recorded only by phase-2 CAS after remote readback."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -87,5 +91,23 @@
     ],
     "pending_execute_invocation": "invoke-8027c964540c001952b35c1f",
     "note": "The designated Claude primary now drives its own development through the O Engine Work bridge: ENTRY, Root, and the pre-application candidate evaluation are answered as immutable Work records, and the frozen Execute unit maps to the in-flight backlog integration (247/245 then 249/250). Its response will be submitted from real outcomes only. work-verify: valid, 4 requests / 3 responses / 1 pending."
+  },
+  "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
+  "result_commit_sha": null,
+  "result_blob_sha": null,
+  "finalize_expected_blob_sha": null,
+  "readback_of_commit_sha": null,
+  "verified_remote_readback": false,
+  "acquisition_phase": "phase1_pending_remote_readback",
+  "recovery_observation": {
+    "observed_at": "2026-08-23T06:14:00Z",
+    "observed_main_sha": "1e2ceeb86825af9f883d561071b4f231bdd1f6fc",
+    "observed_state_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
+    "predecessor_heartbeat_at": "2026-08-23T05:18:00Z",
+    "predecessor_stale_after_seconds": 900,
+    "latest_same_owner_activity_at": "2026-08-23T05:18:36Z",
+    "latest_non_owner_main_activity_at": "2026-08-23T05:32:23Z",
+    "unacknowledged_inbox_revision": 12,
+    "classification": "recover_stale"
   }
 }
