@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-23T18:00:37.467Z",
-  "last_progress_at": "2026-08-23T18:00:37.467Z",
+  "heartbeat_at": "2026-08-23T18:06:06.017Z",
+  "last_progress_at": "2026-08-23T18:06:06.017Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -40,12 +40,12 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/recovery-gen6-semantic-manifests-v1",
-    "snapshot_head_sha": "c9825254d9a5a39a4fd98361f294ea05fa0c526a",
+    "snapshot_branch": "main",
+    "snapshot_head_sha": "fecc6e6d052c5d49d2d29bba4469797403c6aaad",
     "pending_work_invocation_id": "invoke-1f3318851168f6a8f6ba4559",
     "pending_request_ref": ".continual/work-model/invocations/invoke-1f3318851168f6a8f6ba4559/request.json",
-    "durability_status": "Semantic-component DecisionContextManifest implementation is published in PR 279 at exact head c9825254d9a5a39a4fd98361f294ea05fa0c526a; protected regression 88 passed and exact-head CI is pending.",
-    "next_action": "Require unchanged PR 279 head, all exact-head CI shards and aggregate success, clean fresh-main comparison, then merge and read back all reviewed blobs before submitting frozen Execute evidence."
+    "durability_status": "PR 279 exact head passed four shards and aggregate, merged expected-head as fecc6e6d, and all 32 reviewed blobs matched main.",
+    "next_action": "Submit the frozen Execute response for invoke-1f3318851168f6a8f6ba4559, then resume Task Evaluate, Consolidate Episode, Learn, and Root to select the next falsifiable unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -130,20 +130,22 @@
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z"
   },
   "recent_main_integration": {
-    "pull_request": 278,
-    "exact_head_sha": "a628e3feea57025cf8e0701c6d5854a7763a93e4",
-    "exact_head_tree_sha": "37135ffb86b4d0350cf205f0bc7e9a75c59e913c",
-    "exact_head_ci_run": 32652613245,
+    "pull_request": 279,
+    "exact_head_sha": "c9825254d9a5a39a4fd98361f294ea05fa0c526a",
+    "exact_head_tree_sha": "8c2779dd15142cab3b0b56ca356f3ca5855e0bdc",
+    "exact_head_ci_run": 32655413461,
     "exact_head_ci_result": "four pytest shards and dependent aggregate succeeded",
-    "merge_sha": "f949e9eb6029bdb15421307497bf4cfecdba45f8",
+    "merge_sha": "fecc6e6d052c5d49d2d29bba4469797403c6aaad",
     "verified_remote_readback": true,
-    "reviewed_blob_count": 35,
+    "reviewed_blob_count": 32,
     "readback_blobs": {
-      "src/continual/context_observations.py": "64c93d8c2b3f177a126a7bb32660ec29e4ea9c0f",
-      "agi/CONTEXT_OBSERVATION_LEDGER.json": "f40468b7f3746a864da511518979f47450450350",
-      "tests/test_context_observations.py": "8b9b0075ae77b51f60548e22d7af4cec696ebaba"
+      "src/continual/context_kernel.py": "85426d506fd1714c3c7ae18fe183a80cf3047b90",
+      "src/continual/engine.py": "9a9cd9a402d8f972427e74ff026222c107afa005",
+      "src/continual/work_session.py": "64c767349621283a50e2a26aa8fa5a0c0a6e9886",
+      "tests/test_context_kernel.py": "266e30fa63a73ea5a3891fb21de439c0f79bd303",
+      "tests/test_work_session_bridge.py": "fd8cb7baada8bea968dbec5f277f33378a636f18"
     },
-    "claim_boundary": "Request-bound connector observation infrastructure and repository integration are internal context-control evidence. They do not establish independent behavioral improvement, complete context control, AGI, or the user objective."
+    "claim_boundary": "Uniform semantic-component manifests and exact publication are internal context-control evidence. They do not establish dispatch-time revocation, behavioral improvement, AGI, or completion."
   },
   "recent_publication": {
     "pull_request": 272,
@@ -280,11 +282,15 @@
       "pull_request": 279,
       "head_sha": "c9825254d9a5a39a4fd98361f294ea05fa0c526a",
       "exact_tree_sha": "8c2779dd15142cab3b0b56ca356f3ca5855e0bdc",
-      "status": "exact_head_ci_shards_0_2_3_succeeded_1_in_progress",
-      "observed_at": "2026-08-23T18:00:37.467Z",
+      "status": "merged_to_main_all_32_reviewed_blobs_verified",
+      "observed_at": "2026-08-23T18:06:06.017Z",
       "local_validation": "88 protected tests passed; compileall, 853 JSON documents, work-verify 100/99/1 valid, and diff check passed",
       "claim_boundary": "Internal semantic context-control evidence only; no behavioral-capability, AGI, or completion inference.",
-      "workflow_run": 32655413461
+      "workflow_run": 32655413461,
+      "merge_sha": "fecc6e6d052c5d49d2d29bba4469797403c6aaad",
+      "exact_head_ci_result": "four pytest shards and dependent aggregate succeeded",
+      "verified_remote_readback": true,
+      "reviewed_blob_count": 32
     }
   },
   "pending_user_input": {
