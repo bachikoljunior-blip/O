@@ -8,15 +8,15 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T06:14:00Z",
-  "last_progress_at": "2026-08-23T06:14:00Z",
+  "heartbeat_at": "2026-08-23T06:24:58Z",
+  "last_progress_at": "2026-08-23T06:24:58Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "fenced_monitor_recovery_pending_two_phase_readback",
-    "instruction": "User-authorized insurance recovery after stale primary; mutation remains limited to lease acquisition until exact two-phase remote readback authorization.",
+    "kind": "fenced_monitor_recovery_verified",
+    "instruction": "User-authorized insurance recovery after confirmed stale primary; generation-5 two-phase expected-blob CAS, exact remote readback, and checked-in authorizer all succeeded.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Observed predecessor work-primary-claude-20260823T081642JST generation 4 stale with no same-owner activity; preserve unacknowledged inbox revision 12 before next safe unit."
+    "note": "Generation 5 is the sole fenced main writer. Inbox revision 12 is incorporated at a safe Task Evaluate boundary; other branches and writers remain untouched."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -24,28 +24,28 @@
   "source_main_sha": "1e2ceeb86825af9f883d561071b4f231bdd1f6fc",
   "working_branch": "work/recovery-20260823t061400z-ee2d66ce",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute",
-  "active_unit_id": "unit-89058c1acef29b8e657a946c",
+  "active_component": "consolidate_episode",
+  "active_unit_id": "unit-00d92b6d57ce8250c123b90e",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 11,
-    "acknowledged_at": "2026-08-23T05:18:00Z",
-    "application_note": "Revisions 4-11 ingested. 4-6: gate not user-set; Claude primary; smartphone-first; ChatGPT authorized secondary. 7-11: context-conditioning observations (suppressed hypotheses under long-lived context; clock desync; recursive context selection; constraints present in context do not reliably control later actions; integration judged by behavioral change, not storage/recall). Behavioral application of 10-11 in this cycle: the primary itself exhibited entry 10's pattern (omitted --executor-binding despite the constraint being in context, creating orphaned request invoke-32c679e1), and the recorded response is structural rather than contextual - a queued CLI-hardening unit making the binding explicit and required."
+    "highest_acknowledged_revision": 12,
+    "acknowledged_at": "2026-08-23T06:24:58Z",
+    "application_note": "Revisions 4-12 ingested. Revision 12 is applied behaviorally: after the external-handoff cross-binding unit, the next Root-selected unit must compare one independently demonstrated scientist-agent closed loop (hypothesis, experiment, evaluation, result inheritance) against O and adopt a minimal reversible change only when it has a falsifiable expected-time advantage."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation-5 recovery owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; phase-1 readback verified, final authorization awaits phase-2 remote readback.",
-    "secondary": "Existing isolated secondary branches/PRs remain untouched; integration to main stays serialized and no other writer branch, PR, workflow, or native Run may be mutated.",
-    "pending_native_execute": "Frozen Work request invoke-f3f84b7c83c1d48e4962e390 is identity-bound to executor_binding current_chatgpt_work_session / model chatgpt-work-model-unverified, so only that session can truthfully submit its response. The primary will not impersonate that binding; the secondary writer should submit it at its next safe boundary, after which Task Evaluate, Consolidate Episode, and Learn proceed on run-work-mode-handoff-v2.",
+    "primary": "Generation-5 recovery owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; two-phase remote readback verified and checked-in recovery authorizer returned authorized=true.",
+    "secondary": "Existing isolated secondary branches/PRs remain untouched; main integration stays serialized. No predecessor or other writer branch, PR, workflow, or identity-bound native Run is mutated.",
+    "pending_native_execute": "Identity-bound Execute invoke-f3f84b7c83c1d48e4962e390 was answered by current_chatgpt_work_session from actual merged PR 258 evidence. The recovered native Run completed Root, Candidate Evaluate, and Task Evaluate; Consolidate Episode invoke-dae3eeb45c209b00d277d812 is pending.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "main",
-    "snapshot_head_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
-    "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
-    "durability_status": "BACKLOG FULLY SETTLED. Merged on green fresh exact-head CI with unchanged heads: PR 251 (10f03fe), 246 (213e760), 244 (0629bcb), 238 (f1df027), 248 (d20ec94), 230 (f46b5bc), 258 (006002e), 247 (f0aa93b, run 32607999744), 249 (b2e8093, run 32611268930), 245 (dfdbca2, run 32611394647 on re-scoped head 553b46b). PR 250 closed with retained premise-falsification evidence (comment 5383921000): its design requires the first observed-schema stage to learn a Candidate, and the merged 245 diagnostic proves that stage fails closed on the current chain (no same-shape literal variation among deterministically reconstructible learned programs; recursive selection hash-seed dependent - full root cause in PR 245 body, fix commit 553b46b, and module docstring).",
-    "next_action": "FIRST NATIVE PRIMARY CYCLE COMPLETE on run-claude-primary-continuation-20260823 (records persisted at 1e3eb4d): Execute (invoke-8027c964) answered from actual outcomes with the PR 250 deviation; Root selected task_evaluate; preflight trialed candidate-task-evaluate-unit-verdict-v1 (first live trial); Task Evaluate returned honest dual verdicts (task FAIL - end goal open and next unit unimplemented; unit PASS with deviation adjudicated); post-result NEED_MORE_EVIDENCE recorded into the candidate; Consolidate wrote episode-claude-primary-continuation-20260823; Learn proposed candidate-stable-semantics-commitment-v1 (recorded in the immutable Learn response under a non-parsed key - to be registered via the next response's local_learn.candidates) and kept everything else NO_CHANGE. Engine snapshot: task_completion_verdict FAIL, unit_completion_verdict PASS, phase root_pending, revision 7. Next: answer frozen Root invoke-281be56e selecting the deterministic-selection capability unit (bind _recursive_history_commitment at src/agi/recursive_evidence_frontier_growth.py:61,72 to stable behavior semantics, removing the verified entropy leak from evidence_frontier_iterated_expansion.py:399; correct superseded hash-seed docstring wording; prove two-process reproducibility; land via PR on green fresh exact-head CI). Orphaned request invoke-32c679e1 (secondary-bound duplicate) remains not-to-be-answered; CLI binding hardening queued as a subsequent unit."
+    "snapshot_branch": "work/recovery-20260823t061400z-ee2d66ce",
+    "snapshot_head_sha": "51b05dd525108b58eea21dd509d7e5116243b74f",
+    "pending_work_invocation_id": "invoke-dae3eeb45c209b00d277d812",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-dae3eeb45c209b00d277d812/request.json",
+    "durability_status": "Generation-5 lease is authorized. External-handoff cross-binding is already published in merged PR 258 (exact head bacc1a241c64df1744a4247f8ba40a36ef1a241e; workflow 32602836716 success; merge 006002e2c165bdc32ef8bf41906ef46b2bd7a427). Fresh current-main focused regression: 32 passed. Native recovery records are present on the isolated recovery branch worktree and not yet published.",
+    "next_action": "Answer Consolidate Episode invoke-dae3eeb45c209b00d277d812, then Learn and Root. Preserve dual verdicts: bounded cross-binding unit PASS, user-level objective FAIL. At Root ingest revision 12 by selecting one bounded scientist-agent external-baseline comparison; no O change unless a mechanically falsifiable expected-time advantage is demonstrated."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -71,9 +71,9 @@
     "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
     "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
     "result_blob_sha": "dd0d3727a278272a9b128639d67a2d79faa31278",
-    "finalization_commit_sha": null,
-    "finalization_blob_sha": null,
-    "note": "Phase-1 acquisition commit/blob read back exactly; phase-2 finalization commit/blob await final remote readback."
+    "finalization_commit_sha": "51b05dd525108b58eea21dd509d7e5116243b74f",
+    "finalization_blob_sha": "3b80de71f03408f93d29d76e171d9eead1bbceae",
+    "note": "Generation-5 phase-1 acquisition and phase-2 finalization commits/blobs read back exactly; checked-in authorize_work_mode_recovery returned authorized=true."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -81,16 +81,20 @@
     "independent_production_evidence_observed": false
   },
   "primary_native_run": {
-    "run_id": "run-claude-primary-continuation-20260823",
-    "executor_binding": "current_claude_code_remote_session",
-    "model_identity": "claude-fable-5-session-configured-unverified",
+    "run_id": "run-work-mode-handoff-v2",
+    "executor_binding": "current_chatgpt_work_session",
+    "model_identity": "chatgpt-work-model-unverified",
     "answered_invocations": [
-      "invoke-0bfd3de5f042f55f66868f50 (entry)",
-      "invoke-a9569c88120c9311d19feedb (root)",
-      "invoke-6a4d8b2335bc33610e707c70 (candidate_evaluate pre-application, USE_ACTIVE)"
+      "invoke-f3f84b7c83c1d48e4962e390 (execute)",
+      "invoke-81d3289487e456ffdd92b998 (candidate_evaluate recovery preflight)",
+      "invoke-5aa85ebeeaa3117915faacbb (execute recovered request)",
+      "invoke-9ccf40df11cc6f1d718522e0 (root)",
+      "invoke-c67f4d2ca0c3f90372892a15 (candidate_evaluate pre-application)",
+      "invoke-db09246b90d250f42cca472c (task_evaluate)",
+      "invoke-1c8852ca06beb4ca5f6f1710 (candidate_evaluate post-result)"
     ],
-    "pending_execute_invocation": "invoke-8027c964540c001952b35c1f",
-    "note": "The designated Claude primary now drives its own development through the O Engine Work bridge: ENTRY, Root, and the pre-application candidate evaluation are answered as immutable Work records, and the frozen Execute unit maps to the in-flight backlog integration (247/245 then 249/250). Its response will be submitted from real outcomes only. work-verify: valid, 4 requests / 3 responses / 1 pending."
+    "pending_invocation": "invoke-dae3eeb45c209b00d277d812 (consolidate_episode)",
+    "note": "Recovered through the native O Engine. The frozen cross-binding unit is evaluated PASS while the upper objective remains FAIL; no AGI claim is supported."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
   "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
@@ -98,7 +102,7 @@
   "finalize_expected_blob_sha": "dd0d3727a278272a9b128639d67a2d79faa31278",
   "readback_of_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
   "verified_remote_readback": true,
-  "acquisition_phase": "phase2_finalization_pending_readback",
+  "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-23T06:14:00Z",
     "observed_main_sha": "1e2ceeb86825af9f883d561071b4f231bdd1f6fc",
