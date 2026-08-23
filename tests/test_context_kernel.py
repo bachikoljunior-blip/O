@@ -7,7 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from continual.context_kernel import verify_decision_context_manifest
+from continual.context_kernel import (
+    ContextKernelError,
+    verify_decision_context_manifest,
+)
 from continual.store import Store
 from continual.work_session import WorkModelClient, WorkModelPending, WorkSessionError
 
@@ -142,6 +145,11 @@ def test_root_manifest_is_deterministic_minimal_and_o_owned(tmp_path: Path) -> N
     assert "opaque-fence-must-not-be-copied" not in request_text
     assert "An outside-known constraint must not silently disappear from O." in request_text
     assert "outer_session_untracked_memory" in request_text
+
+    tampered = deepcopy(manifest)
+    tampered["sources"][0]["projection"]["lease_generation"] = 99
+    with pytest.raises(ContextKernelError, match="manifest digest mismatch"):
+        verify_decision_context_manifest(tampered, store=Store(root))
 
     replay, after = _freeze_root(client, snapshot)
     assert replay["invocation_id"] == request["invocation_id"]

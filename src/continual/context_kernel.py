@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping
@@ -52,13 +53,13 @@ def _load_source(
     if not absolute.is_file():
         raise ContextKernelError(f"missing mandatory context source: {path.as_posix()}")
     try:
-        document = store.read_json(absolute, None)
-    except (OSError, ValueError) as exc:
+        raw = absolute.read_bytes()
+        document = json.loads(raw.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
         raise ContextKernelError(
             f"malformed mandatory context source: {path.as_posix()}"
         ) from exc
     document = _required_mapping(document, path.as_posix())
-    raw = absolute.read_bytes()
     identity = {
         "source_id": source_id,
         "authoritative_locator": path.as_posix(),
@@ -189,7 +190,15 @@ def verify_decision_context_manifest(
     source_ids = [source.get("source_id") for source in sources if isinstance(source, dict)]
     if len(source_ids) != len(sources) or len(set(source_ids)) != len(source_ids):
         raise ContextKernelError("decision context source ids must be unique")
-    required = set(value.get("policy", {}).get("mandatory_source_ids", []))
+    policy = _required_mapping(value.get("policy"), "decision_context.policy")
+    mandatory = policy.get("mandatory_source_ids")
+    if not isinstance(mandatory, list) or not all(
+        isinstance(source_id, str) and source_id for source_id in mandatory
+    ):
+        raise ContextKernelError(
+            "decision context mandatory_source_ids must be non-empty text"
+        )
+    required = set(mandatory)
     if set(source_ids) != required:
         raise ContextKernelError("decision context mandatory source set mismatch")
     value["manifest_digest"] = supplied
