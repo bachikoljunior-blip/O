@@ -182,8 +182,33 @@ if control state changes later. This is necessary because replaying an already
 recorded result is not a new external authorization. The local pre-dispatch
 recheck does not eliminate the final claim-to-callback micro-race or substitute
 for provider-side idempotency and revocation enforcement; those remain explicit
-system boundaries. This slice is implemented locally and publication evidence
-is pending.
+system boundaries. This slice passed unchanged exact-head CI in workflow
+`32657960739`, merged through PR 280 as
+`8de1ff4b7596e074c6b9a30f3868e573a4c04b48`, and all 31 reviewed blobs were
+read back byte-for-byte.
+
+## Sixth vertical slice: held-out observation rendezvous
+
+The frozen recursive-routing experiment now has a separate evidence-acquisition
+boundary. A selector-visible request contains only situations and child
+summaries. A distinct sealed scorer contains required paths, forbidden Skills,
+eager baselines, thresholds, and claim limits. Both bind the same frozen
+protocol and request digest, but only the scorer artifact carries hidden labels.
+
+Admission is not a selector self-declaration. An O-owned registry must record an
+exact executor/request/protocol preauthorization before selection, deny sealed
+scorer access, and permanently list every executor already exposed to labels.
+The current Work executor is listed as exposed and therefore cannot create an
+admissible held-out observation. Qualified plans produce deterministic,
+per-case, append-only receipts cross-bound to the public request, sealed scorer,
+qualification, selector plan, two replays, and measured artifact. Partial sets
+retain `INSUFFICIENT_EVIDENCE`; mixed, duplicated, relabeled, stale, or tampered
+sets fail closed.
+
+This rendezvous makes a future fresh selector mechanically admissible or
+rejectable. Its implementation tests use a synthetic qualified identity only;
+they are not genuine held-out observations. The checked-in experiment therefore
+still has zero observations and no scoped or global activation.
 
 ## Migration sequence
 
@@ -200,10 +225,13 @@ is pending.
    exact-head verified, merged through PR 279, and read back for all five
    covered semantic components.**
 5. Bind plan and effect authorization to manifests; recheck critical source
-   clocks and revocations immediately before dispatch. **Implemented locally;
-   exact-head publication evidence remains pending.**
+   clocks and revocations immediately before dispatch. **Implemented,
+   exact-head verified, merged through PR 280, and read back.**
 6. Route optional context recursively and learn routing only from held-out
    behavioral evidence, with mandatory context outside that learner's control.
+   **The label-separated, qualification-bound receipt rendezvous is implemented
+   locally; genuine fresh-selector observations and publication evidence remain
+   pending.**
 7. Compact the event ledger into reproducible projections while retaining the
    events and digests needed for audit and reconstruction.
 
