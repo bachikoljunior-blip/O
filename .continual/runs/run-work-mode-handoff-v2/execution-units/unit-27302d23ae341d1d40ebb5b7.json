@@ -1,0 +1,40 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "all four exact-head pytest shard jobs complete successfully",
+    "the aggregate test job runs only after every shard succeeds",
+    "the shard collections remain disjoint and exhaustive with no skipped node IDs",
+    "the PR head remains unchanged and conflict-free",
+    "observed workflow latency is compared with the retained unsharded baseline",
+    "main readback is verified if the change is merged"
+  ],
+  "expected_outputs": [
+    "exact job conclusions and collection counts",
+    "an observed latency comparison rather than an assumed speedup",
+    "MERGE_SHARDING or REJECT_SHARDING with retained failure evidence",
+    "an unchanged user-level FAIL verdict and truthful claim boundary"
+  ],
+  "failure_conditions": [
+    "any shard failure, timeout, cancellation, duplicate, or coverage gap",
+    "the aggregate job can pass without every shard",
+    "no observed latency improvement",
+    "head movement or merge conflict"
+  ],
+  "goal": "Complete the exact-head four-way pytest sharding experiment and decide whether it safely lowers CI feedback latency without weakening coverage or aggregation.",
+  "inputs": [
+    "PR 270 exact head 3d51e7bbe350319418023721439e48348c758093",
+    "GitHub Actions run 32630847871",
+    "PR 264 exact-head pytest baseline: 485 passed in 4064.00 seconds (1:07:43) from workflow 32627670204",
+    "the exact 486-node collection and four selected collections of 122, 122, 121, and 121 node IDs"
+  ],
+  "parent_continuation": "After Execute, evaluate this bounded CI-latency unit separately from the still-unmet user-level objective, consolidate and learn, then return to Root.",
+  "rollback": "Keep the existing single-job full pytest gate and retain the exact negative timing or coverage evidence.",
+  "scope": "ci/exact-head-pytest-sharding",
+  "success_conditions": [
+    "all shards and the aggregate gate succeed on the unchanged head",
+    "every collected node ID is assigned exactly once",
+    "observed end-to-end feedback latency is lower than the unsharded baseline",
+    "no required validation or reference command is removed"
+  ],
+  "unit_id": "unit-27302d23ae341d1d40ebb5b7"
+}
