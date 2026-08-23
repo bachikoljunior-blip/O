@@ -517,13 +517,40 @@ def test_mandatory_work_source_freshness_accepts_exact_fresh_authority(
     assert readiness["source_scope"] == "local_bytes_only_not_remote_revision_proof"
 
 
-def test_stale_source_rejects_before_native_or_work_request_mutation(
+@pytest.mark.parametrize(
+    ("mutation", "match"),
+    [
+        (lambda value, now: value.__setitem__("status", "released"), "running Work lease"),
+        (
+            lambda value, now: value.__setitem__(
+                "heartbeat_at", (now - timedelta(seconds=901)).isoformat()
+            ),
+            "heartbeat is stale",
+        ),
+        (
+            lambda value, now: value.__setitem__(
+                "heartbeat_at", (now + timedelta(seconds=121)).isoformat()
+            ),
+            "future-skewed",
+        ),
+        (lambda value, now: value.__setitem__("heartbeat_at", "not-a-time"), "ISO-8601"),
+        (lambda value, now: value.__setitem__("heartbeat_at", "2026-08-23T00:00:00"), "timezone"),
+        (lambda value, now: value.pop("execution_id"), "state.execution_id"),
+        (lambda value, now: value.pop("lease_generation"), "state.lease_generation"),
+        (lambda value, now: value.pop("fence_token"), "state.fence_token"),
+    ],
+)
+def test_unready_source_rejects_before_native_or_work_request_mutation(
     tmp_path: Path,
+    mutation,
+    match: str,
 ) -> None:
     root, snapshot = _root(tmp_path)
     state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
     state = json.loads(state_path.read_text(encoding="utf-8"))
-    state["heartbeat_at"] = "2000-01-01T00:00:00Z"
+    now = datetime.now(UTC)
+    state["heartbeat_at"] = now.isoformat()
+    mutation(state, now)
     _write_json(state_path, state)
     client = _client(root)
     engine = Engine(root, model=client)
@@ -542,7 +569,7 @@ def test_stale_source_rejects_before_native_or_work_request_mutation(
         }
 
     before = persisted_boundary()
-    with pytest.raises(WorkSessionError, match="heartbeat is stale"):
+    with pytest.raises(WorkSessionError, match=match):
         engine._call_component_direct(
             RUN_ID,
             "root",
