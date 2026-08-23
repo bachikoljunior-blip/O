@@ -9,6 +9,7 @@ import pytest
 
 from continual.context_kernel import (
     ContextKernelError,
+    SEMANTIC_CONTEXT_COMPONENTS,
     verify_decision_context_manifest,
 )
 from continual.context_observations import observation_ledger_entry
@@ -269,13 +270,32 @@ def _freeze_root(client: WorkModelClient, snapshot: dict) -> tuple[dict, bytes]:
     return json.loads(path.read_text(encoding="utf-8")), path.read_bytes()
 
 
+def _freeze_component(
+    client: WorkModelClient,
+    snapshot: dict,
+    component: str,
+) -> tuple[dict, Path]:
+    with pytest.raises(WorkModelPending) as pending:
+        client.call(
+            component,
+            {"snapshot": deepcopy(snapshot), "unit": {"scope": "test"}},
+            prompt_path=f"prompts/{component}.md",
+        )
+    path = client.invocation_root / pending.value.invocation_id / "request.json"
+    return json.loads(path.read_text(encoding="utf-8")), path
+
+
 def test_root_manifest_is_deterministic_minimal_and_o_owned(tmp_path: Path) -> None:
     root, snapshot = _root(tmp_path)
     client = _client(root)
 
     request, before = _freeze_root(client, snapshot)
     manifest = request["payload"]["decision_context"]
-    verified = verify_decision_context_manifest(manifest, store=Store(root))
+    verified = verify_decision_context_manifest(
+        manifest,
+        store=Store(root),
+        expected_component="root",
+    )
     assert verified == manifest
     assert manifest["policy"]["decision_authority"] == "O Engine"
     assert manifest["policy"]["copy_all_raw_context"] is False
@@ -304,6 +324,18 @@ def test_root_manifest_is_deterministic_minimal_and_o_owned(tmp_path: Path) -> N
     inconsistent["manifest_digest"] = Store(root).stable_digest(body, length=64)
     with pytest.raises(ContextKernelError, match="source clock binding mismatch"):
         verify_decision_context_manifest(inconsistent, store=Store(root))
+
+    rebound = deepcopy(manifest)
+    rebound["component"] = "execute"
+    rebound_body = deepcopy(rebound)
+    rebound_body.pop("manifest_digest")
+    rebound["manifest_digest"] = Store(root).stable_digest(rebound_body, length=64)
+    with pytest.raises(ContextKernelError, match="component binding mismatch"):
+        verify_decision_context_manifest(
+            rebound,
+            store=Store(root),
+            expected_component="root",
+        )
 
     replay, after = _freeze_root(client, snapshot)
     assert replay["invocation_id"] == request["invocation_id"]
@@ -462,13 +494,85 @@ def test_bound_resume_keeps_exact_pending_root_after_source_advance(
     assert len(list(client.invocation_root.glob("*/request.json"))) == 1
 
 
+@pytest.mark.parametrize("component", sorted(SEMANTIC_CONTEXT_COMPONENTS))
 def test_outer_payload_cannot_inject_a_competing_decision_context(
     tmp_path: Path,
+    component: str,
 ) -> None:
     root, snapshot = _root(tmp_path)
     with pytest.raises(WorkSessionError, match="may not inject"):
         _client(root).call(
-            "root",
+            component,
             {"snapshot": snapshot, "decision_context": {"authority": "outer"}},
-            prompt_path="prompts/root.md",
+            prompt_path=f"prompts/{component}.md",
         )
+
+
+def test_all_semantic_components_bind_manifest_and_next_source_clock(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    client = _client(root)
+    first: dict[str, tuple[dict, Path, bytes]] = {}
+    for component in sorted(SEMANTIC_CONTEXT_COMPONENTS):
+        request, path = _freeze_component(client, snapshot, component)
+        manifest = request["payload"]["decision_context"]
+        assert manifest["component"] == component
+        assert verify_decision_context_manifest(
+            manifest,
+            store=Store(root),
+            expected_component=component,
+        ) == manifest
+        first[component] = (request, path, path.read_bytes())
+
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = "2026-08-23T00:09:00Z"
+    _write_json(state_path, state)
+
+    for component in sorted(SEMANTIC_CONTEXT_COMPONENTS):
+        previous, path, frozen_bytes = first[component]
+        current, _ = _freeze_component(client, snapshot, component)
+        assert path.read_bytes() == frozen_bytes
+        assert current["invocation_id"] != previous["invocation_id"]
+        assert current["request_digest"] != previous["request_digest"]
+        assert (
+            current["payload"]["decision_context"]["source_clock"][
+                "work_execution_state"
+            ]
+            != previous["payload"]["decision_context"]["source_clock"][
+                "work_execution_state"
+            ]
+        )
+
+
+@pytest.mark.parametrize("component", sorted(SEMANTIC_CONTEXT_COMPONENTS))
+def test_bound_resume_keeps_exact_pending_semantic_request_after_source_advance(
+    tmp_path: Path,
+    component: str,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    client = _client(root)
+    payload = {"snapshot": deepcopy(snapshot), "unit": {"scope": "test"}}
+    with pytest.raises(WorkModelPending) as first:
+        client.call(component, payload, prompt_path=f"prompts/{component}.md")
+
+    request_path = root / first.value.request_ref
+    frozen_bytes = request_path.read_bytes()
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = "2026-08-23T00:10:00Z"
+    _write_json(state_path, state)
+
+    with pytest.raises(WorkModelPending) as resumed:
+        client.resume_bound(
+            component,
+            payload,
+            prompt_path=f"prompts/{component}.md",
+            invocation_id=first.value.invocation_id,
+            request_ref=first.value.request_ref,
+            request_digest=first.value.request_digest,
+        )
+    assert request_path.read_bytes() == frozen_bytes
+    assert resumed.value.invocation_id == first.value.invocation_id
+    assert resumed.value.request_digest == first.value.request_digest

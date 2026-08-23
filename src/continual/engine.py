@@ -962,6 +962,7 @@ class Engine:
                         run_id,
                         "learn",
                         {
+                            "snapshot": snapshot,
                             "mode": "post-task",
                             "episode_id": episode_id,
                             "current_episode": episode,
