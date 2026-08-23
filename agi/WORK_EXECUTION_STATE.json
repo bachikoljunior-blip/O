@@ -33,7 +33,7 @@
     "application_note": "Revisions 4-11 ingested. 4-6: gate not user-set; Claude primary; smartphone-first; ChatGPT authorized secondary. 7-11: context-conditioning observations (suppressed hypotheses under long-lived context; clock desync; recursive context selection; constraints present in context do not reliably control later actions; integration judged by behavioral change, not storage/recall). Behavioral application of 10-11 in this cycle: the primary itself exhibited entry 10's pattern (omitted --executor-binding despite the constraint being in context, creating orphaned request invoke-32c679e1), and the recorded response is structural rather than contextual - a queued CLI-hardening unit making the binding explicit and required."
   },
   "parallel_execution_coordination": {
-    "primary": "Pending fenced generation-5 Work recovery owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; not authorized until two-phase readback completes.",
+    "primary": "Generation-5 recovery owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; phase-1 readback verified, final authorization awaits phase-2 remote readback.",
     "secondary": "Existing isolated secondary branches/PRs remain untouched; integration to main stays serialized and no other writer branch, PR, workflow, or native Run may be mutated.",
     "pending_native_execute": "Frozen Work request invoke-f3f84b7c83c1d48e4962e390 is identity-bound to executor_binding current_chatgpt_work_session / model chatgpt-work-model-unverified, so only that session can truthfully submit its response. The primary will not impersonate that binding; the secondary writer should submit it at its next safe boundary, after which Task Evaluate, Consolidate Episode, and Learn proceed on run-work-mode-handoff-v2.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78."
@@ -66,14 +66,14 @@
     "recovery_eligibility_is_mutation_authority": false
   },
   "remote_persistence": {
-    "published_on_main": false,
-    "verified_remote_readback": false,
+    "published_on_main": true,
+    "verified_remote_readback": true,
     "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
-    "result_commit_sha": null,
-    "result_blob_sha": null,
+    "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
+    "result_blob_sha": "dd0d3727a278272a9b128639d67a2d79faa31278",
     "finalization_commit_sha": null,
     "finalization_blob_sha": null,
-    "note": "Phase-1 acquisition payload; exact commit/blob are recorded only by phase-2 CAS after remote readback."
+    "note": "Phase-1 acquisition commit/blob read back exactly; phase-2 finalization commit/blob await final remote readback."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -93,12 +93,12 @@
     "note": "The designated Claude primary now drives its own development through the O Engine Work bridge: ENTRY, Root, and the pre-application candidate evaluation are answered as immutable Work records, and the frozen Execute unit maps to the in-flight backlog integration (247/245 then 249/250). Its response will be submitted from real outcomes only. work-verify: valid, 4 requests / 3 responses / 1 pending."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
-  "acquisition_phase": "phase1_pending_remote_readback",
+  "result_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
+  "result_blob_sha": "dd0d3727a278272a9b128639d67a2d79faa31278",
+  "finalize_expected_blob_sha": "dd0d3727a278272a9b128639d67a2d79faa31278",
+  "readback_of_commit_sha": "514afd8fd48b0b11ac674f0a19b48e817713768e",
+  "verified_remote_readback": true,
+  "acquisition_phase": "phase2_finalization_pending_readback",
   "recovery_observation": {
     "observed_at": "2026-08-23T06:14:00Z",
     "observed_main_sha": "1e2ceeb86825af9f883d561071b4f231bdd1f6fc",
