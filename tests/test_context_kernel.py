@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 from copy import deepcopy
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -11,8 +12,10 @@ from continual.context_kernel import (
     ContextKernelError,
     SEMANTIC_CONTEXT_COMPONENTS,
     build_effect_dispatch_context,
+    validate_mandatory_work_source_freshness,
     verify_decision_context_manifest,
 )
+from continual.engine import Engine
 from continual.context_observations import observation_ledger_entry
 from continual.store import Store
 from continual.work_effect_dispatch import (
@@ -77,7 +80,7 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
         "execution_id": "work-context-kernel-test",
         "lease_generation": 3,
         "fence_token": "opaque-fence-must-not-be-copied",
-        "heartbeat_at": "2026-08-23T00:00:01Z",
+        "heartbeat_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "stale_after_seconds": 900,
         "active_run_id": RUN_ID,
         "user_input_inbox": {
@@ -449,6 +452,133 @@ def test_root_manifest_fails_closed_on_partial_or_malformed_control_plane(
         _freeze_root(_client(second), durable_snapshot)
 
 
+@pytest.mark.parametrize(
+    ("mutation", "match"),
+    [
+        (lambda value, now: value.__setitem__("status", "released"), "running Work lease"),
+        (
+            lambda value, now: value.__setitem__(
+                "heartbeat_at", (now - timedelta(seconds=901)).isoformat()
+            ),
+            "heartbeat is stale",
+        ),
+        (
+            lambda value, now: value.__setitem__(
+                "heartbeat_at", (now + timedelta(seconds=121)).isoformat()
+            ),
+            "future-skewed",
+        ),
+        (lambda value, now: value.__setitem__("heartbeat_at", "not-a-time"), "ISO-8601"),
+        (lambda value, now: value.__setitem__("heartbeat_at", "2026-08-23T00:00:00"), "timezone"),
+        (lambda value, now: value.pop("execution_id"), "state.execution_id"),
+        (lambda value, now: value.pop("lease_generation"), "state.lease_generation"),
+        (lambda value, now: value.pop("fence_token"), "state.fence_token"),
+    ],
+)
+def test_mandatory_work_source_freshness_fails_closed(
+    tmp_path: Path,
+    mutation,
+    match: str,
+) -> None:
+    root, _ = _root(tmp_path)
+    state = json.loads(
+        (root / "agi" / "WORK_EXECUTION_STATE.json").read_text(encoding="utf-8")
+    )
+    now = datetime.now(UTC)
+    state["heartbeat_at"] = now.isoformat()
+    mutation(state, now)
+
+    with pytest.raises(ContextKernelError, match=match):
+        validate_mandatory_work_source_freshness(
+            state,
+            observed_at=now.isoformat(),
+        )
+
+
+def test_mandatory_work_source_freshness_accepts_exact_fresh_authority(
+    tmp_path: Path,
+) -> None:
+    root, _ = _root(tmp_path)
+    state = json.loads(
+        (root / "agi" / "WORK_EXECUTION_STATE.json").read_text(encoding="utf-8")
+    )
+    now = datetime.now(UTC)
+    state["heartbeat_at"] = (now - timedelta(seconds=30)).isoformat()
+
+    readiness = validate_mandatory_work_source_freshness(
+        state,
+        observed_at=now.isoformat(),
+    )
+
+    assert readiness["execution_id"] == state["execution_id"]
+    assert readiness["lease_generation"] == state["lease_generation"]
+    assert readiness["fence_token"] == state["fence_token"]
+    assert readiness["age_seconds"] == pytest.approx(30)
+    assert readiness["source_scope"] == "local_bytes_only_not_remote_revision_proof"
+
+
+def test_stale_source_rejects_before_native_or_work_request_mutation(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = "2000-01-01T00:00:00Z"
+    _write_json(state_path, state)
+    client = _client(root)
+    engine = Engine(root, model=client)
+
+    def persisted_boundary() -> dict[str, bytes]:
+        bases = (
+            root / ".continual" / "runs" / RUN_ID / "invocations",
+            root / ".continual" / "work-model" / "invocations",
+        )
+        return {
+            path.relative_to(root).as_posix(): path.read_bytes()
+            for base in bases
+            if base.exists()
+            for path in sorted(base.rglob("*"))
+            if path.is_file()
+        }
+
+    before = persisted_boundary()
+    with pytest.raises(WorkSessionError, match="heartbeat is stale"):
+        engine._call_component_direct(
+            RUN_ID,
+            "root",
+            {"snapshot": deepcopy(snapshot), "last_result": {"verdict": "FAIL"}},
+            prompt_path="prompts/root.md",
+        )
+    assert persisted_boundary() == before
+
+
+def test_bound_replay_does_not_revalidate_later_stale_source(tmp_path: Path) -> None:
+    root, snapshot = _root(tmp_path)
+    client = _client(root)
+    payload = {"snapshot": deepcopy(snapshot), "unit": {"scope": "test"}}
+    with pytest.raises(WorkModelPending) as first:
+        client.call("execute", payload, prompt_path="prompts/execute.md")
+    request_path = root / first.value.request_ref
+    frozen_bytes = request_path.read_bytes()
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = "2000-01-01T00:00:00Z"
+    _write_json(state_path, state)
+
+    with pytest.raises(WorkModelPending) as resumed:
+        client.resume_bound(
+            "execute",
+            payload,
+            prompt_path="prompts/execute.md",
+            invocation_id=first.value.invocation_id,
+            request_ref=first.value.request_ref,
+            request_digest=first.value.request_digest,
+        )
+
+    assert request_path.read_bytes() == frozen_bytes
+    assert resumed.value.invocation_id == first.value.invocation_id
+
+
 def test_root_manifest_fails_closed_on_inbox_binding_disagreement(
     tmp_path: Path,
 ) -> None:
@@ -556,7 +686,7 @@ def test_bound_resume_keeps_exact_pending_root_after_source_advance(
 
     state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
     state = json.loads(state_path.read_text(encoding="utf-8"))
-    state["heartbeat_at"] = "2026-08-23T00:05:00Z"
+    state["heartbeat_at"] = Store(root).utc_now()
     _write_json(state_path, state)
 
     with pytest.raises(WorkModelPending) as resumed:
@@ -606,7 +736,7 @@ def test_all_semantic_components_bind_manifest_and_next_source_clock(
 
     state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
     state = json.loads(state_path.read_text(encoding="utf-8"))
-    state["heartbeat_at"] = "2026-08-23T00:09:00Z"
+    state["heartbeat_at"] = Store(root).utc_now()
     _write_json(state_path, state)
 
     for component in sorted(SEMANTIC_CONTEXT_COMPONENTS):
@@ -640,7 +770,7 @@ def test_bound_resume_keeps_exact_pending_semantic_request_after_source_advance(
     frozen_bytes = request_path.read_bytes()
     state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
     state = json.loads(state_path.read_text(encoding="utf-8"))
-    state["heartbeat_at"] = "2026-08-23T00:10:00Z"
+    state["heartbeat_at"] = Store(root).utc_now()
     _write_json(state_path, state)
 
     with pytest.raises(WorkModelPending) as resumed:

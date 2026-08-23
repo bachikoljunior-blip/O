@@ -391,6 +391,14 @@ class Engine:
         else:
             attempt = int(journal.get("attempt", 0)) + 1 if isinstance(journal, dict) else 1
         if output is None:
+            bound_resume = (
+                isinstance(journal, dict)
+                and journal.get("status") == "awaiting_work_model"
+                and callable(getattr(self.model, "resume_bound", None))
+            )
+            preflight_call = getattr(self.model, "preflight_call", None)
+            if not bound_resume and callable(preflight_call):
+                preflight_call(component, payload, prompt_path=prompt_path)
             self.store.atomic_json(
                 path,
                 {
@@ -404,11 +412,7 @@ class Engine:
                 },
             )
             try:
-                if (
-                    isinstance(journal, dict)
-                    and journal.get("status") == "awaiting_work_model"
-                    and callable(getattr(self.model, "resume_bound", None))
-                ):
+                if bound_resume:
                     output = self.model.resume_bound(
                         component,
                         payload,

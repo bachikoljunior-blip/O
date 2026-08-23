@@ -282,6 +282,37 @@ class WorkModelClient:
         request_body["request_digest"] = self.store.stable_digest(request_body, length=64)
         return invocation_id, request_body
 
+    def preflight_call(
+        self,
+        component: str,
+        payload: dict[str, Any],
+        *,
+        prompt_path: str,
+    ) -> None:
+        """Validate a new semantic request before the native journal mutates.
+
+        Engine calls this hook only for a new invocation.  Bound replay skips
+        it and continues to use the exact already-frozen request.
+        """
+
+        del prompt_path
+        if component not in SEMANTIC_CONTEXT_COMPONENTS:
+            return
+        if "decision_context" in payload:
+            raise WorkSessionError(
+                f"{component} payload may not inject an outer decision_context"
+            )
+        try:
+            build_decision_context(
+                self.root,
+                run_id=self.run_id,
+                component=component,
+                payload_snapshot=payload.get("snapshot", {}),
+                store=self.store,
+            )
+        except ContextKernelError as exc:
+            raise WorkSessionError(f"Context Kernel failed closed: {exc}") from exc
+
     def call(
         self,
         component: str,
