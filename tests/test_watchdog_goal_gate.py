@@ -17,19 +17,37 @@ def _completion_state(status: str = "verified_agi") -> dict:
     }
 
 
-def test_completion_marker_without_external_gate_proof_is_recovered_not_trusted() -> None:
+def test_completion_marker_without_user_completion_authority_is_recovered() -> None:
     decision = evaluate_watchdog_lease(_completion_state(), now=NOW)
 
     assert decision.action == "recover_unverified_completion"
     assert decision.safe_to_mutate is True
 
 
-def test_only_separately_verified_external_goal_can_stop_recovery() -> None:
+def test_repository_gate_alone_does_not_stop_recovery() -> None:
     decision = evaluate_watchdog_lease(
         _completion_state("goal_complete"),
         now=NOW,
         verified_goal=True,
     )
 
-    assert decision.action == "goal_complete"
-    assert decision.safe_to_mutate is False
+    assert decision.action == "recover_unverified_completion"
+    assert decision.safe_to_mutate is True
+
+
+def test_user_objective_or_explicit_stop_can_stop_recovery() -> None:
+    objective = evaluate_watchdog_lease(
+        _completion_state("goal_complete"),
+        now=NOW,
+        user_objective_met=True,
+    )
+    stopped = evaluate_watchdog_lease(
+        _completion_state("goal_complete"),
+        now=NOW,
+        explicit_user_stop=True,
+    )
+
+    assert objective.action == "goal_complete"
+    assert objective.safe_to_mutate is False
+    assert stopped.action == "user_stopped"
+    assert stopped.safe_to_mutate is False

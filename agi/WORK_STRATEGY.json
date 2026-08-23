@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "active_falsifiable_policy",
-  "objective": "Minimize defensible expected elapsed time to real-world AGI under the unchanged strict independent external production evidence gate.",
+  "objective": "Minimize defensible expected elapsed time until real-world AGI is actually achieved, without lowering the user's achievement standard or overstating evidence.",
   "strategy_is_assumed_correct": false,
   "system_choice": {
     "o_is_terminal_objective": false,
@@ -12,17 +12,17 @@
       "abandon_o",
       "combine_o_with_materially_different_methods"
     ],
-    "decision_rule": "Use retained comparative evidence for expected time to the unchanged gate; preserve rollback until the replacement is safer and faster."
+    "decision_rule": "Use retained comparative evidence for expected time to the user's real-world objective; preserve rollback until the replacement is safer and faster."
   },
   "hard_constraints": [
-    "Do not weaken the strict independent external production evidence gate.",
+    "Do not lower the user's actual AGI achievement standard; treat repository-authored gates as optional falsifiable verification machinery rather than terminal objectives.",
     "Do not use self-evaluation, architecture, internal tests, or CI as AGI proof.",
     "Preserve evidence integrity, negative evidence, idempotency, and single-writer fencing.",
     "Do not fabricate precise completion dates or unsupported probability estimates."
   ],
   "selection_metrics": [
     "expected_elapsed_time_reduction",
-    "probability_of_falsifiable_gate_progress",
+    "probability_of_falsifiable_real_world_progress",
     "decision_changing_information_value",
     "external_dependency_latency",
     "protected_regression_risk",
@@ -53,7 +53,10 @@
     "repeat_blocked_side_effects": false,
     "every_root_cycle_reconsiders_strategy": true,
     "unbounded_deferral_allowed": false,
-    "default_max_deferral_seconds": 86400
+    "default_max_deferral_seconds": 86400,
+    "validated_execution_results_destination": "main",
+    "main_integration_rule": "isolated branch -> exact-head CI -> unchanged passing head -> merge",
+    "state_only_control_plane_updates": "expected-blob CAS on main"
   },
   "method_change_triggers": [
     {
@@ -95,16 +98,16 @@
   },
   "current_bottlenecks": [
     {
-      "id": "work_migration_merged_needs_safety_followup",
-      "observation": "PR 252 merged the Work-mode migration to main (c2361b81), but three confirmed engine defects and the invalid materialize CI workflow remain on main; PR 254 lands the fixes and the CI repair.",
-      "effect": "Until PR 254 lands, the merged Work bridge has a replay-unstable invocation identity, a model-controlled path traversal, and an unbound-provider resume hazard.",
-      "selected_action": "Observe PR 254 exact-head full CI, merge only an unchanged passing head, verify remote readback, then refresh the fenced primary lease."
+      "id": "checkpoint_inheritance_unmeasured",
+      "observation": "PR 263 merged the frozen scientist-agent comparison and generation-5 native checkpoint after exact-head CI, but bounded checkpoint inheritance still has no matched native observations.",
+      "effect": "No expected-time advantage is established; implementing the mechanism now would be speculative.",
+      "selected_action": "Publish the fail-closed sandbox harness and exact child invocation, then record comparable native observations or reject the mechanism without fabricating measurements."
     },
     {
       "id": "zero_independent_external_evidence",
       "observation": "The external ledger has zero evaluation requests, challenges, disclosures, attestations, and registered verifiers.",
-      "effect": "No internal capability result can satisfy the user-level completion gate; this, not the internal synthesis method, is the expected-time-limiting factor.",
-      "selected_action": "Shift marginal effort from further internal-capability probes toward external-evidence readiness (mechanically verifiable held-out artifacts and provenance) and keep the user-only independent-evaluator request surfaced so evidence is immediately admissible when a channel exists."
+      "effect": "Internal capability work alone cannot support a truthful AGI claim or establish the real-world objective.",
+      "selected_action": "Continue external-evidence readiness and independent evaluation while avoiding the mistake of treating the repository-authored strict gate as the user's completion condition."
     }
   ],
   "saturation_assessment": {
@@ -126,17 +129,19 @@
     }
   ],
   "immediate_sequence": [
-    "Observe PR 254 exact-head full CI; merge only an unchanged passing head.",
-    "Verify remote readback and refresh the fenced primary lease on the new main.",
-    "Settle the backlog conservatively: refresh and merge a representative non-redundant subset of the passing retention PRs onto verified main, close diagnostic-only and near-duplicate heads with the recorded saturation rationale, and preserve every exact failure.",
-    "Reconstruct the observed-schema successor (PR 233 line) with the persisted-iterated Candidate-ID binding repair and a direct end-to-end regression before any merge.",
-    "Redirect marginal effort to external-evidence readiness and the user-only independent-evaluator request; do not upgrade internal evidence to AGI proof."
+    "Publish the checkpoint-inheritance harness and exact native child invocation through exact-head CI; merge only an unchanged passing head.",
+    "Record both frozen arms on all three matched tasks only when native provenance, comparable budgets, replay, and side-effect isolation are mechanically verifiable.",
+    "Adopt only a scoped reversible Candidate if the precommitted metrics improve without worsening and all protected checks pass; otherwise reject and retain single-lineage execution.",
+    "Review PR 262 as the stopped Claude predecessor's shared result without answering any Claude-bound invocation or bypassing fresh-main CI.",
+    "Continue heterogeneous external-evidence readiness and user-request processing without treating internal tests or the repository-authored strict gate as completion."
   ],
   "claim_boundary": {
     "agi_claim_supported": false,
     "strategy_may_weaken_gate": false,
+    "strategy_may_lower_user_achievement_standard": false,
+    "repository_gate_is_user_completion_condition": false,
     "strategy_success_is_external_evidence": false
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "updated_at": "2026-08-22T14:45:00Z"
+  "updated_at": "2026-08-23T08:06:35Z"
 }

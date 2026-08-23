@@ -30,6 +30,8 @@ class WorkModeMonitorDecision:
     recovery_eligible: bool
     mutation_authorized: bool
     verified_external_goal: bool
+    user_objective_met: bool
+    explicit_user_stop: bool
 
     def descriptor(self) -> dict[str, Any]:
         return asdict(self)
@@ -126,6 +128,8 @@ def _decision(
     owner_kind: str | None = None,
     recovery_eligible: bool = False,
     verified_external_goal: bool = False,
+    user_objective_met: bool = False,
+    explicit_user_stop: bool = False,
 ) -> WorkModeMonitorDecision:
     return WorkModeMonitorDecision(
         action=action,
@@ -140,6 +144,8 @@ def _decision(
         recovery_eligible=recovery_eligible,
         mutation_authorized=False,
         verified_external_goal=verified_external_goal,
+        user_objective_met=user_objective_met,
+        explicit_user_stop=explicit_user_stop,
     )
 
 
@@ -149,6 +155,8 @@ def evaluate_work_mode_monitor(
     now: datetime | str,
     migration_present: bool,
     verified_external_goal: bool = False,
+    user_objective_met: bool = False,
+    explicit_user_stop: bool = False,
     max_future_heartbeat_skew_seconds: int = 120,
 ) -> WorkModeMonitorDecision:
     """Classify Work-mode liveness without granting mutation authority.
@@ -160,8 +168,13 @@ def evaluate_work_mode_monitor(
 
     if not isinstance(migration_present, bool):
         raise WorkModeMonitorError("migration_present must be boolean")
-    if not isinstance(verified_external_goal, bool):
-        raise WorkModeMonitorError("verified_external_goal must be boolean")
+    for field, value in (
+        ("verified_external_goal", verified_external_goal),
+        ("user_objective_met", user_objective_met),
+        ("explicit_user_stop", explicit_user_stop),
+    ):
+        if not isinstance(value, bool):
+            raise WorkModeMonitorError(f"{field} must be boolean")
     if (
         not isinstance(max_future_heartbeat_skew_seconds, int)
         or isinstance(max_future_heartbeat_skew_seconds, bool)
@@ -172,11 +185,19 @@ def evaluate_work_mode_monitor(
         )
     now_utc = _parse_now(now)
 
-    if verified_external_goal:
+    if explicit_user_stop:
+        return _decision(
+            action="user_stopped",
+            reason="the user explicitly stopped the Work execution",
+            verified_external_goal=verified_external_goal,
+            explicit_user_stop=True,
+        )
+    if user_objective_met:
         return _decision(
             action="goal_complete",
-            reason="the strict independent external production evidence gate was separately verified",
-            verified_external_goal=True,
+            reason="the user's actual upper-level objective was independently established as met",
+            verified_external_goal=verified_external_goal,
+            user_objective_met=True,
         )
 
     if not migration_present or state is None:
@@ -246,7 +267,8 @@ def evaluate_work_mode_monitor(
     if status in _COMPLETION_STATUSES:
         return _decision(
             action="recover_unverified_completion",
-            reason="completion is not backed by the strict independent external production evidence gate",
+            reason="completion is not backed by the user's actual objective being met or an explicit user stop",
+            verified_external_goal=verified_external_goal,
             recovery_eligible=True,
             **common,
         )

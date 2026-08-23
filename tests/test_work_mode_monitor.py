@@ -113,20 +113,36 @@ def test_malformed_or_future_skewed_state_fails_closed() -> None:
     )
 
 
-def test_unverified_completion_recovers_but_strict_external_gate_completes() -> None:
+def test_repository_gate_does_not_complete_but_user_objective_or_stop_does() -> None:
     marker = _state(status="completed")
     unverified = evaluate_work_mode_monitor(marker, now=NOW, migration_present=True)
-    verified = evaluate_work_mode_monitor(
+    repository_gate_only = evaluate_work_mode_monitor(
         marker,
         now=NOW,
         migration_present=True,
         verified_external_goal=True,
     )
+    objective_met = evaluate_work_mode_monitor(
+        marker,
+        now=NOW,
+        migration_present=True,
+        user_objective_met=True,
+    )
+    user_stopped = evaluate_work_mode_monitor(
+        marker,
+        now=NOW,
+        migration_present=True,
+        explicit_user_stop=True,
+    )
 
     assert unverified.action == "recover_unverified_completion"
     assert unverified.recovery_eligible is True
-    assert verified.action == "goal_complete"
-    assert verified.verified_external_goal is True
+    assert repository_gate_only.action == "recover_unverified_completion"
+    assert repository_gate_only.verified_external_goal is True
+    assert objective_met.action == "goal_complete"
+    assert objective_met.user_objective_met is True
+    assert user_stopped.action == "user_stopped"
+    assert user_stopped.explicit_user_stop is True
 
 
 def test_exact_two_phase_cas_proof_authorizes_recovery() -> None:
