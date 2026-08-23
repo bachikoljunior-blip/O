@@ -1,0 +1,67 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-23T10:01:57.983696Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-5cdf814034231bec41c66bf8-candidate_evaluate.json",
+  "invocation_id": "invoke-5cdf814034231bec41c66bf8",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        "PR 270 exact head 3d51e7bbe350319418023721439e48348c758093",
+        "GitHub Actions run 32630847871",
+        "PR 264 workflow 32627670204"
+      ],
+      "observations": [
+        "The candidate index has no Execute Candidate scoped to ci/exact-head-pytest-sharding.",
+        "The unit already has a mechanically defined unsharded baseline and fail-closed rollback."
+      ],
+      "purpose": "Select the Candidate boundary immediately before the CI-sharding Execute unit.",
+      "unresolved": [
+        "final shard 0 conclusion",
+        "aggregate gate conclusion",
+        "exact end-to-end latency and mergeability"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "A bounded CI topology experiment should be evaluated against its exact retained baseline without importing unrelated semantic Candidates; coverage, aggregation, latency, and unchanged-head evidence are the discriminators."
+    },
+    "result": {
+      "baseline_need": "Use the retained PR 264 unsharded exact-head observation of 485 passed in 4064.00 seconds and the exact 486-node collection as the comparison baseline.",
+      "candidate_id": null,
+      "conflicts": [],
+      "decision": "NOT_APPLICABLE",
+      "dependencies": [],
+      "dimensions": {
+        "external_cost": "GitHub Actions runner concurrency only; no paid resource is initiated here",
+        "failure_risk": "partial success, coverage gaps, aggregate bypass, timeout, cancellation, head movement, or conflict",
+        "latency": "observed workflow feedback time versus 4064.00-second pytest baseline",
+        "quality": "exact full-suite coverage and unchanged non-pytest validation",
+        "token": "not material",
+        "tool": "four pytest runners plus one aggregate gate"
+      },
+      "evidence_to_collect": [
+        "all four exact-head shard conclusions and per-shard collection counts",
+        "aggregate gate dependency and conclusion",
+        "disjoint exhaustive assignment of all 486 node IDs",
+        "observed end-to-end workflow latency against the unsharded baseline",
+        "unchanged PR head, conflict-free merge state, and main readback if merged"
+      ],
+      "mode": "pre-application",
+      "reason": "No indexed Execute Candidate governs deterministic GitHub Actions pytest partitioning or exact-head CI integration. Applying the capability, campaign, live-provider, workspace, or context-hygiene overlays would change an unrelated bounded infrastructure experiment and add uncontrolled variables.",
+      "regression_checks": [
+        "no required test node is skipped or duplicated",
+        "aggregate success is impossible unless every shard succeeds",
+        "compile, suite validation, protocol validation, and reference commands remain required",
+        "no head movement, merge conflict, or claim-boundary promotion"
+      ],
+      "rollback": "Keep the existing unsharded full pytest gate and retain exact failure, timeout, coverage, or latency evidence.",
+      "scope": "ci/exact-head-pytest-sharding"
+    }
+  },
+  "payload_digest": "3d087b1a7dfd138ae4d4b1f1",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}
