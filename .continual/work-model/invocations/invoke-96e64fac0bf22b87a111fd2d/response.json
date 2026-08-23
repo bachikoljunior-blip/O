@@ -1,0 +1,56 @@
+{
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-96e64fac0bf22b87a111fd2d",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/candidates/candidate-c6c462472386c57b124d/candidate.json",
+        ".continual/candidates/index.json"
+      ],
+      "observations": [
+        "Eight execute-family candidates indexed; only the new stable-semantics-commitment overlay is applicable, and this unit is its motivating first trial",
+        "Two ACTIVE_FOR_SCOPE candidates remain inactive here because their verified scopes are not entered by this unit"
+      ],
+      "purpose": "Pre-application evaluation for the deterministic-selection execute unit",
+      "unresolved": []
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "A candidate registered by the immediately preceding Root response was already indexed and payload-visible for this preflight, confirming same-cycle candidate availability end to end."
+    },
+    "result": {
+      "applicability": "APPLICABLE - target_component execute matches; unit authors/repairs a selection commitment under src/agi/; no depends_on, no conflicts_with; candidate has empty scope_states so this is its first trial anywhere",
+      "baseline_needed": false,
+      "baseline_reason": "The unit's own regression test (two identical-seed processes must select identical targets) is the discriminating measurement; the pre-change behavior (divergent selection) is already documented with live evidence in the episode and merged PR 245 body, serving as the baseline.",
+      "candidate_id": "candidate-c6c462472386c57b124d",
+      "decision": "TRIAL_CANDIDATE",
+      "evidence_to_collect": [
+        "The new commitment derivation reads only program descriptors, support examples, and domains - no run ids, no timestamps, no whole-report digests (verified by code reading of the diff)",
+        "Two-subprocess regression test passes deterministically",
+        "Full recursive and observed-schema test files stay green locally and on exact-head CI"
+      ],
+      "reason": "The deterministic-selection unit repairs exactly the class of defect this newly registered stable-semantics-commitment overlay governs: it modifies a history commitment consumed by selection, so the overlay's binding rule (derive only from stable behavior semantics) and its mandated two-process reproducibility check coincide with the unit's own expected outputs. Trialing the overlay on its motivating unit is the cheapest possible discriminating trial - it adds no cost the unit does not already carry - and produces first live evidence for the candidate. All seven other execute-targeted candidates are inapplicable: the live-campaign trio governs live-model campaign migration/observability scopes, the benchmark/workspace pair governs capability-evaluation scope, and context-hygiene governs self-application record hygiene; none touches commitment authorship, and the two ACTIVE_FOR_SCOPE candidates are active only for scopes this unit does not enter.",
+      "regression_checks": [
+        "No weakening of fail-closed controls, candidate immutability, or the claim boundary in the recursive campaign",
+        "Existing persisted evidence must not be invalidated: check for any consumer pinning old history_digest values before changing the derivation"
+      ],
+      "risk_dimensions": {
+        "failure_risk": "low-moderate - the real risk is persisted-evidence coupling to old digests, explicitly listed as a regression check",
+        "latency_tokens": "negligible overlay size",
+        "quality": "upside - the overlay's checklist is the unit's own acceptance criteria",
+        "tool_external_cost": "one extra local subprocess run for the reproducibility check"
+      },
+      "rollback": "Candidate remains status candidate; if the trial shows the rule is unimplementable without breaking persisted-evidence reuse, record the contradictory evidence against the candidate at post-result and repair the unit under the active prompt instead.",
+      "scope": "agi/deterministic-selection"
+    }
+  },
+  "output_digest": "b3b73ddceacf911e61215f6555978f41ef7664c27453371591a80554b32a79c6",
+  "received_at": "2026-08-23T05:18:26.744961Z",
+  "request_digest": "4fd53c9f026fe400fa27780bfa1a94318fe92365a0c754ba8a4226587f34b1c4",
+  "response_digest": "f3cb9ff3637217a4f0527cd8d65048f311662011a083efe954f69b9442e3203e",
+  "schema_version": 1
+}
