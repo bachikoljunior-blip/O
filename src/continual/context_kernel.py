@@ -11,6 +11,10 @@ from .context_observations import (
     ContextObservationError,
     verify_context_observation_ledger,
 )
+from .ci_source_observation import (
+    CiSourceObservationError,
+    verify_ci_source_observation,
+)
 from .effective_directives import (
     EffectiveDirectiveError,
     compile_effective_directives,
@@ -367,6 +371,17 @@ def build_decision_context(
         raise ContextKernelError(
             f"authoritative Work source observation failed: {exc}"
         ) from exc
+    try:
+        ci_observation = verify_ci_source_observation(
+            root,
+            run_id=run_id,
+            state=state,
+            now=request_clock,
+        )
+    except CiSourceObservationError as exc:
+        raise ContextKernelError(
+            f"decision-relevant CI source observation failed: {exc}"
+        ) from exc
     inbox, inbox_identity = _load_source(
         root, store, "user_input_inbox", _CONTROL_PATHS["user_input_inbox"]
     )
@@ -539,6 +554,14 @@ def build_decision_context(
             for entry in verified_observations
         ]
     }
+    if ci_observation is not None:
+        observation_projection["entries"].append(deepcopy(ci_observation))
+        observation_projection["entries"].sort(
+            key=lambda entry: (entry["source_id"], entry["observation_id"])
+        )
+    observation_observed_at = max(
+        entry["observed_at"] for entry in observation_projection["entries"]
+    )
 
     sources = [
         _source_record(
@@ -666,9 +689,7 @@ def build_decision_context(
                 "receipts:"
                 + store.stable_digest(observation_projection, length=64)
             ),
-            observed_at=max(
-                entry["observed_at"] for entry in verified_observations
-            ),
+            observed_at=observation_observed_at,
             projection=observation_projection,
             include_reason="Allow external facts to affect a semantic decision only after an O-requested, request-bound, mechanically verified receipt is ingested.",
             selected_fields=list(observation_projection),

@@ -8,6 +8,10 @@ from typing import Any
 from agi.regression import RegressionPolicy
 
 from .candidate_regression import record_candidate_regression
+from .ci_source_observation import (
+    prepare_ci_source_observation,
+    record_ci_source_observation_receipt,
+)
 from .engine import Engine
 from .self_application import record_self_application
 from .work_session import (
@@ -105,6 +109,26 @@ def build_parser() -> argparse.ArgumentParser:
     source_record.add_argument("--observed-at", required=True)
     source_record.add_argument("--executor-binding", required=True)
     source_record.add_argument("--model-identity", required=True)
+
+    ci_prepare = sub.add_parser(
+        "ci-source-observation-prepare",
+        help="Precommit one decision-relevant exact-head CI connector observation.",
+    )
+    ci_prepare.add_argument("run_id")
+    ci_prepare.add_argument("--model-identity", required=True)
+
+    ci_record = sub.add_parser(
+        "ci-source-observation-record",
+        help="Record bounded workflow run/jobs connector evidence.",
+    )
+    ci_record.add_argument("run_id")
+    ci_record.add_argument("observation_id")
+    ci_record.add_argument("--request-digest", required=True)
+    ci_record.add_argument("--workflow-run", type=Path, required=True)
+    ci_record.add_argument("--jobs", type=Path, required=True)
+    ci_record.add_argument("--observed-at", required=True)
+    ci_record.add_argument("--executor-binding", required=True)
+    ci_record.add_argument("--model-identity", required=True)
 
     self_apply = sub.add_parser(
         "self-apply",
@@ -207,6 +231,40 @@ def main() -> None:
                 commit_sha=args.commit_sha,
                 blob_sha=args.blob_sha,
                 projection=projection,
+                observed_at=args.observed_at,
+            )
+        )
+        return
+
+    if args.cmd == "ci-source-observation-prepare":
+        state = json.loads(
+            (args.root / "agi" / "WORK_EXECUTION_STATE.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        _print(
+            prepare_ci_source_observation(
+                args.root,
+                run_id=args.run_id,
+                state=state,
+                model_identity=args.model_identity,
+            )
+        )
+        return
+
+    if args.cmd == "ci-source-observation-record":
+        workflow_run = json.loads(args.workflow_run.read_text(encoding="utf-8"))
+        jobs = json.loads(args.jobs.read_text(encoding="utf-8"))
+        _print(
+            record_ci_source_observation_receipt(
+                args.root,
+                run_id=args.run_id,
+                observation_id=args.observation_id,
+                request_digest=args.request_digest,
+                executor_binding=args.executor_binding,
+                model_identity=args.model_identity,
+                workflow_run=workflow_run,
+                jobs=jobs,
                 observed_at=args.observed_at,
             )
         )

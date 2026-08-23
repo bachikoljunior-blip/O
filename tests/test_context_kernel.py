@@ -9,6 +9,10 @@ from pathlib import Path
 
 import pytest
 
+from continual.ci_source_observation import (
+    prepare_ci_source_observation,
+    record_ci_source_observation_receipt,
+)
 from continual.context_kernel import (
     ContextKernelError,
     SEMANTIC_CONTEXT_COMPONENTS,
@@ -340,6 +344,60 @@ def _record_authoritative_receipt(root: Path) -> tuple[dict, dict]:
             "heartbeat_at": state["heartbeat_at"],
         },
         observed_at=store.utc_now(),
+    )
+    return request, receipt
+
+
+def _enable_ci_policy(root: Path) -> tuple[dict, dict]:
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["heartbeat_at"] = Store(root).utc_now()
+    required_jobs = [
+        {"id": 101, "name": "pytest shard 0 of 1"},
+        {"id": 102, "name": "test"},
+    ]
+    state["ci_source_observation_policy"] = {
+        "required": True,
+        "repository_full_name": "example/context-test",
+        "exact_head_sha": "b" * 40,
+        "workflow_run_id": 7001,
+        "workflow_id": 8001,
+        "required_jobs": required_jobs,
+        "max_age_seconds": 300,
+        "executor_binding": "context-kernel-test-session",
+    }
+    _write_json(state_path, state)
+    return state, {"required_jobs": required_jobs}
+
+
+def _record_ci_receipt(root: Path) -> tuple[dict, dict]:
+    state, fixture = _enable_ci_policy(root)
+    request = prepare_ci_source_observation(
+        root,
+        run_id=RUN_ID,
+        state=state,
+        model_identity="context-kernel-test-model",
+    )
+    receipt = record_ci_source_observation_receipt(
+        root,
+        run_id=RUN_ID,
+        observation_id=request["observation_id"],
+        request_digest=request["request_digest"],
+        executor_binding="context-kernel-test-session",
+        model_identity="context-kernel-test-model",
+        workflow_run={
+            "id": 7001,
+            "workflow_id": 8001,
+            "name": "test",
+            "status": "completed",
+            "conclusion": "success",
+            "head_sha": "b" * 40,
+        },
+        jobs=[
+            {**job, "status": "completed", "conclusion": "success"}
+            for job in fixture["required_jobs"]
+        ],
+        observed_at=Store(root).utc_now(),
     )
     return request, receipt
 
@@ -680,6 +738,61 @@ def test_precommitted_authoritative_observation_binds_frozen_manifest(
     )
     assert source["freshness"]["authoritative_observation"] == bound
     assert bound["claim_scope"].endswith("not_linearizable_latest_proof")
+
+
+def test_required_ci_observation_rejects_atomically_when_missing(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    _enable_ci_policy(root)
+    engine = Engine(root, model=_client(root))
+    before = _persisted_request_boundary(root)
+
+    with pytest.raises(
+        WorkSessionError,
+        match="decision-relevant CI source observation failed.*matching fresh",
+    ):
+        engine._call_component_direct(
+            RUN_ID,
+            "root",
+            {"snapshot": deepcopy(snapshot), "last_result": {"verdict": "FAIL"}},
+            prompt_path="prompts/root.md",
+        )
+
+    assert _persisted_request_boundary(root) == before
+
+
+def test_precommitted_ci_observation_binds_bounded_external_projection(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    request, receipt = _record_ci_receipt(root)
+
+    frozen, _ = _freeze_root(_client(root), snapshot)
+    sources = frozen["payload"]["decision_context"]["sources"]
+    external = next(source for source in sources if source["source_id"] == "external_observations")
+    entry = next(
+        item
+        for item in external["projection"]["entries"]
+        if item["source_id"] == "github_actions_ci"
+    )
+
+    assert entry["observation_id"] == request["observation_id"]
+    assert entry["request_digest"] == request["request_digest"]
+    assert entry["receipt_digest"] == receipt["receipt_digest"]
+    assert entry["projection"]["workflow_run"] == {
+        "id": 7001,
+        "workflow_id": 8001,
+        "name": "test",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "b" * 40,
+    }
+    serialized = json.dumps(entry, ensure_ascii=False)
+    assert "logs" not in serialized
+    assert entry["claim_scope"].endswith(
+        "not_behavioral_or_completion_evidence"
+    )
 
 
 def test_authoritative_receipt_does_not_authorize_advanced_state_bytes(
