@@ -198,6 +198,51 @@ def test_work_resume_ignores_older_answered_awaiting_journal(
     )
 
 
+def test_work_resume_still_rejects_multiple_unanswered_journals(
+    tmp_path: Path,
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-work-duplicate-unanswered"
+    session = WorkSession(
+        root,
+        executor_binding="session-a",
+        model_identity="model-a",
+    )
+    session.start("reject duplicate unanswered requests", run_id=run_id)
+    invocation_dir = root / ".continual" / "runs" / run_id / "invocations"
+    journal_path = next(invocation_dir.glob("*.json"))
+    duplicate = json.loads(journal_path.read_text(encoding="utf-8"))
+    duplicate["invocation_id"] = "invoke-111111111111111111111111"
+    duplicate_path = invocation_dir / "invoke-111111111111111111111111.json"
+    duplicate_path.write_text(
+        json.dumps(duplicate, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    before = {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for base in (
+            root / ".continual" / "runs" / run_id,
+            root / ".continual" / "work-model" / "invocations",
+        )
+        for path in sorted(base.rglob("*"))
+        if path.is_file()
+    }
+
+    with pytest.raises(WorkSessionError, match="multiple unanswered"):
+        session.resume(run_id)
+
+    after = {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for base in (
+            root / ".continual" / "runs" / run_id,
+            root / ".continual" / "work-model" / "invocations",
+        )
+        for path in sorted(base.rglob("*"))
+        if path.is_file()
+    }
+    assert after == before
+
+
 def test_work_response_is_binding_checked_immutable_and_public(tmp_path: Path):
     root = _root(tmp_path)
     session = WorkSession(root, model_identity="work-model")
