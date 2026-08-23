@@ -1,0 +1,40 @@
+{
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-a9569c88120c9311d19feedb",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        "agi/WORK_STRATEGY.json",
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "observations": [
+        "PRs 247 and 245 have fresh CI in progress on refreshed heads against post-#230 main",
+        "PRs 249 and 250 are stacked successors blocked on 247 and 245 respectively",
+        "The strategy saturation assessment rules out new bounded-synthesis retention probes as the next unit"
+      ],
+      "purpose": "Select exactly one execution unit for the primary continuation Run",
+      "unresolved": [
+        "CI conclusions for PR 247 and PR 245"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Root selection was fully determined by the persisted strategy and open-PR state; no prompt or Candidate change is indicated."
+    },
+    "result": {
+      "component": "execute",
+      "goal": "Settle the remaining backlog integrations: merge PR 247 and PR 245 on green fresh exact-head CI with unchanged heads, then retarget and refresh PR 249 (after 247) and PR 250 (after 245) and merge each on green fresh exact-head CI, root-causing any red only at its demonstrated boundary, and confirm the main merge-push run is green on the resulting tip.",
+      "rationale": "Expected-time ranking under agi/WORK_STRATEGY.json: these four integrations are already validated deltas whose only remaining cost is CI observation and serialized merging, so finishing them clears the board for the next capability unit at minimal marginal cost; the saturation assessment forbids starting new same-family retention probes, so no new probe unit is selected.",
+      "scope": "agi/backlog-integration"
+    }
+  },
+  "output_digest": "47b8ffff59cf6adf7d760794f3cb796e4f9cd82a3261ecdf666d849c2dd1e661",
+  "received_at": "2026-08-23T00:36:43.579414Z",
+  "request_digest": "e98a26ece6fbbe92b08a705e9b88baf52e56db4c2fe46fe6c07520b1580f34b6",
+  "response_digest": "9be1192c043a9d4e5c5e513d6c051914771f2e3001e5a6d370bd4eb7ad638b07",
+  "schema_version": 1
+}
