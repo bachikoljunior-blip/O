@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T13:40:27.864Z",
-  "last_progress_at": "2026-08-23T13:40:27.864Z",
+  "heartbeat_at": "2026-08-23T13:44:37.302Z",
+  "last_progress_at": "2026-08-23T13:44:37.302Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -35,18 +35,18 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "Execute invoke-6a8a4f0eb8a3f1e5791e560f is the sole pending same-owner request. PR 276 exact head 71735f001a169dd6b68a0917be030e756bb336f7, tree 596c1c88b25b1f5b8f66483a774a26f2d42651a1, is mergeable and exact-head workflow 32643028441 is in progress.",
+    "pending_native_execute": "Execute invoke-6a8a4f0eb8a3f1e5791e560f is the sole pending same-owner request. PR 276 exact head 32567bc5193cc432b08c7cacfa88be91973bb0c7, tree 833ae98a51d0254936d058e7ea08890b41e06b00, is mergeable and exact-head workflow 32643232886 is queued after closing a source-read TOCTOU gap.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
     "effect_recovery_stack": "PR 273 exact head 9b05425c passed workflow 32636912049 and merged with expected-head protection to main 3417809d; all six source/test blobs read back exactly."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/o-context-kernel-root-manifest-v1",
-    "snapshot_head_sha": "71735f001a169dd6b68a0917be030e756bb336f7",
+    "snapshot_head_sha": "32567bc5193cc432b08c7cacfa88be91973bb0c7",
     "pending_work_invocation_id": "invoke-6a8a4f0eb8a3f1e5791e560f",
     "pending_request_ref": ".continual/work-model/invocations/invoke-6a8a4f0eb8a3f1e5791e560f/request.json",
-    "durability_status": "PR 276 is open at exact immutable head 71735f0 and workflow 32643028441 is in progress. No CI or merge success is inferred.",
-    "next_action": "Wait for every exact-head shard and aggregate. If unchanged and successful, perform fresh latest-main conflict proof, expected-head merge, exact blob readback, then answer Execute and continue Task Evaluate/Consolidate/Learn/Root."
+    "durability_status": "PR 276 is open at exact immutable head 32567bc5193cc432b08c7cacfa88be91973bb0c7; workflow 32643232886 is queued. Old head 71735f0 and its workflow are superseded and must not be merged. No CI or merge success is inferred.",
+    "next_action": "Wait for every workflow 32643232886 exact-head shard and aggregate. If head is unchanged and successful, perform fresh latest-main conflict proof, expected-head merge, exact blob readback, then answer Execute and continue Task Evaluate/Consolidate/Learn/Root."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -99,7 +99,7 @@
       "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
       "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)"
     ],
-    "pending_invocation": "invoke-6a8a4f0eb8a3f1e5791e560f (Execute Context Kernel Root manifest; PR 276 exact-head CI in progress)",
+    "pending_invocation": "invoke-6a8a4f0eb8a3f1e5791e560f (Execute Context Kernel Root manifest; PR 276 exact head 32567bc5193cc432b08c7cacfa88be91973bb0c7, workflow 32643232886)",
     "note": "Revision 15 was ingested by same-owner Root invoke-344455ae7a59ec86e4fa5d20 without retroactively changing earlier frozen requests. The selected Execute unit is unit-4d9f1592acf97a44ee8afdd6."
   },
   "expected_blob_sha": "f3801631b8750cb43ae7aff3c42b28ee3f230c78",
@@ -233,6 +233,17 @@
       "observed_at": "2026-08-23T13:09:43.895Z",
       "local_validation": "work-verify 83/82/1 valid; 40 focused tests passed; compileall, 736 JSON documents, and diff check passed",
       "claim_boundary": "Internal Work execution-integrity evidence only; routing remains INSUFFICIENT_EVIDENCE with zero observations and no activation; user-level objective remains unmet."
+    },
+    "context_kernel_root_manifest": {
+      "branch": "work/o-context-kernel-root-manifest-v1",
+      "pull_request": 276,
+      "head_sha": "32567bc5193cc432b08c7cacfa88be91973bb0c7",
+      "exact_tree_sha": "833ae98a51d0254936d058e7ea08890b41e06b00",
+      "workflow_run": 32643232886,
+      "status": "queued",
+      "observed_at": "2026-08-23T13:44:37.302Z",
+      "local_validation": "33 focused tests passed; compileall, 798 JSON documents, work-verify 91/90/1 valid, and diff check passed",
+      "claim_boundary": "Root-only decision-context control evidence. Observation receipts, typed partial supersede, all-component manifests, context-bound effects, and behavioral outcome evidence remain pending."
     }
   },
   "pending_user_input": {
