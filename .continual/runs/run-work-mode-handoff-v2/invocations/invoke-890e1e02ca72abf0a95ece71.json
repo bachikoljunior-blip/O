@@ -1,0 +1,48 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-23T11:26:40.459307Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-890e1e02ca72abf0a95ece71-candidate_evaluate.json",
+  "invocation_id": "invoke-890e1e02ca72abf0a95ece71",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/work-model/invocations/invoke-63697c7647a6b79e17a5069e/response.json",
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json"
+      ],
+      "observations": [
+        "The result met every pre-application regression check.",
+        "Original and bounded FAIL verdicts were separately justified rather than collapsed."
+      ],
+      "purpose": "Evaluate the dual-verdict Candidate from the actual contaminated-routing Task Evaluate output.",
+      "unresolved": [
+        "the deterministic scoped activation gate has not run"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "The candidate now has evidence across both bounded PASS and bounded FAIL cases, but the Candidate Evaluator still cannot bypass the separate deterministic activation gate."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [],
+      "decision": "PROPOSE_ACTIVATION",
+      "reason": "The actual Task Evaluate result preserved original-goal FAIL and bounded-unit FAIL as distinct findings with different evidence, retained every contamination and unmeasured-threshold observation, and made no CI, routing-capability, or AGI promotion. Together with earlier PASS/FAIL separation trials, this supports the existing scoped activation proposal subject to its separate deterministic gate.",
+      "required_activation_gate": "Recompute the deterministic protected-baseline verdict matrix and persist VERIFIED_FOR_SCOPE before changing Candidate status.",
+      "rollback": "Keep the Candidate inactive if the deterministic gate finds verdict coupling, unsupported bounded PASS, suppressed negative evidence, or weakened claim boundaries.",
+      "scope": "continual/incremental-task-evaluation",
+      "supporting_evidence": [
+        "actual output contains independent verdict and unit_verdict fields",
+        "the bounded FAIL is tied to selector contamination and missing measurements",
+        "the original FAIL is tied to unmet real-world capability evidence",
+        "negative evidence, rollback, and the no-activation claim boundary are explicit",
+        "earlier trials exercised the complementary original FAIL / bounded PASS case"
+      ]
+    }
+  },
+  "payload_digest": "e63be09148db3aed573f0098",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

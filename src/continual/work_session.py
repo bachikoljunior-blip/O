@@ -364,13 +364,49 @@ class WorkSession:
                 raise WorkSessionError(
                     f"pending Work request identity mismatch: {journal_path.name}"
                 )
-            awaiting.append(request)
+            response_path = request_path.parent / "response.json"
+            received_at: str | None = None
+            if response_path.exists():
+                response, _ = _verified_response(self.store, request, response_path)
+                raw_received_at = response.get("received_at")
+                if not isinstance(raw_received_at, str) or not raw_received_at.strip():
+                    raise WorkSessionError(
+                        f"malformed answered Work identity: {journal_path.name}"
+                    )
+                received_at = raw_received_at
+            awaiting.append(
+                {
+                    "request": request,
+                    "response_received_at": received_at,
+                }
+            )
 
-        if len(awaiting) > 1:
-            raise WorkSessionError("multiple pending Work requests for one native run")
+        unanswered = [
+            item for item in awaiting if item["response_received_at"] is None
+        ]
+        if len(unanswered) > 1:
+            raise WorkSessionError(
+                "multiple unanswered Work requests for one native run"
+            )
         if not awaiting:
             return
-        request = awaiting[0]
+        if unanswered:
+            active = unanswered[0]
+        else:
+            # A recovered native run can retain old awaiting journals whose exact
+            # Work responses were later reconstructed and consumed through a newer
+            # durable boundary.  They are immutable history, not live requests.
+            # When every awaiting journal is already answered, the newest verified
+            # response is the only request the current snapshot can consume next.
+            active = max(
+                awaiting,
+                key=lambda item: (
+                    item["response_received_at"],
+                    str(item["request"].get("created_at", "")),
+                    str(item["request"].get("invocation_id", "")),
+                ),
+            )
+        request = active["request"]
         if request.get("executor_binding") != self.executor_binding:
             raise WorkSessionError(
                 "executor_binding does not match pending Work request"
