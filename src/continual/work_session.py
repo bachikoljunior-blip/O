@@ -6,6 +6,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping
 
+from .context_kernel import ContextKernelError, build_root_decision_context
 from .contracts import validate_component_output
 from .store import Store
 
@@ -207,11 +208,28 @@ class WorkModelClient:
         payload: dict[str, Any],
         prompt_path: str,
     ) -> tuple[str, dict[str, Any]]:
+        effective_payload = deepcopy(payload)
+        if component == "root":
+            if "decision_context" in effective_payload:
+                raise WorkSessionError(
+                    "Root payload may not inject an outer decision_context"
+                )
+            try:
+                decision_context = build_root_decision_context(
+                    self.root,
+                    run_id=self.run_id,
+                    payload_snapshot=effective_payload.get("snapshot", {}),
+                    store=self.store,
+                )
+            except ContextKernelError as exc:
+                raise WorkSessionError(f"Context Kernel failed closed: {exc}") from exc
+            if decision_context is not None:
+                effective_payload["decision_context"] = decision_context
         prompt = (self.root / prompt_path).resolve()
         if prompt != self.root and self.root not in prompt.parents:
             raise WorkSessionError("prompt_path escapes repository")
         prompt_content = prompt.read_text(encoding="utf-8")
-        payload_digest = self.store.stable_digest(payload, length=64)
+        payload_digest = self.store.stable_digest(effective_payload, length=64)
         prompt_digest = self.store.stable_digest(prompt_content, length=64)
         invocation_id = "invoke-" + self.store.stable_digest(
             {
@@ -235,7 +253,7 @@ class WorkModelClient:
             "prompt_digest": prompt_digest,
             "prompt_content": prompt_content,
             "payload_digest": payload_digest,
-            "payload": deepcopy(payload),
+            "payload": effective_payload,
             "contract": {
                 "response_shape": "component output with result, fragment, and local_learn except Learn",
                 "private_reasoning_forbidden": True,
