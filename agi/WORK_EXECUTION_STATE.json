@@ -8,8 +8,8 @@
   "lease_generation": 5,
   "fence_token": "work-recovery-fence-v5-ee2d66ceebe5bd589e5e39ccaf0d0e28538ec4abafa2719d815194488e9dfad2",
   "started_at": "2026-08-23T06:14:00Z",
-  "heartbeat_at": "2026-08-23T12:12:07.355Z",
-  "last_progress_at": "2026-08-23T12:12:07.355Z",
+  "heartbeat_at": "2026-08-23T12:21:44.172Z",
+  "last_progress_at": "2026-08-23T12:21:44.172Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified_and_user_designated_primary",
@@ -35,7 +35,7 @@
   "parallel_execution_coordination": {
     "primary": "User-designated ChatGPT Work primary: generation-5 owner work-recovery-20260823T061400Z-ee2d66ceebe5bd58; fenced recovery readback remains verified.",
     "secondary": "Claude generation 4 is stopped as executor under inbox revision 13. Isolated secondary branches/PRs may contribute reviewable results, but main integration is serialized through the generation-5 primary; no foreign identity-bound invocation is answered.",
-    "pending_native_execute": "Generation-5 Execute invoke-66af21513bffe4e758237708 remains pending. PR 273 is integrated and verified. PR 274 exact head 7ba0fda6 has 3/4 shards successful; shard 0 and dependent aggregate remain.",
+    "pending_native_execute": "Generation-5 Execute invoke-66af21513bffe4e758237708 remains pending only until its immutable response is created. PR 273 and PR 274 are both merged to main with exact-head CI success and verified readback.",
     "predecessor": "work-primary-claude-20260823T081642JST generation 4; stale and fenced by expected blob f3801631b8750cb43ae7aff3c42b28ee3f230c78.",
     "effect_recovery_stack": "PR 273 exact head 9b05425c passed workflow 32636912049 and merged with expected-head protection to main 3417809d; all six source/test blobs read back exactly."
   },
@@ -45,8 +45,8 @@
     "snapshot_head_sha": "7ba0fda631e9bc947695cc7d17a1f12b0bcf55f1",
     "pending_work_invocation_id": "invoke-66af21513bffe4e758237708",
     "pending_request_ref": ".continual/work-model/invocations/invoke-66af21513bffe4e758237708/request.json",
-    "durability_status": "PR 274 exact head 7ba0fda6 is remote-durable with tree ece2ea72 exactly equal to local commit 6a31d646. It adds an explicit fail-closed regression for multiple unanswered journals and a second persisted idempotency record; the focused suite now passes 40 tests. Workflow 32637070506 supersedes f59c4a8b workflow 32636746263 for merge evidence.",
-    "next_action": "Finish exact-head workflow 32637070506 for PR 274. If all four shards and aggregate succeed, verify unchanged head, fresh main conflict-free merge-tree, then merge with expected head and exact readback."
+    "durability_status": "PR 274 exact head 7ba0fda6 passed workflow 32637070506 and merged with expected-head protection to main edf76a27. Eight key source/test/experiment/native blobs read back exactly. PR 273 was already merged to main 3417809d.",
+    "next_action": "Submit Execute invoke-66af21513bffe4e758237708 using the actual PR 273/274 CI, merge, and readback evidence; then continue the native O lifecycle through Task Evaluate, Consolidate Episode, Learn, and the next Root unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -132,13 +132,13 @@
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z"
   },
   "recent_main_integration": {
-    "pull_request": 273,
-    "exact_head_sha": "9b05425c3daf2dc43ecee835fb7c181ab2ba6198",
-    "exact_head_ci_run": 32636912049,
+    "pull_request": 274,
+    "exact_head_sha": "7ba0fda631e9bc947695cc7d17a1f12b0bcf55f1",
+    "exact_head_ci_run": 32637070506,
     "exact_head_ci_result": "four pytest shards and aggregate succeeded",
-    "merge_sha": "3417809d8af9b861e0964846c9a43b589317c24b",
+    "merge_sha": "edf76a275906991c35a3625526f8bc9d3e66e1ae",
     "verified_remote_readback": true,
-    "claim_boundary": "Internal effect dispatch, reconciliation, adjudication, and idempotency safety only; not AGI evidence."
+    "claim_boundary": "Internal Work resume integrity, native-run durability, and held-out harness infrastructure only. Routing evidence remains INSUFFICIENT_EVIDENCE with zero observations and no activation."
   },
   "recent_publication": {
     "pull_request": 272,
@@ -163,11 +163,24 @@
       "head_sha": "7ba0fda631e9bc947695cc7d17a1f12b0bcf55f1",
       "exact_tree_sha": "ece2ea72830935fbdc7981e774d1e92b3caadcbf",
       "workflow_run": 32637070506,
-      "status": "exact_head_ci_running_3_of_4_succeeded",
+      "status": "merged_to_main_verified",
       "local_validation": "40 focused tests passed; compileall, 495 JSON documents, work-verify 75/74/1 valid, and diff check passed",
       "checked_in_verdict": "INSUFFICIENT_EVIDENCE",
       "observations": 0,
-      "superseded_workflow_run": 32636746263
+      "superseded_workflow_run": 32636746263,
+      "merge_sha": "edf76a275906991c35a3625526f8bc9d3e66e1ae",
+      "exact_head_ci_result": "workflow 32637070506: four pytest shards and aggregate succeeded",
+      "verified_remote_readback": true,
+      "readback_blobs": {
+        "src/continual/work_session.py": "25766907dc136037271f9c52a36c23eca1dbc377",
+        "tests/test_work_session_bridge.py": "ac14702e1a7db8d0c74587302fe710ad1bfd8527",
+        "agi/CONTEXT_ROUTING_EXPERIMENT.json": "e9f463d1a1e39583f13e37a2a6de461644f10efa",
+        "src/agi/context_routing_experiment.py": "971a1d960949253bc22555b95130c617323a5fa0",
+        "tests/test_context_routing_experiment.py": "ff07f07d1458de83fa8606fe93690eca2e0aa338",
+        ".continual/runs/run-work-mode-handoff-v2/snapshot.json": "d5ee91cf924f3ed3ea8291f973e3d877352fa6d3",
+        ".continual/work-model/invocations/invoke-66af21513bffe4e758237708/request.json": "8b0d26472ff4369fad44e80b177044646b997f66",
+        ".continual/runs/run-work-mode-handoff-v2/external-effects/publish-pr274-native-v3.json": "2c280e99d6d35134d99d0403cc2dfeb9d939c94c"
+      }
     },
     "effect_recovery_stack": {
       "pull_request": 273,
