@@ -8,8 +8,8 @@
   "lease_generation": 4,
   "fence_token": "work-primary-fence-v4-9c37e5a1b6d2480f3e7a5c19",
   "started_at": "2026-08-22T23:16:42Z",
-  "heartbeat_at": "2026-08-23T00:07:00Z",
-  "last_progress_at": "2026-08-23T00:07:00Z",
+  "heartbeat_at": "2026-08-23T00:33:00Z",
+  "last_progress_at": "2026-08-23T00:33:00Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "direct_primary_work_instruction",
@@ -28,9 +28,9 @@
   "active_unit_id": "unit-89058c1acef29b8e657a946c",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 6,
-    "acknowledged_at": "2026-08-22T23:16:42Z",
-    "application_note": "Revisions 4-6 ingested: the strict external evidence gate is automation-constructed and not the user's completion criterion (truthful reporting unchanged); this Claude session is the designated primary; the operator has only a smartphone, so no terminal steps, no secrets in chat, and no spend without explicit bounded approval; the ChatGPT Work session is authorized as a secondary concurrent writer on isolated branches with serialized main integration."
+    "highest_acknowledged_revision": 9,
+    "acknowledged_at": "2026-08-23T00:33:00Z",
+    "application_note": "Revisions 4-9 ingested. 4-6: gate not user-set; Claude primary; smartphone-first; ChatGPT authorized secondary. 7-9: context-conditioning observations from the secondary (long-lived context can suppress reachable hypotheses; clocks desync between durable state and live state; context selection is recursively conditioned) - design context for the Skill-in-Skill routing work, no immediate behavior change."
   },
   "parallel_execution_coordination": {
     "primary": "This Claude Code remote session (generation-4 lease holder).",
@@ -43,8 +43,8 @@
     "snapshot_head_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
     "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
-    "durability_status": "Backlog settlement 5/6 complete: PR 251 (10f03fe), PR 246 (213e760), PR 244 (0629bcb), PR 238 (f1df027), PR 248 (d20ec94) merged on green fresh exact-head CI against post-#258 main. PR 230 fresh CI 32604883835 (head 1bf82a8) and retargeted PR 247 fresh CI 32606401162 (head fe6b7a5) remain in progress under the 75-minute cap.",
-    "next_action": "Observe PR 230 CI 32604883835 and PR 247 CI 32606401162; merge each only on green with unchanged head. After 247 merges, retarget PR 249 to main and refresh; after 230 merges, retarget 245 then 250. Then open a native O Run (executor current_claude_code_remote_session) for the observed-schema successor reconstruction so primary development also runs through the Work bridge."
+    "durability_status": "Backlog settlement 6/6 complete: PR 251 (10f03fe), 246 (213e760), 244 (0629bcb), 238 (f1df027), 248 (d20ec94), and 230 (f46b5bc, first full-suite completion in 48min under the corrected 75min cap) all merged on green fresh exact-head CI. Transient red-main window explained and closed: 22:56-23:20 the checkpointed gen-3 lease failed the fresh-primary pin test (fixed by the gen-4 acquisition), and 23:44-00:00 the secondary's inbox schema churn broke the inbox pin tests (self-repaired by 7f882e1 restore); every merge decision was based on exact-head PR CI runs whose trees predate the breakage and were green. Current main is locally verified consistent; merge-push run for f46b5bc is in progress as final confirmation.",
+    "next_action": "Observe PR 247 re-refreshed CI (transient-inbox failure repaired by re-merge of restored main) and PR 245 CI on head 2376ed2 (the exact two-file observed-schema delta on verified post-230 main, satisfying its integration boundary); merge each on green unchanged head. Then retarget/refresh 249 (after 247) and 250 (after 245). Confirm main merge-push run for f46b5bc is green. Then open a native O Run (executor current_claude_code_remote_session) for the next semantic development unit so primary development also runs through the Work bridge."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
