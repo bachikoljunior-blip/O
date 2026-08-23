@@ -249,6 +249,24 @@ the source. The receipt proves a timestamped observation of one immutable
 commit/blob only. It is not a linearizable proof that no later main update
 exists, not a capability result, and not AGI or completion evidence.
 
+## Ninth vertical slice: decision-relevant exact-head CI observation
+
+`ci_source_observation_policy` makes one GitHub Actions result an explicit
+mandatory source for a new semantic request. Before any connector read, the
+operator persists an immutable request binding repository, exact head, workflow
+run and workflow identities, every required job id and name, current fenced
+authority, executor, model, and maximum age. The receipt admits only a bounded
+run projection and the exact required-job topology. Raw logs, secrets, step
+output, artifacts, and unrelated jobs are excluded.
+
+Recording and verification both fail closed on a wrong head, run, workflow,
+executor, model, authority, missing or duplicate job, renamed job, pending,
+failed, cancelled, skipped, stale, future-skewed, predating, or tampered
+observation. A valid projection joins the Context Kernel external-observation
+source clock and is frozen into the next manifest; already frozen replay is
+unchanged. This establishes internal CI provenance only. It does not establish
+useful task behavior, production capability, AGI, or completion.
+
 ## Migration sequence
 
 1. Root-only mandatory manifest, audit and fail-closed validation. **Implemented.**
@@ -258,8 +276,9 @@ exists, not a capability result, and not AGI or completion evidence.
    broader behavioral evidence remain required.**
 3. Observation activities and receipts for GitHub, CI, providers, tools, and
    external research; no outside fact affects judgment before ingestion.
-   **Implemented for one exact public GitHub file read; other source kinds and
-   behavioral evidence remain pending.**
+   **Implemented for an exact public GitHub file read and locally for one
+   exact-head GitHub Actions run plus required-job topology; provider, tool,
+   research, publication, and behavioral evidence remain pending.**
 4. Manifests for Execute, Task Evaluate, Consolidate, and Learn. **Implemented,
    exact-head verified, merged through PR 279, and read back for all five
    covered semantic components.**
@@ -275,9 +294,13 @@ exists, not a capability result, and not AGI or completion evidence.
    **Exact-head verified, merged through PR 282, and read back.**
 8. Bind request construction to a provenance-verified authoritative source
    observation rather than treating local freshness as latest-remote proof.
-   **Implemented locally with an explicit prepare/record operator path and
-   atomic failure coverage; exact-head publication remains pending.**
-9. Compact the event ledger into reproducible projections while retaining the
+   **Exact-head verified, merged through PR 283, activated against live main,
+   exercised through a precommitted GitHub connector read, and read back.**
+9. Extend the same precommit and cross-binding boundary to decision-relevant
+   exact-head CI run and required-job observations. **Implemented locally with
+   atomic failure coverage and 658-test protected regression success;
+   publication and live connector exercise remain pending.**
+10. Compact the event ledger into reproducible projections while retaining the
    events and digests needed for audit and reconstruction.
 
 ## Falsification criteria
