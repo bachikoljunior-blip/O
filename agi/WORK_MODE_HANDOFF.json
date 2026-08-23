@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "migration_id": "work-mode-handoff-v2",
-  "status": "generation_6_recovery_primary_effect_dispatch_revocation_publication_pending",
-  "source_main_sha": "14353a307ce8261fab912af8b11ba929d4e86b7b",
-  "working_branch": "work/recovery-gen6-dispatch-revocation-v1",
+  "status": "generation_6_recovery_primary_heldout_routing_rendezvous_in_progress",
+  "source_main_sha": "3b16ef661e2d7cf58d3e564e05fccb99088b207c",
+  "working_branch": "work/recovery-gen6-heldout-routing-rendezvous-v1",
   "authoritative_when_present_on_main": true,
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
@@ -39,7 +39,7 @@
       "consolidate_episode",
       "learn"
     ],
-    "semantic_components_note": "The Work bridge supports the listed components. Generation 6 owns the native run. PR 279's semantic-component manifest lifecycle is complete. The current Root-selected unit unit-bd9a6edf8065f5cbb3f55a6b binds critical effect dispatch to that manifest; Execute invoke-dee658cf5ef1aa86fa033959 remains frozen until exact publication evidence exists. Claude-bound orphaned invocations must not be answered.",
+    "semantic_components_note": "The Work bridge supports the listed components. Generation 6 owns the native run. PR 280's effect-dispatch lifecycle completed through Learn. Root selected held-out routing observation rendezvous unit unit-9c2e7a5ae632fedf0ccf7a68; Candidate Evaluate returned NOT_APPLICABLE and Execute invoke-0890c411a643a99be32a9608 is frozen until exact publication evidence exists. Claude-bound orphaned invocations must not be answered.",
     "observed_invocations": [
       "entry",
       "root",
@@ -64,8 +64,10 @@
     "src/continual/context_kernel.py",
     "src/continual/effective_directives.py",
     "src/continual/context_observations.py",
+    "src/agi/context_routing_rendezvous.py",
     "agi/USER_DIRECTIVE_EVENTS.json",
     "agi/CONTEXT_OBSERVATION_LEDGER.json",
+    "agi/CONTEXT_ROUTING_SELECTOR_REGISTRY.json",
     "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
     "agi/WORK_STRATEGY.json",
     "agi/USER_REQUEST_QUEUE.json",
@@ -73,13 +75,14 @@
     "tests/test_work_mode_monitor.py",
     "tests/test_user_request_queue.py",
     "tests/test_context_kernel.py",
-    "tests/test_context_observations.py"
+    "tests/test_context_observations.py",
+    "tests/test_context_routing_rendezvous.py"
   ],
   "validation": {
     "focused_command": "See exact PR descriptions for the scoped validation commands.",
-    "focused_result": "101 protected Context Kernel, observation, directive, Work bridge/effect, reconciliation, adjudication, Engine safety, monitor, and workspace tests passed locally. These are internal results.",
-    "full_local_baseline": "compileall, 872 checked JSON documents, work-verify 103/102/1 valid, and diff check passed.",
-    "exact_head_ci": "PR 279 exact head passed all four pytest shards and aggregate in workflow 32655413461 and merged as fecc6e6d052c5d49d2d29bba4469797403c6aaad. No remote result exists yet for the current effect-dispatch slice.",
+    "focused_result": "141 protected routing, Context Kernel, observation, directive, Work effect, Work bridge, monitor, Engine safety, Engine, and workspace tests passed locally. These are internal results.",
+    "full_local_baseline": "compileall, 892 checked JSON documents, work-verify 106/105/1 valid, and diff check passed.",
+    "exact_head_ci": "PR 280 exact head passed all four pytest shards and aggregate in workflow 32657960739, merged as 8de1ff4b7596e074c6b9a30f3868e573a4c04b48, and all 31 reviewed blobs matched main. No remote result exists yet for the rendezvous slice.",
     "independent_real_world_evidence": "not_observed"
   },
   "publication": {
@@ -89,7 +92,7 @@
     "stacked_provenance_pull_request": null,
     "reconstructed_predecessor_result_pull_request": null,
     "integration_rule": "isolated branch -> exact-head CI -> unchanged passing conflict-free head -> main merge",
-    "note": "The semantic-component manifest extension is merged and read back through PR 279 at exact head c9825254d9a5a39a4fd98361f294ea05fa0c526a. The effect-dispatch critical-revocation extension remains local and must pass exact-head CI on an isolated PR before expected-head integration and main readback."
+    "note": "The effect-dispatch critical-revocation extension is merged and read back through PR 280 at exact head 7096d6d899fb873bb2ce14db6ddb5cf4791a904f. The held-out routing observation rendezvous remains local and must pass protected validation and exact-head CI on an isolated PR before expected-head integration and main readback."
   },
   "claim_boundary": {
     "agi_claim_supported": false,
@@ -97,7 +100,7 @@
     "internal_tests_or_ci_can_complete_goal": false,
     "repository_strict_gate_is_user_completion_condition": false
   },
-  "updated_at": "2026-08-23T18:16:36.637Z",
+  "updated_at": "2026-08-23T19:12:03Z",
   "user_input": {
     "inbox_path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 15,
