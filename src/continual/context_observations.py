@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .store import Store
+
+
 class ContextObservationError(ValueError):
     """Raised when an external observation is not durably O-requested and bound."""
 
@@ -70,7 +72,6 @@ def _digest_matches(
     supplied = value.get(digest_field)
     body = deepcopy(dict(value))
     body.pop(digest_field, None)
-    body.pop(timestamp_field, None)
     return isinstance(supplied, str) and supplied == store.stable_digest(body, length=64)
 
 
@@ -125,6 +126,14 @@ def _create_or_replay(
             timestamp_field=timestamp_field,
         )
         if current.get(digest_field) != record.get(digest_field):
+            if record_type == "context_observation_request":
+                current_semantics = deepcopy(current)
+                record_semantics = deepcopy(record)
+                for value in (current_semantics, record_semantics):
+                    value.pop(digest_field, None)
+                    value.pop(timestamp_field, None)
+                if current_semantics == record_semantics:
+                    return deepcopy(current)
             raise ContextObservationError(conflict)
         return deepcopy(current)
 
@@ -353,8 +362,8 @@ def prepare_context_observation(
         "operation": "read",
     }
     store = Store(root)
-    body["request_digest"] = store.stable_digest(body, length=64)
     body["requested_at"] = store.utc_now()
+    body["request_digest"] = store.stable_digest(body, length=64)
     path = _observation_dir(root, run_id, observation_id) / "request.json"
     return _create_or_replay(
             store,
@@ -441,8 +450,8 @@ def record_context_observation_receipt(
         "unknowns": unknown_values,
         "evidence_class": request["evidence_class"],
     }
-    body["receipt_digest"] = store.stable_digest(body, length=64)
     body["observed_at"] = observed_at
+    body["receipt_digest"] = store.stable_digest(body, length=64)
     result = _create_or_replay(
             store,
             directory / "receipt.json",

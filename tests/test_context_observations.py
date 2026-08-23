@@ -204,6 +204,18 @@ def test_tamper_and_stale_receipt_fail_closed(tmp_path: Path) -> None:
         / "receipt.json"
     )
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    original = deepcopy(receipt)
+    receipt["observed_at"] = "2026-08-23T00:00:59Z"
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    with pytest.raises(ContextObservationError, match="tampered"):
+        verify_context_observation(
+            root,
+            run_id=RUN_ID,
+            observation_id=OBSERVATION_ID,
+            enforce_freshness=False,
+        )
+
+    receipt = original
     receipt["projection"]["lease_generation"] = 99
     receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
     with pytest.raises(ContextObservationError, match="tampered"):

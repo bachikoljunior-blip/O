@@ -212,8 +212,8 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
         "evidence_class": "operator_connector_readback",
         "operation": "read",
     }
-    request["request_digest"] = store.stable_digest(request, length=64)
     request["requested_at"] = "2026-08-23T00:00:02Z"
+    request["request_digest"] = store.stable_digest(request, length=64)
     receipt = {
         "schema_version": 1,
         "record_type": "context_observation_receipt",
@@ -229,8 +229,8 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
         "unknowns": [],
         "evidence_class": "operator_connector_readback",
     }
-    receipt["receipt_digest"] = store.stable_digest(receipt, length=64)
     receipt["observed_at"] = "2026-08-23T00:00:02Z"
+    receipt["receipt_digest"] = store.stable_digest(receipt, length=64)
     _write_json(observation_dir / "request.json", request)
     _write_json(observation_dir / "receipt.json", receipt)
     ledger_entry = observation_ledger_entry(
