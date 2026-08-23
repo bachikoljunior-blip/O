@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "mode": "work_o_engine_single_writer",
+  "status": "running",
+  "owner_kind": "work_primary",
+  "execution_id": "work-primary-claude-20260823T081642JST",
+  "predecessor_execution_id": "work-recovery-20260823T015401JST",
+  "lease_generation": 4,
+  "fence_token": "work-primary-fence-v4-9c37e5a1b6d2480f3e7a5c19",
+  "started_at": "2026-08-22T23:16:42Z",
+  "heartbeat_at": "2026-08-23T01:13:00Z",
+  "last_progress_at": "2026-08-23T01:13:00Z",
+  "stale_after_seconds": 900,
+  "authorization": {
+    "kind": "direct_primary_work_instruction",
+    "instruction": "実行を引き継いで達成するまで進めて / 並行実行して、あなたが主実行 (user chat; recorded as inbox entries 4 and 6)",
+    "recovery_cas_required_for_this_initial_owner": false,
+    "recovery_cas_required_for_successors": true,
+    "note": "The user designated this Claude Code remote session (claude-code-remote-session-017FWkmFVh47NAsvJ2Ev2yzn) as primary executor (inbox entry 4). The generation-3 recovery owner applied that direction, finished its publication boundary (PR 258 published at exact head bacc1a24 with CI then in progress), and checkpointed at 2026-08-22T22:56:18Z naming this session as the designated successor. Acquisition follows that clean checkpoint, not a usurpation of a live writer."
+  },
+  "continuation_source": "repository_latest_main_only",
+  "strategy_path": "agi/WORK_STRATEGY.json",
+  "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
+  "source_main_sha": "2935322427043faf49dbc2369ef8ced44f0457da",
+  "working_branch": "claude/execution-handoff-completion-mtwgqr",
+  "active_run_id": "run-work-mode-handoff-v2",
+  "active_component": "execute",
+  "active_unit_id": "unit-89058c1acef29b8e657a946c",
+  "user_input_inbox": {
+    "path": "agi/USER_INPUT_INBOX.json",
+    "highest_acknowledged_revision": 10,
+    "acknowledged_at": "2026-08-23T01:13:00Z",
+    "application_note": "Revisions 4-10 ingested. 4-6: gate not user-set; Claude primary; smartphone-first; ChatGPT authorized secondary. 7-10: context-conditioning observations from the secondary (suppressed hypotheses under long-lived context; clock desync; recursive context selection; constraints present in context do not reliably control later actions) - design context for Skill-in-Skill routing, no immediate behavior change."
+  },
+  "parallel_execution_coordination": {
+    "primary": "This Claude Code remote session (generation-4 lease holder).",
+    "secondary": "The ChatGPT Work session is an authorized secondary concurrent writer per inbox entry 6: independent falsifiable units on isolated branches and PRs, distinct native O Run and idempotency scope, no mutation of the primary's branch, native Run, pending invocations, lease, or PR heads. Integration to main stays serialized with exact-head validation; neither writer force-pushes, cancels, reruns, or merges the other's work.",
+    "pending_native_execute": "Frozen Work request invoke-f3f84b7c83c1d48e4962e390 is identity-bound to executor_binding current_chatgpt_work_session / model chatgpt-work-model-unverified, so only that session can truthfully submit its response. The primary will not impersonate that binding; the secondary writer should submit it at its next safe boundary, after which Task Evaluate, Consolidate Episode, and Learn proceed on run-work-mode-handoff-v2."
+  },
+  "exact_continuation": {
+    "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
+    "snapshot_branch": "main",
+    "snapshot_head_sha": "3bc72f41610532737b3ed50665def3c3ab10379b",
+    "pending_work_invocation_id": "invoke-f3f84b7c83c1d48e4962e390",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-f3f84b7c83c1d48e4962e390/request.json",
+    "durability_status": "Backlog settlement 6/6 complete: PR 251 (10f03fe), 246 (213e760), 244 (0629bcb), 238 (f1df027), 248 (d20ec94), and 230 (f46b5bc, first full-suite completion in 48min under the corrected 75min cap) all merged on green fresh exact-head CI. Transient red-main window explained and closed: 22:56-23:20 the checkpointed gen-3 lease failed the fresh-primary pin test (fixed by the gen-4 acquisition), and 23:44-00:00 the secondary's inbox schema churn broke the inbox pin tests (self-repaired by 7f882e1 restore); every merge decision was based on exact-head PR CI runs whose trees predate the breakage and were green. Current main is locally verified consistent; merge-push run for f46b5bc is in progress as final confirmation.",
+    "next_action": "Observe PR 245 CI 32607076987 (head 2376ed2, started 00:08, in progress at 64min under the 75min cap) and PR 247 CI 32607999744 (head eff0101, refreshed 00:29 after the transient-inbox repair); merge each on green unchanged head. Then retarget/refresh 249 (after 247) and 250 (after 245). Then submit the frozen native Execute response invoke-8027c964 from actual outcomes and answer Task Evaluate / Consolidate Episode / Learn as they freeze."
+  },
+  "model": {
+    "required": "highest_performance_model_available_to_work",
+    "actual": "claude-fable-5 (session-configured identifier; serving model may differ)",
+    "verified": false,
+    "verification_source": "Claude Code remote session configuration only; no independent platform attestation was observed"
+  },
+  "primary_run_contract": {
+    "voluntary_exit_permitted": false,
+    "normal_completion_condition": "user_level_objective_met_with_truthful_reporting; the automation-constructed strict external gate is not the user's completion criterion (inbox entry 4) and remains available only as an optional verification tool",
+    "single_test_commit_pr_ci_merge_report_or_milestone_is_exit_condition": false,
+    "forced_end_action": "persist_exact_continuation_and_mark_interrupted_or_checkpointed"
+  },
+  "monitor_contract": {
+    "role": "insurance_only",
+    "fresh_owner_action": "suppress_duplicate",
+    "stale_or_interrupted_action": "classify_then_require_fenced_cas_readback",
+    "recovery_eligibility_is_mutation_authority": false
+  },
+  "remote_persistence": {
+    "published_on_main": true,
+    "verified_remote_readback": true,
+    "result_commit_sha": "5ba689f",
+    "result_blob_sha": null,
+    "note": "Generation-4 acquisition commit 5ba689f was pushed and read back exactly from origin/main."
+  },
+  "external_evidence_state": {
+    "agi_claim_supported": false,
+    "strict_gate_passed": false,
+    "independent_production_evidence_observed": false
+  },
+  "primary_native_run": {
+    "run_id": "run-claude-primary-continuation-20260823",
+    "executor_binding": "current_claude_code_remote_session",
+    "model_identity": "claude-fable-5-session-configured-unverified",
+    "answered_invocations": [
+      "invoke-0bfd3de5f042f55f66868f50 (entry)",
+      "invoke-a9569c88120c9311d19feedb (root)",
+      "invoke-6a4d8b2335bc33610e707c70 (candidate_evaluate pre-application, USE_ACTIVE)"
+    ],
+    "pending_execute_invocation": "invoke-8027c964540c001952b35c1f",
+    "note": "The designated Claude primary now drives its own development through the O Engine Work bridge: ENTRY, Root, and the pre-application candidate evaluation are answered as immutable Work records, and the frozen Execute unit maps to the in-flight backlog integration (247/245 then 249/250). Its response will be submitted from real outcomes only. work-verify: valid, 4 requests / 3 responses / 1 pending."
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-23T00:36:44.528950Z",
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-6a4d8b2335bc33610e707c70",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "payload": {
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/repository-development": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "schema_version": 2
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "claude-fable-5-session-configured-unverified",
+      "os": "Linux-6.18.44-fc-v21-x86_64-with-glibc2.39",
+      "python": "3.11.15",
+      "repository_commit": "72ce3f0ccc9f255acd49a6aa61eec3c6dc82f4ff",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "execute",
+        "goal": "Settle the remaining backlog integrations: merge PR 247 and PR 245 on green fresh exact-head CI with unchanged heads, then retarget and refresh PR 249 (after 247) and PR 250 (after 245) and merge each on green fresh exact-head CI, root-causing any red only at its demonstrated boundary, and confirm the main merge-push run is green on the resulting tip.",
+        "rationale": "Expected-time ranking under agi/WORK_STRATEGY.json: these four integrations are already validated deltas whose only remaining cost is CI observation and serialized merging, so finishing them clears the board for the next capability unit at minimal marginal cost; the saturation assessment forbids starting new same-family retention probes, so no new probe unit is selected.",
+        "scope": "agi/backlog-integration",
+        "unit_id": "unit-08e5e71d6d2e996c315bdbe8"
+      },
+      "snapshot": {
+        "continuation_stack": [],
+        "created_at": "2026-08-23T00:34:34.029935Z",
+        "current_component": "execute",
+        "current_unit": "unit-08e5e71d6d2e996c315bdbe8",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "claude-fable-5-session-configured-unverified",
+          "os": "Linux-6.18.44-fc-v21-x86_64-with-glibc2.39",
+          "python": "3.11.15",
+          "repository_commit": "72ce3f0ccc9f255acd49a6aa61eec3c6dc82f4ff",
+          "runner": "python-engine-v2"
+        },
+        "error_count": 0,
+        "phase": "unit_pending",
+        "revision": 2,
+        "run_id": "run-claude-primary-continuation-20260823",
+        "status": "continue",
+        "updated_at": "2026-08-23T00:36:44.526833Z"
+      }
+    },
+    "mode": "pre-application",
+    "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
+    "run_id": "run-claude-primary-continuation-20260823",
+    "target_component": "execute"
+  },
+  "payload_digest": "662f08992e592f312f0a413f6f52819e8ac19bba2f4e84cdccfa6033507c2c72",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "9a04ffa02fb48ab2ae72c2ff9945e7fac4058514483e9a9c56ff9463f703476d",
+  "run_id": "run-claude-primary-continuation-20260823",
+  "schema_version": 1
+}
