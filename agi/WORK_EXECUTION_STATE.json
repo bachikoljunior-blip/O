@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-23T15:41:00Z",
-  "last_progress_at": "2026-08-23T15:41:00Z",
+  "heartbeat_at": "2026-08-23T15:46:16Z",
+  "last_progress_at": "2026-08-23T15:46:16Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -41,11 +41,11 @@
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/recovery-20260823t151235z-7f8d3b12",
-    "snapshot_head_sha": "eb9533a2b1dbea62ffcf4d4a52ad7017ef2729f9",
+    "snapshot_head_sha": "05617b717becc0b93b98b75e978c9cbc06cc1656",
     "pending_work_invocation_id": "invoke-55255fe17d8e25f39a039bcf",
     "pending_request_ref": ".continual/work-model/invocations/invoke-55255fe17d8e25f39a039bcf/request.json",
-    "durability_status": "Typed effective-directive compiler is published on isolated PR 277 exact head eb9533a2b1dbea62ffcf4d4a52ad7017ef2729f9; remote tree 3669ca51f6b62c906ada89377e23c37065a424e2 equals the reviewed local tree. Exact-head CI and fresh conflict proof are pending; Execute invoke-55255fe17d8e25f39a039bcf remains unanswered.",
-    "next_action": "Observe PR 277 workflow for unchanged exact head eb9533a2b1dbea62ffcf4d4a52ad7017ef2729f9; if all required jobs succeed and current main is conflict-free, merge with expected-head protection, read back reviewed blobs, then answer Execute and continue."
+    "durability_status": "PR 277 review found and repaired a non-increasing supersede-precedence gap. Current exact head 05617b717becc0b93b98b75e978c9cbc06cc1656, tree 5de3d16b55e9e1e7f7a1bc516963a910a814f0fa, matches the reviewed local tree; prior head/workflow are superseded. New exact-head CI is required.",
+    "next_action": "Observe only the workflow for unchanged PR 277 head 05617b717becc0b93b98b75e978c9cbc06cc1656; merge only after all required jobs succeed and fresh main conflict proof passes."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -252,12 +252,14 @@
     "typed_effective_directives": {
       "branch": "work/recovery-20260823t151235z-7f8d3b12",
       "pull_request": 277,
-      "head_sha": "eb9533a2b1dbea62ffcf4d4a52ad7017ef2729f9",
-      "exact_tree_sha": "3669ca51f6b62c906ada89377e23c37065a424e2",
+      "head_sha": "05617b717becc0b93b98b75e978c9cbc06cc1656",
+      "exact_tree_sha": "5de3d16b55e9e1e7f7a1bc516963a910a814f0fa",
       "workflow_run": null,
-      "status": "published_ci_pending",
-      "local_validation": "101 protected tests passed; compileall, 811 JSON documents, work-verify 94/93/1 valid, diff check passed",
-      "claim_boundary": "Internal context-control evidence only; no behavioral outcome or AGI inference."
+      "status": "precedence_gap_repaired_new_ci_pending",
+      "local_validation": "101 protected tests passed after precedence guard; compileall, 811 JSON documents, work-verify 94/93/1 valid, diff check passed",
+      "claim_boundary": "Internal context-control evidence only; no behavioral outcome or AGI inference.",
+      "superseded_head_sha": "eb9533a2b1dbea62ffcf4d4a52ad7017ef2729f9",
+      "superseded_workflow_run": 32649301401
     }
   },
   "pending_user_input": {
