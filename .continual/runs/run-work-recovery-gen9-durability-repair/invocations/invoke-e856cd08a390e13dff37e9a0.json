@@ -1,0 +1,62 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-24T21:08:39.198746Z",
+  "component": "entry",
+  "fragment_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-e856cd08a390e13dff37e9a0-entry.json",
+  "invocation_id": "invoke-e856cd08a390e13dff37e9a0",
+  "output": {
+    "fragment": {
+      "blocked_records_are_not_replayed": true,
+      "milestone": "Validator plus focused tests",
+      "objective": "Fail-closed remote checkpoint integrity"
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "observation": "The failure mode is a cross-artifact durability inconsistency, so the first useful unit is deterministic validation rather than semantic response reconstruction."
+    },
+    "result": {
+      "ambitious_end_goal": "A stopped primary can be resumed from latest remote main without relying on chat history, unpublished files, or inferred native responses.",
+      "constraints": [
+        "Latest remote main is the only continuation source.",
+        "Do not synthesize, replay, or answer missing identity-bound invocations.",
+        "Preserve generation-9 fence and single-writer authority.",
+        "Revision 20 limits every negative conclusion to the exact tested checkpoint/configuration/conditions.",
+        "Internal validation is not AGI or independent production evidence."
+      ],
+      "immediate_blockers": [
+        "Generation 8's state referenced invoke-37609d6e1890c250c8ada58b, whose request is absent from latest main.",
+        "Latest main still has pending Execute records whose semantic results must not be guessed or duplicated."
+      ],
+      "minimum_root_state": {
+        "authoritative_inbox_revision": 20,
+        "claim_boundary": "durability-integrity engineering only; no capability or AGI inference",
+        "durable_native_run": "run-work-mode-handoff-v2 revision 209",
+        "lease_generation": 9,
+        "source": "latest remote main at generation-9 finalization"
+      },
+      "next_falsifiable_milestone": "Implement a read-only checkpoint-integrity validator and focused tests that accept a fully durable checkpoint and reject missing request references, missing claimed responses, digest-invalid invocation records, and malformed state without mutating native records.",
+      "normalized_objective": "Make remote Work checkpoints fail closed unless every continuation reference and every claimed answered native invocation is present and internally verifiable in the checked repository snapshot.",
+      "success_conditions": [
+        {
+          "condition": "The validator cross-checks WORK_EXECUTION_STATE exact continuation and claimed answered invocation IDs against checked-in native request/response records.",
+          "evidence": "Focused tests with valid fixtures and one isolated failure per missing or invalid record."
+        },
+        {
+          "condition": "Validation is fail-closed and produces structured reasons without reconstructing missing semantic content.",
+          "evidence": "Tests prove missing, malformed, digest-mismatched, and inconsistent records are rejected and no files are changed."
+        },
+        {
+          "condition": "The current generation-8 durability discrepancy is detected without re-answering either orphan invocation.",
+          "evidence": "A read-only validation against latest-main records identifies the absent referenced request and/or response inconsistency."
+        },
+        {
+          "condition": "Existing protected behavior remains green and the result is published only through exact-head CI before any merge claim.",
+          "evidence": "Focused and protected tests, unchanged exact-head CI, and remote readback if publication occurs."
+        }
+      ]
+    }
+  },
+  "payload_digest": "b6371e23dd2c4350a68ae5b1",
+  "prompt_path": "prompts/entry.md",
+  "status": "complete"
+}
