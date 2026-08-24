@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T11:20:39.689Z",
-  "last_progress_at": "2026-08-24T11:20:39.689Z",
+  "heartbeat_at": "2026-08-24T11:30:06.546Z",
+  "last_progress_at": "2026-08-24T11:30:06.546Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,11 +21,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
-  "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
+  "source_main_sha": "e0f3b12e34c933eec89249bdbdbe0ccb1a14b1f7",
+  "working_branch": "work/recovery-gen7-context-comparison-native-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_source_observation_policy",
-  "active_unit_id": "unit-42f48b067a5abf643b682fee",
+  "active_component": "execute_native_publication_preflight",
+  "active_unit_id": "unit-52ff04d764576d3a077385d1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 19,
@@ -40,15 +40,15 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/recovery-gen7-inbox-append-native-v1",
-    "snapshot_head_sha": "3b7116b292839233934dee8b5f03fcff54c6834a",
-    "pending_work_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-c21c168fb7f2dc2671560b1d/request.json",
-    "pending_native_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
-    "durability_status": "PR 291 exact head b0ec6f9d4012515b2e038355ff296eb3bb967140 merged as e3ac6911eed1f60b7174ea730164ba83028ec44b; exact merge tree, parents, three reviewed blobs, and generation-7 state were read back.",
-    "next_action": "Create fresh Work-state and exact-head CI source-observation receipts, answer Execute invoke-c21c168fb7f2dc2671560b1d with bounded claims, then continue Task Evaluate, Consolidate Episode, Learn, and Root.",
-    "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
-    "next_native_phase": "execute_source_publication"
+    "snapshot_branch": "work/recovery-gen7-context-comparison-native-v1",
+    "snapshot_head_sha": null,
+    "pending_work_invocation_id": null,
+    "pending_request_ref": null,
+    "pending_native_invocation_id": null,
+    "durability_status": "PR 291 exact head b0ec6f9d4012515b2e038355ff296eb3bb967140 merged as e3ac6911eed1f60b7174ea730164ba83028ec44b and exact source blobs were read back. Root invoke-38e438e6259f40cddc6cccb2 selected native publication unit unit-52ff04d764576d3a077385d1; Candidate preflight invoke-f0ffb9ff98cd84ff9cd5bc28 completed before Execute freeze correctly failed closed on an expired Work-source receipt.",
+    "next_action": "Renew the exact generation-7 Work-state source observation, then resume the unchanged unit to freeze Execute and publish only the reviewed current-unit native lifecycle records through isolated exact-head CI.",
+    "completed_work_invocation_id": "invoke-f0ffb9ff98cd84ff9cd5bc28",
+    "next_native_phase": "preflight_execute_after_fresh_work_source_observation"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -103,10 +103,12 @@
       "invoke-e1e4472a23f0f19ad90e4703 (consolidate_episode inbox append unit)",
       "invoke-b89010c4762fb7eb6a7edcc0 (learn inbox append unit)",
       "invoke-a5db134eb95865beaaf938d1 (root native lifecycle publication)",
-      "invoke-6a98ae4fa1ccc57ad1547991 (candidate_evaluate native publication preflight)"
+      "invoke-6a98ae4fa1ccc57ad1547991 (candidate_evaluate native publication preflight)",
+      "invoke-38e438e6259f40cddc6cccb2 (root context-comparison native publication)",
+      "invoke-f0ffb9ff98cd84ff9cd5bc28 (candidate_evaluate native publication preflight)"
     ],
-    "pending_invocation": "invoke-c21c168fb7f2dc2671560b1d (execute; context comparison contract unit)",
-    "note": "The inbox append unit has completed through Learn with bounded control-plane PASS and original user-level FAIL preserved. The current fenced Execute publishes only its native lifecycle records; no source, authority, lease, or user-directive file is in scope."
+    "pending_invocation": "none; unit-52ff04d764576d3a077385d1 is pending Execute freeze after mandatory Work-source receipt renewal",
+    "note": "The context-comparison contract unit completed with bounded internal PASS and original user-level FAIL preserved. Root selected a native-record-only publication; Candidate preflight completed, and Execute freeze failed closed solely because the prior authoritative Work-state receipt exceeded its 300-second age bound."
   },
   "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
   "result_commit_sha": "0bb180458f14c489be3ce50b57d38368ceeaf3cd",
