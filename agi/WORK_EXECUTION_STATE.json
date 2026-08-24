@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T09:57:54.508Z",
-  "last_progress_at": "2026-08-24T09:57:54.508Z",
+  "heartbeat_at": "2026-08-24T10:07:38.456Z",
+  "last_progress_at": "2026-08-24T10:07:38.456Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,11 +21,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "f61a049e72753ae9cd3fe64e7ebf224af00a10f0",
-  "working_branch": "work/recovery-gen7-inbox-append-native-v1",
+  "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
+  "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute",
-  "active_unit_id": "unit-f0e1404b1156f828ad36fff5",
+  "active_component": "execute_preflight",
+  "active_unit_id": "unit-42f48b067a5abf643b682fee",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 19,
@@ -45,10 +45,10 @@
     "pending_work_invocation_id": "invoke-cac77fa8abcd6a8f7cf7683c",
     "pending_request_ref": ".continual/work-model/invocations/invoke-cac77fa8abcd6a8f7cf7683c/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "PR 290 exact head 27e1358c78e63264460575c68233e35f700cf923 passed workflow 32710018770 and merged/read back as f61a049e72753ae9cd3fe64e7ebf224af00a10f0. Execute and post-result Candidate response are now local; Task Evaluate is blocked until fresh Work and PR-290 CI source receipts are cross-bound.",
-    "next_action": "After exact readback of this state policy CAS, synchronize local state bytes, precommit and record fresh Work-state and CI connector observations, then resume Task Evaluate.",
+    "durability_status": "PR 290 exact head 27e1358c78e63264460575c68233e35f700cf923 passed workflow 32710018770 and merged/read back as f61a049e72753ae9cd3fe64e7ebf224af00a10f0. Root selected unit-42f48b067a5abf643b682fee and Candidate preflight completed locally. Execute request creation then failed closed before mutation because the bounded authoritative Work-source receipt had expired.",
+    "next_action": "After exact readback of this state-only heartbeat CAS, synchronize local state bytes, precommit and record a fresh GitHub Work-state observation for the new blob, then resume creation of the frozen Execute request for unit-42f48b067a5abf643b682fee.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
-    "next_native_phase": "execute_awaiting_work_model"
+    "next_native_phase": "execute_preflight_awaiting_fresh_work_source_receipt"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
