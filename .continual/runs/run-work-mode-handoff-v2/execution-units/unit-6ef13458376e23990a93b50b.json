@@ -1,0 +1,48 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "the current legacy invariant instruction, expected.required tokens, substring scorer, and reference-agent behavior",
+    "a versioned v2 public contract whose exact concept identifiers appear in the executor-visible task and are derived from the same typed source used by scoring",
+    "a deterministic structural scorer that accepts required concept entries and rejects missing, duplicate, malformed, or substring-only evidence",
+    "regressions proving legacy heldout-v1 generation and scoring remain unchanged",
+    "hashes and verdict fields proving every frozen blinded-measurement artifact remains byte-identical and mechanical FAIL"
+  ],
+  "expected_outputs": [
+    "a minimal opt-in v2 contract path in src/agi/heldout.py; default heldout-v1 output and legacy invariant semantics remain unchanged",
+    "a public tool-recovery task that explicitly requests structured steps keyed by stable concept identifiers shared with the sealed scorer contract",
+    "a fail-closed v2 evaluator that validates structure and exact identifiers rather than substring occurrence in arbitrary prose",
+    "tests where a correctly structured answer passes, a missing concept fails, malformed or duplicate entries fail, and irrelevant text containing concept substrings cannot pass",
+    "tests proving executor redaction still excludes expected values, seed, nonce, and scorer-only data",
+    "a pinned regression proving the historical scorer-report digest c6f9b9c06fd5b939f12076131dd756062b779766130a9907ad8779b389fc7646 and FAIL verdict are unchanged",
+    "focused tests, compileall, repository JSON validation, and a diff check showing no historical blinded artifact changed"
+  ],
+  "failure_conditions": [
+    "the repair changes, retries, rescales, semantically rescored, or relabels the historical 11-of-12 trial",
+    "v2 silently changes the existing default heldout-v1 suite or commitments",
+    "the executor-visible task contains sealed expected answers, seed, nonce, scorer implementation, or hidden evaluation material",
+    "arbitrary prose or embedded substrings can satisfy the v2 structural contract",
+    "a missing required concept passes or malformed structure is accepted",
+    "tests cannot pin the legacy behavior and frozen artifact integrity"
+  ],
+  "goal": "Implement and validate a future-only typed public-concept contract for held-out invariant tasks so the public instruction and deterministic scorer consume the same explicit concept identifiers, while leaving the existing heldout-v1 generator, legacy substring scorer behavior, frozen 11-of-12 trial artifacts, and historical FAIL verdict unchanged.",
+  "inputs": [
+    "src/agi/heldout.py",
+    "tests/test_heldout.py",
+    ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/precommitment.json",
+    ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/public-challenge.json",
+    ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/scorer-report.json",
+    ".continual/work-model/invocations/invoke-dc04ab5d32b05f2ae5df61e9/response.json"
+  ],
+  "parent_continuation": "After Execute, Task Evaluate the repair separately from the still-failing user objective, then consolidate and learn. Publish the repair plus accumulated native records on an isolated branch, require unchanged exact-head CI and clean mergeability, merge only the verified head, and only afterward precommit a new secret-seeded v2 measurement with a fresh non-reused response from a separate non-writing executor.",
+  "rollback": "If compatibility or artifact-integrity checks fail, remove only the uncommitted v2 implementation and tests, preserve every native and historical measurement record, retain the old mechanical FAIL, and return INSUFFICIENT_EVIDENCE with the exact mismatch. Do not weaken the scorer or change the old task.",
+  "scope": "agi/heldout-public-concept-contract-v2",
+  "success_conditions": [
+    "the v2 instruction and scorer obtain required concept identifiers from one typed contract representation",
+    "v2 scoring is deterministic, structural, and fail-closed without semantic guessing or accidental substring success",
+    "heldout-v1 remains the default and reproduces its pre-repair behavior",
+    "all new positive and negative regressions pass and no existing held-out regression fails",
+    "the old request, response, audit, report, score, digest, and FAIL verdict are byte-for-byte or field-for-field unchanged",
+    "no fresh behavioral trial is run inside this repair unit"
+  ],
+  "unit_id": "unit-6ef13458376e23990a93b50b"
+}
