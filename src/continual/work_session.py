@@ -91,8 +91,11 @@ def _walk_public(value: Any, path: str = "output") -> None:
 
 
 def _verified_request(store: Store, request_path: Path) -> dict[str, Any]:
-    request = store.read_json(request_path, None)
     invocation_id = request_path.parent.name
+    try:
+        request = store.read_json(request_path, None)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise WorkSessionError(f"malformed Work request: {invocation_id}") from exc
     if not isinstance(request, dict):
         raise WorkSessionError(f"malformed Work request: {invocation_id}")
     if request.get("invocation_id") != invocation_id or not _digest_matches(
@@ -123,8 +126,11 @@ def _verified_response(
     request: Mapping[str, Any],
     response_path: Path,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    response = store.read_json(response_path, None)
     invocation_id = response_path.parent.name
+    try:
+        response = store.read_json(response_path, None)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise WorkSessionError(f"malformed Work response: {invocation_id}") from exc
     if not isinstance(response, dict):
         raise WorkSessionError(f"malformed Work response: {invocation_id}")
     if response.get("invocation_id") != invocation_id:
@@ -188,6 +194,31 @@ def verified_work_invocation(root: Path, invocation_id: str) -> dict[str, Any]:
         "response": deepcopy(response),
         "output": output,
     }
+
+
+def verified_work_request(root: Path, invocation_id: str) -> dict[str, Any]:
+    """Read and fully verify one immutable Work request, response optional.
+
+    Pending checkpoint references need to prove the exact frozen request before
+    a response exists.  This public boundary deliberately shares the request
+    digest and frozen DecisionContext checks used by completed invocation
+    verification instead of creating a weaker checkpoint-specific parser.
+    """
+
+    if not _INVOCATION_ID.fullmatch(invocation_id):
+        raise WorkSessionError("invalid Work invocation_id")
+    root = root.resolve()
+    store = Store(root)
+    request_path = (
+        store.base
+        / "work-model"
+        / "invocations"
+        / invocation_id
+        / "request.json"
+    )
+    if not request_path.is_file():
+        raise WorkSessionError(f"Work request does not exist: {invocation_id}")
+    return deepcopy(_verified_request(store, request_path))
 
 
 class WorkModelClient:
