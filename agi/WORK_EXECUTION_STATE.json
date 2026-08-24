@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-24T01:56:25.214Z",
-  "last_progress_at": "2026-08-24T01:56:25.214Z",
+  "heartbeat_at": "2026-08-24T02:00:32.899Z",
+  "last_progress_at": "2026-08-24T02:00:32.899Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -44,8 +44,8 @@
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
     "pending_work_invocation_id": "invoke-13736715dc4009625e7ecb04",
     "pending_request_ref": ".continual/work-model/invocations/invoke-13736715dc4009625e7ecb04/request.json",
-    "durability_status": "PR 284 exact head e0d4c18f6261cf131d80ef5dcee8b77a3e638c09 passed all four shards and aggregate in workflow 32673271943, merged as 579f6dfc35670f720169da8a39cfb0033828f738, all 41 reviewed blobs matched on main, and the exact PR 283 run/jobs were recorded under precommitted request ci-run-b34ec32bfc8331486158ad7c with verified receipt a004ae84f2e7b45462bbb928cd17e5a8ceb0f2ff856f25caf8b35a66797001af.",
-    "next_action": "After exact readback of this publication precommit, create the isolated branch from that exact main commit, publish the 34-path candidate without state or uv.lock drift, run exact-head CI, merge only unchanged success, read back every reviewed blob, then answer Execute invoke-13736715dc4009625e7ecb04 exactly once."
+    "durability_status": "PR 285 exact head a275ba57e2e1e1166c2ed14913b1e9cf091f5cae passed four pytest shards and dependent aggregate in workflow 32679411712, merged as 07f790d71241396277cd8b915d49a7ad81e0178a, and all 34 reviewed blobs matched at the merge commit.",
+    "next_action": "Submit the already-frozen Execute invocation invoke-13736715dc4009625e7ecb04 exactly once with unit PASS/task FAIL and the verified CI/merge/readback evidence; then continue Task Evaluate, Candidate, Consolidate, Learn, and Root to the next unmet unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -603,7 +603,7 @@
       "workflow_id": 335420036,
       "pr_head": "a275ba57e2e1e1166c2ed14913b1e9cf091f5cae",
       "mergeable": true,
-      "ci_status": "exact_head_ci_success_all_four_shards_and_dependent_aggregate",
+      "ci_status": "success",
       "last_ci_observed_at": "2026-08-24T01:56:25.214Z",
       "aggregate_job_id": 97298367940,
       "exact_head_ci_result": "workflow 32679411712: four pytest shards and dependent aggregate succeeded",
@@ -645,7 +645,49 @@
         "candidate_ahead_by": 1,
         "candidate_behind_by": 9,
         "merge_base": "ceca1b76438c8cb3d4371770ed8a05d95aa32a6d"
-      }
+      },
+      "status": "merged_to_main_all_34_reviewed_blobs_verified",
+      "merge_sha": "07f790d71241396277cd8b915d49a7ad81e0178a",
+      "verified_remote_readback": true,
+      "reviewed_blob_count": 34,
+      "readback_blobs": {
+        ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-7cf565548d637cbe981ed313-result.json": "c53a04a91742b7e920a5d3d16bc54d19b2ffbae4",
+        ".continual/runs/run-work-mode-handoff-v2/candidate-trials/invoke-f404066f25f7868881d42b9b.json": "260b1185bcf00b6bb9445ac820a60fcb5524c1cb",
+        ".continual/runs/run-work-mode-handoff-v2/ci-source-observations/ci-run-b34ec32bfc8331486158ad7c/receipt.json": "9c1005a8244c5f7b88c9cd01cb4f352072fb70a6",
+        ".continual/runs/run-work-mode-handoff-v2/ci-source-observations/ci-run-b34ec32bfc8331486158ad7c/request.json": "c0e5eb36f418bdbc54eb3ba5fb25e658aa3b1356",
+        ".continual/runs/run-work-mode-handoff-v2/events.jsonl": "b157f032524e69c57b9b541b05b0f79440884f7d",
+        ".continual/runs/run-work-mode-handoff-v2/execution-units/unit-25a53ee5ffd91efed4303dcd.json": "97c28031f722e6a4e95dc58adc4f979ab3914cb4",
+        ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-10eda66f526875b0668d6423-candidate_evaluate.json": "bbdd87f8d08d978264487b526724876c04b672d9",
+        ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-b598bc921df7a32b525ba91e-execute.json": "569529f63dad885b60bb83aadd4f5241c00106a6",
+        ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-be495b435736476e394bad18-root.json": "41000bdf42c309088712ded9a7772c3798a4ea7f",
+        ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-f404066f25f7868881d42b9b-candidate_evaluate.json": "cd3a9215040192a87a15e5f4979516ff9a6b9d12",
+        ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-10eda66f526875b0668d6423.json": "93216b16447619f485104a81daa5b51634fff770",
+        ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-9e577c59dafb0a02e7f67407.json": "31835a666194c954c8f6774933c79236e96feede",
+        ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-b598bc921df7a32b525ba91e.json": "f209b559b78fe82b5b44a625bd5ba2ebd088b24d",
+        ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-be495b435736476e394bad18.json": "cf00fb68de4fc66367d30bf942405c46666de6e4",
+        ".continual/runs/run-work-mode-handoff-v2/invocations/invoke-f404066f25f7868881d42b9b.json": "61664ef8b63b32e029c4376a466e891a63b01ac3",
+        ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-10eda66f526875b0668d6423-candidate_evaluate.json": "5e4afe2e4dc3a1c87563d2e8b81b43a2c23bde6d",
+        ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-b598bc921df7a32b525ba91e-execute.json": "e7c0ea09b569dabb7aa815e7bffad6896299fa1c",
+        ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-be495b435736476e394bad18-root.json": "731ed2635dae0e3e6ddc055ef0f86b9f4e8fa03e",
+        ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-f404066f25f7868881d42b9b-candidate_evaluate.json": "f09160d9cae80b30938fec36020a58e2439d6a36",
+        ".continual/runs/run-work-mode-handoff-v2/preflight/preflight-execute-25a84385cbcc90307b1080ee.json": "67cb43b4e214b518589a28c88e4b82a6d9b5b5ba",
+        ".continual/runs/run-work-mode-handoff-v2/preflight/preflight-root-732c8a7275443b703e45e1fa.json": "2e71b2658901b5021e133e52e6e51397da022b8e",
+        ".continual/runs/run-work-mode-handoff-v2/snapshot.json": "6499d350a287feea03ebb78b09426789bcd5b3f6",
+        ".continual/runs/run-work-mode-handoff-v2/work-source-observations/work-state-c6068bdd0a4eb8f8f60c15ac/receipt.json": "bf114d91edcca7afc2fcdf9647c2918ada0f51b8",
+        ".continual/runs/run-work-mode-handoff-v2/work-source-observations/work-state-c6068bdd0a4eb8f8f60c15ac/request.json": "22f3f06a372bba9f12fda53a0f884f63c3fc0ebe",
+        ".continual/work-model/invocations/invoke-13736715dc4009625e7ecb04/request.json": "99ab58347976eef31d3438f2201225c6b25ab1be",
+        ".continual/work-model/invocations/invoke-6036f37046821aec571617d2/request.json": "a950cb3c1015ae5efbd3cf73ea1051f21d3d7cfc",
+        ".continual/work-model/invocations/invoke-6036f37046821aec571617d2/response.json": "4195e452a526382038619daacf058271c6695d40",
+        ".continual/work-model/invocations/invoke-610562bcc91d31491a1d8a86/request.json": "1d4f77a226b3961ef93a028288a8e5705b75d8a7",
+        ".continual/work-model/invocations/invoke-610562bcc91d31491a1d8a86/response.json": "de2412024e859479c6c7658f664b6c4c94c4613d",
+        ".continual/work-model/invocations/invoke-8b60149d0f43ed11e19ac34b/response.json": "4542b957dbd69f0e72b02502c27666c32779262c",
+        ".continual/work-model/invocations/invoke-a5b653a38befcb19fff908d9/request.json": "b7d1ef2293d3cb0fa6f6bf8eb5cef7e91d79f550",
+        ".continual/work-model/invocations/invoke-a5b653a38befcb19fff908d9/response.json": "6bc1c1ac7ac2c718e5bd9be993e7526225c1140a",
+        "src/continual/context_kernel.py": "5b1e08756a668aa1faa67c9b8a887018cfc4431e",
+        "tests/test_context_kernel.py": "695a44c77222fd8d8288c061b35dd6d5b239e722"
+      },
+      "merged_at_observed": "2026-08-24T02:00:32.899Z",
+      "claim_boundary": "Deterministic manifest-bound repository merge-control only; internal CI and readback are not external behavioral capability, AGI, or user-objective completion evidence."
     }
   }
 }
