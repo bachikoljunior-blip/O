@@ -8,8 +8,8 @@
     "lease_generation": 8,
     "fence_token": "work-recovery-fence-v8-073c1e261139db2af15fcdf59df785fd9608de068b2d6b5cc9a05048751b136a",
     "started_at": "2026-08-24T15:31:24.040Z",
-    "heartbeat_at": "2026-08-24T16:07:39.781Z",
-    "last_progress_at": "2026-08-24T16:07:39.781Z",
+    "heartbeat_at": "2026-08-24T16:14:00.459Z",
+    "last_progress_at": "2026-08-24T16:14:00.459Z",
     "stale_after_seconds": 900,
     "authorization": {
         "kind": "fenced_stale_owner_recovery",
@@ -24,8 +24,8 @@
     "source_main_sha": "08cefe0cab7a0858dc2359084fc2a9bcdb163a47",
     "working_branch": "work/recovery-gen7-revision20-native-v1",
     "active_run_id": "run-work-mode-handoff-v2",
-    "active_component": "checkpoint_measurement_readiness_task_evaluate_pending",
-    "active_unit_id": "unit-15428593baa21431b4935253",
+    "active_component": "checkpoint_measurement_readiness_publication_execute",
+    "active_unit_id": "unit-e20d50a4ddc04efb95ba778f",
     "user_input_inbox": {
         "path": "agi/USER_INPUT_INBOX.json",
         "highest_acknowledged_revision": 20,
@@ -56,13 +56,13 @@
         "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
         "snapshot_branch": "main",
         "snapshot_head_sha": "08cefe0cab7a0858dc2359084fc2a9bcdb163a47",
-        "pending_work_invocation_id": "pending_emit_task_evaluate_after_invoke-60f68f61725378eeac4c70e5",
+        "pending_work_invocation_id": "invoke-c95a91de782165b63e4266c7",
         "pending_request_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-        "pending_native_invocation_id": "pending_emit_task_evaluate_after_generation8_heartbeat_receipt",
-        "durability_status": "The exact checkpoint measurement-readiness implementation is local and uncommitted: three tasks, two arms, six cells, twelve prepared attempts, zero observations, no activation, and 114 focused and adjacent tests passing. Execute and post-result Candidate evaluation are complete; Candidate remains REMAIN_CANDIDATE. No behavioral, original-method, scientist-family, adaptation-loss, or untested-mechanism result is claimed.",
-        "next_action": "Read back this state-only expected-blob heartbeat CAS, record a fresh authoritative Work-state observation, then resume Task Evaluate for unit-15428593baa21431b4935253. Preserve exact Revision-20 scope and do not answer the stale generation-6 Execute.",
+        "pending_native_invocation_id": "invoke-214abb796807012259819320",
+        "durability_status": "The exact three-path checkpoint measurement-readiness publication tree is prepared locally from main b83c408a3f27094202de2e58c6578d65b4c6494d as head 2bf1cb1031f6864abe5dc34f4e2c12407b6a4886 and tree c095807da984449e73a1169b0318fff587e2903c. Clean-tree validation passed 114 focused and adjacent tests. No GitHub branch, PR, or merge for this effect exists before this precommit.",
+        "next_action": "Read back this state-only precommit CAS, obtain a fresh Work-source receipt, then non-force publish only branch work/recovery-gen8-checkpoint-readiness-v1 at exact head 2bf1cb1031f6864abe5dc34f4e2c12407b6a4886 and open one PR. Do not answer the stale generation-6 Execute.",
         "completed_work_invocation_id": "invoke-60f68f61725378eeac4c70e5",
-        "next_native_phase": "task_evaluate_checkpoint_measurement_readiness"
+        "next_native_phase": "execute_checkpoint_measurement_readiness_publication"
     },
     "model": {
         "required": "highest_performance_model_available_to_work",
@@ -151,6 +151,26 @@
             "force_push"
         ],
         "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z"
+    },
+    "checkpoint_measurement_readiness_publication_precommit": {
+        "effect_id": "publish-checkpoint-measurement-readiness-v1",
+        "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen8:checkpoint-measurement-readiness:2bf1cb1031f6864abe5dc34f4e2c12407b6a4886:v1",
+        "status": "prepared_not_dispatched",
+        "prepared_at": "2026-08-24T16:14:00.459Z",
+        "branch": "work/recovery-gen8-checkpoint-readiness-v1",
+        "base_main_commit": "b83c408a3f27094202de2e58c6578d65b4c6494d",
+        "exact_head_sha": "2bf1cb1031f6864abe5dc34f4e2c12407b6a4886",
+        "exact_tree_sha": "c095807da984449e73a1169b0318fff587e2903c",
+        "changed_path_count": 3,
+        "changed_path_list_sha256": "d00126791e097e358af69603e7127e0903a9b5533a4c6a6168fe0072a0796f3b",
+        "reviewed_blobs": {
+            "agi/CHECKPOINT_INHERITANCE_MEASUREMENT_V2.json": "7597b2a680c2f31902a9379d9834db727fd26d71",
+            "src/agi/checkpoint_inheritance_experiment.py": "2900c8218e2279306637645c59f86590e2b3b5bc",
+            "tests/test_checkpoint_inheritance_experiment.py": "67f935edf672685f4a40ac32ab469ee4aad3605e"
+        },
+        "local_validation": "114 focused and adjacent tests passed in 6.77s; compileall, readiness JSON parse, clean status, and diff check passed.",
+        "rule": "After exact readback of this state-only expected-blob CAS and a fresh Work-source receipt, publish this exact head non-force to the named new branch and open one PR. Merge only the unchanged exact head after all required CI succeeds, main and authority are fresh, and conflict checks pass; then read back all three reviewed blobs.",
+        "claim_boundary": "Internal readiness publication only. Zero behavioral observations, no checkpoint-inheritance activation, no original-method or scientist-family result, no adaptation-loss or untested-mechanism inference, no AGI evidence, and no user-level completion."
     },
     "recent_main_integration": {
         "pull_request": 281,
