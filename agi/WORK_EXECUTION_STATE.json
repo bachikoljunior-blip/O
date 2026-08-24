@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T12:01:09.069Z",
-  "last_progress_at": "2026-08-24T12:01:09.069Z",
+  "heartbeat_at": "2026-08-24T12:05:08.636Z",
+  "last_progress_at": "2026-08-24T12:05:08.636Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,8 +45,8 @@
     "pending_work_invocation_id": "invoke-bad58dd32377c344b6717fc6",
     "pending_request_ref": ".continual/work-model/invocations/invoke-bad58dd32377c344b6717fc6/request.json",
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
-    "durability_status": "The manifest-correction precommit was read back at main ff37d2851f0444cec1bc7bfabbf9b7feba8a3f2a. PR 292 was non-force fast-forwarded to exact head e3fe61198fe00079e7def3d52d83124dca3e61be and tree 8492f815ece66458d09637a8146470663972a9e1; exact-tree work-verify is valid at 171/169/2 and the 82-path diff is unchanged. Execute remains frozen and unanswered while new exact-head CI is pending.",
-    "next_action": "Observe a new PR 292 workflow bound to exact head e3fe61198fe00079e7def3d52d83124dca3e61be; after all required jobs succeed, re-read generation-7 authority, current main, exact PR head, and conflict-free comparison, then merge with expected-head protection and read back every reviewed blob before answering Execute.",
+    "durability_status": "PR 292 is closed as superseded and replacement PR 293 preserves exact head e3fe61198fe00079e7def3d52d83124dca3e61be and tree 8492f815ece66458d09637a8146470663972a9e1. GitHub Actions REST refuted the connector-index false negative: exact-head run 32724168634 is in progress with shards 0 and 1 successful and shards 2 and 3 running; two redundant exact-head runs remain queued. Execute remains frozen and unanswered while the canonical exact-head CI and aggregate are pending.",
+    "next_action": "Observe canonical exact-head run 32724168634 on PR 293. After all four shards and the dependent aggregate succeed, re-read generation-7 authority, inbox revision 19, current main, exact PR head, and a conflict-free comparison; then precommit merge authorization, merge with expected-head protection, and read back all 82 reviewed blobs before answering Execute.",
     "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
     "next_native_phase": "execute_external_effect_after_state_precommit"
   },
@@ -1300,17 +1300,18 @@
     ],
     "local_validation": "Exact publication tree work-verify is valid with 171 requests, 169 responses, and two recognized pending Execute requests (one pre-existing main request and the current publication request); 82 changed paths include the deterministic 81-payload manifest; every JSON/JSONL parsed; the prior 408-line event log is a byte-identical prefix of the 435-line selected log; secret-marker and forbidden-path scans passed.",
     "prepared_at": "2026-08-24T11:40:38.041Z",
-    "status": "ci_trigger_recovery_precommitted",
+    "status": "ci_in_progress",
     "rule": "No blob, tree, commit, branch, PR, workflow, ref update, or merge for this effect may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base; merge only the unchanged exact head after all required CI succeeds and a fresh main comparison is conflict-free; then read back all 82 reviewed blobs.",
     "claim_boundary": "Internal native O lifecycle durability only. The comparison remains PRECOMMITTED with zero routing observations and no scientist positive-control result; no behavioral benefit, external production evidence, AGI, or user-level completion is claimed.",
     "remote_parent": "92b3b25ab6643dcaa2d043141e4d88032cfbd267",
     "remote_tree": "b1be4dcbf0e9942b2b6c37f8b1637e5cee4a6370",
-    "remote_commit": "58b580c8674fb2d486613e7232a9e79b01ff2b61",
+    "remote_commit": "e3fe61198fe00079e7def3d52d83124dca3e61be",
     "remote_tree_matches_local": true,
     "remote_changed_path_count": 82,
-    "pull_request": 292,
-    "pr_url": "https://github.com/bachikoljunior-blip/O/pull/292",
-    "pr_head": "58b580c8674fb2d486613e7232a9e79b01ff2b61",
+    "pull_request": 293,
+    "pr_url": "https://github.com/bachikoljunior-blip/O/pull/293",
+    "superseded_pull_request": 292,
+    "pr_head": "e3fe61198fe00079e7def3d52d83124dca3e61be",
     "pr_base_at_creation": "cb0eda50fce49a987fc5623f298c5c3be5e62a91",
     "published_at": "2026-08-24T11:48:20Z",
     "superseded_pr_head": "58b580c8674fb2d486613e7232a9e79b01ff2b61",
@@ -1334,17 +1335,46 @@
       "negative_evidence": "No pull_request workflow was associated with the corrected exact head after the non-force synchronize update; the superseded-head workflow cannot authorize merge.",
       "action": "Close and immediately reopen PR 292 without changing its head to emit the default pull_request reopened event exactly once.",
       "prepared_at": "2026-08-24T11:59:35.824Z",
-      "status": "close_reopen_completed_without_workflow",
+      "status": "completed_connector_false_negative_refuted",
       "completed_at": "2026-08-24T12:00:10Z",
       "head_unchanged": true,
+      "reconciliation_note": "The GitHub connector initially returned no corrected-head workflow, but GitHub Actions REST later exposed exact-head runs 32724168634, 32724759054, and 32724935472. No further trigger is authorized or needed.",
       "fallback": {
         "effect_id": "replace-pr292-for-exact-head-ci-v1",
         "idempotency_key": "bachikoljunior-blip/O:pr292:e3fe61198fe00079e7def3d52d83124dca3e61be:replacement-open:v1",
         "expected_state_blob": "1c40540db2a5c263091ec9b2840f37850d15f407",
         "action": "Close PR 292 as superseded, then create exactly one replacement PR from the same branch and exact unchanged head so the pull_request opened event can start CI.",
         "prepared_at": "2026-08-24T12:01:09.069Z",
-        "status": "precommitted"
+        "status": "completed_replacement_pr_created",
+        "completed_at": "2026-08-24T12:02:11Z",
+        "replacement_pull_request": 293,
+        "replacement_pr_url": "https://github.com/bachikoljunior-blip/O/pull/293",
+        "head_unchanged": true
       }
+    },
+    "exact_head_workflows": {
+      "observed_at": "2026-08-24T12:05:08.636Z",
+      "head_sha": "e3fe61198fe00079e7def3d52d83124dca3e61be",
+      "canonical_run": 32724168634,
+      "canonical_status": "in_progress",
+      "canonical_jobs": {
+        "pytest shard 0 of 4": "success",
+        "pytest shard 1 of 4": "success",
+        "pytest shard 2 of 4": "in_progress",
+        "pytest shard 3 of 4": "in_progress",
+        "aggregate": "pending_dependency"
+      },
+      "redundant_runs": [
+        {
+          "run_id": 32724759054,
+          "status": "queued"
+        },
+        {
+          "run_id": 32724935472,
+          "status": "queued"
+        }
+      ],
+      "rule": "Only a completed successful run bound to the unchanged exact head may authorize merge; redundant runs do not weaken or replace that gate."
     }
   }
 }
