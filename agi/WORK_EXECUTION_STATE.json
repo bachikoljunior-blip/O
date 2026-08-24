@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T08:57:45.873Z",
-  "last_progress_at": "2026-08-24T08:57:45.873Z",
+  "heartbeat_at": "2026-08-24T09:04:15.075Z",
+  "last_progress_at": "2026-08-24T09:04:15.075Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -40,13 +40,13 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "local_fenced_worktree_pending_publication",
-    "snapshot_head_sha": "2c94909efcc37c05462063bcccd2850d60837050",
+    "snapshot_branch": "work/recovery-gen7-inbox-append-native-v1",
+    "snapshot_head_sha": "3b7116b292839233934dee8b5f03fcff54c6834a",
     "pending_work_invocation_id": "invoke-cac77fa8abcd6a8f7cf7683c",
     "pending_request_ref": ".continual/work-model/invocations/invoke-cac77fa8abcd6a8f7cf7683c/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "Revision 19 recovery, dedicated append path, exact-head CI, expected-head merge, exact main readback, Task Evaluate, Consolidate Episode, and Learn are complete. A fenced Execute is publishing their exact native lifecycle records from a closed allowlist without source or authority-file changes.",
-    "next_action": "Validate the closed native-record allowlist, precommit it in state, publish one non-force isolated branch from current main, require unchanged exact-head CI, then expected-head merge and exact readback.",
+    "durability_status": "Closed native-record allowlist validated and reconstructed on exact latest-main parent 6d4e518cc393657a67732637ff4ba0d32ab6e74e. No remote branch, commit, PR, workflow, or ref mutation has occurred for this effect.",
+    "next_action": "After this state-only CAS and exact readback, push exactly commit 3b7116b292839233934dee8b5f03fcff54c6834a non-force, read back its tree and 84-path diff, then open one PR and await exact-head CI.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
     "next_native_phase": "execute_awaiting_work_model"
   },
@@ -996,5 +996,42 @@
     "native_learn_decision": "NO_CHANGE",
     "native_publication_status": "local_allowlist_validation_in_progress",
     "native_publication_branch": "work/recovery-gen7-inbox-append-native-v1"
+  },
+  "inbox_append_native_publication_precommit": {
+    "effect_id": "publish-inbox-append-native-lifecycle-v1",
+    "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen7:inbox-append-native:3b7116b292839233934dee8b5f03fcff54c6834a:v1",
+    "branch": "work/recovery-gen7-inbox-append-native-v1",
+    "base_main_commit": "6d4e518cc393657a67732637ff4ba0d32ab6e74e",
+    "expected_state_blob": "6ae22c9c27128102a6c2e53bae83c0e83d5a20d8",
+    "local_result_commit": "3b7116b292839233934dee8b5f03fcff54c6834a",
+    "local_result_tree": "24547c31dc1a8408e8bf895422dc91526da0e89c",
+    "changed_path_count": 84,
+    "changed_path_list_sha256": "cdeff419917b397985c289c5cc758b5f79dbcdb73b926d98095cffc57a89b772",
+    "reviewed_blob_manifest_sha256": "5ca7b2cdcf4efa48f6ed5d8a57cf4971e70f6de5660d6cc758f644d0c336bc2d",
+    "total_bytes": 1290259,
+    "allowed_prefixes": [
+      ".continual/episodes/episode-work-mode-handoff-v2/",
+      ".continual/runs/run-work-mode-handoff-v2/",
+      ".continual/work-model/invocations/"
+    ],
+    "forbidden_categories": [
+      "temporary_files",
+      "credentials",
+      "hidden_reasoning",
+      "foreign_writer_responses",
+      "implementation",
+      "tests",
+      "prompts",
+      "candidates",
+      "inbox",
+      "directives",
+      "strategy",
+      "authority_state"
+    ],
+    "local_validation": "84 paths; every JSON/JSONL parsed; diff check and secret-marker scan passed; native work-verify valid with 161 requests, 159 responses, and 2 recognized pending requests (the current publication request plus one pre-existing main request outside this allowlist).",
+    "prepared_at": "2026-08-24T09:04:15.075Z",
+    "status": "precommitted_no_remote_branch",
+    "rule": "No remote branch, commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base and merge only unchanged exact head after all required CI succeeds and fresh main comparison is conflict-free.",
+    "claim_boundary": "Durable native bookkeeping only; not behavioral capability, positive-control evidence, AGI, or user-level completion."
   }
 }
