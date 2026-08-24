@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T07:53:32.441Z",
-  "last_progress_at": "2026-08-24T07:53:32.441Z",
+  "heartbeat_at": "2026-08-24T07:59:04.864Z",
+  "last_progress_at": "2026-08-24T07:59:04.864Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -35,15 +35,15 @@
   "parallel_execution_coordination": {
     "primary": "Generation 7 remains the sole fenced main writer. The dedicated inbox append implementation is isolated on work/recovery-gen7-inbox-append-path-v1 and will be published non-force from latest main only after exact local validation.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Root invoke-fab205d5bf529019e49ac9cd consumed revision 19 and selected Execute unit unit-d6cbe0a3154ed09edcc8e984; work-resume will freeze its identity-bound Execute request.",
+    "pending_native_execute": "Execute invoke-7a258555c3d521841a26d787 is frozen for unit-d6cbe0a3154ed09edcc8e984 and binds revision 19, generation 7, and work-state readback receipt 9954e1598678361723891eb960651ccb34523318b82e8babe9b2729032d0c9de.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
     "snapshot_head_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
-    "pending_work_invocation_id": "none_at_unit_pending_boundary",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-fab205d5bf529019e49ac9cd/response.json",
+    "pending_work_invocation_id": "invoke-7a258555c3d521841a26d787",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-7a258555c3d521841a26d787/request.json",
     "durability_status": "Authoritative inbox revision 19, its recovery integration receipt, and the revision-19 typed directive ledger are verified on main. Root invoke-fab205d5bf529019e49ac9cd consumed their exact blobs and selected the dedicated append-path Execute unit; revision 19 is now acknowledged at that safe semantic boundary.",
     "next_action": "Freeze and execute the dedicated append-path unit, publish it on an isolated non-force branch, require unchanged exact-head CI and a fresh conflict-free main comparison, then merge and read back exact reviewed bytes. PR 288 remains a separate unmerged unit."
   },
@@ -72,7 +72,7 @@
     "result_commit_sha": "dbd115631e15485cb603e958c18074264c728036",
     "result_blob_sha": "4b1d7b2e4e175ea3de8aeb6c8514453f9f778c9f",
     "finalization_expected_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
-    "note": "State-only heartbeat records remote revision-19 append as pending safe-boundary ingestion without changing the highest acknowledged revision."
+    "note": "Revision 19 is acknowledged at a frozen Root boundary. This state-only CAS also persists the idempotency precommit for the dedicated append-path publication before any branch, commit, or PR mutation."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -98,7 +98,7 @@
       "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)",
       "invoke-8c17214637e8334e3e9b2f3c (execute published PR 288 with exact-head CI success; unmerged)"
     ],
-    "pending_invocation": "none at this exact boundary; Execute invoke-19cf6c8b6241f25bb330f727 has one immutable response and work-resume will issue the next lifecycle invocation",
+    "pending_invocation": "invoke-7a258555c3d521841a26d787 (execute dedicated authoritative inbox append path)",
     "note": "The historical physically blinded trial remains unchanged mechanical FAIL. The opt-in structural public-concepts-v2 repair is locally validated and recorded, but remains inactive and unpublished pending Candidate Evaluate, Task Evaluate, exact-head CI, and merge."
   },
   "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
@@ -912,5 +912,29 @@
     "requested_at": "2026-08-24T07:19:36.636Z",
     "reason": "long-running PR 288 shard-3 heartbeat",
     "verified_remote_readback": false
+  },
+  "inbox_append_path_publication_precommit": {
+    "effect_id": "publish-inbox-append-path-v1",
+    "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen7:inbox-append-path:49d25f5f22a3f7adcb405ba6da4944a919b20bd3:v1",
+    "branch": "work/recovery-gen7-inbox-append-path-v1",
+    "base_main_commit": "64a2529c6e38e4068e6ff9c6372f7fe8c527ae7f",
+    "expected_state_blob": "535c160024aa66e03710981b2bb2d75908edffed",
+    "local_result_commit": "49d25f5f22a3f7adcb405ba6da4944a919b20bd3",
+    "local_result_tree": "16b24e043e7caf67fc1260a930f097f4d0dcc8e4",
+    "changed_paths": [
+      "agi/WORK_MODE.md",
+      "src/agi/user_input_inbox.py",
+      "tests/test_user_input_inbox.py"
+    ],
+    "reviewed_blobs": {
+      "agi/WORK_MODE.md": "ba2c65a47d632a28b9de6f4855b0c565dad4e0c4",
+      "src/agi/user_input_inbox.py": "e18f0e4f0855301bc7cd03af201b7dd4a857b127",
+      "tests/test_user_input_inbox.py": "e87cd909198877965aa5cad1705392ca820d83c1"
+    },
+    "local_validation": "76 focused control-plane and Context Kernel tests passed; compileall, repository JSON parsing, and diff check passed.",
+    "prepared_at": "2026-08-24T07:59:04.864Z",
+    "status": "prepared_before_external_mutation",
+    "rule": "After exact state CAS readback, create one non-force isolated branch from this exact main, publish exactly the three reviewed blobs, verify remote tree identity, open one PR, and require unchanged exact-head CI plus fresh conflict-free main before expected-head merge.",
+    "claim_boundary": "Inbox integrity infrastructure and recovered-direction acknowledgement only; not behavioral capability, positive-control evidence, AGI, or user-level completion."
   }
 }
