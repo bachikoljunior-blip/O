@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T04:56:21.012Z",
-  "last_progress_at": "2026-08-24T04:56:21.012Z",
+  "heartbeat_at": "2026-08-24T05:05:46.890Z",
+  "last_progress_at": "2026-08-24T05:05:46.890Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -44,8 +44,8 @@
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
     "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
-    "durability_status": "PR 287 merged as 9ae71fc3666e94940d589e72dae03b82e99e18cc after exact-head workflow 32689174968 succeeded; merge tree and all three repaired blobs read back exactly. Inbox revision 17 is valid and acknowledged; malformed revision 16 remains withdrawn without inferred semantics.",
-    "next_action": "After exact readback of this PR 286 merge authorization CAS, revalidate exact head 9bd25a5, workflow 32684747406, generation-7 fence, revision-17 acknowledgment, and fresh-main clean mergeability. Merge with expected head only, verify the merge tree, then submit pending Execute exactly once and continue the native lifecycle."
+    "durability_status": "PR 286 exact head 9bd25a5db51f2b95ef07880b7cce01cb9f4a7cbd passed all five required jobs, merged as 35dc41b0c308d6e70f2be68cd0e790bfd1792ccf, and its full merge tree plus representative blobs were read back exactly.",
+    "next_action": "From main 35dc41b0c308d6e70f2be68cd0e790bfd1792ccf, submit pending Execute invoke-7ae7a7ae6a1ddf359cb11335 exactly once with verified publication evidence, then continue the native O lifecycle without treating this integration as user-level completion."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -871,7 +871,7 @@
         "conclusion": "success"
       }
     ],
-    "exact_head_ci_result": "workflow 32684747406: four pytest shards and dependent aggregate succeeded",
+    "exact_head_ci_result": "workflow 32684747406: four pytest shards and dependent aggregate all succeeded",
     "expected_state_blob": "faa637d33d5bc606fea88e3aa38b9bede5ea1be7",
     "observed_main_head": "190bf380adb48bd8383ff759db6471a8f01bdf22",
     "merge_base": "e123bfbaab5d52280b159f1c71028e01407efa5a",
@@ -883,8 +883,28 @@
     "mergeable_state": "clean",
     "combined_validation": "110 focused combined tests passed; broad combined shards 0 and 1 each passed 170 tests; combined shard 2 is additionally in progress.",
     "authorized_at": "2026-08-24T04:56:21.012Z",
-    "status": "merge_authorized",
+    "status": "merged_to_main_verified",
     "rule": "Re-read generation-7 fence, inbox revision 17 acknowledgment, exact PR head, all required jobs, and fresh-main mergeability after this CAS; merge only exact unchanged head without force.",
-    "claim_boundary": "Internal behavioral-outcome/provenance infrastructure and native lifecycle records only; not independent capability, AGI, or user-objective completion evidence."
+    "claim_boundary": "Internal behavioral-outcome/provenance infrastructure and native lifecycle records only; not independent capability, AGI, or user-objective completion evidence.",
+    "merge_sha": "35dc41b0c308d6e70f2be68cd0e790bfd1792ccf",
+    "merge_tree_sha": "6c0d8adcece78165aca4dd1b892d19311125f9a7",
+    "merge_parents": [
+      "01ac8a3e20c811c2d521cef02e4d03849f05f1d7",
+      "9bd25a5db51f2b95ef07880b7cce01cb9f4a7cbd"
+    ],
+    "merged_at": "2026-08-24T05:01:38Z",
+    "merged_head_verified": true,
+    "full_tree_verified": true,
+    "verified_remote_readback": true,
+    "reviewed_path_count": 230,
+    "reviewed_path_list_sha256": "a10ee636b7590c8d65d507205564f808c456385c00589024332f44a98eab6ecb",
+    "readback_blobs": {
+      ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json": "fb329093bb27bb2636f42e4c3b32a16242228f75",
+      "src/continual/behavioral_outcome.py": "9863eff3e9823ad33de8646e1943e8660705ccf4",
+      "src/continual/work_source_observation.py": "726ea040f92b0147d96bf77980b5ac21c58907c7",
+      "src/continual/ci_source_observation.py": "e2fdf3f1d2f5164a677a8cced6fb3e7e2b5bfe70",
+      "agi/USER_INPUT_INBOX.json": "2424a08b249c258787601ca5d004ef8f34a8073b",
+      "agi/WORK_EXECUTION_STATE.json": "ad4438fbf7597f04d87ec4e718ed299ef150a219"
+    }
   }
 }
