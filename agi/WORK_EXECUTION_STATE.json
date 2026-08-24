@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T10:28:13.087Z",
-  "last_progress_at": "2026-08-24T10:28:13.087Z",
+  "heartbeat_at": "2026-08-24T10:29:55.549Z",
+  "last_progress_at": "2026-08-24T10:29:55.549Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
   "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_publication_precommit",
+  "active_component": "execute_exact_head_ci",
   "active_unit_id": "unit-42f48b067a5abf643b682fee",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -45,8 +45,8 @@
     "pending_work_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
     "pending_request_ref": ".continual/work-model/invocations/invoke-c21c168fb7f2dc2671560b1d/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "Context-method comparison source commit 0db878e6c84aa9e02f67354171c94fa2c4094c41 is locally validated and publication-precommitted. No source branch, PR, or merge existed before this CAS.",
-    "next_action": "Read back this state CAS, create the isolated branch from its exact result commit, publish exactly the three reviewed blobs, verify the diff, open one PR, and wait for unchanged exact-head CI.",
+    "durability_status": "PR 291 is open at exact head 63bd16989ab64e3dae9bae7c9e478fffd90df6d2 with exactly three reviewed/read-back blobs. Workflow 32717042325 is queued.",
+    "next_action": "Observe workflow 32717042325 until all four pytest shards and dependent aggregate succeed. Then re-read generation-7 authority, exact PR head, and fresh-main mergeability before expected-head merge.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
     "next_native_phase": "execute_source_publication"
   },
@@ -915,9 +915,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "5a3bc63f18d7cf1a997f9fa36d5c76d4a24ea75a",
-    "requested_at": "2026-08-24T10:28:13.087Z",
-    "reason": "context-method comparison source publication precommit",
+    "expected_blob_sha": "5ed4c2cd7c3662208ab904b75f409dd0314d6d59",
+    "requested_at": "2026-08-24T10:29:55.549Z",
+    "reason": "PR 291 exact-head CI watch",
     "verified_remote_readback": false
   },
   "inbox_append_path_publication_precommit": {
@@ -1147,8 +1147,25 @@
     "protocol_digest": "92b15e3fa1780220006a068c0ce654bda893e1f307b5192b2dd439c895d94f16",
     "local_validation": "16 focused comparison tests and 122 protected Context Kernel/routing/scientist tests passed; compileall, all repository JSON parsing, and diff check passed. A monolithic full suite was stopped at 41% with no observed failure; exact-head four-shard CI plus aggregate remains mandatory.",
     "prepared_at": "2026-08-24T10:28:13.087Z",
-    "status": "prepared_before_remote_publication",
+    "status": "exact_head_ci_queued",
     "rule": "After exact readback of this state-only CAS, create one non-force isolated branch from the CAS result commit, publish exactly the three reviewed blobs, verify the three-path diff and blob identity, then require unchanged exact-head CI plus fresh conflict-free main before expected-head merge.",
-    "claim_boundary": "Internal precommit, validation, and causal-classification infrastructure only; no routing measurement, positive-control result, production evidence, AGI, activation, or user-level completion."
+    "claim_boundary": "Internal precommit, validation, and causal-classification infrastructure only; no routing measurement, positive-control result, production evidence, AGI, activation, or user-level completion.",
+    "remote_parent": "ac6e78b51069dedb62aad4cf62c923abd0957b7c",
+    "remote_commit": "63bd16989ab64e3dae9bae7c9e478fffd90df6d2",
+    "remote_tree": "45753653baedb5558b1fa5624a257c7cb3919fbb",
+    "remote_branch_readback_verified": true,
+    "remote_changed_path_count": 3,
+    "remote_blobs": {
+      "agi/CONTEXT_METHOD_COMPARISON.json": "107426f39208b226863c69a48a28231d71a89118",
+      "src/agi/context_method_comparison.py": "200b63c1138a71e65a7ad6fcb6dc19f4abca8bb1",
+      "tests/test_context_method_comparison.py": "328420d7ef3da9d797d5a6440d369eb8d24447c9"
+    },
+    "pull_request": 291,
+    "pr_url": "https://github.com/bachikoljunior-blip/O/pull/291",
+    "pr_head": "63bd16989ab64e3dae9bae7c9e478fffd90df6d2",
+    "workflow_run": 32717042325,
+    "workflow_id": 335420036,
+    "ci_status": "queued",
+    "last_ci_observed_at": "2026-08-24T10:29:55.549Z"
   }
 }
