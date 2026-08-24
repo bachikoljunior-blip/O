@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T08:46:49.427Z",
-  "last_progress_at": "2026-08-24T08:46:49.427Z",
+  "heartbeat_at": "2026-08-24T08:57:45.873Z",
+  "last_progress_at": "2026-08-24T08:57:45.873Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -22,10 +22,10 @@
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "2c94909efcc37c05462063bcccd2850d60837050",
-  "working_branch": "work/recovery-gen7-inbox-append-path-v1",
+  "working_branch": "work/recovery-gen7-inbox-append-native-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "consolidate_episode",
-  "active_unit_id": "unit-776776cd9e670bdce147a49d",
+  "active_component": "execute",
+  "active_unit_id": "unit-f0e1404b1156f828ad36fff5",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 19,
@@ -40,14 +40,15 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "main",
-    "snapshot_head_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
-    "pending_work_invocation_id": null,
-    "pending_request_ref": null,
-    "durability_status": "Authoritative inbox revision 19 and the dedicated append path are merged and exact-readback verified. Execute and Task Evaluate completed; Consolidate Episode invoke-e1e4472a23f0f19ad90e4703 completed with bounded PASS/original FAIL preserved.",
-    "next_action": "Freeze and answer Learn for unit-776776cd9e670bdce147a49d, then return to Root without claiming user-level completion.",
-    "completed_work_invocation_id": "invoke-e1e4472a23f0f19ad90e4703",
-    "next_native_phase": "learn_pending"
+    "snapshot_branch": "local_fenced_worktree_pending_publication",
+    "snapshot_head_sha": "2c94909efcc37c05462063bcccd2850d60837050",
+    "pending_work_invocation_id": "invoke-cac77fa8abcd6a8f7cf7683c",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-cac77fa8abcd6a8f7cf7683c/request.json",
+    "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
+    "durability_status": "Revision 19 recovery, dedicated append path, exact-head CI, expected-head merge, exact main readback, Task Evaluate, Consolidate Episode, and Learn are complete. A fenced Execute is publishing their exact native lifecycle records from a closed allowlist without source or authority-file changes.",
+    "next_action": "Validate the closed native-record allowlist, precommit it in state, publish one non-force isolated branch from current main, require unchanged exact-head CI, then expected-head merge and exact readback.",
+    "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
+    "next_native_phase": "execute_awaiting_work_model"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -99,10 +100,13 @@
       "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
       "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)",
       "invoke-8c17214637e8334e3e9b2f3c (execute published PR 288 with exact-head CI success; unmerged)",
-      "invoke-e1e4472a23f0f19ad90e4703 (consolidate_episode inbox append unit)"
+      "invoke-e1e4472a23f0f19ad90e4703 (consolidate_episode inbox append unit)",
+      "invoke-b89010c4762fb7eb6a7edcc0 (learn inbox append unit)",
+      "invoke-a5db134eb95865beaaf938d1 (root native lifecycle publication)",
+      "invoke-6a98ae4fa1ccc57ad1547991 (candidate_evaluate native publication preflight)"
     ],
-    "pending_invocation": null,
-    "note": "The historical physically blinded trial remains unchanged mechanical FAIL. The opt-in structural public-concepts-v2 repair is locally validated and recorded, but remains inactive and unpublished pending Candidate Evaluate, Task Evaluate, exact-head CI, and merge."
+    "pending_invocation": "invoke-bff370c703865bdf69a10b85 (execute; work invocation invoke-cac77fa8abcd6a8f7cf7683c)",
+    "note": "The inbox append unit has completed through Learn with bounded control-plane PASS and original user-level FAIL preserved. The current fenced Execute publishes only its native lifecycle records; no source, authority, lease, or user-directive file is in scope."
   },
   "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
   "result_commit_sha": "0bb180458f14c489be3ce50b57d38368ceeaf3cd",
@@ -987,6 +991,10 @@
     "state_observation_receipt": "90d569b981e6851fd41063cd6940ca0f6bac88aa0000fa8310981422528c9fe8",
     "native_task_evaluate_response_digest": "96cd5c191c869acc46dbb9bd78ec8fdd242f42981978aa35fe2e33540232fdb3",
     "native_consolidate_response_digest": "0e82eac67bd2e4ca8a93135f5a224dc34c4f580cf91d266bc67c11843304f0b1",
-    "native_consolidate_completed_at": "2026-08-24T08:46:49.427Z"
+    "native_consolidate_completed_at": "2026-08-24T08:46:49.427Z",
+    "native_learn_response_digest": "b0547e77bfdaa18a142120b51ad595c6671384f35a7511f2ce1c9b1ac6f4bde0",
+    "native_learn_decision": "NO_CHANGE",
+    "native_publication_status": "local_allowlist_validation_in_progress",
+    "native_publication_branch": "work/recovery-gen7-inbox-append-native-v1"
   }
 }
