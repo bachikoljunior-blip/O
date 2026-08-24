@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T10:29:55.549Z",
-  "last_progress_at": "2026-08-24T10:29:55.549Z",
+  "heartbeat_at": "2026-08-24T10:31:52.770Z",
+  "last_progress_at": "2026-08-24T10:31:52.770Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
   "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_exact_head_ci",
+  "active_component": "execute_publication_head_update_precommit",
   "active_unit_id": "unit-42f48b067a5abf643b682fee",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -45,8 +45,8 @@
     "pending_work_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
     "pending_request_ref": ".continual/work-model/invocations/invoke-c21c168fb7f2dc2671560b1d/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "PR 291 is open at exact head 63bd16989ab64e3dae9bae7c9e478fffd90df6d2 with exactly three reviewed/read-back blobs. Workflow 32717042325 is queued.",
-    "next_action": "Observe workflow 32717042325 until all four pytest shards and dependent aggregate succeed. Then re-read generation-7 authority, exact PR head, and fresh-main mergeability before expected-head merge.",
+    "durability_status": "A review-detected historical-binding defect is fixed locally at c784023a80500eaf472893425d908791a339b954. Seventeen focused and 123 protected tests pass. PR 291 head 63bd1698 and workflow 32717042325 are superseded but untouched until this CAS readback.",
+    "next_action": "Read back this state CAS, fast-forward PR 291 with the two reviewed replacement blobs, verify exact diff/readback, and observe the new exact-head CI.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
     "next_native_phase": "execute_source_publication"
   },
@@ -915,9 +915,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "5ed4c2cd7c3662208ab904b75f409dd0314d6d59",
-    "requested_at": "2026-08-24T10:29:55.549Z",
-    "reason": "PR 291 exact-head CI watch",
+    "expected_blob_sha": "252c1e4f3798d38b6b24db324123cb2d527eb0cc",
+    "requested_at": "2026-08-24T10:31:52.770Z",
+    "reason": "PR 291 historical-binding fix precommit",
     "verified_remote_readback": false
   },
   "inbox_append_path_publication_precommit": {
@@ -1127,13 +1127,13 @@
   },
   "context_method_comparison_publication_precommit": {
     "effect_id": "publish-context-method-comparison-contract-v1",
-    "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen7:context-method-comparison:0db878e6c84aa9e02f67354171c94fa2c4094c41:v1",
+    "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen7:context-method-comparison:c784023a80500eaf472893425d908791a339b954:v2",
     "branch": "work/recovery-gen7-context-comparison-contract-v1",
     "observed_main_before_precommit": "7300081954ba2c9caea5bf0b0769f83cd7f82d2b",
     "base_main_rule": "Use the exact result commit of this state-only CAS after authority and blob readback.",
     "expected_state_blob": "5a3bc63f18d7cf1a997f9fa36d5c76d4a24ea75a",
-    "local_result_commit": "0db878e6c84aa9e02f67354171c94fa2c4094c41",
-    "local_result_tree": "964ac8a863f4496eedf2a00a44078fa9eb6dbb98",
+    "local_result_commit": "c784023a80500eaf472893425d908791a339b954",
+    "local_result_tree": "c17e46f2db81559d03d33e38e062b9ccf106dac3",
     "changed_paths": [
       "agi/CONTEXT_METHOD_COMPARISON.json",
       "src/agi/context_method_comparison.py",
@@ -1141,14 +1141,14 @@
     ],
     "reviewed_blobs": {
       "agi/CONTEXT_METHOD_COMPARISON.json": "107426f39208b226863c69a48a28231d71a89118",
-      "src/agi/context_method_comparison.py": "200b63c1138a71e65a7ad6fcb6dc19f4abca8bb1",
-      "tests/test_context_method_comparison.py": "328420d7ef3da9d797d5a6440d369eb8d24447c9"
+      "src/agi/context_method_comparison.py": "c750ca11c53605eb2ff016ab3c9acc9b4b50697a",
+      "tests/test_context_method_comparison.py": "dfd3f9923ee7223cc16016b42dc5a780680d6f98"
     },
     "protocol_digest": "92b15e3fa1780220006a068c0ce654bda893e1f307b5192b2dd439c895d94f16",
-    "local_validation": "16 focused comparison tests and 122 protected Context Kernel/routing/scientist tests passed; compileall, all repository JSON parsing, and diff check passed. A monolithic full suite was stopped at 41% with no observed failure; exact-head four-shard CI plus aggregate remains mandatory.",
+    "local_validation": "17 focused comparison tests and 123 protected Context Kernel/routing/scientist tests passed; compileall, all repository JSON parsing, and diff check passed.",
     "prepared_at": "2026-08-24T10:28:13.087Z",
-    "status": "exact_head_ci_queued",
-    "rule": "After exact readback of this state-only CAS, create one non-force isolated branch from the CAS result commit, publish exactly the three reviewed blobs, verify the three-path diff and blob identity, then require unchanged exact-head CI plus fresh conflict-free main before expected-head merge.",
+    "status": "prepared_before_non_force_head_update",
+    "rule": "After exact readback of this state CAS, create new blobs and one child commit of exact prior PR head 63bd16989ab64e3dae9bae7c9e478fffd90df6d2, fast-forward the branch without force, verify the three-path diff and blob identity, and require a new unchanged exact-head CI.",
     "claim_boundary": "Internal precommit, validation, and causal-classification infrastructure only; no routing measurement, positive-control result, production evidence, AGI, activation, or user-level completion.",
     "remote_parent": "ac6e78b51069dedb62aad4cf62c923abd0957b7c",
     "remote_commit": "63bd16989ab64e3dae9bae7c9e478fffd90df6d2",
@@ -1166,6 +1166,11 @@
     "workflow_run": 32717042325,
     "workflow_id": 335420036,
     "ci_status": "queued",
-    "last_ci_observed_at": "2026-08-24T10:29:55.549Z"
+    "last_ci_observed_at": "2026-08-24T10:29:55.549Z",
+    "superseded_remote_head": "63bd16989ab64e3dae9bae7c9e478fffd90df6d2",
+    "superseded_workflow_run": 32717042325,
+    "head_update_reason": "Separate historical source bindings from explicit current-byte prepublication verification so later legitimate inbox revisions cannot invalidate the frozen protocol.",
+    "expected_state_blob_for_head_update": "252c1e4f3798d38b6b24db324123cb2d527eb0cc",
+    "head_update_prepared_at": "2026-08-24T10:31:52.770Z"
   }
 }
