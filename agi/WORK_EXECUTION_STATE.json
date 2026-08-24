@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T13:35:14.301Z",
-  "last_progress_at": "2026-08-24T13:35:14.301Z",
+  "heartbeat_at": "2026-08-24T13:50:57.128Z",
+  "last_progress_at": "2026-08-24T13:50:57.128Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,11 +21,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "e65aba9b785ab76aaa17ad835151a2960eeec0dd",
-  "working_branch": "work/recovery-gen7-revision20-reconcile-v1",
+  "source_main_sha": "98c4f54e97aa7972163ee971cb7f8e8797f13ec1",
+  "working_branch": "work/recovery-gen7-revision20-native-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "root_revision20_reconciliation_response",
-  "active_unit_id": "unit-52ff04d764576d3a077385d1",
+  "active_component": "revision20_equivalence_audit_execute_pending",
+  "active_unit_id": "unit-047b85a7eaf9308e1f4b5771",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 20,
@@ -49,20 +49,20 @@
   "parallel_execution_coordination": {
     "primary": "Generation 7 is the sole fenced main writer. Revision-20 reconciliation is isolated at daf77e4a45326abb17f9e36d213a43dd189a1ae4; no foreign branch or writer is modified.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Root invoke-76ed667d67bf98a4b2112b2f remains immutable and unanswered under revision 19. Its own state projection records a pending clarification; after publication it may select only the reconciliation unit, and the next semantic request must bind revision 20.",
+    "pending_native_execute": "Revision-20 Root invoke-85330be26dddf176cff6f256 and Candidate preflight invoke-2ccaba18f142705e42a9e0b7 are complete. Emit and answer only the new generation-7 Execute for unit-047b85a7eaf9308e1f4b5771; leave stale generation-6 invocation invoke-7ae7a7ae6a1ddf359cb11335 unanswered.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
     "snapshot_head_sha": "e65aba9b785ab76aaa17ad835151a2960eeec0dd",
-    "pending_work_invocation_id": "invoke-76ed667d67bf98a4b2112b2f",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-76ed667d67bf98a4b2112b2f/request.json",
+    "pending_work_invocation_id": "pending_emit_execute_for_unit-047b85a7eaf9308e1f4b5771",
+    "pending_request_ref": ".continual/runs/run-work-mode-handoff-v2/execution-units/unit-047b85a7eaf9308e1f4b5771.json",
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
     "durability_status": "PR 294 exact head ad3e5dbc45a29c14c571f329ad301d13b77d1ddb passed workflow 32729581016 with four successful pytest shards and successful dependent aggregate, then merged atomically with expected-head protection as e65aba9b785ab76aaa17ad835151a2960eeec0dd. All ten reviewed source/policy/test blobs matched exact main readback. Revision 20 source digest 7aa9b022600a5ce83d996e3275ff03c8d1a9b90a57eed3f44101c56a8dc97ee3 is typed in USER_DIRECTIVE_EVENTS and projected into WORK_STRATEGY, CONTINUATION, and every semantic DecisionContextManifest.",
-    "next_action": "Answer the preserved frozen revision-19 Root invoke-76ed667d67bf98a4b2112b2f only with the generic control-plane reconciliation unit visible in its own request. Submit and resume. Verify the next semantic request binds inbox revision 20, typed directive ledger revision 20, strategy negative-evidence scope policy, and this acknowledgement before evaluating any scientist-derived candidate.",
-    "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
-    "next_native_phase": "root_control_plane_reconciliation_unit"
+    "next_action": "Record a fresh authoritative Work-state observation for this exact CAS result, resume the native Run, and answer only the newly emitted generation-7 Execute for the positive-control equivalence audit. Do not answer the stale generation-6 Execute.",
+    "completed_work_invocation_id": "invoke-2ccaba18f142705e42a9e0b7",
+    "next_native_phase": "execute_positive_control_equivalence_audit"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -121,7 +121,7 @@
       "invoke-38e438e6259f40cddc6cccb2 (root context-comparison native publication)",
       "invoke-f0ffb9ff98cd84ff9cd5bc28 (candidate_evaluate native publication preflight)"
     ],
-    "pending_invocation": "invoke-76ed667d67bf98a4b2112b2f (root, frozen revision-19 request; answer only with its visible reconciliation unit)",
+    "pending_invocation": "pending generation-7 Execute emission for unit-047b85a7eaf9308e1f4b5771",
     "note": "The context-comparison contract unit completed with bounded internal PASS and original user-level FAIL preserved. Root selected a native-record-only publication; Candidate preflight completed, and Execute freeze failed closed solely because the prior authoritative Work-state receipt exceeded its 300-second age bound."
   },
   "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
