@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T05:05:46.890Z",
-  "last_progress_at": "2026-08-24T05:05:46.890Z",
+  "heartbeat_at": "2026-08-24T05:12:44.279Z",
+  "last_progress_at": "2026-08-24T05:12:44.279Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "59b429f4f286c3477b49f40399b93c2077012b02",
   "working_branch": "work/recovery-gen7-inbox-integrity-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute",
+  "active_component": "root",
   "active_unit_id": "unit-33b4de6134559ad14073b30a",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -42,10 +42,10 @@
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
-    "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
-    "durability_status": "PR 286 exact head 9bd25a5db51f2b95ef07880b7cce01cb9f4a7cbd passed all five required jobs, merged as 35dc41b0c308d6e70f2be68cd0e790bfd1792ccf, and its full merge tree plus representative blobs were read back exactly.",
-    "next_action": "From main 35dc41b0c308d6e70f2be68cd0e790bfd1792ccf, submit pending Execute invoke-7ae7a7ae6a1ddf359cb11335 exactly once with verified publication evidence, then continue the native O lifecycle without treating this integration as user-level completion."
+    "pending_work_invocation_id": null,
+    "pending_request_ref": null,
+    "durability_status": "Execute invoke-7ae7a7ae6a1ddf359cb11335 and post-result Candidate Evaluate invoke-113a463f09bcd8f72e536121 were submitted exactly once in the isolated generation-7 worktree. work-verify is valid with 151 requests, 151 responses, and zero pending. The next Root freeze failed closed before request or journal creation because generation 7 lacks a matching fresh authoritative Work source receipt.",
+    "next_action": "Precommit a new Work source observation for the exact generation-7 state commit/blob produced by this CAS, read that exact file through the GitHub connector, record the cross-bound receipt, then resume to freeze Root and continue the native lifecycle."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -97,8 +97,8 @@
       "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
       "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)"
     ],
-    "pending_invocation": "pending Root after completed Learn invoke-ff0daaaf2414b310b96401e6",
-    "note": "Generation 6 completed PR 281 publication and exact readback, submitted Execute invoke-0890 exactly once, discovered that a newly frozen Root request bound a Work heartbeat already older than stale_after_seconds, selected the bounded pre-freeze freshness repair at Root, trialed the scoped context-hygiene Candidate, and froze Execute invoke-b912c756."
+    "pending_invocation": "none; Root source-readiness preflight required before the next immutable request",
+    "note": "Generation 7 answered the frozen publication Execute and its post-result Candidate Evaluate exactly once. The Context Kernel correctly rejected Root request creation until a fresh generation-7 Work source observation is precommitted and recorded."
   },
   "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
   "result_commit_sha": "0bb180458f14c489be3ce50b57d38368ceeaf3cd",
@@ -358,28 +358,15 @@
     "summary": "O selected a Root-only DecisionContextManifest vertical slice: authoritative sources remain external while O owns observation/source clocks, inclusion/exclusion decisions, provenance, dependencies, freshness, invalidation, and immutable per-decision projections."
   },
   "pre_freeze_source_readiness": {
-    "status": "merged_to_main_all_31_reviewed_blobs_verified",
-    "active_unit_id": "unit-c75f375e4a78a4a543327c49",
-    "pending_invocation": "invoke-b912c7565911e5b6561025c9",
-    "immutable_failure_witness": ".continual/work-model/invocations/invoke-485a88b6d4687f7a3b0d623b/request.json",
-    "witness_request_created_at": "2026-08-23T20:03:19.374785Z",
-    "witness_work_heartbeat_at": "2026-08-23T17:22:28.270Z",
-    "stale_after_seconds": 900,
-    "claim_boundary": "Internal request-safety evidence only. Local source freshness is not latest-remote proof, useful behavioral capability, AGI, or completion.",
-    "branch": "work/recovery-gen6-pre-freeze-source-readiness-v1",
-    "pull_request": 282,
-    "exact_head_sha": "d73a67e21e8e1348c468010f6b9fdfe5f94263d6",
-    "exact_tree_sha": "2958070e7e303fa4ddb9bac5e916b3b4bb7827b0",
-    "reviewed_blob_count": 31,
-    "local_validation": "159 protected tests passed; compileall, 914 JSON documents, work-verify 109/108/1 valid, diff check passed",
-    "publication_negative_evidence": "Initial branch commit preceded the durable publication idempotency record; retained explicitly. No PR, workflow, merge, or ref rewrite occurred before the record.",
-    "workflow_run": 32664134793,
-    "superseded_exact_head_sha": "c325b280065de4d3c6d83203be478a5e58ef9631",
-    "superseded_workflow_run": 32664023828,
-    "observed_at": "2026-08-23T20:50:18.127Z",
-    "exact_head_ci_result": "four pytest shards and dependent aggregate succeeded",
-    "merge_sha": "50968e6605dc92213c2b2f310bb4cc307dcfb060",
-    "verified_remote_readback": true
+    "status": "failed_closed_no_matching_generation_7_work_receipt",
+    "attempted_at": "2026-08-24T05:10:59.949806Z",
+    "next_component": "root",
+    "requests_before": 151,
+    "responses_before": 151,
+    "pending_before": 0,
+    "mutation_result": "no new Work-model request or native component invocation was created",
+    "error": "mandatory Work source lacks a matching fresh authoritative observation",
+    "remediation": "precommit and record an exact GitHub connector observation for the current generation-7 state commit/blob before retrying resume"
   },
   "authoritative_source_observation": {
     "status": "live_receipt_exercised_execute_frozen",
