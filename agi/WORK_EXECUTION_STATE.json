@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T12:40:09.648Z",
-  "last_progress_at": "2026-08-24T12:40:09.648Z",
+  "heartbeat_at": "2026-08-24T12:51:10.597Z",
+  "last_progress_at": "2026-08-24T12:51:10.597Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "ae2f5e037a771cbe68b190ce2ad4fb34929e3e1c",
-  "working_branch": "work/recovery-gen7-context-comparison-native-v1",
+  "source_main_sha": "ff7290ed7c231dae2c64cc01ac6fb865d03f0d4d",
+  "working_branch": "work/recovery-gen7-revision20-reconcile-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "root_revision20_reconciliation",
+  "active_component": "revision20_reconciliation_publication_precommit",
   "active_unit_id": "unit-52ff04d764576d3a077385d1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -34,32 +34,33 @@
     "pending_safe_boundary_input": {
       "observed_at": "2026-08-24T12:15:21.585Z",
       "target_revision": 20,
-      "status": "appended_pending_typed_reconciliation",
+      "status": "typed_reconciled_on_isolated_head_pending_exact_head_publication",
       "inbox_commit_sha": "ae2f5e037a771cbe68b190ce2ad4fb34929e3e1c",
       "inbox_blob_sha": "c462c8d1636d0249646627311257978b8c679a3d",
       "interpretation": "Revision 20 limits negative evidence to the actually tested candidate, configuration, and conditions; forbids family-wide or untested-mechanism generalization; and does not require duplicate positive-control reproduction when equivalent original conditions are already established with adequate provenance.",
-      "next_safe_boundary": "Reconcile the typed directive ledger and canonical strategy/state projections, then create a new Root request identity bound to inbox revision 20. Do not answer the previously frozen revision-19 Root request."
+      "next_safe_boundary": "Reconcile the typed directive ledger and canonical strategy/state projections, then create a new Root request identity bound to inbox revision 20. Do not answer the previously frozen revision-19 Root request.",
+      "isolated_head_sha": "daf77e4a45326abb17f9e36d213a43dd189a1ae4",
+      "validation": "106 focused tests passed; JSON and diff validation passed",
+      "acknowledgement_rule": "Keep highest_acknowledged_revision at 19 until the exact head is merged and the resulting revision-20 source/ledger/strategy cross-binding is read back on main."
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 7 remains the sole fenced main writer while revision 20 is reconciled. No second writer or foreign branch is modified.",
+    "primary": "Generation 7 is the sole fenced main writer. Revision-20 reconciliation is isolated at daf77e4a45326abb17f9e36d213a43dd189a1ae4; no foreign branch or writer is modified.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "The post-publication Execute and Candidate evaluation completed locally. Root invoke-76ed667d67bf98a4b2112b2f is frozen under revision 19, remains unanswered, and is stale-source after the revision-20 append.",
+    "pending_native_execute": "Root invoke-76ed667d67bf98a4b2112b2f remains immutable and unanswered under revision 19. Its own state projection records a pending clarification; after publication it may select only the reconciliation unit, and the next semantic request must bind revision 20.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
-    "snapshot_branch": "work/recovery-gen7-context-comparison-native-v1",
-    "snapshot_head_sha": "e3fe61198fe00079e7def3d52d83124dca3e61be",
-    "pending_work_invocation_id": "none_authoritative_until_revision20_reconciliation",
-    "pending_request_ref": null,
+    "snapshot_branch": "work/recovery-gen7-revision20-reconcile-v1",
+    "snapshot_head_sha": "daf77e4a45326abb17f9e36d213a43dd189a1ae4",
+    "pending_work_invocation_id": "invoke-76ed667d67bf98a4b2112b2f",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-76ed667d67bf98a4b2112b2f/request.json",
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
     "durability_status": "PR 293 exact head e3fe61198fe00079e7def3d52d83124dca3e61be passed canonical workflow 32724168634 with four successful pytest shards and successful aggregate, then merged with expected-head protection as 84d71549319ee6c8d19f0ed94ba45a74b1dfc5b6. The merge tree 8c28e0a20e0377f9a139faf3a58e44b3e2a2d1c1 matched the final pre-dispatch merge-tree proof; parents are the authorization main 2441148c2f51dad4e61ea288713e541349b79983 and exact head. All 81 manifest-listed payload blobs plus manifest blob 0d20ecb7dd52f25877618abe75e9b1147bcabc1e matched on main, the diff contained exactly 82 paths, and the sorted path-list digest matched c51341b646d59990741d9c37c92fa8c99d6f629ec3c35a3442b0ecbc2349f2fb.",
-    "next_action": "Reconcile authoritative inbox revision 20 into agi/USER_DIRECTIVE_EVENTS.json and strategy/state projections on an isolated branch, validate exact source cross-binding, then generate a fresh Root identity bound to revision 20 without answering invoke-76ed667d67bf98a4b2112b2f.",
+    "next_action": "Publish isolated head daf77e4a45326abb17f9e36d213a43dd189a1ae4, require unchanged exact-head CI, merge and read back revision-20 typed policy, then acknowledge revision 20 by state-only CAS. Preserve the frozen revision-19 Root request; answer it only with the control-plane reconciliation unit already visible in its state projection, so the next semantic request binds revision 20 without injecting unseen content.",
     "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
-    "next_native_phase": "root_source_clock_rebind",
-    "stale_source_unanswered_local_root_invocation_id": "invoke-76ed667d67bf98a4b2112b2f",
-    "stale_source_reason": "Frozen after authoritative inbox revision advanced from 19 to 20; must remain unanswered and be replaced by a new source-clock-bound Root identity."
+    "next_native_phase": "root_control_plane_reconciliation_unit"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
