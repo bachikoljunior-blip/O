@@ -144,6 +144,85 @@ def test_missing_receipt_fails_closed(tmp_path: Path) -> None:
         )
 
 
+def test_same_source_can_precommit_a_new_fresh_observation(tmp_path: Path) -> None:
+    state, blob, first = _prepared(tmp_path)
+    first_path = (
+        tmp_path
+        / ".continual"
+        / "runs"
+        / RUN_ID
+        / "work-source-observations"
+        / first["observation_id"]
+        / "request.json"
+    )
+    first_bytes = first_path.read_bytes()
+    first_receipt = _record(tmp_path, state, blob, first)
+
+    second = prepare_work_source_observation(
+        tmp_path,
+        run_id=RUN_ID,
+        state=state,
+        state_blob_sha=blob,
+        expected_commit_sha=COMMIT,
+        model_identity=MODEL,
+    )
+
+    second_path = (
+        tmp_path
+        / ".continual"
+        / "runs"
+        / RUN_ID
+        / "work-source-observations"
+        / second["observation_id"]
+        / "request.json"
+    )
+    assert second["observation_id"] != first["observation_id"]
+    assert second["request_digest"] != first["request_digest"]
+    assert first_path.read_bytes() == first_bytes
+    assert first_receipt["request_digest"] == first["request_digest"]
+    assert second_path.is_file()
+    assert not (second_path.parent / "receipt.json").exists()
+
+
+def test_verification_prefers_latest_same_source_renewal(tmp_path: Path) -> None:
+    now = datetime.now(UTC)
+    state, blob, first = _prepared(tmp_path, now=now)
+    _record(
+        tmp_path,
+        state,
+        blob,
+        first,
+        observed_at=(now + timedelta(seconds=1)).isoformat(),
+    )
+    second = prepare_work_source_observation(
+        tmp_path,
+        run_id=RUN_ID,
+        state=state,
+        state_blob_sha=blob,
+        expected_commit_sha=COMMIT,
+        model_identity=MODEL,
+    )
+    second_receipt = _record(
+        tmp_path,
+        state,
+        blob,
+        second,
+        observed_at=(now + timedelta(seconds=2)).isoformat(),
+    )
+
+    verified = verify_work_source_observation(
+        tmp_path,
+        run_id=RUN_ID,
+        state=state,
+        state_blob_sha=blob,
+        now=(now + timedelta(seconds=3)).isoformat(),
+    )
+
+    assert verified is not None
+    assert verified["observation_id"] == second["observation_id"]
+    assert verified["receipt_digest"] == second_receipt["receipt_digest"]
+
+
 @pytest.mark.parametrize(
     ("field", "value", "match"),
     [

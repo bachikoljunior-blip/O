@@ -178,11 +178,16 @@ def prepare_ci_source_observation(
     if policy is None:
         raise CiSourceObservationError("CI source observation policy is not enabled")
     authority = _authority(state, store)
+    requested_at = store.utc_now()
     seed = {
         "run_id": run_id,
         "source": policy,
         "authority": authority,
         "model_identity": model_identity,
+        # A timestamped observation is intentionally renewable while the exact
+        # CI policy and fence remain unchanged. Without this clock, a second
+        # precommit aliases the old immutable request and can never become fresh.
+        "requested_at": requested_at,
     }
     observation_id = "ci-run-" + store.stable_digest(seed, length=24)
     body = {
@@ -204,7 +209,7 @@ def prepare_ci_source_observation(
         "freshness": {"kind": "max_age", "max_age_seconds": policy["max_age_seconds"]},
         "evidence_class": "operator_connector_readback",
         "operation": "read_workflow_run_and_jobs",
-        "requested_at": store.utc_now(),
+        "requested_at": requested_at,
     }
     body["request_digest"] = store.stable_digest(body, length=64)
     return _write_once(

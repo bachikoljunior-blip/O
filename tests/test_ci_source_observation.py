@@ -150,6 +150,22 @@ def test_missing_receipt_fails_closed(tmp_path: Path) -> None:
         )
 
 
+def test_same_policy_can_precommit_a_new_fresh_observation(tmp_path: Path) -> None:
+    state, first = _prepared(tmp_path)
+    _record(tmp_path, first)
+    second = prepare_ci_source_observation(
+        tmp_path,
+        run_id=RUN_ID,
+        state=state,
+        model_identity=MODEL,
+    )
+
+    assert second["observation_id"] != first["observation_id"]
+    assert second["request_digest"] != first["request_digest"]
+    assert _receipt_path(tmp_path, first).is_file()
+    assert not _receipt_path(tmp_path, second).exists()
+
+
 @pytest.mark.parametrize(
     ("run_change", "message"),
     [

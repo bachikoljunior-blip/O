@@ -1,0 +1,322 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-24T02:37:49.687007Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-35cb4de82f0efe1ee2ddd115",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "NEED_MORE_EVIDENCE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-c6c462472386c57b124d",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/campaign-authoring",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-c6c462472386c57b124d/prompt.md",
+          "scope_states": {},
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/repository-development": "REMAIN_CANDIDATE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "schema_version": 2
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "execute",
+        "evidence_needed": [
+          "the observed immutable conflict when prepare_work_source_observation is called again for an unchanged commit, blob, authority, and policy after requested_at advances",
+          "the already validated CI source observation renewal design, which includes the fresh request clock in the immutable observation identifier",
+          "tests proving two preparations against the same exact source and authority create distinct immutable request identities without overwriting the first",
+          "tests proving each request can receive only its own cross-bound receipt and that verification selects the latest fresh valid receipt",
+          "existing tamper, wrong-version, future-skew, stale, authority-change, and fail-closed regressions",
+          "focused Work-source, CI-source, Context Kernel, Work bridge, and behavioral-outcome validation"
+        ],
+        "expected_outputs": [
+          "a minimal safe-renewal change in src/continual/work_source_observation.py that preserves every immutable request and adds no remote mutation",
+          "a regression test demonstrating distinct observation ids and unchanged first-request bytes for repeated same-source preparation",
+          "evidence that the renewed receipt satisfies the same exact commit, blob, authority projection, executor binding, and freshness checks",
+          "negative evidence and rollback guidance if renewal weakens source-version or fence binding",
+          "a bounded Execute result ready for Task Evaluate before the combined behavioral implementation and native records are published"
+        ],
+        "goal": "Repair unchanged-source Work observation renewal so a fresh, separately immutable connector read can be precommitted for the same exact remote commit/blob and fenced authority after the prior receipt ages, without requiring an unrelated heartbeat mutation or overwriting any prior request.",
+        "inputs": [
+          "src/continual/work_source_observation.py",
+          "tests/test_work_source_observation.py",
+          "src/continual/ci_source_observation.py and tests/test_ci_source_observation.py as the validated analogous renewal contract",
+          "the generation-6 failure recorded in the current episode: immutable source observation conflict for unchanged source with a later requested_at",
+          "current Work source receipt work-state-3375be62e09c57c24c14393d bound to main commit 583f08418b350102623b6add46199aa03ef409db and blob 9fe6f30a73afc202791df888c0b9884aed9f938c"
+        ],
+        "parent_continuation": "After Execute, Task Evaluate the exact renewal semantics and protected regressions, then Consolidate Episode and Learn. If the bounded repair passes, publish it together with the already validated behavioral-outcome primitive and native evidence through a new isolated exact-head PR before selecting the physically blinded multi-case behavioral unit.",
+        "scope": "context-kernel/work-source-observation-safe-renewal-v1",
+        "unit_id": "unit-1f9f811d15fe79a8cc26e75d"
+      },
+      "snapshot": {
+        "continuation_stack": [
+          {
+            "continuation": "After Task Evaluate, consolidate and learn. If the bounded unit passes, Root should select the smallest sandboxed matched experiment for checkpoint inheritance; main remains single-writer and implementation remains inactive until evidence supports it.",
+            "parent_unit_id": "unit-85bfcc10eb003a178e261658",
+            "result_ref": "artifacts/unit-85bfcc10eb003a178e261658-result.json"
+          },
+          {
+            "continuation": "Publish the verified harness and this native boundary to main through exact-head CI. Then run only the frozen child measurement unit; if genuine comparable native measurements cannot be obtained, return INSUFFICIENT_EVIDENCE or REJECT_MECHANISM rather than fabricating observations.",
+            "parent_unit_id": "unit-7248d09ab66196abd19984f1",
+            "result_ref": "artifacts/unit-7248d09ab66196abd19984f1-result.json"
+          },
+          {
+            "continuation": "Resume only the frozen child selection-plan measurement. Do not modify case labels, graph contents, baselines, budgets, thresholds, or claim boundaries after viewing routing output. After Task Evaluate, consolidate, learn, and return to Root regardless of the bounded verdict.",
+            "parent_unit_id": "unit-b9e109e2f146deb1deb9f3ff",
+            "result_ref": "artifacts/unit-b9e109e2f146deb1deb9f3ff-result.json"
+          },
+          {
+            "continuation": "Task Evaluate must classify the bounded child without inventing observations. Consolidate and learn the contamination result, publish validated native records through exact-head CI, and return to Root.",
+            "parent_unit_id": "unit-7c74345c417a64e25fa80dd6",
+            "result_ref": "artifacts/unit-7c74345c417a64e25fa80dd6-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact integration evidence, then Consolidate Episode and Learn before returning to Root for the next falsifiable unit.",
+            "parent_unit_id": "unit-24e1807c3c65cd90d50be3eb",
+            "result_ref": "artifacts/unit-24e1807c3c65cd90d50be3eb-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact PR 275 integration evidence, then Consolidate Episode and Learn. At the next Root boundary refresh the inbox, resolve revision 15, reconcile O's durable control state, and select the highest-information Context Kernel unit.",
+            "parent_unit_id": "unit-f06051defa0312907f5f28ab",
+            "result_ref": "artifacts/unit-f06051defa0312907f5f28ab-result.json"
+          },
+          {
+            "continuation": {
+              "next": "Consume the one child response, mechanically judge it in a separate Execute, and preserve the internal-only claim boundary.",
+              "parent_unit_id": "unit-7353e639723862d91ae4e0f1"
+            },
+            "parent_unit_id": "unit-7353e639723862d91ae4e0f1",
+            "result_ref": "artifacts/unit-7353e639723862d91ae4e0f1-result.json"
+          },
+          {
+            "continuation": {
+              "next": "Use only the deterministic outcome primitive to judge and persist this immutable response.",
+              "source_work_invocation_id": "invoke-061603bcb6a9566e1ea02873"
+            },
+            "parent_unit_id": "unit-2640beb7270bce5cc39e6d9d",
+            "result_ref": "artifacts/unit-2640beb7270bce5cc39e6d9d-result.json"
+          }
+        ],
+        "created_at": "2026-08-22T11:41:47.630118Z",
+        "current_component": "execute",
+        "current_unit": "unit-1f9f811d15fe79a8cc26e75d",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+          "runner": "python-engine-v2"
+        },
+        "episode_id": "episode-work-mode-handoff-v2",
+        "error_count": 7,
+        "last_evaluation": {
+          "agi_claim_supported": false,
+          "candidate_trial": {
+            "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+            "outcome": "SUPPORTED_FOR_SCOPE",
+            "reason": "The overlay preserved bounded PASS, internal non-heldout classification, and user-level FAIL independently while retaining every stated limitation."
+          },
+          "claim_boundary": "The parent-child-finalizer chain establishes one provenance-bound, deterministic, replay-safe internal behavioral outcome. The rubric was visible to the child, the model identity is unverified, the provider and judge are project-operated, and one task establishes neither independence nor breadth, AGI, or completion.",
+          "continuation": "Proceed through post-result Candidate Evaluate, Consolidate Episode, and Learn; then publish the validated implementation and native evidence through an isolated exact-head PR before Root selects a stronger behavioral-evidence unit.",
+          "evaluated_goal": "Minimize defensible elapsed time until genuine real-world AGI is achieved while preserving truthful reporting, O-centered durable context, and safe single-writer execution.",
+          "evidence": [
+            {
+              "finding": "The task and exact-canonical-JSON rubric were frozen under request digest b3197d3be9f6906a623fc5885017d3c310bddd98b71d37658cadd0113a0bd6a9 before child execution.",
+              "source": ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/request.json"
+            },
+            {
+              "finding": "Exactly one bound child Work response exists with request 7872be8f, response d818c9d6, and output db715651; no second provider call was made.",
+              "source": ".continual/work-model/invocations/invoke-061603bcb6a9566e1ea02873"
+            },
+            {
+              "finding": "The separate deterministic judge returned score 1.0 and PASS; receipt eb4b3499 cross-binds request, response, rubric, authority, and timestamps.",
+              "source": ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/receipt.json"
+            },
+            {
+              "finding": "Replay left all behavioral record bytes unchanged and the internal ledger contains exactly one receipt.",
+              "source": ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/ledger.json"
+            },
+            {
+              "finding": "The 47 focused behavioral, Work bridge, rendezvous, and CI-source tests passed; the independent external ledger hash remained 888ab76fa17d910b7353664162b3d1cbccca476dbc12a5822866d122f482fbb9.",
+              "source": "local protected validation and evidence/external_ledger.json"
+            }
+          ],
+          "global_activation_authorized": false,
+          "negative_evidence": [
+            "The task rubric and expected answer were present in the same request file referenced by the child, so this is not held-out evidence.",
+            "The model identity is chatgpt-work-model-unverified.",
+            "The provider and deterministic judge are operated within the project boundary.",
+            "Only one sandboxed deterministic task was observed, so capability breadth is unmeasured.",
+            "The independent external evidence ledger did not change.",
+            "Internal tests, native O integration, and a correct answer do not satisfy the user's upper objective."
+          ],
+          "repair": {
+            "completed_unit": "Consolidate and learn the internal behavioral receipt result, then publish the validated implementation and native records through exact-head CI.",
+            "do_not_repair": "Do not relabel this task as held-out or independent, infer breadth from one case, attest the model identity, or promote the Task Evaluate Candidate without its separate deterministic gate.",
+            "next_falsifiable_unit": "After publication, precommit a physically separated hidden rubric or independently operated evaluator for a small multi-case behavioral set, with the child's visible context excluding expected answers and with explicit contamination checks."
+          },
+          "unit_subfinding": {
+            "reason": "A real child response was submitted once, mechanically judged against a precommitted exact rubric, issued an immutable cross-bound receipt, replayed byte-stably, incremented only the internal ledger, and preserved all claim limitations.",
+            "unit_id": "unit-04fbfd61edfa11722cd279fd",
+            "verdict": "PASS"
+          },
+          "unit_verdict": "PASS",
+          "unmet_conditions": [
+            "The user's real-world AGI objective has not been achieved or demonstrated.",
+            "No independent production capability evidence supports an AGI claim.",
+            "Behavioral breadth, hidden-rubric performance, and model identity remain unverified.",
+            "The implementation and native records are not yet integrated from an unchanged exact-head PR."
+          ],
+          "user_level_verdict": "FAIL",
+          "verdict": "FAIL"
+        },
+        "last_result_ref": "artifacts/unit-04fbfd61edfa11722cd279fd-result.json",
+        "phase": "unit_pending",
+        "produced_candidates": [],
+        "revision": 93,
+        "run_id": "run-work-mode-handoff-v2",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "PASS",
+        "updated_at": "2026-08-24T02:37:49.683696Z"
+      }
+    },
+    "mode": "pre-application",
+    "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
+    "run_id": "run-work-mode-handoff-v2",
+    "target_component": "execute"
+  },
+  "payload_digest": "33227b3a30b7b1e4f4b5536ec10499123b15779abdd68a29137673149c3dde2d",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "7dd10973576ea9c0fa8817f054241d8edfa0c9029e7894bfec9c8c0c08484cf1",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}

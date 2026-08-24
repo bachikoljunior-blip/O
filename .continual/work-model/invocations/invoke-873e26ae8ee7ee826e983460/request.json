@@ -1,0 +1,316 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-24T02:24:26.848333Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-873e26ae8ee7ee826e983460",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "actual_result": {
+      "behavioral_answer": {
+        "rows": [
+          {
+            "quantity": 4,
+            "sku": "alpha"
+          },
+          {
+            "quantity": 2,
+            "sku": "charlie"
+          },
+          {
+            "quantity": 7,
+            "sku": "delta"
+          }
+        ],
+        "total": 13
+      },
+      "child_execution_unit": {
+        "behavioral_outcome": {
+          "outcome_id": "behavioral-outcome-4272816b64c262f5e0126396",
+          "request_digest": "b3197d3be9f6906a623fc5885017d3c310bddd98b71d37658cadd0113a0bd6a9",
+          "response_pointer": [
+            "result",
+            "behavioral_answer"
+          ],
+          "rubric_digest": "fd06ba630caa56e8edd9d3d04f847c4d87a50ed2cd5a3e023b451d39d9af59b8",
+          "task_digest": "6e88f3090310fcb28e108407b0f549968acfd7b02af1ef749f5d4089c7e037a8"
+        },
+        "component": "execute",
+        "expected_outputs": [
+          "immutable response, judgment, and receipt records cross-bound to invoke-061603bcb6a9566e1ea02873",
+          "byte-stable replay and internal behavioral ledger count exactly one",
+          "independent evidence counters unchanged and user-level verdict remains FAIL"
+        ],
+        "failure_conditions": [
+          "any identity, authority, timestamp, task, rubric, or response binding fails",
+          "the provider is invoked again for the same task",
+          "the result is described as independent evidence, breadth, AGI, or completion"
+        ],
+        "goal": "Deterministically record and verify the already-immutable child Work response as a behavioral outcome receipt; do not invoke another provider task or change the precommitted task, rubric, threshold, budget, or claim scope.",
+        "parent_continuation": "After finalization, run protected focused tests and Task Evaluate the whole parent chain.",
+        "scope": "behavioral-outcome/finalize-live-receipt-v1",
+        "source_work_invocation_id": "invoke-061603bcb6a9566e1ea02873"
+      },
+      "continuation": {
+        "next": "Use only the deterministic outcome primitive to judge and persist this immutable response.",
+        "source_work_invocation_id": "invoke-061603bcb6a9566e1ea02873"
+      }
+    },
+    "candidate": {
+      "applicability": [
+        "AGI research planning",
+        "AGI capability evaluation",
+        "Claims that a system has become more generally capable"
+      ],
+      "candidate_id": "candidate-agi-benchmark-suite-v1",
+      "conflicts_with": [],
+      "contradictory_evidence": [],
+      "depends_on": [],
+      "expected_scope": "agi/capability-evaluation",
+      "incompatible_with": [],
+      "non_applicability": [
+        "Ordinary unrelated software tasks"
+      ],
+      "prompt_mode": "overlay",
+      "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+      "rejected_reasons": [],
+      "scope_states": {
+        "agi/capability-evaluation": "NEED_MORE_EVIDENCE",
+        "global": "untested"
+      },
+      "source_refs": [
+        ".continual/runs/run-prod-agi-20260816-1609/local-learn/0002-execute.json",
+        ".continual/runs/run-prod-agi-20260816-1609/local-learn/0003-task_evaluate.json"
+      ],
+      "status": "candidate",
+      "supporting_evidence": [
+        {
+          "episode_id": "episode-prod-agi-20260816-1609",
+          "finding": "The prior run produced structural progress but lacked behavioral cross-domain evidence."
+        },
+        {
+          "at": "2026-08-24T02:20:39.752193Z",
+          "evidence": [
+            "29 focused tests passed",
+            "live request b3197d3be9f6906a623fc5885017d3c310bddd98b71d37658cadd0113a0bd6a9 was frozen before the child"
+          ],
+          "scope": "agi/capability-evaluation"
+        }
+      ],
+      "target_component": "execute",
+      "tested_with": [],
+      "what_it_changes": "Before further AGI completion claims, build and run representative cross-domain benchmarks whose evidence maps to the six AGI criteria."
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "behavioral_outcome": {
+          "outcome_id": "behavioral-outcome-4272816b64c262f5e0126396",
+          "request_digest": "b3197d3be9f6906a623fc5885017d3c310bddd98b71d37658cadd0113a0bd6a9",
+          "response_pointer": [
+            "result",
+            "behavioral_answer"
+          ],
+          "rubric_digest": "fd06ba630caa56e8edd9d3d04f847c4d87a50ed2cd5a3e023b451d39d9af59b8",
+          "task_digest": "6e88f3090310fcb28e108407b0f549968acfd7b02af1ef749f5d4089c7e037a8"
+        },
+        "component": "execute",
+        "expected_outputs": [
+          "result.behavioral_answer containing only the public canonical-JSON answer",
+          "result.child_execution_unit scheduling deterministic receipt finalization and naming this exact Work invocation id",
+          "no hidden reasoning, secret, provider self-score, or unbounded payload"
+        ],
+        "failure_conditions": [
+          "task or rubric bytes change after the precommit",
+          "response is not bound to the current child Work invocation",
+          "the child claims independent evidence, AGI, or completion"
+        ],
+        "goal": "Answer exactly one already-precommitted bounded public JSON task, then schedule a separate finalizer bound to this child Work invocation; do not inspect or alter the sealed expected answer or judge.",
+        "inputs": [
+          ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/request.json"
+        ],
+        "parent_continuation": "After the real child response is immutable, run a deterministic finalizer using its exact invocation id, verify the receipt and ledger transition from zero to one, run protected validation, then Task Evaluate the parent unit without treating one internal task as breadth or completion.",
+        "request_ref": ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/request.json",
+        "scope": "behavioral-outcome/live-precommitted-child-v1",
+        "unit_id": "unit-2640beb7270bce5cc39e6d9d"
+      },
+      "snapshot": {
+        "continuation_stack": [
+          {
+            "continuation": "After Task Evaluate, consolidate and learn. If the bounded unit passes, Root should select the smallest sandboxed matched experiment for checkpoint inheritance; main remains single-writer and implementation remains inactive until evidence supports it.",
+            "parent_unit_id": "unit-85bfcc10eb003a178e261658",
+            "result_ref": "artifacts/unit-85bfcc10eb003a178e261658-result.json"
+          },
+          {
+            "continuation": "Publish the verified harness and this native boundary to main through exact-head CI. Then run only the frozen child measurement unit; if genuine comparable native measurements cannot be obtained, return INSUFFICIENT_EVIDENCE or REJECT_MECHANISM rather than fabricating observations.",
+            "parent_unit_id": "unit-7248d09ab66196abd19984f1",
+            "result_ref": "artifacts/unit-7248d09ab66196abd19984f1-result.json"
+          },
+          {
+            "continuation": "Resume only the frozen child selection-plan measurement. Do not modify case labels, graph contents, baselines, budgets, thresholds, or claim boundaries after viewing routing output. After Task Evaluate, consolidate, learn, and return to Root regardless of the bounded verdict.",
+            "parent_unit_id": "unit-b9e109e2f146deb1deb9f3ff",
+            "result_ref": "artifacts/unit-b9e109e2f146deb1deb9f3ff-result.json"
+          },
+          {
+            "continuation": "Task Evaluate must classify the bounded child without inventing observations. Consolidate and learn the contamination result, publish validated native records through exact-head CI, and return to Root.",
+            "parent_unit_id": "unit-7c74345c417a64e25fa80dd6",
+            "result_ref": "artifacts/unit-7c74345c417a64e25fa80dd6-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact integration evidence, then Consolidate Episode and Learn before returning to Root for the next falsifiable unit.",
+            "parent_unit_id": "unit-24e1807c3c65cd90d50be3eb",
+            "result_ref": "artifacts/unit-24e1807c3c65cd90d50be3eb-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact PR 275 integration evidence, then Consolidate Episode and Learn. At the next Root boundary refresh the inbox, resolve revision 15, reconcile O's durable control state, and select the highest-information Context Kernel unit.",
+            "parent_unit_id": "unit-f06051defa0312907f5f28ab",
+            "result_ref": "artifacts/unit-f06051defa0312907f5f28ab-result.json"
+          },
+          {
+            "continuation": {
+              "next": "Consume the one child response, mechanically judge it in a separate Execute, and preserve the internal-only claim boundary.",
+              "parent_unit_id": "unit-7353e639723862d91ae4e0f1"
+            },
+            "parent_unit_id": "unit-7353e639723862d91ae4e0f1",
+            "result_ref": "artifacts/unit-7353e639723862d91ae4e0f1-result.json"
+          }
+        ],
+        "created_at": "2026-08-22T11:41:47.630118Z",
+        "current_component": "execute",
+        "current_unit": "unit-2640beb7270bce5cc39e6d9d",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+          "runner": "python-engine-v2"
+        },
+        "episode_id": "episode-work-mode-handoff-v2",
+        "error_count": 4,
+        "last_error": {
+          "at": "2026-08-24T02:23:12.391436Z",
+          "message": "Context Kernel failed closed: decision-relevant CI source observation failed: CI source observation is future-skewed",
+          "phase": "unit_pending",
+          "type": "WorkSessionError"
+        },
+        "last_evaluation": {
+          "agi_claim_supported": false,
+          "candidate_trial": {
+            "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+            "outcome": "SUPPORTED_FOR_SCOPE",
+            "reason": "The overlay kept the bounded publication PASS, routing INSUFFICIENT_EVIDENCE, and user-level FAIL independent while preserving all negative evidence."
+          },
+          "claim_boundary": "PR 275 publication and native-record integration passed as an internal engineering unit. It does not establish routing capability, independent production capability, AGI, or completion of the user's upper objective.",
+          "continuation": "Proceed through post-result Candidate Evaluate, Consolidate Episode, and Learn. At Root refresh latest main and inbox, resolve revision 15 without retroactive mutation of the completed invocation, reconcile the canonical O control state, and select the first falsifiable Context Kernel unit.",
+          "evaluated_goal": "Minimize defensible elapsed time until genuine real-world AGI is achieved while preserving truthful reporting, evidence integrity, and safe single-writer execution.",
+          "evidence": [
+            {
+              "finding": "Before Execute submission, work-verify reported 83 requests, 82 responses, exactly one pending request, and valid=true; all JSON, compileall, and diff checks succeeded.",
+              "source": "run-work-mode-handoff-v2 and main 918387412bc9ee026625020c6d83970817c13bc3"
+            },
+            {
+              "finding": "PR 275 exact head 66e36c36 remained unchanged and all four pytest shards plus the dependent aggregate succeeded.",
+              "source": "https://github.com/bachikoljunior-blip/O/actions/runs/32639887224"
+            },
+            {
+              "finding": "A fresh latest-main merge-tree was conflict-free and GitHub accepted an expected-head merge to 3ed156be.",
+              "source": "https://github.com/bachikoljunior-blip/O/commit/3ed156be00fc3439c0bb0e1e8184c3c87deedb4a"
+            },
+            {
+              "finding": "Five reviewed native O blobs read back exactly from main after the merge.",
+              "source": "agi/WORK_EXECUTION_STATE.json recent_main_integration.readback_blobs"
+            },
+            {
+              "finding": "The state-only CAS readback preserved generation 5, owner, execution id, fence, and inbox acknowledgement 14 while recording the integration.",
+              "source": "agi/WORK_EXECUTION_STATE.json blob 1bbc4bcefddec9c6f6b35ff129af32bc26acf7f8"
+            },
+            {
+              "finding": "The checked-in recursive routing experiment still records zero observations, INSUFFICIENT_EVIDENCE, and no activation.",
+              "source": "agi/CONTEXT_ROUTING_EXPERIMENT.json"
+            }
+          ],
+          "global_activation_authorized": false,
+          "negative_evidence": [
+            "No admissible recursive routing observations exist; required recall, forbidden-read isolation, replay, and content-efficiency measures remain unavailable.",
+            "Repository CI and exact main durability are internal engineering evidence only.",
+            "The actual upper-level AGI objective has not been achieved or demonstrated.",
+            "The serving model identity remains externally unverified.",
+            "Revision 15 was not part of the frozen Execute decision context and remains unapplied until the next safe Root."
+          ],
+          "repair": {
+            "completed_unit": "Consolidate and learn the PR 275 publication boundary and its separation from capability and user-level claims.",
+            "do_not_repair": "Do not relabel CI, merge, readback, or native O persistence as AGI or routing evidence; do not retroactively insert revision 15 into the frozen invocation.",
+            "next_falsifiable_unit": "At Root ingest revision 15, reconcile canonical strategy and execution context, compare full raw-context internalization with an O-owned Context Kernel backed by authoritative external sources, and implement the smallest behavioral omission/staleness guard selected by O."
+          },
+          "routing_observations": 0,
+          "routing_verdict": "INSUFFICIENT_EVIDENCE",
+          "unit_subfinding": {
+            "reason": "Journal validity, unchanged exact-head CI, fresh conflict proof, expected-head merge, exact main blob readback, and unchanged lease identity all passed.",
+            "unit_id": "unit-b9474100638b3680913c90e4",
+            "verdict": "PASS"
+          },
+          "unit_verdict": "PASS",
+          "unmet_conditions": [
+            "The user's real-world AGI objective remains unmet.",
+            "O does not yet own a complete, provenance-bound decision context; facts known only outside O can still be omitted.",
+            "Recursive routing lacks admissible behavioral measurement.",
+            "Independent real-world capability evidence remains absent."
+          ],
+          "user_level_verdict": "FAIL",
+          "verdict": "FAIL"
+        },
+        "last_result_ref": "artifacts/unit-25a53ee5ffd91efed4303dcd-result.json",
+        "phase": "unit_pending",
+        "produced_candidates": [],
+        "revision": 83,
+        "run_id": "run-work-mode-handoff-v2",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "PASS",
+        "updated_at": "2026-08-24T02:23:12.391548Z"
+      }
+    },
+    "mode": "post-result",
+    "pre_application": {
+      "baseline_needed": false,
+      "candidate_id": "candidate-agi-benchmark-suite-v1",
+      "decision": "TRIAL_CANDIDATE",
+      "evidence_to_collect": [
+        "one exact child Work request and response",
+        "deterministic judgment and byte-stable receipt",
+        "internal ledger count changes from zero to one only"
+      ],
+      "reason": "The benchmark discipline is directly applicable to the one precommitted child task, while its breadth claims remain explicitly unavailable.",
+      "regression_checks": [
+        "do not expose or change the rubric",
+        "do not treat the provider self-report as a score",
+        "do not infer breadth, independence, AGI, or completion"
+      ],
+      "rollback": "Reject the child and preserve zero accepted observations if any binding or judgment check fails.",
+      "scope": "agi/capability-evaluation"
+    },
+    "run_id": "run-work-mode-handoff-v2",
+    "target_component": "execute"
+  },
+  "payload_digest": "ee34752f1611e73debf9842c27d7acb960a64a569b744740cc5594b9ddc4e838",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "1905a714183e615e024a2d1b70a680561caa6ab5ca3c3e3f8be9f1516c1914f8",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}
