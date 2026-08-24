@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T11:52:21.127Z",
-  "last_progress_at": "2026-08-24T11:52:21.127Z",
+  "heartbeat_at": "2026-08-24T11:57:37.899Z",
+  "last_progress_at": "2026-08-24T11:57:37.899Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -41,12 +41,12 @@
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/recovery-gen7-context-comparison-native-v1",
-    "snapshot_head_sha": "58b580c8674fb2d486613e7232a9e79b01ff2b61",
+    "snapshot_head_sha": "e3fe61198fe00079e7def3d52d83124dca3e61be",
     "pending_work_invocation_id": "invoke-bad58dd32377c344b6717fc6",
     "pending_request_ref": ".continual/work-model/invocations/invoke-bad58dd32377c344b6717fc6/request.json",
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
-    "durability_status": "PR 292 head 58b580c8674fb2d486613e7232a9e79b01ff2b61 is valid, but exact-branch verification found that the manifest's work-verify count described the dirty local development branch rather than the exact publication tree. A state precommit now authorizes only the manifest correction to the verified exact-tree counts; Execute remains frozen and unanswered.",
-    "next_action": "After exact readback of the manifest-correction precommit, create one child commit changing only the deterministic manifest, fast-forward PR 292 without force, require a new unchanged exact-head CI, then perform fresh authority/main/comparison checks and expected-head merge.",
+    "durability_status": "The manifest-correction precommit was read back at main ff37d2851f0444cec1bc7bfabbf9b7feba8a3f2a. PR 292 was non-force fast-forwarded to exact head e3fe61198fe00079e7def3d52d83124dca3e61be and tree 8492f815ece66458d09637a8146470663972a9e1; exact-tree work-verify is valid at 171/169/2 and the 82-path diff is unchanged. Execute remains frozen and unanswered while new exact-head CI is pending.",
+    "next_action": "Observe a new PR 292 workflow bound to exact head e3fe61198fe00079e7def3d52d83124dca3e61be; after all required jobs succeed, re-read generation-7 authority, current main, exact PR head, and conflict-free comparison, then merge with expected-head protection and read back every reviewed blob before answering Execute.",
     "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
     "next_native_phase": "execute_external_effect_after_state_precommit"
   },
@@ -1300,7 +1300,7 @@
     ],
     "local_validation": "Exact publication tree work-verify is valid with 171 requests, 169 responses, and two recognized pending Execute requests (one pre-existing main request and the current publication request); 82 changed paths include the deterministic 81-payload manifest; every JSON/JSONL parsed; the prior 408-line event log is a byte-identical prefix of the 435-line selected log; secret-marker and forbidden-path scans passed.",
     "prepared_at": "2026-08-24T11:40:38.041Z",
-    "status": "manifest_correction_precommitted",
+    "status": "ci_pending",
     "rule": "No blob, tree, commit, branch, PR, workflow, ref update, or merge for this effect may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base; merge only the unchanged exact head after all required CI succeeds and a fresh main comparison is conflict-free; then read back all 82 reviewed blobs.",
     "claim_boundary": "Internal native O lifecycle durability only. The comparison remains PRECOMMITTED with zero routing observations and no scientist positive-control result; no behavioral benefit, external production evidence, AGI, or user-level completion is claimed.",
     "remote_parent": "92b3b25ab6643dcaa2d043141e4d88032cfbd267",
@@ -1318,6 +1318,13 @@
     "manifest_correction_reason": "Correct the native work-verify counts to the exact remote publication tree; no payload path or payload blob changes.",
     "manifest_correction_expected_state_blob": "3e9931a12176b51b638efe1e1164592e76ed160d",
     "manifest_correction_planned_tree": "8492f815ece66458d09637a8146470663972a9e1",
-    "manifest_correction_prepared_at": "2026-08-24T11:52:21.127Z"
+    "manifest_correction_prepared_at": "2026-08-24T11:52:21.127Z",
+    "remote_tree": "8492f815ece66458d09637a8146470663972a9e1",
+    "remote_commit": "e3fe61198fe00079e7def3d52d83124dca3e61be",
+    "pr_head": "e3fe61198fe00079e7def3d52d83124dca3e61be",
+    "non_force_fast_forward_verified": true,
+    "corrected_manifest_remote_readback_verified": true,
+    "corrected_exact_tree_work_verify": "valid: 171 requests, 169 responses, 2 recognized pending requests",
+    "corrected_head_observed_at": "2026-08-24T11:57:37.899Z"
   }
 }
