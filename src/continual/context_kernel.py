@@ -524,6 +524,9 @@ def build_decision_context(
         "claim_boundary": deepcopy(strategy.get("claim_boundary", {})),
         "immediate_sequence": deepcopy(strategy.get("immediate_sequence", [])),
         "context_management": deepcopy(strategy.get("context_management", {})),
+        "negative_evidence_scope_policy": deepcopy(
+            strategy.get("negative_evidence_scope_policy", {})
+        ),
     }
     snapshot_projection = {
         "run_id": run_id,

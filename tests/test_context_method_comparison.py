@@ -12,10 +12,12 @@ from agi.context_method_comparison import (
     classify_routing_comparison,
     classify_scientist_comparison,
     context_method_comparison_protocol_digest,
+    equivalent_positive_control_evidence_digest,
     load_context_method_comparison,
     routing_comparison_receipt_digest,
     scientist_comparison_receipt_digest,
     validate_context_method_comparison,
+    validate_equivalent_positive_control_evidence,
     validate_routing_comparison_receipt,
     validate_scientist_comparison_receipt,
     verify_current_context_method_sources,
@@ -140,6 +142,37 @@ def _scientist_receipt(
     return receipt
 
 
+def _equivalent_positive_control(protocol: dict) -> dict:
+    contract = protocol["scientist_positive_control"]
+    evidence = {
+        "schema_version": 1,
+        "evidence_id": "existing-ai-scientist-v2-control-v1",
+        "source_locator": "evidence://independent/original-configuration-v1",
+        "observed_at": "2026-08-24T12:00:00Z",
+        "system": contract["system"],
+        "source_artifact_id": contract["source_artifact_id"],
+        "configuration_id": "original-configuration-equivalent-v1",
+        "status": "PASS",
+        "fidelity": contract["required_fidelity"],
+        "rubric_dimensions": deepcopy(contract["rubric_dimensions"]),
+        "task_set_digest": contract["task_set_digest"],
+        "budget_digest": contract["budget_digest"],
+        "model_executor_class": contract["model_executor_class"],
+        "result_digest": "3" * 64,
+        "equivalence_basis": [
+            "same frozen task-set digest",
+            "same frozen budget digest",
+            "same model/executor class",
+            "unmodified or fidelity-preserving original configuration",
+        ],
+        "evidence_digest": "",
+    }
+    evidence["evidence_digest"] = equivalent_positive_control_evidence_digest(
+        evidence
+    )
+    return evidence
+
+
 def test_checked_in_protocol_is_valid_frozen_and_unmeasured() -> None:
     protocol = load_context_method_comparison(PROTOCOL_PATH)
 
@@ -215,8 +248,13 @@ def test_source_artifact_change_is_bound_without_rebinding_historical_protocol()
         validate_context_method_comparison(protocol)
 
 
-def test_current_source_verification_is_an_explicit_prepublication_check() -> None:
-    assert verify_current_context_method_sources(PROTOCOL_PATH)["status"] == "PRECOMMITTED"
+def test_historical_revision_19_precommit_stays_valid_after_revision_20_source_advance() -> None:
+    assert load_context_method_comparison(PROTOCOL_PATH)["status"] == "PRECOMMITTED"
+    with pytest.raises(
+        ValueError,
+        match="source artifact digest changed: agi/USER_INPUT_INBOX.json",
+    ):
+        verify_current_context_method_sources(PROTOCOL_PATH)
 
 
 def test_claim_inflation_and_checked_in_measurements_are_rejected() -> None:
@@ -309,6 +347,75 @@ def test_positive_control_pass_plus_adapted_failure_is_adaptation_loss() -> None
     result = classify_scientist_comparison(protocol, receipt)
     assert result["classification"] == "ADAPTATION_OR_ABLATION_LOSS"
     assert result["evidence_against_original_method"] is False
+
+
+def test_equivalent_existing_positive_control_avoids_duplicate_reproduction() -> None:
+    protocol = _protocol()
+    receipt = _scientist_receipt(
+        protocol,
+        control_status="NOT_RUN",
+        evaluated_status="FAIL",
+    )
+    evidence = _equivalent_positive_control(protocol)
+
+    assert validate_equivalent_positive_control_evidence(protocol, evidence) == evidence
+    result = classify_scientist_comparison(
+        protocol,
+        receipt,
+        equivalent_positive_control=evidence,
+    )
+
+    assert result["classification"] == "ADAPTATION_OR_ABLATION_LOSS"
+    assert result["positive_control_basis"] == (
+        "reused_equivalent_existing_evidence"
+    )
+    assert result["positive_control_evidence_digest"] == evidence["evidence_digest"]
+    assert result["tested_scope"]["evaluated_fidelity"] == "o_adapted"
+    assert result["negative_evidence_scope"] == (
+        "tested_candidate_configuration_and_conditions_only"
+    )
+    assert result["evidence_against_scientist_agent_family"] is False
+    assert result["evidence_against_untested_mechanisms"] is False
+
+
+def test_equivalent_positive_control_must_match_every_frozen_condition() -> None:
+    protocol = _protocol()
+    evidence = _equivalent_positive_control(protocol)
+    evidence["task_set_digest"] = "4" * 64
+    evidence["evidence_digest"] = equivalent_positive_control_evidence_digest(
+        evidence
+    )
+
+    with pytest.raises(ValueError, match="unmatched task set digest"):
+        validate_equivalent_positive_control_evidence(protocol, evidence)
+
+
+def test_negative_scientist_classification_never_generalizes_beyond_tested_scope() -> None:
+    protocol = _protocol()
+    receipt = _scientist_receipt(
+        protocol,
+        control_status="FAIL",
+        evaluated_status="FAIL",
+    )
+
+    result = classify_scientist_comparison(protocol, receipt)
+    assert result["classification"] == "BASELINE_REPRODUCTION_FAILURE"
+    assert result["tested_scope"] == {
+        "comparison_kind": "adaptation",
+        "system": "The AI Scientist-v2",
+        "evaluated_fidelity": "o_adapted",
+        "target_domain": None,
+        "task_set_digest": protocol["scientist_positive_control"][
+            "task_set_digest"
+        ],
+        "budget_digest": protocol["scientist_positive_control"]["budget_digest"],
+        "model_executor_class": protocol["scientist_positive_control"][
+            "model_executor_class"
+        ],
+    }
+    assert result["evidence_against_original_method"] is False
+    assert result["evidence_against_scientist_agent_family"] is False
+    assert result["evidence_against_untested_mechanisms"] is False
 
 
 def test_positive_control_pass_plus_matched_target_failure_is_narrow_only() -> None:

@@ -18,6 +18,7 @@
     "Do not lower the user's actual AGI achievement standard; treat repository-authored gates as optional falsifiable verification machinery rather than terminal objectives.",
     "Do not use self-evaluation, architecture, internal tests, or CI as AGI proof.",
     "Preserve evidence integrity, negative evidence, idempotency, and single-writer fencing.",
+    "Scope every negative-evidence claim to the candidate, configuration, and conditions actually tested; do not generalize a scientist-agent-derived or O-adapted result to an entire family or untested mechanism without direct evidence.",
     "Do not fabricate precise completion dates or unsupported probability estimates."
   ],
   "selection_metrics": [
@@ -59,7 +60,7 @@
     "state_only_control_plane_updates": "expected-blob CAS on main"
   },
   "context_management": {
-    "source_user_input_revision": 15,
+    "source_user_input_revision": 20,
     "decision_authority": "O Engine owns the observation ledger, source clocks, decision projections, inclusion and exclusion decisions, invalidation, and context-bound action authorization.",
     "raw_source_authority": "GitHub, CI, providers, files, and other source systems remain authoritative for the raw facts they produce; O stores provenance-bound references, projections, and receipts rather than copying everything.",
     "outer_session_role": "Execute O-requested observations and effects and return receipts. Untracked outer-session memory is not decision authority.",
@@ -77,6 +78,19 @@
     "copy_all_raw_context": false,
     "architecture_path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
     "current_stage": "decision_relevant_ci_source_observation_vertical_slice"
+  },
+  "negative_evidence_scope_policy": {
+    "source_user_input_revision": 20,
+    "claim_boundary": "A negative result applies only to the named candidate, exact configuration, and tested conditions unless additional direct evidence supports a broader inference.",
+    "scientist_agent_family_generalization": "forbidden_without_direct_family_level_evidence",
+    "untested_mechanism_generalization": "forbidden",
+    "required_attribution_classes": [
+      "tested_variant_failure",
+      "adaptation_or_ablation_loss",
+      "original_baseline_reproduction_failure",
+      "untested_mechanism"
+    ],
+    "positive_control_rule": "Do not demand a duplicate positive-control reproduction when conditions equivalent to the demonstrated original configuration are already established with adequate provenance; otherwise require an unmodified or fidelity-preserving baseline before attributing an adapted failure to the original method."
   },
   "method_change_triggers": [
     {
@@ -121,7 +135,8 @@
       "id": "checkpoint_inheritance_unmeasured",
       "observation": "PR 263 merged the frozen scientist-agent comparison and generation-5 native checkpoint after exact-head CI, but bounded checkpoint inheritance still has no matched native observations.",
       "effect": "No expected-time advantage is established; implementing the mechanism now would be speculative.",
-      "selected_action": "Publish the fail-closed sandbox harness and exact child invocation, then record comparable native observations or reject the mechanism without fabricating measurements."
+      "selected_action": "Publish the fail-closed sandbox harness and exact child invocation, then record comparable native observations or reject only the tested bounded checkpoint-inheritance candidate without fabricating measurements.",
+      "negative_evidence_scope": "This observation concerns the named O-adapted bounded checkpoint-inheritance candidate and its recorded native conditions only. It is not evidence against the scientist-agent family or any untested mechanism."
     },
     {
       "id": "zero_independent_external_evidence",
@@ -158,7 +173,8 @@
     "Retain PR 282's exact-head verified pre-freeze readiness barrier: reject stale, future-skewed, non-running, malformed, or incomplete mandatory Work authority before new semantic request or native invocation mutation, while preserving exact frozen replay.",
     "Require a precommitted, cross-bound, fresh connector receipt for the exact main commit, Work-state blob, authority, executor, and model before a new semantic request whenever the authoritative-source policy is enabled; retain its timestamped-observation-only claim boundary.",
     "Publish and live-exercise the bounded exact-head GitHub Actions run plus required-job observation path; reject identity, topology, conclusion, freshness, and authority mismatches atomically and exclude logs and secrets.",
-    "After admissible receipts exist, evaluate useful behavioral and outcome change rather than storage, verbal recall, or internal safety alone."
+    "After admissible receipts exist, evaluate useful behavioral and outcome change rather than storage, verbal recall, or internal safety alone.",
+    "Apply revision 20 during every evaluation: name the tested candidate/configuration/conditions, keep negative claims within that scope, distinguish adaptation loss from baseline failure, and reuse an adequately proven equivalent original positive control instead of duplicating it."
   ],
   "claim_boundary": {
     "agi_claim_supported": false,
@@ -168,5 +184,5 @@
     "strategy_success_is_external_evidence": false
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "updated_at": "2026-08-23T23:11:47.645Z"
+  "updated_at": "2026-08-24T12:40:09.648Z"
 }
