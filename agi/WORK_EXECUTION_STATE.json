@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T10:24:11.715Z",
-  "last_progress_at": "2026-08-24T10:24:11.715Z",
+  "heartbeat_at": "2026-08-24T10:28:13.087Z",
+  "last_progress_at": "2026-08-24T10:28:13.087Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
   "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_local_validation",
+  "active_component": "execute_publication_precommit",
   "active_unit_id": "unit-42f48b067a5abf643b682fee",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -45,10 +45,10 @@
     "pending_work_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
     "pending_request_ref": ".continual/work-model/invocations/invoke-c21c168fb7f2dc2671560b1d/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "The matched routing and scientist positive-control protocol, validator, deterministic classifiers, and 16 focused tests are implemented locally. 122 protected Context Kernel/routing/scientist tests passed; the full repository suite is still running. No source branch, PR, or merge has been published for this unit.",
-    "next_action": "Finish the full repository regression, recheck generation-7 authority, precommit the exact three-path source publication, publish on an isolated non-force branch, require unchanged exact-head CI, then merge/read back before Task Evaluate.",
+    "durability_status": "Context-method comparison source commit 0db878e6c84aa9e02f67354171c94fa2c4094c41 is locally validated and publication-precommitted. No source branch, PR, or merge existed before this CAS.",
+    "next_action": "Read back this state CAS, create the isolated branch from its exact result commit, publish exactly the three reviewed blobs, verify the diff, open one PR, and wait for unchanged exact-head CI.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
-    "next_native_phase": "execute_implementation_validation"
+    "next_native_phase": "execute_source_publication"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -915,9 +915,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "16a0ae6817c48c755467eb2b39545bf9b01d6144",
-    "requested_at": "2026-08-24T10:24:11.715Z",
-    "reason": "active context-comparison implementation and full-regression heartbeat",
+    "expected_blob_sha": "5a3bc63f18d7cf1a997f9fa36d5c76d4a24ea75a",
+    "requested_at": "2026-08-24T10:28:13.087Z",
+    "reason": "context-method comparison source publication precommit",
     "verified_remote_readback": false
   },
   "inbox_append_path_publication_precommit": {
@@ -1124,5 +1124,31 @@
     "final_fresh_main_before_merge": "38f24cd30b87c7a2555dc1e07726a03dc1816977",
     "final_fresh_merge_tree": "de1d348204a02b80ec4a816087b5fa652820f4e6",
     "final_pr_head_unchanged": true
+  },
+  "context_method_comparison_publication_precommit": {
+    "effect_id": "publish-context-method-comparison-contract-v1",
+    "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen7:context-method-comparison:0db878e6c84aa9e02f67354171c94fa2c4094c41:v1",
+    "branch": "work/recovery-gen7-context-comparison-contract-v1",
+    "observed_main_before_precommit": "7300081954ba2c9caea5bf0b0769f83cd7f82d2b",
+    "base_main_rule": "Use the exact result commit of this state-only CAS after authority and blob readback.",
+    "expected_state_blob": "5a3bc63f18d7cf1a997f9fa36d5c76d4a24ea75a",
+    "local_result_commit": "0db878e6c84aa9e02f67354171c94fa2c4094c41",
+    "local_result_tree": "964ac8a863f4496eedf2a00a44078fa9eb6dbb98",
+    "changed_paths": [
+      "agi/CONTEXT_METHOD_COMPARISON.json",
+      "src/agi/context_method_comparison.py",
+      "tests/test_context_method_comparison.py"
+    ],
+    "reviewed_blobs": {
+      "agi/CONTEXT_METHOD_COMPARISON.json": "107426f39208b226863c69a48a28231d71a89118",
+      "src/agi/context_method_comparison.py": "200b63c1138a71e65a7ad6fcb6dc19f4abca8bb1",
+      "tests/test_context_method_comparison.py": "328420d7ef3da9d797d5a6440d369eb8d24447c9"
+    },
+    "protocol_digest": "92b15e3fa1780220006a068c0ce654bda893e1f307b5192b2dd439c895d94f16",
+    "local_validation": "16 focused comparison tests and 122 protected Context Kernel/routing/scientist tests passed; compileall, all repository JSON parsing, and diff check passed. A monolithic full suite was stopped at 41% with no observed failure; exact-head four-shard CI plus aggregate remains mandatory.",
+    "prepared_at": "2026-08-24T10:28:13.087Z",
+    "status": "prepared_before_remote_publication",
+    "rule": "After exact readback of this state-only CAS, create one non-force isolated branch from the CAS result commit, publish exactly the three reviewed blobs, verify the three-path diff and blob identity, then require unchanged exact-head CI plus fresh conflict-free main before expected-head merge.",
+    "claim_boundary": "Internal precommit, validation, and causal-classification infrastructure only; no routing measurement, positive-control result, production evidence, AGI, activation, or user-level completion."
   }
 }
