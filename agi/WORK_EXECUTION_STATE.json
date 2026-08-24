@@ -8,8 +8,8 @@
     "lease_generation": 8,
     "fence_token": "work-recovery-fence-v8-073c1e261139db2af15fcdf59df785fd9608de068b2d6b5cc9a05048751b136a",
     "started_at": "2026-08-24T15:31:24.040Z",
-    "heartbeat_at": "2026-08-24T16:54:37.106Z",
-    "last_progress_at": "2026-08-24T16:54:37.106Z",
+    "heartbeat_at": "2026-08-24T16:56:55.204Z",
+    "last_progress_at": "2026-08-24T16:56:55.204Z",
     "stale_after_seconds": 900,
     "authorization": {
         "kind": "fenced_stale_owner_recovery",
@@ -59,8 +59,8 @@
         "pending_work_invocation_id": "invoke-c95a91de782165b63e4266c7",
         "pending_request_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
         "pending_native_invocation_id": "invoke-214abb796807012259819320",
-        "durability_status": "PR 296 is open at exact unchanged head 8ba946ddfc57fa27664f22b18704f01a2cd2d602. GitHub compare confirms one commit and exactly the three reviewed paths. In pull-request workflow 32750439516, pytest shards 0, 1, and 3 completed successfully; long-running shard 2 remains in progress. No merge is authorized before all four shards plus dependent aggregate succeed and fresh authority/main/conflict checks pass.",
-        "next_action": "Wait for exact-head workflow 32750439516. After all required jobs succeed, re-read main, authority, inbox, PR exact head, and conflict status; state-only CAS an expected-head merge authorization before dispatch. Do not answer the stale generation-6 Execute.",
+        "durability_status": "PR 296 exact head 8ba946ddfc57fa27664f22b18704f01a2cd2d602 passed workflow 32750439516 with all four pytest shards and the dependent aggregate successful. Fresh main 20e6b892b5c619b18a28fc6bf10aab492e216f76 differs from the branch only through eight state-only commits since merge base b83c408a3f27094202de2e58c6578d65b4c6494d; git merge-tree produced conflict-free tree b29467534162ac3acf7c5f6907a011abda06c1c0. Inbox remains authoritative revision 20 and generation 8 remains the sole running owner.",
+        "next_action": "Read back this merge-authorization state CAS, then obtain fresh Work and exact-head CI source receipts. Re-read main, branch head, inbox, and authority one final time and merge PR 296 only with expected head 8ba946ddfc57fa27664f22b18704f01a2cd2d602. Read back all three reviewed blobs. Do not answer the stale generation-6 Execute.",
         "completed_work_invocation_id": "invoke-60f68f61725378eeac4c70e5",
         "next_native_phase": "execute_checkpoint_measurement_readiness_publication"
     },
@@ -155,7 +155,7 @@
     "checkpoint_measurement_readiness_publication_precommit": {
         "effect_id": "publish-checkpoint-measurement-readiness-v1",
         "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen8:checkpoint-measurement-readiness:2bf1cb1031f6864abe5dc34f4e2c12407b6a4886:v1",
-        "status": "pr_open_exact_head_ci_queued",
+        "status": "merge_authorization_precommitted",
         "prepared_at": "2026-08-24T16:14:00.459Z",
         "branch": "work/recovery-gen8-checkpoint-readiness-v1",
         "base_main_commit": "b83c408a3f27094202de2e58c6578d65b4c6494d",
@@ -175,8 +175,43 @@
         "remote_compare_commit_count": 1,
         "remote_compare_path_count": 3,
         "exact_head_workflow_run": 32750439516,
-        "exact_head_workflow_status": "in_progress_shards_0_1_3_success_shard_2_running",
-        "last_ci_observed_at": "2026-08-24T16:54:28Z",
+        "exact_head_workflow_status": "success_four_shards_and_dependent_aggregate",
+        "last_ci_observed_at": "2026-08-24T16:56:37Z",
+        "merge_authorization": {
+            "effect_id": "merge-pr296-checkpoint-measurement-readiness-v1",
+            "idempotency_key": "bachikoljunior-blip/O:pr296:8ba946ddfc57fa27664f22b18704f01a2cd2d602:merge:v1",
+            "prepared_at": "2026-08-24T16:56:55.204Z",
+            "status": "authorized_not_dispatched",
+            "expected_head_sha": "8ba946ddfc57fa27664f22b18704f01a2cd2d602",
+            "expected_head_tree": "c095807da984449e73a1169b0318fff587e2903c",
+            "exact_head_workflow_run": 32750439516,
+            "required_jobs": {
+                "97505865185": "pytest shard 0 of 4: success",
+                "97505865400": "pytest shard 1 of 4: success",
+                "97505864959": "pytest shard 2 of 4: success",
+                "97505865238": "pytest shard 3 of 4: success",
+                "97515974558": "test: success"
+            },
+            "observed_main_sha": "20e6b892b5c619b18a28fc6bf10aab492e216f76",
+            "merge_base_sha": "b83c408a3f27094202de2e58c6578d65b4c6494d",
+            "candidate_ahead_by": 1,
+            "candidate_behind_by": 8,
+            "main_changed_paths_since_base": [
+                "agi/WORK_EXECUTION_STATE.json"
+            ],
+            "candidate_changed_path_count": 3,
+            "changed_path_intersection": [],
+            "predicted_merge_tree": "b29467534162ac3acf7c5f6907a011abda06c1c0",
+            "conflict_proof": "git merge-tree --write-tree completed with exit 0; main changes since the common base are state-only and path-disjoint from the three reviewed candidate paths.",
+            "authority": {
+                "owner_kind": "work_recovery_automation",
+                "execution_id": "work-recovery-20260824T153124Z-073c1e261139db2a",
+                "lease_generation": 8,
+                "highest_acknowledged_inbox_revision": 20,
+                "authoritative_inbox_blob": "c462c8d1636d0249646627311257978b8c679a3d"
+            },
+            "dispatch_rule": "After exact readback of this CAS and fresh Work plus CI source receipts, re-read main, authority, inbox, branch exact head, and required job success. Merge only through GitHub expected-head protection; any moved head, changed authority, new inbox revision, failed job, or conflict invalidates this authorization."
+        },
         "initial_invalid_parent_attempt": "GitHub rejected the first unattached-commit request with HTTP 422 before commit or ref creation because an inferred parent SHA did not exist; the retry used the exact locally resolved full parent SHA.",
         "exact_tree_sha": "c095807da984449e73a1169b0318fff587e2903c",
         "changed_path_count": 3,
@@ -543,28 +578,28 @@
     "ci_source_observation_policy": {
         "required": true,
         "repository_full_name": "bachikoljunior-blip/O",
-        "exact_head_sha": "7ad6ee206a65a3c83f193d866a01765baf4e6ab9",
-        "workflow_run_id": 32738203858,
+        "exact_head_sha": "8ba946ddfc57fa27664f22b18704f01a2cd2d602",
+        "workflow_run_id": 32750439516,
         "workflow_id": 335420036,
         "required_jobs": [
             {
-                "id": 97466066840,
+                "id": 97505865185,
                 "name": "pytest shard 0 of 4"
             },
             {
-                "id": 97466066618,
+                "id": 97505865400,
                 "name": "pytest shard 1 of 4"
             },
             {
-                "id": 97466066983,
+                "id": 97505864959,
                 "name": "pytest shard 2 of 4"
             },
             {
-                "id": 97466067020,
+                "id": 97505865238,
                 "name": "pytest shard 3 of 4"
             },
             {
-                "id": 97477038383,
+                "id": 97515974558,
                 "name": "test"
             }
         ],
