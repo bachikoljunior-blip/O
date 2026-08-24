@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T04:13:52.507Z",
-  "last_progress_at": "2026-08-24T04:13:52.507Z",
+  "heartbeat_at": "2026-08-24T04:24:09.830Z",
+  "last_progress_at": "2026-08-24T04:24:09.830Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
     "durability_status": "PR 286 exact head 9bd25a5 passed workflow 32684747406 (four shards plus aggregate). Main inbox blob 645f6f1f5ef0b4e7842142991f3748df858082a1 declares revision 16 but is invalid JSON, truncated inside sequence 13 by commit 36e02c3749344861518982ea2376b21bef90a0af. Revision 16 cannot be safely interpreted or acknowledged.",
-    "next_action": "Observe workflow 32689174968 for exact unchanged PR 287 head 8979b54baecfc7fca69ccd2dbf63196dcb1fa364. Merge only if all four pytest shards and dependent aggregate succeed, the head remains unchanged, generation-7 fence is exact, and fresh-main comparison remains conflict-free."
+    "next_action": "Continue exact-head workflow 32689174968. After all shards plus aggregate succeed, re-read PR 287 head, generation-7 fence, and fresh-main mergeability; then merge with expected head 8979b54baecfc7fca69ccd2dbf63196dcb1fa364 and verify repaired blobs."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -744,7 +744,40 @@
     "workflow_id": 335420036,
     "pr_head": "8979b54baecfc7fca69ccd2dbf63196dcb1fa364",
     "mergeable": true,
-    "ci_status": "in_progress",
-    "last_ci_observed_at": "2026-08-24T04:13:52.507Z"
+    "ci_status": "in_progress_2_of_4_shards_succeeded",
+    "last_ci_observed_at": "2026-08-24T04:24:09.830Z",
+    "required_jobs": [
+      {
+        "id": 97319615517,
+        "name": "pytest shard 3 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 97319615678,
+        "name": "pytest shard 0 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97319615700,
+        "name": "pytest shard 2 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 97319615818,
+        "name": "pytest shard 1 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "combined_pr286_validation": {
+      "temporary_tree": "537b0d630a8cae47c6c066a6319495e2bc23f010",
+      "result": "110 focused combined tests passed; compileall, JSON parse, and diff check passed",
+      "pr286_exact_head": "9bd25a5db51f2b95ef07880b7cce01cb9f4a7cbd",
+      "pr286_changed_paths": 230,
+      "overlap_with_main_control_repair": 0
+    }
   }
 }
