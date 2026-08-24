@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T11:30:06.546Z",
-  "last_progress_at": "2026-08-24T11:30:06.546Z",
+  "heartbeat_at": "2026-08-24T11:40:38.041Z",
+  "last_progress_at": "2026-08-24T11:40:38.041Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -35,20 +35,20 @@
   "parallel_execution_coordination": {
     "primary": "Generation 7 remains the sole fenced main writer. The dedicated inbox append implementation is isolated on work/recovery-gen7-inbox-append-path-v1 and will be published non-force from latest main only after exact local validation.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Execute invoke-c21c168fb7f2dc2671560b1d is frozen for unit-42f48b067a5abf643b682fee and binds authoritative inbox revision 19 plus the generation-7 fence.",
+    "pending_native_execute": "Execute invoke-bad58dd32377c344b6717fc6 is frozen for native-publication unit unit-52ff04d764576d3a077385d1 under native invocation invoke-aceac153a88306e9ba0ed664 and binds authoritative inbox revision 19 plus the generation-7 fence.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/recovery-gen7-context-comparison-native-v1",
     "snapshot_head_sha": null,
-    "pending_work_invocation_id": null,
-    "pending_request_ref": null,
-    "pending_native_invocation_id": null,
-    "durability_status": "PR 291 exact head b0ec6f9d4012515b2e038355ff296eb3bb967140 merged as e3ac6911eed1f60b7174ea730164ba83028ec44b and exact source blobs were read back. Root invoke-38e438e6259f40cddc6cccb2 selected native publication unit unit-52ff04d764576d3a077385d1; Candidate preflight invoke-f0ffb9ff98cd84ff9cd5bc28 completed before Execute freeze correctly failed closed on an expired Work-source receipt.",
-    "next_action": "Renew the exact generation-7 Work-state source observation, then resume the unchanged unit to freeze Execute and publish only the reviewed current-unit native lifecycle records through isolated exact-head CI.",
-    "completed_work_invocation_id": "invoke-f0ffb9ff98cd84ff9cd5bc28",
-    "next_native_phase": "preflight_execute_after_fresh_work_source_observation"
+    "pending_work_invocation_id": "invoke-bad58dd32377c344b6717fc6",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-bad58dd32377c344b6717fc6/request.json",
+    "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
+    "durability_status": "PR 291 exact head b0ec6f9d4012515b2e038355ff296eb3bb967140 merged as e3ac6911eed1f60b7174ea730164ba83028ec44b and exact source blobs were read back. Root invoke-38e438e6259f40cddc6cccb2 selected native publication unit unit-52ff04d764576d3a077385d1; Candidate retry invoke-7d08d2f67228d5b31d3eab2e completed under fresh Work-state observation work-state-8f7deff9ec3bae5b8e412d67, and Execute invoke-bad58dd32377c344b6717fc6 is frozen but unanswered pending the precommitted external publication side effect.",
+    "next_action": "After exact expected-blob readback of the native-publication precommit, create only the reviewed 82-path tree from main 92b3b25ab6643dcaa2d043141e4d88032cfbd267, open an isolated PR, require unchanged exact-head CI and a fresh conflict-free main comparison, merge with expected-head protection, read back every blob, then answer the frozen Execute request.",
+    "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
+    "next_native_phase": "execute_external_effect_after_state_precommit"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -1263,5 +1263,45 @@
     "final_pr_head_unchanged": true,
     "github_atomic_expected_head_merge_succeeded": true,
     "ci_source_observation_policy_updated_at": "2026-08-24T11:20:39.689Z"
+  },
+  "context_comparison_native_publication_precommit": {
+    "effect_id": "publish-context-comparison-native-lifecycle-v1",
+    "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen7:context-comparison-native:unit-52ff04d764576d3a077385d1:v1",
+    "branch": "work/recovery-gen7-context-comparison-native-v1",
+    "base_main_commit": "92b3b25ab6643dcaa2d043141e4d88032cfbd267",
+    "expected_state_blob": "dd70e83a83a1370c255f69daa5e837ace9d6bbb4",
+    "pending_work_invocation_id": "invoke-bad58dd32377c344b6717fc6",
+    "pending_work_request_digest": "8a32bdbed4b540c592ed6986dd51543a240e79f716b7731d64092da314a3f4d4",
+    "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
+    "decision_context_manifest_digest": "928c24911542f09aff1cc205b7da91dee61f1f689e9c07a5aa241c19937904b2",
+    "publication_manifest_path": ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-52ff04d764576d3a077385d1-publication-manifest.json",
+    "publication_manifest_blob": "592df9e7a572cc4fca6a8c192d869e5b83ade5d4",
+    "payload_path_count": 81,
+    "changed_path_count": 82,
+    "changed_path_list_sha256": "c51341b646d59990741d9c37c92fa8c99d6f629ec3c35a3442b0ecbc2349f2fb",
+    "reviewed_blob_manifest_sha256": "0a034cac64c90392efe82d650d21c4632e44fa611ffad888260efd90ffcb40f1",
+    "total_bytes": 815630,
+    "allowed_prefixes": [
+      ".continual/runs/run-work-mode-handoff-v2/",
+      ".continual/work-model/invocations/"
+    ],
+    "forbidden_categories": [
+      "authority_state",
+      "inbox",
+      "strategy",
+      "source_implementation",
+      "tests",
+      "prompts",
+      "candidate_authority",
+      "scratch_responses",
+      "credentials",
+      "obsolete_source_observations",
+      "foreign_writer_records"
+    ],
+    "local_validation": "82 changed paths including the deterministic 81-payload manifest; native work-verify valid with 188 requests, 187 responses, and one intentional pending Execute request; every JSON/JSONL parsed; the prior 408-line event log is a byte-identical prefix of the 435-line selected log; secret-marker and forbidden-path scans passed.",
+    "prepared_at": "2026-08-24T11:40:38.041Z",
+    "status": "precommitted",
+    "rule": "No blob, tree, commit, branch, PR, workflow, ref update, or merge for this effect may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base; merge only the unchanged exact head after all required CI succeeds and a fresh main comparison is conflict-free; then read back all 82 reviewed blobs.",
+    "claim_boundary": "Internal native O lifecycle durability only. The comparison remains PRECOMMITTED with zero routing observations and no scientist positive-control result; no behavioral benefit, external production evidence, AGI, or user-level completion is claimed."
   }
 }
