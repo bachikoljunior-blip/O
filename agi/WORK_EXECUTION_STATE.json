@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T04:46:45.215Z",
-  "last_progress_at": "2026-08-24T04:46:45.215Z",
+  "heartbeat_at": "2026-08-24T04:51:08.029Z",
+  "last_progress_at": "2026-08-24T04:51:08.029Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
     "durability_status": "PR 286 exact head 9bd25a5 passed workflow 32684747406 (four shards plus aggregate). Main inbox blob 645f6f1f5ef0b4e7842142991f3748df858082a1 declares revision 16 but is invalid JSON, truncated inside sequence 13 by commit 36e02c3749344861518982ea2376b21bef90a0af. Revision 16 cannot be safely interpreted or acknowledged.",
-    "next_action": "Continue exact-head workflow 32689174968. After all shards plus aggregate succeed, re-read PR 287 head, generation-7 fence, and fresh-main mergeability; then merge with expected head 8979b54baecfc7fca69ccd2dbf63196dcb1fa364 and verify repaired blobs."
+    "next_action": "After exact readback of this merge authorization CAS, revalidate state, PR 287 head, workflow jobs, and fresh-main mergeability. Merge exact head only, then verify the merge tree and all three repaired blobs before acknowledging revision 17."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -728,7 +728,7 @@
     "semantic_rule": "Restore entries 1-15 byte-semantically from the valid parent, record revision 16 only as withdrawn integrity provenance, and apply the user's exact revision-17 words 再開して without inferring missing revision-16 semantics.",
     "local_validation": "87 focused tests passed; all repository JSON parsed; compileall and diff check passed.",
     "prepared_at": "2026-08-24T04:11:22.408Z",
-    "status": "published_ci_in_progress",
+    "status": "ci_success_merge_authorized",
     "rule": "No remote branch, remote commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback.",
     "remote_parent": "c93201b7dd1503357009963820a6b4a5fe750439",
     "remote_commit": "8979b54baecfc7fca69ccd2dbf63196dcb1fa364",
@@ -744,14 +744,14 @@
     "workflow_id": 335420036,
     "pr_head": "8979b54baecfc7fca69ccd2dbf63196dcb1fa364",
     "mergeable": true,
-    "ci_status": "in_progress_3_of_4_shards_succeeded",
-    "last_ci_observed_at": "2026-08-24T04:46:45.215Z",
+    "ci_status": "success",
+    "last_ci_observed_at": "2026-08-24T04:51:08.029Z",
     "required_jobs": [
       {
         "id": 97319615517,
         "name": "pytest shard 3 of 4",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 97319615678,
@@ -768,6 +768,12 @@
       {
         "id": 97319615818,
         "name": "pytest shard 1 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97325588604,
+        "name": "test",
         "status": "completed",
         "conclusion": "success"
       }
@@ -792,6 +798,17 @@
           "duration_seconds": 1030.63
         }
       ]
+    },
+    "exact_head_ci_result": "workflow 32689174968: four pytest shards and dependent aggregate succeeded",
+    "merge_authorization": {
+      "expected_head_sha": "8979b54baecfc7fca69ccd2dbf63196dcb1fa364",
+      "observed_main_head": "ad39393584fb50cd94c30126d35c66c2620d91bd",
+      "mergeable": true,
+      "candidate_ahead_by": 1,
+      "candidate_behind_by": 4,
+      "merge_base": "c93201b7dd1503357009963820a6b4a5fe750439",
+      "authorized_at": "2026-08-24T04:51:08.029Z",
+      "rule": "Re-read state fence, PR head, all required jobs, and fresh-main mergeability after this CAS; merge only exact unchanged head."
     }
   }
 }
