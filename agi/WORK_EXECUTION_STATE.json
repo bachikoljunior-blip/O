@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T07:19:36.636Z",
-  "last_progress_at": "2026-08-24T07:19:36.636Z",
+  "heartbeat_at": "2026-08-24T07:30:33.966Z",
+  "last_progress_at": "2026-08-24T07:30:33.966Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "0fce899298d2f1ad3755760eb00db1ff6c172998",
   "working_branch": "work/recovery-gen7-public-concepts-v2-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute",
+  "active_component": "candidate_evaluate",
   "active_unit_id": "unit-publish-public-concepts-v2",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -35,17 +35,17 @@
   "parallel_execution_coordination": {
     "primary": "Generation 7 remains the sole fenced main writer; publication content is rebased on main 0fce899298d2f1ad3755760eb00db1ff6c172998 at local exact head f1277e74872d4941f4328cef68df6b26120e3bf0.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Execute invoke-8c17214637e8334e3e9b2f3c is pending exactly once for isolated publication and unchanged exact-head CI.",
+    "pending_native_execute": "Execute invoke-8c17214637e8334e3e9b2f3c was submitted exactly once; post-result Candidate Evaluate invoke-c52310e8902964a85e57491b is pending.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
-    "pending_work_invocation_id": "invoke-8c17214637e8334e3e9b2f3c",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-8c17214637e8334e3e9b2f3c/request.json",
-    "durability_status": "PR 288 remains at unchanged exact head 803d314996c9b3906c1de272e2465ea338a325b7. Workflow 32698944696 shards 0, 1, and 2 succeeded; long-running shard 3 is still in pytest with no failure or cancellation; aggregate is pending. Local shard 0 passed 171 tests and local shard 3 is independently in progress.",
-    "next_action": "Observe workflow 32698944696 without rerun. Require all four shards plus aggregate success at unchanged PR head 803d314996c9b3906c1de272e2465ea338a325b7, then submit Execute invoke-8c17214637e8334e3e9b2f3c exactly once and continue the native lifecycle. Do not merge in this Execute unit."
+    "pending_work_invocation_id": "invoke-c52310e8902964a85e57491b",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-c52310e8902964a85e57491b/request.json",
+    "durability_status": "PR 288 remains open and unmerged at exact head 803d314996c9b3906c1de272e2465ea338a325b7. Workflow 32698944696 completed successfully: all four pytest shards and aggregate passed. Execute invoke-8c17214637e8334e3e9b2f3c was submitted exactly once with internal-only claim boundary.",
+    "next_action": "Submit post-result Candidate Evaluate invoke-c52310e8902964a85e57491b, continue Task Evaluate, Consolidate Episode, and Learn. Merge adjudication remains a separate fresh effect boundary; do not merge before revalidating exact head, checks, lease, inbox, main, and conflict-free state."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -68,11 +68,11 @@
   "remote_persistence": {
     "published_on_main": true,
     "verified_remote_readback": true,
-    "expected_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
+    "expected_blob_sha": "d2aa3827e92310de26128abcdfcad7228b494c0b",
     "result_commit_sha": "dbd115631e15485cb603e958c18074264c728036",
     "result_blob_sha": "4b1d7b2e4e175ea3de8aeb6c8514453f9f778c9f",
     "finalization_expected_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
-    "note": "Generation-7 phase-1 and phase-2 acquisition CAS commits were read back exactly. This state-only CAS renews the heartbeat and records phase-2 finalization before inbox-repair publication."
+    "note": "State-only CAS heartbeat after exact-once publication Execute submission; immediate connector readback is required before continuing."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -95,7 +95,8 @@
       "invoke-840d2f0a8f5e2132fbef5d99 (execute froze verified harness and scheduled child)",
       "invoke-96f980003141d4ba2de0294c (candidate_evaluate child measurement preflight)",
       "invoke-7ce263e8f2b55bae063d677a (root held-out routing unit)",
-      "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)"
+      "invoke-67acf113c0261229cadcb5fb (candidate_evaluate held-out routing preflight)",
+      "invoke-8c17214637e8334e3e9b2f3c (execute published PR 288 with exact-head CI success; unmerged)"
     ],
     "pending_invocation": "none at this exact boundary; Execute invoke-19cf6c8b6241f25bb330f727 has one immutable response and work-resume will issue the next lifecycle invocation",
     "note": "The historical physically blinded trial remains unchanged mechanical FAIL. The opt-in structural public-concepts-v2 repair is locally validated and recorded, but remains inactive and unpublished pending Candidate Evaluate, Task Evaluate, exact-head CI, and merge."
