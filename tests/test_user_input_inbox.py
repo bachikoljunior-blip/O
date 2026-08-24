@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import datetime, timezone
+import hashlib
+import json
 from pathlib import Path
 
 import pytest
 
 from agi.user_input_inbox import (
     UserInputInboxError,
+    append_remote_user_input_inbox,
     load_user_input_inbox,
+    prepare_user_input_inbox_append,
+    serialize_user_input_inbox,
     unapplied_user_inputs,
     validate_user_input_inbox,
 )
@@ -59,8 +65,250 @@ def test_truncated_revision_is_quarantined_without_becoming_effective() -> None:
     assert resumed["sequence"] == 17
     assert resumed["status"] == "active"
     assert resumed["directives"][0] == "The user's exact words were: 再開して (2026-08-24)."
-    assert [entry["sequence"] for entry in unapplied_user_inputs(inbox, after_revision=15)] == [17]
+    assert [entry["sequence"] for entry in unapplied_user_inputs(inbox, after_revision=15)] == [
+        17,
+        18,
+        19,
+    ]
 
+
+def test_recovery_entries_are_integrated_after_revision_17_with_exact_provenance() -> None:
+    inbox = load_user_input_inbox(ROOT)
+    recovery = json.loads((ROOT / "agi" / "USER_INPUT_INBOX_RECOVERY.json").read_text())
+
+    assert inbox["revision"] == 19
+    assert recovery["status"] == "integrated_authoritative_revision_19"
+    assert recovery["integration_receipt"]["expected_revision"] == 17
+    assert recovery["integration_receipt"]["result_revision"] == 19
+    assert recovery["integration_receipt"]["remote_readback_verified"] is True
+    for target, source, sequence in zip(
+        inbox["entries"][17:], recovery["pending_entries"], (18, 19), strict=True
+    ):
+        expected = deepcopy(source)
+        expected["sequence"] = sequence
+        assert target == expected
+
+
+def _append_entry(entry_id: str = "new-user-input") -> dict:
+    return {
+        "id": entry_id,
+        "received_at": "2026-08-24T07:00:00Z",
+        "kind": "user_direction",
+        "status": "active",
+        "summary": "A new safe append test entry.",
+        "directives": ["Preserve expected-revision and provider readback safety."],
+        "supersedes": [],
+        "source": "user_chat",
+    }
+
+
+def test_prepare_append_is_revision_bound_validated_and_idempotent() -> None:
+    inbox = load_user_input_inbox(ROOT)
+    entry = _append_entry()
+    prepared = prepare_user_input_inbox_append(
+        inbox,
+        [entry],
+        expected_revision=19,
+        updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
+    )
+
+    assert prepared["status"] == "prepared"
+    assert prepared["value"]["revision"] == 20
+    assert prepared["value"]["entries"][:19] == inbox["entries"]
+    assert prepared["value"]["entries"][19] == {**entry, "sequence": 20}
+    assert validate_user_input_inbox(prepared["value"]) == []
+    assert serialize_user_input_inbox(prepared["value"]).endswith("\n")
+
+    retried = prepare_user_input_inbox_append(
+        prepared["value"],
+        [entry],
+        expected_revision=19,
+        updated_at=datetime(2026, 8, 24, 7, 2, tzinfo=timezone.utc),
+    )
+    assert retried["status"] == "already_applied"
+
+
+def test_prepare_append_rejects_stale_sequence_duplicate_and_secret() -> None:
+    inbox = load_user_input_inbox(ROOT)
+    timestamp = datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc)
+    with pytest.raises(UserInputInboxError, match="revision conflict"):
+        prepare_user_input_inbox_append(
+            inbox, [_append_entry()], expected_revision=18, updated_at=timestamp
+        )
+    with pytest.raises(UserInputInboxError, match="sequence conflict"):
+        prepare_user_input_inbox_append(
+            inbox,
+            [{**_append_entry(), "sequence": 99}],
+            expected_revision=19,
+            updated_at=timestamp,
+        )
+    with pytest.raises(UserInputInboxError, match="forbidden secret-bearing field"):
+        prepare_user_input_inbox_append(
+            inbox,
+            [{**_append_entry(), "token": "must-not-persist"}],
+            expected_revision=19,
+            updated_at=timestamp,
+        )
+    with pytest.raises(UserInputInboxError, match="updated_at must include a timezone"):
+        prepare_user_input_inbox_append(
+            inbox,
+            [_append_entry()],
+            expected_revision=19,
+            updated_at="2026-08-24T07:01:00Z",  # type: ignore[arg-type]
+        )
+
+
+def test_remote_append_performs_one_cas_and_exact_readback() -> None:
+    current = load_user_input_inbox(ROOT)
+    state = {
+        "content": serialize_user_input_inbox(current),
+        "blob_sha": "a" * 40,
+    }
+    calls: list[tuple[str, str]] = []
+
+    def fetch() -> dict:
+        return deepcopy(state)
+
+    def compare_and_swap(expected_blob_sha: str, content: str) -> dict:
+        calls.append((expected_blob_sha, content))
+        assert expected_blob_sha == state["blob_sha"]
+        state["content"] = content
+        state["blob_sha"] = "b" * 40
+        return {"commit_sha": "c" * 40, "content_sha": state["blob_sha"]}
+
+    receipt = append_remote_user_input_inbox(
+        [_append_entry()],
+        expected_revision=19,
+        updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
+        fetch=fetch,
+        compare_and_swap=compare_and_swap,
+    )
+
+    assert len(calls) == 1
+    assert receipt == {
+        "status": "appended",
+        "expected_revision": 19,
+        "result_revision": 20,
+        "expected_blob_sha": "a" * 40,
+        "result_blob_sha": "b" * 40,
+        "result_commit_sha": "c" * 40,
+        "entry_ids": ["new-user-input"],
+        "content_sha256": hashlib.sha256(state["content"].encode()).hexdigest(),
+        "remote_readback_verified": True,
+        "readback_attempts": 1,
+    }
+
+    retry = append_remote_user_input_inbox(
+        [_append_entry()],
+        expected_revision=19,
+        updated_at=datetime(2026, 8, 24, 7, 2, tzinfo=timezone.utc),
+        fetch=fetch,
+        compare_and_swap=compare_and_swap,
+    )
+    assert retry["status"] == "already_applied"
+    assert len(calls) == 1
+
+
+def test_remote_append_tolerates_bounded_stale_readback_without_repeating_cas() -> None:
+    current_content = serialize_user_input_inbox(load_user_input_inbox(ROOT))
+    published: dict[str, str] = {}
+    fetch_calls = 0
+    cas_calls = 0
+    waits: list[int] = []
+
+    def fetch() -> dict:
+        nonlocal fetch_calls
+        fetch_calls += 1
+        if fetch_calls <= 2:
+            return {"content": current_content, "blob_sha": "a" * 40}
+        return {"content": published["content"], "blob_sha": "b" * 40}
+
+    def compare_and_swap(expected_blob_sha: str, content: str) -> dict:
+        nonlocal cas_calls
+        cas_calls += 1
+        assert expected_blob_sha == "a" * 40
+        published["content"] = content
+        return {"commit_sha": "c" * 40, "content_sha": "b" * 40}
+
+    receipt = append_remote_user_input_inbox(
+        [_append_entry()],
+        expected_revision=19,
+        updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
+        fetch=fetch,
+        compare_and_swap=compare_and_swap,
+        readback_wait=waits.append,
+    )
+
+    assert receipt["readback_attempts"] == 2
+    assert cas_calls == 1
+    assert waits == [1]
+
+
+def test_remote_append_fails_closed_before_cas_or_after_one_mismatched_readback() -> None:
+    current = load_user_input_inbox(ROOT)
+    content = serialize_user_input_inbox(current)
+    cas_calls = 0
+
+    def stale_fetch() -> dict:
+        return {"content": content, "blob_sha": "a" * 40}
+
+    def cas(_: str, __: str) -> dict:
+        nonlocal cas_calls
+        cas_calls += 1
+        return {"commit_sha": "c" * 40, "content_sha": "b" * 40}
+
+    with pytest.raises(UserInputInboxError, match="revision conflict"):
+        append_remote_user_input_inbox(
+            [_append_entry()],
+            expected_revision=18,
+            updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
+            fetch=stale_fetch,
+            compare_and_swap=cas,
+        )
+    assert cas_calls == 0
+
+    with pytest.raises(UserInputInboxError, match="readback mismatch"):
+        append_remote_user_input_inbox(
+            [_append_entry()],
+            expected_revision=19,
+            updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
+            fetch=stale_fetch,
+            compare_and_swap=cas,
+        )
+    assert cas_calls == 1
+
+    with pytest.raises(UserInputInboxError, match="malformed JSON"):
+        append_remote_user_input_inbox(
+            [_append_entry()],
+            expected_revision=19,
+            updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
+            fetch=lambda: {"content": "{", "blob_sha": "a" * 40},
+            compare_and_swap=cas,
+        )
+    assert cas_calls == 1
+
+
+def test_remote_append_never_retries_a_failed_cas() -> None:
+    content = serialize_user_input_inbox(load_user_input_inbox(ROOT))
+    cas_calls = 0
+
+    def fetch() -> dict:
+        return {"content": content, "blob_sha": "a" * 40}
+
+    def rejected_cas(_: str, __: str) -> dict:
+        nonlocal cas_calls
+        cas_calls += 1
+        raise UserInputInboxError("provider compare-and-swap conflict")
+
+    with pytest.raises(UserInputInboxError, match="compare-and-swap conflict"):
+        append_remote_user_input_inbox(
+            [_append_entry()],
+            expected_revision=19,
+            updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
+            fetch=fetch,
+            compare_and_swap=rejected_cas,
+        )
+    assert cas_calls == 1
 
 def test_user_input_inbox_rejects_secret_bearing_fields_and_sequence_gaps() -> None:
     inbox = load_user_input_inbox(ROOT)

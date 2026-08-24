@@ -38,6 +38,18 @@ At each safe Root or logical-unit boundary, refresh the inbox from latest remote
 
 Inbox entries are directions, constraints, design context, or hypotheses rather than automatic technical truth or AGI evidence. Preserve the user's terminal objective and explicit constraints, but test technical proposals, compare them against alternatives, and reject or revise them when retained evidence favors another route. Persist the highest acknowledged revision and the factual interpretation needed to survive context reset. The current accumulated input includes expected real-world AGI elapsed-time minimization, O replaceability, autonomous strategy/evaluation/exploration/self-improvement/timing, saturation-driven method change, heterogeneous external research search, non-blocking durable user requests, strict claim-gate preservation, falsifiability of user proposals, and recursive situation-dependent Skill-in-Skill context routing.
 
+All future remote appends use the dedicated `append_remote_user_input_inbox`
+path in `src/agi/user_input_inbox.py`. The caller adapts its provider to one
+read callback returning exact UTF-8 content plus blob SHA and one Contents-API
+compare-and-swap callback. The path validates the current JSON and schema,
+requires the exact expected revision, assigns only contiguous sequences,
+rejects duplicate IDs and secret-bearing fields, performs one expected-blob
+CAS, and requires exact content/blob remote readback. Bounded readback retries
+may absorb provider propagation delay, but the mutation itself is never
+retried. A conflict or exhausted/mismatched readback fails closed for explicit
+reconciliation; an ambiguous successful retry is idempotent only when every
+requested entry already exists at its exact expected sequence and content.
+
 ## O-owned decision context
 
 Inbox revision 15 adds a structural requirement: context known by the outer Work

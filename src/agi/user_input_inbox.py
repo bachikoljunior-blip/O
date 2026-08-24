@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from collections.abc import Callable, Sequence
+from copy import deepcopy
+from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Mapping
@@ -23,6 +26,11 @@ FORBIDDEN_SECRET_KEYS = {
 
 class UserInputInboxError(RuntimeError):
     pass
+
+
+RemoteInboxFetch = Callable[[], Mapping[str, Any]]
+RemoteInboxCompareAndSwap = Callable[[str, str], Mapping[str, Any]]
+RemoteInboxReadbackWait = Callable[[int], None]
 
 
 def _aware_timestamp(value: Any, *, field: str, errors: list[str]) -> None:
@@ -146,6 +154,234 @@ def load_user_input_inbox(root: Path) -> dict[str, Any]:
     if errors:
         raise UserInputInboxError("invalid user input inbox: " + "; ".join(errors))
     return value
+
+
+def serialize_user_input_inbox(value: Mapping[str, Any]) -> str:
+    """Return validated, deterministic UTF-8 text for the authoritative inbox."""
+
+    errors = validate_user_input_inbox(value)
+    if errors:
+        raise UserInputInboxError("invalid user input inbox: " + "; ".join(errors))
+    return json.dumps(value, ensure_ascii=False, indent=2) + "\n"
+
+
+def _validated_append_entries(
+    entries: Sequence[Mapping[str, Any]], *, expected_revision: int
+) -> list[dict[str, Any]]:
+    if isinstance(entries, (str, bytes)) or not isinstance(entries, Sequence) or not entries:
+        raise UserInputInboxError("entries must be a non-empty sequence of objects")
+    prepared: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for offset, raw_entry in enumerate(entries, start=1):
+        if not isinstance(raw_entry, Mapping):
+            raise UserInputInboxError("every appended entry must be an object")
+        entry = deepcopy(dict(raw_entry))
+        target_sequence = expected_revision + offset
+        supplied_sequence = entry.get("sequence")
+        if supplied_sequence is not None and supplied_sequence != target_sequence:
+            raise UserInputInboxError(
+                "entry sequence conflict: "
+                f"expected {target_sequence}, observed {supplied_sequence}"
+            )
+        entry["sequence"] = target_sequence
+        entry_id = entry.get("id")
+        if not isinstance(entry_id, str) or not entry_id.strip():
+            raise UserInputInboxError("every appended entry id must be non-empty")
+        if entry_id in seen_ids:
+            raise UserInputInboxError(f"duplicate appended entry id: {entry_id}")
+        seen_ids.add(entry_id)
+        prepared.append(entry)
+    return prepared
+
+
+def prepare_user_input_inbox_append(
+    current: Mapping[str, Any],
+    entries: Sequence[Mapping[str, Any]],
+    *,
+    expected_revision: int,
+    updated_at: datetime,
+) -> dict[str, Any]:
+    """Build one revision-bound append candidate without performing I/O.
+
+    A retry after an ambiguous provider response is idempotent only when every
+    requested entry already exists at its exact expected sequence with identical
+    content. Any stale or divergent request fails closed.
+    """
+
+    errors = validate_user_input_inbox(current)
+    if errors:
+        raise UserInputInboxError("invalid current user input inbox: " + "; ".join(errors))
+    if (
+        isinstance(expected_revision, bool)
+        or not isinstance(expected_revision, int)
+        or expected_revision < 0
+    ):
+        raise UserInputInboxError("expected_revision must be a non-negative integer")
+    if (
+        not isinstance(updated_at, datetime)
+        or updated_at.tzinfo is None
+        or updated_at.utcoffset() is None
+    ):
+        raise UserInputInboxError("updated_at must include a timezone")
+
+    prepared = _validated_append_entries(entries, expected_revision=expected_revision)
+    current_revision = int(current["revision"])
+    existing_by_id = {entry["id"]: entry for entry in current["entries"]}
+
+    if current_revision > expected_revision:
+        if all(existing_by_id.get(entry["id"]) == entry for entry in prepared):
+            return {
+                "status": "already_applied",
+                "expected_revision": expected_revision,
+                "result_revision": current_revision,
+                "entry_ids": [entry["id"] for entry in prepared],
+                "value": deepcopy(dict(current)),
+            }
+        raise UserInputInboxError(
+            "inbox revision conflict: "
+            f"expected {expected_revision}, observed {current_revision}"
+        )
+    if current_revision != expected_revision:
+        raise UserInputInboxError(
+            "inbox revision conflict: "
+            f"expected {expected_revision}, observed {current_revision}"
+        )
+    duplicates = [entry["id"] for entry in prepared if entry["id"] in existing_by_id]
+    if duplicates:
+        raise UserInputInboxError(
+            "entry id already exists with non-idempotent placement: " + ", ".join(duplicates)
+        )
+
+    candidate = deepcopy(dict(current))
+    candidate["entries"].extend(prepared)
+    candidate["revision"] = expected_revision + len(prepared)
+    candidate["updated_at"] = (
+        updated_at.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    )
+    errors = validate_user_input_inbox(candidate)
+    if errors:
+        raise UserInputInboxError("invalid appended user input inbox: " + "; ".join(errors))
+    return {
+        "status": "prepared",
+        "expected_revision": expected_revision,
+        "result_revision": candidate["revision"],
+        "entry_ids": [entry["id"] for entry in prepared],
+        "value": candidate,
+    }
+
+
+def _remote_inbox_snapshot(fetch: RemoteInboxFetch) -> dict[str, Any]:
+    raw = fetch()
+    if not isinstance(raw, Mapping):
+        raise UserInputInboxError("remote inbox fetch must return an object")
+    content = raw.get("content")
+    blob_sha = raw.get("blob_sha")
+    if not isinstance(content, str) or not content:
+        raise UserInputInboxError("remote inbox content must be non-empty UTF-8 text")
+    if (
+        not isinstance(blob_sha, str)
+        or len(blob_sha) != 40
+        or any(character not in "0123456789abcdef" for character in blob_sha)
+    ):
+        raise UserInputInboxError("remote inbox blob_sha must be a lowercase 40-hex Git SHA")
+    try:
+        value = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise UserInputInboxError(f"remote inbox is malformed JSON: {exc}") from exc
+    if not isinstance(value, dict):
+        raise UserInputInboxError("remote inbox must be a JSON object")
+    errors = validate_user_input_inbox(value)
+    if errors:
+        raise UserInputInboxError("invalid remote user input inbox: " + "; ".join(errors))
+    return {"content": content, "blob_sha": blob_sha, "value": value}
+
+
+def append_remote_user_input_inbox(
+    entries: Sequence[Mapping[str, Any]],
+    *,
+    expected_revision: int,
+    updated_at: datetime,
+    fetch: RemoteInboxFetch,
+    compare_and_swap: RemoteInboxCompareAndSwap,
+    readback_attempts: int = 3,
+    readback_wait: RemoteInboxReadbackWait | None = None,
+) -> dict[str, Any]:
+    """Append through one fail-closed fetch/CAS/readback transaction.
+
+    ``compare_and_swap`` receives ``(expected_blob_sha, complete_content)`` and
+    must atomically replace only ``agi/USER_INPUT_INBOX.json``. It returns the
+    provider's ``commit_sha`` and ``content_sha``. This function never retries a
+    mutation: a conflict or mismatched readback is surfaced for reconciliation.
+    """
+
+    if (
+        isinstance(readback_attempts, bool)
+        or not isinstance(readback_attempts, int)
+        or readback_attempts < 1
+    ):
+        raise UserInputInboxError("readback_attempts must be a positive integer")
+    before = _remote_inbox_snapshot(fetch)
+    prepared = prepare_user_input_inbox_append(
+        before["value"],
+        entries,
+        expected_revision=expected_revision,
+        updated_at=updated_at,
+    )
+    if prepared["status"] == "already_applied":
+        return {
+            "status": "already_applied",
+            "expected_revision": expected_revision,
+            "result_revision": prepared["result_revision"],
+            "expected_blob_sha": before["blob_sha"],
+            "result_blob_sha": before["blob_sha"],
+            "result_commit_sha": None,
+            "entry_ids": prepared["entry_ids"],
+            "content_sha256": hashlib.sha256(before["content"].encode("utf-8")).hexdigest(),
+            "remote_readback_verified": True,
+            "readback_attempts": 1,
+        }
+
+    content = serialize_user_input_inbox(prepared["value"])
+    result = compare_and_swap(before["blob_sha"], content)
+    if not isinstance(result, Mapping):
+        raise UserInputInboxError("remote inbox CAS must return an object")
+    commit_sha = result.get("commit_sha")
+    content_sha = result.get("content_sha")
+    for field, value in (("commit_sha", commit_sha), ("content_sha", content_sha)):
+        if (
+            not isinstance(value, str)
+            or len(value) != 40
+            or any(character not in "0123456789abcdef" for character in value)
+        ):
+            raise UserInputInboxError(f"remote inbox CAS {field} must be lowercase 40-hex")
+
+    after: dict[str, Any] | None = None
+    verified_attempt = 0
+    for attempt in range(1, readback_attempts + 1):
+        after = _remote_inbox_snapshot(fetch)
+        if after["blob_sha"] == content_sha and after["content"] == content:
+            verified_attempt = attempt
+            break
+        if attempt < readback_attempts and readback_wait is not None:
+            readback_wait(attempt)
+    if verified_attempt == 0 or after is None:
+        raise UserInputInboxError(
+            "remote inbox CAS readback mismatch; do not retry mutation before reconciliation"
+        )
+    if after["value"] != prepared["value"]:
+        raise UserInputInboxError("remote inbox semantic readback mismatch")
+    return {
+        "status": "appended",
+        "expected_revision": expected_revision,
+        "result_revision": prepared["result_revision"],
+        "expected_blob_sha": before["blob_sha"],
+        "result_blob_sha": content_sha,
+        "result_commit_sha": commit_sha,
+        "entry_ids": prepared["entry_ids"],
+        "content_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+        "remote_readback_verified": True,
+        "readback_attempts": verified_attempt,
+    }
 
 
 def unapplied_user_inputs(
