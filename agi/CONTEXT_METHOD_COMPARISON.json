@@ -1,0 +1,336 @@
+{
+  "schema_version": 1,
+  "protocol_digest": "92b15e3fa1780220006a068c0ce654bda893e1f307b5192b2dd439c895d94f16",
+  "status": "PRECOMMITTED",
+  "mechanism": "context_method_comparison_positive_control_v1",
+  "frozen_before_observation": true,
+  "source_artifacts": [
+    {
+      "source_id": "context_kernel_architecture",
+      "path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
+      "sha256": "b5b33bfe8eae940aa4a1001fd7ead18840d9d81c6896fa6231cfc9e6dc254bcb"
+    },
+    {
+      "source_id": "recursive_routing_experiment",
+      "path": "agi/CONTEXT_ROUTING_EXPERIMENT.json",
+      "sha256": "39aee1edaf237da4ef0c6b78ed6e219bb5731daa2cfefbd4123c7b91f41901e8"
+    },
+    {
+      "source_id": "recursive_routing_rendezvous",
+      "path": "src/agi/context_routing_rendezvous.py",
+      "sha256": "feeaaf9b602491e89750dfa8afb029cc6cda089f83c06b6c52464e9590790f76"
+    },
+    {
+      "source_id": "scientist_agent_baseline",
+      "path": "agi/SCIENTIST_AGENT_BASELINE.json",
+      "sha256": "9d0fd528507e6c2c3333fedd4de5b65a67f5dea416a3f68daa28e99d62d94278"
+    },
+    {
+      "source_id": "user_input_inbox_revision_19",
+      "path": "agi/USER_INPUT_INBOX.json",
+      "sha256": "4bbcf252381d7da04181b7d440426b54f7a0735f007ebc3644e6f6d13da3fb0e"
+    }
+  ],
+  "user_directives": {
+    "authoritative_inbox_revision": 19,
+    "entry_ids": [
+      "user-proposal-recursive-skill-context-retrieval-20260824-v16",
+      "external-context-positive-control-before-adaptation-20260824-v17"
+    ]
+  },
+  "routing_comparison": {
+    "task_ids": [
+      "precommit-routing-evaluation",
+      "safe-effect-dispatch",
+      "incident-recovery",
+      "router-regression-suite",
+      "truthful-evidence-claim",
+      "shared-evidence-synthesis"
+    ],
+    "shared_budget": {
+      "max_depth": 8,
+      "max_nodes": 20,
+      "max_selected_children": 4,
+      "max_context_chars": 8000,
+      "max_model_calls": 24,
+      "max_tool_calls": 48
+    },
+    "model_executor_class": "same_chatgpt_work_model_and_executor_class_per_matched_stratum",
+    "tool_permissions": [
+      "read_frozen_fixture",
+      "write_ephemeral_fixture"
+    ],
+    "arms": [
+      {
+        "arm_id": "current_context_kernel",
+        "role": "protected_control",
+        "implementation_ref": "src/continual/context_kernel.py",
+        "task_ids": [
+          "precommit-routing-evaluation",
+          "safe-effect-dispatch",
+          "incident-recovery",
+          "router-regression-suite",
+          "truthful-evidence-claim",
+          "shared-evidence-synthesis"
+        ],
+        "budget": {
+          "max_depth": 8,
+          "max_nodes": 20,
+          "max_selected_children": 4,
+          "max_context_chars": 8000,
+          "max_model_calls": 24,
+          "max_tool_calls": 48
+        },
+        "model_executor_class": "same_chatgpt_work_model_and_executor_class_per_matched_stratum",
+        "tool_permissions": [
+          "read_frozen_fixture",
+          "write_ephemeral_fixture"
+        ]
+      },
+      {
+        "arm_id": "recursive_skill_in_skill",
+        "role": "candidate",
+        "implementation_ref": "src/agi/context_routing_rendezvous.py",
+        "task_ids": [
+          "precommit-routing-evaluation",
+          "safe-effect-dispatch",
+          "incident-recovery",
+          "router-regression-suite",
+          "truthful-evidence-claim",
+          "shared-evidence-synthesis"
+        ],
+        "budget": {
+          "max_depth": 8,
+          "max_nodes": 20,
+          "max_selected_children": 4,
+          "max_context_chars": 8000,
+          "max_model_calls": 24,
+          "max_tool_calls": 48
+        },
+        "model_executor_class": "same_chatgpt_work_model_and_executor_class_per_matched_stratum",
+        "tool_permissions": [
+          "read_frozen_fixture",
+          "write_ephemeral_fixture"
+        ]
+      },
+      {
+        "arm_id": "eager_all_context",
+        "role": "diagnostic_control",
+        "implementation_ref": "agi/CONTEXT_ROUTING_EXPERIMENT.json#cases[].eager_context_chars",
+        "task_ids": [
+          "precommit-routing-evaluation",
+          "safe-effect-dispatch",
+          "incident-recovery",
+          "router-regression-suite",
+          "truthful-evidence-claim",
+          "shared-evidence-synthesis"
+        ],
+        "budget": {
+          "max_depth": 8,
+          "max_nodes": 20,
+          "max_selected_children": 4,
+          "max_context_chars": 8000,
+          "max_model_calls": 24,
+          "max_tool_calls": 48
+        },
+        "model_executor_class": "same_chatgpt_work_model_and_executor_class_per_matched_stratum",
+        "tool_permissions": [
+          "read_frozen_fixture",
+          "write_ephemeral_fixture"
+        ]
+      }
+    ],
+    "execution_order": [
+      {
+        "task_id": "precommit-routing-evaluation",
+        "arm_ids": [
+          "current_context_kernel",
+          "recursive_skill_in_skill",
+          "eager_all_context"
+        ]
+      },
+      {
+        "task_id": "safe-effect-dispatch",
+        "arm_ids": [
+          "recursive_skill_in_skill",
+          "eager_all_context",
+          "current_context_kernel"
+        ]
+      },
+      {
+        "task_id": "incident-recovery",
+        "arm_ids": [
+          "eager_all_context",
+          "current_context_kernel",
+          "recursive_skill_in_skill"
+        ]
+      },
+      {
+        "task_id": "router-regression-suite",
+        "arm_ids": [
+          "current_context_kernel",
+          "recursive_skill_in_skill",
+          "eager_all_context"
+        ]
+      },
+      {
+        "task_id": "truthful-evidence-claim",
+        "arm_ids": [
+          "recursive_skill_in_skill",
+          "eager_all_context",
+          "current_context_kernel"
+        ]
+      },
+      {
+        "task_id": "shared-evidence-synthesis",
+        "arm_ids": [
+          "eager_all_context",
+          "current_context_kernel",
+          "recursive_skill_in_skill"
+        ]
+      }
+    ],
+    "metrics": [
+      {
+        "metric_id": "required_context_recall",
+        "direction": "higher_is_better",
+        "unit": "ratio",
+        "required": true,
+        "nullable": false
+      },
+      {
+        "metric_id": "unnecessary_context_chars",
+        "direction": "lower_is_better",
+        "unit": "characters",
+        "required": true,
+        "nullable": false
+      },
+      {
+        "metric_id": "unnecessary_context_ratio",
+        "direction": "lower_is_better",
+        "unit": "ratio",
+        "required": true,
+        "nullable": false
+      },
+      {
+        "metric_id": "final_task_outcome",
+        "direction": "pass_is_better",
+        "unit": "boolean",
+        "required": true,
+        "nullable": false
+      },
+      {
+        "metric_id": "elapsed_ms",
+        "direction": "lower_is_better",
+        "unit": "milliseconds",
+        "required": true,
+        "nullable": false
+      },
+      {
+        "metric_id": "materialized_context_chars",
+        "direction": "lower_is_better",
+        "unit": "characters",
+        "required": true,
+        "nullable": false
+      },
+      {
+        "metric_id": "model_calls",
+        "direction": "lower_is_better",
+        "unit": "count",
+        "required": true,
+        "nullable": false
+      },
+      {
+        "metric_id": "tool_calls",
+        "direction": "lower_is_better",
+        "unit": "count",
+        "required": true,
+        "nullable": false
+      },
+      {
+        "metric_id": "observable_cost_usd",
+        "direction": "lower_is_better",
+        "unit": "usd",
+        "required": true,
+        "nullable": true
+      }
+    ],
+    "decision_rule": {
+      "minimum_required_context_recall": 1.0,
+      "require_no_final_outcome_regression": true,
+      "require_lower_unnecessary_context_chars": true,
+      "maximum_elapsed_ratio": 1.25,
+      "maximum_model_call_ratio": 1.25,
+      "maximum_tool_call_ratio": 1.25,
+      "cost_policy": "compare_only_when_every_arm_reports_observable_cost",
+      "global_activation_authorized": false
+    },
+    "scorer": "matched_context_routing_score_v1"
+  },
+  "scientist_positive_control": {
+    "system": "The AI Scientist-v2",
+    "source_artifact_id": "scientist_agent_baseline",
+    "required_fidelity": "unmodified_or_fidelity_preserving",
+    "rubric_dimensions": [
+      "hypothesis_generation",
+      "experiment_execution",
+      "mechanical_evaluation",
+      "result_inheritance",
+      "cost_and_latency",
+      "failure_containment"
+    ],
+    "task_binding": {
+      "demonstrated_system": "The AI Scientist-v2",
+      "study": "fidelity-preserving reproduction before any O adaptation inference",
+      "rubric_dimensions": [
+        "hypothesis_generation",
+        "experiment_execution",
+        "mechanical_evaluation",
+        "result_inheritance",
+        "cost_and_latency",
+        "failure_containment"
+      ]
+    },
+    "task_set_digest": "64573270e341883b983fbd65410c4700ecb4b241db58249bf8dbc0ffd56e2d70",
+    "budget_binding": {
+      "configuration_match_required": true,
+      "provider_and_model_match_or_documented_fidelity_equivalence_required": true,
+      "minimum_replays": 3,
+      "same_budget_for_positive_control_and_evaluated_arm": true
+    },
+    "budget_digest": "2601bdbcc74dc9c34451f81456812c6437b8329f4bd9f43cf226a2e74ad951df",
+    "model_executor_class": "same_demonstrated_baseline_or_documented_fidelity_equivalent_class",
+    "separate_receipt_required": true,
+    "status": "NOT_RUN",
+    "receipt": null,
+    "classification_matrix": {
+      "missing_or_unrun_positive_control": "INSUFFICIENT_POSITIVE_CONTROL",
+      "positive_control_failed": "BASELINE_REPRODUCTION_FAILURE",
+      "positive_control_passed_adapted_failed": "ADAPTATION_OR_ABLATION_LOSS",
+      "positive_control_passed_matched_target_failed": "NARROW_TARGET_TRANSFER_NEGATIVE",
+      "evidence_against_original_method": false
+    }
+  },
+  "observations": [],
+  "decision": {
+    "routing_verdict": "INSUFFICIENT_EVIDENCE",
+    "scientist_inference": "INSUFFICIENT_POSITIVE_CONTROL",
+    "scoped_activation_authorized": false,
+    "global_activation_authorized": false,
+    "reason": "The matched protocol is frozen, but neither routing outcomes nor a fidelity-preserving scientist-agent positive control have been observed."
+  },
+  "next_measurement_boundary": {
+    "routing_executor": "fresh_unexposed_executor_required",
+    "scientist_control": "separate_fidelity_preserving_receipt_required",
+    "mutation_rule": "append_receipts_without_rewriting_protocol",
+    "unavailable_evidence_action": "retain_insufficient_evidence_and_continue_independent_work"
+  },
+  "user_level_verdict": "FAIL",
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "user_goal_completed": false,
+    "internal_measurement_is_independent_production_evidence": false,
+    "routing_precommit_authorizes_activation": false,
+    "adapted_failure_is_evidence_against_original_method": false
+  }
+}
