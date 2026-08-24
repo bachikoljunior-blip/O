@@ -8,8 +8,8 @@
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-24T01:08:07.935Z",
-  "last_progress_at": "2026-08-24T01:08:07.935Z",
+  "heartbeat_at": "2026-08-24T01:15:19.520Z",
+  "last_progress_at": "2026-08-24T01:15:19.520Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -22,7 +22,7 @@
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "59b429f4f286c3477b49f40399b93c2077012b02",
-  "working_branch": "work/recovery-gen6-ci-observation-v1",
+  "working_branch": "work/recovery-gen6-ci-merge-authorization-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
   "active_unit_id": "unit-25a53ee5ffd91efed4303dcd",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-13736715dc4009625e7ecb04",
     "pending_request_ref": ".continual/work-model/invocations/invoke-13736715dc4009625e7ecb04/request.json",
     "durability_status": "PR 284 exact head e0d4c18f6261cf131d80ef5dcee8b77a3e638c09 passed all four shards and aggregate in workflow 32673271943, merged as 579f6dfc35670f720169da8a39cfb0033828f738, all 41 reviewed blobs matched on main, and the exact PR 283 run/jobs were recorded under precommitted request ci-run-b34ec32bfc8331486158ad7c with verified receipt a004ae84f2e7b45462bbb928cd17e5a8ceb0f2ff856f25caf8b35a66797001af.",
-    "next_action": "Complete protected tests for manifest-bound CI merge authorization, publish through isolated exact-head CI, answer frozen Execute invoke-13736715dc4009625e7ecb04 exactly once, and continue the native O lifecycle."
+    "next_action": "After exact readback of this publication precommit, create the isolated branch from that exact main commit, publish the 34-path candidate without state or uv.lock drift, run exact-head CI, merge only unchanged success, read back every reviewed blob, then answer Execute invoke-13736715dc4009625e7ecb04 exactly once."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -510,7 +510,7 @@
     "executor_binding": "current_chatgpt_work_session"
   },
   "ci_source_observation": {
-    "status": "live_receipt_verified_execute_completed_next_merge_authorization_execute_frozen",
+    "status": "merge_authorization_publication_precommitted_no_remote_branch",
     "active_unit_id": "unit-25a53ee5ffd91efed4303dcd",
     "pending_invocation": "invoke-13736715dc4009625e7ecb04",
     "source_run": 32667061602,
@@ -579,6 +579,20 @@
       "src/continual/context_kernel.py": "4621b19869de3dac7391a1fbca86842c06d63416",
       "tests/test_ci_source_observation.py": "7321ffe55f5dfefb34bf1e861b9927c997797e8a",
       "tests/test_context_kernel.py": "c2dad3629fff45119e7517e8cda609e4626cdfd8"
+    },
+    "merge_authorization_publication_precommit": {
+      "effect_id": "publish-manifest-bound-ci-merge-authorization-v1",
+      "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen6:manifest-bound-ci-merge-authorization:v1",
+      "branch": "work/recovery-gen6-ci-merge-authorization-v1",
+      "base_main_commit": "b9c19efc3f6bdbac14f00502d9f86f4778a9ca18",
+      "expected_state_blob": "c01f63b30b7c1d76c23ce1ea772cafabba0f3b6b",
+      "local_result_commit": "cf95e62e9f06d7edeb4f4df9c58445579929f932",
+      "local_result_tree": "9f85d1391ba67085611ba7d789f664038b6378d5",
+      "changed_path_count": 34,
+      "changed_path_list_sha256": "9c86af9f4cc1882eda2624803e7d94eb326fd82fda5f420c6b0617546721b82b",
+      "local_validation": "665 passed in 4139.70s; protected 99 tests passed; compileall and diff check passed",
+      "prepared_at": "2026-08-24T01:15:19.520Z",
+      "rule": "No remote branch, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback."
     }
   }
 }
