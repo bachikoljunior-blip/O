@@ -1,0 +1,56 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "evidence_refs": [
+      ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json",
+      ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+      ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/scorer-report.json"
+    ],
+    "observations": [
+      "The upcoming component is Task Evaluate and the bounded and original goals are distinct.",
+      "The Candidate has relevant evidence in other scopes but no deterministic activation for this measurement scope.",
+      "The overlay cannot alter the fixed trial, only require explicit independent verdict fields."
+    ],
+    "purpose": "Select only the Task Evaluate Candidate that can affect bounded-versus-user-level verdict separation.",
+    "unresolved": [
+      "the actual current-scope Task Evaluate result",
+      "post-result Candidate evidence for this measurement scope",
+      "a separate deterministic activation gate"
+    ]
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "observation": "Dual-verdict discipline is especially relevant when a cleanly blinded protocol produces useful diagnostic evidence but still fails its fixed success threshold."
+  },
+  "result": {
+    "baseline_need": "The active Task Evaluate prompt plus the Root-frozen threshold and claim boundary is the baseline. The overlay adds only an explicit unit_verdict alongside the unchanged original-task verdict; it cannot change the evidence, threshold, score, or failure classification.",
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "conflicts": [],
+    "decision": "TRIAL_CANDIDATE",
+    "dependencies": [],
+    "evidence_to_collect": [
+      "an explicit unit_verdict derived from the fixed 12-of-12 threshold and immutable scorer report",
+      "a separate verdict and user_level_verdict for the original upper objective",
+      "unit_verdict_reason and verdict_reason with distinct evidence provenance",
+      "preserved negative evidence for the lexical contract mismatch, unverified model identity, repository-authored evaluator, and unpublished native records",
+      "an explicit false AGI-claim field and no Candidate promotion"
+    ],
+    "reason": "The exact upcoming Task Evaluate has two independent falsifiable levels: the bounded frozen measurement and the user's upper objective. The Candidate's dual-verdict discipline directly reduces claim conflation risk. It is still only a Candidate, and its PROPOSE_ACTIVATION evidence is scoped elsewhere, so this call may trial the overlay for the current measurement scope but may not activate or promote it.",
+    "regression_checks": [
+      "the unit verdict remains FAIL at 11 of 12",
+      "the verification-versus-verify mismatch is diagnostic only and does not relabel the frozen score",
+      "the original user-level verdict remains independent and is not weakened to the bounded unit",
+      "internal blinded evidence is not called independent production evidence, AGI, or completion",
+      "the next repair preserves historical artifacts and requires a fresh response"
+    ],
+    "risk_dimensions": {
+      "failure_risk": "low if the fixed score and claim boundary are treated as immutable; high only if diagnosis is confused with relabeling",
+      "latency_tokens": "small overlay cost",
+      "quality": "upside from explicit separation of bounded and user-level outcomes",
+      "tool_external_cost": "none"
+    },
+    "rollback": "If the overlay causes verdict conflation, omits contradictory evidence, or changes the mechanical score, reject it for this scope and evaluate under the active prompt. No Candidate state promotion is authorized.",
+    "scope": "measurement/physically-blinded-multicase-v1"
+  }
+}

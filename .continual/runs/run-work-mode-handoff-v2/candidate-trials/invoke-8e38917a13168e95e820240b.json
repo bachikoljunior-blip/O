@@ -1,0 +1,59 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "evidence_refs": [
+      ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/precommitment.json",
+      ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/child-visible-request.txt",
+      ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/locked-response.txt",
+      ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/contamination-audit.json",
+      ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/scorer-report.json",
+      ".continual/work-model/invocations/invoke-c530fceb99652e013fcbd1c7/response.json"
+    ],
+    "observations": [
+      "The trial was cleanly blinded and exactly-once, and 11 of 12 cases passed.",
+      "The fixed threshold failed because the scorer checked verify while the instruction and answer used verification.",
+      "The failure remains mechanical FAIL; the mismatch is a next-unit repair input, not authority to relabel this result."
+    ],
+    "purpose": "Adjudicate the benchmark Candidate from the exact blinded measurement without retroactively changing the frozen protocol.",
+    "unresolved": [
+      "a precommitted instruction-scorer vocabulary repair",
+      "a fresh non-reused blinded response after repair",
+      "verified serving-model identity and independent production evidence"
+    ]
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "observation": "The benchmark Candidate successfully enforced representative coverage, contamination controls, exactly-once evidence, and claim separation, but a mechanically failed case plus a demonstrable instruction-scorer vocabulary mismatch means the evidence is diagnostic rather than activation-grade."
+  },
+  "result": {
+    "candidate_id": "candidate-agi-benchmark-suite-v1",
+    "contradictory_evidence": [
+      "The fixed success threshold was 12 of 12 plus a clean audit, but the mechanical result was 11 of 12 and therefore FAIL.",
+      "The public instruction requested verification while the frozen invariant scorer required the literal substring verify; the response supplied a verification field and verification action, but did not contain the literal verify token.",
+      "The evaluator and scorer are repository-authored, the serving model identity is externally unverified, and the executor was not an independently operated production verifier.",
+      "The measurement and native records have not yet been published through a new unchanged exact-head CI result."
+    ],
+    "decision": "NEED_MORE_EVIDENCE",
+    "global_activation_authorized": false,
+    "promotion_performed": false,
+    "reason": "The Candidate materially improved evidence discipline: the trial froze a representative two-per-criterion suite, separated generator, executor, and scorer identities, kept evaluator-only material out of the child context, bound one immutable response to the exact request, reproduced deterministic scores, and kept the bounded, Candidate, AGI-claim, and user-level verdicts separate. However, the precommitted all-cases threshold mechanically failed at 11 of 12, and the lone failure exposes a public-instruction-to-scorer lexical mismatch between verification and the literal token verify. That mismatch cannot be repaired retroactively, the serving model identity remains unverified, and one repository-authored internal trial is insufficient for scoped activation.",
+    "regression_gate_required": true,
+    "required_next_evidence": [
+      "Preserve this trial, response, scorer report, and FAIL verdict immutably; do not retry or rescore it under changed semantics.",
+      "Precommit a minimal instruction-scorer contract repair that aligns the public concept vocabulary and deterministic invariant without revealing expected answers or weakening the fixed threshold.",
+      "Add regression tests proving that the public instruction and scorer share the same explicit concept contract, missing concepts still fail closed, and historical trial artifacts remain unchanged.",
+      "After the repair is independently validated and published, generate a fresh secret-seeded suite and obtain a new single response from a separate non-writing executor; do not reuse this response.",
+      "Keep Candidate activation blocked until fresh repeat evidence and the separate deterministic protected-baseline gate support it."
+    ],
+    "rollback": "Remain at NEED_MORE_EVIDENCE. Preserve the current mechanical FAIL and immutable artifacts, make no active prompt change, perform no Candidate promotion, and select a separately precommitted repair or fresh stronger measurement at the next Root boundary.",
+    "scope": "agi/capability-evaluation",
+    "supporting_evidence": [
+      "The frozen suite contained exactly 12 tasks with exactly two tasks for each of breadth, transfer, autonomy, continual_learning, self_improvement, and robustness.",
+      "The child-visible request digest matched the precommitment; seed, nonce, expected values, evaluator fields, scorer state, and repository mutation authority were absent.",
+      "A distinct non-writing executor returned one complete immutable response, with retry_count zero and no observed repository mutation.",
+      "The contamination audit was clean and the deterministic re-score reproduced byte-identical per-case verdicts and report digest c6f9b9c06fd5b939f12076131dd756062b779766130a9907ad8779b389fc7646.",
+      "Eleven cases passed, every non-autonomy criterion passed two of two, and the parent Execute preserved the internal-only claim boundary without promoting the result to AGI or completion."
+    ]
+  }
+}

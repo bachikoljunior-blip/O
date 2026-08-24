@@ -1,0 +1,67 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-24T05:59:56.821918Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-b014d3d606bee161ca41ba93-candidate_evaluate.json",
+  "invocation_id": "invoke-b014d3d606bee161ca41ba93",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/work-model/invocations/invoke-dc04ab5d32b05f2ae5df61e9/response.json",
+        ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/scorer-report.json",
+        ".continual/runs/run-work-mode-handoff-v2/blinded-measurements/blinded-unit-7ac66d7f847659930dd3729a-v1/contamination-audit.json",
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json"
+      ],
+      "observations": [
+        "The bounded unit and user objective both failed, but for independent reasons and evidence provenance.",
+        "The historical score, negative evidence, and claim boundary were preserved exactly in meaning.",
+        "The Candidate is supported for a narrow scope but remains gated and unpromoted."
+      ],
+      "purpose": "Evaluate the dual-verdict Task Evaluate Candidate from the immutable blinded-measurement result without changing the result or promoting the Candidate.",
+      "unresolved": [
+        "the separate deterministic protected-baseline activation gate",
+        "the future-only typed public-concept contract repair",
+        "a fresh non-reused blinded response after repair",
+        "external real-world evidence and verified model identity"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "A useful dual-verdict overlay must demonstrate discrimination when both outcomes fail as well as when the bounded unit passes; this trial adds that evidence but still requires the separate deterministic activation gate."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [
+        "This unit itself failed its fixed measurement threshold; that failure is evidence that the evaluator overlay discriminates rather than evidence of behavioral capability.",
+        "The Candidate has not yet passed the separate deterministic protected-baseline regression gate for this measurement scope.",
+        "Its expected_scope is continual/incremental-task-evaluation, so any activation must remain narrowly scoped and explicitly versioned for the present measurement use.",
+        "The trial and evaluator are internal and do not establish external validity, verified serving-model identity, or AGI."
+      ],
+      "decision": "PROPOSE_ACTIVATION",
+      "global_activation_authorized": false,
+      "promotion_performed": false,
+      "reason": "The actual Task Evaluate output independently derived the bounded-unit and user-level verdicts and kept both at FAIL for different evidence-backed reasons. It preserved the immutable 11-of-12 threshold failure, treated the verification-versus-verify mismatch only as diagnostic negative evidence, stated agi_claim_supported false, blocked global activation, and required a future-only repair plus a fresh response. That is a clean, discriminating current-scope trial of the overlay. This call recommends scoped activation only; it neither promotes the Candidate nor changes the historical measurement.",
+      "regression_gate_required": true,
+      "required_next_evidence": [
+        "Run the deterministic protected-baseline regression gate over PASS, FAIL, and UNCERTAIN bounded-unit cases while checking that original-task verdicts remain independent.",
+        "Verify that the gate preserves contradictory evidence, explicit claim boundaries, and no-promotion behavior across the protected baseline.",
+        "Persist VERIFIED_FOR_SCOPE evidence before any scoped activation; otherwise keep the Candidate unactivated.",
+        "Preserve the historical 11-of-12 report and FAIL verdict byte-for-byte regardless of Candidate status."
+      ],
+      "rollback": "If the deterministic gate finds verdict conflation, loss of negative evidence, weakened original-goal evaluation, or any implicit promotion, reject activation for this scope and retain the active baseline plus the Candidate record unchanged.",
+      "scope": "measurement/physically-blinded-multicase-v1",
+      "supporting_evidence": [
+        "The actual output contains verdict FAIL, user_level_verdict FAIL, and unit_verdict FAIL, with distinct verdict_reason and unit_verdict_reason fields.",
+        "The unit reason is bound to the precommitted 12-of-12 threshold and immutable 11-of-12 scorer report rather than semantic reinterpretation.",
+        "The user-level reason separately retains the unmet real-world objective, unverified model identity, repository-authored evaluation, and lack of independent production evidence.",
+        "The lexical instruction-scorer mismatch is preserved as negative evidence and explicitly denied authority to retry, rescore, relabel, or edit the old trial.",
+        "The actual output sets agi_claim_supported and global_activation_authorized false and proposes no Candidate promotion."
+      ]
+    }
+  },
+  "payload_digest": "8b3d7d98538b7297ec722535",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

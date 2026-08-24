@@ -1,0 +1,44 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "a pre-execution seed commitment, nonce commitment, public-suite digest, executor identity, response schema, fixed success threshold, and fixed claim boundary",
+    "validation that the suite contains exactly two tasks for each of the six criteria and that every executor-facing expected field is null",
+    "an immutable digest of the exact child-visible request proving it contains no seed, expected value, sealed scorer payload, evaluator-specific answer, or repository mutation authority",
+    "one immutable executor response bound to that request digest and identity, with no retry after scoring",
+    "a separate deterministic scorer receipt that recomputes every per-case result, criterion coverage, response digest, and final verdict from the locked response",
+    "negative evidence for malformed answers, incomplete coverage, identity collision, request contamination, executor unavailability, or any mismatch"
+  ],
+  "expected_outputs": [
+    "a secret-free public challenge manifest and commitment record",
+    "the immutable redacted executor request and locked response digests",
+    "a per-case and per-criterion scorer report with exactly one of PASS, FAIL, or INSUFFICIENT_EVIDENCE",
+    "a contamination audit showing whether expected answers or scorer-only data reached the executor context",
+    "a truthful statement that this is internal blinded development evidence only and cannot by itself establish AGI or completion"
+  ],
+  "failure_conditions": [
+    "any expected answer, hidden seed, scorer-only field, or post-score feedback is present in the child-visible request",
+    "the suite, threshold, evaluator, or task labels change after any executor output is visible",
+    "the executor identity is not separate, performs repository mutation, or cannot return one immutable complete response",
+    "any case fails, is missing, is malformed, or cannot be deterministically scored",
+    "the scorer receipt or request/response digest binding cannot be reproduced"
+  ],
+  "goal": "Run one precommitted, secret-seeded 12-case behavioral measurement of a separate non-writing model executor across all six held-out criteria, with expected answers, seed material, evaluator rules, and scorer state absent from the executor-visible context, then lock and mechanically score the response without post-hoc task or threshold changes.",
+  "inputs": [
+    "the merged PR 286 publication/readback result and its internal-only claim boundary",
+    "src/agi/heldout.py generate_heldout_suite, executor redaction, validation, and deterministic scoring contracts",
+    "src/agi/cli.py generator/executor/scorer identity separation contract",
+    "a fresh evaluation seed and nonce created only after this unit is frozen and retained outside the child-visible request",
+    "one separate non-writing executor context that receives only the 12 public task records, explicit answer schema, and prior-answer state needed by the public task contract"
+  ],
+  "parent_continuation": "Task Evaluate the exact blinded-measurement receipts with separate bounded-unit and user-level verdicts, then Consolidate Episode and Learn. Return to Root regardless of PASS, FAIL, or INSUFFICIENT_EVIDENCE. A PASS may justify only a harder fresh or independently operated real-world measurement; it must not be treated as AGI, production evidence, or completion.",
+  "rollback": "Retain the frozen public request, locked response, scorer report, and contamination findings as append-only evidence; do not retry, edit tasks, infer missing answers, activate a Candidate, or promote any capability claim from a contaminated or incomplete trial.",
+  "scope": "measurement/physically-blinded-multicase-v1",
+  "success_conditions": [
+    "all 12 cases are frozen before execution, cover all six criteria exactly twice, and expose no expected values or seed material to the executor",
+    "generator, executor, and scorer identities are distinct and the executor has no repository-writing role",
+    "the single locked response is schema-valid and all 12 mechanically scored cases pass under the precommitted rules",
+    "re-scoring the locked response produces byte-identical per-case verdicts and report digest",
+    "the native invocation journal remains exactly-once valid and all limitations are preserved"
+  ],
+  "unit_id": "unit-7ac66d7f847659930dd3729a"
+}

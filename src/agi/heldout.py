@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import random
@@ -8,6 +9,10 @@ from typing import Any, Iterable
 
 from .benchmark import AgentAnswer, AgentState, BenchmarkAgent, BenchmarkTask
 from .evaluation import CRITERION_KEYS, EvidenceRecord
+
+
+LEGACY_TOOL_RECOVERY_CONTRACT = "legacy-invariant-v1"
+PUBLIC_CONCEPT_CONTRACT_V2 = "public-concepts-v2"
 
 
 @dataclass(frozen=True)
@@ -20,6 +25,100 @@ class EvaluationIdentity:
             raise ValueError("identity_id is required")
         if self.role not in {"generator", "executor", "scorer"}:
             raise ValueError(f"unsupported evaluation role: {self.role}")
+
+
+@dataclass(frozen=True)
+class PublicConceptContract:
+    """Executor-visible structural requirements shared by task text and scoring."""
+
+    version: str
+    answer_field: str
+    entry_fields: tuple[str, str]
+    concept_ids: tuple[str, ...]
+    ordered: bool = True
+
+    def validate(self) -> None:
+        if not isinstance(self.version, str) or self.version != PUBLIC_CONCEPT_CONTRACT_V2:
+            raise ValueError(f"unsupported public concept contract: {self.version}")
+        if (
+            not isinstance(self.answer_field, str)
+            or not self.answer_field
+            or not self.answer_field.replace("_", "").isalnum()
+        ):
+            raise ValueError("answer_field must be a non-empty identifier")
+        if self.entry_fields != ("concept_id", "action"):
+            raise ValueError("entry_fields must be exactly concept_id and action")
+        if not self.concept_ids or len(set(self.concept_ids)) != len(self.concept_ids):
+            raise ValueError("concept_ids must be non-empty and unique")
+        if any(
+            not isinstance(concept_id, str)
+            or not concept_id
+            or not concept_id.replace("_", "").isalnum()
+            for concept_id in self.concept_ids
+        ):
+            raise ValueError("concept_ids must be non-empty identifiers")
+        if not isinstance(self.ordered, bool):
+            raise ValueError("ordered must be boolean")
+
+    def to_public_dict(self) -> dict[str, Any]:
+        self.validate()
+        return {
+            "version": self.version,
+            "answer_field": self.answer_field,
+            "entry_fields": list(self.entry_fields),
+            "concept_ids": list(self.concept_ids),
+            "ordered": self.ordered,
+        }
+
+    @classmethod
+    def from_public_dict(cls, value: Any) -> PublicConceptContract:
+        if not isinstance(value, dict) or set(value) != {
+            "version",
+            "answer_field",
+            "entry_fields",
+            "concept_ids",
+            "ordered",
+        }:
+            raise ValueError("invalid public concept contract shape")
+        entry_fields = value["entry_fields"]
+        concept_ids = value["concept_ids"]
+        if not isinstance(entry_fields, list) or not all(
+            isinstance(item, str) for item in entry_fields
+        ):
+            raise ValueError("entry_fields must be a string list")
+        if not isinstance(concept_ids, list) or not all(
+            isinstance(item, str) for item in concept_ids
+        ):
+            raise ValueError("concept_ids must be a string list")
+        contract = cls(
+            version=value["version"],
+            answer_field=value["answer_field"],
+            entry_fields=tuple(entry_fields),
+            concept_ids=tuple(concept_ids),
+            ordered=value["ordered"],
+        )
+        contract.validate()
+        return contract
+
+    def instruction(self) -> str:
+        self.validate()
+        concepts = ", ".join(f"`{concept_id}`" for concept_id in self.concept_ids)
+        order = " in that exact order" if self.ordered else " in any order"
+        return (
+            "A required tool timed out. Return one JSON object whose only key is "
+            f"`{self.answer_field}`. `{self.answer_field}` must be an array containing exactly "
+            f"one object for each public concept ID{order}: {concepts}. Each object must contain "
+            "only `concept_id` and `action`; `concept_id` is the exact public identifier and "
+            "`action` is a non-empty concrete recovery step."
+        )
+
+
+_TOOL_RECOVERY_CONTRACT_V2 = PublicConceptContract(
+    version=PUBLIC_CONCEPT_CONTRACT_V2,
+    answer_field="steps",
+    entry_fields=("concept_id", "action"),
+    concept_ids=("verify_external_state", "use_fallback", "checkpoint_progress"),
+)
 
 
 @dataclass(frozen=True)
@@ -133,11 +232,14 @@ def generate_heldout_suite(
     *,
     nonce: str = "heldout-v1",
     generator: EvaluationIdentity | None = None,
+    tool_recovery_contract: str = LEGACY_TOOL_RECOVERY_CONTRACT,
 ) -> tuple[SealedTask, ...]:
     """Generate parameterized tasks while keeping exact answers outside executor input.
 
     The seed is never placed in PublicTask or HeldOutReport. Production use should supply a
     fresh secret seed from an evaluation service or secret store and destroy it after scoring.
+    The default recovery contract intentionally preserves the frozen heldout-v1 behavior;
+    callers must explicitly opt into the structural public-concepts-v2 contract.
     """
 
     generator = generator or EvaluationIdentity("generator:local", "generator")
@@ -146,6 +248,11 @@ def generate_heldout_suite(
         raise ValueError("generator identity must have generator role")
     if not seed:
         raise ValueError("held-out seed must be non-empty")
+    if tool_recovery_contract not in {
+        LEGACY_TOOL_RECOVERY_CONTRACT,
+        PUBLIC_CONCEPT_CONTRACT_V2,
+    }:
+        raise ValueError(f"unsupported tool recovery contract: {tool_recovery_contract}")
 
     seed_commit = seed_commitment(seed, nonce)
     rng = random.Random(int(hashlib.sha256(f"{nonce}:{seed}".encode()).hexdigest(), 16))
@@ -221,11 +328,38 @@ def generate_heldout_suite(
             "plan",
         )
     )
+    tool_task_id = _opaque_id(rng, "autonomy", 2)
+    tool_input: dict[str, Any] = {
+        "tool": f"tool-{rng.randint(10,99)}",
+        "error": "transient-timeout",
+        "attempt": rng.randint(1, 3),
+    }
+    if tool_recovery_contract == LEGACY_TOOL_RECOVERY_CONTRACT:
+        tool_instruction = (
+            "A required tool timed out. Return a recovery plan containing verification, "
+            "a fallback, and a checkpoint before retrying."
+        )
+        tool_expected: Any = {"required": ["verify", "fallback", "checkpoint"]}
+        tool_evaluator = "invariant"
+    else:
+        public_contract = _TOOL_RECOVERY_CONTRACT_V2.to_public_dict()
+        tool_input["public_concept_contract"] = public_contract
+        tool_instruction = _TOOL_RECOVERY_CONTRACT_V2.instruction()
+        tool_expected = {
+            "public_concept_contract": _TOOL_RECOVERY_CONTRACT_V2.to_public_dict()
+        }
+        tool_evaluator = "public-concepts-v2"
     tasks.append(
         (
-            PublicTask(_opaque_id(rng, "autonomy", 2), "autonomy", "tool-use", "A required tool timed out. Return a recovery plan containing verification, a fallback, and a checkpoint before retrying.", {"tool": f"tool-{rng.randint(10,99)}", "error": "transient-timeout", "attempt": rng.randint(1, 3)}),
-            {"required": ["verify", "fallback", "checkpoint"]},
-            "invariant",
+            PublicTask(
+                tool_task_id,
+                "autonomy",
+                "tool-use",
+                tool_instruction,
+                tool_input,
+            ),
+            tool_expected,
+            tool_evaluator,
         )
     )
 
@@ -313,8 +447,22 @@ def validate_heldout_suite(tasks: Iterable[SealedTask]) -> dict[str, Any]:
             errors.append(f"unknown criterion: {public.criterion}")
         else:
             coverage[public.criterion] += 1
-        if item.evaluator not in {"exact", "plan", "invariant"}:
+        if item.evaluator not in {"exact", "plan", "invariant", "public-concepts-v2"}:
             errors.append(f"unsupported evaluator: {item.evaluator}")
+        if item.evaluator == "public-concepts-v2":
+            public_contract = public.input.get("public_concept_contract")
+            expected_contract = (
+                item.expected.get("public_concept_contract")
+                if isinstance(item.expected, dict)
+                else None
+            )
+            if public_contract != expected_contract:
+                errors.append(f"public concept contract mismatch: {public.opaque_id}")
+            else:
+                try:
+                    PublicConceptContract.from_public_dict(public_contract)
+                except (TypeError, ValueError) as exc:
+                    errors.append(f"invalid public concept contract {public.opaque_id}: {exc}")
         if not item.commitment:
             errors.append(f"missing commitment: {public.opaque_id}")
     for criterion, count in coverage.items():
@@ -342,6 +490,37 @@ def _score(item: SealedTask, answer: AgentAnswer) -> bool:
         required = item.expected.get("required", [])
         text = json.dumps(answer.answer, ensure_ascii=False).lower()
         return all(str(value).lower() in text for value in required)
+    if item.evaluator == "public-concepts-v2":
+        if not isinstance(item.expected, dict):
+            return False
+        public_contract = item.public.input.get("public_concept_contract")
+        expected_contract = item.expected.get("public_concept_contract")
+        if public_contract != expected_contract:
+            return False
+        try:
+            contract = PublicConceptContract.from_public_dict(public_contract)
+        except (TypeError, ValueError):
+            return False
+        payload = answer.answer
+        if not isinstance(payload, dict) or set(payload) != {contract.answer_field}:
+            return False
+        entries = payload[contract.answer_field]
+        if not isinstance(entries, list) or len(entries) != len(contract.concept_ids):
+            return False
+        observed: list[str] = []
+        for entry in entries:
+            if not isinstance(entry, dict) or set(entry) != set(contract.entry_fields):
+                return False
+            concept_id = entry["concept_id"]
+            action = entry["action"]
+            if not isinstance(concept_id, str) or not isinstance(action, str) or not action.strip():
+                return False
+            observed.append(concept_id)
+        if len(set(observed)) != len(observed):
+            return False
+        if contract.ordered:
+            return tuple(observed) == contract.concept_ids
+        return set(observed) == set(contract.concept_ids)
     return False
 
 
@@ -352,7 +531,7 @@ def _redact_for_executor(item: SealedTask) -> BenchmarkTask:
         criterion=public.criterion,
         domain=public.domain,
         instruction=public.instruction,
-        input=public.input,
+        input=copy.deepcopy(public.input),
         expected=None,
         evaluator=item.evaluator,
     )
@@ -456,7 +635,22 @@ class ReferenceHeldOutAgent:
                 answer.extend(ready)
                 remaining.difference_update(ready)
         elif task.domain == "tool-use":
-            answer = ["verify external state", "use fallback", "checkpoint progress"]
+            public_contract = data.get("public_concept_contract")
+            if public_contract is None:
+                answer = ["verify external state", "use fallback", "checkpoint progress"]
+            else:
+                contract = PublicConceptContract.from_public_dict(public_contract)
+                actions = {
+                    "verify_external_state": "Verify the external state and partial side effects.",
+                    "use_fallback": "Use the approved fallback if the primary tool remains unavailable.",
+                    "checkpoint_progress": "Checkpoint validated progress before any bounded retry.",
+                }
+                answer = {
+                    contract.answer_field: [
+                        {"concept_id": concept_id, "action": actions[concept_id]}
+                        for concept_id in contract.concept_ids
+                    ]
+                }
         elif task.domain == "memory":
             labels = state.memory.setdefault("labels", {})
             labels.update(data.get("teach", {}))
