@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T04:10:10.198Z",
-  "last_progress_at": "2026-08-24T04:10:10.198Z",
+  "heartbeat_at": "2026-08-24T04:11:22.408Z",
+  "last_progress_at": "2026-08-24T04:11:22.408Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
     "durability_status": "PR 286 exact head 9bd25a5 passed workflow 32684747406 (four shards plus aggregate). Main inbox blob 645f6f1f5ef0b4e7842142991f3748df858082a1 declares revision 16 but is invalid JSON, truncated inside sequence 13 by commit 36e02c3749344861518982ea2376b21bef90a0af. Revision 16 cannot be safely interpreted or acknowledged.",
-    "next_action": "Publish the validated revision-17 inbox integrity repair from isolated branch work/recovery-gen7-inbox-integrity-v1 after recording a publication precommit; then require exact-head CI, unchanged head, clean mergeability, and blob readback before acknowledging revision 17."
+    "next_action": "After exact readback of this publication precommit, construct the remote repair commit on the resulting latest main tree, open an isolated PR, and merge only after exact-head CI succeeds, the head is unchanged, mergeability is clean, and repaired blobs read back exactly."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -704,5 +704,31 @@
       "result": "four pytest shards and dependent aggregate succeeded"
     },
     "observed_at": "2026-08-24T03:25:52.604Z"
+  },
+  "inbox_integrity_repair": {
+    "effect_id": "publish-inbox-integrity-repair-v1",
+    "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen7:inbox-integrity-repair:v1",
+    "branch": "work/recovery-gen7-inbox-integrity-v1",
+    "base_main_commit": "96bae96a5834b0514f8571aa89e2cef39cc609fe",
+    "expected_state_blob": "0843fff8b6a9bbff0ca0c4d4612f2b82182d7b1e",
+    "local_result_commit": "a370e33f25564a1a9ff2d44195b8cb8c4c8b9c0c",
+    "local_result_tree": "663f0b97fa7f9c8ea2e2ad4b720f571d5afd0e1a",
+    "changed_paths": [
+      "agi/USER_DIRECTIVE_EVENTS.json",
+      "agi/USER_INPUT_INBOX.json",
+      "tests/test_user_input_inbox.py"
+    ],
+    "changed_path_count": 3,
+    "changed_path_list_sha256": "a7f275af10f54acd8976d33f8c92cbede41ce188a1c3355ec3e62c1c6b65e688",
+    "malformed_revision": 16,
+    "malformed_blob_sha": "645f6f1f5ef0b4e7842142991f3748df858082a1",
+    "introducing_commit": "36e02c3749344861518982ea2376b21bef90a0af",
+    "valid_parent_commit": "cb6b161e3a96ab2b1d6f2e940d6ae809b2d76fab",
+    "repaired_revision": 17,
+    "semantic_rule": "Restore entries 1-15 byte-semantically from the valid parent, record revision 16 only as withdrawn integrity provenance, and apply the user's exact revision-17 words 再開して without inferring missing revision-16 semantics.",
+    "local_validation": "87 focused tests passed; all repository JSON parsed; compileall and diff check passed.",
+    "prepared_at": "2026-08-24T04:11:22.408Z",
+    "status": "precommitted_local_verified",
+    "rule": "No remote branch, remote commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback."
   }
 }
