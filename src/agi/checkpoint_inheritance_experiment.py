@@ -9,6 +9,10 @@ from pathlib import Path
 from statistics import median
 from typing import Any, Mapping
 
+from continual.behavioral_outcome import (
+    behavioral_child_binding,
+    prepare_behavioral_outcome,
+)
 from continual.work_session import verified_work_invocation
 
 
@@ -36,6 +40,14 @@ _NATIVE_FIELDS = {
     "executor_binding",
     "model_identity",
     "model_verified",
+}
+_READINESS_TASK_IDS = {"research-unit-a", "research-unit-b", "research-unit-c"}
+_READINESS_CLAIM_BOUNDARY = {
+    "agi_claim_supported": False,
+    "readiness_is_behavioral_evidence": False,
+    "scientist_agent_family_inference_supported": False,
+    "untested_mechanism_inference_supported": False,
+    "adaptation_loss_inference_supported": False,
 }
 
 
@@ -68,6 +80,298 @@ def checkpoint_protocol_digest(value: Mapping[str, Any]) -> str:
         separators=(",", ":"),
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def _canonical_digest(value: Any) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def checkpoint_measurement_readiness_digest(value: Mapping[str, Any]) -> str:
+    """Return the immutable identity of a measurement-readiness contract."""
+
+    frozen = {
+        field: value.get(field)
+        for field in (
+            "schema_version",
+            "plan_id",
+            "mechanism",
+            "base_experiment",
+            "frozen_before_preparation",
+            "executor_model_policy",
+            "budget",
+            "tasks",
+            "arms",
+            "scorer_binding",
+            "safety",
+            "claim_boundary",
+            "negative_evidence_scope",
+        )
+    }
+    return _canonical_digest(frozen)
+
+
+def _contains_key(value: Any, forbidden: set[str]) -> bool:
+    if isinstance(value, Mapping):
+        return any(
+            str(key) in forbidden or _contains_key(child, forbidden)
+            for key, child in value.items()
+        )
+    if isinstance(value, list):
+        return any(_contains_key(child, forbidden) for child in value)
+    return False
+
+
+def validate_checkpoint_measurement_readiness(
+    value: Mapping[str, Any],
+    experiment: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Validate the versioned, no-observation checkpoint measurement plan."""
+
+    base = validate_checkpoint_experiment(experiment)
+    if base["status"] != "HARNESS_READY" or base["observations"] != []:
+        raise ValueError("measurement readiness requires the unmeasured HARNESS_READY baseline")
+    if base["decision"].get("implementation_authorized") is not False:
+        raise ValueError("baseline implementation must remain unauthorized")
+    if value.get("schema_version") != 1:
+        raise ValueError("readiness schema_version must be 1")
+    if value.get("status") != "READY_NO_OBSERVATIONS":
+        raise ValueError("readiness status must be READY_NO_OBSERVATIONS")
+    if value.get("plan_id") != "bounded-stage-checkpoint-measurement-v2":
+        raise ValueError("unexpected readiness plan_id")
+    if value.get("mechanism") != base["mechanism"]:
+        raise ValueError("readiness mechanism must match the baseline")
+    if value.get("frozen_before_preparation") is not True:
+        raise ValueError("readiness must be frozen before preparation")
+
+    base_binding = value.get("base_experiment")
+    if not isinstance(base_binding, Mapping) or set(base_binding) != {
+        "path",
+        "protocol_digest",
+    }:
+        raise ValueError("base_experiment binding is malformed")
+    if base_binding.get("path") != "agi/CHECKPOINT_INHERITANCE_EXPERIMENT.json":
+        raise ValueError("unexpected base experiment path")
+    if base_binding.get("protocol_digest") != checkpoint_protocol_digest(base):
+        raise ValueError("base experiment protocol digest mismatch")
+
+    if value.get("executor_model_policy") != {
+        "same_executor_binding_across_all_cells": True,
+        "same_model_identity_across_all_cells": True,
+        "model_identity_may_remain_platform_unverified": True,
+    }:
+        raise ValueError("executor/model policy must remain exact and fail-closed")
+    budget = value.get("budget")
+    if not isinstance(budget, Mapping) or budget != {
+        "max_model_invocations_per_attempt": 1,
+        "max_response_bytes": 4096,
+    }:
+        raise ValueError("readiness budget is invalid")
+
+    tasks = value.get("tasks")
+    if not isinstance(tasks, list) or len(tasks) != 3:
+        raise ValueError("readiness requires exactly three tasks")
+    seen_tasks: set[str] = set()
+    for index, item in enumerate(tasks):
+        if not isinstance(item, Mapping) or set(item) != {
+            "task_id",
+            "public_task",
+            "rubric_binding",
+        }:
+            raise ValueError("readiness task schema is invalid")
+        task_id = _nonempty(item.get("task_id"), f"tasks[{index}].task_id")
+        if task_id not in _READINESS_TASK_IDS or task_id in seen_tasks:
+            raise ValueError("readiness task ids must exactly match the baseline")
+        seen_tasks.add(task_id)
+        public = item.get("public_task")
+        if not isinstance(public, Mapping) or set(public) != {
+            "task_id",
+            "instruction",
+            "input",
+            "answer_format",
+            "response_pointer",
+        }:
+            raise ValueError("public task schema is invalid")
+        if public.get("task_id") != task_id:
+            raise ValueError("public task identity mismatch")
+        _nonempty(public.get("instruction"), f"tasks[{index}].instruction")
+        if public.get("answer_format") != "canonical_json":
+            raise ValueError("public task answer format must be canonical_json")
+        if public.get("response_pointer") != ["result", "behavioral_answer"]:
+            raise ValueError("public task response pointer is invalid")
+        if _contains_key(public, {"expected_answer", "labels", "answer_key"}):
+            raise ValueError("judgment-only values cannot appear in public tasks")
+        rubric = item.get("rubric_binding")
+        if not isinstance(rubric, Mapping) or set(rubric) != {
+            "judge_kind",
+            "judge_version",
+            "rubric_digest",
+            "success_threshold",
+            "supplied_at_preparation",
+        }:
+            raise ValueError("rubric binding schema is invalid")
+        if rubric.get("judge_kind") != "exact_canonical_json":
+            raise ValueError("readiness requires the exact canonical judge")
+        if rubric.get("judge_version") != "exact-canonical-json-v1":
+            raise ValueError("readiness judge version is invalid")
+        if rubric.get("success_threshold") != 1.0:
+            raise ValueError("readiness success threshold must be 1.0")
+        if rubric.get("supplied_at_preparation") != "judgment_only_out_of_child_payload":
+            raise ValueError("private rubric must be supplied only at preparation")
+        if not _SHA256.fullmatch(str(rubric.get("rubric_digest", ""))):
+            raise ValueError("rubric binding requires a lowercase SHA-256")
+    if seen_tasks != _READINESS_TASK_IDS:
+        raise ValueError("readiness task ids must exactly match the baseline")
+
+    arms = value.get("arms")
+    if not isinstance(arms, Mapping) or set(arms) != set(ARMS):
+        raise ValueError("readiness arms must exactly match the baseline")
+    for arm, width in ARMS.items():
+        binding = arms.get(arm)
+        base_arm = base["arms"][arm]
+        if not isinstance(binding, Mapping) or binding != {
+            "attempt_count": width,
+            "checkpoint_inheritance": base_arm["checkpoint_inheritance"],
+            "main_write_allowed": False,
+        }:
+            raise ValueError(f"readiness arm binding is invalid for {arm}")
+
+    if value.get("scorer_binding") != {
+        "implementation_ref": "src/continual/behavioral_outcome.py",
+        "prepare_function": "prepare_behavioral_outcome",
+        "record_function": "record_behavioral_outcome_from_work_invocation",
+        "judge_kind": "exact_canonical_json",
+        "judge_version": "exact-canonical-json-v1",
+        "expected_values_in_child_payload": False,
+    }:
+        raise ValueError("scorer binding is invalid")
+    safety = value.get("safety")
+    if not isinstance(safety, Mapping) or safety != {
+        "sandbox_required": True,
+        "main_writers_per_arm": 0,
+        "non_idempotent_external_effects_allowed": False,
+        "protected_regressions_must_pass": True,
+        "exact_replay_required": True,
+        "synthetic_preparation_is_observation": False,
+    }:
+        raise ValueError("readiness safety boundary must remain fail-closed")
+    if value.get("observations") != []:
+        raise ValueError("measurement readiness cannot contain observations")
+    if value.get("implementation_authorized") is not False:
+        raise ValueError("measurement readiness cannot authorize implementation")
+    if value.get("claim_boundary") != _READINESS_CLAIM_BOUNDARY:
+        raise ValueError("readiness claim boundary must remain exact")
+    scope = value.get("negative_evidence_scope")
+    if not isinstance(scope, Mapping) or scope != {
+        "tested_candidate": "bounded_stage_checkpoint_inheritance",
+        "tested_configuration": "measurement-readiness-v1 over the frozen width-1 versus width-3 O harness",
+        "tested_conditions": "static preparation and validation only; no behavioral attempt executed",
+        "evidence_against_original_method": False,
+        "evidence_against_scientist_agent_family": False,
+        "evidence_against_untested_mechanisms": False,
+        "adaptation_or_ablation_loss_established": False,
+    }:
+        raise ValueError("negative evidence scope must remain exact")
+    return deepcopy(dict(value))
+
+
+def prepare_checkpoint_measurement_requests(
+    root: Path,
+    *,
+    run_id: str,
+    state: Mapping[str, Any],
+    experiment: Mapping[str, Any],
+    readiness: Mapping[str, Any],
+    private_rubrics: Mapping[str, Mapping[str, Any]],
+    executor_binding: str,
+    model_identity: str,
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Prepare all exact task-arm attempts without recording an observation."""
+
+    plan = validate_checkpoint_measurement_readiness(readiness, experiment)
+    protocol_digest = checkpoint_protocol_digest(experiment)
+    readiness_digest = checkpoint_measurement_readiness_digest(plan)
+    if set(private_rubrics) != _READINESS_TASK_IDS:
+        raise ValueError("private rubrics must exactly match readiness tasks")
+    tasks = {item["task_id"]: item for item in plan["tasks"]}
+    cells: list[dict[str, Any]] = []
+    for task_id in sorted(tasks):
+        task_definition = tasks[task_id]
+        rubric = deepcopy(dict(private_rubrics[task_id]))
+        if _canonical_digest(rubric) != task_definition["rubric_binding"]["rubric_digest"]:
+            raise ValueError(f"private rubric digest mismatch for {task_id}")
+        for arm in sorted(ARMS):
+            attempt_count = ARMS[arm]
+            attempts: list[dict[str, Any]] = []
+            for attempt_index in range(1, attempt_count + 1):
+                candidate_id = f"{task_id}-{arm}-{attempt_index}"
+                binding = {
+                    "protocol_digest": protocol_digest,
+                    "readiness_digest": readiness_digest,
+                    "task_id": task_id,
+                    "arm": arm,
+                    "candidate_id": candidate_id,
+                    "attempt_index": attempt_index,
+                    "attempt_count": attempt_count,
+                    "max_model_invocations": 1,
+                }
+                public_task = deepcopy(dict(task_definition["public_task"]))
+                public_task["input"] = {
+                    "checkpoint_measurement": binding,
+                    "task_input": public_task["input"],
+                }
+                request = prepare_behavioral_outcome(
+                    root,
+                    run_id=run_id,
+                    state=state,
+                    task=public_task,
+                    rubric=rubric,
+                    executor_binding=executor_binding,
+                    model_identity=model_identity,
+                    now=now,
+                    max_response_bytes=plan["budget"]["max_response_bytes"],
+                )
+                child_unit = {
+                    "goal": public_task["instruction"],
+                    "scope": "agi/bounded-stage-checkpoint-inheritance/behavioral-attempt-v1",
+                    "checkpoint_measurement": binding,
+                    "behavioral_outcome": behavioral_child_binding(request),
+                    "task": public_task,
+                    "production_effects_allowed": False,
+                    "main_write_allowed": False,
+                }
+                if _contains_key(child_unit, {"expected_answer", "labels", "answer_key"}):
+                    raise ValueError("judgment-only values leaked into child execution unit")
+                attempts.append(
+                    {
+                        "candidate_id": candidate_id,
+                        "outcome_id": request["outcome_id"],
+                        "request_digest": request["request_digest"],
+                        "child_execution_unit": child_unit,
+                    }
+                )
+            cells.append({"task_id": task_id, "arm": arm, "attempts": attempts})
+    return {
+        "schema_version": 1,
+        "record_type": "checkpoint_measurement_preparation",
+        "run_id": run_id,
+        "protocol_digest": protocol_digest,
+        "readiness_digest": readiness_digest,
+        "executor_binding": executor_binding,
+        "model_identity": model_identity,
+        "cells": cells,
+        "prepared_attempt_count": sum(len(cell["attempts"]) for cell in cells),
+        "observation_count": 0,
+        "implementation_authorized": False,
+        "claim_boundary": deepcopy(_READINESS_CLAIM_BOUNDARY),
+    }
 
 
 def validate_checkpoint_experiment(value: Mapping[str, Any]) -> dict[str, Any]:

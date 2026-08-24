@@ -8,10 +8,13 @@ from pathlib import Path
 import pytest
 
 from agi.checkpoint_inheritance_experiment import (
+    checkpoint_measurement_readiness_digest,
     checkpoint_protocol_digest,
     evaluate_checkpoint_experiment,
     load_checkpoint_experiment,
+    prepare_checkpoint_measurement_requests,
     validate_checkpoint_experiment,
+    validate_checkpoint_measurement_readiness,
     verify_checkpoint_experiment_provenance,
 )
 from continual.work_session import WorkModelClient, WorkModelPending, submit_work_response
@@ -19,10 +22,60 @@ from continual.work_session import WorkModelClient, WorkModelPending, submit_wor
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_PATH = ROOT / "agi" / "CHECKPOINT_INHERITANCE_EXPERIMENT.json"
+READINESS_PATH = ROOT / "agi" / "CHECKPOINT_INHERITANCE_MEASUREMENT_V2.json"
 
 
 def _experiment() -> dict:
     return json.loads(EXPERIMENT_PATH.read_text(encoding="utf-8"))
+
+
+def _readiness() -> dict:
+    return json.loads(READINESS_PATH.read_text(encoding="utf-8"))
+
+
+def _private_rubrics() -> dict:
+    return {
+        "research-unit-a": {
+            "judge_kind": "exact_canonical_json",
+            "judge_version": "exact-canonical-json-v1",
+            "expected_answer": {
+                "selected_hypothesis_id": "latency-cache",
+                "experiment": "measure cached vs uncached median latency",
+            },
+            "success_threshold": 1.0,
+        },
+        "research-unit-b": {
+            "judge_kind": "exact_canonical_json",
+            "judge_version": "exact-canonical-json-v1",
+            "expected_answer": {
+                "selected_repair_id": "safe-minimal",
+                "reason_code": "remove_regression_surface",
+            },
+            "success_threshold": 1.0,
+        },
+        "research-unit-c": {
+            "judge_kind": "exact_canonical_json",
+            "judge_version": "exact-canonical-json-v1",
+            "expected_answer": {
+                "retained_trace_id": "trace-a",
+                "reason_code": "highest_safe_replay_stable_score_then_id",
+            },
+            "success_threshold": 1.0,
+        },
+    }
+
+
+def _state() -> dict:
+    return {
+        "status": "running",
+        "owner_kind": "work_recovery_automation",
+        "execution_id": "work-recovery-test",
+        "lease_generation": 8,
+        "fence_token": "opaque-test-fence",
+        "heartbeat_at": "2026-08-24T15:00:00Z",
+        "stale_after_seconds": 900,
+        "user_input_inbox": {"highest_acknowledged_revision": 20},
+    }
 
 
 def _attempt(candidate_id: str, *, score: float, invocations: int, seconds: float, retained: bool) -> dict:
@@ -285,3 +338,114 @@ def test_measurement_rejects_cross_arm_model_binding_changes(tmp_path: Path) -> 
     )
     with pytest.raises(ValueError, match="one executor/model binding"):
         verify_checkpoint_experiment_provenance(tmp_path, value)
+
+
+def test_checked_in_measurement_readiness_is_exact_and_unobserved() -> None:
+    experiment = _experiment()
+    readiness = validate_checkpoint_measurement_readiness(_readiness(), experiment)
+    assert readiness["status"] == "READY_NO_OBSERVATIONS"
+    assert readiness["observations"] == []
+    assert readiness["implementation_authorized"] is False
+    assert len(checkpoint_measurement_readiness_digest(readiness)) == 64
+    assert readiness["base_experiment"]["protocol_digest"] == checkpoint_protocol_digest(
+        experiment
+    )
+    assert readiness["negative_evidence_scope"]["evidence_against_scientist_agent_family"] is False
+
+
+def test_prepare_all_cells_without_exposing_judgment_or_recording_observations(
+    tmp_path: Path,
+) -> None:
+    prepared = prepare_checkpoint_measurement_requests(
+        tmp_path,
+        run_id="run-checkpoint-readiness-test",
+        state=_state(),
+        experiment=_experiment(),
+        readiness=_readiness(),
+        private_rubrics=_private_rubrics(),
+        executor_binding="checkpoint-readiness-test-session",
+        model_identity="work-model-unverified",
+        now="2026-08-24T15:01:00Z",
+    )
+    assert len(prepared["cells"]) == 6
+    assert prepared["prepared_attempt_count"] == 12
+    assert prepared["observation_count"] == 0
+    assert prepared["implementation_authorized"] is False
+    assert not (
+        tmp_path
+        / ".continual"
+        / "runs"
+        / "run-checkpoint-readiness-test"
+        / "behavioral-outcomes"
+        / "ledger.json"
+    ).exists()
+    child_units = [
+        attempt["child_execution_unit"]
+        for cell in prepared["cells"]
+        for attempt in cell["attempts"]
+    ]
+    encoded = json.dumps(child_units, ensure_ascii=False, sort_keys=True)
+    assert "expected_answer" not in encoded
+    assert "answer_key" not in encoded
+    assert '"labels"' not in encoded
+    assert all(unit["production_effects_allowed"] is False for unit in child_units)
+    assert all(unit["main_write_allowed"] is False for unit in child_units)
+
+    replay = prepare_checkpoint_measurement_requests(
+        tmp_path,
+        run_id="run-checkpoint-readiness-test",
+        state=_state(),
+        experiment=_experiment(),
+        readiness=_readiness(),
+        private_rubrics=_private_rubrics(),
+        executor_binding="checkpoint-readiness-test-session",
+        model_identity="work-model-unverified",
+        now="2026-08-24T15:02:00Z",
+    )
+    assert replay == prepared
+
+
+def test_measurement_readiness_rejects_task_rubric_and_protocol_tampering(
+    tmp_path: Path,
+) -> None:
+    readiness = _readiness()
+    readiness["tasks"][0]["public_task"]["input"]["answer_key"] = "leak"
+    with pytest.raises(ValueError, match="judgment-only"):
+        validate_checkpoint_measurement_readiness(readiness, _experiment())
+
+    readiness = _readiness()
+    readiness["base_experiment"]["protocol_digest"] = "0" * 64
+    with pytest.raises(ValueError, match="protocol digest mismatch"):
+        validate_checkpoint_measurement_readiness(readiness, _experiment())
+
+    rubrics = _private_rubrics()
+    rubrics["research-unit-a"]["expected_answer"]["selected_hypothesis_id"] = "general-intelligence"
+    with pytest.raises(ValueError, match="private rubric digest mismatch"):
+        prepare_checkpoint_measurement_requests(
+            tmp_path,
+            run_id="run-checkpoint-readiness-tamper",
+            state=_state(),
+            experiment=_experiment(),
+            readiness=_readiness(),
+            private_rubrics=rubrics,
+            executor_binding="checkpoint-readiness-test-session",
+            model_identity="work-model-unverified",
+            now="2026-08-24T15:01:00Z",
+        )
+
+
+def test_measurement_readiness_cannot_weaken_safety_or_claim_scope() -> None:
+    readiness = deepcopy(_readiness())
+    readiness["safety"]["non_idempotent_external_effects_allowed"] = True
+    with pytest.raises(ValueError, match="safety boundary"):
+        validate_checkpoint_measurement_readiness(readiness, _experiment())
+
+    readiness = deepcopy(_readiness())
+    readiness["claim_boundary"]["scientist_agent_family_inference_supported"] = True
+    with pytest.raises(ValueError, match="claim boundary"):
+        validate_checkpoint_measurement_readiness(readiness, _experiment())
+
+    readiness = deepcopy(_readiness())
+    readiness["observations"] = [{"synthetic": True}]
+    with pytest.raises(ValueError, match="cannot contain observations"):
+        validate_checkpoint_measurement_readiness(readiness, _experiment())
