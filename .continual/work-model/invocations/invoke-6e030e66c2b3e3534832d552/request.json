@@ -1,0 +1,118 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-24T21:59:53.557390Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-6e030e66c2b3e3534832d552",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "continual/incremental-task-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+          "scope_states": {
+            "agi/backlog-integration": "NEED_MORE_EVIDENCE",
+            "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1": "PROPOSE_ACTIVATION",
+            "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+            "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+            "continual/incremental-task-evaluation": "PROPOSE_ACTIVATION"
+          },
+          "status": "candidate",
+          "target_component": "task_evaluate"
+        }
+      ],
+      "schema_version": 2
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "task_evaluate",
+        "evidence_needed": [
+          "one verdict that distinguishes local implementation correctness from publication completion",
+          "explicit verification that no orphan invocation was answered or mutated",
+          "explicit revision-20 scope attribution for the generation-8 rejection",
+          "a concrete continuation for exact-head publication if integration evidence is missing"
+        ],
+        "expected_outputs": [
+          "a bounded Task Evaluate verdict",
+          "preserved contradictions and remaining publication work",
+          "no Candidate activation from internal durability evidence"
+        ],
+        "failure_conditions": [
+          "calling the user objective complete",
+          "generalizing the checkpoint rejection to other mechanisms or agent families",
+          "treating local tests as exact-head CI or independent production evidence",
+          "activating a Candidate from this unit"
+        ],
+        "goal": "Evaluate the exact checkpoint-integrity implementation against its valid control, isolated fail-closed cases, non-mutation property, known generation-8 discrepancy, revision-20 claim boundary, and still-missing publication evidence.",
+        "inputs": [
+          "the completed local result for unit-ed0ffc4ab0d4d5cbede05040",
+          "116 focused and protected passing tests",
+          "current generation-9 valid-control report",
+          "generation-8 exact-state rejection report",
+          "the absence of exact-head CI, merge, and remote readback for this implementation"
+        ],
+        "parent_continuation": "After Task Evaluate and required post-result Candidate evaluation, consolidate and learn this local result, then Root must select exact-head publication and remote readback as the next bounded unit.",
+        "rollback": "If evidence is inconsistent, retain the local branch and exact records, leave orphan work untouched, and return UNCERTAIN with the missing evidence named.",
+        "scope": "work-checkpoint-integrity/continuation-and-claimed-answer-verifier-v1/evaluation",
+        "success_conditions": [
+          "local verifier behavior is judged only from actual test and control evidence",
+          "missing exact-head publication cannot be reported as integrated",
+          "negative evidence remains limited to the exact generation-8 checkpoint and checked records",
+          "the next continuation closes publication and remote durability"
+        ],
+        "unit_id": "unit-81713499c87b48ba8cf78110"
+      },
+      "snapshot": {
+        "continuation_stack": [],
+        "created_at": "2026-08-24T21:08:07.556157Z",
+        "current_component": "task_evaluate",
+        "current_unit": "unit-81713499c87b48ba8cf78110",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+          "runner": "python-engine-v2"
+        },
+        "error_count": 4,
+        "last_result_ref": "artifacts/unit-ed0ffc4ab0d4d5cbede05040-result.json",
+        "phase": "unit_pending",
+        "revision": 8,
+        "run_id": "run-work-recovery-gen9-durability-repair",
+        "status": "continue",
+        "updated_at": "2026-08-24T21:59:53.548537Z"
+      }
+    },
+    "mode": "pre-application",
+    "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "target_component": "task_evaluate"
+  },
+  "payload_digest": "6a1943cb41295bc18a2d6532a0a281afdf466f67e873bd3fef8c10eec088f15a",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "e8e77becb83bc5b00504d9fedf402d9a974270e06eb27cec56956786bba22aca",
+  "run_id": "run-work-recovery-gen9-durability-repair",
+  "schema_version": 1
+}

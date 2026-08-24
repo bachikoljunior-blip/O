@@ -20,6 +20,7 @@ from .work_session import (
     submit_work_response,
     verify_work_invocations,
 )
+from .work_checkpoint_integrity import verify_work_checkpoint_integrity
 from .work_source_observation import (
     prepare_work_source_observation,
     record_work_source_observation_receipt,
@@ -79,6 +80,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     work_verify = sub.add_parser("work-verify", help="Verify all persisted Work invocations.")
     work_verify.add_argument("--run-id")
+
+    checkpoint_verify = sub.add_parser(
+        "work-checkpoint-verify",
+        help="Read-only verification of durable Work checkpoint references.",
+    )
+    checkpoint_verify.add_argument(
+        "--state",
+        type=Path,
+        default=Path("agi/WORK_EXECUTION_STATE.json"),
+    )
 
     work_submit = sub.add_parser("work-submit", help="Submit one immutable Work-model response.")
     work_submit.add_argument("invocation_id")
@@ -183,6 +194,15 @@ def main() -> None:
 
     if args.cmd == "work-verify":
         _print(verify_work_invocations(args.root, run_id=args.run_id))
+        return
+
+    if args.cmd == "work-checkpoint-verify":
+        _print(
+            verify_work_checkpoint_integrity(
+                args.root,
+                state_path=args.state,
+            )
+        )
         return
 
     if args.cmd == "work-submit":

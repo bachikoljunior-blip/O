@@ -201,7 +201,10 @@ def test_checked_in_work_state_is_a_fresh_single_writer_lease() -> None:
     if state["owner_kind"] == "work_recovery_automation":
         assert state["lease_generation"] >= 1
         assert state["remote_persistence"]["verified_remote_readback"] is True
-    assert state["active_run_id"] == "run-work-mode-handoff-v2"
+    assert state["active_run_id"] == state["primary_native_run"]["run_id"]
+    assert (
+        ROOT / ".continual" / "runs" / state["active_run_id"] / "snapshot.json"
+    ).is_file()
     assert state["primary_run_contract"]["voluntary_exit_permitted"] is False
     assert state["external_evidence_state"]["agi_claim_supported"] is False
     assert strategy["strategy_is_assumed_correct"] is False

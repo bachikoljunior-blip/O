@@ -1,0 +1,83 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-7f909e27c4a626c68f6f630c",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        "agi/WORK_EXECUTION_STATE.json",
+        ".continual/work-model/invocations/invoke-7f909e27c4a626c68f6f630c/request.json",
+        "src/continual/work_session.py",
+        "https://github.com/bachikoljunior-blip/O/pull/298"
+      ],
+      "observations": [
+        "PR 298 made the generation-9 repair run durable and exact-head verified.",
+        "The observed generation-8 defect is missing or inconsistent durable invocation evidence, not evidence about semantic execution quality."
+      ],
+      "purpose": "Select the smallest falsifiable unit that closes the observed latest-main checkpoint durability gap.",
+      "unresolved": [
+        "implementation and focused tests for the validator",
+        "Task Evaluate and publication evidence",
+        "the user's upper-level objective"
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "observations": [
+        "Generation 9 has a main-durable Entry and fresh authority-bound receipts, so a new Root request can be answered without replaying generation-8 identity-bound work.",
+        "The smallest safe repair is a read-only verifier built on existing immutable Work invocation verification rather than a recovery mechanism that guesses missing content.",
+        "Revision 20 requires every negative claim to name the exact checkpoint, records, configuration, and conditions tested."
+      ],
+      "reason": "The selected unit is a bounded durability repair whose evidence has not yet been produced; no Candidate or prompt change is justified at Root."
+    },
+    "result": {
+      "component": "execute",
+      "evidence_needed": [
+        "a fully durable fixture is accepted with structured verified references",
+        "missing request, missing response, malformed JSON, digest mismatch, binding mismatch, and state-to-record inconsistency are independently rejected",
+        "read-only validation leaves invocation and state bytes unchanged",
+        "the known generation-8 discrepancy is detected while orphan Execute invocations remain unanswered",
+        "focused protected tests and exact-head CI succeed before merge"
+      ],
+      "expected_outputs": [
+        "a small reusable checkpoint-integrity module with a structured result and machine-readable issue codes",
+        "focused tests covering one valid control and isolated fail-closed cases",
+        "an operator-facing read-only validation entry point or CLI surface only if it reuses the same validator",
+        "native O lifecycle records for Execute, Task Evaluate, Consolidate Episode, and Learn",
+        "isolated branch publication, exact-head CI, expected-head merge, and remote readback if the unit passes"
+      ],
+      "failure_conditions": [
+        "the validator infers or synthesizes a missing request or response",
+        "validation mutates native or Work records",
+        "a string mention of an invocation is treated as proof without exact request/response verification",
+        "negative evidence is generalized to other checkpoints, mechanisms, or the scientist-agent family",
+        "publication or merge is claimed without unchanged exact-head CI and remote readback"
+      ],
+      "goal": "Implement a read-only, fail-closed checkpoint-integrity validator that verifies every exact-continuation reference and every claimed answered native invocation against immutable checked-in Work request/response records without reconstructing or mutating missing semantic content.",
+      "inputs": [
+        "agi/WORK_EXECUTION_STATE.json and its exact_continuation and primary_native_run projections",
+        ".continual/work-model/invocations/<invocation_id>/request.json and response.json",
+        "src/continual/work_session.py verified_work_invocation and canonical digest/binding rules",
+        "the current generation-8 discrepancy: missing invoke-37609d6e1890c250c8ada58b request and missing claimed response for invoke-3e7b66bfc42ae092653c4668",
+        "tests/test_work_session_bridge.py and focused new checkpoint-integrity tests"
+      ],
+      "parent_continuation": "After Execute, Task Evaluate the valid control, each isolated fail-closed class, non-mutation proof, current discrepancy detection, revision-20 claim boundary, protected tests, and publication evidence. Consolidate and Learn, then return to Root for the next unmet durability or upper-objective unit.",
+      "rollback": "Leave the generation-9 repair run and the two orphan invocations unchanged, retain the read-only discrepancy evidence, and checkpoint the exact failing case if the validator cannot preserve existing verification semantics.",
+      "scope": "work-checkpoint-integrity/continuation-and-claimed-answer-verifier-v1",
+      "success_conditions": [
+        "continuation references and claimed answered invocation IDs are cross-checked against verified immutable records",
+        "all malformed, absent, or inconsistent evidence fails closed without content reconstruction or writes",
+        "the validator identifies the actual generation-8 durability defect without answering either orphan invocation",
+        "negative conclusions remain limited to the exact tested checkpoint, records, and conditions under revision 20",
+        "existing Work-session verification behavior remains green"
+      ]
+    }
+  },
+  "output_digest": "8f9fd3001873881ee401353390ab3522b2240ac272900270a6e7bc69a7f9bab3",
+  "received_at": "2026-08-24T21:51:35.882769Z",
+  "request_digest": "c33b1b50d47ddf1f7f5af8bb477b0a6854cf0b3a21e957ad6d66cd0f1b6d953f",
+  "response_digest": "e6c136874f3afc81e98999cf2d474437e1e2e01f5905a46dd2be1b14619760fb",
+  "schema_version": 1
+}
