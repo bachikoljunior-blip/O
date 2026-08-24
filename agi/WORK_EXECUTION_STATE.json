@@ -1,22 +1,22 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "checkpointed",
+  "status": "running",
   "owner_kind": "work_recovery_automation",
-  "execution_id": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62",
-  "predecessor_execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
-  "lease_generation": 6,
-  "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
-  "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-24T03:25:52.604Z",
-  "last_progress_at": "2026-08-24T03:25:52.604Z",
+  "execution_id": "work-recovery-20260824T040019Z-fed49f4a10c39430",
+  "predecessor_execution_id": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62",
+  "lease_generation": 7,
+  "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
+  "started_at": "2026-08-24T04:00:19.597Z",
+  "heartbeat_at": "2026-08-24T04:00:19.597Z",
+  "last_progress_at": "2026-08-24T04:00:19.597Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "fenced_monitor_recovery_verified",
-    "instruction": "Insurance recovery after generation-5 heartbeat and same-owner activity both exceeded stale_after_seconds; phase-1 expected-blob CAS must be read back exactly before any further mutation.",
+    "kind": "fenced_user_directed_resume_pending_readback",
+    "instruction": "The user explicitly said 再開して after generation 6 checkpointed on malformed inbox revision 16. Generation 7 must preserve the malformed blob in quarantine and must not infer missing revision-16 semantics.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation-6 phase-1 and phase-2 expected-blob CAS commits/blobs were read back exactly. This owner is the sole authorized main writer."
+    "note": "Phase-1 acquisition update; authority is not usable until commit/blob and owner/generation/fence/heartbeat exact readback."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -33,10 +33,10 @@
     "application_note": "Revision 15 ingested at safe Root invoke-344455ae7a59ec86e4fa5d20. It adds O-centered context-control direction and no ownership supersede. O selected an authoritative-source-referenced DecisionContextManifest/Event-Ledger architecture over copying all raw external data into O. Revision 14 remains effective: generation 5 is the sole primary/main integrator and validated results publish through isolated exact-head CI."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation-6 recovery execution checkpointed fail-closed after detecting malformed unacknowledged inbox revision 16 on main; no PR merge or development mutation may continue until the authoritative revision-16 text is restored.",
+    "primary": "Generation-7 recovery acquisition pending exact readback; no other primary activity observed after generation-6 checkpoint.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Execute invoke-7ae7a7ae6a1ddf359cb11335 remains pending. PR 286 exact head 9bd25a5 passed all four pytest shards and aggregate in workflow 32684747406, but merge is blocked before effect completion by malformed unacknowledged USER_INPUT_INBOX revision 16.",
-    "predecessor": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58 generation 5; heartbeat 2026-08-23T05:18:00Z superseded only after stale classification and CAS."
+    "pending_native_execute": "Execute invoke-7ae7a7ae6a1ddf359cb11335 remains pending behind inbox integrity repair and PR 286 merge revalidation.",
+    "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
     "durability_status": "PR 286 exact head 9bd25a5 passed workflow 32684747406 (four shards plus aggregate). Main inbox blob 645f6f1f5ef0b4e7842142991f3748df858082a1 declares revision 16 but is invalid JSON, truncated inside sequence 13 by commit 36e02c3749344861518982ea2376b21bef90a0af. Revision 16 cannot be safely interpreted or acknowledged.",
-    "next_action": "Repair agi/USER_INPUT_INBOX.json using expected malformed blob 645f6f1f5ef0b4e7842142991f3748df858082a1: restore the complete valid revision-15 history from commit 4d21b8c00740842eb2a9063a53632f81c639fb87 (or 36e02c^), append the complete authoritative revision-16 entry without guessing, and validate JSON. Then acquire a new fenced generation by CAS, ingest/supersede revision 16 at a safe Root boundary, and revalidate PR 286 unchanged head/CI/mergeability before merge."
+    "next_action": "After phase-1 exact readback, finalize generation-7 authority in a second state-only CAS. Then quarantine exact malformed inbox blob 645f6f1f5ef0b4e7842142991f3748df858082a1 and repair the control inbox without guessing missing revision-16 semantics."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -107,16 +107,16 @@
   "finalize_expected_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
   "readback_of_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
   "verified_remote_readback": true,
-  "acquisition_phase": "checkpointed_malformed_unacknowledged_user_input",
+  "acquisition_phase": "phase1_pending_readback",
   "recovery_observation": {
-    "observed_at": "2026-08-23T15:12:35Z",
-    "observed_main_sha": "a80047bbb0c398fe2bdf665e79944442836c4187",
-    "observed_state_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
-    "predecessor_heartbeat_at": "2026-08-23T14:56:44.370Z",
+    "observed_at": "2026-08-24T04:00:19.597Z",
+    "observed_main_sha": "d6bff51921762e67d31e8aa57c7a48bad8adc342",
+    "observed_state_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
+    "predecessor_heartbeat_at": "2026-08-24T03:25:52.604Z",
     "predecessor_stale_after_seconds": 900,
-    "latest_same_owner_activity_at": "2026-08-23T14:56:46Z",
-    "unacknowledged_inbox_revision": null,
-    "classification": "recover_stale"
+    "latest_same_owner_activity_at": "2026-08-24T03:25:52.604Z",
+    "unacknowledged_inbox_revision": 16,
+    "classification": "explicit_user_resume_from_checkpoint"
   },
   "result_publication_policy": {
     "destination": "main",
