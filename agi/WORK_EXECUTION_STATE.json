@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T10:33:07.595Z",
-  "last_progress_at": "2026-08-24T10:33:07.595Z",
+  "heartbeat_at": "2026-08-24T10:41:00.098Z",
+  "last_progress_at": "2026-08-24T10:41:00.098Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
     "pending_request_ref": ".continual/work-model/invocations/invoke-c21c168fb7f2dc2671560b1d/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "PR 291 now has replacement exact head b0ec6f9d4012515b2e038355ff296eb3bb967140, fast-forwarded without force. The three-path diff and reviewed blob identities match; workflow 32717303596 is queued.",
+    "durability_status": "PR 291 exact head b0ec6f9d4012515b2e038355ff296eb3bb967140 is unchanged. Workflow 32717303596 has all four pytest shards in progress and no observed failure; aggregate is not yet created.",
     "next_action": "Observe workflow 32717303596 until all four pytest shards and dependent aggregate succeed. Then re-read generation-7 authority, exact PR head, and fresh-main mergeability before expected-head merge.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
     "next_native_phase": "execute_source_publication"
@@ -915,9 +915,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "e1ac054f03440ad0a5f1498c1d9c8e14c6e60aac",
-    "requested_at": "2026-08-24T10:33:07.595Z",
-    "reason": "PR 291 replacement exact-head CI watch",
+    "expected_blob_sha": "8d9fc387176a56e9e8bd5e4b9efc4e869d2eb1d9",
+    "requested_at": "2026-08-24T10:41:00.098Z",
+    "reason": "PR 291 four-shard exact-head CI heartbeat",
     "verified_remote_readback": false
   },
   "inbox_append_path_publication_precommit": {
@@ -1165,14 +1165,22 @@
     "pr_head": "b0ec6f9d4012515b2e038355ff296eb3bb967140",
     "workflow_run": 32717303596,
     "workflow_id": 335420036,
-    "ci_status": "queued",
-    "last_ci_observed_at": "2026-08-24T10:33:07.595Z",
+    "ci_status": "four_shards_in_progress",
+    "last_ci_observed_at": "2026-08-24T10:41:00.098Z",
     "superseded_remote_head": "63bd16989ab64e3dae9bae7c9e478fffd90df6d2",
     "superseded_workflow_run": 32717042325,
     "head_update_reason": "Separate historical source bindings from explicit current-byte prepublication verification so later legitimate inbox revisions cannot invalidate the frozen protocol.",
     "expected_state_blob_for_head_update": "252c1e4f3798d38b6b24db324123cb2d527eb0cc",
     "head_update_prepared_at": "2026-08-24T10:31:52.770Z",
     "non_force_fast_forward_verified": true,
-    "pr_mergeable_after_update": true
+    "pr_mergeable_after_update": true,
+    "running_job_ids": [
+      97401169437,
+      97401169481,
+      97401169548,
+      97401169678
+    ],
+    "successful_job_ids": [],
+    "pending_job_ids": []
   }
 }
