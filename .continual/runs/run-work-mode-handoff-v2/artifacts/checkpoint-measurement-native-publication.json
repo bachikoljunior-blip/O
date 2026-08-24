@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "record_type": "native_measurement_publication_manifest",
+  "created_at": "2026-08-24T18:19:49.603Z",
+  "run_id": "run-work-mode-handoff-v2",
+  "execution_id": "work-recovery-20260824T153124Z-073c1e261139db2a",
+  "lease_generation": 8,
+  "fence_token_digest": "612a31099cf171c32453cb21557e8f71fb0f02c920aa979ce068bfb73f71810f",
+  "base_main_commit": "fd34b6baef1d3f3a87e41bc6e08d858028a148c0",
+  "base_main_tree": "22efb3a1ee247790bfa63726c9ff0186b95bf73c",
+  "payload_selection": {
+    "rule": "include content-different native records under the allowed prefixes relative to base_main_commit; preserve the remote events.jsonl as an exact prefix",
+    "allowed_prefixes": [
+      ".continual/candidates/",
+      ".continual/episodes/episode-work-mode-handoff-v2/",
+      ".continual/runs/run-work-mode-handoff-v2/",
+      ".continual/work-model/invocations/"
+    ],
+    "forbidden_categories": [
+      "agi control-plane state",
+      "authoritative user inbox",
+      "source code",
+      "tests",
+      "standalone prompt or scratch files",
+      "credentials"
+    ],
+    "payload_path_count": 690,
+    "payload_total_bytes": 8419838,
+    "payload_path_list_sha256": "a932bb734edcfed5c30d1c47da50d31ca007a121b9c751b3fe2598e822b92b31",
+    "payload_blob_manifest_sha256": "5539889c092c78bcdf8559a3b7590a1c20d96f6974806a401fbce5a038a24596"
+  },
+  "validation": {
+    "json_and_jsonl_parse_errors": 0,
+    "forbidden_paths": 0,
+    "credential_pattern_hits": 0,
+    "remote_event_prefix_lines": 461,
+    "publication_event_lines": 666,
+    "remote_event_prefix_exact": true,
+    "work_verify_valid": true,
+    "work_requests": 283,
+    "work_responses": 279,
+    "recognized_pending_requests": 4,
+    "behavioral_ledger_count": 13,
+    "behavioral_ledger_digest": "d15ff8fc54318a69e229f11b74241542585d5a4c0a17f347e6cd183075764165",
+    "exact_replay_passed": true
+  },
+  "frozen_measurement": {
+    "candidate": "bounded_stage_checkpoint_inheritance",
+    "tested_tasks": [
+      "research-unit-a",
+      "research-unit-b",
+      "research-unit-c"
+    ],
+    "single_lineage": {
+      "median_model_invocations_per_retained_capability": 1.0,
+      "median_wall_time_seconds_per_retained_capability": 39.195993
+    },
+    "sibling_checkpoint": {
+      "median_model_invocations_per_retained_capability": 3.0,
+      "median_wall_time_seconds_per_retained_capability": 38.368784
+    },
+    "frozen_advantage_rule": "At least one median metric improves and neither worsens; exact replay and safety must pass.",
+    "verdict": "REJECT_MECHANISM",
+    "implementation_authorized": false,
+    "activation_authorized": false
+  },
+  "claim_boundary": {
+    "negative_evidence_applies_only_to": "the exact bounded_stage_checkpoint_inheritance candidate, configuration, tasks, executor, model identity, budgets, deterministic judge, replay policy, and sandbox recorded by this native run",
+    "does_not_support_claims_about": [
+      "the scientist-agent family",
+      "the original scientist-agent method",
+      "other adaptations or adaptation loss",
+      "untested mechanisms or configurations"
+    ],
+    "duplicate_positive_control_required": false,
+    "duplicate_positive_control_condition": "provenance-equivalent controls already exist and no family-wide or original-method claim is made",
+    "user_objective_complete": false,
+    "agi_claim_supported": false
+  },
+  "publication_policy": {
+    "records_only": true,
+    "source_change": false,
+    "test_change": false,
+    "mechanism_activation": false,
+    "merge_requires_exact_head_ci_success": true,
+    "merge_requires_unchanged_head": true,
+    "merge_requires_no_conflict": true
+  }
+}

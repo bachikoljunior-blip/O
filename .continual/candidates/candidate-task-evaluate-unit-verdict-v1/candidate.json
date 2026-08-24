@@ -14,6 +14,9 @@
   "risk": "An overlay could overproduce unit PASS; regression must require explicit bounded success conditions and preserve original verdict independence.",
   "scope_states": {
     "agi/backlog-integration": "NEED_MORE_EVIDENCE",
+    "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1": "PROPOSE_ACTIVATION",
+    "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+    "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1": "PROPOSE_ACTIVATION",
     "continual/incremental-task-evaluation": "PROPOSE_ACTIVATION"
   },
   "source_refs": [
@@ -43,6 +46,36 @@
         "global_activation_authorized remains false"
       ],
       "scope": "continual/incremental-task-evaluation"
+    },
+    {
+      "at": "2026-08-24T17:32:20.212520Z",
+      "evidence": [
+        "unit_verdict PASS is supported by four exact score-1.0 replay-stable receipts",
+        "mechanism_verdict remains INSUFFICIENT_EVIDENCE because research-unit-b/c are absent",
+        "user_level_verdict and task completion remain FAIL",
+        "negative evidence remains limited to research-unit-a exact tested conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1"
+    },
+    {
+      "at": "2026-08-24T17:51:27.425678Z",
+      "evidence": [
+        "unit_verdict PASS is supported by four exact score-1.0 replay/cross-binding verified receipts",
+        "mechanism_verdict remains INSUFFICIENT_EVIDENCE because research-unit-c is absent",
+        "user_level_verdict and task completion remain FAIL",
+        "negative evidence remains limited to research-unit-b exact tested conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1"
+    },
+    {
+      "at": "2026-08-24T18:11:07.788154Z",
+      "evidence": [
+        "unit PASS is supported by twelve score-1.0 replay-verified attempts",
+        "mechanism REJECT_MECHANISM follows the frozen median rule because invocation cost worsened",
+        "user-level and task completion remain FAIL",
+        "negative evidence remains limited to the exact tested candidate/configuration/conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1"
     }
   ],
   "target_component": "task_evaluate",

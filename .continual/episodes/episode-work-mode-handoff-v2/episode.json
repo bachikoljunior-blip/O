@@ -1,133 +1,31 @@
 {
-  "candidate_decisions": [
-    {
-      "component": "task_evaluate",
-      "decision": "NOT_APPLICABLE",
-      "reason": "No verified scoped evaluator overlay existed and the active evaluator already preserved bounded PASS separately from original FAIL."
-    },
-    {
-      "component": "consolidate_episode",
-      "decision": "USE_ACTIVE",
-      "reason": "No Candidate targets consolidation."
-    }
-  ],
-  "claim_boundary": "Bounded authoritative-state recovery and publication-integrity PASS only; not behavioral, production, AGI, or user-level completion evidence.",
-  "episode_type": "authoritative_inbox_recovery_and_remote_append_hardening",
-  "failures_and_repairs": [
-    {
-      "failure": "The earlier inbox mutation left malformed/truncated JSON and stranded two intended records in the recovery file.",
-      "repair": "Reconstruct only from the complete authoritative revision-17 base plus the two explicit recovery records, validate the full revision-19 document, perform one expected-blob CAS, and require exact remote readback."
-    },
-    {
-      "failure": "A general fetch-mutate-write path could repeat the same class of corruption or silently race.",
-      "repair": "Add a dedicated append API with expected revision, strict validation, one CAS, no mutation retry, bounded exact readback, and exact-only idempotency."
-    }
-  ],
-  "negative_evidence": [
-    "The reusable helper has not yet processed a later unrelated live append.",
-    "No behavioral capability or useful-outcome change was measured by this unit.",
-    "No scientist-agent positive control or recursive retrieval comparison was executed.",
-    "The serving model identity is unverified.",
-    "AGI and the user's upper objective remain unsupported."
-  ],
-  "objective": "Safely integrate the two recovery records after authoritative revision 17 and make future remote appends use expected_revision, validation, one CAS, and exact remote readback.",
-  "objective_evidence": [
-    "inbox blob 7909d7a2d9076ce7916e3c3403fb929db1b501a6 at revision 19",
-    "recovery receipt blob a5974d662a5c2487b78f602b3ba77f98286662fb",
-    "directive ledger blob 197d78d081fa400f2689165c5599baeece45970a",
-    "implementation blob e18f0e4f0855301bc7cd03af201b7dd4a857b127",
-    "test blob e87cd909198877965aa5cad1705392ca820d83c1",
-    "CI receipt 655badaaecfc426138e55aff463376bed8c5ff801ff6c38f6d419a8a476eab80",
-    "authority receipt d81c66f5712d662ce7882969393b0d48db2dd6d0a4bba2d43ad531a70cf8ba15"
-  ],
-  "searchable_metadata": {
-    "inbox_revision": 19,
-    "pr": 289,
-    "run_id": "run-work-mode-handoff-v2",
-    "tags": [
-      "user-input-inbox",
-      "expected-revision",
-      "json-schema",
-      "contents-cas",
-      "remote-readback",
-      "exact-head-ci",
-      "dual-verdict"
-    ],
-    "unit_ids": [
-      "unit-d6cbe0a3154ed09edcc8e984",
-      "unit-776776cd9e670bdce147a49d"
-    ],
-    "workflow": 32704286413
+  "activation_state": {
+    "checkpoint_inheritance": false,
+    "global_activation_authorized": false,
+    "implementation_authorized": false
   },
-  "sequence": [
-    {
-      "observation": "Generation 7 froze authoritative inbox revision 17 and its expected blob before mutation.",
-      "step": 1
-    },
-    {
-      "observation": "One expected-blob Contents CAS produced revision 19, preserving entries 1 through 17 and assigning the two recovery entries sequences 18 and 19.",
-      "step": 2
-    },
-    {
-      "observation": "Exact remote readback verified inbox blob 7909d7a2d9076ce7916e3c3403fb929db1b501a6; recovery receipt and directive ledger were reconciled and read back.",
-      "step": 3
-    },
-    {
-      "observation": "The dedicated append implementation and 76 focused tests were reviewed on isolated PR head 2c0852dbf17e169da0ad045f9958d88123dc1ab3.",
-      "step": 4
-    },
-    {
-      "observation": "All four pytest shards and aggregate succeeded in workflow 32704286413; an expected-head merge produced 2c94909efcc37c05462063bcccd2850d60837050 and main readback matched every reviewed blob.",
-      "step": 5
-    },
-    {
-      "observation": "Task Evaluate returned bounded PASS and original-task FAIL with AGI unsupported.",
-      "step": 6
-    }
+  "consolidated_facts": [
+    "Twelve immutable task-a/b/c attempts ran under the same executor/model, one invocation each, 4096-byte cap, sandbox, no effects, and no main writes.",
+    "All twelve answers scored 1.0, passed exact-canonical judgment, and replayed byte-stably with exact precommit and Work cross-bindings.",
+    "Frozen median metrics were single_lineage 1.0 invocations and 39.195993 seconds versus sibling_checkpoint 3.0 invocations and 38.368784 seconds.",
+    "Wall time improved by 0.827209 seconds, but invocation cost worsened from 1.0 to 3.0; the frozen non-worsening rule therefore rejects this exact bounded_stage_checkpoint_inheritance configuration.",
+    "The exact mechanism remains inactive and the user-level objective remains unmet.",
+    "Revision-20 scope is preserved: no scientist-agent-family, original-method, adaptation-loss, or untested-mechanism inference."
   ],
-  "side_effect_state": {
-    "directive_ledger": {
-      "blob_sha": "197d78d081fa400f2689165c5599baeece45970a",
-      "commit_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
-      "revision": 19,
-      "state": "reconciled_and_read_back"
-    },
-    "inbox_cas": {
-      "blob_sha": "7909d7a2d9076ce7916e3c3403fb929db1b501a6",
-      "commit_sha": "c860a4dbc561ae99d0104947f783db6acc377f89",
-      "revision": 19,
-      "state": "succeeded_and_read_back"
-    },
-    "publication": {
-      "exact_head": "2c0852dbf17e169da0ad045f9958d88123dc1ab3",
-      "merge_sha": "2c94909efcc37c05462063bcccd2850d60837050",
-      "pr": 289,
-      "state": "merged_and_read_back",
-      "workflow": 32704286413
-    },
-    "recovery_receipt": {
-      "blob_sha": "a5974d662a5c2487b78f602b3ba77f98286662fb",
-      "commit_sha": "2b65083654aaf2ef166db532decd27020d08512a",
-      "state": "integrated_authoritative_revision_19"
-    }
-  },
-  "success_condition_mapping": {
-    "atomic_cas": "PASS: the remote path attempts exactly one expected-blob compare-and-swap and never retries a mutation.",
-    "expected_revision": "PASS: append preparation requires exact current revision and fails closed on mismatch.",
-    "json_and_schema_validation": "PASS: current document and proposed complete document are validated before mutation; entry, sequence, ID, time, and secret-field constraints are enforced.",
-    "publication": "PASS: exact-head CI, unchanged-head and fence checks, mergeability, disjoint-diff proof, expected-head merge, and main blob readback all succeeded.",
-    "remote_readback": "PASS: bounded polling requires exact serialized content and returned blob SHA; mismatch fails closed.",
-    "safe_idempotency": "PASS: only an exact already-present sequence/content retry is accepted as idempotent.",
-    "two_recovery_entries_after_revision_17": "PASS: authoritative revision 19 contains contiguous sequences 18 and 19 with entries 1 through 17 preserved."
-  },
-  "unknowns": [
-    "Behavior of the helper under a future independently authored append is not yet observed.",
-    "Comparative benefit of recursive Skill-in-Skill retrieval is unknown.",
-    "Fidelity of any adapted scientist-agent experiment is unknown until the original positive control is established."
+  "continuation": "Learn the exact bounded rejection and causal-scope lesson, then return to Root and select the next smallest falsifiable unmet unit without activating this mechanism.",
+  "episode_outcome": "FROZEN_THREE_TASK_MEASUREMENT_RECORDED_AND_BOUNDED_MECHANISM_REJECTED",
+  "mechanism_verdict": "REJECT_MECHANISM",
+  "rejected_inferences": [
+    "the exact mechanism rejection is not a scientist-agent-family or original-method negative",
+    "it does not establish adaptation loss or evidence about untested mechanisms",
+    "internal provider/judge observations are not independent production evidence",
+    "no duplicate scientist-agent positive-control reproduction is required for this exact O measurement"
   ],
-  "unresolved_end_goals": [
-    "Run Learn for this episode and return to Root.",
-    "Precommit and execute the smallest matched recovered-direction experiment.",
-    "Meet the user's actual upper objective with truthful evidence."
-  ]
+  "retained_evidence": [
+    "task-c receipts 845432c5, 30ba83a4, d8b79f8b, and 0b57896a",
+    "behavioral ledger digest d15ff8fc54318a69e229f11b74241542585d5a4c0a17f347e6cd183075764165",
+    "Task Evaluate PASS for the recording unit, REJECT_MECHANISM for the exact configuration, and user FAIL"
+  ],
+  "unit_verdict": "PASS",
+  "user_level_verdict": "FAIL"
 }

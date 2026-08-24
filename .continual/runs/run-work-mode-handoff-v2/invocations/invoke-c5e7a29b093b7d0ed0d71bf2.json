@@ -1,0 +1,120 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-24T18:03:43.906490Z",
+  "component": "execute",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-c5e7a29b093b7d0ed0d71bf2-execute.json",
+  "invocation_id": "invoke-c5e7a29b093b7d0ed0d71bf2",
+  "output": {
+    "fragment": {
+      "component": "execute",
+      "observations": [
+        "One canonical JSON answer was produced; no effect or main write occurred."
+      ],
+      "purpose": "Answer frozen research-unit-c sibling attempt 1.",
+      "unresolved": [
+        "two sibling attempts",
+        "deterministic judgment"
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "observation": "The public trace-selection rule uniquely retains trace-a; no hidden-rubric or repository context was used."
+    },
+    "result": {
+      "behavioral_answer": {
+        "reason_code": "highest_safe_replay_stable_score_then_id",
+        "retained_trace_id": "trace-a"
+      },
+      "continuation": {
+        "completed_candidate_id": "research-unit-c-sibling_checkpoint-1",
+        "remaining_candidate_ids": [
+          "research-unit-c-sibling_checkpoint-2",
+          "research-unit-c-sibling_checkpoint-3"
+        ]
+      },
+      "next_execution_unit": {
+        "behavioral_outcome": {
+          "outcome_id": "behavioral-outcome-826b7c53c2eb12060ace900d",
+          "request_digest": "bd7fcfc1dc47236432f6f1c86914be17de6a59f604b66976f5b679133b449a87",
+          "response_pointer": [
+            "result",
+            "behavioral_answer"
+          ],
+          "rubric_digest": "b41b5dece4a42e45d6bc8ca2ac73e4a0e6786c55a3adac5550136f5743e4f3d3",
+          "task_digest": "b33f19eb2ada8084f73d0c86ba215661860bae9033e7bc4e596b7741a72b56b7"
+        },
+        "checkpoint_measurement": {
+          "arm": "sibling_checkpoint",
+          "attempt_count": 3,
+          "attempt_index": 2,
+          "candidate_id": "research-unit-c-sibling_checkpoint-2",
+          "max_model_invocations": 1,
+          "protocol_digest": "d83a1d46bb4b82d7304af027fa4b838c865d8f608312a35922e57c28223f0352",
+          "readiness_digest": "c176f8060479e74a1522dd76f956a0a79417b52e21809ba176d1234656477b05",
+          "task_id": "research-unit-c"
+        },
+        "component": "execute",
+        "goal": "Select the retained experimental trace using only safe, replay-stable traces, then highest score, then ascending trace id for an exact tie. Return only canonical JSON in the requested fields.",
+        "main_write_allowed": false,
+        "production_effects_allowed": false,
+        "scope": "agi/bounded-stage-checkpoint-inheritance/behavioral-attempt-v1",
+        "task": {
+          "answer_format": "canonical_json",
+          "input": {
+            "checkpoint_measurement": {
+              "arm": "sibling_checkpoint",
+              "attempt_count": 3,
+              "attempt_index": 2,
+              "candidate_id": "research-unit-c-sibling_checkpoint-2",
+              "max_model_invocations": 1,
+              "protocol_digest": "d83a1d46bb4b82d7304af027fa4b838c865d8f608312a35922e57c28223f0352",
+              "readiness_digest": "c176f8060479e74a1522dd76f956a0a79417b52e21809ba176d1234656477b05",
+              "task_id": "research-unit-c"
+            },
+            "task_input": {
+              "required_fields": [
+                "retained_trace_id",
+                "reason_code"
+              ],
+              "selection_rule": "filter to capability-retained, protected-regression-passing, replay-verified traces; maximize score; break exact ties by ascending trace_id",
+              "traces": [
+                {
+                  "capability_retained": true,
+                  "protected_regressions_passed": true,
+                  "replay_verified": true,
+                  "score": 0.8,
+                  "trace_id": "trace-a"
+                },
+                {
+                  "capability_retained": true,
+                  "protected_regressions_passed": false,
+                  "replay_verified": true,
+                  "score": 0.9,
+                  "trace_id": "trace-b"
+                },
+                {
+                  "capability_retained": true,
+                  "protected_regressions_passed": true,
+                  "replay_verified": true,
+                  "score": 0.8,
+                  "trace_id": "trace-c"
+                }
+              ]
+            }
+          },
+          "instruction": "Select the retained experimental trace using only safe, replay-stable traces, then highest score, then ascending trace id for an exact tie. Return only canonical JSON in the requested fields.",
+          "response_pointer": [
+            "result",
+            "behavioral_answer"
+          ],
+          "task_id": "research-unit-c"
+        },
+        "unit_id": "unit-research-c-sibling-2"
+      },
+      "status": "answered_one_frozen_attempt"
+    }
+  },
+  "payload_digest": "7f65e94a798d9210e90defd2",
+  "prompt_path": "prompts/execute.md",
+  "status": "complete"
+}
