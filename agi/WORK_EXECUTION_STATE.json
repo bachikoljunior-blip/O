@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T07:30:33.966Z",
-  "last_progress_at": "2026-08-24T07:30:33.966Z",
+  "heartbeat_at": "2026-08-24T07:42:14.129Z",
+  "last_progress_at": "2026-08-24T07:42:14.129Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -30,7 +30,10 @@
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 17,
     "acknowledged_at": "2026-08-24T04:54:31.496Z",
-    "application_note": "Revision 16 is a withdrawn integrity quarantine bound to malformed blob 645f6f1f5ef0b4e7842142991f3748df858082a1; no missing semantics were reconstructed. Revision 17 applies the user's exact direction 再開して: generation 7 resumed under the existing CAS/fence and the insurance monitor was re-enabled. The already-frozen generation-6 native Execute request remains immutable and consumes its exact journal-bound context; revision 17 governs the next semantic boundary and does not alter the upper objective."
+    "application_note": "Revision 16 is a withdrawn integrity quarantine bound to malformed blob 645f6f1f5ef0b4e7842142991f3748df858082a1; no missing semantics were reconstructed. Revision 17 applies the user's exact direction 再開して: generation 7 resumed under the existing CAS/fence and the insurance monitor was re-enabled. The already-frozen generation-6 native Execute request remains immutable and consumes its exact journal-bound context; revision 17 governs the next semantic boundary and does not alter the upper objective.",
+    "pending_revision": 19,
+    "pending_inbox_blob_sha": "7909d7a2d9076ce7916e3c3403fb929db1b501a6",
+    "pending_application_note": "Authoritative revisions 18 and 19 were appended from USER_INPUT_INBOX_RECOVERY via expected-revision 17 and expected-blob CAS with exact remote readback. They remain unacknowledged while the already-frozen post-result Candidate Evaluate invoke-c52310e8902964a85e57491b completes; typed directive reconciliation is being published before semantic ingestion at the next safe boundary."
   },
   "parallel_execution_coordination": {
     "primary": "Generation 7 remains the sole fenced main writer; publication content is rebased on main 0fce899298d2f1ad3755760eb00db1ff6c172998 at local exact head f1277e74872d4941f4328cef68df6b26120e3bf0.",
@@ -44,8 +47,8 @@
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
     "pending_work_invocation_id": "invoke-c52310e8902964a85e57491b",
     "pending_request_ref": ".continual/work-model/invocations/invoke-c52310e8902964a85e57491b/request.json",
-    "durability_status": "PR 288 remains open and unmerged at exact head 803d314996c9b3906c1de272e2465ea338a325b7. Workflow 32698944696 completed successfully: all four pytest shards and aggregate passed. Execute invoke-8c17214637e8334e3e9b2f3c was submitted exactly once with internal-only claim boundary.",
-    "next_action": "Submit post-result Candidate Evaluate invoke-c52310e8902964a85e57491b, continue Task Evaluate, Consolidate Episode, and Learn. Merge adjudication remains a separate fresh effect boundary; do not merge before revalidating exact head, checks, lease, inbox, main, and conflict-free state."
+    "durability_status": "PR 288 exact-head CI succeeded and Execute was submitted exactly once. Authoritative inbox is now revision 19 at blob 7909d7a2d9076ce7916e3c3403fb929db1b501a6; recovery integration receipt is verified. Revisions 18 and 19 are pending safe-boundary acknowledgement; frozen Candidate Evaluate invoke-c52310e8902964a85e57491b remains pending.",
+    "next_action": "CAS-publish the validated revision-19 typed directive ledger, finish frozen Candidate Evaluate and publication lifecycle, then reconcile and acknowledge inbox revision 19 at the next safe native boundary. Continue the dedicated append-path implementation and exact-head CI; do not merge PR 288 until its separate adjudication."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -68,11 +71,11 @@
   "remote_persistence": {
     "published_on_main": true,
     "verified_remote_readback": true,
-    "expected_blob_sha": "d2aa3827e92310de26128abcdfcad7228b494c0b",
+    "expected_blob_sha": "e0a7d7bd8f068a305aae55a84473afe7b1a81850",
     "result_commit_sha": "dbd115631e15485cb603e958c18074264c728036",
     "result_blob_sha": "4b1d7b2e4e175ea3de8aeb6c8514453f9f778c9f",
     "finalization_expected_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
-    "note": "State-only CAS heartbeat after exact-once publication Execute submission; immediate connector readback is required before continuing."
+    "note": "State-only heartbeat records remote revision-19 append as pending safe-boundary ingestion without changing the highest acknowledged revision."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
