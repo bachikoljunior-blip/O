@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T04:54:31.496Z",
-  "last_progress_at": "2026-08-24T04:54:31.496Z",
+  "heartbeat_at": "2026-08-24T04:56:21.012Z",
+  "last_progress_at": "2026-08-24T04:56:21.012Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
     "durability_status": "PR 287 merged as 9ae71fc3666e94940d589e72dae03b82e99e18cc after exact-head workflow 32689174968 succeeded; merge tree and all three repaired blobs read back exactly. Inbox revision 17 is valid and acknowledged; malformed revision 16 remains withdrawn without inferred semantics.",
-    "next_action": "Revalidate PR 286 exact head 9bd25a5db51f2b95ef07880b7cce01cb9f4a7cbd, workflow 32684747406, generation-7 fence, and fresh-main mergeability. Merge only unchanged head if clean, verify the exact merge tree, then submit pending Execute invoke-7ae7a7ae6a1ddf359cb11335 exactly once and continue Task Evaluate, Candidate Evaluate, Consolidate Episode, Learn, and Root."
+    "next_action": "After exact readback of this PR 286 merge authorization CAS, revalidate exact head 9bd25a5, workflow 32684747406, generation-7 fence, revision-17 acknowledgment, and fresh-main clean mergeability. Merge with expected head only, verify the merge tree, then submit pending Execute exactly once and continue the native lifecycle."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -830,5 +830,61 @@
     "status": "resolved_by_pr_287_exact_readback",
     "merge_sha": "9ae71fc3666e94940d589e72dae03b82e99e18cc",
     "resolved_at": "2026-08-24T04:54:31.496Z"
+  },
+  "behavioral_source_renewal_integration": {
+    "effect_id": "merge-pr286-behavioral-source-renewal-v1",
+    "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen7:pr286:9bd25a5:merge:v1",
+    "pull_request": 286,
+    "exact_head_sha": "9bd25a5db51f2b95ef07880b7cce01cb9f4a7cbd",
+    "exact_head_tree_sha": "4e6ab62b50e269d29d641b646194bf8bcfe101e8",
+    "workflow_run": 32684747406,
+    "workflow_id": 335420036,
+    "required_jobs": [
+      {
+        "id": 97307661298,
+        "name": "pytest shard 3 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97307661350,
+        "name": "pytest shard 1 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97307661386,
+        "name": "pytest shard 0 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97307661405,
+        "name": "pytest shard 2 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97311598642,
+        "name": "test",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "exact_head_ci_result": "workflow 32684747406: four pytest shards and dependent aggregate succeeded",
+    "expected_state_blob": "faa637d33d5bc606fea88e3aa38b9bede5ea1be7",
+    "observed_main_head": "190bf380adb48bd8383ff759db6471a8f01bdf22",
+    "merge_base": "e123bfbaab5d52280b159f1c71028e01407efa5a",
+    "candidate_ahead_by": 1,
+    "candidate_behind_by": 17,
+    "changed_path_count": 230,
+    "control_repair_overlap_count": 0,
+    "mergeable": true,
+    "mergeable_state": "clean",
+    "combined_validation": "110 focused combined tests passed; broad combined shards 0 and 1 each passed 170 tests; combined shard 2 is additionally in progress.",
+    "authorized_at": "2026-08-24T04:56:21.012Z",
+    "status": "merge_authorized",
+    "rule": "Re-read generation-7 fence, inbox revision 17 acknowledgment, exact PR head, all required jobs, and fresh-main mergeability after this CAS; merge only exact unchanged head without force.",
+    "claim_boundary": "Internal behavioral-outcome/provenance infrastructure and native lifecycle records only; not independent capability, AGI, or user-objective completion evidence."
   }
 }
