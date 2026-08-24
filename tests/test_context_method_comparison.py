@@ -18,6 +18,7 @@ from agi.context_method_comparison import (
     validate_context_method_comparison,
     validate_routing_comparison_receipt,
     validate_scientist_comparison_receipt,
+    verify_current_context_method_sources,
 )
 
 
@@ -206,12 +207,16 @@ def test_unmatched_arm_tasks_and_budgets_fail_closed() -> None:
         validate_context_method_comparison(protocol)
 
 
-def test_source_artifact_change_is_detected_against_repository_bytes() -> None:
+def test_source_artifact_change_is_bound_without_rebinding_historical_protocol() -> None:
     protocol = _protocol()
     protocol["source_artifacts"][0]["sha256"] = "0" * 64
 
-    with pytest.raises(ValueError, match="source artifact digest changed"):
-        validate_context_method_comparison(protocol, source_root=ROOT)
+    with pytest.raises(ValueError, match="protocol_digest"):
+        validate_context_method_comparison(protocol)
+
+
+def test_current_source_verification_is_an_explicit_prepublication_check() -> None:
+    assert verify_current_context_method_sources(PROTOCOL_PATH)["status"] == "PRECOMMITTED"
 
 
 def test_claim_inflation_and_checked_in_measurements_are_rejected() -> None:

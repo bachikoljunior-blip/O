@@ -529,6 +529,17 @@ def validate_context_method_comparison(
 
 def load_context_method_comparison(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
+    return validate_context_method_comparison(value)
+
+
+def verify_current_context_method_sources(path: Path) -> dict[str, Any]:
+    """Explicitly compare frozen source digests with current bytes before publication.
+
+    Normal loading deliberately does not perform this check: a later legitimate inbox
+    revision or source evolution must not rewrite or invalidate a historical precommit.
+    """
+
+    value = json.loads(path.read_text(encoding="utf-8"))
     return validate_context_method_comparison(value, source_root=path.parents[1])
 
 
@@ -806,4 +817,3 @@ def classify_scientist_comparison(
         "agi_claim_supported": False,
         "user_goal_completed": False,
     }
-
