@@ -45,6 +45,23 @@ def test_unapplied_user_inputs_are_revision_ordered() -> None:
         unapplied_user_inputs(inbox, after_revision=inbox["revision"] + 1)
 
 
+def test_truncated_revision_is_quarantined_without_becoming_effective() -> None:
+    inbox = load_user_input_inbox(ROOT)
+
+    quarantined = inbox["entries"][15]
+    resumed = inbox["entries"][16]
+    assert quarantined["sequence"] == 16
+    assert quarantined["status"] == "withdrawn"
+    assert quarantined["source"] == "repository_integrity_repair"
+    assert "645f6f1f5ef0b4e7842142991f3748df858082a1" in " ".join(
+        quarantined["directives"]
+    )
+    assert resumed["sequence"] == 17
+    assert resumed["status"] == "active"
+    assert resumed["directives"][0] == "The user's exact words were: 再開して (2026-08-24)."
+    assert [entry["sequence"] for entry in unapplied_user_inputs(inbox, after_revision=15)] == [17]
+
+
 def test_user_input_inbox_rejects_secret_bearing_fields_and_sequence_gaps() -> None:
     inbox = load_user_input_inbox(ROOT)
 
