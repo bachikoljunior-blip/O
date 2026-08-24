@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "running",
+  "status": "checkpointed",
   "owner_kind": "work_recovery_automation",
   "execution_id": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62",
   "predecessor_execution_id": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58",
   "lease_generation": 6,
   "fence_token": "work-recovery-fence-v6-7f8d3b125a9c4e6283d174f8c05ea2b10a649c9f4efc7d3480fa0ae708cc3e11",
   "started_at": "2026-08-23T15:12:35Z",
-  "heartbeat_at": "2026-08-24T03:14:11.851Z",
-  "last_progress_at": "2026-08-24T03:05:37.768Z",
+  "heartbeat_at": "2026-08-24T03:25:52.604Z",
+  "last_progress_at": "2026-08-24T03:25:52.604Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_monitor_recovery_verified",
@@ -33,9 +33,9 @@
     "application_note": "Revision 15 ingested at safe Root invoke-344455ae7a59ec86e4fa5d20. It adds O-centered context-control direction and no ownership supersede. O selected an authoritative-source-referenced DecisionContextManifest/Event-Ledger architecture over copying all raw external data into O. Revision 14 remains effective: generation 5 is the sole primary/main integrator and validated results publish through isolated exact-head CI."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation-6 recovery owner remains the sole primary/main integrator; PR 286 exact head 9bd25a5 is in exact-head CI. Shards 0 and 3 succeeded; shards 1 and 2 remain in progress.",
+    "primary": "Generation-6 recovery execution checkpointed fail-closed after detecting malformed unacknowledged inbox revision 16 on main; no PR merge or development mutation may continue until the authoritative revision-16 text is restored.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Execute invoke-7ae7a7ae6a1ddf359cb11335 owns publication effect publish-behavioral-source-renewal-v1; PR 286 workflow 32684747406 has shards 0/3 successful, shards 1/2 in progress, and no aggregate result yet.",
+    "pending_native_execute": "Execute invoke-7ae7a7ae6a1ddf359cb11335 remains pending. PR 286 exact head 9bd25a5 passed all four pytest shards and aggregate in workflow 32684747406, but merge is blocked before effect completion by malformed unacknowledged USER_INPUT_INBOX revision 16.",
     "predecessor": "work-recovery-20260823T061400Z-ee2d66ceebe5bd58 generation 5; heartbeat 2026-08-23T05:18:00Z superseded only after stale classification and CAS."
   },
   "exact_continuation": {
@@ -44,8 +44,8 @@
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
     "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
-    "durability_status": "Publication effect was precommitted, local protected validation passed, remote tree 4e6ab62 matched the local tree, and PR 286 exact head 9bd25a5 has shards 0/3 successful with shards 1/2 still running.",
-    "next_action": "Wait for workflow 32684747406. Merge PR 286 only if all four shards and dependent aggregate succeed, head 9bd25a5 remains unchanged, generation-6 authority is freshly revalidated, and GitHub reports no conflict; then read back all 230 reviewed paths."
+    "durability_status": "PR 286 exact head 9bd25a5 passed workflow 32684747406 (four shards plus aggregate). Main inbox blob 645f6f1f5ef0b4e7842142991f3748df858082a1 declares revision 16 but is invalid JSON, truncated inside sequence 13 by commit 36e02c3749344861518982ea2376b21bef90a0af. Revision 16 cannot be safely interpreted or acknowledged.",
+    "next_action": "Repair agi/USER_INPUT_INBOX.json using expected malformed blob 645f6f1f5ef0b4e7842142991f3748df858082a1: restore the complete valid revision-15 history from commit 4d21b8c00740842eb2a9063a53632f81c639fb87 (or 36e02c^), append the complete authoritative revision-16 entry without guessing, and validate JSON. Then acquire a new fenced generation by CAS, ingest/supersede revision 16 at a safe Root boundary, and revalidate PR 286 unchanged head/CI/mergeability before merge."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -107,7 +107,7 @@
   "finalize_expected_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
   "readback_of_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
   "verified_remote_readback": true,
-  "acquisition_phase": "authorized_running",
+  "acquisition_phase": "checkpointed_malformed_unacknowledged_user_input",
   "recovery_observation": {
     "observed_at": "2026-08-23T15:12:35Z",
     "observed_main_sha": "a80047bbb0c398fe2bdf665e79944442836c4187",
@@ -689,5 +689,21 @@
       "merged_at_observed": "2026-08-24T02:00:32.899Z",
       "claim_boundary": "Deterministic manifest-bound repository merge-control only; internal CI and readback are not external behavioral capability, AGI, or user-objective completion evidence."
     }
+  },
+  "blocker": {
+    "kind": "malformed_unacknowledged_user_input",
+    "path": "agi/USER_INPUT_INBOX.json",
+    "declared_revision": 16,
+    "acknowledged_revision": 15,
+    "malformed_blob_sha": "645f6f1f5ef0b4e7842142991f3748df858082a1",
+    "introducing_commit": "36e02c3749344861518982ea2376b21bef90a0af",
+    "parse_error": "Unfinished string at EOF at line 26 column 396; content ends inside sequence 13 directive.",
+    "required_repair": "Restore complete valid history and append the full authoritative revision-16 entry; do not infer its content from the commit title.",
+    "pr286_ci": {
+      "head": "9bd25a5db51f2b95ef07880b7cce01cb9f4a7cbd",
+      "workflow_run": 32684747406,
+      "result": "four pytest shards and dependent aggregate succeeded"
+    },
+    "observed_at": "2026-08-24T03:25:52.604Z"
   }
 }
