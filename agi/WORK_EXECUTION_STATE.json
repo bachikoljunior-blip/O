@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T06:27:52.521Z",
-  "last_progress_at": "2026-08-24T06:27:52.521Z",
+  "heartbeat_at": "2026-08-24T06:46:00.775Z",
+  "last_progress_at": "2026-08-24T06:46:00.775Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,11 +21,11 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "59b429f4f286c3477b49f40399b93c2077012b02",
-  "working_branch": "work/recovery-gen7-inbox-integrity-v1",
+  "source_main_sha": "0fce899298d2f1ad3755760eb00db1ff6c172998",
+  "working_branch": "work/recovery-gen7-public-concepts-v2-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
-  "active_unit_id": "unit-6ef13458376e23990a93b50b",
+  "active_unit_id": "unit-publish-public-concepts-v2",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 17,
@@ -33,19 +33,19 @@
     "application_note": "Revision 16 is a withdrawn integrity quarantine bound to malformed blob 645f6f1f5ef0b4e7842142991f3748df858082a1; no missing semantics were reconstructed. Revision 17 applies the user's exact direction 再開して: generation 7 resumed under the existing CAS/fence and the insurance monitor was re-enabled. The already-frozen generation-6 native Execute request remains immutable and consumes its exact journal-bound context; revision 17 governs the next semantic boundary and does not alter the upper objective."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation-7 phase-2 finalization commit dbd115631e15485cb603e958c18074264c728036 and blob 4b1d7b2e4e175ea3de8aeb6c8514453f9f778c9f were read back exactly; generation 7 is the sole fenced main writer.",
+    "primary": "Generation 7 remains the sole fenced main writer; publication content is rebased on main 0fce899298d2f1ad3755760eb00db1ff6c172998 at local exact head f1277e74872d4941f4328cef68df6b26120e3bf0.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Execute invoke-7ae7a7ae6a1ddf359cb11335 remains pending behind inbox integrity repair and PR 286 merge revalidation.",
+    "pending_native_execute": "Execute invoke-8c17214637e8334e3e9b2f3c is pending exactly once for isolated publication and unchanged exact-head CI.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
-    "pending_work_invocation_id": "invoke-19cf6c8b6241f25bb330f727",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-19cf6c8b6241f25bb330f727/request.json",
-    "durability_status": "Post-result Candidate Evaluate invoke-080808945e12e3e95b618f60, Root invoke-a18946bd108855d790c9adef, and pre-application Candidate Evaluate invoke-92afdd2250e6c1ae82b25fc9 were submitted exactly once. Execute invoke-19cf6c8b6241f25bb330f727 was submitted exactly once with response digest 099d3c8402ca67a4425fb9f8bd86a8ee2586a527aaeeff36318d1e881cc4b877. The opt-in public-concepts-v2 implementation passed 13 focused tests, compileall, JSON validation, diff checks, and pinned historical FAIL hashes; it remains unpublished.",
-    "next_action": "Renew authoritative Work and CI observations, resume the native O lifecycle into post-result Candidate Evaluate and Task Evaluate, then publish the bounded repair and accumulated native records through an isolated exact-head CI branch."
+    "pending_work_invocation_id": "invoke-8c17214637e8334e3e9b2f3c",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-8c17214637e8334e3e9b2f3c/request.json",
+    "durability_status": "public-concepts-v2 and accumulated native records are committed locally at f1277e74872d4941f4328cef68df6b26120e3bf0, rebased on main 0fce899298d2f1ad3755760eb00db1ff6c172998. Related regression: 74 passed; Work audit: 166 requests, 165 responses, one pending, valid. Remote branch and PR are not yet created.",
+    "next_action": "Publish isolated branch work/recovery-gen7-public-concepts-v2-v1 without force, create one PR, observe unchanged exact-head CI, then submit Execute invoke-8c17214637e8334e3e9b2f3c exactly once and continue the native lifecycle."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -893,5 +893,11 @@
       "agi/USER_INPUT_INBOX.json": "2424a08b249c258787601ca5d004ef8f34a8073b",
       "agi/WORK_EXECUTION_STATE.json": "ad4438fbf7597f04d87ec4e718ed299ef150a219"
     }
+  },
+  "lease_renewal": {
+    "expected_blob_sha": "75bee7fe88876046aa1ac010a6df6eb40281dce9",
+    "requested_at": "2026-08-24T06:46:00.775Z",
+    "reason": "pre-publication heartbeat and exact continuation boundary",
+    "verified_remote_readback": false
   }
 }
