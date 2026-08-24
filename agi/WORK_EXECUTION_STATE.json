@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T04:11:22.408Z",
-  "last_progress_at": "2026-08-24T04:11:22.408Z",
+  "heartbeat_at": "2026-08-24T04:13:52.507Z",
+  "last_progress_at": "2026-08-24T04:13:52.507Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,7 +45,7 @@
     "pending_work_invocation_id": "invoke-7ae7a7ae6a1ddf359cb11335",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7ae7a7ae6a1ddf359cb11335/request.json",
     "durability_status": "PR 286 exact head 9bd25a5 passed workflow 32684747406 (four shards plus aggregate). Main inbox blob 645f6f1f5ef0b4e7842142991f3748df858082a1 declares revision 16 but is invalid JSON, truncated inside sequence 13 by commit 36e02c3749344861518982ea2376b21bef90a0af. Revision 16 cannot be safely interpreted or acknowledged.",
-    "next_action": "After exact readback of this publication precommit, construct the remote repair commit on the resulting latest main tree, open an isolated PR, and merge only after exact-head CI succeeds, the head is unchanged, mergeability is clean, and repaired blobs read back exactly."
+    "next_action": "Observe workflow 32689174968 for exact unchanged PR 287 head 8979b54baecfc7fca69ccd2dbf63196dcb1fa364. Merge only if all four pytest shards and dependent aggregate succeed, the head remains unchanged, generation-7 fence is exact, and fresh-main comparison remains conflict-free."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -728,7 +728,23 @@
     "semantic_rule": "Restore entries 1-15 byte-semantically from the valid parent, record revision 16 only as withdrawn integrity provenance, and apply the user's exact revision-17 words 再開して without inferring missing revision-16 semantics.",
     "local_validation": "87 focused tests passed; all repository JSON parsed; compileall and diff check passed.",
     "prepared_at": "2026-08-24T04:11:22.408Z",
-    "status": "precommitted_local_verified",
-    "rule": "No remote branch, remote commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback."
+    "status": "published_ci_in_progress",
+    "rule": "No remote branch, remote commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback.",
+    "remote_parent": "c93201b7dd1503357009963820a6b4a5fe750439",
+    "remote_commit": "8979b54baecfc7fca69ccd2dbf63196dcb1fa364",
+    "remote_tree": "82241504d8bbb2399907579738d7fa6fcc0d4aa0",
+    "remote_branch_readback_verified": true,
+    "remote_blobs": {
+      "agi/USER_DIRECTIVE_EVENTS.json": "adab104aa187a3428c6f09410e011620fed2da0f",
+      "agi/USER_INPUT_INBOX.json": "2424a08b249c258787601ca5d004ef8f34a8073b",
+      "tests/test_user_input_inbox.py": "566b4a1b5f72eba01ea2ecb5f9405b40668b7a79"
+    },
+    "pull_request": 287,
+    "workflow_run": 32689174968,
+    "workflow_id": 335420036,
+    "pr_head": "8979b54baecfc7fca69ccd2dbf63196dcb1fa364",
+    "mergeable": true,
+    "ci_status": "in_progress",
+    "last_ci_observed_at": "2026-08-24T04:13:52.507Z"
   }
 }
