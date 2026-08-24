@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T13:20:55.609Z",
-  "last_progress_at": "2026-08-24T13:20:55.609Z",
+  "heartbeat_at": "2026-08-24T13:32:17.760Z",
+  "last_progress_at": "2026-08-24T13:32:17.760Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "f0671a929caded39df93dbf99ccb3a4426112d51",
+  "source_main_sha": "3ec21d0bf41052f9615261d35ba602015757cc6f",
   "working_branch": "work/recovery-gen7-revision20-reconcile-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "revision20_reconciliation_exact_head_ci",
+  "active_component": "revision20_reconciliation_merge_authorized",
   "active_unit_id": "unit-52ff04d764576d3a077385d1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -61,7 +61,7 @@
     "pending_request_ref": ".continual/work-model/invocations/invoke-76ed667d67bf98a4b2112b2f/request.json",
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
     "durability_status": "PR 293 exact head e3fe61198fe00079e7def3d52d83124dca3e61be passed canonical workflow 32724168634 with four successful pytest shards and successful aggregate, then merged with expected-head protection as 84d71549319ee6c8d19f0ed94ba45a74b1dfc5b6. The merge tree 8c28e0a20e0377f9a139faf3a58e44b3e2a2d1c1 matched the final pre-dispatch merge-tree proof; parents are the authorization main 2441148c2f51dad4e61ea288713e541349b79983 and exact head. All 81 manifest-listed payload blobs plus manifest blob 0d20ecb7dd52f25877618abe75e9b1147bcabc1e matched on main, the diff contained exactly 82 paths, and the sorted path-list digest matched c51341b646d59990741d9c37c92fa8c99d6f629ec3c35a3442b0ecbc2349f2fb.",
-    "next_action": "Wait for all four pytest shards and the dependent aggregate on exact head ad3e5dbc45a29c14c571f329ad301d13b77d1ddb. If and only if they succeed with unchanged head and conflict-free current main, record merge authorization by state-only CAS, merge PR 294 with expected-head protection, exact-read back all ten reviewed blobs, then acknowledge revision 20 by state-only CAS. Preserve frozen Root invoke-76ed667d67bf98a4b2112b2f and answer it only with its already-visible control-plane reconciliation unit.",
+    "next_action": "Re-read this merge authorization, current main, generation-7 fence, PR 294 head, and all five exact-head jobs. If unchanged, merge expected head ad3e5dbc45a29c14c571f329ad301d13b77d1ddb, exact-read back the ten reviewed blobs, then acknowledge inbox revision 20 by state-only CAS and resume the frozen Root reconciliation boundary.",
     "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
     "next_native_phase": "root_control_plane_reconciliation_unit"
   },
@@ -1460,7 +1460,7 @@
     "changed_path_count": 10,
     "local_validation": "106 focused tests passed; changed JSON parsed; diff check passed.",
     "exact_head_workflow_run": 32729581016,
-    "ci_status": "in_progress_three_shards_success_one_shard_running",
+    "ci_status": "success_four_shards_and_dependent_aggregate",
     "jobs": {
       "pytest shard 0 of 4": {
         "id": 97438535946,
@@ -1474,19 +1474,58 @@
       },
       "pytest shard 2 of 4": {
         "id": 97438536001,
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       "pytest shard 3 of 4": {
         "id": 97438535645,
         "status": "completed",
         "conclusion": "success"
+      },
+      "test": {
+        "id": 97449330064,
+        "status": "completed",
+        "conclusion": "success"
       }
     },
     "prepared_at": "2026-08-24T13:08:49.958Z",
-    "status": "exact_head_ci_in_progress",
+    "status": "merge_authorized_pending_final_readback",
     "claim_boundary": "Negative evidence is scoped only to the tested candidate, configuration, and conditions. This publication makes no scientist-agent-family or untested-mechanism negative claim, does not demand duplicate positive-control reproduction where an equivalent original control is already adequately established, and makes no AGI or user-level completion claim.",
     "rule": "Merge only after exact-head CI has four successful shards plus successful dependent aggregate, PR head is unchanged, current main is re-read, generation-7 fence matches, and mergeability is conflict-free. Use GitHub expected-head protection and exact remote readback.",
-    "last_ci_observed_at": "2026-08-24T13:20:55.609Z"
+    "last_ci_observed_at": "2026-08-24T13:32:17.760Z",
+    "merge_authorization": {
+      "effect_id": "merge-pr294-revision20-negative-evidence-scope-v1",
+      "idempotency_key": "bachikoljunior-blip/O:pr294:ad3e5dbc45a29c14c571f329ad301d13b77d1ddb:merge:v1",
+      "expected_state_blob": "2e8d6f9d52725a80f7ea62a605b84535b554581c",
+      "prepared_at": "2026-08-24T13:32:17.760Z",
+      "status": "authorized_pending_final_readback",
+      "expected_head_sha": "ad3e5dbc45a29c14c571f329ad301d13b77d1ddb",
+      "expected_head_tree": "b1a4bd8cb2a078c7716923f5f8ab3c04b422fe0d",
+      "exact_head_workflow_run": 32729581016,
+      "observed_main_sha": "3ec21d0bf41052f9615261d35ba602015757cc6f",
+      "merge_base_sha": "1c992ae0b43a303c135322ccf0b598473c9a05d2",
+      "main_ahead_by": 4,
+      "candidate_ahead_by": 1,
+      "candidate_behind_by": 4,
+      "main_changed_paths": [
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "candidate_changed_paths": [
+        "agi/CONTINUATION.json",
+        "agi/USER_DIRECTIVE_EVENTS.json",
+        "agi/WORK_MODE.md",
+        "agi/WORK_STRATEGY.json",
+        "src/agi/context_method_comparison.py",
+        "src/continual/context_kernel.py",
+        "tests/test_context_kernel.py",
+        "tests/test_context_method_comparison.py",
+        "tests/test_effective_directives.py",
+        "tests/test_user_input_inbox.py"
+      ],
+      "changed_path_intersection": [],
+      "github_pr_wrapper_mergeable": false,
+      "conflict_proof": "From common base 1c992ae0b43a303c135322ccf0b598473c9a05d2 to current main, all four commits change only agi/WORK_EXECUTION_STATE.json. The exact candidate changes ten different paths. Therefore the three-way content merge is path-disjoint; GitHub expected-head merge remains the atomic final conflict check.",
+      "rule": "After exact readback of this authorization, re-read main, generation-7 fence, exact PR head, and all five successful jobs. Merge only expected head ad3e5dbc45a29c14c571f329ad301d13b77d1ddb; GitHub must atomically reject any moved head or true conflict."
+    }
   }
 }
