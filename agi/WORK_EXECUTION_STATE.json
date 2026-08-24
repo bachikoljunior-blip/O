@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T08:33:54.582Z",
-  "last_progress_at": "2026-08-24T08:33:54.582Z",
+  "heartbeat_at": "2026-08-24T08:39:22.584Z",
+  "last_progress_at": "2026-08-24T08:39:22.584Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -44,8 +44,10 @@
     "snapshot_head_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
     "pending_work_invocation_id": "invoke-7a258555c3d521841a26d787",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7a258555c3d521841a26d787/request.json",
-    "durability_status": "Recovered inbox entries are authoritative and acknowledged at revision 19. Dedicated append-path PR 289 passed exact-head workflow 32704286413 (four pytest shards plus dependent aggregate) and merged to main at 2c94909efcc37c05462063bcccd2850d60837050 with exact reviewed-byte readback.",
-    "next_action": "Record a fresh main-state observation for the frozen Execute invoke-7a258555c3d521841a26d787, submit its factual PASS result, then continue Candidate Evaluate, Task Evaluate, Consolidate Episode, Learn, and the next Root without treating this control-plane unit as user-level completion. PR 288 remains separate."
+    "durability_status": "Inbox append unit Execute invoke-7a258555c3d521841a26d787 completed with response digest 3fc75e8fcb93f3b4a7cb0a06dc1ea88d35959f14caee13895d3d31e34aacc91f after PR 289 CI, merge, and exact main readback; native run revision 121 is root_pending.",
+    "next_action": "Freeze the next Root against the fresh generation-7 state and exact-head CI receipt. Root must select Task Evaluate/Consolidate/Learn for this bounded unit before the separate recursive-retrieval and positive-control work.",
+    "completed_work_invocation_id": "invoke-7a258555c3d521841a26d787",
+    "next_native_phase": "root_pending"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -480,28 +482,28 @@
   "ci_source_observation_policy": {
     "required": true,
     "repository_full_name": "bachikoljunior-blip/O",
-    "exact_head_sha": "a275ba57e2e1e1166c2ed14913b1e9cf091f5cae",
-    "workflow_run_id": 32679411712,
+    "exact_head_sha": "2c0852dbf17e169da0ad045f9958d88123dc1ab3",
+    "workflow_run_id": 32704286413,
     "workflow_id": 335420036,
     "required_jobs": [
       {
-        "id": 97293313998,
+        "id": 97362006748,
         "name": "pytest shard 0 of 4"
       },
       {
-        "id": 97293314158,
+        "id": 97362006890,
         "name": "pytest shard 1 of 4"
       },
       {
-        "id": 97293314132,
+        "id": 97362006945,
         "name": "pytest shard 2 of 4"
       },
       {
-        "id": 97293314108,
+        "id": 97362006910,
         "name": "pytest shard 3 of 4"
       },
       {
-        "id": 97298367940,
+        "id": 97369011320,
         "name": "test"
       }
     ],
@@ -978,6 +980,9 @@
       "agi/USER_INPUT_INBOX.json": "7909d7a2d9076ce7916e3c3403fb929db1b501a6",
       "agi/USER_INPUT_INBOX_RECOVERY.json": "a5974d662a5c2487b78f602b3ba77f98286662fb",
       "agi/USER_DIRECTIVE_EVENTS.json": "197d78d081fa400f2689165c5599baeece45970a"
-    }
+    },
+    "native_execute_response_digest": "3fc75e8fcb93f3b4a7cb0a06dc1ea88d35959f14caee13895d3d31e34aacc91f",
+    "native_execute_completed_at": "2026-08-24T08:37:55.171745Z",
+    "state_observation_receipt": "90d569b981e6851fd41063cd6940ca0f6bac88aa0000fa8310981422528c9fe8"
   }
 }
