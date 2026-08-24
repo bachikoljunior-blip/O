@@ -8,8 +8,8 @@
     "lease_generation": 8,
     "fence_token": "work-recovery-fence-v8-073c1e261139db2af15fcdf59df785fd9608de068b2d6b5cc9a05048751b136a",
     "started_at": "2026-08-24T15:31:24.040Z",
-    "heartbeat_at": "2026-08-24T15:35:20.040Z",
-    "last_progress_at": "2026-08-24T15:35:20.040Z",
+    "heartbeat_at": "2026-08-24T15:43:57.821Z",
+    "last_progress_at": "2026-08-24T15:43:57.821Z",
     "stale_after_seconds": 900,
     "authorization": {
         "kind": "fenced_stale_owner_recovery",
@@ -21,10 +21,10 @@
     "continuation_source": "repository_latest_main_only",
     "strategy_path": "agi/WORK_STRATEGY.json",
     "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-    "source_main_sha": "d3847832d2b0a81c680bb64399a3113d66c238ec",
+    "source_main_sha": "08cefe0cab7a0858dc2359084fc2a9bcdb163a47",
     "working_branch": "work/recovery-gen7-revision20-native-v1",
     "active_run_id": "run-work-mode-handoff-v2",
-    "active_component": "revision20_equivalence_audit_publication_exact_head_ci_receipt_premerge",
+    "active_component": "revision20_equivalence_audit_publication_root_pending_postmerge",
     "active_unit_id": "unit-0212b6b9232f1f6a5fcd49a1",
     "user_input_inbox": {
         "path": "agi/USER_INPUT_INBOX.json",
@@ -47,22 +47,22 @@
         }
     },
     "parallel_execution_coordination": {
-        "primary": "Generation 7 is the sole fenced main writer. Revision-20 reconciliation is isolated at daf77e4a45326abb17f9e36d213a43dd189a1ae4; no foreign branch or writer is modified.",
-        "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-        "pending_native_execute": "Revision-20 Root invoke-85330be26dddf176cff6f256 and Candidate preflight invoke-2ccaba18f142705e42a9e0b7 are complete. Emit and answer only the new generation-7 Execute for unit-047b85a7eaf9308e1f4b5771; leave stale generation-6 invocation invoke-7ae7a7ae6a1ddf359cb11335 unanswered.",
+        "primary": "Generation 8 is the sole fenced main writer. PR 295 is merged and exact remote readback is complete; no foreign branch or writer is modified.",
+        "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched. The stale generation-6 invocation remains unanswered.",
+        "pending_native_execute": "Execute invoke-2a3f5ecce3340e7c93cfb67f and post-result Candidate invoke-f5954399b0cb349353973e1f are complete locally. Resume only after a fresh generation-8 Work-source receipt; next phase is Root.",
         "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
     },
     "exact_continuation": {
         "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
         "snapshot_branch": "main",
-        "snapshot_head_sha": "e65aba9b785ab76aaa17ad835151a2960eeec0dd",
-        "pending_work_invocation_id": "invoke-2a3f5ecce3340e7c93cfb67f",
-        "pending_request_ref": ".continual/work-model/invocations/invoke-2a3f5ecce3340e7c93cfb67f/request.json",
-        "pending_native_invocation_id": "invoke-a6c6117e48294ff243d02930",
-        "durability_status": "PR 295 exact head 7ad6ee206a65a3c83f193d866a01765baf4e6ab9 passed workflow 32738203858 with successful pytest shards 0, 1, 2, 3 and successful dependent aggregate job 97477038383. Generation 8 authority is active and inbox remains revision 20.",
-        "next_action": "Record fresh generation-8 Work and exact-head CI receipts for this state, verify head unchanged and PR conflict-free against latest main, merge PR 295 with expected-head protection, then exact-readback all 80 reviewed blobs before answering Execute invoke-2a3f5ecce3340e7c93cfb67f.",
-        "completed_work_invocation_id": "invoke-55d70135f61a5669037c513a",
-        "next_native_phase": "complete_revision20_equivalence_audit_publication_execute"
+        "snapshot_head_sha": "08cefe0cab7a0858dc2359084fc2a9bcdb163a47",
+        "pending_work_invocation_id": "pending_emit_root_after_invoke-f5954399b0cb349353973e1f",
+        "pending_request_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
+        "pending_native_invocation_id": "pending_emit_root_after_generation8_source_receipt",
+        "durability_status": "PR 295 exact head 7ad6ee206a65a3c83f193d866a01765baf4e6ab9 passed workflow 32738203858, merged with expected-head protection as 08cefe0cab7a0858dc2359084fc2a9bcdb163a47, and all 80 reviewed blobs matched exact remote main readback. Execute publication result and post-result Candidate evaluation completed locally; Candidate remains inactive.",
+        "next_action": "Record a fresh authoritative Work-state observation for this exact generation-8 CAS, resume Root, refresh current inbox and main, and select the next smallest decision-changing falsifiable unit. Do not answer the stale generation-6 Execute.",
+        "completed_work_invocation_id": "invoke-f5954399b0cb349353973e1f",
+        "next_native_phase": "root_after_revision20_equivalence_audit_publication"
     },
     "model": {
         "required": "highest_performance_model_available_to_work",
@@ -121,8 +121,8 @@
             "invoke-38e438e6259f40cddc6cccb2 (root context-comparison native publication)",
             "invoke-f0ffb9ff98cd84ff9cd5bc28 (candidate_evaluate native publication preflight)"
         ],
-        "pending_invocation": "pending generation-7 Execute emission for unit-0212b6b9232f1f6a5fcd49a1",
-        "note": "The context-comparison contract unit completed with bounded internal PASS and original user-level FAIL preserved. Root selected a native-record-only publication; Candidate preflight completed, and Execute freeze failed closed solely because the prior authoritative Work-state receipt exceeded its 300-second age bound."
+        "pending_invocation": "pending Root emission after fresh generation-8 Work-source receipt",
+        "note": "Revision-20 equivalence-audit publication is merged and read back. Execute and post-result Candidate are complete; Candidate remains REMAIN_CANDIDATE. The next Root call is fail-closed until this exact state CAS is observed through a fresh source receipt."
     },
     "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
     "result_commit_sha": "0bb180458f14c489be3ce50b57d38368ceeaf3cd",
