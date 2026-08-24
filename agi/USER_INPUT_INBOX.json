@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 17,
+  "revision": 19,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -288,7 +288,33 @@
       ],
       "supersedes": [],
       "source": "user_chat"
+    },
+    {
+      "sequence": 18,
+      "id": "user-proposal-recursive-skill-context-retrieval-20260824-v16",
+      "received_at": "2026-08-24T03:09:14Z",
+      "kind": "architecture_proposal",
+      "status": "active",
+      "summary": "Compare a recursive Skill-in-Skill context-retrieval architecture within the O-centered Context Kernel.",
+      "directives": [
+        "Revision 15のO-centered Context Kernelの候補構造として、Skill-in-Skill型の再帰的context retrievalを比較検討してほしい。各Skillでモデル自身が現在materializeされているcontextを使って推論し、必要な子Skillを一つまたは複数選んで開き、追加contextを得て再推論する流れを再帰的に行う。全contextはO Engine内から到達可能にするが一度に全てはmaterializeしない。必要なSkillには局所的な判断基準・checklist・prior等を持たせ、それらも子Skill選択や局所判断に使えるようにするが、固定ルールとして絶対視せず改善・反証可能にする。Kernel=root Skillや各Skill自身が子選択を持つ構造は候補として扱い、より良い等価構造があれば比較してよい。routing/context selection自体も、必要contextの取り逃し、不要context負荷、最終判断/結果、所要時間・コストで評価する。即採用ではなく、現Context Kernel案との比較・検証対象として扱ってほしい。"
+      ],
+      "supersedes": [],
+      "source": "user_chat"
+    },
+    {
+      "sequence": 19,
+      "id": "external-context-positive-control-before-adaptation-20260824-v17",
+      "received_at": "2026-08-24T04:15:00Z",
+      "kind": "external_context_observation",
+      "status": "active",
+      "summary": "Do not infer the value of an externally successful scientist-agent method from a modified O-specific variant unless the demonstrated original behavior has first been established as a positive control.",
+      "directives": [
+        "External context: if the part or configuration that actually produced reported results in a scientist-agent system has not been tested as an unmodified or fidelity-preserving positive control, failure after adapting or decomposing it for O does not establish that the original method lacks value. Preserve the distinction between failure to reproduce the demonstrated baseline, loss of effect caused by adaptation/ablation, and genuine evidence against the original method."
+      ],
+      "supersedes": [],
+      "source": "user_chat"
     }
   ],
-  "updated_at": "2026-08-24T04:04:14.037Z"
+  "updated_at": "2026-08-24T07:33:22.932Z"
 }
