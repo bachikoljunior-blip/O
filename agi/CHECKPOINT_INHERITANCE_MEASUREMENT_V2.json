@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "plan_id": "bounded-stage-checkpoint-measurement-v2",
+  "status": "READY_NO_OBSERVATIONS",
+  "mechanism": "bounded_stage_checkpoint_inheritance",
+  "base_experiment": {
+    "path": "agi/CHECKPOINT_INHERITANCE_EXPERIMENT.json",
+    "protocol_digest": "d83a1d46bb4b82d7304af027fa4b838c865d8f608312a35922e57c28223f0352"
+  },
+  "frozen_before_preparation": true,
+  "executor_model_policy": {
+    "same_executor_binding_across_all_cells": true,
+    "same_model_identity_across_all_cells": true,
+    "model_identity_may_remain_platform_unverified": true
+  },
+  "budget": {
+    "max_model_invocations_per_attempt": 1,
+    "max_response_bytes": 4096
+  },
+  "tasks": [
+    {
+      "task_id": "research-unit-a",
+      "public_task": {
+        "task_id": "research-unit-a",
+        "instruction": "Select the one falsifiable hypothesis and its exact bounded experiment from the supplied candidates. Return only canonical JSON in the requested fields.",
+        "input": {
+          "candidates": [
+            {
+              "hypothesis_id": "latency-cache",
+              "falsifiable": true,
+              "experiment": "measure cached vs uncached median latency",
+              "production_effects": false
+            },
+            {
+              "hypothesis_id": "general-intelligence",
+              "falsifiable": false,
+              "experiment": "observe whether the system becomes generally better",
+              "production_effects": false
+            }
+          ],
+          "required_fields": [
+            "selected_hypothesis_id",
+            "experiment"
+          ],
+          "selection_rule": "choose the unique falsifiable candidate with a bounded measurable experiment"
+        },
+        "answer_format": "canonical_json",
+        "response_pointer": [
+          "result",
+          "behavioral_answer"
+        ]
+      },
+      "rubric_binding": {
+        "judge_kind": "exact_canonical_json",
+        "judge_version": "exact-canonical-json-v1",
+        "rubric_digest": "1e474ce9848b7ab2ab92847cf1e48a83230e09b4e34cbd740ea7e3022772986e",
+        "success_threshold": 1.0,
+        "supplied_at_preparation": "judgment_only_out_of_child_payload"
+      }
+    },
+    {
+      "task_id": "research-unit-b",
+      "public_task": {
+        "task_id": "research-unit-b",
+        "instruction": "Repair the failed research plan by selecting the one option that removes the observed protected-regression cause without widening production effects. Return only canonical JSON in the requested fields.",
+        "input": {
+          "failed_plan": {
+            "plan_id": "broad-rewrite",
+            "negative_observation": "protected regression failed after unrelated surface expansion"
+          },
+          "repair_options": [
+            {
+              "repair_id": "retry-broad",
+              "removes_regression_surface": false,
+              "production_effects": false
+            },
+            {
+              "repair_id": "safe-minimal",
+              "removes_regression_surface": true,
+              "production_effects": false
+            }
+          ],
+          "required_fields": [
+            "selected_repair_id",
+            "reason_code"
+          ],
+          "selection_rule": "choose the unique repair that removes the observed regression surface and adds no production effect"
+        },
+        "answer_format": "canonical_json",
+        "response_pointer": [
+          "result",
+          "behavioral_answer"
+        ]
+      },
+      "rubric_binding": {
+        "judge_kind": "exact_canonical_json",
+        "judge_version": "exact-canonical-json-v1",
+        "rubric_digest": "cc8a49c4af6a0e3e72fd356d11039be4473039974fb4c6288d0757e4f232d754",
+        "success_threshold": 1.0,
+        "supplied_at_preparation": "judgment_only_out_of_child_payload"
+      }
+    },
+    {
+      "task_id": "research-unit-c",
+      "public_task": {
+        "task_id": "research-unit-c",
+        "instruction": "Select the retained experimental trace using only safe, replay-stable traces, then highest score, then ascending trace id for an exact tie. Return only canonical JSON in the requested fields.",
+        "input": {
+          "traces": [
+            {
+              "trace_id": "trace-a",
+              "score": 0.8,
+              "capability_retained": true,
+              "protected_regressions_passed": true,
+              "replay_verified": true
+            },
+            {
+              "trace_id": "trace-b",
+              "score": 0.9,
+              "capability_retained": true,
+              "protected_regressions_passed": false,
+              "replay_verified": true
+            },
+            {
+              "trace_id": "trace-c",
+              "score": 0.8,
+              "capability_retained": true,
+              "protected_regressions_passed": true,
+              "replay_verified": true
+            }
+          ],
+          "required_fields": [
+            "retained_trace_id",
+            "reason_code"
+          ],
+          "selection_rule": "filter to capability-retained, protected-regression-passing, replay-verified traces; maximize score; break exact ties by ascending trace_id"
+        },
+        "answer_format": "canonical_json",
+        "response_pointer": [
+          "result",
+          "behavioral_answer"
+        ]
+      },
+      "rubric_binding": {
+        "judge_kind": "exact_canonical_json",
+        "judge_version": "exact-canonical-json-v1",
+        "rubric_digest": "b41b5dece4a42e45d6bc8ca2ac73e4a0e6786c55a3adac5550136f5743e4f3d3",
+        "success_threshold": 1.0,
+        "supplied_at_preparation": "judgment_only_out_of_child_payload"
+      }
+    }
+  ],
+  "arms": {
+    "single_lineage": {
+      "attempt_count": 1,
+      "checkpoint_inheritance": false,
+      "main_write_allowed": false
+    },
+    "sibling_checkpoint": {
+      "attempt_count": 3,
+      "checkpoint_inheritance": true,
+      "main_write_allowed": false
+    }
+  },
+  "scorer_binding": {
+    "implementation_ref": "src/continual/behavioral_outcome.py",
+    "prepare_function": "prepare_behavioral_outcome",
+    "record_function": "record_behavioral_outcome_from_work_invocation",
+    "judge_kind": "exact_canonical_json",
+    "judge_version": "exact-canonical-json-v1",
+    "expected_values_in_child_payload": false
+  },
+  "safety": {
+    "sandbox_required": true,
+    "main_writers_per_arm": 0,
+    "non_idempotent_external_effects_allowed": false,
+    "protected_regressions_must_pass": true,
+    "exact_replay_required": true,
+    "synthetic_preparation_is_observation": false
+  },
+  "observations": [],
+  "implementation_authorized": false,
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "readiness_is_behavioral_evidence": false,
+    "scientist_agent_family_inference_supported": false,
+    "untested_mechanism_inference_supported": false,
+    "adaptation_loss_inference_supported": false
+  },
+  "negative_evidence_scope": {
+    "tested_candidate": "bounded_stage_checkpoint_inheritance",
+    "tested_configuration": "measurement-readiness-v1 over the frozen width-1 versus width-3 O harness",
+    "tested_conditions": "static preparation and validation only; no behavioral attempt executed",
+    "evidence_against_original_method": false,
+    "evidence_against_scientist_agent_family": false,
+    "evidence_against_untested_mechanisms": false,
+    "adaptation_or_ablation_loss_established": false
+  }
+}
