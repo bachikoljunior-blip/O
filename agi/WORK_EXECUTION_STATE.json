@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T09:04:15.075Z",
-  "last_progress_at": "2026-08-24T09:04:15.075Z",
+  "heartbeat_at": "2026-08-24T09:09:34.362Z",
+  "last_progress_at": "2026-08-24T09:09:34.362Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,8 +45,8 @@
     "pending_work_invocation_id": "invoke-cac77fa8abcd6a8f7cf7683c",
     "pending_request_ref": ".continual/work-model/invocations/invoke-cac77fa8abcd6a8f7cf7683c/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "Closed native-record allowlist validated and reconstructed on exact latest-main parent 6d4e518cc393657a67732637ff4ba0d32ab6e74e. No remote branch, commit, PR, workflow, or ref mutation has occurred for this effect.",
-    "next_action": "After this state-only CAS and exact readback, push exactly commit 3b7116b292839233934dee8b5f03fcff54c6834a non-force, read back its tree and 84-path diff, then open one PR and await exact-head CI.",
+    "durability_status": "Remote branch work/recovery-gen7-inbox-append-native-v1 now points to commit 27e1358c78e63264460575c68233e35f700cf923 with exact tree 24547c31dc1a8408e8bf895422dc91526da0e89c. GitHub compare returned exactly 84 allowlisted native paths and every remote blob read back exactly.",
+    "next_action": "Open one PR from the verified branch, bind its exact head, and await all four pytest shards plus dependent aggregate without rerunning or changing the head.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
     "next_native_phase": "execute_awaiting_work_model"
   },
@@ -1030,8 +1030,15 @@
     ],
     "local_validation": "84 paths; every JSON/JSONL parsed; diff check and secret-marker scan passed; native work-verify valid with 161 requests, 159 responses, and 2 recognized pending requests (the current publication request plus one pre-existing main request outside this allowlist).",
     "prepared_at": "2026-08-24T09:04:15.075Z",
-    "status": "precommitted_no_remote_branch",
+    "status": "remote_branch_published_verified",
     "rule": "No remote branch, commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base and merge only unchanged exact head after all required CI succeeds and fresh main comparison is conflict-free.",
-    "claim_boundary": "Durable native bookkeeping only; not behavioral capability, positive-control evidence, AGI, or user-level completion."
+    "claim_boundary": "Durable native bookkeeping only; not behavioral capability, positive-control evidence, AGI, or user-level completion.",
+    "remote_parent": "6d4e518cc393657a67732637ff4ba0d32ab6e74e",
+    "remote_commit": "27e1358c78e63264460575c68233e35f700cf923",
+    "remote_tree": "24547c31dc1a8408e8bf895422dc91526da0e89c",
+    "remote_branch_readback_verified": true,
+    "remote_changed_path_count": 84,
+    "exact_blob_readback_count": 84,
+    "git_transport_fallback": "Direct git push lacked an interactive credential. The precommitted exact blobs, tree, commit, and branch were created through the authorized GitHub Git Data API; remote tree matched the locally reviewed tree exactly."
   }
 }
