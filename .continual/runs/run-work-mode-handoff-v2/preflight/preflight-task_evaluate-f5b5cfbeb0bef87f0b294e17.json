@@ -1,0 +1,52 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "evidence_refs": [
+      ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json",
+      ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/receipt.json",
+      ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-b1f69055447b65669c2d3049-result.json"
+    ],
+    "observations": [
+      "The only indexed Candidate targets this exact Task Evaluate component and requires bounded-unit and original-goal verdict separation.",
+      "The candidate remains unactivated, so it may be trialed only for this scope and cannot promote itself."
+    ],
+    "purpose": "Trial verdict separation on the exact behavioral outcome evaluation without granting activation.",
+    "unresolved": [
+      "actual bounded-unit verdict",
+      "whether the trial preserves visible-rubric, unverified-model, and internal-only negative evidence"
+    ]
+  },
+  "local_learn": {
+    "candidates": [
+      "candidate-task-evaluate-unit-verdict-v1"
+    ],
+    "decision": "TRIAL_CANDIDATE",
+    "observation": "This unit directly tests whether one correct internal task can remain a bounded PASS while the user's upper objective remains FAIL."
+  },
+  "result": {
+    "baseline_need": "Compare the overlay result against the frozen evidence and reject it if it conflates receipt correctness with held-out, independent, broad, AGI, or completion evidence.",
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "conflicts": [],
+    "decision": "TRIAL_CANDIDATE",
+    "dependencies": [],
+    "evaluated_candidates": [
+      "candidate-task-evaluate-unit-verdict-v1"
+    ],
+    "evidence_to_collect": [
+      "bounded unit verdict and reason",
+      "separate user-level verdict",
+      "preservation of every negative-evidence item",
+      "no activation or completion side effect"
+    ],
+    "reason": "The Candidate's exact scope is incremental task evaluation, and this unit is a clean falsification case: the mechanical receipt can pass while the upper objective must remain failed.",
+    "regression_checks": [
+      "visible rubric remains explicit",
+      "unverified model identity remains explicit",
+      "internal observation count one is not interpreted as breadth",
+      "independent evidence unchanged and AGI claim false",
+      "candidate state is not promoted by this call"
+    ],
+    "rollback": "Discard the overlay result and use the baseline Task Evaluate prompt if verdicts are conflated or any negative evidence is omitted.",
+    "scope": "behavioral-outcome/evaluate-precommitted-work-task-receipt-v1"
+  }
+}

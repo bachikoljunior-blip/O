@@ -1,0 +1,29 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "the observed immutable conflict when prepare_work_source_observation is called again for an unchanged commit, blob, authority, and policy after requested_at advances",
+    "the already validated CI source observation renewal design, which includes the fresh request clock in the immutable observation identifier",
+    "tests proving two preparations against the same exact source and authority create distinct immutable request identities without overwriting the first",
+    "tests proving each request can receive only its own cross-bound receipt and that verification selects the latest fresh valid receipt",
+    "existing tamper, wrong-version, future-skew, stale, authority-change, and fail-closed regressions",
+    "focused Work-source, CI-source, Context Kernel, Work bridge, and behavioral-outcome validation"
+  ],
+  "expected_outputs": [
+    "a minimal safe-renewal change in src/continual/work_source_observation.py that preserves every immutable request and adds no remote mutation",
+    "a regression test demonstrating distinct observation ids and unchanged first-request bytes for repeated same-source preparation",
+    "evidence that the renewed receipt satisfies the same exact commit, blob, authority projection, executor binding, and freshness checks",
+    "negative evidence and rollback guidance if renewal weakens source-version or fence binding",
+    "a bounded Execute result ready for Task Evaluate before the combined behavioral implementation and native records are published"
+  ],
+  "goal": "Repair unchanged-source Work observation renewal so a fresh, separately immutable connector read can be precommitted for the same exact remote commit/blob and fenced authority after the prior receipt ages, without requiring an unrelated heartbeat mutation or overwriting any prior request.",
+  "inputs": [
+    "src/continual/work_source_observation.py",
+    "tests/test_work_source_observation.py",
+    "src/continual/ci_source_observation.py and tests/test_ci_source_observation.py as the validated analogous renewal contract",
+    "the generation-6 failure recorded in the current episode: immutable source observation conflict for unchanged source with a later requested_at",
+    "current Work source receipt work-state-3375be62e09c57c24c14393d bound to main commit 583f08418b350102623b6add46199aa03ef409db and blob 9fe6f30a73afc202791df888c0b9884aed9f938c"
+  ],
+  "parent_continuation": "After Execute, Task Evaluate the exact renewal semantics and protected regressions, then Consolidate Episode and Learn. If the bounded repair passes, publish it together with the already validated behavioral-outcome primitive and native evidence through a new isolated exact-head PR before selecting the physically blinded multi-case behavioral unit.",
+  "scope": "context-kernel/work-source-observation-safe-renewal-v1",
+  "unit_id": "unit-1f9f811d15fe79a8cc26e75d"
+}

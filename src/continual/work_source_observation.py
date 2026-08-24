@@ -177,6 +177,7 @@ def prepare_work_source_observation(
     blob = _sha(state_blob_sha, "state_blob_sha")
     commit = _sha(expected_commit_sha, "expected_commit_sha")
     authority = _authority(state, store)
+    requested_at = store.utc_now()
     seed = {
         "run_id": run_id,
         "repository_full_name": policy["repository_full_name"],
@@ -185,6 +186,10 @@ def prepare_work_source_observation(
         "expected_blob_sha": blob,
         "authority": authority,
         "executor_binding": policy["executor_binding"],
+        # The same exact remote state may need a later connector read after an
+        # earlier receipt ages out.  Give every precommit its own immutable
+        # identity rather than aliasing and conflicting with the old request.
+        "requested_at": requested_at,
     }
     observation_id = "work-state-" + store.stable_digest(seed, length=24)
     body = {
@@ -215,7 +220,7 @@ def prepare_work_source_observation(
         },
         "evidence_class": "operator_connector_readback",
         "operation": "read",
-        "requested_at": store.utc_now(),
+        "requested_at": requested_at,
     }
     body["request_digest"] = store.stable_digest(body, length=64)
     return _write_once(

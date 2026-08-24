@@ -1,0 +1,45 @@
+{
+  "child_execution_unit": {
+    "behavioral_outcome": {
+      "outcome_id": "behavioral-outcome-4272816b64c262f5e0126396",
+      "request_digest": "b3197d3be9f6906a623fc5885017d3c310bddd98b71d37658cadd0113a0bd6a9",
+      "response_pointer": [
+        "result",
+        "behavioral_answer"
+      ],
+      "rubric_digest": "fd06ba630caa56e8edd9d3d04f847c4d87a50ed2cd5a3e023b451d39d9af59b8",
+      "task_digest": "6e88f3090310fcb28e108407b0f549968acfd7b02af1ef749f5d4089c7e037a8"
+    },
+    "component": "execute",
+    "expected_outputs": [
+      "result.behavioral_answer containing only the public canonical-JSON answer",
+      "result.child_execution_unit scheduling deterministic receipt finalization and naming this exact Work invocation id",
+      "no hidden reasoning, secret, provider self-score, or unbounded payload"
+    ],
+    "failure_conditions": [
+      "task or rubric bytes change after the precommit",
+      "response is not bound to the current child Work invocation",
+      "the child claims independent evidence, AGI, or completion"
+    ],
+    "goal": "Answer exactly one already-precommitted bounded public JSON task, then schedule a separate finalizer bound to this child Work invocation; do not inspect or alter the sealed expected answer or judge.",
+    "inputs": [
+      ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/request.json"
+    ],
+    "parent_continuation": "After the real child response is immutable, run a deterministic finalizer using its exact invocation id, verify the receipt and ledger transition from zero to one, run protected validation, then Task Evaluate the parent unit without treating one internal task as breadth or completion.",
+    "request_ref": ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/request.json",
+    "scope": "behavioral-outcome/live-precommitted-child-v1"
+  },
+  "claim_boundary": "Infrastructure tests and the precommit are internal engineering evidence only; no behavioral observation exists until the real child Work response is judged.",
+  "continuation": {
+    "next": "Consume the one child response, mechanically judge it in a separate Execute, and preserve the internal-only claim boundary.",
+    "parent_unit_id": "unit-7353e639723862d91ae4e0f1"
+  },
+  "evidence": [
+    "src/continual/behavioral_outcome.py",
+    "tests/test_behavioral_outcome.py",
+    ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/request.json",
+    "29 focused tests passed; compileall, JSON parse, and diff check passed"
+  ],
+  "status": "CHILD_REQUIRED",
+  "summary": "Implemented and adversarially validated the immutable behavioral outcome primitive, then froze the live public task and exact judge before any child response."
+}
