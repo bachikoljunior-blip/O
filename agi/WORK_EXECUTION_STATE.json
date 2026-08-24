@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T06:46:00.775Z",
-  "last_progress_at": "2026-08-24T06:46:00.775Z",
+  "heartbeat_at": "2026-08-24T06:52:17.771Z",
+  "last_progress_at": "2026-08-24T06:52:17.771Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -44,8 +44,8 @@
     "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
     "pending_work_invocation_id": "invoke-8c17214637e8334e3e9b2f3c",
     "pending_request_ref": ".continual/work-model/invocations/invoke-8c17214637e8334e3e9b2f3c/request.json",
-    "durability_status": "public-concepts-v2 and accumulated native records are committed locally at f1277e74872d4941f4328cef68df6b26120e3bf0, rebased on main 0fce899298d2f1ad3755760eb00db1ff6c172998. Related regression: 74 passed; Work audit: 166 requests, 165 responses, one pending, valid. Remote branch and PR are not yet created.",
-    "next_action": "Publish isolated branch work/recovery-gen7-public-concepts-v2-v1 without force, create one PR, observe unchanged exact-head CI, then submit Execute invoke-8c17214637e8334e3e9b2f3c exactly once and continue the native lifecycle."
+    "durability_status": "PR 288 publishes public-concepts-v2 and accumulated native records at exact remote head 803d314996c9b3906c1de272e2465ea338a325b7 and exact tree afd7f6121c31a3f94bc86c2fb373aec8142fdddd. GitHub recalculated mergeable=true. Workflow 32698944696 is running four pytest shards; aggregate has not yet completed.",
+    "next_action": "Observe workflow 32698944696 without rerun. Require all four shards plus aggregate success at unchanged PR head 803d314996c9b3906c1de272e2465ea338a325b7, then submit Execute invoke-8c17214637e8334e3e9b2f3c exactly once and continue the native lifecycle. Do not merge in this Execute unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -346,6 +346,17 @@
       "head_sha": "8ae27866125e04cbb5bc536f8aebb953e1b5c314",
       "exact_tree_sha": "84f21223126aecaa9efcb6c69e7b7a71a3bed973",
       "workflow_run": 32660836320
+    },
+    "public_concepts_v2": {
+      "branch": "work/recovery-gen7-public-concepts-v2-v1",
+      "pull_request": 288,
+      "head_sha": "803d314996c9b3906c1de272e2465ea338a325b7",
+      "exact_tree_sha": "afd7f6121c31a3f94bc86c2fb373aec8142fdddd",
+      "workflow_run": 32698944696,
+      "status": "four_pytest_shards_in_progress",
+      "mergeable": true,
+      "local_validation": "74 related tests passed; compileall, JSON, diff and hash checks passed; work-verify 166/165/1 valid",
+      "claim_boundary": "Future-only evaluator-contract repair and native-run publication; not fresh behavioral evidence, AGI, or user-objective completion."
     }
   },
   "pending_user_input": {
@@ -895,9 +906,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "75bee7fe88876046aa1ac010a6df6eb40281dce9",
-    "requested_at": "2026-08-24T06:46:00.775Z",
-    "reason": "pre-publication heartbeat and exact continuation boundary",
+    "expected_blob_sha": "e09710a6b0367fdd4e3e54dbb6ae5dd84715427b",
+    "requested_at": "2026-08-24T06:52:17.771Z",
+    "reason": "PR 288 publication and CI-in-progress continuation boundary",
     "verified_remote_readback": false
   }
 }
