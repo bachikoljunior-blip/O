@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T07:59:04.864Z",
-  "last_progress_at": "2026-08-24T07:59:04.864Z",
+  "heartbeat_at": "2026-08-24T08:03:11.069Z",
+  "last_progress_at": "2026-08-24T08:03:11.069Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -44,8 +44,8 @@
     "snapshot_head_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
     "pending_work_invocation_id": "invoke-7a258555c3d521841a26d787",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7a258555c3d521841a26d787/request.json",
-    "durability_status": "Authoritative inbox revision 19, its recovery integration receipt, and the revision-19 typed directive ledger are verified on main. Root invoke-fab205d5bf529019e49ac9cd consumed their exact blobs and selected the dedicated append-path Execute unit; revision 19 is now acknowledged at that safe semantic boundary.",
-    "next_action": "Freeze and execute the dedicated append-path unit, publish it on an isolated non-force branch, require unchanged exact-head CI and a fresh conflict-free main comparison, then merge and read back exact reviewed bytes. PR 288 remains a separate unmerged unit."
+    "durability_status": "Authoritative inbox revision 19 is acknowledged. Dedicated append-path PR 289 is published at exact head 2c0852dbf17e169da0ad045f9958d88123dc1ab3 with three reviewed blobs verified; workflow 32704286413 is running all four pytest shards.",
+    "next_action": "Wait for all four exact-head shards and the dependent aggregate. Re-read the unchanged head, generation-7 fence, latest main, and conflict status; merge only if every check succeeds, then read back exact reviewed bytes. PR 288 remains a separate unmerged unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -933,8 +933,23 @@
     },
     "local_validation": "76 focused control-plane and Context Kernel tests passed; compileall, repository JSON parsing, and diff check passed.",
     "prepared_at": "2026-08-24T07:59:04.864Z",
-    "status": "prepared_before_external_mutation",
+    "status": "published_exact_head_ci_running",
     "rule": "After exact state CAS readback, create one non-force isolated branch from this exact main, publish exactly the three reviewed blobs, verify remote tree identity, open one PR, and require unchanged exact-head CI plus fresh conflict-free main before expected-head merge.",
-    "claim_boundary": "Inbox integrity infrastructure and recovered-direction acknowledgement only; not behavioral capability, positive-control evidence, AGI, or user-level completion."
+    "claim_boundary": "Inbox integrity infrastructure and recovered-direction acknowledgement only; not behavioral capability, positive-control evidence, AGI, or user-level completion.",
+    "remote_parent": "e2f6d9796b09e230bbf116acd88d4f29a33cb385",
+    "remote_commit": "2c0852dbf17e169da0ad045f9958d88123dc1ab3",
+    "remote_tree": "54e803a8ab0d863236a92682e8ddbac4d76ac461",
+    "remote_branch_readback_verified": true,
+    "remote_changed_path_count": 3,
+    "remote_blobs": {
+      "agi/WORK_MODE.md": "ba2c65a47d632a28b9de6f4855b0c565dad4e0c4",
+      "src/agi/user_input_inbox.py": "e18f0e4f0855301bc7cd03af201b7dd4a857b127",
+      "tests/test_user_input_inbox.py": "e87cd909198877965aa5cad1705392ca820d83c1"
+    },
+    "pull_request": 289,
+    "workflow_run": 32704286413,
+    "workflow_id": 335420036,
+    "ci_status": "in_progress",
+    "last_ci_observed_at": "2026-08-24T08:03:11.069Z"
   }
 }
