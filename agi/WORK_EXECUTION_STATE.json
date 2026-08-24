@@ -8,8 +8,8 @@
     "lease_generation": 8,
     "fence_token": "work-recovery-fence-v8-073c1e261139db2af15fcdf59df785fd9608de068b2d6b5cc9a05048751b136a",
     "started_at": "2026-08-24T15:31:24.040Z",
-    "heartbeat_at": "2026-08-24T16:14:00.459Z",
-    "last_progress_at": "2026-08-24T16:14:00.459Z",
+    "heartbeat_at": "2026-08-24T16:15:46.595Z",
+    "last_progress_at": "2026-08-24T16:15:46.595Z",
     "stale_after_seconds": 900,
     "authorization": {
         "kind": "fenced_stale_owner_recovery",
@@ -155,11 +155,12 @@
     "checkpoint_measurement_readiness_publication_precommit": {
         "effect_id": "publish-checkpoint-measurement-readiness-v1",
         "idempotency_key": "bachikoljunior-blip/O:work-recovery-gen8:checkpoint-measurement-readiness:2bf1cb1031f6864abe5dc34f4e2c12407b6a4886:v1",
-        "status": "prepared_not_dispatched",
+        "status": "connector_git_data_construction_authorized_ref_not_dispatched",
         "prepared_at": "2026-08-24T16:14:00.459Z",
         "branch": "work/recovery-gen8-checkpoint-readiness-v1",
         "base_main_commit": "b83c408a3f27094202de2e58c6578d65b4c6494d",
-        "exact_head_sha": "2bf1cb1031f6864abe5dc34f4e2c12407b6a4886",
+        "local_reference_head_sha": "2bf1cb1031f6864abe5dc34f4e2c12407b6a4886",
+        "remote_commit_sha": null,
         "exact_tree_sha": "c095807da984449e73a1169b0318fff587e2903c",
         "changed_path_count": 3,
         "changed_path_list_sha256": "d00126791e097e358af69603e7127e0903a9b5533a4c6a6168fe0072a0796f3b",
@@ -169,7 +170,9 @@
             "tests/test_checkpoint_inheritance_experiment.py": "67f935edf672685f4a40ac32ab469ee4aad3605e"
         },
         "local_validation": "114 focused and adjacent tests passed in 6.77s; compileall, readiness JSON parse, clean status, and diff check passed.",
-        "rule": "After exact readback of this state-only expected-blob CAS and a fresh Work-source receipt, publish this exact head non-force to the named new branch and open one PR. Merge only the unchanged exact head after all required CI succeeds, main and authority are fresh, and conflict checks pass; then read back all three reviewed blobs.",
+        "publication_transport": "GitHub connector Git Data API because git push credentials are unavailable in this runtime",
+        "git_push_attempt": "2026-08-24T16:15:31Z failed before any remote branch mutation: HTTPS credential unavailable",
+        "rule": "After exact readback of this amended state-only CAS and a fresh Work-source receipt, create only the three reviewed blobs, the exact tree c095807da984449e73a1169b0318fff587e2903c on base b83c408a3f27094202de2e58c6578d65b4c6494d, and one unattached commit through GitHub Git Data. Read back its exact tree and parent, then state-only CAS the returned remote commit SHA before creating the named branch ref or PR. Merge only the unchanged connector-created head after all required CI succeeds, main and authority are fresh, and conflict checks pass; then read back all three reviewed blobs.",
         "claim_boundary": "Internal readiness publication only. Zero behavioral observations, no checkpoint-inheritance activation, no original-method or scientist-family result, no adaptation-loss or untested-mechanism inference, no AGI evidence, and no user-level completion."
     },
     "recent_main_integration": {
