@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T09:09:34.362Z",
-  "last_progress_at": "2026-08-24T09:09:34.362Z",
+  "heartbeat_at": "2026-08-24T09:10:07.821Z",
+  "last_progress_at": "2026-08-24T09:10:07.821Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,8 +45,8 @@
     "pending_work_invocation_id": "invoke-cac77fa8abcd6a8f7cf7683c",
     "pending_request_ref": ".continual/work-model/invocations/invoke-cac77fa8abcd6a8f7cf7683c/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "Remote branch work/recovery-gen7-inbox-append-native-v1 now points to commit 27e1358c78e63264460575c68233e35f700cf923 with exact tree 24547c31dc1a8408e8bf895422dc91526da0e89c. GitHub compare returned exactly 84 allowlisted native paths and every remote blob read back exactly.",
-    "next_action": "Open one PR from the verified branch, bind its exact head, and await all four pytest shards plus dependent aggregate without rerunning or changing the head.",
+    "durability_status": "PR 290 is open at exact head 27e1358c78e63264460575c68233e35f700cf923 and 84 native-only paths. Head and path count match the reviewed branch.",
+    "next_action": "Discover the pull-request workflow for exact head 27e1358c78e63264460575c68233e35f700cf923, observe all four pytest shards and dependent aggregate, then re-read fence/head/main/mergeability before any merge.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
     "next_native_phase": "execute_awaiting_work_model"
   },
@@ -1030,7 +1030,7 @@
     ],
     "local_validation": "84 paths; every JSON/JSONL parsed; diff check and secret-marker scan passed; native work-verify valid with 161 requests, 159 responses, and 2 recognized pending requests (the current publication request plus one pre-existing main request outside this allowlist).",
     "prepared_at": "2026-08-24T09:04:15.075Z",
-    "status": "remote_branch_published_verified",
+    "status": "pr_open_exact_head_ci_pending",
     "rule": "No remote branch, commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base and merge only unchanged exact head after all required CI succeeds and fresh main comparison is conflict-free.",
     "claim_boundary": "Durable native bookkeeping only; not behavioral capability, positive-control evidence, AGI, or user-level completion.",
     "remote_parent": "6d4e518cc393657a67732637ff4ba0d32ab6e74e",
@@ -1039,6 +1039,13 @@
     "remote_branch_readback_verified": true,
     "remote_changed_path_count": 84,
     "exact_blob_readback_count": 84,
-    "git_transport_fallback": "Direct git push lacked an interactive credential. The precommitted exact blobs, tree, commit, and branch were created through the authorized GitHub Git Data API; remote tree matched the locally reviewed tree exactly."
+    "git_transport_fallback": "Direct git push lacked an interactive credential. The precommitted exact blobs, tree, commit, and branch were created through the authorized GitHub Git Data API; remote tree matched the locally reviewed tree exactly.",
+    "pull_request": 290,
+    "pr_url": "https://github.com/bachikoljunior-blip/O/pull/290",
+    "pr_head": "27e1358c78e63264460575c68233e35f700cf923",
+    "pr_base_at_creation": "a70e6f3aa1862ce35d027c1eedf09c22d5516768",
+    "pr_changed_path_count": 84,
+    "pr_created_at": "2026-08-24T09:09:48Z",
+    "ci_status": "awaiting_workflow_discovery"
   }
 }
