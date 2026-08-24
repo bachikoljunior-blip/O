@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T11:15:32.300Z",
-  "last_progress_at": "2026-08-24T11:15:32.300Z",
+  "heartbeat_at": "2026-08-24T11:17:01.765Z",
+  "last_progress_at": "2026-08-24T11:17:01.765Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
   "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_merge_precommit_conflict_proof",
+  "active_component": "execute_source_observation",
   "active_unit_id": "unit-42f48b067a5abf643b682fee",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -45,8 +45,8 @@
     "pending_work_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
     "pending_request_ref": ".continual/work-model/invocations/invoke-c21c168fb7f2dc2671560b1d/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "PR 291 exact head b0ec6f9d4012515b2e038355ff296eb3bb967140 passed all four pytest shards and dependent aggregate in workflow 32717303596. Merge authorization is being persisted against current main 6e5b03803ece9991faff79d5a5f123fdc3c2055b.",
-    "next_action": "After exact CAS readback, re-read generation-7 fence, PR head b0ec6f9d4012515b2e038355ff296eb3bb967140, all five jobs, current main, and mergeability; then expected-head merge PR 291.",
+    "durability_status": "PR 291 exact head b0ec6f9d4012515b2e038355ff296eb3bb967140 merged as e3ac6911eed1f60b7174ea730164ba83028ec44b; exact merge tree, parents, three reviewed blobs, and generation-7 state were read back.",
+    "next_action": "Create fresh Work-state and exact-head CI source-observation receipts, answer Execute invoke-c21c168fb7f2dc2671560b1d with bounded claims, then continue Task Evaluate, Consolidate Episode, Learn, and Root.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
     "next_native_phase": "execute_source_publication"
   },
@@ -915,9 +915,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "bbf2fe827a47783035cd4ffd58e382c90ef4f058",
-    "requested_at": "2026-08-24T11:15:32.300Z",
-    "reason": "PR 291 fresh-main conflict-free merge-tree proof",
+    "expected_blob_sha": "6275bee358b7d29ca354935e70450da19c3cc9df",
+    "requested_at": "2026-08-24T11:17:01.765Z",
+    "reason": "PR 291 merge and exact main readback",
     "verified_remote_readback": false
   },
   "inbox_append_path_publication_precommit": {
@@ -1147,9 +1147,9 @@
     "protocol_digest": "92b15e3fa1780220006a068c0ce654bda893e1f307b5192b2dd439c895d94f16",
     "local_validation": "17 focused comparison tests and 123 protected Context Kernel/routing/scientist tests passed; compileall, all repository JSON parsing, and diff check passed.",
     "prepared_at": "2026-08-24T10:28:13.087Z",
-    "status": "merge_authorized_local_conflict_free",
+    "status": "merged_to_main_verified",
     "rule": "After exact readback of this state CAS, create new blobs and one child commit of exact prior PR head 63bd16989ab64e3dae9bae7c9e478fffd90df6d2, fast-forward the branch without force, verify the three-path diff and blob identity, and require a new unchanged exact-head CI.",
-    "claim_boundary": "Internal precommit, validation, and causal-classification infrastructure only; no routing measurement, positive-control result, production evidence, AGI, activation, or user-level completion.",
+    "claim_boundary": "Internal precommit, validation, and causal-classification infrastructure only; observations remain zero, the positive control remains NOT_RUN, and no routing activation, production evidence, AGI, or user-level completion is claimed.",
     "remote_parent": "ac6e78b51069dedb62aad4cf62c923abd0957b7c",
     "remote_commit": "b0ec6f9d4012515b2e038355ff296eb3bb967140",
     "remote_tree": "0f14b4cd2638ff72b5abd1ced7c0827fb0a04138",
@@ -1240,6 +1240,25 @@
       "expected_merge_tree": "2d5e359cf00826ea0ec0be0d311bfe24599682ba",
       "local_merge_verified_at": "2026-08-24T11:15:32.300Z",
       "mergeability_note": "GitHub wrapper toggled false after the state-only main CAS. A fetched exact-main/exact-head git merge-tree completed with exit 0 and only the three precommitted additions; final fresh-main merge-tree and GitHub atomic expected-head rejection remain required."
-    }
+    },
+    "exact_head_ci_result": "workflow 32717303596: four pytest shards and dependent aggregate succeeded",
+    "merge_sha": "e3ac6911eed1f60b7174ea730164ba83028ec44b",
+    "merge_tree": "f65eecccb5d31fd8d317d0681758a90b79c6a25f",
+    "merge_parents": [
+      "43006d9c0edef84ed78c5084d888601d5a38d092",
+      "b0ec6f9d4012515b2e038355ff296eb3bb967140"
+    ],
+    "merged_at": "2026-08-24T11:16:11Z",
+    "main_readback_verified": true,
+    "main_readback_blobs": {
+      "agi/CONTEXT_METHOD_COMPARISON.json": "107426f39208b226863c69a48a28231d71a89118",
+      "src/agi/context_method_comparison.py": "c750ca11c53605eb2ff016ab3c9acc9b4b50697a",
+      "tests/test_context_method_comparison.py": "dfd3f9923ee7223cc16016b42dc5a780680d6f98",
+      "agi/WORK_EXECUTION_STATE.json": "6275bee358b7d29ca354935e70450da19c3cc9df"
+    },
+    "final_fresh_main_before_merge": "43006d9c0edef84ed78c5084d888601d5a38d092",
+    "final_fresh_merge_tree": "f65eecccb5d31fd8d317d0681758a90b79c6a25f",
+    "final_pr_head_unchanged": true,
+    "github_atomic_expected_head_merge_succeeded": true
   }
 }
