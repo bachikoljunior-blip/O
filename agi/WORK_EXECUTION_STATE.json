@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T11:17:01.765Z",
-  "last_progress_at": "2026-08-24T11:17:01.765Z",
+  "heartbeat_at": "2026-08-24T11:20:39.689Z",
+  "last_progress_at": "2026-08-24T11:20:39.689Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
   "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_source_observation",
+  "active_component": "execute_source_observation_policy",
   "active_unit_id": "unit-42f48b067a5abf643b682fee",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -44,7 +44,7 @@
     "snapshot_head_sha": "3b7116b292839233934dee8b5f03fcff54c6834a",
     "pending_work_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
     "pending_request_ref": ".continual/work-model/invocations/invoke-c21c168fb7f2dc2671560b1d/request.json",
-    "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
+    "pending_native_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
     "durability_status": "PR 291 exact head b0ec6f9d4012515b2e038355ff296eb3bb967140 merged as e3ac6911eed1f60b7174ea730164ba83028ec44b; exact merge tree, parents, three reviewed blobs, and generation-7 state were read back.",
     "next_action": "Create fresh Work-state and exact-head CI source-observation receipts, answer Execute invoke-c21c168fb7f2dc2671560b1d with bounded claims, then continue Task Evaluate, Consolidate Episode, Learn, and Root.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
@@ -105,7 +105,7 @@
       "invoke-a5db134eb95865beaaf938d1 (root native lifecycle publication)",
       "invoke-6a98ae4fa1ccc57ad1547991 (candidate_evaluate native publication preflight)"
     ],
-    "pending_invocation": "invoke-bff370c703865bdf69a10b85 (execute; work invocation invoke-cac77fa8abcd6a8f7cf7683c)",
+    "pending_invocation": "invoke-c21c168fb7f2dc2671560b1d (execute; context comparison contract unit)",
     "note": "The inbox append unit has completed through Learn with bounded control-plane PASS and original user-level FAIL preserved. The current fenced Execute publishes only its native lifecycle records; no source, authority, lease, or user-directive file is in scope."
   },
   "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
@@ -487,28 +487,28 @@
   "ci_source_observation_policy": {
     "required": true,
     "repository_full_name": "bachikoljunior-blip/O",
-    "exact_head_sha": "27e1358c78e63264460575c68233e35f700cf923",
-    "workflow_run_id": 32710018770,
+    "exact_head_sha": "b0ec6f9d4012515b2e038355ff296eb3bb967140",
+    "workflow_run_id": 32717303596,
     "workflow_id": 335420036,
     "required_jobs": [
       {
-        "id": 97379211904,
+        "id": 97401169437,
         "name": "pytest shard 0 of 4"
       },
       {
-        "id": 97379211635,
+        "id": 97401169548,
         "name": "pytest shard 1 of 4"
       },
       {
-        "id": 97379211967,
+        "id": 97401169481,
         "name": "pytest shard 2 of 4"
       },
       {
-        "id": 97379211812,
+        "id": 97401169678,
         "name": "pytest shard 3 of 4"
       },
       {
-        "id": 97388877024,
+        "id": 97410937648,
         "name": "test"
       }
     ],
@@ -915,9 +915,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "6275bee358b7d29ca354935e70450da19c3cc9df",
-    "requested_at": "2026-08-24T11:17:01.765Z",
-    "reason": "PR 291 merge and exact main readback",
+    "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
+    "requested_at": "2026-08-24T11:20:39.689Z",
+    "reason": "bind PR 291 exact-head CI source observation policy",
     "verified_remote_readback": false
   },
   "inbox_append_path_publication_precommit": {
@@ -1259,6 +1259,7 @@
     "final_fresh_main_before_merge": "43006d9c0edef84ed78c5084d888601d5a38d092",
     "final_fresh_merge_tree": "f65eecccb5d31fd8d317d0681758a90b79c6a25f",
     "final_pr_head_unchanged": true,
-    "github_atomic_expected_head_merge_succeeded": true
+    "github_atomic_expected_head_merge_succeeded": true,
+    "ci_source_observation_policy_updated_at": "2026-08-24T11:20:39.689Z"
   }
 }
