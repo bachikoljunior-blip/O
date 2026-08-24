@@ -8,15 +8,15 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T04:00:19.597Z",
-  "last_progress_at": "2026-08-24T04:00:19.597Z",
+  "heartbeat_at": "2026-08-24T04:00:55.627Z",
+  "last_progress_at": "2026-08-24T04:00:55.627Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "fenced_user_directed_resume_pending_readback",
+    "kind": "fenced_user_directed_resume_verified",
     "instruction": "The user explicitly said 再開して after generation 6 checkpointed on malformed inbox revision 16. Generation 7 must preserve the malformed blob in quarantine and must not infer missing revision-16 semantics.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Phase-1 acquisition update; authority is not usable until commit/blob and owner/generation/fence/heartbeat exact readback."
+    "note": "Generation-7 phase-1 commit 0bb180458f14c489be3ce50b57d38368ceeaf3cd and blob b7bd20299d1714769834fe29e665fcfa4729d065 were read back with exact owner, execution, generation, fence, and heartbeat. Phase-2 finalization is this state-only CAS."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -68,12 +68,11 @@
   "remote_persistence": {
     "published_on_main": true,
     "verified_remote_readback": true,
-    "expected_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
-    "result_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
-    "result_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
-    "finalization_commit_sha": "f75473cd7d00d52141dde88a581060e9a9bc255a",
-    "finalization_blob_sha": "41663f85097d04017c7d16309301d97ca671a216",
-    "note": "Generation-6 phase-1 acquisition and phase-2 finalization commits/blobs read back exactly."
+    "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
+    "result_commit_sha": "0bb180458f14c489be3ce50b57d38368ceeaf3cd",
+    "result_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
+    "finalization_expected_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
+    "note": "Generation-7 phase-1 acquisition read back exactly; phase-2 finalization pending exact readback."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -101,13 +100,13 @@
     "pending_invocation": "pending Root after completed Learn invoke-ff0daaaf2414b310b96401e6",
     "note": "Generation 6 completed PR 281 publication and exact readback, submitted Execute invoke-0890 exactly once, discovered that a newly frozen Root request bound a Work heartbeat already older than stale_after_seconds, selected the bounded pre-freeze freshness repair at Root, trialed the scoped context-hygiene Candidate, and froze Execute invoke-b912c756."
   },
-  "expected_blob_sha": "ababfad9f2b889c5d698c4a8122aa8630bb603df",
-  "result_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
-  "result_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
-  "finalize_expected_blob_sha": "d5cf519189d02abadce3861499516b8d9a774513",
-  "readback_of_commit_sha": "36764d20a414fc23b1a4fef535d23eadbd616ad8",
+  "expected_blob_sha": "4547967dd4da9e9ef246d861b6a1057393a85cb4",
+  "result_commit_sha": "0bb180458f14c489be3ce50b57d38368ceeaf3cd",
+  "result_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
+  "finalize_expected_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
+  "readback_of_commit_sha": "0bb180458f14c489be3ce50b57d38368ceeaf3cd",
   "verified_remote_readback": true,
-  "acquisition_phase": "phase1_pending_readback",
+  "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-24T04:00:19.597Z",
     "observed_main_sha": "d6bff51921762e67d31e8aa57c7a48bad8adc342",
