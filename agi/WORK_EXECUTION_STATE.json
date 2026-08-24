@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T10:07:38.456Z",
-  "last_progress_at": "2026-08-24T10:07:38.456Z",
+  "heartbeat_at": "2026-08-24T10:24:11.715Z",
+  "last_progress_at": "2026-08-24T10:24:11.715Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
   "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_preflight",
+  "active_component": "execute_local_validation",
   "active_unit_id": "unit-42f48b067a5abf643b682fee",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -35,20 +35,20 @@
   "parallel_execution_coordination": {
     "primary": "Generation 7 remains the sole fenced main writer. The dedicated inbox append implementation is isolated on work/recovery-gen7-inbox-append-path-v1 and will be published non-force from latest main only after exact local validation.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Execute invoke-7a258555c3d521841a26d787 is frozen for unit-d6cbe0a3154ed09edcc8e984 and binds revision 19, generation 7, and work-state readback receipt 9954e1598678361723891eb960651ccb34523318b82e8babe9b2729032d0c9de.",
+    "pending_native_execute": "Execute invoke-c21c168fb7f2dc2671560b1d is frozen for unit-42f48b067a5abf643b682fee and binds authoritative inbox revision 19 plus the generation-7 fence.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/recovery-gen7-inbox-append-native-v1",
     "snapshot_head_sha": "3b7116b292839233934dee8b5f03fcff54c6834a",
-    "pending_work_invocation_id": "invoke-cac77fa8abcd6a8f7cf7683c",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-cac77fa8abcd6a8f7cf7683c/request.json",
+    "pending_work_invocation_id": "invoke-c21c168fb7f2dc2671560b1d",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-c21c168fb7f2dc2671560b1d/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "PR 290 exact head 27e1358c78e63264460575c68233e35f700cf923 passed workflow 32710018770 and merged/read back as f61a049e72753ae9cd3fe64e7ebf224af00a10f0. Root selected unit-42f48b067a5abf643b682fee and Candidate preflight completed locally. Execute request creation then failed closed before mutation because the bounded authoritative Work-source receipt had expired.",
-    "next_action": "After exact readback of this state-only heartbeat CAS, synchronize local state bytes, precommit and record a fresh GitHub Work-state observation for the new blob, then resume creation of the frozen Execute request for unit-42f48b067a5abf643b682fee.",
+    "durability_status": "The matched routing and scientist positive-control protocol, validator, deterministic classifiers, and 16 focused tests are implemented locally. 122 protected Context Kernel/routing/scientist tests passed; the full repository suite is still running. No source branch, PR, or merge has been published for this unit.",
+    "next_action": "Finish the full repository regression, recheck generation-7 authority, precommit the exact three-path source publication, publish on an isolated non-force branch, require unchanged exact-head CI, then merge/read back before Task Evaluate.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
-    "next_native_phase": "execute_preflight_awaiting_fresh_work_source_receipt"
+    "next_native_phase": "execute_implementation_validation"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -915,9 +915,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "17bebf8f966d4576b744595c2ce016f09513e461",
-    "requested_at": "2026-08-24T07:19:36.636Z",
-    "reason": "long-running PR 288 shard-3 heartbeat",
+    "expected_blob_sha": "16a0ae6817c48c755467eb2b39545bf9b01d6144",
+    "requested_at": "2026-08-24T10:24:11.715Z",
+    "reason": "active context-comparison implementation and full-regression heartbeat",
     "verified_remote_readback": false
   },
   "inbox_append_path_publication_precommit": {
