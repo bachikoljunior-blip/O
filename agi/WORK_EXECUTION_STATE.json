@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T09:47:20.193Z",
-  "last_progress_at": "2026-08-24T09:47:20.193Z",
+  "heartbeat_at": "2026-08-24T09:51:50.142Z",
+  "last_progress_at": "2026-08-24T09:51:50.142Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,7 +21,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "2c94909efcc37c05462063bcccd2850d60837050",
+  "source_main_sha": "f61a049e72753ae9cd3fe64e7ebf224af00a10f0",
   "working_branch": "work/recovery-gen7-inbox-append-native-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
@@ -45,8 +45,8 @@
     "pending_work_invocation_id": "invoke-cac77fa8abcd6a8f7cf7683c",
     "pending_request_ref": ".continual/work-model/invocations/invoke-cac77fa8abcd6a8f7cf7683c/request.json",
     "pending_native_invocation_id": "invoke-bff370c703865bdf69a10b85",
-    "durability_status": "PR 290 exact head 27e1358c78e63264460575c68233e35f700cf923 passed workflow 32710018770: four shards and dependent aggregate succeeded. Fresh main 114890c0da49e8a358b4601c4ecb034b61bf1fc1 produced clean merge tree 468c784b9950e9703bdce62883617cd6e7dd09be over exactly 84 .continual paths.",
-    "next_action": "After exact readback of this state-only merge authorization, re-read fence, PR head, all required jobs, current main, and merge-tree; then expected-head merge PR 290 and exact remote blob readback.",
+    "durability_status": "PR 290 exact head 27e1358c78e63264460575c68233e35f700cf923 passed all five required CI jobs and merged as f61a049e72753ae9cd3fe64e7ebf224af00a10f0. Merge tree de1d348204a02b80ec4a816087b5fa652820f4e6 and all 84 reviewed native blobs were read back exactly on main.",
+    "next_action": "Answer pending work invocation invoke-cac77fa8abcd6a8f7cf7683c with the bounded native-publication PASS and explicit user-level FAIL boundary, submit native Execute invoke-bff370c703865bdf69a10b85, then continue Task Evaluate, Consolidate Episode, Learn, and the next Root selection.",
     "completed_work_invocation_id": "invoke-fc3eed7e8484bcb9d282161e",
     "next_native_phase": "execute_awaiting_work_model"
   },
@@ -994,8 +994,10 @@
     "native_consolidate_completed_at": "2026-08-24T08:46:49.427Z",
     "native_learn_response_digest": "b0547e77bfdaa18a142120b51ad595c6671384f35a7511f2ce1c9b1ac6f4bde0",
     "native_learn_decision": "NO_CHANGE",
-    "native_publication_status": "local_allowlist_validation_in_progress",
-    "native_publication_branch": "work/recovery-gen7-inbox-append-native-v1"
+    "native_publication_status": "merged_to_main_verified",
+    "native_publication_branch": "work/recovery-gen7-inbox-append-native-v1",
+    "native_publication_pull_request": 290,
+    "native_publication_merge_sha": "f61a049e72753ae9cd3fe64e7ebf224af00a10f0"
   },
   "inbox_append_native_publication_precommit": {
     "effect_id": "publish-inbox-append-native-lifecycle-v1",
@@ -1030,9 +1032,9 @@
     ],
     "local_validation": "84 paths; every JSON/JSONL parsed; diff check and secret-marker scan passed; native work-verify valid with 161 requests, 159 responses, and 2 recognized pending requests (the current publication request plus one pre-existing main request outside this allowlist).",
     "prepared_at": "2026-08-24T09:04:15.075Z",
-    "status": "merge_authorized_exact_head_ci_success",
+    "status": "merged_to_main_verified",
     "rule": "No remote branch, commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base and merge only unchanged exact head after all required CI succeeds and fresh main comparison is conflict-free.",
-    "claim_boundary": "Durable native bookkeeping only; not behavioral capability, positive-control evidence, AGI, or user-level completion.",
+    "claim_boundary": "Durable native bookkeeping only; no implementation, test, prompt, Candidate, inbox, directive, strategy, authority, behavioral capability, positive-control evidence, AGI, or user-level completion claim.",
     "remote_parent": "6d4e518cc393657a67732637ff4ba0d32ab6e74e",
     "remote_commit": "27e1358c78e63264460575c68233e35f700cf923",
     "remote_tree": "24547c31dc1a8408e8bf895422dc91526da0e89c",
@@ -1107,6 +1109,20 @@
       "expected_merge_tree": "468c784b9950e9703bdce62883617cd6e7dd09be",
       "authorized_at": "2026-08-24T09:47:20.193Z",
       "rule": "Re-read this generation-7 fence, exact PR head, all five required jobs, current main, and a fresh conflict-free merge tree after this CAS; merge only expected head 27e1358c78e63264460575c68233e35f700cf923. GitHub must atomically reject any moved head or true conflict."
-    }
+    },
+    "exact_head_ci_result": "workflow 32710018770: four pytest shards and dependent aggregate succeeded",
+    "merge_sha": "f61a049e72753ae9cd3fe64e7ebf224af00a10f0",
+    "merge_tree": "de1d348204a02b80ec4a816087b5fa652820f4e6",
+    "merge_parents": [
+      "38f24cd30b87c7a2555dc1e07726a03dc1816977",
+      "27e1358c78e63264460575c68233e35f700cf923"
+    ],
+    "merged_at": "2026-08-24T09:48:23Z",
+    "main_readback_verified": true,
+    "main_readback_blob_count": 84,
+    "main_readback_mismatch_count": 0,
+    "final_fresh_main_before_merge": "38f24cd30b87c7a2555dc1e07726a03dc1816977",
+    "final_fresh_merge_tree": "de1d348204a02b80ec4a816087b5fa652820f4e6",
+    "final_pr_head_unchanged": true
   }
 }
