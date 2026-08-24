@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T12:28:08.082Z",
-  "last_progress_at": "2026-08-24T12:28:08.082Z",
+  "heartbeat_at": "2026-08-24T12:40:09.648Z",
+  "last_progress_at": "2026-08-24T12:40:09.648Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "cb0eda50fce49a987fc5623f298c5c3be5e62a91",
+  "source_main_sha": "ae2f5e037a771cbe68b190ce2ad4fb34929e3e1c",
   "working_branch": "work/recovery-gen7-context-comparison-native-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_native_publication_response",
+  "active_component": "root_revision20_reconciliation",
   "active_unit_id": "unit-52ff04d764576d3a077385d1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -34,28 +34,32 @@
     "pending_safe_boundary_input": {
       "observed_at": "2026-08-24T12:15:21.585Z",
       "target_revision": 20,
-      "status": "observed_not_yet_appended_or_acknowledged",
-      "interpretation": "Limit negative evidence to the actually tested candidate, configuration, and conditions; do not generalize it to an entire scientist-agent family or untested mechanisms. Do not require a duplicate positive-control reproduction when conditions equivalent to the original configuration are already established. Treat revision 19 as an anti-overgeneralization rule.",
-      "apply_after": "Complete the identity-bound frozen Execute invocation, then append through the dedicated expected-revision/CAS/readback path and ingest at the next safe O boundary."
+      "status": "appended_pending_typed_reconciliation",
+      "inbox_commit_sha": "ae2f5e037a771cbe68b190ce2ad4fb34929e3e1c",
+      "inbox_blob_sha": "c462c8d1636d0249646627311257978b8c679a3d",
+      "interpretation": "Revision 20 limits negative evidence to the actually tested candidate, configuration, and conditions; forbids family-wide or untested-mechanism generalization; and does not require duplicate positive-control reproduction when equivalent original conditions are already established with adequate provenance.",
+      "next_safe_boundary": "Reconcile the typed directive ledger and canonical strategy/state projections, then create a new Root request identity bound to inbox revision 20. Do not answer the previously frozen revision-19 Root request."
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 7 remains the sole fenced main writer. The dedicated inbox append implementation is isolated on work/recovery-gen7-inbox-append-path-v1 and will be published non-force from latest main only after exact local validation.",
+    "primary": "Generation 7 remains the sole fenced main writer while revision 20 is reconciled. No second writer or foreign branch is modified.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Execute invoke-bad58dd32377c344b6717fc6 is frozen for native-publication unit unit-52ff04d764576d3a077385d1 under native invocation invoke-aceac153a88306e9ba0ed664 and binds authoritative inbox revision 19 plus the generation-7 fence.",
+    "pending_native_execute": "The post-publication Execute and Candidate evaluation completed locally. Root invoke-76ed667d67bf98a4b2112b2f is frozen under revision 19, remains unanswered, and is stale-source after the revision-20 append.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "work/recovery-gen7-context-comparison-native-v1",
     "snapshot_head_sha": "e3fe61198fe00079e7def3d52d83124dca3e61be",
-    "pending_work_invocation_id": "invoke-bad58dd32377c344b6717fc6",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-bad58dd32377c344b6717fc6/request.json",
+    "pending_work_invocation_id": "none_authoritative_until_revision20_reconciliation",
+    "pending_request_ref": null,
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
     "durability_status": "PR 293 exact head e3fe61198fe00079e7def3d52d83124dca3e61be passed canonical workflow 32724168634 with four successful pytest shards and successful aggregate, then merged with expected-head protection as 84d71549319ee6c8d19f0ed94ba45a74b1dfc5b6. The merge tree 8c28e0a20e0377f9a139faf3a58e44b3e2a2d1c1 matched the final pre-dispatch merge-tree proof; parents are the authorization main 2441148c2f51dad4e61ea288713e541349b79983 and exact head. All 81 manifest-listed payload blobs plus manifest blob 0d20ecb7dd52f25877618abe75e9b1147bcabc1e matched on main, the diff contained exactly 82 paths, and the sorted path-list digest matched c51341b646d59990741d9c37c92fa8c99d6f629ec3c35a3442b0ecbc2349f2fb.",
-    "next_action": "Read back this post-merge state CAS, then submit the identity-bound Execute response for invoke-bad58dd32377c344b6717fc6 with bounded internal durability PASS and user-level FAIL. At the resulting safe semantic boundary append the pending clarification as authoritative inbox revision 20 through the dedicated expected-revision 19, JSON/schema validation, one-CAS, exact-readback path; ingest it at the next Root boundary without changing the completed frozen Execute identity.",
+    "next_action": "Reconcile authoritative inbox revision 20 into agi/USER_DIRECTIVE_EVENTS.json and strategy/state projections on an isolated branch, validate exact source cross-binding, then generate a fresh Root identity bound to revision 20 without answering invoke-76ed667d67bf98a4b2112b2f.",
     "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
-    "next_native_phase": "execute_external_effect_after_state_precommit"
+    "next_native_phase": "root_source_clock_rebind",
+    "stale_source_unanswered_local_root_invocation_id": "invoke-76ed667d67bf98a4b2112b2f",
+    "stale_source_reason": "Frozen after authoritative inbox revision advanced from 19 to 20; must remain unanswered and be replaced by a new source-clock-bound Root identity."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -82,7 +86,7 @@
     "result_commit_sha": "dbd115631e15485cb603e958c18074264c728036",
     "result_blob_sha": "4b1d7b2e4e175ea3de8aeb6c8514453f9f778c9f",
     "finalization_expected_blob_sha": "b7bd20299d1714769834fe29e665fcfa4729d065",
-    "note": "Revision 19 is acknowledged at a frozen Root boundary. This state-only CAS also persists the idempotency precommit for the dedicated append-path publication before any branch, commit, or PR mutation."
+    "note": "Heartbeat and exact continuation refreshed after authoritative inbox revision 20 append. Revision 20 is not acknowledged until typed directive reconciliation and a fresh source-clock-bound Root boundary complete."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -1311,7 +1315,7 @@
     "rule": "No blob, tree, commit, branch, PR, workflow, ref update, or merge for this effect may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base; merge only the unchanged exact head after all required CI succeeds and a fresh main comparison is conflict-free; then read back all 82 reviewed blobs.",
     "claim_boundary": "Internal native O lifecycle durability only. The comparison remains PRECOMMITTED with zero routing observations and no scientist positive-control result; no behavioral benefit, external production evidence, AGI, or user-level completion is claimed.",
     "remote_parent": "92b3b25ab6643dcaa2d043141e4d88032cfbd267",
-    "remote_tree": "b1be4dcbf0e9942b2b6c37f8b1637e5cee4a6370",
+    "remote_tree": "8492f815ece66458d09637a8146470663972a9e1",
     "remote_commit": "e3fe61198fe00079e7def3d52d83124dca3e61be",
     "remote_tree_matches_local": true,
     "remote_changed_path_count": 82,
@@ -1327,9 +1331,6 @@
     "manifest_correction_expected_state_blob": "3e9931a12176b51b638efe1e1164592e76ed160d",
     "manifest_correction_planned_tree": "8492f815ece66458d09637a8146470663972a9e1",
     "manifest_correction_prepared_at": "2026-08-24T11:52:21.127Z",
-    "remote_tree": "8492f815ece66458d09637a8146470663972a9e1",
-    "remote_commit": "e3fe61198fe00079e7def3d52d83124dca3e61be",
-    "pr_head": "e3fe61198fe00079e7def3d52d83124dca3e61be",
     "non_force_fast_forward_verified": true,
     "corrected_manifest_remote_readback_verified": true,
     "corrected_exact_tree_work_verify": "valid: 171 requests, 169 responses, 2 recognized pending requests",
