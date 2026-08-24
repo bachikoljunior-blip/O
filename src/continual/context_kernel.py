@@ -807,6 +807,154 @@ def _source_by_id(
     raise ContextKernelError(f"decision context is missing source: {source_id}")
 
 
+def _stable_ci_observation(value: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the immutable CI fields that may authorize one merge action."""
+
+    exact = _required_mapping(value, "CI source observation")
+    freshness = _required_mapping(exact.get("freshness"), "CI source freshness")
+    if freshness.get("kind") != "max_age":
+        raise ContextKernelError("CI source freshness kind mismatch")
+    return {
+        "source_id": _required_text(exact.get("source_id"), "CI source_id"),
+        "observation_id": _required_text(
+            exact.get("observation_id"), "CI observation_id"
+        ),
+        "request_digest": _required_text(
+            exact.get("request_digest"), "CI request_digest"
+        ),
+        "receipt_digest": _required_text(
+            exact.get("receipt_digest"), "CI receipt_digest"
+        ),
+        "authoritative_locator": _required_text(
+            exact.get("authoritative_locator"), "CI authoritative_locator"
+        ),
+        "source_version": deepcopy(
+            _required_mapping(exact.get("source_version"), "CI source_version")
+        ),
+        "projection": deepcopy(
+            _required_mapping(exact.get("projection"), "CI projection")
+        ),
+        "evidence_class": _required_text(
+            exact.get("evidence_class"), "CI evidence_class"
+        ),
+        "unknowns": deepcopy(exact.get("unknowns")),
+        "claim_scope": _required_text(
+            exact.get("claim_scope"), "CI claim_scope"
+        ),
+        "freshness": {
+            "kind": "max_age",
+            "max_age_seconds": _required_int(
+                freshness.get("max_age_seconds"),
+                "CI freshness.max_age_seconds",
+                minimum=1,
+            ),
+        },
+    }
+
+
+def _ci_merge_authorization(
+    root: Path,
+    *,
+    run_id: str,
+    state: Mapping[str, Any],
+    manifest: Mapping[str, Any],
+    action: Mapping[str, Any],
+    store: Store,
+) -> dict[str, Any] | None:
+    """Cross-bind one GitHub merge action to fresh manifest CI evidence."""
+
+    if action.get("kind") != "github_merge_pull_request":
+        return None
+    target = _required_mapping(action.get("target"), "merge action target")
+    parameters = _required_mapping(
+        action.get("parameters"), "merge action parameters"
+    )
+    if set(target) != {"repository", "pull_request"}:
+        raise ContextKernelError(
+            "merge action target must contain repository and pull_request"
+        )
+    if set(parameters) - {"expected_head_sha", "merge_method"}:
+        raise ContextKernelError("merge action contains unsupported parameters")
+    repository = _required_text(target.get("repository"), "merge repository")
+    pull_request = _required_int(
+        target.get("pull_request"), "merge pull_request", minimum=1
+    )
+    expected_head = _required_text(
+        parameters.get("expected_head_sha"), "merge expected_head_sha"
+    )
+    if len(expected_head) != 40 or any(
+        character not in "0123456789abcdef" for character in expected_head
+    ):
+        raise ContextKernelError("merge expected_head_sha must be a full SHA")
+    merge_method = parameters.get("merge_method", "merge")
+    if merge_method not in {"merge", "squash", "rebase"}:
+        raise ContextKernelError("unsupported merge method")
+
+    observations = _source_by_id(manifest, "external_observations")
+    projection = _required_mapping(
+        observations.get("projection"), "manifest observation projection"
+    )
+    entries = projection.get("entries")
+    if not isinstance(entries, list):
+        raise ContextKernelError("manifest observation entries must be an array")
+    manifest_ci = [
+        entry
+        for entry in entries
+        if isinstance(entry, Mapping)
+        and entry.get("source_id") == "github_actions_ci"
+    ]
+    if len(manifest_ci) != 1:
+        raise ContextKernelError(
+            "merge action requires exactly one manifest CI observation"
+        )
+    try:
+        current = verify_ci_source_observation(
+            root,
+            run_id=run_id,
+            state=state,
+            now=store.utc_now(),
+        )
+    except CiSourceObservationError as exc:
+        raise ContextKernelError(
+            f"merge CI source observation failed: {exc}"
+        ) from exc
+    if current is None:
+        raise ContextKernelError("merge action requires CI source policy")
+    bound = _stable_ci_observation(manifest_ci[0])
+    current_bound = _stable_ci_observation(current)
+    if bound != current_bound:
+        raise ContextKernelError(
+            "merge CI source changed since semantic decision"
+        )
+    policy = _required_mapping(
+        state.get("ci_source_observation_policy"), "CI source policy"
+    )
+    if repository != policy.get("repository_full_name"):
+        raise ContextKernelError("merge repository does not match CI source")
+    if expected_head != current_bound["source_version"].get("exact_head_sha"):
+        raise ContextKernelError("merge head does not match CI source")
+    workflow = _required_mapping(
+        current_bound["projection"].get("workflow_run"),
+        "CI workflow run projection",
+    )
+    jobs = current_bound["projection"].get("required_jobs")
+    if not isinstance(jobs, list) or not jobs:
+        raise ContextKernelError("CI required jobs projection is empty")
+    return {
+        "repository_full_name": repository,
+        "pull_request": pull_request,
+        "expected_head_sha": expected_head,
+        "merge_method": merge_method,
+        "observation_id": current_bound["observation_id"],
+        "request_digest": current_bound["request_digest"],
+        "receipt_digest": current_bound["receipt_digest"],
+        "workflow_run_id": workflow.get("id"),
+        "workflow_id": workflow.get("workflow_id"),
+        "required_jobs": deepcopy(jobs),
+        "claim_scope": current_bound["claim_scope"],
+    }
+
+
 def build_effect_dispatch_context(
     root: Path,
     *,
@@ -968,6 +1116,14 @@ def build_effect_dispatch_context(
         raise ContextKernelError("effect dispatch effective policy changed")
 
     exact_action = _required_mapping(action, "effect action")
+    ci_merge = _ci_merge_authorization(
+        root,
+        run_id=run_id,
+        state=state,
+        manifest=manifest,
+        action=exact_action,
+        store=store,
+    )
     context = {
         "schema_version": 1,
         "record_type": "effect_dispatch_context",
@@ -1001,5 +1157,7 @@ def build_effect_dispatch_context(
             "action_digest": store.stable_digest(exact_action, length=64),
         },
     }
+    if ci_merge is not None:
+        context["ci_merge_authorization"] = ci_merge
     context["dispatch_context_digest"] = store.stable_digest(context, length=64)
     return context

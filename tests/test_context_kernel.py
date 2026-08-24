@@ -445,9 +445,32 @@ def _effect_action(path: str = "guarded.txt") -> dict:
     }
 
 
+def _merge_action(
+    *,
+    repository: str = "example/context-test",
+    expected_head_sha: str = "b" * 40,
+) -> dict:
+    return {
+        "kind": "github_merge_pull_request",
+        "target": {
+            "repository": repository,
+            "pull_request": 284,
+        },
+        "parameters": {
+            "expected_head_sha": expected_head_sha,
+            "merge_method": "merge",
+        },
+    }
+
+
 def _context_authorized_effect(
-    root: Path, snapshot: dict, *, effect_id: str
+    root: Path,
+    snapshot: dict,
+    *,
+    effect_id: str,
+    action: dict | None = None,
 ):
+    exact_action = action or _effect_action()
     request, request_path = _freeze_component(
         _client(root), snapshot, "execute"
     )
@@ -475,7 +498,7 @@ def _context_authorized_effect(
         run_id=RUN_ID,
         effect_id=effect_id,
         invocation_id=request["invocation_id"],
-        action=_effect_action(),
+        action=exact_action,
         executor_binding="context-kernel-test-session",
         model_identity="context-kernel-test-model",
     )
@@ -485,7 +508,7 @@ def _context_authorized_effect(
         effect_id=effect_id,
         invocation_id=request["invocation_id"],
         request_digest=request["request_digest"],
-        action=_effect_action(),
+        action=exact_action,
         executor_binding="context-kernel-test-session",
         model_identity="context-kernel-test-model",
     )
@@ -1117,6 +1140,192 @@ def test_effect_dispatch_context_binds_manifest_and_allows_heartbeat_refresh(
     )
     assert result["dispatched"] is True
     assert len(calls) == 1
+
+
+def test_merge_dispatch_is_cross_bound_to_fresh_manifest_ci_and_at_most_once(
+    tmp_path: Path,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    request, receipt = _record_ci_receipt(root)
+    _, plan, authorization, typed = _context_authorized_effect(
+        root,
+        snapshot,
+        effect_id="manifest-ci-merge-v1",
+        action=_merge_action(),
+    )
+    binding = plan["dispatch_context"]["ci_merge_authorization"]
+    assert binding == {
+        "repository_full_name": "example/context-test",
+        "pull_request": 284,
+        "expected_head_sha": "b" * 40,
+        "merge_method": "merge",
+        "observation_id": request["observation_id"],
+        "request_digest": request["request_digest"],
+        "receipt_digest": receipt["receipt_digest"],
+        "workflow_run_id": 7001,
+        "workflow_id": 8001,
+        "required_jobs": [
+            {
+                "id": 101,
+                "name": "pytest shard 0 of 1",
+                "status": "completed",
+                "conclusion": "success",
+            },
+            {
+                "id": 102,
+                "name": "test",
+                "status": "completed",
+                "conclusion": "success",
+            },
+        ],
+        "claim_scope": "internal_ci_provenance_not_behavioral_or_completion_evidence",
+    }
+    assert authorization["dispatch_context_digest"] == plan[
+        "dispatch_context_digest"
+    ]
+    assert typed.dispatch_context_digest == plan["dispatch_context_digest"]
+    persisted = json.dumps(plan, ensure_ascii=False).lower()
+    assert "secret" not in persisted
+    assert "opaque-fence-must-not-be-copied" not in persisted
+    assert "logs" not in persisted
+
+    calls: list[dict] = []
+    first = dispatch_work_effect(
+        root,
+        authorization=typed,
+        callback=lambda envelope: calls.append(envelope)
+        or {"verified_readback": True, "merge_sha": "c" * 40},
+    )
+    replay = dispatch_work_effect(
+        root,
+        authorization=typed,
+        callback=lambda envelope: calls.append(envelope)
+        or {"verified_readback": True},
+    )
+    assert first["dispatched"] is True
+    assert replay["replayed"] is True
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize(
+    ("mutation", "match"),
+    [
+        (
+            lambda state: state["ci_source_observation_policy"].__setitem__(
+                "exact_head_sha", "c" * 40
+            ),
+            "merge CI source observation failed",
+        ),
+        (
+            lambda state: state["ci_source_observation_policy"][
+                "required_jobs"
+            ].pop(),
+            "merge CI source observation failed",
+        ),
+    ],
+)
+def test_merge_dispatch_rejects_moved_head_or_changed_job_topology_atomically(
+    tmp_path: Path,
+    mutation,
+    match: str,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    _record_ci_receipt(root)
+    _, _, _, typed = _context_authorized_effect(
+        root,
+        snapshot,
+        effect_id="revoked-manifest-ci-merge-v1",
+        action=_merge_action(),
+    )
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    mutation(state)
+    state["heartbeat_at"] = Store(root).utc_now()
+    _write_json(state_path, state)
+    calls = 0
+
+    def provider(_: dict) -> dict:
+        nonlocal calls
+        calls += 1
+        return {"verified_readback": True}
+
+    with pytest.raises(WorkEffectError, match=match):
+        dispatch_work_effect(root, authorization=typed, callback=provider)
+    assert calls == 0
+    assert not (
+        root
+        / ".continual"
+        / "runs"
+        / RUN_ID
+        / "external-effects"
+        / "revoked-manifest-ci-merge-v1"
+        / "dispatch.json"
+    ).exists()
+
+
+@pytest.mark.parametrize("aggregate_mutation", ["failed", "missing"])
+def test_merge_dispatch_rejects_invalid_aggregate_atomically(
+    tmp_path: Path,
+    aggregate_mutation: str,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    request, _ = _record_ci_receipt(root)
+    _, _, _, typed = _context_authorized_effect(
+        root,
+        snapshot,
+        effect_id="failed-aggregate-manifest-ci-merge-v1",
+        action=_merge_action(),
+    )
+    receipt_path = (
+        root
+        / ".continual"
+        / "runs"
+        / RUN_ID
+        / "ci-source-observations"
+        / request["observation_id"]
+        / "receipt.json"
+    )
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if aggregate_mutation == "failed":
+        receipt["projection"]["required_jobs"][1]["conclusion"] = "failure"
+    else:
+        receipt["projection"]["required_jobs"].pop()
+    receipt.pop("receipt_digest")
+    receipt["receipt_digest"] = Store(root).stable_digest(receipt, length=64)
+    _write_json(receipt_path, receipt)
+    calls = 0
+
+    def provider(_: dict) -> dict:
+        nonlocal calls
+        calls += 1
+        return {"verified_readback": True}
+
+    with pytest.raises(WorkEffectError, match="merge CI source observation failed"):
+        dispatch_work_effect(root, authorization=typed, callback=provider)
+    assert calls == 0
+
+
+@pytest.mark.parametrize(
+    ("action", "match"),
+    [
+        (_merge_action(repository="other/repository"), "repository does not match"),
+        (_merge_action(expected_head_sha="c" * 40), "head does not match"),
+    ],
+)
+def test_merge_plan_rejects_repository_or_head_not_bound_to_manifest_ci(
+    tmp_path: Path,
+    action: dict,
+    match: str,
+) -> None:
+    root, snapshot = _root(tmp_path)
+    _record_ci_receipt(root)
+    with pytest.raises(WorkEffectError, match=match):
+        _context_authorized_effect(
+            root,
+            snapshot,
+            effect_id="wrong-binding-manifest-ci-merge-v1",
+            action=action,
+        )
 
 
 def test_control_plane_effect_without_execute_manifest_fails_closed(
