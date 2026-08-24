@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T08:26:56.012Z",
-  "last_progress_at": "2026-08-24T08:14:12.196Z",
+  "heartbeat_at": "2026-08-24T08:33:54.582Z",
+  "last_progress_at": "2026-08-24T08:33:54.582Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,7 +21,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
+  "source_main_sha": "2c94909efcc37c05462063bcccd2850d60837050",
   "working_branch": "work/recovery-gen7-inbox-append-path-v1",
   "active_run_id": "run-work-mode-handoff-v2",
   "active_component": "execute",
@@ -44,8 +44,8 @@
     "snapshot_head_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
     "pending_work_invocation_id": "invoke-7a258555c3d521841a26d787",
     "pending_request_ref": ".continual/work-model/invocations/invoke-7a258555c3d521841a26d787/request.json",
-    "durability_status": "Authoritative inbox revision 19 is acknowledged. Dedicated append-path PR 289 remains at exact head 2c0852dbf17e169da0ad045f9958d88123dc1ab3; workflow 32704286413 has pytest shards 0 and 3 succeeded, shards 1 and 2 in progress, aggregate pending.",
-    "next_action": "Wait for all four exact-head shards and the dependent aggregate. Re-read the unchanged head, generation-7 fence, latest main, and conflict status; merge only if every check succeeds, then read back exact reviewed bytes. PR 288 remains a separate unmerged unit."
+    "durability_status": "Recovered inbox entries are authoritative and acknowledged at revision 19. Dedicated append-path PR 289 passed exact-head workflow 32704286413 (four pytest shards plus dependent aggregate) and merged to main at 2c94909efcc37c05462063bcccd2850d60837050 with exact reviewed-byte readback.",
+    "next_action": "Record a fresh main-state observation for the frozen Execute invoke-7a258555c3d521841a26d787, submit its factual PASS result, then continue Candidate Evaluate, Task Evaluate, Consolidate Episode, Learn, and the next Root without treating this control-plane unit as user-level completion. PR 288 remains separate."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -933,7 +933,7 @@
     },
     "local_validation": "76 focused control-plane and Context Kernel tests passed; compileall, repository JSON parsing, and diff check passed.",
     "prepared_at": "2026-08-24T07:59:04.864Z",
-    "status": "published_exact_head_ci_running",
+    "status": "merged_to_main_verified",
     "rule": "After exact state CAS readback, create one non-force isolated branch from this exact main, publish exactly the three reviewed blobs, verify remote tree identity, open one PR, and require unchanged exact-head CI plus fresh conflict-free main before expected-head merge.",
     "claim_boundary": "Inbox integrity infrastructure and recovered-direction acknowledgement only; not behavioral capability, positive-control evidence, AGI, or user-level completion.",
     "remote_parent": "e2f6d9796b09e230bbf116acd88d4f29a33cb385",
@@ -949,15 +949,35 @@
     "pull_request": 289,
     "workflow_run": 32704286413,
     "workflow_id": 335420036,
-    "ci_status": "in_progress_2_of_4_shards_succeeded",
-    "last_ci_observed_at": "2026-08-24T08:26:56.012Z",
+    "ci_status": "success_four_shards_and_dependent_aggregate",
+    "last_ci_observed_at": "2026-08-24T08:33:54.582Z",
     "successful_job_ids": [
       97362006748,
-      97362006910
-    ],
-    "pending_job_ids": [
       97362006890,
-      97362006945
-    ]
+      97362006910,
+      97362006945,
+      97369011320
+    ],
+    "pending_job_ids": [],
+    "exact_head_ci_run": 32704286413,
+    "exact_head_ci_head": "2c0852dbf17e169da0ad045f9958d88123dc1ab3",
+    "exact_head_unchanged": true,
+    "mergeable_before_merge": true,
+    "main_before_merge": "2e647fe824ab00d62a9ecc73acc8a96b4509ea92",
+    "merge_sha": "2c94909efcc37c05462063bcccd2850d60837050",
+    "merge_parents": [
+      "2e647fe824ab00d62a9ecc73acc8a96b4509ea92",
+      "2c0852dbf17e169da0ad045f9958d88123dc1ab3"
+    ],
+    "merged_at": "2026-08-24T08:32:26Z",
+    "main_readback_verified": true,
+    "main_readback_blobs": {
+      "agi/WORK_MODE.md": "ba2c65a47d632a28b9de6f4855b0c565dad4e0c4",
+      "src/agi/user_input_inbox.py": "e18f0e4f0855301bc7cd03af201b7dd4a857b127",
+      "tests/test_user_input_inbox.py": "e87cd909198877965aa5cad1705392ca820d83c1",
+      "agi/USER_INPUT_INBOX.json": "7909d7a2d9076ce7916e3c3403fb929db1b501a6",
+      "agi/USER_INPUT_INBOX_RECOVERY.json": "a5974d662a5c2487b78f602b3ba77f98286662fb",
+      "agi/USER_DIRECTIVE_EVENTS.json": "197d78d081fa400f2689165c5599baeece45970a"
+    }
   }
 }
