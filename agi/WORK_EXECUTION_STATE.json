@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T12:15:21.585Z",
-  "last_progress_at": "2026-08-24T12:15:21.585Z",
+  "heartbeat_at": "2026-08-24T12:25:13.064Z",
+  "last_progress_at": "2026-08-24T12:25:13.064Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -52,8 +52,8 @@
     "pending_work_invocation_id": "invoke-bad58dd32377c344b6717fc6",
     "pending_request_ref": ".continual/work-model/invocations/invoke-bad58dd32377c344b6717fc6/request.json",
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
-    "durability_status": "PR 292 is closed as superseded and replacement PR 293 preserves exact head e3fe61198fe00079e7def3d52d83124dca3e61be and tree 8492f815ece66458d09637a8146470663972a9e1. GitHub Actions REST refuted the connector-index false negative: exact-head run 32724168634 is in progress with shards 0 and 1 successful and shards 2 and 3 running; two redundant exact-head runs remain queued. Execute remains frozen and unanswered while the canonical exact-head CI and aggregate are pending.",
-    "next_action": "Observe canonical exact-head run 32724168634 on PR 293. After all four shards and the dependent aggregate succeed, re-read generation-7 authority, inbox revision 19, current main, exact PR head, and a conflict-free comparison; then precommit merge authorization, merge with expected-head protection, and read back all 82 reviewed blobs before answering Execute.",
+    "durability_status": "PR 293 preserves exact head e3fe61198fe00079e7def3d52d83124dca3e61be and tree 8492f815ece66458d09637a8146470663972a9e1. Canonical exact-head run 32724168634 completed successfully with all four pytest shards and the dependent aggregate successful. Fresh main 974f1e50dd4f5bac1fa9b606d0c0bf4f9c11abb0 retained generation-7 authority and acknowledged inbox revision 19; PR head is unchanged, GitHub reports mergeable=true, and git merge-tree produced conflict-free tree 8b33a765ef6b95cfa3a9f46ccdba3c45026f98a9. Execute remains frozen until expected-head merge and 82-blob main readback complete.",
+    "next_action": "Read back this merge-authorization CAS; then re-read current main, generation-7 fence, inbox revision 19, PR 293 head, and exact-head run 32724168634. If unchanged, merge PR 293 with expected head e3fe61198fe00079e7def3d52d83124dca3e61be and read back the merge tree, parents, manifest, and all 82 reviewed blobs before answering Execute.",
     "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
     "next_native_phase": "execute_external_effect_after_state_precommit"
   },
@@ -1307,7 +1307,7 @@
     ],
     "local_validation": "Exact publication tree work-verify is valid with 171 requests, 169 responses, and two recognized pending Execute requests (one pre-existing main request and the current publication request); 82 changed paths include the deterministic 81-payload manifest; every JSON/JSONL parsed; the prior 408-line event log is a byte-identical prefix of the 435-line selected log; secret-marker and forbidden-path scans passed.",
     "prepared_at": "2026-08-24T11:40:38.041Z",
-    "status": "ci_in_progress",
+    "status": "merge_authorization_precommitted",
     "rule": "No blob, tree, commit, branch, PR, workflow, ref update, or merge for this effect may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base; merge only the unchanged exact head after all required CI succeeds and a fresh main comparison is conflict-free; then read back all 82 reviewed blobs.",
     "claim_boundary": "Internal native O lifecycle durability only. The comparison remains PRECOMMITTED with zero routing observations and no scientist positive-control result; no behavioral benefit, external production evidence, AGI, or user-level completion is claimed.",
     "remote_parent": "92b3b25ab6643dcaa2d043141e4d88032cfbd267",
@@ -1360,17 +1360,24 @@
       }
     },
     "exact_head_workflows": {
-      "observed_at": "2026-08-24T12:15:21.585Z",
+      "observed_at": "2026-08-24T12:25:13.064Z",
       "head_sha": "e3fe61198fe00079e7def3d52d83124dca3e61be",
       "canonical_run": 32724168634,
-      "canonical_status": "in_progress",
+      "canonical_status": "completed_success",
       "canonical_jobs": {
         "pytest shard 0 of 4": "success",
         "pytest shard 1 of 4": "success",
-        "pytest shard 2 of 4": "in_progress",
-        "pytest shard 3 of 4": "in_progress",
-        "aggregate": "pending_dependency"
+        "pytest shard 2 of 4": "success",
+        "pytest shard 3 of 4": "success",
+        "aggregate": "success"
       },
+      "successful_job_ids": [
+        97421679156,
+        97421678805,
+        97421679062,
+        97421678901,
+        97430017832
+      ],
       "redundant_runs": [
         {
           "run_id": 32724759054,
@@ -1382,6 +1389,41 @@
         }
       ],
       "rule": "Only a completed successful run bound to the unchanged exact head may authorize merge; redundant runs do not weaken or replace that gate."
+    },
+    "merge_authorization": {
+      "effect_id": "merge-pr293-context-comparison-native-v1",
+      "idempotency_key": "bachikoljunior-blip/O:pr293:e3fe61198fe00079e7def3d52d83124dca3e61be:merge:v1",
+      "expected_state_blob": "4f5f1e646cf8ced92e1cc4259fa57ae0b6c49d93",
+      "prepared_at": "2026-08-24T12:25:13.064Z",
+      "status": "precommitted",
+      "expected_head_sha": "e3fe61198fe00079e7def3d52d83124dca3e61be",
+      "expected_head_tree": "8492f815ece66458d09637a8146470663972a9e1",
+      "observed_main_sha": "974f1e50dd4f5bac1fa9b606d0c0bf4f9c11abb0",
+      "merge_base_sha": "92b3b25ab6643dcaa2d043141e4d88032cfbd267",
+      "predicted_merge_tree": "8b33a765ef6b95cfa3a9f46ccdba3c45026f98a9",
+      "compare_status": "diverged",
+      "ahead_by": 2,
+      "behind_by": 8,
+      "github_mergeable": true,
+      "exact_head_workflow_run": 32724168634,
+      "required_jobs": {
+        "97421679156": "success",
+        "97421678805": "success",
+        "97421679062": "success",
+        "97421678901": "success",
+        "97430017832": "success"
+      },
+      "authority": {
+        "owner_kind": "work_recovery_automation",
+        "execution_id": "work-recovery-20260824T040019Z-fed49f4a10c39430",
+        "lease_generation": 7,
+        "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
+        "status": "running",
+        "highest_acknowledged_inbox_revision": 19,
+        "authoritative_inbox_blob": "7909d7a2d9076ce7916e3c3403fb929db1b501a6"
+      },
+      "pending_input_rule": "The observed revision-20 clarification remains unapplied and cannot change this frozen Execute identity; it will be appended and ingested at the next safe semantic boundary after Execute.",
+      "dispatch_rule": "Merge only after exact readback of this CAS and one final unchanged re-read of main, authority, inbox, PR head, and workflow success."
     }
   }
 }
