@@ -1,0 +1,86 @@
+{
+  "behavioral_answer": {
+    "reason_code": "remove_regression_surface",
+    "selected_repair_id": "safe-minimal"
+  },
+  "continuation": {
+    "completed_candidate_id": "research-unit-b-sibling_checkpoint-1",
+    "remaining_candidate_ids": [
+      "research-unit-b-sibling_checkpoint-2",
+      "research-unit-b-sibling_checkpoint-3"
+    ]
+  },
+  "next_execution_unit": {
+    "behavioral_outcome": {
+      "outcome_id": "behavioral-outcome-aa465110cb164f1af5755cd4",
+      "request_digest": "9c62730a78c9e49342f4b3faa1891aef0e3696cb5e04a429776b58bc60e1352f",
+      "response_pointer": [
+        "result",
+        "behavioral_answer"
+      ],
+      "rubric_digest": "cc8a49c4af6a0e3e72fd356d11039be4473039974fb4c6288d0757e4f232d754",
+      "task_digest": "94f8933df152c7d00f45c2fde1949f45dc36750bb6ee94dccf5379fd16bebfc5"
+    },
+    "checkpoint_measurement": {
+      "arm": "sibling_checkpoint",
+      "attempt_count": 3,
+      "attempt_index": 2,
+      "candidate_id": "research-unit-b-sibling_checkpoint-2",
+      "max_model_invocations": 1,
+      "protocol_digest": "d83a1d46bb4b82d7304af027fa4b838c865d8f608312a35922e57c28223f0352",
+      "readiness_digest": "c176f8060479e74a1522dd76f956a0a79417b52e21809ba176d1234656477b05",
+      "task_id": "research-unit-b"
+    },
+    "component": "execute",
+    "goal": "Repair the failed research plan by selecting the one option that removes the observed protected-regression cause without widening production effects. Return only canonical JSON in the requested fields.",
+    "main_write_allowed": false,
+    "production_effects_allowed": false,
+    "scope": "agi/bounded-stage-checkpoint-inheritance/behavioral-attempt-v1",
+    "task": {
+      "answer_format": "canonical_json",
+      "input": {
+        "checkpoint_measurement": {
+          "arm": "sibling_checkpoint",
+          "attempt_count": 3,
+          "attempt_index": 2,
+          "candidate_id": "research-unit-b-sibling_checkpoint-2",
+          "max_model_invocations": 1,
+          "protocol_digest": "d83a1d46bb4b82d7304af027fa4b838c865d8f608312a35922e57c28223f0352",
+          "readiness_digest": "c176f8060479e74a1522dd76f956a0a79417b52e21809ba176d1234656477b05",
+          "task_id": "research-unit-b"
+        },
+        "task_input": {
+          "failed_plan": {
+            "negative_observation": "protected regression failed after unrelated surface expansion",
+            "plan_id": "broad-rewrite"
+          },
+          "repair_options": [
+            {
+              "production_effects": false,
+              "removes_regression_surface": false,
+              "repair_id": "retry-broad"
+            },
+            {
+              "production_effects": false,
+              "removes_regression_surface": true,
+              "repair_id": "safe-minimal"
+            }
+          ],
+          "required_fields": [
+            "selected_repair_id",
+            "reason_code"
+          ],
+          "selection_rule": "choose the unique repair that removes the observed regression surface and adds no production effect"
+        }
+      },
+      "instruction": "Repair the failed research plan by selecting the one option that removes the observed protected-regression cause without widening production effects. Return only canonical JSON in the requested fields.",
+      "response_pointer": [
+        "result",
+        "behavioral_answer"
+      ],
+      "task_id": "research-unit-b"
+    },
+    "unit_id": "unit-research-b-sibling-2"
+  },
+  "status": "answered_one_frozen_attempt"
+}

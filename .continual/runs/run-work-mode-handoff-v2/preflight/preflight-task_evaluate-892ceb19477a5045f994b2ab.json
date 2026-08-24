@@ -1,0 +1,56 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "evidence_refs": [
+      ".continual/runs/run-work-mode-handoff-v2/execution-units/unit-ee7daa32b6ea49df70773453.json",
+      ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-0212b6b9232f1f6a5fcd49a1-result.json",
+      ".continual/runs/run-work-mode-handoff-v2/work-source-observations/work-state-46b1ec81b24a78c8bf8ff2f7/receipt.json"
+    ],
+    "observations": [
+      "The upcoming component is Task Evaluate and the Candidate targets that component.",
+      "The bounded publication evidence is complete, but the upper objective remains unmet.",
+      "Revision 20 makes evidence-scope preservation a required regression check."
+    ],
+    "purpose": "Choose the dual-verdict Candidate only for the exact publication Task Evaluate.",
+    "unresolved": [
+      "actual Task Evaluate verdict",
+      "post-result Candidate evaluation",
+      "Consolidate Episode and Learn"
+    ]
+  },
+  "local_learn": {
+    "decision": "NO_CHANGE",
+    "observation": "The Candidate is suitable for a reversible exact-scope trial because this evaluator must emit two non-conflated verdicts; activation still requires a separate protected gate."
+  },
+  "result": {
+    "applicability": "APPLICABLE: the exact Task Evaluate must separate the bounded publication verdict from the original user-level objective and retain narrow evidence scope.",
+    "baseline_needed": false,
+    "baseline_reason": "The frozen unit already specifies separate bounded and user-level verdicts plus immutable evidence. The Candidate may enforce that separation but may not change success criteria or evidence scope.",
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "decision": "TRIAL_CANDIDATE",
+    "dependency_conflict_status": "No declared dependencies or conflicts. Trial only; the evaluator cannot activate itself and no global activation is authorized.",
+    "evidence_to_collect": [
+      "closed 80-path allowlist and reviewed blob-manifest digests",
+      "exact-head workflow and all five required successful jobs",
+      "generation-8 fence and inbox revision 20 receipt before merge",
+      "expected-head merge and 80-of-80 remote readback",
+      "all Revision-20 broad-negative flags remaining false",
+      "inactive Candidate state and user-level FAIL"
+    ],
+    "regression_checks": [
+      "bounded publication PASS must not imply user-level PASS",
+      "evidence insufficiency must not be relabeled as original-method, family-wide, adaptation-loss, or untested-mechanism failure",
+      "an adequately proven equivalent original control must not require duplicate reproduction",
+      "internal CI and readback must not be relabeled as behavioral or independent production evidence",
+      "no Candidate activation may result from this evaluator call"
+    ],
+    "risk_dimensions": {
+      "failure_risk": "Low if the evaluator uses only immutable publication evidence; material risk is claim inflation or scope generalization.",
+      "latency_tokens": "Small bounded evidence classification.",
+      "quality": "Positive if dual verdicts and exact scope remain explicit.",
+      "tool_external_cost": "No new external side effect is required."
+    },
+    "rollback": "Discard the Candidate trial if it changes the frozen criteria, merges verdicts, enlarges a negative claim, or recommends activation without the protected deterministic gate.",
+    "scope": "work/revision20-equivalence-audit-native-publication/evaluation-v1"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "authority": {
+    "execution_id": "work-recovery-20260824T153124Z-073c1e261139db2a",
+    "fence_token_digest": "612a31099cf171c32453cb21557e8f71fb0f02c920aa979ce068bfb73f71810f",
+    "highest_acknowledged_inbox_revision": 20,
+    "lease_generation": 8,
+    "owner_kind": "work_recovery_automation",
+    "status": "running"
+  },
+  "budget": {
+    "max_response_bytes": 4096
+  },
+  "claim_scope": "internal_provider_behavioral_outcome_not_independent_or_completion_evidence",
+  "executor_binding": "current_chatgpt_work_session",
+  "model_identity": "chatgpt-work-model-unverified",
+  "outcome_id": "behavioral-outcome-27e5a9ffe4ace227dfd3c57c",
+  "prepared_authority": {
+    "execution_id": "work-recovery-20260824T153124Z-073c1e261139db2a",
+    "fence_token_digest": "612a31099cf171c32453cb21557e8f71fb0f02c920aa979ce068bfb73f71810f",
+    "heartbeat_at": "2026-08-24T17:12:40.262Z",
+    "highest_acknowledged_inbox_revision": 20,
+    "lease_generation": 8,
+    "owner_kind": "work_recovery_automation",
+    "stale_after_seconds": 900,
+    "status": "running"
+  },
+  "record_type": "behavioral_outcome_request",
+  "request_digest": "5cce946cc533585423e306f45a45d2653096b72baf0cf22f68bff9c0b81442f2",
+  "requested_at": "2026-08-24T17:20:30Z",
+  "rubric": {
+    "expected_answer": {
+      "reason_code": "highest_safe_replay_stable_score_then_id",
+      "retained_trace_id": "trace-a"
+    },
+    "judge_kind": "exact_canonical_json",
+    "judge_version": "exact-canonical-json-v1",
+    "success_threshold": 1.0
+  },
+  "rubric_digest": "b41b5dece4a42e45d6bc8ca2ac73e4a0e6786c55a3adac5550136f5743e4f3d3",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1,
+  "task": {
+    "answer_format": "canonical_json",
+    "input": {
+      "checkpoint_measurement": {
+        "arm": "sibling_checkpoint",
+        "attempt_count": 3,
+        "attempt_index": 1,
+        "candidate_id": "research-unit-c-sibling_checkpoint-1",
+        "max_model_invocations": 1,
+        "protocol_digest": "d83a1d46bb4b82d7304af027fa4b838c865d8f608312a35922e57c28223f0352",
+        "readiness_digest": "c176f8060479e74a1522dd76f956a0a79417b52e21809ba176d1234656477b05",
+        "task_id": "research-unit-c"
+      },
+      "task_input": {
+        "required_fields": [
+          "retained_trace_id",
+          "reason_code"
+        ],
+        "selection_rule": "filter to capability-retained, protected-regression-passing, replay-verified traces; maximize score; break exact ties by ascending trace_id",
+        "traces": [
+          {
+            "capability_retained": true,
+            "protected_regressions_passed": true,
+            "replay_verified": true,
+            "score": 0.8,
+            "trace_id": "trace-a"
+          },
+          {
+            "capability_retained": true,
+            "protected_regressions_passed": false,
+            "replay_verified": true,
+            "score": 0.9,
+            "trace_id": "trace-b"
+          },
+          {
+            "capability_retained": true,
+            "protected_regressions_passed": true,
+            "replay_verified": true,
+            "score": 0.8,
+            "trace_id": "trace-c"
+          }
+        ]
+      }
+    },
+    "instruction": "Select the retained experimental trace using only safe, replay-stable traces, then highest score, then ascending trace id for an exact tie. Return only canonical JSON in the requested fields.",
+    "response_pointer": [
+      "result",
+      "behavioral_answer"
+    ],
+    "task_id": "research-unit-c"
+  },
+  "task_digest": "62b5b26346c359464734a4fbf4c00b520275c922c11dc7529c9c7780d7680f55"
+}
