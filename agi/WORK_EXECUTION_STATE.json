@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T07:42:14.129Z",
-  "last_progress_at": "2026-08-24T07:42:14.129Z",
+  "heartbeat_at": "2026-08-24T07:53:32.441Z",
+  "last_progress_at": "2026-08-24T07:53:32.441Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -21,34 +21,31 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "0fce899298d2f1ad3755760eb00db1ff6c172998",
-  "working_branch": "work/recovery-gen7-public-concepts-v2-v1",
+  "source_main_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
+  "working_branch": "work/recovery-gen7-inbox-append-path-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "candidate_evaluate",
-  "active_unit_id": "unit-publish-public-concepts-v2",
+  "active_component": "execute",
+  "active_unit_id": "unit-d6cbe0a3154ed09edcc8e984",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 17,
-    "acknowledged_at": "2026-08-24T04:54:31.496Z",
-    "application_note": "Revision 16 is a withdrawn integrity quarantine bound to malformed blob 645f6f1f5ef0b4e7842142991f3748df858082a1; no missing semantics were reconstructed. Revision 17 applies the user's exact direction 再開して: generation 7 resumed under the existing CAS/fence and the insurance monitor was re-enabled. The already-frozen generation-6 native Execute request remains immutable and consumes its exact journal-bound context; revision 17 governs the next semantic boundary and does not alter the upper objective.",
-    "pending_revision": 19,
-    "pending_inbox_blob_sha": "7909d7a2d9076ce7916e3c3403fb929db1b501a6",
-    "pending_application_note": "Authoritative revisions 18 and 19 were appended from USER_INPUT_INBOX_RECOVERY via expected-revision 17 and expected-blob CAS with exact remote readback. They remain unacknowledged while the already-frozen post-result Candidate Evaluate invoke-c52310e8902964a85e57491b completes; typed directive reconciliation is being published before semantic ingestion at the next safe boundary."
+    "highest_acknowledged_revision": 19,
+    "acknowledged_at": "2026-08-24T07:53:32.441Z",
+    "application_note": "Revisions 18 and 19 were appended from USER_INPUT_INBOX_RECOVERY after authoritative revision 17 using expected-revision 17, expected-blob GitHub Contents CAS, JSON/schema validation, and exact remote readback. Frozen Root invocation invoke-fab205d5bf529019e49ac9cd bound inbox blob 7909d7a2d9076ce7916e3c3403fb929db1b501a6 and effective-directive blob 197d78d081fa400f2689165c5599baeece45970a before selecting Execute unit unit-d6cbe0a3154ed09edcc8e984. Revision 18 is an architecture comparison proposal, not automatic adoption; revision 19 requires a fidelity-preserving positive control before interpreting adapted scientist-agent results."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 7 remains the sole fenced main writer; publication content is rebased on main 0fce899298d2f1ad3755760eb00db1ff6c172998 at local exact head f1277e74872d4941f4328cef68df6b26120e3bf0.",
+    "primary": "Generation 7 remains the sole fenced main writer. The dedicated inbox append implementation is isolated on work/recovery-gen7-inbox-append-path-v1 and will be published non-force from latest main only after exact local validation.",
     "secondary": "Existing branches, PRs, workflows, and identity-bound native invocations remain untouched.",
-    "pending_native_execute": "Execute invoke-8c17214637e8334e3e9b2f3c was submitted exactly once; post-result Candidate Evaluate invoke-c52310e8902964a85e57491b is pending.",
+    "pending_native_execute": "Root invoke-fab205d5bf529019e49ac9cd consumed revision 19 and selected Execute unit unit-d6cbe0a3154ed09edcc8e984; work-resume will freeze its identity-bound Execute request.",
     "predecessor": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62 generation 6 checkpointed on malformed inbox revision 16."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-mode-handoff-v2/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
-    "pending_work_invocation_id": "invoke-c52310e8902964a85e57491b",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-c52310e8902964a85e57491b/request.json",
-    "durability_status": "PR 288 exact-head CI succeeded and Execute was submitted exactly once. Authoritative inbox is now revision 19 at blob 7909d7a2d9076ce7916e3c3403fb929db1b501a6; recovery integration receipt is verified. Revisions 18 and 19 are pending safe-boundary acknowledgement; frozen Candidate Evaluate invoke-c52310e8902964a85e57491b remains pending.",
-    "next_action": "CAS-publish the validated revision-19 typed directive ledger, finish frozen Candidate Evaluate and publication lifecycle, then reconcile and acknowledge inbox revision 19 at the next safe native boundary. Continue the dedicated append-path implementation and exact-head CI; do not merge PR 288 until its separate adjudication."
+    "snapshot_head_sha": "e922c16b7ef35bb766418c7c6c5838b8e370adf5",
+    "pending_work_invocation_id": "none_at_unit_pending_boundary",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-fab205d5bf529019e49ac9cd/response.json",
+    "durability_status": "Authoritative inbox revision 19, its recovery integration receipt, and the revision-19 typed directive ledger are verified on main. Root invoke-fab205d5bf529019e49ac9cd consumed their exact blobs and selected the dedicated append-path Execute unit; revision 19 is now acknowledged at that safe semantic boundary.",
+    "next_action": "Freeze and execute the dedicated append-path unit, publish it on an isolated non-force branch, require unchanged exact-head CI and a fresh conflict-free main comparison, then merge and read back exact reviewed bytes. PR 288 remains a separate unmerged unit."
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
