@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T11:48:28.608Z",
-  "last_progress_at": "2026-08-24T11:48:28.608Z",
+  "heartbeat_at": "2026-08-24T11:52:21.127Z",
+  "last_progress_at": "2026-08-24T11:52:21.127Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -45,8 +45,8 @@
     "pending_work_invocation_id": "invoke-bad58dd32377c344b6717fc6",
     "pending_request_ref": ".continual/work-model/invocations/invoke-bad58dd32377c344b6717fc6/request.json",
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
-    "durability_status": "The generation-7 precommit was read back at main cb0eda50fce49a987fc5623f298c5c3be5e62a91. The exact reviewed 82-path tree b1be4dcbf0e9942b2b6c37f8b1637e5cee4a6370 was published as commit 58b580c8674fb2d486613e7232a9e79b01ff2b61 on isolated PR 292. Execute invoke-bad58dd32377c344b6717fc6 remains frozen and unanswered while exact-head CI is pending.",
-    "next_action": "Observe PR 292 CI for unchanged exact head 58b580c8674fb2d486613e7232a9e79b01ff2b61; after all required jobs succeed, re-read generation-7 authority, current main, exact PR head, and conflict-free comparison, then merge with expected-head protection and read back every reviewed blob before answering Execute.",
+    "durability_status": "PR 292 head 58b580c8674fb2d486613e7232a9e79b01ff2b61 is valid, but exact-branch verification found that the manifest's work-verify count described the dirty local development branch rather than the exact publication tree. A state precommit now authorizes only the manifest correction to the verified exact-tree counts; Execute remains frozen and unanswered.",
+    "next_action": "After exact readback of the manifest-correction precommit, create one child commit changing only the deterministic manifest, fast-forward PR 292 without force, require a new unchanged exact-head CI, then perform fresh authority/main/comparison checks and expected-head merge.",
     "completed_work_invocation_id": "invoke-7d08d2f67228d5b31d3eab2e",
     "next_native_phase": "execute_external_effect_after_state_precommit"
   },
@@ -1275,12 +1275,12 @@
     "pending_native_invocation_id": "invoke-aceac153a88306e9ba0ed664",
     "decision_context_manifest_digest": "928c24911542f09aff1cc205b7da91dee61f1f689e9c07a5aa241c19937904b2",
     "publication_manifest_path": ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-52ff04d764576d3a077385d1-publication-manifest.json",
-    "publication_manifest_blob": "592df9e7a572cc4fca6a8c192d869e5b83ade5d4",
+    "publication_manifest_blob": "0d20ecb7dd52f25877618abe75e9b1147bcabc1e",
     "payload_path_count": 81,
     "changed_path_count": 82,
     "changed_path_list_sha256": "c51341b646d59990741d9c37c92fa8c99d6f629ec3c35a3442b0ecbc2349f2fb",
-    "reviewed_blob_manifest_sha256": "0a034cac64c90392efe82d650d21c4632e44fa611ffad888260efd90ffcb40f1",
-    "total_bytes": 815630,
+    "reviewed_blob_manifest_sha256": "08ecc33cd4a5cd68e2f377107ea89ca1ec2b6b63bb1af02be651b18e63e8dd7b",
+    "total_bytes": 815728,
     "allowed_prefixes": [
       ".continual/runs/run-work-mode-handoff-v2/",
       ".continual/work-model/invocations/"
@@ -1298,9 +1298,9 @@
       "obsolete_source_observations",
       "foreign_writer_records"
     ],
-    "local_validation": "82 changed paths including the deterministic 81-payload manifest; native work-verify valid with 188 requests, 187 responses, and one intentional pending Execute request; every JSON/JSONL parsed; the prior 408-line event log is a byte-identical prefix of the 435-line selected log; secret-marker and forbidden-path scans passed.",
+    "local_validation": "Exact publication tree work-verify is valid with 171 requests, 169 responses, and two recognized pending Execute requests (one pre-existing main request and the current publication request); 82 changed paths include the deterministic 81-payload manifest; every JSON/JSONL parsed; the prior 408-line event log is a byte-identical prefix of the 435-line selected log; secret-marker and forbidden-path scans passed.",
     "prepared_at": "2026-08-24T11:40:38.041Z",
-    "status": "ci_pending",
+    "status": "manifest_correction_precommitted",
     "rule": "No blob, tree, commit, branch, PR, workflow, ref update, or merge for this effect may occur before this state-only expected-blob CAS and exact readback. Publish non-force from the exact base; merge only the unchanged exact head after all required CI succeeds and a fresh main comparison is conflict-free; then read back all 82 reviewed blobs.",
     "claim_boundary": "Internal native O lifecycle durability only. The comparison remains PRECOMMITTED with zero routing observations and no scientist positive-control result; no behavioral benefit, external production evidence, AGI, or user-level completion is claimed.",
     "remote_parent": "92b3b25ab6643dcaa2d043141e4d88032cfbd267",
@@ -1312,6 +1312,12 @@
     "pr_url": "https://github.com/bachikoljunior-blip/O/pull/292",
     "pr_head": "58b580c8674fb2d486613e7232a9e79b01ff2b61",
     "pr_base_at_creation": "cb0eda50fce49a987fc5623f298c5c3be5e62a91",
-    "published_at": "2026-08-24T11:48:20Z"
+    "published_at": "2026-08-24T11:48:20Z",
+    "superseded_pr_head": "58b580c8674fb2d486613e7232a9e79b01ff2b61",
+    "superseded_workflow_run": 32723742330,
+    "manifest_correction_reason": "Correct the native work-verify counts to the exact remote publication tree; no payload path or payload blob changes.",
+    "manifest_correction_expected_state_blob": "3e9931a12176b51b638efe1e1164592e76ed160d",
+    "manifest_correction_planned_tree": "8492f815ece66458d09637a8146470663972a9e1",
+    "manifest_correction_prepared_at": "2026-08-24T11:52:21.127Z"
   }
 }
