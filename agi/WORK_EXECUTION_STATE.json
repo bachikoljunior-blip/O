@@ -8,8 +8,8 @@
   "lease_generation": 7,
   "fence_token": "work-recovery-fence-v7-fed49f4a10c39430ba2097c1e79de5cee24aec47988774b58e681151fca74082",
   "started_at": "2026-08-24T04:00:19.597Z",
-  "heartbeat_at": "2026-08-24T11:13:02.437Z",
-  "last_progress_at": "2026-08-24T11:13:02.437Z",
+  "heartbeat_at": "2026-08-24T11:15:32.300Z",
+  "last_progress_at": "2026-08-24T11:15:32.300Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_user_directed_resume_verified",
@@ -24,7 +24,7 @@
   "source_main_sha": "f1530c98903646242a7a00821c0faf40c34eb42c",
   "working_branch": "work/recovery-gen7-context-comparison-contract-v1",
   "active_run_id": "run-work-mode-handoff-v2",
-  "active_component": "execute_merge_precommit",
+  "active_component": "execute_merge_precommit_conflict_proof",
   "active_unit_id": "unit-42f48b067a5abf643b682fee",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -915,9 +915,9 @@
     }
   },
   "lease_renewal": {
-    "expected_blob_sha": "48f21e86fb75c4eeb764c16261fb6c738557d201",
-    "requested_at": "2026-08-24T11:13:02.437Z",
-    "reason": "PR 291 merge authorization precommit",
+    "expected_blob_sha": "bbf2fe827a47783035cd4ffd58e382c90ef4f058",
+    "requested_at": "2026-08-24T11:15:32.300Z",
+    "reason": "PR 291 fresh-main conflict-free merge-tree proof",
     "verified_remote_readback": false
   },
   "inbox_append_path_publication_precommit": {
@@ -1147,7 +1147,7 @@
     "protocol_digest": "92b15e3fa1780220006a068c0ce654bda893e1f307b5192b2dd439c895d94f16",
     "local_validation": "17 focused comparison tests and 123 protected Context Kernel/routing/scientist tests passed; compileall, all repository JSON parsing, and diff check passed.",
     "prepared_at": "2026-08-24T10:28:13.087Z",
-    "status": "merge_authorized_exact_head_ci_success",
+    "status": "merge_authorized_local_conflict_free",
     "rule": "After exact readback of this state CAS, create new blobs and one child commit of exact prior PR head 63bd16989ab64e3dae9bae7c9e478fffd90df6d2, fast-forward the branch without force, verify the three-path diff and blob identity, and require a new unchanged exact-head CI.",
     "claim_boundary": "Internal precommit, validation, and causal-classification infrastructure only; no routing measurement, positive-control result, production evidence, AGI, activation, or user-level completion.",
     "remote_parent": "ac6e78b51069dedb62aad4cf62c923abd0957b7c",
@@ -1220,11 +1220,11 @@
     "exact_head_unchanged": true,
     "merge_authorization": {
       "expected_head_sha": "b0ec6f9d4012515b2e038355ff296eb3bb967140",
-      "observed_main_head": "6e5b03803ece9991faff79d5a5f123fdc3c2055b",
-      "observed_main_state_blob": "48f21e86fb75c4eeb764c16261fb6c738557d201",
+      "observed_main_head": "1d37d38cb7e05895730bd7eb29d1e9ba1035d1b1",
+      "observed_main_state_blob": "bbf2fe827a47783035cd4ffd58e382c90ef4f058",
       "comparison_status": "diverged",
       "candidate_ahead_by": 2,
-      "candidate_behind_by": 7,
+      "candidate_behind_by": 8,
       "merge_base": "ac6e78b51069dedb62aad4cf62c923abd0957b7c",
       "changed_path_count": 3,
       "changed_paths": [
@@ -1234,7 +1234,12 @@
       ],
       "github_pr_mergeable": true,
       "authorized_at": "2026-08-24T11:13:02.437Z",
-      "rule": "Re-read generation-7 fence, exact PR head, all five required jobs, current main, and conflict-free mergeability after this CAS; merge only expected head b0ec6f9d4012515b2e038355ff296eb3bb967140. GitHub must atomically reject a moved head or conflict."
+      "rule": "Re-read generation-7 fence, exact PR head, all five required jobs, current main, and conflict-free mergeability after this CAS; merge only expected head b0ec6f9d4012515b2e038355ff296eb3bb967140. GitHub must atomically reject a moved head or conflict.",
+      "github_pr_wrapper_mergeable": false,
+      "local_fresh_main_merge_tree_clean": true,
+      "expected_merge_tree": "2d5e359cf00826ea0ec0be0d311bfe24599682ba",
+      "local_merge_verified_at": "2026-08-24T11:15:32.300Z",
+      "mergeability_note": "GitHub wrapper toggled false after the state-only main CAS. A fetched exact-main/exact-head git merge-tree completed with exit 0 and only the three precommitted additions; final fresh-main merge-tree and GitHub atomic expected-head rejection remain required."
     }
   }
 }
