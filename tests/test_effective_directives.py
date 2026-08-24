@@ -73,6 +73,15 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
     assert effective["r6-parallel-safety"]["value"] == (
         "isolated_non_destructive_exact_head_parallel_contribution"
     )
+    assert effective["r20-negative-evidence-scope"]["value"] == (
+        "name_tested_target_configuration_and_conditions_and_do_not_generalize_beyond_direct_evidence"
+    )
+    assert effective["r20-external-method-positive-control"]["value"] == (
+        "require_positive_control_only_when_equivalent_original_conditions_are_not_already_established"
+    )
+    assert effective["r20-external-method-failure-attribution"]["value"] == (
+        "distinguish_tested_variant_failure_adaptation_or_ablation_loss_baseline_reproduction_failure_and_untested_mechanisms"
+    )
     assert "r4-input-provenance" in effective
     assert superseded == {
         "r13-primary-executor": "r14-primary-executor",
@@ -81,6 +90,8 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
         "r4-primary-executor": "r6-primary-executor",
         "r6-parallel-mode": "r14-parallel-mode",
         "r6-primary-executor": "r13-primary-executor",
+        "r19-external-method-positive-control": "r20-external-method-positive-control",
+        "r19-external-method-failure-attribution": "r20-external-method-failure-attribution",
     }
     rendered = json.dumps(first, ensure_ascii=False)
     assert "strict independent external production evidence gate" not in rendered

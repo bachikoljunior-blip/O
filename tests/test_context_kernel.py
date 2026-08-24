@@ -138,6 +138,11 @@ def _root(tmp_path: Path) -> tuple[Path, dict]:
             "decision_authority": "O Engine owns decision context.",
             "raw_authority": "source systems",
         },
+        "negative_evidence_scope_policy": {
+            "source_user_input_revision": 20,
+            "claim_boundary": "tested target and conditions only",
+            "positive_control_rule": "reuse an adequately proven equivalent control",
+        },
         "updated_at": "2026-08-23T00:00:02Z",
     }
     store = Store(tmp_path)
@@ -536,6 +541,16 @@ def test_root_manifest_is_deterministic_minimal_and_o_owned(tmp_path: Path) -> N
     assert verified == manifest
     assert manifest["policy"]["decision_authority"] == "O Engine"
     assert manifest["policy"]["copy_all_raw_context"] is False
+    strategy_projection = next(
+        source["projection"]
+        for source in manifest["sources"]
+        if source["source_id"] == "work_strategy"
+    )
+    assert strategy_projection["negative_evidence_scope_policy"] == {
+        "source_user_input_revision": 20,
+        "claim_boundary": "tested target and conditions only",
+        "positive_control_rule": "reuse an adequately proven equivalent control",
+    }
     assert [source["source_id"] for source in manifest["sources"]] == [
         "work_execution_state",
         "user_input_inbox",

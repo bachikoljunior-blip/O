@@ -157,6 +157,24 @@ _SCIENTIST_RECEIPT_FIELDS = {
     "contamination_detected",
     "receipt_digest",
 }
+_EQUIVALENT_POSITIVE_CONTROL_FIELDS = {
+    "schema_version",
+    "evidence_id",
+    "system",
+    "source_artifact_id",
+    "source_locator",
+    "observed_at",
+    "configuration_id",
+    "status",
+    "fidelity",
+    "rubric_dimensions",
+    "task_set_digest",
+    "budget_digest",
+    "model_executor_class",
+    "result_digest",
+    "equivalence_basis",
+    "evidence_digest",
+}
 _SCIENTIST_RESULT_FIELDS = {
     "status",
     "fidelity",
@@ -726,9 +744,72 @@ def _validate_scientist_result(
         _sha256(result_digest, f"{label}.result_digest")
 
 
+def equivalent_positive_control_evidence_digest(value: Mapping[str, Any]) -> str:
+    """Digest provenance for an already-established equivalent positive control."""
+
+    return _canonical_digest(
+        {key: item for key, item in value.items() if key != "evidence_digest"}
+    )
+
+
+def validate_equivalent_positive_control_evidence(
+    protocol: Mapping[str, Any],
+    evidence: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Admit a prior positive control only when its conditions match exactly.
+
+    This is the revision-20 reuse path: it prevents a redundant reproduction,
+    but it does not relax fidelity, task, budget, executor, result, or provenance
+    requirements. The immutable revision-19 precommit remains unchanged.
+    """
+
+    validated = validate_context_method_comparison(protocol)
+    if not isinstance(evidence, Mapping) or set(evidence) != _EQUIVALENT_POSITIVE_CONTROL_FIELDS:
+        raise ValueError("equivalent positive-control evidence has an unexpected schema")
+    _reject_secret_fields(evidence, "equivalent_positive_control")
+    if evidence.get("schema_version") != 1:
+        raise ValueError("equivalent positive-control schema_version must be 1")
+    contract = validated["scientist_positive_control"]
+    for field in (
+        "evidence_id",
+        "source_locator",
+        "observed_at",
+        "configuration_id",
+    ):
+        _nonempty(evidence.get(field), f"equivalent_positive_control.{field}")
+    if evidence.get("system") != contract["system"]:
+        raise ValueError("equivalent positive control names a different system")
+    if evidence.get("source_artifact_id") != contract["source_artifact_id"]:
+        raise ValueError("equivalent positive control does not bind the frozen baseline")
+    if evidence.get("status") != "PASS":
+        raise ValueError("equivalent positive control must be an established PASS")
+    if evidence.get("fidelity") != contract["required_fidelity"]:
+        raise ValueError("equivalent positive control is not fidelity-preserving")
+    if evidence.get("rubric_dimensions") != contract["rubric_dimensions"]:
+        raise ValueError("equivalent positive-control rubric does not match")
+    for field in ("task_set_digest", "budget_digest", "model_executor_class"):
+        if evidence.get(field) != contract[field]:
+            raise ValueError(
+                f"equivalent positive control uses an unmatched {field.replace('_', ' ')}"
+            )
+    _sha256(evidence.get("result_digest"), "equivalent_positive_control.result_digest")
+    basis = evidence.get("equivalence_basis")
+    if not isinstance(basis, list) or not basis or not all(
+        isinstance(item, str) and item.strip() for item in basis
+    ):
+        raise ValueError("equivalent positive control must name its equivalence basis")
+    if evidence.get("evidence_digest") != equivalent_positive_control_evidence_digest(
+        evidence
+    ):
+        raise ValueError("equivalent positive-control evidence digest mismatch")
+    return deepcopy(dict(evidence))
+
+
 def validate_scientist_comparison_receipt(
     protocol: Mapping[str, Any],
     receipt: Mapping[str, Any],
+    *,
+    equivalent_positive_control: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     validated = validate_context_method_comparison(protocol)
     if set(receipt) != _SCIENTIST_RECEIPT_FIELDS:
@@ -757,6 +838,15 @@ def validate_scientist_comparison_receipt(
     )
     if control["fidelity"] != control_contract["required_fidelity"]:
         raise ValueError("positive control is not fidelity-preserving")
+    if equivalent_positive_control is not None:
+        if control["status"] != "NOT_RUN":
+            raise ValueError(
+                "equivalent positive-control reuse is allowed only when no duplicate control was run"
+            )
+        validate_equivalent_positive_control_evidence(
+            validated,
+            equivalent_positive_control,
+        )
     if evaluated.get("matched_to_positive_control") is not True:
         raise ValueError("evaluated arm must be matched to the positive control")
     target_domain = evaluated.get("target_domain")
@@ -782,15 +872,41 @@ def validate_scientist_comparison_receipt(
 def classify_scientist_comparison(
     protocol: Mapping[str, Any],
     receipt: Mapping[str, Any] | None,
+    *,
+    equivalent_positive_control: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Classify causally narrow outcomes; never reject the original method broadly."""
+    """Classify only the tested scope and reuse equivalent controls when proven."""
 
     validated_protocol = validate_context_method_comparison(protocol)
+    reused_control: dict[str, Any] | None = None
+    if equivalent_positive_control is not None:
+        reused_control = validate_equivalent_positive_control_evidence(
+            validated_protocol,
+            equivalent_positive_control,
+        )
     if receipt is None:
-        classification = "INSUFFICIENT_POSITIVE_CONTROL"
+        classification = (
+            "INSUFFICIENT_EVALUATED_ARM_EVIDENCE"
+            if reused_control is not None
+            else "INSUFFICIENT_POSITIVE_CONTROL"
+        )
+        control_basis = (
+            "reused_equivalent_existing_evidence"
+            if reused_control is not None
+            else "none"
+        )
+        tested_scope = None
     else:
-        validated = validate_scientist_comparison_receipt(validated_protocol, receipt)
+        validated = validate_scientist_comparison_receipt(
+            validated_protocol,
+            receipt,
+            equivalent_positive_control=reused_control,
+        )
         control_status = validated["positive_control"]["status"]
+        control_basis = "receipt"
+        if control_status == "NOT_RUN" and reused_control is not None:
+            control_status = "PASS"
+            control_basis = "reused_equivalent_existing_evidence"
         evaluated_status = validated["evaluated_arm"]["status"]
         if control_status == "NOT_RUN":
             classification = "INSUFFICIENT_POSITIVE_CONTROL"
@@ -810,9 +926,28 @@ def classify_scientist_comparison(
                 if evaluated_status == "PASS"
                 else "NARROW_TARGET_TRANSFER_NEGATIVE"
             )
+        tested_scope = {
+            "comparison_kind": validated["comparison_kind"],
+            "system": validated_protocol["scientist_positive_control"]["system"],
+            "evaluated_fidelity": validated["evaluated_arm"]["fidelity"],
+            "target_domain": validated["evaluated_arm"]["target_domain"],
+            "task_set_digest": validated["evaluated_arm"]["task_set_digest"],
+            "budget_digest": validated["evaluated_arm"]["budget_digest"],
+            "model_executor_class": validated["evaluated_arm"][
+                "model_executor_class"
+            ],
+        }
     return {
         "classification": classification,
+        "positive_control_basis": control_basis,
+        "positive_control_evidence_digest": (
+            reused_control["evidence_digest"] if reused_control is not None else None
+        ),
+        "tested_scope": tested_scope,
+        "negative_evidence_scope": "tested_candidate_configuration_and_conditions_only",
         "evidence_against_original_method": False,
+        "evidence_against_scientist_agent_family": False,
+        "evidence_against_untested_mechanisms": False,
         "activation_authorized": False,
         "agi_claim_supported": False,
         "user_goal_completed": False,
