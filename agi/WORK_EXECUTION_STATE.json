@@ -8,8 +8,8 @@
   "lease_generation": 9,
   "fence_token": "work-recovery-fence-v9-42631febacea086b4a2b12d664ff294368ff882ec81858d574498fabf4b55664",
   "started_at": "2026-08-24T21:04:35.100Z",
-  "heartbeat_at": "2026-08-25T02:14:19.627Z",
-  "last_progress_at": "2026-08-25T02:14:19.627Z",
+  "heartbeat_at": "2026-08-25T02:37:43.853Z",
+  "last_progress_at": "2026-08-25T02:37:43.853Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
@@ -24,8 +24,8 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "negative_evidence_scope_audit_pr302_merged_readback_verified",
-  "active_unit_id": "unit-de402d4bcbb594d8e3f74a3b",
+  "active_component": "checkpoint_measurement_reconciliation_task_evaluate_preflight_complete",
+  "active_unit_id": "unit-checkpoint-measurement-reconciliation-task-evaluate",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 20,
@@ -54,15 +54,15 @@
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-    "snapshot_branch": "main",
-    "snapshot_head_sha": "50cb3717c8ff848ba1d2075f4a36b1e8b50c1d3a",
-    "pending_work_invocation_id": "invoke-f9f51a0b3a81e964afcb7826",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-f9f51a0b3a81e964afcb7826/request.json",
+    "snapshot_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
+    "snapshot_head_sha": "local_unpublished_reconciliation_records",
+    "pending_work_invocation_id": null,
+    "pending_request_ref": null,
     "pending_native_invocation_id": null,
-    "durability_status": "PR 302 exact head 4b5a1b312e1a6e1275521793b03c72bb0264f450 passed workflow 32798283663 with four pytest shards and the dependent aggregate, merged with expected-head protection as dd91b5b1dcb9cc43c1f6163bd34d50314016d129, and all 86 reviewed blob SHAs matched the non-truncated latest-main tree 7c0c228843a1f9ed4206b7b9268617b66f2425e6.",
-    "next_action": "Resume and answer immutable publication Execute Work invoke-f9f51a0b3a81e964afcb7826 from latest main, then continue Candidate Evaluate, Consolidate, Learn, and Root without treating this merge as user-level completion.",
-    "completed_work_invocation_id": "invoke-cba10c768d124ddb128de374",
-    "next_native_phase": "negative_evidence_scope_audit_exact_head_publication_execute"
+    "durability_status": "The twelve-attempt reconciliation implementation and Execute response are local and O-journaled but not yet published. Candidate preflight invoke-b9bc040b6ed9c697b4897042 completed NOT_APPLICABLE; Task Evaluate request was not created because the prior Work heartbeat correctly failed stale.",
+    "next_action": "Create a fresh authoritative Work-state observation for this exact CAS commit/blob, then resume run-work-recovery-gen9-durability-repair to create and answer Task Evaluate for unit-checkpoint-measurement-reconciliation-task-evaluate.",
+    "completed_work_invocation_id": "invoke-b9bc040b6ed9c697b4897042",
+    "next_native_phase": "checkpoint_measurement_reconciliation_task_evaluate"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -2112,5 +2112,20 @@
     "claim_boundary": "Internal evidence-hygiene engineering limited to four exact retained entries and their candidate, configuration, source, and conditions. No scientist-agent-family, untested-mechanism, AGI, independent-production, or user-objective-completion inference.",
     "publication_rule": "No remote candidate blob, tree, commit, ref, PR, workflow, or merge may occur before this state-only expected-blob CAS and exact readback. Publish only the reviewed 86 paths on the recorded main parent; WORK_EXECUTION_STATE, USER_INPUT_INBOX, uv.lock, temporary responses, and unrelated files are excluded. Require unchanged exact-head CI, fresh generation-9 authority and inbox checks, expected-head merge, and all-blob remote readback.",
     "next_action": "Resume and answer immutable publication Execute Work invoke-f9f51a0b3a81e964afcb7826 from latest main, then continue Candidate Evaluate, Consolidate, Learn, and Root without treating this merge as user-level completion."
+  },
+  "checkpoint_measurement_reconciliation": {
+    "status": "execute_completed_task_evaluate_preflight_completed",
+    "result_path": "agi/CHECKPOINT_INHERITANCE_MEASUREMENT_RESULT.json",
+    "result_digest": "bd8f3c0d0bd369b990314afa17507435d93b49d57b491817ef7eacd6e7240cbf",
+    "ledger_digest": "d15ff8fc54318a69e229f11b74241542585d5a4c0a17f347e6cd183075764165",
+    "measurement_receipt_count": 12,
+    "existing_controls_reused": 3,
+    "new_attempts_executed": 0,
+    "execute_work_invocation_id": "invoke-8c35d540108d59b190189888",
+    "candidate_preflight_work_invocation_id": "invoke-b9bc040b6ed9c697b4897042",
+    "focused_validation": "44 passed",
+    "negative_scope": "Exact bounded_stage_checkpoint_inheritance candidate/configuration/conditions only; no scientist-agent-family, original-method, adaptation-loss, or untested-mechanism inference.",
+    "user_level_objective_met": false,
+    "agi_claim_supported": false
   }
 }
