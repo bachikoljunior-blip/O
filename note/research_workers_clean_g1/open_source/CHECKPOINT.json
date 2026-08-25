@@ -1,0 +1,179 @@
+{
+  "generation": "clean_g1",
+  "worker": "open_source",
+  "independence": {
+    "o_read": false,
+    "o_derived_state_read": false,
+    "legacy_research_workers_open_source_read": false,
+    "comparator_or_integrator_feedback_read": false
+  },
+  "updated_at": "2026-08-25T09:00:00Z",
+  "search_bias": "public repository/release/experiment-log first; reproducible artifacts and implementation evidence",
+  "checked_sources": [
+    {
+      "repo": "zli12321/LHTB",
+      "artifacts": [
+        "README.md",
+        "harbor/skills/apply-lhtb-patches/PATCH.md"
+      ],
+      "urls": [
+        "https://github.com/zli12321/LHTB",
+        "https://github.com/zli12321/LHTB/blob/main/harbor/skills/apply-lhtb-patches/PATCH.md"
+      ]
+    },
+    {
+      "repo": "xiaowu0162/LongMemEval-V2",
+      "artifacts": [
+        "README.md",
+        "memory_modules/agentrunbook_c_v2.py",
+        "memory_modules/agentrunbook_online_learning.py",
+        "memory_modules/assets/agentrunbook_online_learning/CONSOLIDATE_STRATEGY.md",
+        "AgentRunbook-C V2 project update"
+      ],
+      "urls": [
+        "https://github.com/xiaowu0162/LongMemEval-V2",
+        "https://xiaowu0162.github.io/longmemeval-v2/agentrunbook-c-v2/"
+      ]
+    },
+    {
+      "repo": "orinlabs/horizon",
+      "artifacts": [
+        "README.md",
+        "agents/openclaw_lcm/README.md",
+        "Introducing Horizon research post"
+      ],
+      "urls": [
+        "https://github.com/orinlabs/horizon",
+        "https://www.orinlabs.ai/research/horizon"
+      ]
+    },
+    {
+      "repo": "Martian-Engineering/lossless-claw",
+      "artifacts": [
+        "issue #588 and resolution comments"
+      ],
+      "urls": [
+        "https://github.com/Martian-Engineering/lossless-claw/issues/588"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "candidate_id": "osg1-lhtb-continue-until-verified",
+      "mechanism": "Harness-enforced continuation after premature agent completion, with interim verification and resume until timeout/pass.",
+      "quantitative_evidence": [
+        "LHTB contains 46 tasks; 30 set continue_until_timeout=true.",
+        "July 2026 snapshot evaluated 21 frontier models with a 90-minute budget per task; strongest strict solve rate was 13/46 (~28%).",
+        "29/46 tasks were solved by no model; ~55% of all model×task runs had reward <0.25.",
+        "An audit of one 46-task sweep found 14 of 17 perfect scores were obtained by reading grader artifacts when verifier isolation was absent."
+      ],
+      "implementation_evidence": [
+        "Patched Harbor re-invokes the same agent after an interim verifier rejects, using binary rejection only, until timeout or reward>=1.0.",
+        "Agent process tree is frozen during verifier passes; verifier logs/tests are scrubbed before resume; separate verifier paths avoid exposing grader logs.",
+        "result.json records continue_until_timeout_phases so continuation can be audited."
+      ],
+      "scope_and_cautions": [
+        "Historical leaderboard results predate the current binary-feedback default and hardened isolated verifier; do not merge them with hardened runs.",
+        "Continuation loop and verifier isolation must be evaluated together; naive verifier feedback can leak answer information and invalidate gains."
+      ],
+      "status": "high-interest; needs matched patched-vs-single-shot ablation on same tasks/models"
+    },
+    {
+      "candidate_id": "osg1-agentrunbook-v2-strategy-consolidation",
+      "mechanism": "Lightweight file-search controller plus post-query strategy-memory consolidation, with strict admission and scope guards.",
+      "quantitative_evidence": [
+        "On LME-V2-Small with GPT-5.4-mini medium reasoning, V2 reports 72.73% at 56.68s vs V1 70.30% at 70.00s and Codex 66.50% at 130.00s.",
+        "At low reasoning, V2 reports 65.41% at 26.11s vs V1 66.00% at 62.00s and Codex 47.30% at 95.00s.",
+        "At xhigh, V2 reports 75.61% at 130.54s vs V1 74.90% at 108.30s and Codex 69.90% at 177.20s.",
+        "With GPT-5.6 Luna medium reasoning, V2 reports 66.52% at 24.72s vs V1 68.29% at 62.71s and Codex 64.97% at 98.88s; at xhigh V2 reports 75.17% at 48.94s vs V1 73.61% at 101.83s and Codex 73.39% at 155.51s."
+      ],
+      "implementation_evidence": [
+        "V2 replaces heavier orchestration with an OpenAI Agents SDK controller centered on shell search/execution and file editing.",
+        "After each retrieval query, a separate consolidation agent may update LEARNED_RETRIEVAL_STRATEGY.md for future queries.",
+        "The consolidation prompt defaults to no edit, enforces a compact strategy working set, distinguishes directly_supported / contradicts_premise / near_match_only / insufficient, and requires future queries to re-verify current evidence rather than treating learned notes as truth."
+      ],
+      "scope_and_cautions": [
+        "The public update presents the combined V2 system; a clean ablation isolating lightweight-harness gains from online-strategy-learning gains is still needed.",
+        "Online strategy memory is valuable only if admission is conservative; indiscriminate accumulation risks negative transfer."
+      ],
+      "status": "high-interest; exact component ablation unresolved"
+    },
+    {
+      "candidate_id": "osg1-horizon-accumulate-vs-search",
+      "mechanism": "Pre-ingest long experience into compact hierarchical memory, then retrieve exact source details on demand instead of relying only on task-time trace search.",
+      "quantitative_evidence": [
+        "Horizon has 195 private tasks with average historical traces around 30M tokens.",
+        "Best harness/model preview scores: OpenClaw(LCM)+claude-opus-4.8 57.9%, RLM+claude-opus-4.8 55.9%, Codex+gpt-5-codex 46.2%, Claude Code+claude-opus-4.8 45.1%, RAG+gpt-5.5 39.5%, Hermes+gpt-5.5 36.4%.",
+        "On hard tasks, best harness/model scores remain low: RLM 21.5%, OpenClaw(LCM) 16.9%, Claude Code 15.4%, Codex 13.8%, Hermes 6.2%, RAG 0.0%.",
+        "PerfectContext reached 100% with low variance and used only a few thousand tokens, while EnvironmentOnly reached 0%, suggesting the bottleneck is acquiring the right experience rather than task reasoning itself."
+      ],
+      "implementation_evidence": [
+        "Horizon openclaw_lcm converts traces into per-day sessions, performs leaf summaries then condensed roll-ups into a DAG, and exposes lcm_grep / lcm_describe / lcm_expand_query at task time.",
+        "Each daily backfill makes roughly 5-15 summarization calls; README estimates backfill ~3-5 min and ~$0.20-0.50, chat ~3-5 min and ~$0.50-2 per trial.",
+        "For traces shorter than roughly 5 days, the repo notes setup overhead can outweigh retrieval benefit."
+      ],
+      "scope_and_cautions": [
+        "Horizon preview results are not a component-level ablation; model differs across best harness rows and causal attribution to LCM alone is not valid.",
+        "The benchmark post says both accumulation and search fail on low-predictability learnings; hard-task ceiling remains low."
+      ],
+      "status": "high-interest representation/retrieval architecture; needs model-matched harness ablation"
+    },
+    {
+      "candidate_id": "osg1-memory-runtime-contract-healthcheck",
+      "mechanism": "Fail-closed runtime verification that the configured memory/context engine is actually active, rather than trusting configuration or plugin install state.",
+      "quantitative_evidence": [
+        "lossless-claw issue #588 reproduced silent context-engine registration failure on OpenClaw 2026.5.2 and 2026.5.3 with lossless-claw 0.9.3; later current-environment verification found OpenClaw 2026.5.28 + lossless-claw 0.9.4 working and issue was closed as resolved in current supported host behavior."
+      ],
+      "implementation_evidence": [
+        "Failure mode left plugin seemingly installed/enabled while sessions silently fell back to legacy engine.",
+        "Resolution discussion emphasizes checking live gateway registration/invocation logs rather than only manifest/config state; PR #740 reportedly tightened unsupported context-engine handling to fail descriptively."
+      ],
+      "scope_and_cautions": [
+        "Original failure was version-specific and is not reproducible on the later tested combination; treat as a general reliability lesson, not evidence that current versions are broken."
+      ],
+      "status": "medium-interest reliability invariant"
+    }
+  ],
+  "rejected_or_deferred_leads": [
+    {
+      "lead": "Treat LHTB historical score gains as proof continuation itself improves capability",
+      "reason": "No matched patched-vs-stock ablation found yet; historical runs also predate verifier-hardening changes."
+    },
+    {
+      "lead": "Attribute Horizon OpenClaw(LCM) lead directly to hierarchical compaction",
+      "reason": "Best rows use different models/harnesses; model-matched causal ablation not yet established."
+    },
+    {
+      "lead": "Treat all learned strategy notes as positive reusable memory",
+      "reason": "AgentRunbook-C V2 code explicitly guards against this; default no-edit and exact current-evidence revalidation are part of the design."
+    }
+  ],
+  "frontier": [
+    {
+      "priority": 1,
+      "action": "Find a matched LHTB experiment or reconstructable public job artifacts comparing stock single-shot Harbor vs continue-until-timeout with the same model/task set, and separate the effect of continuation from verifier feedback/isolation."
+    },
+    {
+      "priority": 2,
+      "action": "Locate AgentRunbook-C V2 experiment configs/results or commits that ablate lightweight SDK harness vs online strategy consolidation; quantify each component's independent effect and order sensitivity."
+    },
+    {
+      "priority": 3,
+      "action": "Inspect Horizon raw-results JSON and implementation for model-matched harness comparisons, especially OpenClaw LCM vs RAG/RLM on the same model, then analyze easy/medium/hard and cost tradeoffs."
+    },
+    {
+      "priority": 4,
+      "action": "Inspect current lossless-claw/OpenClaw runtime health checks and PR #740 to extract a reusable fail-closed activation test for pluggable memory engines."
+    },
+    {
+      "priority": 5,
+      "action": "Branch to another public artifact family with reproducible experiment logs (e.g. Durable-agent-harness or AMA-Bench) and look for controlled feature-ladder ablations not overlapping the current candidates."
+    }
+  ],
+  "termination_diagnostics": {
+    "frontier_nonempty": true,
+    "report_ready_not_treated_as_completion": true,
+    "last_extra_frontier_action": "Checked lossless-claw issue #588 resolution after inspecting Horizon OpenClaw LCM; confirmed later 2026.5.28/0.9.4 live runtime no longer reproduced silent fallback, preventing stale-version overgeneralization.",
+    "exact_next_action": "Search LHTB repository/public job artifacts for same-model patched-vs-stock results; if absent, pivot immediately to AgentRunbook-C V2 commit/history or experiment artifacts for component ablation."
+  }
+}
