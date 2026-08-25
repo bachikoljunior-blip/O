@@ -8,8 +8,8 @@
   "lease_generation": 14,
   "fence_token": "work-recovery-fence-v14-e0161aa4853efb06aae70428ccfaaabeab37875a135c24363304a154dfc8ccf9",
   "started_at": "2026-08-25T16:13:08.318Z",
-  "heartbeat_at": "2026-08-25T16:17:41.446Z",
-  "last_progress_at": "2026-08-25T16:17:41.446Z",
+  "heartbeat_at": "2026-08-25T16:19:23.585Z",
+  "last_progress_at": "2026-08-25T16:19:23.585Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,39 +21,40 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "73d25dbb402c6749c86980ba61b905f7fa326850",
+  "source_main_sha": "937299ce2c3895e15e3d186316b2b3d770c56a5f",
   "working_branch": "work/recovery-gen13-revision23-targeting-correction-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision24_targeting_correction_merge_authorized",
+  "active_component": "paired_route_harness_revision24_safe_reclassification",
   "active_unit_id": "unit-revision24-primary-o-targeting-correction",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 23,
-    "acknowledged_at": "2026-08-25T13:31:29.443Z",
-    "application_note": "Revision 24 is observed at the safe boundary and corrects revision 23 as belonging to a separate automation. Revision 23's primary-O interpretation is no longer effective; durable acknowledgement remains at 23 only until PR 312 passes exact-head CI, merges unchanged, and all four reviewed blobs are read back. Primary O retains pre-revision-23 routing, revision 5 constraints, and the existing frozen revision-22 Execute and single-writer/fence/CAS bindings.",
-    "pending_revision": 24,
-    "pending_inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8",
-    "pending_inbox_commit_sha": "c96d30399fe89f165a055ef61f4a70ab016b2e73",
+    "highest_acknowledged_revision": 24,
+    "acknowledged_at": "2026-08-25T16:19:23.585Z",
+    "application_note": "Revision 24 is durably reconciled and effective: revision 23 belonged to the separate work_delegation_gate automation and is not a primary-O routing directive. Primary O retains pre-revision-23 routing behavior, revision-5 constraints, the frozen revision-22 Execute, and the existing single-writer/fence/CAS contracts.",
+    "pending_revision": null,
+    "pending_inbox_blob_sha": null,
+    "pending_inbox_commit_sha": null,
     "last_acknowledged_input": {
-      "revision": 23,
-      "acknowledged_at": "2026-08-25T13:31:29.443Z",
-      "inbox_blob_sha": "c072ea229e78188022765c12716e19bdf2d81704",
-      "directive_ledger_blob_sha": "77ea32e744639cfc25aadb5812b4ba16fc4aefce",
-      "strategy_blob_sha": "af5952c3dbf57147ca2d149461e9551b3d5e7d2e",
-      "effective_directives_test_blob_sha": "a1f3387e4ddefc14654ef4e79b28ccbfa667a5b3",
-      "inbox_test_blob_sha": "ca244507abcd6ab1fec1f1f79e9512296b6caf67",
-      "pull_request": 309,
-      "exact_head_sha": "a361f0c0489f8b8847f33bc82505efe856498f80",
-      "exact_head_ci_run": 32850794847,
-      "merge_sha": "1aa996c7375ec9cb71998f47d5005aab8ec93fe2",
+      "revision": 24,
+      "acknowledged_at": "2026-08-25T16:19:23.585Z",
+      "inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8",
+      "directive_ledger_blob_sha": "b809efca403cf1944618a8792269b30a20b19534",
+      "strategy_blob_sha": "65bb8c494e9a091ed7ea8fa9a1c65c178959133d",
+      "effective_directives_test_blob_sha": "7e0c45b4b1ed6affeb80a5a2778752ddc8d751a8",
+      "inbox_test_blob_sha": "43575b453c8c1f074bc3202cfd083a6eba20f62e",
+      "pull_request": 312,
+      "exact_head_sha": "3505181048c0fd6ddee8f9f0f9bceb03a921ed8d",
+      "exact_head_tree_sha": "41e83ebe967ce51b2cdc98baa2bd2a384138851b",
+      "exact_head_ci_run": 32859595540,
+      "merge_sha": "937299ce2c3895e15e3d186316b2b3d770c56a5f",
+      "merge_tree_sha": "cecd5d16e435c90dc31846a04b60a135cb99a3a5",
       "verified_remote_readback": true,
-      "interpretation": "Historical PR 309 interpretation, now superseded for primary O by authoritative pending revision 24 targeting correction.",
-      "effective": false,
-      "superseded_by_pending_revision": 24
+      "interpretation": "Revision 24 corrects revision 23 as separate-automation-only. Primary O must not apply the separate work_delegation_gate least-Work policy.",
+      "effective": true
     }
   },
   "revision23_least_work_routing_reconciliation": {
-    "status": "historical_merged_interpretation_superseded_by_revision24_pending_pr312",
+    "status": "historical_mistargeted_interpretation_superseded_by_revision24",
     "pull_request": 309,
     "exact_head_sha": "a361f0c0489f8b8847f33bc82505efe856498f80",
     "exact_head_ci_run": 32850794847,
@@ -66,7 +67,7 @@
     "claim_boundary": "Historical control-plane reconciliation only. Revision 24 establishes that this interpretation was mistargeted to primary O; it is not behavioral, scientist-agent-family, external-production, AGI, or completion evidence."
   },
   "revision24_targeting_correction_reconciliation": {
-    "status": "exact_head_ci_succeeded_merge_authorized",
+    "status": "merged_main_durable_and_revision24_acknowledged",
     "source_correction_path": "agi/REVISION_23_TARGETING_CORRECTION.json",
     "source_correction_commit": "50348b12990ba8198ae7dff816ff100a6349c05b",
     "inbox_revision": 24,
@@ -117,10 +118,26 @@
       "merge_method": "merge",
       "require_second_fresh_read": true,
       "dispatch_rule": "After exact readback of this state CAS, freshly re-read generation-14 authority, control revision 4, inbox revision 24, unchanged PR head/tree and five successful jobs, and recompute the merge tree. Merge only with expected-head protection; any change invalidates this authorization."
-    }
+    },
+    "merge_sha": "937299ce2c3895e15e3d186316b2b3d770c56a5f",
+    "merge_tree_sha": "cecd5d16e435c90dc31846a04b60a135cb99a3a5",
+    "merged_at": "2026-08-25T16:19:23.585Z",
+    "main_readback": {
+      "verified_at": "2026-08-25T16:19:23.585Z",
+      "reviewed_blob_count": 4,
+      "mismatch_count": 0,
+      "all_reviewed_blobs_match": true,
+      "blobs": {
+        "agi/USER_DIRECTIVE_EVENTS.json": "b809efca403cf1944618a8792269b30a20b19534",
+        "agi/WORK_STRATEGY.json": "65bb8c494e9a091ed7ea8fa9a1c65c178959133d",
+        "tests/test_effective_directives.py": "7e0c45b4b1ed6affeb80a5a2778752ddc8d751a8",
+        "tests/test_user_input_inbox.py": "43575b453c8c1f074bc3202cfd083a6eba20f62e"
+      }
+    },
+    "acknowledged_at": "2026-08-25T16:19:23.585Z"
   },
   "paired_route_isolation_harness_publication": {
-    "status": "exact_head_ci_succeeded_held_for_revision24_targeting_reconciliation",
+    "status": "exact_head_ci_succeeded_pending_fresh_revision24_safe_reclassification",
     "route_classification": "pre_revision23_repository_support_for_frozen_revision22_execute",
     "new_work_handoff_created": false,
     "branch": "work/recovery-gen13-paired-route-isolation-harness-v1",
@@ -137,7 +154,7 @@
     "claim_boundary": "Precommit harness only. No route observation, output, score, judgment, behavioral result, negative evidence, family inference, external-production evidence, AGI evidence, or completion claim exists."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 14 acquisition commit and blob matched remote readback. Finalization is state-only; PR 312, PR 310, and frozen revision-22 Execute remain unchanged until finalization readback and authorization validation complete.",
+    "primary": "Generation 14 is the sole authorized fenced owner. Revision 24 is merged, read back, and acknowledged. PR 310 remains unchanged and unmerged until freshly classified solely as direct pre-revision-23 support for the frozen revision-22 Execute; no separate-automation least-Work policy is imported into primary O.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
@@ -155,7 +172,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Read back this generation-14 merge-authorization state exactly. Then freshly re-read control revision 4, generation/fence, inbox revision 24/blob 5085d21e, PR 312 unchanged head 3505181/tree 41e83e, all five successful exact-head jobs, and recompute the clean merge tree. If every binding matches, merge PR 312 with expected-head protection, exact-readback all four reviewed blobs, and acknowledge revision 24 by state-only CAS. Then freshly reclassify PR 310 only as direct pre-revision-23 support for the frozen revision-22 Execute before any integration. Never recreate the frozen request or publish generated invocation/prompt/model/native records without explicit permission.",
+    "next_action": "Freshly inspect PR 310 exact head 0d7e73df10f87382c7f7b00527b07f904e3234f8, its five-job CI, source/test blobs, and diff against current main. Classify it only as repository support for the already-frozen revision-22 two-route/three-scenario Execute, not as a revision-23 handoff or new Work unit. If unchanged, conflict-free, and directly supportive without widening claim scope, record a fresh expected-head merge authorization, merge, and exact-readback both blobs. Then resume the existing immutable Execute from cbb8619f4d7dd6a12fed740fe80764c3c971c71e without recreating it or publishing generated invocation/prompt/model/native records without explicit permission.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement"
   },
