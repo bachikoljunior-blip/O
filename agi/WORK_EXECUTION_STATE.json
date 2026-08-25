@@ -8,15 +8,15 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T06:15:40.000Z",
-  "last_progress_at": "2026-08-25T06:15:40.000Z",
+  "heartbeat_at": "2026-08-25T06:16:00.000Z",
+  "last_progress_at": "2026-08-25T06:16:00.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
     "instruction": "Generation 10 is checkpointed with an exact unanswered Execute. Recover from latest remote main; observe inbox revision 21 and the compact research feed at this safe boundary before selecting further semantic work.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 11 phase-one acquisition commit/blob matched exact remote readback. This second CAS binds the proof; authorization awaits exact finalization readback."
+    "note": "Generation 11 two-phase CAS and exact readback were accepted by authorize_work_mode_recovery at 2026-08-25T06:16:00Z. Apply inbox revision 21 at this safe boundary before further semantic execution."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -24,7 +24,7 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "recovery_generation11_finalization_pending_readback",
+  "active_component": "inbox_revision21_reconciliation",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -112,7 +112,7 @@
   "finalize_expected_blob_sha": "32ed9b4ec8c0ce991b55866b8b3cfb8940de8b94",
   "readback_of_commit_sha": "433cab7761d49aa42c0504b8b9d927e007b5ba07",
   "verified_remote_readback": true,
-  "acquisition_phase": "phase2_finalized_pending_exact_readback",
+  "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-25T06:15:06.804Z",
     "observed_state_blob_sha": "1a142de77db4d5a32ee62b2551984d4df386d600",
@@ -573,13 +573,11 @@
     }
   },
   "pending_user_input": {
-    "revision": 15,
-    "inbox_blob_sha": "6d360fba463dee47ac777a378dab2ccfe5ad05c3",
-    "status": "acknowledged_applied_at_safe_root",
-    "root_invocation_id": "invoke-344455ae7a59ec86e4fa5d20",
-    "root_response_digest": "25b3d8006e159f042182ee902171ad9d9e310b72b85c44680114900ce78b9ce3",
-    "selected_unit_id": "unit-4d9f1592acf97a44ee8afdd6",
-    "summary": "O selected a Root-only DecisionContextManifest vertical slice: authoritative sources remain external while O owns observation/source clocks, inclusion/exclusion decisions, provenance, dependencies, freshness, invalidation, and immutable per-decision projections."
+    "revision": 21,
+    "inbox_blob_sha": "6a60ef74ce1dc37a906e5dd67affc0ddf612f005",
+    "entry_id": "user-direction-external-research-feed-poll-20260825-v21",
+    "status": "pending_canonical_reconciliation",
+    "safe_boundary": "before unanswered Execute invoke-445821c809a6ca734fb1b97e"
   },
   "pre_freeze_source_readiness": {
     "status": "failed_closed_no_matching_generation_7_work_receipt",
@@ -2262,8 +2260,8 @@
     "next_execute_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "next_execute_request_digest": "fd25431ea8e0bcfd910ebcd8f53f6040a4984987412845949904284fcbf25b86"
   },
-  "finalization_commit_sha": "c4ef9f93774bf60a5aa0430814ff839f7f10a841",
-  "finalization_blob_sha": "5648fe56d990f025acb3952b72b4c07a912289f7",
+  "finalization_commit_sha": "0d9653c86f8318d0b9544f2c896ee1b978a5ce67",
+  "finalization_blob_sha": "3cb4ca1be8249e310da83049256a7dfb8daa4a71",
   "finalization_readback_verified": true,
   "checkpoint": {
     "checkpointed_at": "2026-08-25T04:57:40.361Z",
