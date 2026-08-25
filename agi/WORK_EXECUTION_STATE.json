@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T08:19:10.000Z",
-  "last_progress_at": "2026-08-25T07:49:36.000Z",
+  "heartbeat_at": "2026-08-25T08:27:00.000Z",
+  "last_progress_at": "2026-08-25T08:27:00.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "aa8374cb210d29f5342e89d34ef150b6a92494e7",
-  "working_branch": "work/recovery-gen11-inbox21-feed-policy-v1",
+  "source_main_sha": "a25480f4ea287179959cf8bb9e394c18f81d2777",
+  "working_branch": "work/recovery-gen11-inbox22-clean-g1-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "missing_publication_response_pr307_ci",
+  "active_component": "inbox_revision22_clean_g1_reconciliation",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -61,9 +61,9 @@
     "pending_request_ref": null,
     "pending_native_invocation_id": null,
     "durability_status": "PR 306 merged with expected head 27078f4420e91eab3902262df8e29b7f4cf9b6c9 as aa8374cb210d29f5342e89d34ef150b6a92494e7 after all four pytest shards plus aggregate succeeded. Main request/response blobs exactly match 24467625128504877a3bed00c5dc37da03a64385 and 88b5e67a8b21e0c0d66b938460be6360c052c23d. The superseded revision-20 Execute is durably closed with no effects and no result claims. A second pre-existing durability gap was found for completed publication Execute invoke-b810f007118d82a0565c33cb; its exact state-bound response has been recovered locally and is precommitted for isolated exact-head publication without repeating effects.",
-    "next_action": "Wait for PR 307 exact-head workflow 32823475772. If all four pytest shards and dependent aggregate succeed at unchanged head a6612d909435b763405e0a7e5ae0f938716a548d, perform fresh generation-11/inbox/head/path-disjoint checks, precommit expected-head merge by state CAS, merge, and exact blob readback; then issue the fresh revision-21-bound Context Kernel held-out action-adherence unit.",
+    "next_action": "Publish and validate the isolated revision-22 clean_g1 reconciliation first. Revision 22 supersedes revision 21, so the prior PR 307 merge authorization is invalidated. After revision 22 is merged and acknowledged by state CAS, freshly re-read generation-11 authority, inbox revision 22, PR 307 exact head and jobs, and path-disjointness before any expected-head merge; then issue a fresh revision-22-bound Context Kernel held-out action-adherence unit.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
-    "next_native_phase": "context_kernel_held_out_action_adherence_revision21"
+    "next_native_phase": "context_kernel_held_out_action_adherence_revision22"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -2557,5 +2557,27 @@
         "conclusion": null
       }
     ]
+  },
+  "inbox_revision22_reconciliation_precommit": {
+    "entry_id": "user-direction-clean-g1-research-feed-poll-20260825-v22",
+    "status": "prepared_local_validated_pending_remote_publication",
+    "observed_at": "2026-08-25T08:25:36.592Z",
+    "expected_inbox_revision": 22,
+    "expected_inbox_blob_sha": "5c1e9390b87821b191edf11b7c7e3a2b01f1bba1",
+    "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
+    "interpretation": "Use only research_index_clean_g1/O_FEED.json as the current external-research bridge at safe Root or equivalent boundaries. Legacy and pre-independence research remains historical only and must not be bridged as clean_g1 evidence. Preserve exact provenance, uncertainty, contradictory evidence, and tested claim scope; keep polling nonblocking and do not add Work solely for polling.",
+    "branch": "work/recovery-gen11-inbox22-clean-g1-v1",
+    "base_main_sha": "a25480f4ea287179959cf8bb9e394c18f81d2777",
+    "local_commit_sha": "d66e8fd93cca844cedf6877d57f575859ba6dbf7",
+    "local_tree_sha": "a441c0f7de8b3406d2d988ec383d84c352b03505",
+    "changed_paths": [
+      "agi/USER_DIRECTIVE_EVENTS.json",
+      "agi/WORK_STRATEGY.json",
+      "tests/test_effective_directives.py",
+      "tests/test_user_input_inbox.py"
+    ],
+    "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed.",
+    "publication_rule": "After exact readback of this state-only CAS, publish only the reviewed four-path commit on the named isolated branch. Require unchanged exact-head CI, fresh generation-11/inbox/head/path-disjoint checks, expected-head merge, and exact main blob readback before acknowledging revision 22.",
+    "parallel_pr307_rule": "PR 307 may continue CI, but revision 22 invalidates its earlier merge authorization. Do not merge PR 307 until revision 22 is durably reconciled and a new fresh authorization is recorded."
   }
 }
