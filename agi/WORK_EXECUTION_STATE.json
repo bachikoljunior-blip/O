@@ -8,29 +8,32 @@
   "lease_generation": 13,
   "fence_token": "work-recovery-fence-v13-091be1e739a5ef2f443e579c623510c68c4b3759cd86334bab9cf65d87c2ae4c",
   "started_at": "2026-08-25T12:33:55.477Z",
-  "heartbeat_at": "2026-08-25T13:45:16.343Z",
-  "last_progress_at": "2026-08-25T13:45:16.343Z",
+  "heartbeat_at": "2026-08-25T14:27:59.016Z",
+  "last_progress_at": "2026-08-25T14:27:59.016Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
-    "instruction": "Continue generation 13 from latest remote main and the exact remote continuation for invoke-248450c08547af10470c50e6. Inbox revision 23 is authoritative: classify each new handoff and reserve Work for only an irreducibly Work-exclusive remainder while preserving revision 5's remaining constraints and existing frozen contracts. Use only the clean_g1 research feed at safe boundaries, preserve exact negative-evidence scope, and never disable the independent condition-watch task from an automation run.",
+    "instruction": "Continue generation 13 from latest remote main and the exact remote continuation for invoke-248450c08547af10470c50e6. Inbox revision 24 authoritatively corrects revision 23 as targeted to a separate automation: restore primary O's pre-revision-23 routing behavior, preserve revision 5 constraints and existing single-writer/fence/CAS contracts, and resume the valid frozen revision-22 Execute without the revision-23 detour. Use only the clean_g1 research feed at safe boundaries, preserve exact negative-evidence scope, and never disable the independent condition-watch task from an automation run.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 13 acquisition commit 9e6634170a82d32091bab413448bf0017045b5d6 and blob f1505548f9b99106685412eaccd605e478f640b5 matched exact remote readback. This finalization state records the proof for authorize_work_mode_recovery; revision 23 was subsequently reconciled through PR 309 without changing the generation, owner, or fence."
+    "note": "Generation 13 acquisition commit 9e6634170a82d32091bab413448bf0017045b5d6 and blob f1505548f9b99106685412eaccd605e478f640b5 matched exact remote readback. This finalization state records the proof for authorize_work_mode_recovery. Revision 24 now corrects PR 309's revision-23 interpretation without changing the generation, owner, fence, or frozen revision-22 Execute; PR 312 is the pending reviewed reconciliation."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "1aa996c7375ec9cb71998f47d5005aab8ec93fe2",
-  "working_branch": "work/recovery-gen13-paired-route-isolation-harness-v1",
+  "source_main_sha": "c96d30399fe89f165a055ef61f4a70ab016b2e73",
+  "working_branch": "work/recovery-gen13-revision23-targeting-correction-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "paired_route_isolation_harness_exact_head_ci",
-  "active_unit_id": "unit-rev23-paired-route-isolation-harness",
+  "active_component": "revision24_primary_o_targeting_correction_exact_head_ci",
+  "active_unit_id": "unit-revision24-primary-o-targeting-correction",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 23,
     "acknowledged_at": "2026-08-25T13:31:29.443Z",
-    "application_note": "Revision 23 is authoritative and applied. Every subsequent handoff is classified first; ordinary reasoning and capable connected-tool, automation, repository, or GitHub routes stay outside Work, and only an irreducibly Work-exclusive remainder may enter Work. Revision 5 smartphone-first, secret, spend, account-holder, and automatable-work constraints remain active. Valid frozen invocations and all single-writer, fence, CAS, request, and executor bindings remain unchanged.",
+    "application_note": "Revision 24 is observed at the safe boundary and corrects revision 23 as belonging to a separate automation. Revision 23's primary-O interpretation is no longer effective; durable acknowledgement remains at 23 only until PR 312 passes exact-head CI, merges unchanged, and all four reviewed blobs are read back. Primary O retains pre-revision-23 routing, revision 5 constraints, and the existing frozen revision-22 Execute and single-writer/fence/CAS bindings.",
+    "pending_revision": 24,
+    "pending_inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8",
+    "pending_inbox_commit_sha": "c96d30399fe89f165a055ef61f4a70ab016b2e73",
     "last_acknowledged_input": {
       "revision": 23,
       "acknowledged_at": "2026-08-25T13:31:29.443Z",
@@ -44,11 +47,13 @@
       "exact_head_ci_run": 32850794847,
       "merge_sha": "1aa996c7375ec9cb71998f47d5005aab8ec93fe2",
       "verified_remote_readback": true,
-      "interpretation": "Classify each new handoff and use Work only for an irreducibly Work-exclusive remainder. Keep reasoning and capable connected-tool, automation, repository, and GitHub execution outside Work. This narrows only revision 5's broad Work-routing atom; its smartphone-first and user-action constraints remain active, and existing frozen Work contracts are not interrupted."
+      "interpretation": "Historical PR 309 interpretation, now superseded for primary O by authoritative pending revision 24 targeting correction.",
+      "effective": false,
+      "superseded_by_pending_revision": 24
     }
   },
   "revision23_least_work_routing_reconciliation": {
-    "status": "completed_merged_and_exact_readback_verified",
+    "status": "historical_merged_interpretation_superseded_by_revision24_pending_pr312",
     "pull_request": 309,
     "exact_head_sha": "a361f0c0489f8b8847f33bc82505efe856498f80",
     "exact_head_ci_run": 32850794847,
@@ -58,11 +63,30 @@
     "blob_mismatch_count": 0,
     "verified_remote_readback": true,
     "applied_at": "2026-08-25T13:31:29.443Z",
-    "claim_boundary": "Control-plane routing reconciliation only; not behavioral, scientist-agent-family, external-production, AGI, or user-objective-completion evidence."
+    "claim_boundary": "Historical control-plane reconciliation only. Revision 24 establishes that this interpretation was mistargeted to primary O; it is not behavioral, scientist-agent-family, external-production, AGI, or completion evidence."
+  },
+  "revision24_targeting_correction_reconciliation": {
+    "status": "exact_head_ci_in_progress",
+    "source_correction_path": "agi/REVISION_23_TARGETING_CORRECTION.json",
+    "source_correction_commit": "50348b12990ba8198ae7dff816ff100a6349c05b",
+    "inbox_revision": 24,
+    "inbox_append_commit": "c96d30399fe89f165a055ef61f4a70ab016b2e73",
+    "inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8",
+    "inbox_remote_readback_verified": true,
+    "branch": "work/recovery-gen13-revision23-targeting-correction-v1",
+    "pull_request": 312,
+    "exact_head_sha": "3505181048c0fd6ddee8f9f0f9bceb03a921ed8d",
+    "exact_head_tree_sha": "41e83ebe967ce51b2cdc98baa2bd2a384138851b",
+    "exact_head_ci_run": 32859595540,
+    "reviewed_path_count": 4,
+    "focused_test_count": 17,
+    "focused_tests_passed": true,
+    "frozen_revision22_execute_preserved": true,
+    "claim_boundary": "Targeting correction only. It does not publish generated records, prompt/model output, native responses, behavioral results, negative evidence, scientist-agent-family inference, external-production evidence, AGI evidence, or completion evidence."
   },
   "paired_route_isolation_harness_publication": {
-    "status": "exact_head_ci_in_progress",
-    "route_classification": "repository_or_github_action_sufficient",
+    "status": "exact_head_ci_succeeded_held_for_revision24_targeting_reconciliation",
+    "route_classification": "pre_revision23_repository_support_for_frozen_revision22_execute",
     "new_work_handoff_created": false,
     "branch": "work/recovery-gen13-paired-route-isolation-harness-v1",
     "base_main_sha": "aadfa7c049961e79ab7e15cd634c25b292293ff8",
@@ -78,7 +102,7 @@
     "claim_boundary": "Precommit harness only. No route observation, output, score, judgment, behavioral result, negative evidence, family inference, external-production evidence, AGI evidence, or completion claim exists."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 13 remains the sole fenced owner. Revision 23 is merged and exactly read back; the owner is alive and no recovery or duplicate writer is permitted. The next repository-capable unit is the precommit-only paired-route isolation harness.",
+    "primary": "Generation 13 remains the sole fenced owner. Revision 24 targeting correction is pending exact-head CI in PR 312; the owner is alive and no recovery or duplicate writer is permitted. PR 310's passing unchanged harness head is retained but not merged until the correction is durably reconciled.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
@@ -96,7 +120,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Inspect PR 310 exact-head workflow 32855147214 for unchanged head 0d7e73df10f87382c7f7b00527b07f904e3234f8. Merge only after all four pytest shards and the dependent aggregate succeed, a fresh-main comparison remains conflict-free, and generation 13 owner, fence, and inbox revision 23 remain unchanged; then exact-readback both reviewed blobs. Do not publish local generated invocation, prompt, response, or native lifecycle records without explicit permission. The existing immutable revision-22 Execute and durable commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e remain the authoritative remote fallback; do not recreate them. Keep every later behavioral conclusion within the exact two routes, three scenarios, configuration, and conditions actually tested.",
+    "next_action": "Inspect PR 312 exact-head workflow 32859595540 for unchanged head 3505181048c0fd6ddee8f9f0f9bceb03a921ed8d. Merge only after all four pytest shards and the dependent aggregate succeed, a fresh-main comparison remains conflict-free, and generation 13 owner, fence, inbox revision 24, and correction source remain unchanged; then exact-readback all four reviewed blobs and acknowledge revision 24. Only after that reconciliation, freshly revalidate PR 310's already-passing unchanged head 0d7e73df10f87382c7f7b00527b07f904e3234f8 as direct support for the frozen revision-22 Execute before any merge. Do not publish local generated invocation, prompt, response, or native lifecycle records without explicit permission. The existing immutable revision-22 Execute and durable commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e remain the authoritative remote fallback; do not recreate them. Keep every later behavioral conclusion within the exact two routes, three scenarios, configuration, and conditions actually tested.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement"
   },
@@ -142,7 +166,7 @@
       "invoke-7100b70e41324428ec748123 (Candidate Evaluate NOT_APPLICABLE)"
     ],
     "pending_invocation": "Work invoke-248450c08547af10470c50e6 (Execute) for unit-3d61e557b2542d07c83fa354; no unrelated Candidate is applied.",
-    "note": "Revision 23 was applied at the safe Root boundary without creating a new Work handoff. Prepare the paired held-out comparison through repository-capable source and tests first. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, publish unapproved generated records, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
+    "note": "Revision 24 corrects revision 23 as not applicable to primary O. Preserve and resume the existing revision-22-bound Execute without a new Work handoff or routing detour. The paired-route harness remains valid support only if freshly revalidated against that frozen Execute after the correction is main-durable. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, publish unapproved generated records, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
   },
   "expected_blob_sha": "597eb1a763a2dec8efb9c202e13f89dcc3fb8a2f",
   "result_commit_sha": "9e6634170a82d32091bab413448bf0017045b5d6",
