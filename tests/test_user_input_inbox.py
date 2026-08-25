@@ -117,7 +117,7 @@ def test_revision_22_supersedes_legacy_feed_bridge_with_clean_g1_only() -> None:
     assert "historical_only" in strategy["research_feed"]["legacy_policy"]
 
 
-def test_revision_23_narrows_work_routing_without_erasing_revision_5_constraints() -> None:
+def test_revision_24_excludes_mistargeted_revision_23_from_primary_o() -> None:
     inbox = load_user_input_inbox(ROOT)
     ledger = json.loads((ROOT / "agi" / "USER_DIRECTIVE_EVENTS.json").read_text())
     strategy = json.loads((ROOT / "agi" / "WORK_STRATEGY.json").read_text())
@@ -126,37 +126,37 @@ def test_revision_23_narrows_work_routing_without_erasing_revision_5_constraints
     revision_23 = inbox["entries"][22]
     assert revision_23["id"] == "user-direction-least-work-routing-20260825-v23"
     assert revision_23["sequence"] == 23
+    revision_24 = inbox["entries"][23]
+    assert revision_24["id"] == "user-correction-revision23-targeting-20260825-v24"
+    assert revision_24["sequence"] == 24
+    assert revision_24["supersedes"] == [revision_23["id"]]
     assert ledger["source"]["revision"] == inbox["revision"]
     assert ledger["source"]["content_digest"] == hashlib.sha256(
         json.dumps(inbox, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
     ).hexdigest()
 
     atoms = {atom["atom_id"]: atom for atom in ledger["atoms"]}
-    assert atoms["r5-smartphone-operator"]["source_directive_indices"] == [
-        0,
-        3,
-        4,
-        5,
-        6,
-        7,
+    assert atoms["r5-smartphone-operator"]["source_directive_indices"] == list(range(8))
+    assert "r5-work-routing" not in atoms
+    assert atoms["r23-least-work-routing"]["supersedes"] == []
+    assert atoms["r24-primary-o-routing-targeting-correction"]["supersedes"] == [
+        "r23-least-work-routing"
     ]
-    assert atoms["r5-work-routing"]["source_directive_indices"] == [1, 2]
-    assert atoms["r23-least-work-routing"]["supersedes"] == ["r5-work-routing"]
-    assert atoms["r23-retain-smartphone-and-account-constraints"][
-        "source_directive_indices"
-    ] == [3]
-    assert atoms["r23-preserve-frozen-work-contracts"][
-        "source_directive_indices"
-    ] == [4]
+    assert atoms["r24-revision5-constraint-authority"]["supersedes"] == [
+        "r23-retain-smartphone-and-account-constraints"
+    ]
+    assert atoms["r24-resume-frozen-revision22-execute"]["supersedes"] == [
+        "r23-preserve-frozen-work-contracts"
+    ]
 
-    assert strategy["source_user_input_revision"] >= 23
-    assert strategy["context_management"]["source_user_input_revision"] >= 23
-    assert strategy["execution_rules"]["work_handoff_policy"] == (
-        "only_irreducibly_work_exclusive"
+    assert strategy["source_user_input_revision"] >= 24
+    assert strategy["context_management"]["source_user_input_revision"] >= 24
+    assert strategy["execution_rules"]["primary_o_work_routing_policy"] == (
+        "pre_revision23_behavior"
     )
     assert strategy["execution_rules"][
-        "reasoning_planning_review_and_routing_stay_outside_work_when_adequate"
-    ] is True
+        "revision23_least_work_routing_applies_to_primary_o"
+    ] is False
     assert strategy["execution_rules"][
         "interrupt_valid_frozen_work_exclusive_invocation_for_routing_change"
     ] is False
