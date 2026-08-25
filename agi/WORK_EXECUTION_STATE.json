@@ -8,8 +8,8 @@
   "lease_generation": 9,
   "fence_token": "work-recovery-fence-v9-42631febacea086b4a2b12d664ff294368ff882ec81858d574498fabf4b55664",
   "started_at": "2026-08-24T21:04:35.100Z",
-  "heartbeat_at": "2026-08-25T03:04:55.830Z",
-  "last_progress_at": "2026-08-25T03:04:55.830Z",
+  "heartbeat_at": "2026-08-25T03:57:25.890Z",
+  "last_progress_at": "2026-08-25T03:57:25.890Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "checkpoint_measurement_reconciliation_pr303_exact_head_ci_pending",
+  "active_component": "checkpoint_measurement_reconciliation_pr303_merge_precommit_pending_readback",
   "active_unit_id": "unit-2bfa35279c57f76d48f13d4b",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -59,8 +59,8 @@
     "pending_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "pending_request_ref": ".continual/work-model/invocations/invoke-b810f007118d82a0565c33cb/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "Reconciliation results are published on PR 303 at exact head a175150e05452f28d6b32a78260ad3e65dbfa7d6. Workflow 32803793697 is queued. Publication Execute remains pending until unchanged exact-head CI, fresh authority/inbox/conflict checks, expected-head merge, and remote blob readback complete.",
-    "next_action": "Observe workflow 32803793697 for exact head a175150e05452f28d6b32a78260ad3e65dbfa7d6. If four pytest shards and the dependent aggregate succeed unchanged, precommit merge authorization through state-only CAS, re-read main/authority/inbox/head/jobs/conflicts, then merge PR 303 with expected-head protection and verify all 107 reviewed blobs on main.",
+    "durability_status": "PR 303 exact head a175150e05452f28d6b32a78260ad3e65dbfa7d6 passed workflow 32803793697 with four successful pytest shards plus the dependent aggregate. Fresh authority/inbox and state-only main-delta conflict proof are recorded in the merge precommit; merge remains forbidden until this expected-blob CAS is read back exactly.",
+    "next_action": "CAS this merge precommit against state blob 76e1c9140796f7e0bdf5f86321e54961e2f9549d, verify exact remote readback, then re-read main/authority/inbox/PR head/jobs/compare. Merge PR 303 only with expected head a175150e05452f28d6b32a78260ad3e65dbfa7d6 and verify all 107 reviewed blobs on main.",
     "completed_work_invocation_id": "invoke-d3c3b79d43f40c33511a9e92",
     "next_native_phase": "checkpoint_measurement_reconciliation_publication_execute"
   },
@@ -2137,7 +2137,7 @@
   "checkpoint_measurement_reconciliation_publication_precommit": {
     "effect_id": "publish-checkpoint-measurement-reconciliation-v1",
     "idempotency_key": "bachikoljunior-blip/O:gen9:checkpoint-measurement-reconciliation:107:d7315722d98cdf251156bfd39be9756e5c0c25cf717a883dd9ab66dc61dfe686:64a145d564dc3b14d8bdaba8edc4fd3c3bfe51f75091fd901fcb0608dfec1b3d:v1",
-    "status": "pr_open_exact_head_ci_pending",
+    "status": "merge_authorization_prepared_pending_state_cas_readback",
     "prepared_at": "2026-08-25T02:55:13.170Z",
     "branch": "work/recovery-gen9-checkpoint-reconciliation-v1",
     "observed_main_commit": "7ed7f190702c731a744c87a142e9a9717a057e02",
@@ -2167,8 +2167,37 @@
     "pr_changed_path_count": 107,
     "exact_head_workflow_run": 32803793697,
     "exact_head_workflow_id": 335420036,
-    "exact_head_workflow_status": "queued",
+    "exact_head_workflow_status": "success_four_shards_and_dependent_aggregate",
     "merge_authorized": false,
+    "merge_authorization": {
+      "effect_id": "merge-pr303-checkpoint-reconciliation-v1",
+      "idempotency_key": "bachikoljunior-blip/O:pr303:a175150e05452f28d6b32a78260ad3e65dbfa7d6:merge:v1",
+      "status": "prepared_pending_state_cas_readback",
+      "prepared_at": "2026-08-25T03:57:25.890Z",
+      "expected_head_sha": "a175150e05452f28d6b32a78260ad3e65dbfa7d6",
+      "expected_head_tree": "20a71e11004963bab7f956d517fb2501766faf35",
+      "exact_head_workflow_run": 32803793697,
+      "required_jobs": {
+        "97669806087": "pytest shard 0 of 4: success",
+        "97669806297": "pytest shard 1 of 4: success",
+        "97669806455": "pytest shard 2 of 4: success",
+        "97669806194": "pytest shard 3 of 4: success",
+        "97674166955": "test: success"
+      },
+      "observed_main_sha": "3acb4af75c67668fdb342d3839bd972e5c641867",
+      "merge_base_sha": "1a41a8be0cef4a99dd1a8972163a6c557ccb3872",
+      "candidate_ahead_by": 1,
+      "candidate_behind_by": 3,
+      "candidate_changed_path_count": 107,
+      "main_changed_paths_since_base": [
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "changed_path_intersection": [],
+      "reconstructed_main_tree": "22d4f72891b794a8391d7a30d697847e6510886e",
+      "predicted_merge_tree_before_precommit_cas": "0335c75cdaeb266e2227f496fc23e18dfc0c2923",
+      "conflict_proof": "git merge-tree --write-tree completed with exit 0 against a structurally equivalent local reconstruction of main 3acb4af75c67668fdb342d3839bd972e5c641867 and candidate a175150e05452f28d6b32a78260ad3e65dbfa7d6; the only main path changed since merge base is agi/WORK_EXECUTION_STATE.json and its intersection with the 107 reviewed candidate paths is empty.",
+      "dispatch_rule": "After exact readback of this CAS, re-read main, owner, generation, fence, inbox revision, PR head, required jobs, and compare/conflict state. Any moved head, changed authority, new inbox revision, failed or missing job, or non-state main overlap invalidates this authorization. Merge only through expected-head protection, then verify every reviewed blob on main."
+    },
     "changed_path_count": 107,
     "changed_total_bytes": 1028109,
     "changed_path_list_sha256": "d7315722d98cdf251156bfd39be9756e5c0c25cf717a883dd9ab66dc61dfe686",
