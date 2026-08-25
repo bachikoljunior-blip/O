@@ -15,6 +15,7 @@ from .paired_route_isolation import (
 PUBLIC_INPUTS_REF = (
     "agi/evaluations/revision22_action_adherence/public_inputs.json"
 )
+PUBLIC_INPUTS_SHA256 = "7eb6d985737aa280a2c63195cc8e4f6d58b672e1e37ce0bbf6168a08468622ef"
 EXPECTED_SCOPE = "agi/context-kernel/held-out-action-adherence-revision22-v1"
 EXPECTED_INVOCATION = "invoke-248450c08547af10470c50e6"
 EXPECTED_ROUTE_IDS = ("current-context-kernel", "manifest-free-control")
@@ -83,7 +84,10 @@ def load_revision22_public_inputs(
     """
 
     root = root.resolve()
-    value = _load_object(root / PUBLIC_INPUTS_REF, "revision-22 public inputs")
+    public_inputs_path = root / PUBLIC_INPUTS_REF
+    if _sha256_bytes(public_inputs_path) != PUBLIC_INPUTS_SHA256:
+        raise PairedRouteIsolationError("public input digest mismatch")
+    value = _load_object(public_inputs_path, "revision-22 public inputs")
     if value.get("schema_version") != 1:
         raise PairedRouteIsolationError("public input schema is unsupported")
     if value.get("record_type") != "revision22_paired_route_public_inputs":
@@ -120,7 +124,16 @@ def load_revision22_public_inputs(
         context = _load_object(root / ref, "route context")
         if context.get("route_id") != route["route_id"]:
             raise PairedRouteIsolationError("route context identity mismatch")
-        exact_routes.append({**route, "context_digest": _sha256_bytes(root / ref)})
+        digest = _sha256_bytes(root / ref)
+        if route.get("context_sha256") != digest:
+            raise PairedRouteIsolationError("route context digest mismatch")
+        exact_routes.append(
+            {
+                "route_id": route["route_id"],
+                "context_ref": ref,
+                "context_digest": digest,
+            }
+        )
 
     exact_scenarios = []
     for scenario in scenarios:

@@ -117,9 +117,9 @@ def test_missing_commitment_or_route_tamper_fails_closed(tmp_path: Path) -> None
         / "agi/evaluations/revision22_action_adherence/routes/current-context-kernel.json"
     )
     route = json.loads(route_path.read_text(encoding="utf-8"))
-    route["route_id"] = "unexpected-route"
+    route["mechanism"] = "tampered-route"
     route_path.write_text(json.dumps(route), encoding="utf-8")
-    with pytest.raises(PairedRouteIsolationError, match="identity mismatch"):
+    with pytest.raises(PairedRouteIsolationError, match="digest mismatch"):
         load_revision22_public_inputs(
             tmp_path, rubric_commitments=_commitments()
         )
