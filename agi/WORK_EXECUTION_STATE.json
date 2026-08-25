@@ -8,8 +8,8 @@
   "lease_generation": 15,
   "fence_token": "work-recovery-fence-v15-0002f5e95b9489d5fe811b3629dd4d9a0fb77bd31127cd3dc2ca22c84946ca33",
   "started_at": "2026-08-25T16:57:05.952Z",
-  "heartbeat_at": "2026-08-25T17:05:10.000Z",
-  "last_progress_at": "2026-08-25T17:05:10.000Z",
+  "heartbeat_at": "2026-08-25T17:08:00.000Z",
+  "last_progress_at": "2026-08-25T17:08:00.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Monitor exact-head workflow 32875729952 for unchanged head a8ba737f47a68fa1dc3b35eb79458f88ba0c7a88. On five-job success, freshly re-read control revision 4, generation-15 fence, inbox revision 24, PR head/tree, main advance and changed-path intersection; merge PR 313 only with expected-head protection and read back all five blobs. Do not create the paired-route precommit until a trusted coordinator has sealed all three rubric commitments without exposing answers/nonces.",
+    "next_action": "After exact readback of this replacement-head state precommit, update PR 313 to remote tree 229880a2d047b5d8e589b5709950eafff8c8137d, require a new exact-head workflow, and disregard every result from superseded head a8ba737f47a68fa1dc3b35eb79458f88ba0c7a88.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2939,21 +2939,21 @@
     "exact_continuation_persisted": true
   },
   "revision22_public_inputs_publication_precommit": {
-    "status": "remote_branch_and_pr_published_exact_head_ci_queued",
+    "status": "replacement_head_state_precommitted_before_remote_ref_update",
     "prepared_at": "2026-08-25T17:02:54.688Z",
     "branch": "work/recovery-gen15-revision22-public-inputs-v1",
     "base_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
-    "expected_state_blob_sha": "88d0e390886f47d90d305915f0d5f19c13acaafe",
-    "local_commit_sha": "ef445a35b031d47f4a8e769017c51dec7b1cbc0b",
-    "local_tree_sha": "6d55066cd89b94f31315eed8254a87da9c4dcb1d",
+    "expected_state_blob_sha": "c36209945824793c3877c1e4a1509ff2eefd4bd1",
+    "local_commit_sha": "d4f622e24118257fc46cd5944fc1240594405663",
+    "local_tree_sha": "229880a2d047b5d8e589b5709950eafff8c8137d",
     "changed_path_count": 5,
     "changed_path_list_sha256": "300d5fee931c16a7770701f8b057cb1189f4fe67cc8f995e4f53b416224566d9",
     "reviewed_blobs": {
-      "agi/evaluations/revision22_action_adherence/public_inputs.json": "c2da2e2530814270621c89690fe8c1d32d465f37",
+      "agi/evaluations/revision22_action_adherence/public_inputs.json": "639b1861b7a3369ad9e863633d7daacf413aeecf",
       "agi/evaluations/revision22_action_adherence/routes/current-context-kernel.json": "ebe2d32ea9b4c7e8b7c22948518ff45940ccd378",
       "agi/evaluations/revision22_action_adherence/routes/manifest-free-control.json": "4046f6eed6048d1c73bd61ea9e08ec950a147074",
-      "src/continual/revision22_paired_route_inputs.py": "fa10e2a6fdc255693a5160d8815fe2894de0f766",
-      "tests/test_revision22_paired_route_inputs.py": "b65e953e7bd9bd1a6825dd3a5441c0a3109e0c90"
+      "src/continual/revision22_paired_route_inputs.py": "bf33f905963ce58bb9d2483b63e1061b18dc4a85",
+      "tests/test_revision22_paired_route_inputs.py": "5cbc596d099ed0679e80af6102029aec8fa3ee55"
     },
     "local_validation": {
       "compileall_passed": true,
@@ -2982,14 +2982,19 @@
       "prior_unverified_value": "ef445a3af5c1b2f77e5ea42a06ded7d15998e5bb",
       "remote_publication_had_occurred": false
     },
-    "remote_commit_sha": "a8ba737f47a68fa1dc3b35eb79458f88ba0c7a88",
-    "remote_tree_sha": "6d55066cd89b94f31315eed8254a87da9c4dcb1d",
+    "remote_commit_sha": null,
+    "remote_tree_sha": null,
     "remote_blob_match_count": 5,
     "pull_request": 313,
-    "exact_head_ci_run": 32875729952,
-    "exact_head_ci_status": "queued",
+    "exact_head_ci_run": null,
+    "exact_head_ci_status": "not_dispatched_for_replacement_head",
     "mergeable": true,
     "mergeable_state": "unstable_pending_required_ci",
-    "published_at": "2026-08-25T17:04:32Z"
+    "published_at": "2026-08-25T17:04:32Z",
+    "previous_remote_head_sha": "a8ba737f47a68fa1dc3b35eb79458f88ba0c7a88",
+    "previous_exact_head_ci_run": 32875729952,
+    "previous_ci_status_at_invalidation": "in_progress_or_queued",
+    "previous_head_evidence_admissible": false,
+    "hardening_note": "Bind both the public-input file and the two public route files to exact SHA-256 digests so same-identity tampering fails closed before precommit."
   }
 }
