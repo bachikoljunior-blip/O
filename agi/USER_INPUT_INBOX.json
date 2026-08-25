@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 20,
+  "revision": 21,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -332,7 +332,24 @@
       ],
       "source": "user_chat",
       "sequence": 20
+    },
+    {
+      "id": "user-direction-external-research-feed-poll-20260825-v21",
+      "received_at": "2026-08-25T05:55:31Z",
+      "kind": "external_research_feed_subscription",
+      "status": "active",
+      "summary": "Poll the compact external research feed at existing safe O boundaries without adding Work invocations solely for feed polling.",
+      "directives": [
+        "At each safe Root or equivalent logical-unit boundary, read the latest bachikoljunior-blip/note research_index/O_FEED.json and compare its feed_revision and content_digest_sha256 with the highest research-feed revision/digest already acknowledged by O.",
+        "Ingest only feed items that are genuinely novel and decision-relevant into normal O decision context; preserve source provenance, quantitative evidence, contradictory evidence, and the exact scope of positive or negative claims rather than treating feed items as automatic truth.",
+        "Record the highest acknowledged research-feed revision/digest in durable O execution state so later boundaries can skip already-consumed feed content.",
+        "Do not create an additional ChatGPT Work invocation solely to poll, parse, or acknowledge this feed. Consume it inside an already-occurring Root/context-selection/logical-unit cycle so Work call volume is not increased for this bridge.",
+        "If the feed is missing, empty, stale, temporarily unreadable, or contains no novel decision-relevant item, continue normal O work without blocking; retry at a later safe boundary."
+      ],
+      "supersedes": [],
+      "source": "user_chat",
+      "sequence": 21
     }
   ],
-  "updated_at": "2026-08-24T12:30:41.231000Z"
+  "updated_at": "2026-08-25T05:55:31Z"
 }
