@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 23,
+  "revision": 24,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -386,7 +386,25 @@
       "supersedes": [],
       "source": "user_chat",
       "sequence": 23
+    },
+    {
+      "id": "user-correction-revision23-targeting-20260825-v24",
+      "received_at": "2026-08-25T13:46:56Z",
+      "kind": "targeting_correction",
+      "status": "active",
+      "summary": "Revision 23 targeted a separate automation and must not alter primary O routing.",
+      "directives": [
+        "Revision 23 was intended for a separate automation, not for the primary O / Work execution; primary O must not apply revision 23 as a least-Work routing policy.",
+        "Revert PR 309's primary-O interpretation of revision 23 and preserve the primary Work execution's pre-revision-23 routing behavior and existing single-writer, fence, and CAS safety contracts.",
+        "Do not interrupt or discard valid progress on the already-frozen revision-22 Context Kernel action-adherence Execute; resume that work without the revision-23 routing detour.",
+        "Do not treat revision 23 as a primary-O directive on future recovery or context reconstruction; it belongs to the separate automation it was originally addressed to."
+      ],
+      "supersedes": [
+        "user-direction-least-work-routing-20260825-v23"
+      ],
+      "source": "user_chat",
+      "sequence": 24
     }
   ],
-  "updated_at": "2026-08-25T12:38:08Z"
+  "updated_at": "2026-08-25T14:23:07.655875Z"
 }
