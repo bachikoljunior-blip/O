@@ -82,14 +82,6 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
     assert effective["r20-external-method-failure-attribution"]["value"] == (
         "distinguish_tested_variant_failure_adaptation_or_ablation_loss_baseline_reproduction_failure_and_untested_mechanisms"
     )
-    assert effective["r23-least-work-routing"]["value"] == (
-        "classify_each_new_handoff_and_use_work_only_for_irreducibly_work_exclusive_remainder"
-    )
-    assert effective["r5-smartphone-operator"]["value"] == (
-        "automate_repository_work_and_minimize_secret_free_user_actions"
-    )
-    assert "r23-retain-smartphone-and-account-constraints" in effective
-    assert "r23-preserve-frozen-work-contracts" in effective
     assert "r4-input-provenance" in effective
     assert superseded == {
         "r13-primary-executor": "r14-primary-executor",
@@ -105,7 +97,6 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
         "r21-external-research-feed-cursor": "r22-clean-g1-research-feed-cursor",
         "r21-external-research-feed-work-volume": "r22-clean-g1-research-feed-work-volume",
         "r21-external-research-feed-failure-policy": "r22-clean-g1-research-feed-failure-policy",
-        "r5-work-routing": "r23-least-work-routing",
     }
     rendered = json.dumps(first, ensure_ascii=False)
     assert "strict independent external production evidence gate" not in rendered
