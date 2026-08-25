@@ -125,18 +125,18 @@
       }
     },
     {
-      "entry_id": "strategy-checkpoint-inheritance-unmeasured",
+      "entry_id": "strategy-checkpoint-inheritance-reconciled",
       "source": {
         "path": "agi/WORK_STRATEGY.json",
         "json_pointer": "/current_bottlenecks/0",
-        "content_digest": "30b9aac75d3c1f6fdd3d91782d4fc16500c16cdac324a69cb6cc6c7a3af6e897"
+        "content_digest": "73ddc84b0f5f27813f36ed84949feffbdff40bd3a877a55d61f8e7a7b1c5285f"
       },
       "tested_target": "O-adapted bounded checkpoint-inheritance candidate tracked by the current strategy",
-      "candidate_or_version": "bounded_stage_checkpoint_inheritance after PR 263",
-      "configuration": "The persisted frozen comparison and generation-5 native checkpoint, without matched native observations",
-      "conditions": "Publication and checkpoint persistence exist, but no matched behavioral observations establish an expected-time effect.",
-      "classification": "untested_mechanism",
-      "supported_conclusion": "No expected-time advantage is established for this exact O-adapted candidate under the recorded conditions; implementation remains speculative.",
+      "candidate_or_version": "bounded_stage_checkpoint_inheritance / reconciled run-work-mode-handoff-v2 measurement",
+      "configuration": "Three frozen tasks; width-1 single_lineage versus width-3 sibling_checkpoint; one invocation per attempt; exact-canonical-json; 4096-byte cap; current_chatgpt_work_session; chatgpt-work-model-unverified; sandbox; no effects or main writes",
+      "conditions": "Twelve precommitted, deterministically judged, replay-verified attempts and the source-bound thirteen-receipt ledger; the sibling arm improved median wall time by 0.827209 seconds but increased median invocations from 1.0 to 3.0.",
+      "classification": "tested_variant_failure",
+      "supported_conclusion": "This exact bounded_stage_checkpoint_inheritance configuration fails its frozen non-worsening rule and remains unauthorized for implementation or activation.",
       "prohibited_conclusions": [
         "scientist_agent_family_failure",
         "untested_mechanism_failure",
@@ -145,12 +145,21 @@
       "family_failure_supported": false,
       "untested_mechanism_failure_supported": false,
       "positive_control": {
-        "decision": "not_required_without_negative_attribution",
-        "rationale": "The bottleneck states an absence of matched observations, not a failed adapted result attributed to an original method.",
-        "provenance_refs": [],
+        "decision": "reuse_provenance_equivalent",
+        "rationale": "The three single_lineage attempts are precommitted matched controls from the same tasks, executor/model, budgets, judge, replay, and sandbox conditions, so duplicate reproduction is not required.",
+        "provenance_refs": [
+          "agi/CHECKPOINT_INHERITANCE_MEASUREMENT_RESULT.json#/positive_controls/outcome_ids/0",
+          "agi/CHECKPOINT_INHERITANCE_MEASUREMENT_RESULT.json#/positive_controls/outcome_ids/1",
+          "agi/CHECKPOINT_INHERITANCE_MEASUREMENT_RESULT.json#/positive_controls/outcome_ids/2"
+        ],
         "equivalence": {
-          "status": "not_applicable",
-          "criteria": ["No adapted negative effect is asserted."]
+          "status": "established",
+          "criteria": [
+            "same three frozen public tasks",
+            "same executor and model identity",
+            "same response budget and exact-canonical-json judge",
+            "same replay and no-effect safety boundary"
+          ]
         }
       },
       "repair": {
@@ -165,13 +174,13 @@
     "classification_counts": {
       "adaptation_or_ablation_loss": 0,
       "original_baseline_reproduction_failure": 0,
-      "tested_variant_failure": 1,
-      "untested_mechanism": 3
+      "tested_variant_failure": 2,
+      "untested_mechanism": 2
     },
     "repair_required_count": 1,
     "family_wide_negative_count": 0,
     "untested_mechanism_negative_count": 0
   },
   "claim_boundary": "This deterministic audit scopes only the four named retained entries and their exact source values. It does not establish performance of any untested scientist-agent mechanism, AGI, independent production behavior, or completion of the user's objective.",
-  "ledger_digest": "245e1d98d18ac1c11a0aecb5172cd50be81a27ea18dae1081b5f4698b97a58e6"
+  "ledger_digest": "aa0bf2a3e37f66aed83a752fdcc6a62a0e0019717255cc0a1c0ea4bf3f9ca940"
 }

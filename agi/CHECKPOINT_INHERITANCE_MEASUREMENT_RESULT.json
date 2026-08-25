@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "record_type": "checkpoint_measurement_reconciliation",
+  "status": "MEASURED_RECONCILED",
+  "run_id": "run-work-mode-handoff-v2",
+  "mechanism": "bounded_stage_checkpoint_inheritance",
+  "protocol_digest": "d83a1d46bb4b82d7304af027fa4b838c865d8f608312a35922e57c28223f0352",
+  "readiness_digest": "c176f8060479e74a1522dd76f956a0a79417b52e21809ba176d1234656477b05",
+  "source_records": {
+    "ledger": {
+      "path": ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/ledger.json",
+      "sha256": "219ea9e6522bef72ce9f6a174e27484d808595597442482be4c6ee59fdd0e59c",
+      "git_blob_sha": "bbdc2bd796b7ba21baeee7888fb79290f68a0aff"
+    },
+    "task_a": {
+      "path": ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-research-a-record-outcomes-result.json",
+      "sha256": "791a74f721411649e1b39f5b19ab27b1acb55898412505d9b4b3927a6527f678",
+      "git_blob_sha": "2157d63f2e9ac8aec8d78d84bcce25a20aacc369"
+    },
+    "task_b": {
+      "path": ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-research-b-record-outcomes-result.json",
+      "sha256": "7c56f474ca9920f94bb056e11a72dbd1c9649ccbf5e7544e916bd3654e2f83ee",
+      "git_blob_sha": "cd19b1060b5f46961130115fa4e8856a093d5601"
+    },
+    "task_c": {
+      "path": ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-research-c-record-outcomes-result.json",
+      "sha256": "4701314661c215da12cd5712a726ce7e5747149f2234d6c285ce00ddfd7fd4d1",
+      "git_blob_sha": "457de6083e09a97dc955dda139e71d59dad1bb85"
+    },
+    "final_evaluation": {
+      "path": ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-research-c-final-task-evaluate-result.json",
+      "sha256": "5f25798963eccc52aca48d0eaa3810fe4e6f1a478c458997183f5116fac27feb",
+      "git_blob_sha": "2095be2c4c6741a462671a30d3851f95dd918e02"
+    }
+  },
+  "ledger": {
+    "ledger_digest": "d15ff8fc54318a69e229f11b74241542585d5a4c0a17f347e6cd183075764165",
+    "receipt_count": 13,
+    "measurement_receipt_count": 12,
+    "unrelated_receipt_count": 1
+  },
+  "measurement_outcomes": {
+    "research-unit-a": {
+      "single_lineage": [
+        "behavioral-outcome-4240ffbaa77cc8b89fb49006"
+      ],
+      "sibling_checkpoint": [
+        "behavioral-outcome-6de7656aa576d34fff9f0c29",
+        "behavioral-outcome-ea92894ba6c37f34baa12c5a",
+        "behavioral-outcome-41dac4d7a007b5ae02b045bb"
+      ]
+    },
+    "research-unit-b": {
+      "single_lineage": [
+        "behavioral-outcome-dbb88d8ab9da81238374e9df"
+      ],
+      "sibling_checkpoint": [
+        "behavioral-outcome-30193ce81457c4595dde6ecf",
+        "behavioral-outcome-aa465110cb164f1af5755cd4",
+        "behavioral-outcome-aa01a8ffb5e6083a08422e29"
+      ]
+    },
+    "research-unit-c": {
+      "single_lineage": [
+        "behavioral-outcome-8573e39a4e3b83d3eb51ca48"
+      ],
+      "sibling_checkpoint": [
+        "behavioral-outcome-27e5a9ffe4ace227dfd3c57c",
+        "behavioral-outcome-826b7c53c2eb12060ace900d",
+        "behavioral-outcome-0ca5e26e4ae02d844c2a7986"
+      ]
+    }
+  },
+  "metrics": {
+    "per_task": {
+      "research-unit-a": {
+        "single_lineage": {
+          "model_invocations": 1,
+          "wall_time_seconds": 39.195993,
+          "retained_score": 1.0
+        },
+        "sibling_checkpoint": {
+          "model_invocations": 3,
+          "parallel_wall_time_seconds": 37.19564,
+          "retained_score": 1.0
+        }
+      },
+      "research-unit-b": {
+        "single_lineage": {
+          "model_invocations": 1,
+          "wall_time_seconds": 41.175697,
+          "retained_score": 1.0
+        },
+        "sibling_checkpoint": {
+          "model_invocations": 3,
+          "parallel_wall_time_seconds": 38.368784,
+          "retained_score": 1.0
+        }
+      },
+      "research-unit-c": {
+        "single_lineage": {
+          "model_invocations": 1,
+          "wall_time_seconds": 38.62749,
+          "retained_score": 1.0
+        },
+        "sibling_checkpoint": {
+          "model_invocations": 3,
+          "parallel_wall_time_seconds": 118.915951,
+          "retained_score": 1.0
+        }
+      }
+    },
+    "medians": {
+      "single_lineage": {
+        "model_invocations": 1.0,
+        "wall_time_seconds": 39.195993
+      },
+      "sibling_checkpoint": {
+        "model_invocations": 3.0,
+        "wall_time_seconds": 38.368784
+      }
+    }
+  },
+  "decision": {
+    "verdict": "REJECT_MECHANISM",
+    "reason": "sibling_checkpoint improved median wall time by 0.827209 seconds but worsened median model invocations from 1.0 to 3.0, violating the frozen non-worsening rule",
+    "advantage_rule": "At least one median metric improves and neither worsens; exact replay and safety must pass.",
+    "implementation_authorized": false,
+    "global_activation_authorized": false
+  },
+  "positive_controls": {
+    "policy": "reuse_provenance_equivalent_controls_without_duplicate_reproduction",
+    "outcome_ids": [
+      "behavioral-outcome-4240ffbaa77cc8b89fb49006",
+      "behavioral-outcome-8573e39a4e3b83d3eb51ca48",
+      "behavioral-outcome-dbb88d8ab9da81238374e9df"
+    ],
+    "duplicate_reproduction_required": false
+  },
+  "negative_evidence_scope": {
+    "tested_candidate": "bounded_stage_checkpoint_inheritance",
+    "tested_configuration": "three frozen tasks; width-1 single_lineage versus width-3 sibling_checkpoint; one invocation per attempt; exact-canonical-json; 4096-byte cap; current_chatgpt_work_session; chatgpt-work-model-unverified; sandbox; no effects or main writes",
+    "tested_conditions": "the exact twelve immutable Work attempts and their precommitted requests, deterministic judgments, replay checks, and measured request-response intervals",
+    "evidence_against_original_method": false,
+    "evidence_against_scientist_agent_family": false,
+    "evidence_against_untested_mechanisms": false,
+    "adaptation_or_ablation_loss_established": false
+  },
+  "execution_policy": {
+    "existing_attempts_reused": true,
+    "new_attempts_executed": 0,
+    "duplicate_positive_control_executed": false,
+    "rerun_forbidden_while_sources_validate": true
+  },
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "independent_production_evidence_observed": false,
+    "scientist_agent_family_inference_supported": false,
+    "original_method_inference_supported": false,
+    "untested_mechanism_inference_supported": false,
+    "adaptation_or_ablation_loss_established": false,
+    "global_activation_authorized": false,
+    "implementation_authorized": false,
+    "user_level_objective_met": false
+  },
+  "result_digest": "bd8f3c0d0bd369b990314afa17507435d93b49d57b491817ef7eacd6e7240cbf"
+}

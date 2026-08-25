@@ -33,6 +33,13 @@ def _readiness() -> dict:
     return json.loads(READINESS_PATH.read_text(encoding="utf-8"))
 
 
+def _unconsumed_readiness() -> dict:
+    value = _readiness()
+    value.pop("measurement_state", None)
+    value.pop("measurement_result", None)
+    return value
+
+
 def _private_rubrics() -> dict:
     return {
         "research-unit-a": {
@@ -340,11 +347,14 @@ def test_measurement_rejects_cross_arm_model_binding_changes(tmp_path: Path) -> 
         verify_checkpoint_experiment_provenance(tmp_path, value)
 
 
-def test_checked_in_measurement_readiness_is_exact_and_unobserved() -> None:
+def test_checked_in_measurement_plan_is_exact_and_reconciled() -> None:
     experiment = _experiment()
     readiness = validate_checkpoint_measurement_readiness(_readiness(), experiment)
     assert readiness["status"] == "READY_NO_OBSERVATIONS"
     assert readiness["observations"] == []
+    assert readiness["measurement_state"] == "MEASURED_RECONCILED"
+    assert readiness["measurement_result"]["measurement_receipt_count"] == 12
+    assert readiness["measurement_result"]["new_attempts_executed_during_reconciliation"] == 0
     assert readiness["implementation_authorized"] is False
     assert len(checkpoint_measurement_readiness_digest(readiness)) == 64
     assert readiness["base_experiment"]["protocol_digest"] == checkpoint_protocol_digest(
@@ -361,7 +371,7 @@ def test_prepare_all_cells_without_exposing_judgment_or_recording_observations(
         run_id="run-checkpoint-readiness-test",
         state=_state(),
         experiment=_experiment(),
-        readiness=_readiness(),
+        readiness=_unconsumed_readiness(),
         private_rubrics=_private_rubrics(),
         executor_binding="checkpoint-readiness-test-session",
         model_identity="work-model-unverified",
@@ -396,7 +406,7 @@ def test_prepare_all_cells_without_exposing_judgment_or_recording_observations(
         run_id="run-checkpoint-readiness-test",
         state=_state(),
         experiment=_experiment(),
-        readiness=_readiness(),
+        readiness=_unconsumed_readiness(),
         private_rubrics=_private_rubrics(),
         executor_binding="checkpoint-readiness-test-session",
         model_identity="work-model-unverified",
@@ -426,7 +436,7 @@ def test_measurement_readiness_rejects_task_rubric_and_protocol_tampering(
             run_id="run-checkpoint-readiness-tamper",
             state=_state(),
             experiment=_experiment(),
-            readiness=_readiness(),
+            readiness=_unconsumed_readiness(),
             private_rubrics=rubrics,
             executor_binding="checkpoint-readiness-test-session",
             model_identity="work-model-unverified",
@@ -449,3 +459,18 @@ def test_measurement_readiness_cannot_weaken_safety_or_claim_scope() -> None:
     readiness["observations"] = [{"synthetic": True}]
     with pytest.raises(ValueError, match="cannot contain observations"):
         validate_checkpoint_measurement_readiness(readiness, _experiment())
+
+
+def test_reconciled_measurement_forbids_duplicate_preparation(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="duplicate preparation is forbidden"):
+        prepare_checkpoint_measurement_requests(
+            tmp_path,
+            run_id="run-checkpoint-duplicate-test",
+            state=_state(),
+            experiment=_experiment(),
+            readiness=_readiness(),
+            private_rubrics=_private_rubrics(),
+            executor_binding="checkpoint-readiness-test-session",
+            model_identity="work-model-unverified",
+            now="2026-08-24T15:01:00Z",
+        )
