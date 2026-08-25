@@ -1,28 +1,28 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "running",
+  "status": "checkpointed",
   "owner_kind": "work_recovery_automation",
   "execution_id": "work-recovery-20260825T100803Z-9a82cfcc7affd1e3a617ba9e2c512ec0",
   "predecessor_execution_id": "work-recovery-20260825T061506Z-33befd84ccb52a05",
   "lease_generation": 12,
   "fence_token": "work-recovery-fence-v12-b8d0767ba47976828e04d76bc5ba0469fb608f9c192076c11373daf8cbcf0289",
   "started_at": "2026-08-25T10:08:03.000Z",
-  "heartbeat_at": "2026-08-25T10:10:00.000Z",
-  "last_progress_at": "2026-08-25T10:10:00.000Z",
+  "heartbeat_at": "2026-08-25T10:16:19.000Z",
+  "last_progress_at": "2026-08-25T10:16:19.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
     "instruction": "Continue generation 12 from latest remote main and the exact remote continuation for invoke-248450c08547af10470c50e6. Keep inbox revision 22 authoritative, use only the clean_g1 research feed at safe boundaries, and preserve exact negative-evidence scope.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 12 acquisition commit d76ca926fa02c5967ec7a41f0edbfc5e11311381 and blob 934d4020a6f0200b24208e912b77fdac881653be matched exact remote readback. This finalization state records the proof for authorize_work_mode_recovery."
+    "note": "Generation 12 acquisition commit d76ca926fa02c5967ec7a41f0edbfc5e11311381 and blob 934d4020a6f0200b24208e912b77fdac881653be matched exact remote readback; finalization commit 45b636c39f13331e41a326c4c801e8958623fdaa and blob ab050879f6dbb1d18b2a1672bd1ef955b3a78b8e were accepted by authorize_work_mode_recovery. The writer is now checkpointed because the newer records-only branch could not be published."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "074b9117430ceae9d491ef8cd936d667e626288e",
-  "working_branch": "work/recovery-gen12-rev22-action-adherence-v1",
+  "working_branch": "work/recovery-gen11-rev22-native-lifecycle-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_component": "revision22_action_adherence_execute_pending",
   "active_unit_id": "unit-3d61e557b2542d07c83fa354",
@@ -48,7 +48,7 @@
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 12 is acquiring the sole fenced main-writer lease by two-phase state-only CAS. Inbox revision 22 remains merged and acknowledged.",
+    "primary": "Generation 12 is checkpointed. Inbox revision 22 remains merged and acknowledged; resume from the last remote-durable generation-11 checkpoint only.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
@@ -2260,8 +2260,8 @@
   "finalization_blob_sha": "3cb4ca1be8249e310da83049256a7dfb8daa4a71",
   "finalization_readback_verified": true,
   "checkpoint": {
-    "checkpointed_at": "2026-08-25T09:15:57.000Z",
-    "reason": "physical automation execution boundary after completing the prior native publication lifecycle and freezing the fresh revision-22 action-adherence Execute; no measurement result exists yet",
+    "checkpointed_at": "2026-08-25T10:16:19.000Z",
+    "reason": "Generation 12 recovery and local native continuation succeeded, but policy rejected publication of the newer generated records branch. Those local responses are not authoritative. Resume from remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e and the still-unanswered immutable Execute invoke-248450c08547af10470c50e6; do not claim or replay any unpublished local result as durable evidence.",
     "exact_pending_work_invocation_id": "invoke-248450c08547af10470c50e6",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-248450c08547af10470c50e6/request.json",
     "exact_pending_request_digest": "e8d9e30cf7f46c8ad50bfd0ca1f4a9b3636c60d636064d2386c97bd1c3ccc143",
