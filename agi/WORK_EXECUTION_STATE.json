@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "running",
+  "status": "checkpointed",
   "owner_kind": "work_recovery_automation",
   "execution_id": "work-recovery-20260825T045411Z-de6c251469b36628",
   "predecessor_execution_id": "work-recovery-20260824T2101Z-2c49f84cf8b39fad",
   "lease_generation": 10,
   "fence_token": "work-recovery-fence-v10-fe2c9328bf8912a1fbb5cfdd4d2aebe25b9bd38a1d738c3db8851c9379fe592f",
   "started_at": "2026-08-25T04:54:11.386Z",
-  "heartbeat_at": "2026-08-25T04:55:20.000Z",
-  "last_progress_at": "2026-08-25T04:55:20.000Z",
+  "heartbeat_at": "2026-08-25T04:57:40.361Z",
+  "last_progress_at": "2026-08-25T04:57:40.361Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
@@ -59,8 +59,8 @@
     "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "Generation 10 recovery was authorized by exact generation+1 two-phase CAS and remote readback. Existing immutable Work Execute invoke-445821c809a6ca734fb1b97e remains the sole next semantic action; inbox revision remains 20.",
-    "next_action": "Execute only immutable Work invocation invoke-445821c809a6ca734fb1b97e for unit-context-kernel-held-out-action-outcomes-v1. Freeze the three held-out scenarios and mechanical rubric before either arm begins; compare only the manifest-free control and current provenance-bound Context Kernel route under equal conditions; fail closed on identity, authority, provenance, budget, or replay mismatch; limit every result to the exact tested routes and conditions.",
+    "durability_status": "Generation 10 recovery is fully authorized and checkpointed. The exact immutable Execute invoke-445821c809a6ca734fb1b97e remains unanswered and is the sole next semantic action; no scenario, rubric, arm result, or claim has been created yet. Inbox revision remains 20.",
+    "next_action": "Acquire the checkpointed generation-10 lease only through a new generation+1 two-phase CAS, then resume immutable Work Execute invoke-445821c809a6ca734fb1b97e without recreating it. Freeze scenarios and rubric before either arm, use equal conditions, and keep any negative evidence limited to exact tested routes/configuration/conditions.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
   },
@@ -112,7 +112,7 @@
   "finalize_expected_blob_sha": "ff7e45764cf47d1efe1aae5feabcf301016cb544",
   "readback_of_commit_sha": "9fc0bb9a140a5dc4e356d85946dcc85f50c95ef5",
   "verified_remote_readback": true,
-  "acquisition_phase": "authorized_running",
+  "acquisition_phase": "authorized_checkpointed",
   "recovery_observation": {
     "observed_at": "2026-08-25T04:54:11.386Z",
     "observed_state_blob_sha": "62de40fcf89df680d1df3dc6e48a7d845e912b55",
@@ -2259,5 +2259,17 @@
   },
   "finalization_commit_sha": "c4ef9f93774bf60a5aa0430814ff839f7f10a841",
   "finalization_blob_sha": "5648fe56d990f025acb3952b72b4c07a912289f7",
-  "finalization_readback_verified": true
+  "finalization_readback_verified": true,
+  "checkpoint": {
+    "checkpointed_at": "2026-08-25T04:57:40.361Z",
+    "reason": "physical automation execution boundary after safe generation-10 recovery; the semantic Execute was not answered or partially claimed",
+    "exact_pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
+    "exact_pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
+    "exact_pending_request_digest": "fd25431ea8e0bcfd910ebcd8f53f6040a4984987412845949904284fcbf25b86",
+    "next_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
+    "next_scope": "agi/context-kernel/held-out-action-outcome-comparison-v1",
+    "no_partial_result_claimed": true,
+    "user_level_objective_met": false,
+    "agi_claim_supported": false
+  }
 }
