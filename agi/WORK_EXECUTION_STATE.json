@@ -8,8 +8,8 @@
   "lease_generation": 9,
   "fence_token": "work-recovery-fence-v9-42631febacea086b4a2b12d664ff294368ff882ec81858d574498fabf4b55664",
   "started_at": "2026-08-24T21:04:35.100Z",
-  "heartbeat_at": "2026-08-25T02:10:23.940Z",
-  "last_progress_at": "2026-08-25T02:10:23.940Z",
+  "heartbeat_at": "2026-08-25T02:14:19.627Z",
+  "last_progress_at": "2026-08-25T02:14:19.627Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "negative_evidence_scope_audit_pr302_merge_authorized",
+  "active_component": "negative_evidence_scope_audit_pr302_merged_readback_verified",
   "active_unit_id": "unit-de402d4bcbb594d8e3f74a3b",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -59,8 +59,8 @@
     "pending_work_invocation_id": "invoke-f9f51a0b3a81e964afcb7826",
     "pending_request_ref": ".continual/work-model/invocations/invoke-f9f51a0b3a81e964afcb7826/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "The reviewed 86-path audit payload is published on PR 302 at unchanged exact head 4b5a1b312e1a6e1275521793b03c72bb0264f450. Workflow 32798283663 completed successfully with four pytest shards and the dependent aggregate. Fresh generation-9 authority, inbox revision 20, clean mergeability, and zero path intersection against main state-only advances were verified; expected-head merge is authorized but not yet executed.",
-    "next_action": "After exact remote readback of this state-only merge authorization, merge PR 302 only with expected head 4b5a1b312e1a6e1275521793b03c72bb0264f450, then read back all 86 reviewed blobs from latest main before answering Work invoke-f9f51a0b3a81e964afcb7826.",
+    "durability_status": "PR 302 exact head 4b5a1b312e1a6e1275521793b03c72bb0264f450 passed workflow 32798283663 with four pytest shards and the dependent aggregate, merged with expected-head protection as dd91b5b1dcb9cc43c1f6163bd34d50314016d129, and all 86 reviewed blob SHAs matched the non-truncated latest-main tree 7c0c228843a1f9ed4206b7b9268617b66f2425e6.",
+    "next_action": "Resume and answer immutable publication Execute Work invoke-f9f51a0b3a81e964afcb7826 from latest main, then continue Candidate Evaluate, Consolidate, Learn, and Root without treating this merge as user-level completion.",
     "completed_work_invocation_id": "invoke-cba10c768d124ddb128de374",
     "next_native_phase": "negative_evidence_scope_audit_exact_head_publication_execute"
   },
@@ -2046,8 +2046,8 @@
   "negative_evidence_scope_audit_checkpoint": {
     "effect_id": "checkpoint-generation9-negative-evidence-scope-audit-v1",
     "idempotency_key": "bachikoljunior-blip/O:generation9:negative-evidence-scope-audit:245e1d98d18ac1c11a0aecb5172cd50be81a27ea18dae1081b5f4698b97a58e6:v1",
-    "status": "merge_authorized",
-    "checkpointed_at": "2026-08-25T02:10:23.940Z",
+    "status": "merged_readback_verified",
+    "checkpointed_at": "2026-08-25T02:14:19.627Z",
     "expected_state_blob": "b158a504d8e3e3828935362391545597dc0d162d",
     "branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
     "ledger_digest": "245e1d98d18ac1c11a0aecb5172cd50be81a27ea18dae1081b5f4698b97a58e6",
@@ -2096,6 +2096,14 @@
     "main_advance_paths": [
       "agi/WORK_EXECUTION_STATE.json"
     ],
+    "merge_commit_sha": "dd91b5b1dcb9cc43c1f6163bd34d50314016d129",
+    "merge_commit_tree_sha": "7c0c228843a1f9ed4206b7b9268617b66f2425e6",
+    "merge_expected_head_verified": true,
+    "remote_readback_verified": true,
+    "remote_readback_path_count": 86,
+    "remote_readback_match_count": 86,
+    "remote_readback_mismatch_count": 0,
+    "remote_readback_tree_truncated": false,
     "changed_path_count": 86,
     "changed_path_list_sha256": "99a12c11361b774d56a827f4da5c1a519b01099538b1d75fd95f3ab7462f3637",
     "blob_manifest_sha256": "a21d714701f56e3dd2075e777eae6038b3af94acd2285aaba3568ea380fb578e",
@@ -2103,6 +2111,6 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed.",
     "claim_boundary": "Internal evidence-hygiene engineering limited to four exact retained entries and their candidate, configuration, source, and conditions. No scientist-agent-family, untested-mechanism, AGI, independent-production, or user-objective-completion inference.",
     "publication_rule": "No remote candidate blob, tree, commit, ref, PR, workflow, or merge may occur before this state-only expected-blob CAS and exact readback. Publish only the reviewed 86 paths on the recorded main parent; WORK_EXECUTION_STATE, USER_INPUT_INBOX, uv.lock, temporary responses, and unrelated files are excluded. Require unchanged exact-head CI, fresh generation-9 authority and inbox checks, expected-head merge, and all-blob remote readback.",
-    "next_action": "After exact remote readback of this state-only merge authorization, merge PR 302 only with expected head 4b5a1b312e1a6e1275521793b03c72bb0264f450, read back all 86 reviewed blobs from latest main, answer the pending publication Execute, and continue the O lifecycle."
+    "next_action": "Resume and answer immutable publication Execute Work invoke-f9f51a0b3a81e964afcb7826 from latest main, then continue Candidate Evaluate, Consolidate, Learn, and Root without treating this merge as user-level completion."
   }
 }
