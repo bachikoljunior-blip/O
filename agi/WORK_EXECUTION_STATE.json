@@ -8,8 +8,8 @@
   "lease_generation": 13,
   "fence_token": "work-recovery-fence-v13-091be1e739a5ef2f443e579c623510c68c4b3759cd86334bab9cf65d87c2ae4c",
   "started_at": "2026-08-25T12:33:55.477Z",
-  "heartbeat_at": "2026-08-25T12:34:32.009Z",
-  "last_progress_at": "2026-08-25T12:34:32.009Z",
+  "heartbeat_at": "2026-08-25T13:01:32.800Z",
+  "last_progress_at": "2026-08-25T13:01:32.800Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,16 +21,16 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "074b9117430ceae9d491ef8cd936d667e626288e",
-  "working_branch": "work/recovery-gen13-rev22-action-adherence-v1",
+  "source_main_sha": "e87ac5f6e5994194bdf997f9e4d605bc57c8ed21",
+  "working_branch": "work/recovery-gen13-inbox23-least-work-routing-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_action_adherence_execute_pending",
-  "active_unit_id": "unit-3d61e557b2542d07c83fa354",
+  "active_component": "revision23_least_work_routing_exact_head_ci",
+  "active_unit_id": "unit-revision23-least-work-routing-reconcile",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 22,
     "acknowledged_at": "2026-08-25T09:03:00.000Z",
-    "application_note": "Revision 22 is acknowledged after PR 308 exact head d03fd0bdaf7ec6386a0e2c283ac8ee8d509c33a1 passed workflow 32826741340 with four successful pytest shards plus the dependent aggregate, merged with expected-head protection as 8e38d40e57d158e3c2e7bedf2755ac818d680f97, and all four reviewed blobs matched exact main readback. Only research_index_clean_g1/O_FEED.json is the current research bridge; legacy and pre-independence research is historical-only. Polling remains nonblocking and creates no extra Work invocation solely for feed handling.",
+    "application_note": "Revision 22 remains the highest acknowledged revision. Authoritative revision 23 was observed at a safe semantic boundary and is being reconciled through PR 309 exact head a361f0c0489f8b8847f33bc82505efe856498f80; acknowledgement remains 22 until unchanged exact-head CI, merge, and remote readback succeed. No new Work handoff is created for this reasoning and repository-capable unit.",
     "last_acknowledged_input": {
       "revision": 22,
       "acknowledged_at": "2026-08-25T09:03:00.000Z",
@@ -48,7 +48,7 @@
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 13 is acquiring the sole fenced main-writer lease by two-phase state-only CAS. Inbox revision 22 remains merged and acknowledged.",
+    "primary": "Generation 13 remains the sole fenced owner. Revision 23 control-plane reconciliation is published as PR 309 and exact-head CI is in progress; the owner is alive and no recovery or duplicate writer is permitted.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
@@ -66,7 +66,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Answer only invoke-248450c08547af10470c50e6. Freeze the three scenarios, rubric, route configurations, source clock, identical budget, and judge before any route output; collect actual action traces for the current Context Kernel and manifest-free control. If comparable execution cannot be preserved, return exact-scope INSUFFICIENT_EVIDENCE. Do not generalize negative evidence or duplicate equivalent positive controls.",
+    "next_action": "Inspect PR 309 workflow 32850794847 for unchanged exact head a361f0c0489f8b8847f33bc82505efe856498f80, recompute fresh main conflict proof, merge only on success, verify all four blobs on main, and CAS-acknowledge inbox revision 23. Then resume the existing immutable revision-22 Execute from durable commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e without recreation; route subsequent reasoning and repository-capable work outside Work and keep every conclusion within the exact tested scope.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement"
   },
