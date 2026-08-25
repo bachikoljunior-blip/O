@@ -92,6 +92,11 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
         "r6-primary-executor": "r13-primary-executor",
         "r19-external-method-positive-control": "r20-external-method-positive-control",
         "r19-external-method-failure-attribution": "r20-external-method-failure-attribution",
+        "r21-external-research-feed-boundary-poll": "r22-clean-g1-research-feed-boundary-poll",
+        "r21-external-research-feed-ingestion": "r22-clean-g1-research-feed-ingestion",
+        "r21-external-research-feed-cursor": "r22-clean-g1-research-feed-cursor",
+        "r21-external-research-feed-work-volume": "r22-clean-g1-research-feed-work-volume",
+        "r21-external-research-feed-failure-policy": "r22-clean-g1-research-feed-failure-policy",
     }
     rendered = json.dumps(first, ensure_ascii=False)
     assert "strict independent external production evidence gate" not in rendered

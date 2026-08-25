@@ -89,6 +89,34 @@ def test_recovery_entries_are_integrated_after_revision_17_with_exact_provenance
         assert target == expected
 
 
+def test_revision_22_supersedes_legacy_feed_bridge_with_clean_g1_only() -> None:
+    inbox = load_user_input_inbox(ROOT)
+    ledger = json.loads((ROOT / "agi" / "USER_DIRECTIVE_EVENTS.json").read_text())
+    strategy = json.loads((ROOT / "agi" / "WORK_STRATEGY.json").read_text())
+
+    assert inbox["revision"] == 22
+    assert inbox["entries"][-1]["sequence"] == 22
+    assert inbox["entries"][-1]["supersedes"] == [
+        "user-direction-external-research-feed-poll-20260825-v21"
+    ]
+    assert ledger["source"]["revision"] == 22
+    assert ledger["source"]["content_digest"] == hashlib.sha256(
+        json.dumps(inbox, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    ).hexdigest()
+
+    atoms = {atom["atom_id"]: atom for atom in ledger["atoms"]}
+    assert atoms["r22-clean-g1-research-feed-boundary-poll"]["supersedes"] == [
+        "r21-external-research-feed-boundary-poll"
+    ]
+    assert atoms["r22-clean-g1-research-feed-ingestion"]["supersedes"] == [
+        "r21-external-research-feed-ingestion"
+    ]
+    assert strategy["context_management"]["source_user_input_revision"] == 22
+    assert strategy["research_feed"]["source_user_input_revision"] == 22
+    assert strategy["research_feed"]["path"] == "research_index_clean_g1/O_FEED.json"
+    assert "historical_only" in strategy["research_feed"]["legacy_policy"]
+
+
 def _append_entry(entry_id: str = "new-user-input") -> dict:
     return {
         "id": entry_id,
