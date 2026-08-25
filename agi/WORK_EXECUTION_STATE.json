@@ -8,8 +8,8 @@
   "lease_generation": 15,
   "fence_token": "work-recovery-fence-v15-0002f5e95b9489d5fe811b3629dd4d9a0fb77bd31127cd3dc2ca22c84946ca33",
   "started_at": "2026-08-25T16:57:05.952Z",
-  "heartbeat_at": "2026-08-25T17:03:40.000Z",
-  "last_progress_at": "2026-08-25T17:03:40.000Z",
+  "heartbeat_at": "2026-08-25T17:05:10.000Z",
+  "last_progress_at": "2026-08-25T17:05:10.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "After exact readback of the generation-15 public-input publication precommit, publish the reviewed five-path branch, require unchanged exact-head CI and fresh conflict/authority/inbox checks, then merge with expected-head protection and exact blob readback. The trusted coordinator must seal all three rubric commitments before creating the paired-route precommit; answers and nonces remain absent from public child-visible inputs. Do not recreate or answer frozen Execute invoke-248450c08547af10470c50e6 and do not publish generated invocation/prompt/model/native records without explicit permission.",
+    "next_action": "Monitor exact-head workflow 32875729952 for unchanged head a8ba737f47a68fa1dc3b35eb79458f88ba0c7a88. On five-job success, freshly re-read control revision 4, generation-15 fence, inbox revision 24, PR head/tree, main advance and changed-path intersection; merge PR 313 only with expected-head protection and read back all five blobs. Do not create the paired-route precommit until a trusted coordinator has sealed all three rubric commitments without exposing answers/nonces.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2939,7 +2939,7 @@
     "exact_continuation_persisted": true
   },
   "revision22_public_inputs_publication_precommit": {
-    "status": "state_only_precommit_pending_remote_publication",
+    "status": "remote_branch_and_pr_published_exact_head_ci_queued",
     "prepared_at": "2026-08-25T17:02:54.688Z",
     "branch": "work/recovery-gen15-revision22-public-inputs-v1",
     "base_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
@@ -2981,6 +2981,15 @@
       "reason": "Replace an unverified expanded abbreviation with the exact local commit read from git rev-parse before any remote branch publication.",
       "prior_unverified_value": "ef445a3af5c1b2f77e5ea42a06ded7d15998e5bb",
       "remote_publication_had_occurred": false
-    }
+    },
+    "remote_commit_sha": "a8ba737f47a68fa1dc3b35eb79458f88ba0c7a88",
+    "remote_tree_sha": "6d55066cd89b94f31315eed8254a87da9c4dcb1d",
+    "remote_blob_match_count": 5,
+    "pull_request": 313,
+    "exact_head_ci_run": 32875729952,
+    "exact_head_ci_status": "queued",
+    "mergeable": true,
+    "mergeable_state": "unstable_pending_required_ci",
+    "published_at": "2026-08-25T17:04:32Z"
   }
 }
