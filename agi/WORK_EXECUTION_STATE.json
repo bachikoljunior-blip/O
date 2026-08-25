@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T06:16:00.000Z",
-  "last_progress_at": "2026-08-25T06:16:00.000Z",
+  "heartbeat_at": "2026-08-25T06:18:30.000Z",
+  "last_progress_at": "2026-08-25T06:18:30.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "inbox_revision21_reconciliation",
+  "active_component": "inbox_revision21_reconciliation_publication_precommit",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -59,8 +59,8 @@
     "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "Generation 10 recovery is fully authorized and checkpointed. The exact immutable Execute invoke-445821c809a6ca734fb1b97e remains unanswered and is the sole next semantic action; no scenario, rubric, arm result, or claim has been created yet. Inbox revision remains 20.",
-    "next_action": "Acquire the checkpointed generation-10 lease only through a new generation+1 two-phase CAS, then resume immutable Work Execute invoke-445821c809a6ca734fb1b97e without recreating it. Freeze scenarios and rubric before either arm, use equal conditions, and keep any negative evidence limited to exact tested routes/configuration/conditions.",
+    "durability_status": "Generation 11 is authorized. Inbox revision 21 and empty research feed revision 1 are validated into a two-path canonical reconciliation; publication is blocked until this state precommit CAS is read back exactly.",
+    "next_action": "Verify this precommit readback, publish branch work/recovery-gen11-inbox21-feed-policy-v1 exact head 4bfbee2ac9d68fbadbd1bc2897c9ee7fa016b858, require exact-head CI, merge with expected-head protection and read back both blobs, then state-CAS acknowledge inbox 21/feed cursor and close stale revision-20 Execute fail-closed.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
   },
@@ -576,7 +576,7 @@
     "revision": 21,
     "inbox_blob_sha": "6a60ef74ce1dc37a906e5dd67affc0ddf612f005",
     "entry_id": "user-direction-external-research-feed-poll-20260825-v21",
-    "status": "pending_canonical_reconciliation",
+    "status": "canonical_reconciliation_validated_pending_publication",
     "safe_boundary": "before unanswered Execute invoke-445821c809a6ca734fb1b97e"
   },
   "pre_freeze_source_readiness": {
@@ -2274,5 +2274,36 @@
     "no_partial_result_claimed": true,
     "user_level_objective_met": false,
     "agi_claim_supported": false
+  },
+  "inbox_revision21_reconciliation": {
+    "status": "validated_pending_state_cas_readback",
+    "prepared_at": "2026-08-25T06:18:30.000Z",
+    "inbox_revision": 21,
+    "inbox_blob_sha": "6a60ef74ce1dc37a906e5dd67affc0ddf612f005",
+    "entry_id": "user-direction-external-research-feed-poll-20260825-v21",
+    "entry_digest": "4845e0c5e86ecdd26168c5190d6580a2d100b3474f95cff51c911d34b82eaef9",
+    "branch": "work/recovery-gen11-inbox21-feed-policy-v1",
+    "publication_parent_commit": "0d9653c86f8318d0b9544f2c896ee1b978a5ce67",
+    "local_candidate_commit": "4bfbee2ac9d68fbadbd1bc2897c9ee7fa016b858",
+    "exact_candidate_tree": "971dafa57ffcad62bf688fbf48bd1c28c2d19d08",
+    "changed_paths": [
+      "agi/USER_DIRECTIVE_EVENTS.json",
+      "agi/WORK_STRATEGY.json"
+    ],
+    "changed_path_list_sha256": "4847b7d0447296525be37f41ff381035260ddfa183fb25b86484cc8b795fddc9",
+    "blob_manifest_sha256": "b62f3844405547d306f4fb9d7730739212bd0e6ebc8697b8e2d5734549fa0b24",
+    "validation": "USER_INPUT_INBOX and both reconciled JSON files parsed; compile_effective_directives produced effective policy digest 0d7311459ade262f34bf2dca325e63cbfde266bb2462e49053ceb16c27698f73; 65 effective-directive and Context Kernel tests passed; git diff check passed.",
+    "research_feed_observation": {
+      "repository": "bachikoljunior-blip/note",
+      "path": "research_index/O_FEED.json",
+      "feed_revision": 1,
+      "content_digest_sha256": "354e8690a37603b801db18c9927dbee877ba80ee73dbed384660ea71a9ae84af",
+      "blob_sha": "ae77b52c21cc21db13194ad1f262b0c18a4195ad",
+      "item_count": 0,
+      "decision_relevant_novel_item_count": 0,
+      "action": "acknowledge_cursor_and_continue_without_extra_work_invocation"
+    },
+    "publication_rule": "After exact readback of this state-only CAS, publish only the reviewed two paths on the named branch, require unchanged exact-head CI, fresh authority/inbox/head/conflict checks, expected-head merge, both-blob main readback, then acknowledge inbox revision 21 and feed cursor by expected-blob state CAS.",
+    "semantic_rule": "The pre-existing Execute invoke-445821c809a6ca734fb1b97e remains immutable but its revision-20 context is superseded at this safe boundary. Do not use it for external effects or claim completion; close it fail-closed only after canonical revision-21 reconciliation is main-durable."
   }
 }
