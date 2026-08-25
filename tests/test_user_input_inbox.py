@@ -112,54 +112,60 @@ def test_revision_22_supersedes_legacy_feed_bridge_with_clean_g1_only() -> None:
     assert atoms["r22-clean-g1-research-feed-ingestion"]["supersedes"] == [
         "r21-external-research-feed-ingestion"
     ]
+    assert strategy["context_management"]["source_user_input_revision"] == 22
     assert strategy["research_feed"]["source_user_input_revision"] == 22
     assert strategy["research_feed"]["path"] == "research_index_clean_g1/O_FEED.json"
     assert "historical_only" in strategy["research_feed"]["legacy_policy"]
 
 
-def test_revision_23_narrows_work_routing_without_erasing_revision_5_constraints() -> None:
+def test_revision_23_is_recorded_as_misdirected_without_primary_o_routing_effect() -> None:
     inbox = load_user_input_inbox(ROOT)
     ledger = json.loads((ROOT / "agi" / "USER_DIRECTIVE_EVENTS.json").read_text())
     strategy = json.loads((ROOT / "agi" / "WORK_STRATEGY.json").read_text())
+    correction = json.loads(
+        (ROOT / "agi" / "REVISION_23_TARGETING_CORRECTION.json").read_text()
+    )
 
     assert inbox["revision"] >= 23
     revision_23 = inbox["entries"][22]
     assert revision_23["id"] == "user-direction-least-work-routing-20260825-v23"
     assert revision_23["sequence"] == 23
-    assert ledger["source"]["revision"] == inbox["revision"]
-    assert ledger["source"]["content_digest"] == hashlib.sha256(
-        json.dumps(inbox, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
-    ).hexdigest()
+    assert correction["status"] == "authoritative_user_targeting_correction"
+    assert correction["corrects"]["inbox_revision"] == 23
+    assert "separate automation" in correction["correction"]
 
     atoms = {atom["atom_id"]: atom for atom in ledger["atoms"]}
-    assert atoms["r5-smartphone-operator"]["source_directive_indices"] == [
+    assert atoms["r5-smartphone-operator"]["source_directive_indices"] == list(range(8))
+    assert "r5-work-routing" not in atoms
+    assert "r23-least-work-routing" not in atoms
+    assert atoms["r23-misdirected-routing-provenance"]["source_directive_indices"] == [
         0,
-        3,
-        4,
-        5,
-        6,
-        7,
+        1,
+        2,
     ]
-    assert atoms["r5-work-routing"]["source_directive_indices"] == [1, 2]
-    assert atoms["r23-least-work-routing"]["supersedes"] == ["r5-work-routing"]
-    assert atoms["r23-retain-smartphone-and-account-constraints"][
-        "source_directive_indices"
-    ] == [3]
-    assert atoms["r23-preserve-frozen-work-contracts"][
-        "source_directive_indices"
-    ] == [4]
-
-    assert strategy["source_user_input_revision"] >= 23
-    assert strategy["context_management"]["source_user_input_revision"] >= 23
-    assert strategy["execution_rules"]["work_handoff_policy"] == (
-        "only_irreducibly_work_exclusive"
+    assert atoms["r23-misdirected-constraint-provenance"]["source_directive_indices"] == [3]
+    assert atoms["r23-misdirected-handoff-provenance"]["source_directive_indices"] == [4]
+    assert all(
+        atoms[atom_id]["slot"] == "input.provenance"
+        for atom_id in (
+            "r23-misdirected-routing-provenance",
+            "r23-misdirected-constraint-provenance",
+            "r23-misdirected-handoff-provenance",
+        )
     )
-    assert strategy["execution_rules"][
+
+    assert "source_user_input_revision" not in strategy
+    assert strategy["context_management"]["source_user_input_revision"] == 22
+    assert "work_handoff_policy" not in strategy["execution_rules"]
+    assert "handoff_route_classes" not in strategy["execution_rules"]
+    assert (
         "reasoning_planning_review_and_routing_stay_outside_work_when_adequate"
-    ] is True
-    assert strategy["execution_rules"][
+        not in strategy["execution_rules"]
+    )
+    assert (
         "interrupt_valid_frozen_work_exclusive_invocation_for_routing_change"
-    ] is False
+        not in strategy["execution_rules"]
+    )
 
 
 def _append_entry(entry_id: str = "new-user-input") -> dict:
@@ -397,12 +403,16 @@ def test_remote_append_never_retries_a_failed_cas() -> None:
         )
     assert cas_calls == 1
 
+
 def test_user_input_inbox_rejects_secret_bearing_fields_and_sequence_gaps() -> None:
     inbox = load_user_input_inbox(ROOT)
 
     unsafe = deepcopy(inbox)
     unsafe["entries"][0]["token"] = "must-not-be-stored"
-    assert any("forbidden secret-bearing field" in error for error in validate_user_input_inbox(unsafe))
+    assert any(
+        "forbidden secret-bearing field" in error
+        for error in validate_user_input_inbox(unsafe)
+    )
 
     gapped = deepcopy(inbox)
     gapped["entries"][1]["sequence"] = 3
