@@ -8,15 +8,15 @@
   "lease_generation": 14,
   "fence_token": "work-recovery-fence-v14-e0161aa4853efb06aae70428ccfaaabeab37875a135c24363304a154dfc8ccf9",
   "started_at": "2026-08-25T16:13:08.318Z",
-  "heartbeat_at": "2026-08-25T16:13:08.318Z",
-  "last_progress_at": "2026-08-25T16:13:08.318Z",
+  "heartbeat_at": "2026-08-25T16:15:02.227Z",
+  "last_progress_at": "2026-08-25T16:15:02.227Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
     "instruction": "Continue generation 14 from latest remote main. First complete the already-reviewed revision-24 primary-O targeting correction from unchanged PR 312 after fresh exact-head CI, conflict, authority, inbox, and blob checks; then acknowledge revision 24. Preserve pre-revision-23 primary-O routing, revision-5 constraints, the frozen revision-22 Execute invoke-248450c08547af10470c50e6, and all single-writer/fence/CAS bindings. Do not inject the separate work_delegation_gate least-Work policy into primary O, recreate the frozen request, or publish generated invocation/prompt/model/native records without explicit permission.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 14 acquisition is in the first phase of the required state-only CAS. Generation 13 was stale; exact-head workflow 32859595540 completed successfully at 2026-08-25T14:59:57Z, and no same-owner commit, branch, PR, workflow, or tool progress was observed for more than stale_after_seconds after completion. Semantic execution remains frozen until acquisition and finalization remote readback are authorized."
+    "note": "Generation 14 acquisition commit 4973d2693dbb75d7b1105df7fc80bffc452ac9a6 and blob 0f56649b037369e76a25a861b620bbb5ed15dcfc matched exact remote readback. This finalization state records the proof for authorize_work_mode_recovery; semantic execution remains frozen until the finalization commit/blob are read back and authorization is validated."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -24,7 +24,7 @@
   "source_main_sha": "7cd4386c7dcce2678e8f5fe3be477860102fbfad",
   "working_branch": "work/recovery-gen13-revision23-targeting-correction-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision24_targeting_correction_recovery_acquisition",
+  "active_component": "revision24_targeting_correction_recovery_authorization",
   "active_unit_id": "unit-revision24-primary-o-targeting-correction",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -102,7 +102,7 @@
     "claim_boundary": "Precommit harness only. No route observation, output, score, judgment, behavioral result, negative evidence, family inference, external-production evidence, AGI evidence, or completion claim exists."
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 14 acquisition is state-only and not yet mutation-authorized. Generation 13 stop was established from stale heartbeat plus absence of same-owner progress after PR 312 exact-head CI completion. PR 312, PR 310, and the frozen revision-22 Execute remain unchanged until two-phase authorization completes.",
+    "primary": "Generation 14 acquisition commit and blob matched remote readback. Finalization is state-only; PR 312, PR 310, and frozen revision-22 Execute remain unchanged until finalization readback and authorization validation complete.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
@@ -169,11 +169,11 @@
     "note": "Revision 24 corrects revision 23 as not applicable to primary O. Preserve and resume the existing revision-22-bound Execute without a new Work handoff or routing detour. The paired-route harness remains valid support only if freshly revalidated against that frozen Execute after the correction is main-durable. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, publish unapproved generated records, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
   },
   "expected_blob_sha": "928a33f0e924b5566b56d37150599c33e91119a9",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
+  "result_commit_sha": "4973d2693dbb75d7b1105df7fc80bffc452ac9a6",
+  "result_blob_sha": "0f56649b037369e76a25a861b620bbb5ed15dcfc",
+  "finalize_expected_blob_sha": "0f56649b037369e76a25a861b620bbb5ed15dcfc",
+  "readback_of_commit_sha": "4973d2693dbb75d7b1105df7fc80bffc452ac9a6",
+  "verified_remote_readback": true,
   "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-25T16:13:08.318Z",
