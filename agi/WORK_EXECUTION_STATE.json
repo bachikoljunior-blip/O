@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "running",
+  "status": "checkpointed",
   "owner_kind": "work_recovery_automation",
   "execution_id": "work-recovery-20260825T165705Z-6a8d35c32da082b54c16386a0abdbb2f",
   "predecessor_execution_id": "work-recovery-20260825T161308Z-07da90af972aa0815a5a0d42b40c7fe9",
   "lease_generation": 15,
   "fence_token": "work-recovery-fence-v15-0002f5e95b9489d5fe811b3629dd4d9a0fb77bd31127cd3dc2ca22c84946ca33",
   "started_at": "2026-08-25T16:57:05.952Z",
-  "heartbeat_at": "2026-08-25T17:14:30.000Z",
-  "last_progress_at": "2026-08-25T17:14:30.000Z",
+  "heartbeat_at": "2026-08-25T17:15:28.696Z",
+  "last_progress_at": "2026-08-25T17:15:28.696Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
   "working_branch": "work/recovery-gen15-revision22-public-inputs-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_public_paired_route_inputs_publication_pending",
+  "active_component": "revision22_public_inputs_exact_head_ci_in_progress",
   "active_unit_id": "unit-revision22-public-paired-route-precommit-inputs",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -232,7 +232,7 @@
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 15 is the sole owner after acquisition commit/blob exact readback. Semantic mutation begins only after this finalization CAS is read back and the fence bindings validate.",
+    "primary": "Generation 15 reached a safe physical checkpoint with PR 313 exact-head CI still in progress. No other writer is authorized. The next monitor may recover generation 16 through the same two-phase state-only CAS and continue from workflow 32875956360.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 14 checkpoint commit 67e71492fee51a2f2dab5133c090c40e112a595c is the sole continuation source; generation 8 and generation 6 orphan invocations remain untouched."
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Continue monitoring exact-head workflow 32875956360. Current state: shard 0 in progress; shards 1/2/3 queued behind superseded-head capacity. Require the exact current head and all five successful jobs before any merge.",
+    "next_action": "From latest main, recover generation 16 by exact generation+1 two-phase state-only CAS. Re-read control revision 4, inbox revision 24, PR 313 exact head ffa00be1ae8f7791530f6074d83b8f33012b28ab/tree 229880a2d047b5d8e589b5709950eafff8c8137d, and workflow 32875956360. If all four shards plus dependent aggregate succeed and fresh authority/inbox/head/path-disjoint checks remain exact, merge PR 313 with expected-head protection and read back all five blobs. If any job fails, preserve the exact failure and repair on a new precommitted head. After integration, a trusted coordinator must seal three rubric commitments without exposing answers/nonces before the six child bindings are materialized. Do not recreate or answer the frozen Execute and do not publish generated invocation/prompt/model/native records without explicit permission.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2452,15 +2452,15 @@
   "finalization_blob_sha": "3cb4ca1be8249e310da83049256a7dfb8daa4a71",
   "finalization_readback_verified": true,
   "checkpoint": {
-    "checkpointed_at": "2026-08-25T10:16:19.000Z",
-    "reason": "Generation 12 recovery and local native continuation succeeded, but policy rejected publication of the newer generated records branch. Those local responses are not authoritative. Resume from remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e and the still-unanswered immutable Execute invoke-248450c08547af10470c50e6; do not claim or replay any unpublished local result as durable evidence.",
+    "checkpointed_at": "2026-08-25T17:15:28.696Z",
+    "reason": "Physical run boundary while exact-head CI for the hardened public-input head is still in progress. No merge, rubric reveal, route execution, result, or partial success claim occurred.",
     "exact_pending_work_invocation_id": "invoke-248450c08547af10470c50e6",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-248450c08547af10470c50e6/request.json",
     "exact_pending_request_digest": "e8d9e30cf7f46c8ad50bfd0ca1f4a9b3636c60d636064d2386c97bd1c3ccc143",
     "exact_pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "remote_checkpoint_commit": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
     "remote_checkpoint_tree": "ced01225faead09cf8390e12d7cf2dcccd56b812",
-    "next_unit_id": "unit-3d61e557b2542d07c83fa354",
+    "next_unit_id": "unit-revision22-public-paired-route-precommit-inputs",
     "next_scope": "agi/context-kernel/held-out-action-adherence-revision22-v1",
     "no_partial_result_claimed": true,
     "user_level_objective_met": false,
@@ -2928,18 +2928,15 @@
     }
   },
   "termination": {
-    "kind": "physical_automation_run_boundary_checkpoint",
-    "at": "2026-08-25T16:23:33.359Z",
+    "kind": "physical_run_boundary_checkpoint",
     "global_completion": false,
     "user_objective_met": false,
     "explicit_user_stop": false,
-    "agi_claim_supported": false,
     "self_disable_attempted": false,
-    "monitor_must_remain_enabled": true,
-    "exact_continuation_persisted": true
+    "monitor_should_remain_enabled": true
   },
   "revision22_public_inputs_publication_precommit": {
-    "status": "hardened_remote_head_published_waiting_exact_head_ci",
+    "status": "exact_head_ci_in_progress_checkpointed",
     "prepared_at": "2026-08-25T17:02:54.688Z",
     "branch": "work/recovery-gen15-revision22-public-inputs-v1",
     "base_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
@@ -2989,7 +2986,7 @@
     "remote_blob_match_count": 5,
     "pull_request": 313,
     "exact_head_ci_run": 32875956360,
-    "exact_head_ci_status": "one_shard_in_progress_three_queued",
+    "exact_head_ci_status": "four_shards_in_progress_aggregate_not_started",
     "mergeable": true,
     "mergeable_state": "unstable_pending_required_ci",
     "published_at": "2026-08-25T17:04:32Z",
@@ -3009,19 +3006,19 @@
       {
         "id": 97893768386,
         "name": "pytest shard 2 of 4",
-        "status": "queued",
+        "status": "in_progress",
         "conclusion": null
       },
       {
         "id": 97893768469,
         "name": "pytest shard 3 of 4",
-        "status": "queued",
+        "status": "in_progress",
         "conclusion": null
       },
       {
         "id": 97893768570,
         "name": "pytest shard 1 of 4",
-        "status": "queued",
+        "status": "in_progress",
         "conclusion": null
       }
     ]
