@@ -1,0 +1,72 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-25T01:14:46.282161Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-8acd543339195af8a8c02bf4-candidate_evaluate.json",
+  "invocation_id": "invoke-8acd543339195af8a8c02bf4",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "observations": [
+        "The candidate targets Task Evaluate and has no dependencies or conflicts.",
+        "Exact-scope protected verification is absent, so global or scoped activation is not authorized."
+      ],
+      "purpose": "Select the dual-verdict overlay for a one-call bounded trial.",
+      "unresolved": [
+        "actual trial output",
+        "post-result Candidate decision",
+        "publication of the audited artifacts"
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "observations": [
+        "This audit has a separately falsifiable completion boundary and therefore benefits from explicit dual verdicts.",
+        "Revision 20 makes the negative-evidence scope itself a mandatory regression dimension for the trial."
+      ],
+      "reason": "Candidate applicability is bounded to this one Task Evaluate call; no activation evidence exists yet."
+    },
+    "result": {
+      "activation_authorized": false,
+      "applicability": {
+        "active_version": "prompts/task_evaluate.md",
+        "candidate_version": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+        "conflicts": [],
+        "dependencies_satisfied": true,
+        "target_component_matches": true
+      },
+      "baseline_needed": false,
+      "baseline_reason": "The active Task Evaluate contract already requires the unchanged original goal, while the trial adds only an explicit separately falsifiable unit verdict. Prior deterministic observations establish the active behavior sufficiently for a bounded non-mutating trial; no duplicate evaluation call is needed.",
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "decision": "TRIAL_CANDIDATE",
+      "evidence_to_collect": [
+        "both verdict and unit_verdict are present and non-conflated",
+        "unit PASS, if supported, is limited to the four exact audited entries and does not imply original-goal PASS",
+        "user-level verdict remains FAIL and agi_claim_supported remains false",
+        "negative evidence is limited to actual candidate, configuration, and conditions",
+        "the one repair-required legacy wording remains a repair item rather than a family-wide negative"
+      ],
+      "quality_dimensions": {
+        "expected_benefit": "prevents a bounded engineering PASS from being mistaken for task completion",
+        "external_cost": "none",
+        "failure_risk": "overproduction of unit PASS is controlled by explicit frozen success mapping and independent user-level FAIL",
+        "latency": "one existing evaluation call; no duplicate baseline call",
+        "token_cost": "small overlay",
+        "tool_cost": "none"
+      },
+      "reason": "The upcoming evaluation must keep the bounded audit-unit verdict independent from the unchanged user-level verdict. The overlay directly targets Task Evaluate and has compatible prior evidence, but it is not VERIFIED_FOR_SCOPE for this exact evidence-scope audit, so it is trialed only for this call and is not activated globally.",
+      "regression_checks": [
+        "reject any original-goal weakening",
+        "reject family-wide or untested-mechanism generalization",
+        "reject unsupported positive-control equivalence or duplicate-control requirements",
+        "preserve internal-only claim boundary and exact provenance",
+        "do not propose activation from self-report alone"
+      ],
+      "rollback": "Discard the trial output if it conflates verdicts, weakens the original goal, broadens negative evidence, omits provenance, or implies Candidate activation without deterministic protected-baseline verification.",
+      "scope": "agi/evidence-scope/negative-evidence-ledger-audit-v1"
+    }
+  },
+  "payload_digest": "add1571c3fd721a112633e42",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}
