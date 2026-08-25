@@ -8,8 +8,8 @@
   "lease_generation": 9,
   "fence_token": "work-recovery-fence-v9-42631febacea086b4a2b12d664ff294368ff882ec81858d574498fabf4b55664",
   "started_at": "2026-08-24T21:04:35.100Z",
-  "heartbeat_at": "2026-08-25T01:16:09.047Z",
-  "last_progress_at": "2026-08-25T01:16:09.047Z",
+  "heartbeat_at": "2026-08-25T01:31:19.591Z",
+  "last_progress_at": "2026-08-25T01:31:19.591Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
@@ -24,8 +24,8 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "negative_evidence_scope_audit_task_evaluate_submitted_lifecycle_pending",
-  "active_unit_id": "unit-5f417462c8926bf80b5a73b8",
+  "active_component": "negative_evidence_scope_audit_exact_head_publication_pending",
+  "active_unit_id": "unit-de402d4bcbb594d8e3f74a3b",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 20,
@@ -55,14 +55,14 @@
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "d04c41bb2453969508337c40d35d5cf400cab209",
-    "pending_work_invocation_id": null,
-    "pending_request_ref": null,
-    "pending_native_invocation_id": "invoke-e64cf9aa207fe96ac509c7d8",
-    "durability_status": "The bounded negative-evidence audit implementation passed 47 focused tests. Execute Work invoke-7a5674c90a25ad39f7d70663/native invoke-be351de83f9e9051bc6b8299 and Task Evaluate Work invoke-3c5ff0087f6d0a811ca53d2c/native invoke-e64cf9aa207fe96ac509c7d8 have immutable responses locally; Task Evaluate reports unit PASS, user-level FAIL, zero family-wide negatives, and zero untested-mechanism negatives.",
-    "next_action": "Resume once to consume native Task Evaluate invoke-e64cf9aa207fe96ac509c7d8, then complete post-result Candidate Evaluate, Consolidate Episode, and Learn. Publish the audit ledger, validator, tests, bounded CONTEXT_METHOD_COMPARISON wording repair, and native/Work records through an isolated exact-head-CI PR; continue the O lifecycle afterward.",
-    "completed_work_invocation_id": "invoke-3c5ff0087f6d0a811ca53d2c",
-    "next_native_phase": "negative_evidence_scope_audit_task_evaluate_consume_then_lifecycle"
+    "snapshot_head_sha": "d201871575e1838cc002ce4646cd882a6aa8c0ce",
+    "pending_work_invocation_id": "invoke-f9f51a0b3a81e964afcb7826",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-f9f51a0b3a81e964afcb7826/request.json",
+    "pending_native_invocation_id": null,
+    "durability_status": "The audit, bounded Task Evaluate, post-result Candidate decision, Consolidate, Learn, and next publication Root/Candidate preflight are complete locally. The publication Execute request is immutable and included in the reviewed 86-path candidate manifest. No publication side effect has occurred yet.",
+    "next_action": "After exact remote readback of this state-only CAS, create only the 86 reviewed content-addressed blobs and exact tree 799fb82a821d7f8b685b6eb50b845e5f28948a71 on parent main d201871575e1838cc002ce4646cd882a6aa8c0ce, open the recorded branch PR, require unchanged exact-head CI, then merge with fresh authority and read back every reviewed blob before answering Work invoke-f9f51a0b3a81e964afcb7826.",
+    "completed_work_invocation_id": "invoke-cba10c768d124ddb128de374",
+    "next_native_phase": "negative_evidence_scope_audit_exact_head_publication_execute"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -2046,9 +2046,9 @@
   "negative_evidence_scope_audit_checkpoint": {
     "effect_id": "checkpoint-generation9-negative-evidence-scope-audit-v1",
     "idempotency_key": "bachikoljunior-blip/O:generation9:negative-evidence-scope-audit:245e1d98d18ac1c11a0aecb5172cd50be81a27ea18dae1081b5f4698b97a58e6:v1",
-    "status": "task_evaluate_submitted_lifecycle_and_publication_pending",
-    "checkpointed_at": "2026-08-25T01:16:09.047Z",
-    "expected_state_blob": "d102acc39b951a59319db10952704eab95b8f2bb",
+    "status": "publication_precommitted_no_remote_candidate_objects_created",
+    "checkpointed_at": "2026-08-25T01:31:19.591Z",
+    "expected_state_blob": "b158a504d8e3e3828935362391545597dc0d162d",
     "branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
     "ledger_digest": "245e1d98d18ac1c11a0aecb5172cd50be81a27ea18dae1081b5f4698b97a58e6",
     "entry_count": 4,
@@ -2061,8 +2061,15 @@
     "execute_native_invocation_id": "invoke-be351de83f9e9051bc6b8299",
     "task_evaluate_work_invocation_id": "invoke-3c5ff0087f6d0a811ca53d2c",
     "task_evaluate_native_invocation_id": "invoke-e64cf9aa207fe96ac509c7d8",
-    "validation": "47 focused tests passed; compileall, JSON parse, and git diff check passed.",
+    "publication_base_main_commit": "d201871575e1838cc002ce4646cd882a6aa8c0ce",
+    "exact_candidate_tree": "799fb82a821d7f8b685b6eb50b845e5f28948a71",
+    "changed_path_count": 86,
+    "changed_path_list_sha256": "99a12c11361b774d56a827f4da5c1a519b01099538b1d75fd95f3ab7462f3637",
+    "blob_manifest_sha256": "a21d714701f56e3dd2075e777eae6038b3af94acd2285aaba3568ea380fb578e",
+    "publication_execute_work_invocation_id": "invoke-f9f51a0b3a81e964afcb7826",
+    "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed.",
     "claim_boundary": "Internal evidence-hygiene engineering limited to four exact retained entries and their candidate, configuration, source, and conditions. No scientist-agent-family, untested-mechanism, AGI, independent-production, or user-objective-completion inference.",
-    "next_action": "Consume the submitted Task Evaluate response, complete the native lifecycle, publish the reviewed artifacts and bounded wording repair through unchanged exact-head CI, and continue with the next falsifiable unit."
+    "publication_rule": "No remote candidate blob, tree, commit, ref, PR, workflow, or merge may occur before this state-only expected-blob CAS and exact readback. Publish only the reviewed 86 paths on the recorded main parent; WORK_EXECUTION_STATE, USER_INPUT_INBOX, uv.lock, temporary responses, and unrelated files are excluded. Require unchanged exact-head CI, fresh generation-9 authority and inbox checks, expected-head merge, and all-blob remote readback.",
+    "next_action": "CAS and read back this publication precommit, publish the exact candidate tree, run exact-head CI, merge only if unchanged and successful, read back all 86 blobs, answer the pending publication Execute, and continue the O lifecycle."
   }
 }
