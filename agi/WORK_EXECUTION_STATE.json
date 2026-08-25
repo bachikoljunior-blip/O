@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T06:58:51.000Z",
-  "last_progress_at": "2026-08-25T06:58:51.000Z",
+  "heartbeat_at": "2026-08-25T07:04:28.000Z",
+  "last_progress_at": "2026-08-25T07:04:28.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "6bd30e195445185179e325343207abc879fe37e4",
   "working_branch": "work/recovery-gen11-inbox21-feed-policy-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "inbox_revision21_reconciliation_pr305_exact_head_ci_pending",
+  "active_component": "inbox_revision21_reconciliation_pr305_merge_authorized",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -59,8 +59,8 @@
     "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "PR 305 exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d has successful shards 0, 2, and 3 in workflow 32817489674; shard 1 remains in progress and the dependent aggregate has not started. Merge and inbox acknowledgement remain forbidden.",
-    "next_action": "Monitor workflow 32817489674 for exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d. On success, precommit fresh merge proof, expected-head merge PR 305, read back all three blobs, then acknowledge inbox revision 21 and feed revision 1 by state-only CAS and close stale revision-20 Execute fail-closed.",
+    "durability_status": "PR 305 exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d passed all four pytest shards and the dependent aggregate in workflow 32817489674. Fresh precommit proof found no changed-path intersection with main; expected-head merge is authorized only after a second unchanged read.",
+    "next_action": "Read back this merge authorization state exactly; repeat state, inbox revision/blob, PR head/mergeability, exact-head CI, and changed-path intersection checks; then merge PR 305 with expected head 8c03f19f79b982dfdead4c265c4df4d9899c744d.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
   },
@@ -2276,7 +2276,7 @@
     "agi_claim_supported": false
   },
   "inbox_revision21_reconciliation": {
-    "status": "pr_open_exact_head_ci_queued",
+    "status": "merge_authorized_by_fresh_exact_head_proof",
     "prepared_at": "2026-08-25T06:18:30.000Z",
     "inbox_revision": 21,
     "inbox_blob_sha": "6a60ef74ce1dc37a906e5dd67affc0ddf612f005",
@@ -2321,7 +2321,7 @@
     "pr_additions": 108,
     "pr_deletions": 30,
     "exact_head_workflow_run": 32817489674,
-    "exact_head_workflow_status": "in_progress_3_of_4_shards_success",
+    "exact_head_workflow_status": "completed_success",
     "remote_test_blob": "40389a0f5b953b612939a85ec171866529a3898c",
     "superseded_exact_head_workflow_runs": [
       32816712708,
@@ -2337,8 +2337,8 @@
       {
         "id": 97708616257,
         "name": "pytest shard 1 of 4",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 97708616270,
@@ -2351,7 +2351,33 @@
         "name": "pytest shard 2 of 4",
         "status": "completed",
         "conclusion": "success"
+      },
+      {
+        "id": 97715022283,
+        "name": "test",
+        "status": "completed",
+        "conclusion": "success"
       }
-    ]
+    ],
+    "merge_authorization": {
+      "authorized_at": "2026-08-25T07:04:28.000Z",
+      "expected_state_blob_sha": "63e34b660cd188e0987b49682a179725d7c46652",
+      "expected_inbox_revision": 21,
+      "expected_inbox_blob_sha": "6a60ef74ce1dc37a906e5dd67affc0ddf612f005",
+      "expected_pr": 305,
+      "expected_head_sha": "8c03f19f79b982dfdead4c265c4df4d9899c744d",
+      "expected_head_tree": "41ef2fa30ef24db32320439cf73ff2dfabead667",
+      "exact_head_workflow_run": 32817489674,
+      "required_jobs_success": 5,
+      "mergeable_state": "clean",
+      "merge_base": "fd0a7666db59dec1211536aee7457abffc980728",
+      "latest_main_before_precommit": "343cf1b2ba7178f25cbeb806074e692668fdd113",
+      "main_changes_since_merge_base": [
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "changed_path_intersection": [],
+      "merge_method": "merge",
+      "require_second_fresh_read": true
+    }
   }
 }
