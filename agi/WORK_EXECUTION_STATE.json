@@ -8,8 +8,8 @@
   "lease_generation": 16,
   "fence_token": "work-recovery-fence-v16-51b3fc3aa7d1e2ac59d151fe91c25a425a38a66efc2cd66a4dc122b1ea287d5f",
   "started_at": "2026-08-25T18:00:39.978Z",
-  "heartbeat_at": "2026-08-25T18:33:11.362Z",
-  "last_progress_at": "2026-08-25T18:33:11.362Z",
+  "heartbeat_at": "2026-08-25T18:41:41.250Z",
+  "last_progress_at": "2026-08-25T18:41:41.250Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Continue monitoring exact-head workflow 32881528014 for repair head 4a6efaed77d4f3122a030c757895f24e8e517919. Shards 0/1/2 succeeded; shard 3 is actually running. Require shard 3 and the dependent aggregate to succeed before fresh control/authority/inbox/head/conflict checks and expected-head merge.",
+    "next_action": "Read back this merge-authorization CAS, then perform the required second fresh control/authority/inbox/PR/jobs/response/conflict read. If unchanged, merge PR 313 with expected head 4a6efaed77d4f3122a030c757895f24e8e517919 and read back all five reviewed blobs on main.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -3078,7 +3078,7 @@
       "remote_tree_sha": "0c0bd789cf1487a734bf03a76e69ddb13de8ee9d",
       "pull_request": 313,
       "exact_head_ci_run": 32881528014,
-      "exact_head_ci_status": "three_shards_success_shard3_in_progress",
+      "exact_head_ci_status": "success_four_shards_and_dependent_aggregate",
       "remote_blob_match": true,
       "published_at": "2026-08-25T18:03:28Z",
       "exact_head_ci_jobs": [
@@ -3103,8 +3103,14 @@
         {
           "id": 97911932260,
           "name": "pytest shard 3 of 4",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 97923405440,
+          "name": "test",
+          "status": "completed",
+          "conclusion": "success"
         }
       ],
       "preliminary_conflict_check": {
@@ -3124,6 +3130,55 @@
         "merge_tree_clean": true,
         "predicted_merge_tree_sha": "2e40f600f054dcb9efcc8e6bd929162e145175b4",
         "final_fresh_check_required": true
+      },
+      "merge_authorization": {
+        "authorized_at": "2026-08-25T18:41:41.250Z",
+        "expected_state_blob_sha": "4a360f1ce2d8678bbbbfde7323760e8592af221c",
+        "expected_control_blob_sha": "0236f9a9ccdc5727595c45c21b8430cd30c65406",
+        "expected_control_revision": 4,
+        "expected_config_revision": 4,
+        "expected_inbox_revision": 24,
+        "expected_inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8",
+        "expected_pr": 313,
+        "expected_head_sha": "4a6efaed77d4f3122a030c757895f24e8e517919",
+        "expected_head_tree_sha": "0c0bd789cf1487a734bf03a76e69ddb13de8ee9d",
+        "exact_head_workflow_run": 32881528014,
+        "required_jobs_success": 5,
+        "required_job_ids": [
+          97911931581,
+          97911931930,
+          97911931947,
+          97911932260,
+          97923405440
+        ],
+        "observed_main_sha": "5391357aef4d3f6aada955919720754a56be2c23",
+        "merge_base_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
+        "main_changes_since_merge_base": [
+          "agi/WORK_EXECUTION_STATE.json"
+        ],
+        "reviewed_paths": [
+          "agi/evaluations/revision22_action_adherence/public_inputs.json",
+          "agi/evaluations/revision22_action_adherence/routes/current-context-kernel.json",
+          "agi/evaluations/revision22_action_adherence/routes/manifest-free-control.json",
+          "src/continual/revision22_paired_route_inputs.py",
+          "tests/test_revision22_paired_route_inputs.py"
+        ],
+        "changed_path_intersection": [],
+        "merge_tree_clean": true,
+        "predicted_merge_tree_sha": "19cae98bc3594011d446ade6158508e28c64246d",
+        "expected_main_blobs": {
+          "agi/evaluations/revision22_action_adherence/public_inputs.json": "639b1861b7a3369ad9e863633d7daacf413aeecf",
+          "agi/evaluations/revision22_action_adherence/routes/current-context-kernel.json": "ebe2d32ea9b4c7e8b7c22948518ff45940ccd378",
+          "agi/evaluations/revision22_action_adherence/routes/manifest-free-control.json": "4046f6eed6048d1c73bd61ea9e08ec950a147074",
+          "src/continual/revision22_paired_route_inputs.py": "bf33f905963ce58bb9d2483b63e1061b18dc4a85",
+          "tests/test_revision22_paired_route_inputs.py": "58cbe7efb41f3cf1bbacd1c731dc8f6777f9b141"
+        },
+        "merge_method": "merge",
+        "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
+        "response_absent": true,
+        "claim_boundary": "Exact-head repository validation only. No route execution, result, score, negative evidence, scientist-agent-family inference, untested-mechanism inference, AGI, or completion claim.",
+        "require_second_fresh_read": true,
+        "dispatch_rule": "After exact readback of this state-only CAS, freshly re-read control revision 4, generation-16 authority/fence, inbox revision 24, unchanged PR head/tree, all five successful jobs, absent frozen response, and latest main. Recompute path intersection and merge tree. Merge only with expected-head protection; any change invalidates authorization."
       }
     }
   }
