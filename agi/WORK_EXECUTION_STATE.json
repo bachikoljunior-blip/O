@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "running",
+  "status": "checkpointed",
   "owner_kind": "work_recovery_automation",
   "execution_id": "work-recovery-20260825T161308Z-07da90af972aa0815a5a0d42b40c7fe9",
   "predecessor_execution_id": "work-recovery-20260825T123355Z-f2dc2499035972f8cde69d18c67b3687",
   "lease_generation": 14,
   "fence_token": "work-recovery-fence-v14-e0161aa4853efb06aae70428ccfaaabeab37875a135c24363304a154dfc8ccf9",
   "started_at": "2026-08-25T16:13:08.318Z",
-  "heartbeat_at": "2026-08-25T16:21:27.899Z",
-  "last_progress_at": "2026-08-25T16:21:27.899Z",
+  "heartbeat_at": "2026-08-25T16:23:33.359Z",
+  "last_progress_at": "2026-08-25T16:23:33.359Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "132fc900ba37fc19c4761e8cad221aee92ffd1d7",
-  "working_branch": "work/recovery-gen13-paired-route-isolation-harness-v1",
+  "source_main_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
+  "working_branch": "work/recovery-gen11-rev22-native-lifecycle-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "paired_route_harness_merge_authorized",
+  "active_component": "revision22_public_paired_route_precommit_inputs_pending",
   "active_unit_id": "unit-revision24-primary-o-targeting-correction",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -137,7 +137,7 @@
     "acknowledged_at": "2026-08-25T16:19:23.585Z"
   },
   "paired_route_isolation_harness_publication": {
-    "status": "revision24_safe_reclassified_exact_head_ci_succeeded_merge_authorized",
+    "status": "merged_main_durable_exact_readback",
     "route_classification": "direct_pre_revision23_repository_support_for_existing_frozen_revision22_execute",
     "new_work_handoff_created": false,
     "branch": "work/recovery-gen13-paired-route-isolation-harness-v1",
@@ -151,7 +151,7 @@
     "related_local_test_count": 110,
     "related_local_tests_passed": true,
     "prepared_at": "2026-08-25T13:45:16.343Z",
-    "claim_boundary": "Precommit harness only. No route observation, output, score, judgment, behavioral result, negative evidence, family inference, external-production evidence, AGI evidence, or completion claim exists.",
+    "claim_boundary": "Merged precommit harness only. No route execution, observation, score, judgment, behavioral result, negative evidence, family inference, external-production evidence, AGI evidence, or completion claim exists.",
     "revision23_least_work_policy_applied": false,
     "frozen_revision22_invocation_id": "invoke-248450c08547af10470c50e6",
     "reviewed_source_blob_sha": "baf8506cbaca0e7f35d5b4522d32c8c78895554d",
@@ -216,10 +216,23 @@
       "merge_method": "merge",
       "require_second_fresh_read": true,
       "dispatch_rule": "After exact readback of this state CAS, freshly re-read generation-14 authority, control revision 4, acknowledged inbox revision 24, unchanged PR head/tree and five successful jobs, and recompute the clean merge tree. Merge only with expected-head protection; any change invalidates this authorization."
+    },
+    "merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
+    "merge_tree_sha": "df79cae7cd21336cf5096e98f6052d8d983bcfd6",
+    "merged_at": "2026-08-25T16:23:33.359Z",
+    "main_readback": {
+      "verified_at": "2026-08-25T16:23:33.359Z",
+      "reviewed_blob_count": 2,
+      "mismatch_count": 0,
+      "all_reviewed_blobs_match": true,
+      "blobs": {
+        "src/continual/paired_route_isolation.py": "baf8506cbaca0e7f35d5b4522d32c8c78895554d",
+        "tests/test_paired_route_isolation.py": "1d1e26f92ebcead6a7d0428f83a8fe8134170aa3"
+      }
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 14 is the sole authorized fenced owner. Revision 24 is durable and acknowledged. PR 310 is freshly reclassified only as direct pre-revision-23 repository support for the existing frozen revision-22 Execute; it does not create a new Work unit or apply the separate automation's least-Work policy.",
+    "primary": "Generation 14 reached a safe physical checkpoint after revision 24 reconciliation and paired-route harness integration. No other writer is authorized. The next monitor may recover generation 15 through the same two-phase CAS and continue the exact frozen revision-22 Execute.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
@@ -237,9 +250,14 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Read back this PR 310 merge-authorization state exactly. Freshly re-read control revision 4, generation-14 authority, acknowledged inbox revision 24, unchanged PR 310 head/tree and all five successful jobs, and recompute the clean merge tree. If every binding matches, merge PR 310 with expected-head protection and exact-readback both blobs. Then checkpoint the existing immutable Execute continuation and proceed to materialize only the public precommit inputs at a safe boundary; do not recreate the request, publish generated prompt/model/native records without explicit permission, or claim any route result.",
+    "next_action": "From latest main fdedb213be8a271345fe59d0b73b28effe166f42, recover by generation+1 two-phase state-only CAS. Re-read control, authority, inbox revision 24, the frozen request on cbb8619f4d7dd6a12fed740fe80764c3c971c71e, and the merged paired-route module blobs. Materialize the public two-route/three-scenario precommit inputs for the already-frozen revision-22 Execute using current Context Kernel versus manifest-free control, identical task text/tools/budget/executor/model/judge, sealed rubrics, balanced order, and no results. Keep the measurement and every later conclusion scoped to those exact routes, scenarios, configuration, executor/model binding, budget, and conditions. Reuse established equivalent positive controls. Do not recreate or answer the immutable request until all six child bindings and actual action traces can be produced under the frozen protocol. Do not publish generated invocation records, prompt/model output, responses, or native lifecycle records without explicit permission; this is an individual publication blocker, not project completion or monitor-stop.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
-    "next_native_phase": "execute_revision22_action_adherence_measurement"
+    "next_native_phase": "execute_revision22_action_adherence_measurement",
+    "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
+    "harness_source_blob_sha": "baf8506cbaca0e7f35d5b4522d32c8c78895554d",
+    "harness_test_blob_sha": "1d1e26f92ebcead6a7d0428f83a8fe8134170aa3",
+    "inbox_revision": 24,
+    "inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -2902,5 +2920,26 @@
       "mismatch_count": 0,
       "all_reviewed_blobs_match": true
     }
+  },
+  "blockers": {
+    "generated_native_record_publication": {
+      "status": "requires_explicit_permission",
+      "scope": "individual_operation",
+      "blocks_monitor": false,
+      "blocks_public_fixture_and_harness_work": false,
+      "unpublished_data_authoritative": false,
+      "safe_alternative": "Continue public fixture/precommit preparation and repository validation without publishing generated invocation, prompt, model-output, response, or native lifecycle records."
+    }
+  },
+  "termination": {
+    "kind": "physical_automation_run_boundary_checkpoint",
+    "at": "2026-08-25T16:23:33.359Z",
+    "global_completion": false,
+    "user_objective_met": false,
+    "explicit_user_stop": false,
+    "agi_claim_supported": false,
+    "self_disable_attempted": false,
+    "monitor_must_remain_enabled": true,
+    "exact_continuation_persisted": true
   }
 }
