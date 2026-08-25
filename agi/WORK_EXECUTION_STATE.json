@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T09:06:00.000Z",
-  "last_progress_at": "2026-08-25T09:06:00.000Z",
+  "heartbeat_at": "2026-08-25T09:06:58.000Z",
+  "last_progress_at": "2026-08-25T09:06:58.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "a25480f4ea287179959cf8bb9e394c18f81d2777",
+  "source_main_sha": "074b9117430ceae9d491ef8cd936d667e626288e",
   "working_branch": "work/recovery-gen11-inbox22-clean-g1-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "missing_publication_response_pr307_fresh_merge_authorization",
+  "active_component": "revision22_native_lifecycle_continuation",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -60,8 +60,8 @@
     "pending_work_invocation_id": null,
     "pending_request_ref": null,
     "pending_native_invocation_id": null,
-    "durability_status": "PR 306 merged with expected head 27078f4420e91eab3902262df8e29b7f4cf9b6c9 as aa8374cb210d29f5342e89d34ef150b6a92494e7 after all four pytest shards plus aggregate succeeded. Main request/response blobs exactly match 24467625128504877a3bed00c5dc37da03a64385 and 88b5e67a8b21e0c0d66b938460be6360c052c23d. The superseded revision-20 Execute is durably closed with no effects and no result claims. A second pre-existing durability gap was found for completed publication Execute invoke-b810f007118d82a0565c33cb; its exact state-bound response has been recovered locally and is precommitted for isolated exact-head publication without repeating effects.",
-    "next_action": "After exact readback of the fresh PR 307 merge authorization, re-read generation-11 authority, inbox revision 22, unchanged PR head and five successful jobs, clean_g1 cursor, main path intersection, and merge-tree. Merge only with expected-head protection, exact-read the restored response blob, then continue the native lifecycle into a fresh revision-22-bound Context Kernel held-out action-adherence unit.",
+    "durability_status": "PR 306 remains durably closed. PR 307 exact head a6612d909435b763405e0a7e5ae0f938716a548d passed all four pytest shards plus the dependent aggregate, was freshly reauthorized against inbox revision 22 and clean_g1 feed revision 3, and merged with expected-head protection as 074b9117430ceae9d491ef8cd936d667e626288e. The restored main response blob exactly matches 48c8d97258ff0512a2a2a4d8f2a2379ad8beefe1. No external effect was repeated, no semantic result was recomputed, and no claim scope was widened.",
+    "next_action": "Continue run-work-recovery-gen9-durability-repair through its remaining native Task Evaluate, Candidate Evaluate, Consolidate, Learn, and Root phases, then freeze a fresh revision-22-bound Context Kernel held-out action-adherence unit. Compare only the named routes/configurations/conditions; do not generalize negative evidence or duplicate equivalent positive controls.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_adherence_revision22"
   },
@@ -388,13 +388,15 @@
     "claim_boundary": "The held-out routing rendezvous is internal evidence-acquisition infrastructure. No genuinely fresh selector participated; routing retains zero observations and INSUFFICIENT_EVIDENCE, so this is not behavioral improvement, AGI, or completion."
   },
   "recent_publication": {
-    "pull_request": 272,
-    "branch": "work/resume-identity-guard-v3",
-    "exact_head_sha": "c6bdb662a084a896564d8f5a671b157ba31cc59e",
+    "pull_request": 307,
+    "branch": "work/recovery-gen11-missing-publication-response-v1",
+    "exact_head_sha": "a6612d909435b763405e0a7e5ae0f938716a548d",
+    "exact_head_tree_sha": "b6b2401c9a84e5e07d903043d7f1f5336ffb4360",
     "verified_remote_readback": true,
-    "exact_head_ci": "success: workflow 32633554610",
-    "merge_sha": "bc636ff2b7857c795a45ab85cd63f53ee299020a",
-    "claim_boundary": "Internal resume/fencing safety only; not AGI evidence."
+    "exact_head_ci": "workflow 32823475772: four pytest shards and dependent aggregate succeeded",
+    "merge_sha": "074b9117430ceae9d491ef8cd936d667e626288e",
+    "readback_blob_sha": "48c8d97258ff0512a2a2a4d8f2a2379ad8beefe1",
+    "claim_boundary": "Records-only durability repair for one already-completed Execute. No effect repetition, semantic recomputation, AGI evidence, family-level inference, untested-mechanism inference, or user-objective completion claim."
   },
   "local_combined_regression": {
     "result": "515 passed",
@@ -2514,7 +2516,7 @@
     "invocation_id": "invoke-b810f007118d82a0565c33cb",
     "original_generation": 9,
     "current_generation": 11,
-    "status": "expected_head_merge_precommitted_after_revision22",
+    "status": "merged_main_durable",
     "discovered_at": "2026-08-25T07:44:00.000Z",
     "reason": "WORK_EXECUTION_STATE recorded the publication Execute as completed with response digest cc4812da6ecd134ee4887aaf89b6f0ab11c23775dbe65d636d58ea5871ed3fb0, but latest main retained only its request. The exact response survived in a prior isolated worktree and matches the durable state digest and completed PR 303 facts.",
     "effects_repeated": false,
@@ -2541,7 +2543,13 @@
     "exact_head_sha": "a6612d909435b763405e0a7e5ae0f938716a548d",
     "exact_head_workflow_run": 32823475772,
     "exact_head_workflow_status": "success_four_shards_and_dependent_aggregate",
-    "last_ci_observed_at": "2026-08-25T09:05:00.000Z",
+    "last_ci_observed_at": "2026-08-25T09:06:58.000Z",
+    "merge_sha": "074b9117430ceae9d491ef8cd936d667e626288e",
+    "merged_at": "2026-08-25T09:06:14.000Z",
+    "post_state_cas_observed_main_sha": "a7a1502ef20b0712953ffeb9f468aa2f1b5840eb",
+    "post_state_cas_predicted_merge_tree_sha": "bfc3a9635ab141c5c4daa22f4ac48c282be78400",
+    "main_response_blob_sha": "48c8d97258ff0512a2a2a4d8f2a2379ad8beefe1",
+    "remote_readback_verified": true,
     "local_full_pytest_observation": "main-aligned full pytest reached at least 69 percent with no observed failure; still running",
     "exact_head_jobs": [
       {
