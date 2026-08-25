@@ -8,8 +8,8 @@
   "lease_generation": 16,
   "fence_token": "work-recovery-fence-v16-51b3fc3aa7d1e2ac59d151fe91c25a425a38a66efc2cd66a4dc122b1ea287d5f",
   "started_at": "2026-08-25T18:00:39.978Z",
-  "heartbeat_at": "2026-08-25T18:02:46.257Z",
-  "last_progress_at": "2026-08-25T18:02:46.257Z",
+  "heartbeat_at": "2026-08-25T18:04:00.000Z",
+  "last_progress_at": "2026-08-25T18:04:00.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,7 +21,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "f41451907abe2953ba1db4e54e9ffc3fcc0aaf89",
+  "source_main_sha": "66f65428fb988c497fc456afead3962aeaab1089",
   "working_branch": "work/recovery-gen15-revision22-public-inputs-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_component": "revision22_public_inputs_exact_failure_repair_precommitted",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "After exact readback of this state precommit, update PR 313 by appending only the reviewed test repair blob 58cbe7efb41f3cf1bbacd1c731dc8f6777f9b141, then require a new exact-head workflow for the new head. Preserve workflow 32875956360 as exact failure evidence and do not rerun it as if unchanged.",
+    "next_action": "Monitor exact-head workflow 32881528014 for repair head 4a6efaed77d4f3122a030c757895f24e8e517919. Require all four shards and the dependent aggregate to succeed. Then freshly re-read control revision 4, generation-16 fence, inbox revision 24, PR head/tree, main advance and changed-path intersection before expected-head merge.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2951,7 +2951,7 @@
     "monitor_should_remain_enabled": true
   },
   "revision22_public_inputs_publication_precommit": {
-    "status": "exact_failure_preserved_repair_head_state_precommitted",
+    "status": "repair_head_published_exact_head_ci_queued",
     "prepared_at": "2026-08-25T17:02:54.688Z",
     "branch": "work/recovery-gen15-revision22-public-inputs-v1",
     "base_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
@@ -3073,7 +3073,14 @@
         "diff_check_passed": true,
         "pytest_available": false
       },
-      "publication_rule": "After exact state readback, append only this reviewed test repair to PR 313. Require a new unchanged exact-head CI; all old workflow results remain inadmissible for the new head."
+      "publication_rule": "After exact state readback, append only this reviewed test repair to PR 313. Require a new unchanged exact-head CI; all old workflow results remain inadmissible for the new head.",
+      "remote_commit_sha": "4a6efaed77d4f3122a030c757895f24e8e517919",
+      "remote_tree_sha": "0c0bd789cf1487a734bf03a76e69ddb13de8ee9d",
+      "pull_request": 313,
+      "exact_head_ci_run": 32881528014,
+      "exact_head_ci_status": "queued",
+      "remote_blob_match": true,
+      "published_at": "2026-08-25T18:03:28Z"
     }
   }
 }
