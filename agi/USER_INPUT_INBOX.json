@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 22,
+  "revision": 23,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -369,7 +369,24 @@
       ],
       "source": "user_chat",
       "sequence": 22
+    },
+    {
+      "id": "user-direction-least-work-routing-20260825-v23",
+      "received_at": "2026-08-25T12:38:08Z",
+      "kind": "execution_routing_direction",
+      "status": "active",
+      "summary": "Use ChatGPT Work only for irreducibly Work-exclusive tasks; keep reasoning and other capable execution paths outside Work.",
+      "directives": [
+        "Before any new ChatGPT Work handoff, classify the task as one of: ordinary chat reasoning sufficient; connected read/write tool or API sufficient; automation sufficient; repository/GitHub action sufficient; or Work-exclusive.",
+        "Planning, brainstorming, prioritization, decomposition, literature review, status inspection, routing, drafting, comparison, and other reasoning must stay outside Work whenever ordinary chat or available connected tools can do them adequately.",
+        "If a non-Work path is sufficient, use or prepare that path instead of handing the task to Work. Work receives only the irreducible remainder that genuinely requires Work-only workspace, artifact, or code execution.",
+        "This narrows only revision 5's broad Work-routing rule. Revision 5's smartphone-first operator constraint, secret-handling rule, spend-approval rule, account-holder-only action rule, and requirement to perform automatable work rather than hand it back to the user remain active.",
+        "Preserve existing O single-writer, fence, CAS, frozen-request, and executor-binding contracts. Do not create a duplicate writer or interrupt an already-frozen valid Work-exclusive invocation merely to apply this routing change; apply it at the next safe semantic boundary and to subsequent handoffs."
+      ],
+      "supersedes": [],
+      "source": "user_chat",
+      "sequence": 23
     }
   ],
-  "updated_at": "2026-08-25T07:53:18Z"
+  "updated_at": "2026-08-25T12:38:08Z"
 }
