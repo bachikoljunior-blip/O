@@ -59,6 +59,14 @@ def _copy_public_inputs(tmp_path: Path) -> None:
         route_target.write_bytes(route_source.read_bytes())
 
 
+def _keys(value: object) -> set[str]:
+    if isinstance(value, dict):
+        return set(value) | {key for child in value.values() for key in _keys(child)}
+    if isinstance(value, list):
+        return {key for child in value for key in _keys(child)}
+    return set()
+
+
 def test_public_inputs_bind_exact_frozen_unit_without_results_or_reveals(
     tmp_path: Path,
 ) -> None:
@@ -74,7 +82,7 @@ def test_public_inputs_bind_exact_frozen_unit_without_results_or_reveals(
         EXPECTED_SCENARIO_IDS
     )
     assert all(len(route["context_digest"]) == 64 for route in inputs["routes"])
-    rendered = json.dumps(json.loads((tmp_path / PUBLIC_INPUTS_REF).read_text()))
+    public_value = json.loads((tmp_path / PUBLIC_INPUTS_REF).read_text())
     for forbidden in (
         "expected_answer",
         "nonce",
@@ -83,8 +91,8 @@ def test_public_inputs_bind_exact_frozen_unit_without_results_or_reveals(
         "route_output",
         "judgment",
     ):
-        assert forbidden not in rendered
-    assert EXPECTED_INVOCATION in rendered
+        assert forbidden not in _keys(public_value)
+    assert public_value["frozen_invocation_id"] == EXPECTED_INVOCATION
 
 
 def test_prepare_derives_six_bound_children_and_no_result(tmp_path: Path) -> None:
