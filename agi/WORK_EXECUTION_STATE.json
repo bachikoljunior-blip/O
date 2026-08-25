@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T07:08:59.000Z",
-  "last_progress_at": "2026-08-25T07:08:59.000Z",
+  "heartbeat_at": "2026-08-25T07:12:29.000Z",
+  "last_progress_at": "2026-08-25T07:12:29.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "6bd30e195445185179e325343207abc879fe37e4",
   "working_branch": "work/recovery-gen11-inbox21-feed-policy-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision21_main_durable_close_superseded_execute",
+  "active_component": "superseded_execute_closure_pr306_ci_pending",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -50,18 +50,18 @@
   "parallel_execution_coordination": {
     "primary": "Generation 11 is the sole fenced main writer. Inbox revision 21 reconciliation is isolated in PR 305 and remains unmerged pending exact-head CI.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
-    "pending_native_execute": "Immutable Work Execute invoke-445821c809a6ca734fb1b97e was frozen under revision 20. It is preserved without effects or answer and will be closed fail-closed only after revision 21 is main-durable.",
+    "pending_native_execute": "Execute invoke-445821c809a6ca734fb1b97e is locally closed fail-closed under response digest ed50e6d59b6c3004e01962f73929b22cc7243c6a93ef3ffb24d95d839d489b81. No effects or claims were produced. Request/response publication is pending exact-head PR 306 CI.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "work/recovery-gen11-inbox21-feed-policy-v1",
     "snapshot_head_sha": "8c03f19f79b982dfdead4c265c4df4d9899c744d",
-    "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
+    "pending_work_invocation_id": null,
+    "pending_request_ref": null,
     "pending_native_invocation_id": null,
-    "durability_status": "Inbox revision 21 and feed policy are main-durable through merged PR 305 with exact blob readback. Feed cursor advanced to revision 3; eight provenance-bound candidates were observed, with goal_knowledge_vs_action_adherence directly relevant to the pending Context Kernel held-out unit but not treated as validated O evidence.",
-    "next_action": "Close immutable revision-20 Execute invoke-445821c809a6ca734fb1b97e fail-closed with no effects or result claims because revision 21 superseded its context at the safe boundary. Then select/issue a revision-21-bound continuation for the same Context Kernel held-out action-adherence objective, incorporating only scoped feed provenance.",
+    "durability_status": "Revision-20 Execute invoke-445821c809a6ca734fb1b97e was closed fail-closed after revision 21 became main-durable. Its exact request and response are isolated in PR 306 at head 27078f4420e91eab3902262df8e29b7f4cf9b6c9; workflow 32820424960 is queued. Main does not yet contain these records.",
+    "next_action": "Monitor exact-head workflow 32820424960. On all required jobs success, repeat fresh authority/inbox/head/conflict checks, expected-head merge PR 306, read back request blob 24467625128504877a3bed00c5dc37da03a64385 and response blob 88b5e67a8b21e0c0d66b938460be6360c052c23d, then issue a revision-21-bound Context Kernel continuation.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
   },
@@ -2415,5 +2415,26 @@
     ],
     "global_novelty_claim": false,
     "decision_rule": "Preserve provenance, quantitative evidence, contradictory evidence, and claim scope; validate on the named O target/configuration/conditions before treating any candidate as evidence."
+  },
+  "superseded_execute_closure": {
+    "invocation_id": "invoke-445821c809a6ca734fb1b97e",
+    "original_inbox_revision": 20,
+    "superseding_inbox_revision": 21,
+    "status": "response_submitted_pr_open_ci_queued",
+    "effects_performed": false,
+    "result_claims_produced": false,
+    "request_digest": "ad613bbbbe5d79c93cf30d32e5f546863cfc6d786782b2bcf2221966a8f7d3a3",
+    "response_digest": "ed50e6d59b6c3004e01962f73929b22cc7243c6a93ef3ffb24d95d839d489b81",
+    "output_digest": "10ca3fe9433e79e0e389292b4605ada09b2b492518817d8f288ebb0494c4a435",
+    "request_blob_sha": "24467625128504877a3bed00c5dc37da03a64385",
+    "response_blob_sha": "88b5e67a8b21e0c0d66b938460be6360c052c23d",
+    "received_at": "2026-08-25T07:10:36.826434Z",
+    "branch": "work/recovery-gen11-superseded-execute-records-v1",
+    "pull_request": 306,
+    "exact_head_sha": "27078f4420e91eab3902262df8e29b7f4cf9b6c9",
+    "exact_head_tree": "c52e59a2a09349878c7f5b7dfd7d66a4a40222c8",
+    "exact_head_workflow_run": 32820424960,
+    "exact_head_workflow_status": "queued",
+    "main_readback_verified": false
   }
 }
