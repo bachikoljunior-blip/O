@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T06:22:00.000Z",
-  "last_progress_at": "2026-08-25T06:22:00.000Z",
+  "heartbeat_at": "2026-08-25T06:24:30.000Z",
+  "last_progress_at": "2026-08-25T06:24:30.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "inbox_revision21_reconciliation_remote_commit_precommit",
+  "active_component": "inbox_revision21_reconciliation_pr305_ci_pending",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -59,8 +59,8 @@
     "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "The two reconciled JSON objects were created as content-addressed remote blobs and unattached commit 02d974af08cbe83a0d81a632ce0bfcae07b0cd6b on latest main parent fd0a7666db59dec1211536aee7457abffc980728. Branch/ref creation remains blocked until this CAS is read back.",
-    "next_action": "Read back this state CAS and the unattached commit/tree/blobs, then create branch work/recovery-gen11-inbox21-feed-policy-v1 at exact commit 02d974af08cbe83a0d81a632ce0bfcae07b0cd6b, open a two-path PR, and require exact-head CI before merge.",
+    "durability_status": "Inbox revision 21 canonical reconciliation is open as PR 305 at exact minimal-diff head e55ea0b41594d105bd5fbdfb66e57e70b510cd9c. Exact-head workflow 32816863473 is queued; merge and inbox acknowledgement remain forbidden until all required jobs succeed and fresh authority/inbox/conflict checks pass.",
+    "next_action": "Monitor workflow 32816863473 for exact head e55ea0b41594d105bd5fbdfb66e57e70b510cd9c. On success, precommit fresh merge proof, expected-head merge PR 305, read back both blobs, then acknowledge inbox revision 21/feed revision 1 by state-only CAS and close stale revision-20 Execute fail-closed.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
   },
@@ -2276,7 +2276,7 @@
     "agi_claim_supported": false
   },
   "inbox_revision21_reconciliation": {
-    "status": "remote_unattached_commit_created_pending_state_readback",
+    "status": "pr_open_exact_head_ci_queued",
     "prepared_at": "2026-08-25T06:18:30.000Z",
     "inbox_revision": 21,
     "inbox_blob_sha": "6a60ef74ce1dc37a906e5dd67affc0ddf612f005",
@@ -2307,9 +2307,19 @@
     "semantic_rule": "The pre-existing Execute invoke-445821c809a6ca734fb1b97e remains immutable but its revision-20 context is superseded at this safe boundary. Do not use it for external effects or claim completion; close it fail-closed only after canonical revision-21 reconciliation is main-durable.",
     "remote_unattached_commit": "02d974af08cbe83a0d81a632ce0bfcae07b0cd6b",
     "remote_unattached_commit_tree": "3b46ec9fda6f2fffe971547685f80d666a902228",
-    "remote_ledger_blob": "45e8a671fbe7faf9c8ad300d1e2c385773403d0c",
-    "remote_strategy_blob": "367329c23101b20c78088b81e5eac2074203bbf3",
+    "remote_ledger_blob": "6758d4319c6730e9d5a20d02714a68a7204a14e2",
+    "remote_strategy_blob": "70b9a66b67f2749d88ef05df858f3f8c1bd40e70",
     "remote_commit_readback_verified": false,
-    "format_note": "Remote canonical JSON formatting differs from the local reference commit but parses to the same validated objects; the exact remote tree and blobs are now authoritative for publication."
+    "format_note": "Remote canonical JSON formatting differs from the local reference commit but parses to the same validated objects; the exact remote tree and blobs are now authoritative for publication.",
+    "remote_minimal_diff_commit": "e55ea0b41594d105bd5fbdfb66e57e70b510cd9c",
+    "remote_minimal_diff_tree": "3b42489e32b4c637a65a2c6759e09ed2eedd765f",
+    "branch_ref_readback_sha": "e55ea0b41594d105bd5fbdfb66e57e70b510cd9c",
+    "pull_request": 305,
+    "pr_url": "https://github.com/bachikoljunior-blip/O/pull/305",
+    "pr_changed_paths": 2,
+    "pr_additions": 70,
+    "pr_deletions": 5,
+    "exact_head_workflow_run": 32816863473,
+    "exact_head_workflow_status": "queued"
   }
 }
