@@ -8,8 +8,8 @@
   "lease_generation": 16,
   "fence_token": "work-recovery-fence-v16-51b3fc3aa7d1e2ac59d151fe91c25a425a38a66efc2cd66a4dc122b1ea287d5f",
   "started_at": "2026-08-25T18:00:39.978Z",
-  "heartbeat_at": "2026-08-25T18:01:24.993Z",
-  "last_progress_at": "2026-08-25T18:01:24.993Z",
+  "heartbeat_at": "2026-08-25T18:02:46.257Z",
+  "last_progress_at": "2026-08-25T18:02:46.257Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "b6b89c5e67d8e456dfb1e65729f2306f23d01ad6",
+  "source_main_sha": "f41451907abe2953ba1db4e54e9ffc3fcc0aaf89",
   "working_branch": "work/recovery-gen15-revision22-public-inputs-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_public_inputs_exact_head_ci_failure_diagnosis",
+  "active_component": "revision22_public_inputs_exact_failure_repair_precommitted",
   "active_unit_id": "unit-revision22-public-paired-route-precommit-inputs",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "From latest main, recover generation 16 by exact generation+1 two-phase state-only CAS. Re-read control revision 4, inbox revision 24, PR 313 exact head ffa00be1ae8f7791530f6074d83b8f33012b28ab/tree 229880a2d047b5d8e589b5709950eafff8c8137d, and workflow 32875956360. If all four shards plus dependent aggregate succeed and fresh authority/inbox/head/path-disjoint checks remain exact, merge PR 313 with expected-head protection and read back all five blobs. If any job fails, preserve the exact failure and repair on a new precommitted head. After integration, a trusted coordinator must seal three rubric commitments without exposing answers/nonces before the six child bindings are materialized. Do not recreate or answer the frozen Execute and do not publish generated invocation/prompt/model/native records without explicit permission.",
+    "next_action": "After exact readback of this state precommit, update PR 313 by appending only the reviewed test repair blob 58cbe7efb41f3cf1bbacd1c731dc8f6777f9b141, then require a new exact-head workflow for the new head. Preserve workflow 32875956360 as exact failure evidence and do not rerun it as if unchanged.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2951,7 +2951,7 @@
     "monitor_should_remain_enabled": true
   },
   "revision22_public_inputs_publication_precommit": {
-    "status": "exact_head_ci_in_progress_checkpointed",
+    "status": "exact_failure_preserved_repair_head_state_precommitted",
     "prepared_at": "2026-08-25T17:02:54.688Z",
     "branch": "work/recovery-gen15-revision22-public-inputs-v1",
     "base_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
@@ -3036,6 +3036,44 @@
         "status": "in_progress",
         "conclusion": null
       }
-    ]
+    ],
+    "failed_exact_head": {
+      "head_sha": "ffa00be1ae8f7791530f6074d83b8f33012b28ab",
+      "tree_sha": "229880a2d047b5d8e589b5709950eafff8c8137d",
+      "workflow_run": 32875956360,
+      "failed_job": {
+        "id": 97893768469,
+        "name": "pytest shard 3 of 4",
+        "result": "1_failed_183_passed_555_deselected",
+        "duration_seconds": 1982.1
+      },
+      "successful_jobs": [
+        97893768140,
+        97893768386,
+        97893768570
+      ],
+      "skipped_aggregate": 97906391428,
+      "failure": "The test searched serialized text for substring 'nonce', which correctly occurred inside the metadata key answers_and_nonces_absent_from_public_inputs. Product behavior did not fail.",
+      "claim_boundary": "Exact test assertion failure on this head only; no route behavior, scientist-agent-family, untested-mechanism, or completion inference."
+    },
+    "repair": {
+      "prepared_at": "2026-08-25T18:02:46.257Z",
+      "expected_state_blob_sha": "0aecfbf3bcccb282ec917f32c4690044b7c531ec",
+      "prior_remote_head_sha": "ffa00be1ae8f7791530f6074d83b8f33012b28ab",
+      "local_commit_sha": "a893bcb38d6eb260eccd0406194953a9331fc05d",
+      "local_tree_sha": "0c0bd789cf1487a734bf03a76e69ddb13de8ee9d",
+      "changed_paths": [
+        "tests/test_revision22_paired_route_inputs.py"
+      ],
+      "reviewed_blob_sha": "58cbe7efb41f3cf1bbacd1c731dc8f6777f9b141",
+      "fix": "Assert absence of forbidden exact JSON keys recursively and bind frozen_invocation_id structurally, instead of rejecting benign substrings in metadata key names.",
+      "validation": {
+        "exact_failure_regression_manual": "PASS",
+        "compileall_passed": true,
+        "diff_check_passed": true,
+        "pytest_available": false
+      },
+      "publication_rule": "After exact state readback, append only this reviewed test repair to PR 313. Require a new unchanged exact-head CI; all old workflow results remain inadmissible for the new head."
+    }
   }
 }
