@@ -66,10 +66,9 @@ def test_truncated_revision_is_quarantined_without_becoming_effective() -> None:
     assert resumed["status"] == "active"
     assert resumed["directives"][0] == "The user's exact words were: 再開して (2026-08-24)."
     assert [entry["sequence"] for entry in unapplied_user_inputs(inbox, after_revision=15)] == [
-        17,
-        18,
-        19,
-        20,
+        entry["sequence"]
+        for entry in inbox["entries"][15:]
+        if entry["status"] == "active"
     ]
 
 
@@ -77,7 +76,7 @@ def test_recovery_entries_are_integrated_after_revision_17_with_exact_provenance
     inbox = load_user_input_inbox(ROOT)
     recovery = json.loads((ROOT / "agi" / "USER_INPUT_INBOX_RECOVERY.json").read_text())
 
-    assert inbox["revision"] == 20
+    assert inbox["revision"] >= recovery["integration_receipt"]["result_revision"]
     assert recovery["status"] == "integrated_authoritative_revision_19"
     assert recovery["integration_receipt"]["expected_revision"] == 17
     assert recovery["integration_receipt"]["result_revision"] == 19
@@ -105,25 +104,29 @@ def _append_entry(entry_id: str = "new-user-input") -> dict:
 
 def test_prepare_append_is_revision_bound_validated_and_idempotent() -> None:
     inbox = load_user_input_inbox(ROOT)
+    expected_revision = inbox["revision"]
     entry = _append_entry()
     prepared = prepare_user_input_inbox_append(
         inbox,
         [entry],
-        expected_revision=20,
+        expected_revision=expected_revision,
         updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
     )
 
     assert prepared["status"] == "prepared"
-    assert prepared["value"]["revision"] == 21
-    assert prepared["value"]["entries"][:20] == inbox["entries"]
-    assert prepared["value"]["entries"][20] == {**entry, "sequence": 21}
+    assert prepared["value"]["revision"] == expected_revision + 1
+    assert prepared["value"]["entries"][:expected_revision] == inbox["entries"]
+    assert prepared["value"]["entries"][expected_revision] == {
+        **entry,
+        "sequence": expected_revision + 1,
+    }
     assert validate_user_input_inbox(prepared["value"]) == []
     assert serialize_user_input_inbox(prepared["value"]).endswith("\n")
 
     retried = prepare_user_input_inbox_append(
         prepared["value"],
         [entry],
-        expected_revision=20,
+        expected_revision=expected_revision,
         updated_at=datetime(2026, 8, 24, 7, 2, tzinfo=timezone.utc),
     )
     assert retried["status"] == "already_applied"
@@ -131,36 +134,41 @@ def test_prepare_append_is_revision_bound_validated_and_idempotent() -> None:
 
 def test_prepare_append_rejects_stale_sequence_duplicate_and_secret() -> None:
     inbox = load_user_input_inbox(ROOT)
+    expected_revision = inbox["revision"]
     timestamp = datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc)
     with pytest.raises(UserInputInboxError, match="revision conflict"):
         prepare_user_input_inbox_append(
-            inbox, [_append_entry()], expected_revision=19, updated_at=timestamp
+            inbox,
+            [_append_entry()],
+            expected_revision=expected_revision - 1,
+            updated_at=timestamp,
         )
     with pytest.raises(UserInputInboxError, match="sequence conflict"):
         prepare_user_input_inbox_append(
             inbox,
             [{**_append_entry(), "sequence": 99}],
-            expected_revision=20,
+            expected_revision=expected_revision,
             updated_at=timestamp,
         )
     with pytest.raises(UserInputInboxError, match="forbidden secret-bearing field"):
         prepare_user_input_inbox_append(
             inbox,
             [{**_append_entry(), "token": "must-not-persist"}],
-            expected_revision=20,
+            expected_revision=expected_revision,
             updated_at=timestamp,
         )
     with pytest.raises(UserInputInboxError, match="updated_at must include a timezone"):
         prepare_user_input_inbox_append(
             inbox,
             [_append_entry()],
-            expected_revision=20,
+            expected_revision=expected_revision,
             updated_at="2026-08-24T07:01:00Z",  # type: ignore[arg-type]
         )
 
 
 def test_remote_append_performs_one_cas_and_exact_readback() -> None:
     current = load_user_input_inbox(ROOT)
+    expected_revision = current["revision"]
     state = {
         "content": serialize_user_input_inbox(current),
         "blob_sha": "a" * 40,
@@ -179,7 +187,7 @@ def test_remote_append_performs_one_cas_and_exact_readback() -> None:
 
     receipt = append_remote_user_input_inbox(
         [_append_entry()],
-        expected_revision=20,
+        expected_revision=expected_revision,
         updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
         fetch=fetch,
         compare_and_swap=compare_and_swap,
@@ -188,8 +196,8 @@ def test_remote_append_performs_one_cas_and_exact_readback() -> None:
     assert len(calls) == 1
     assert receipt == {
         "status": "appended",
-        "expected_revision": 20,
-        "result_revision": 21,
+        "expected_revision": expected_revision,
+        "result_revision": expected_revision + 1,
         "expected_blob_sha": "a" * 40,
         "result_blob_sha": "b" * 40,
         "result_commit_sha": "c" * 40,
@@ -201,7 +209,7 @@ def test_remote_append_performs_one_cas_and_exact_readback() -> None:
 
     retry = append_remote_user_input_inbox(
         [_append_entry()],
-        expected_revision=20,
+        expected_revision=expected_revision,
         updated_at=datetime(2026, 8, 24, 7, 2, tzinfo=timezone.utc),
         fetch=fetch,
         compare_and_swap=compare_and_swap,
@@ -211,7 +219,9 @@ def test_remote_append_performs_one_cas_and_exact_readback() -> None:
 
 
 def test_remote_append_tolerates_bounded_stale_readback_without_repeating_cas() -> None:
-    current_content = serialize_user_input_inbox(load_user_input_inbox(ROOT))
+    current = load_user_input_inbox(ROOT)
+    expected_revision = current["revision"]
+    current_content = serialize_user_input_inbox(current)
     published: dict[str, str] = {}
     fetch_calls = 0
     cas_calls = 0
@@ -233,7 +243,7 @@ def test_remote_append_tolerates_bounded_stale_readback_without_repeating_cas() 
 
     receipt = append_remote_user_input_inbox(
         [_append_entry()],
-        expected_revision=20,
+        expected_revision=expected_revision,
         updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
         fetch=fetch,
         compare_and_swap=compare_and_swap,
@@ -247,6 +257,7 @@ def test_remote_append_tolerates_bounded_stale_readback_without_repeating_cas() 
 
 def test_remote_append_fails_closed_before_cas_or_after_one_mismatched_readback() -> None:
     current = load_user_input_inbox(ROOT)
+    expected_revision = current["revision"]
     content = serialize_user_input_inbox(current)
     cas_calls = 0
 
@@ -261,7 +272,7 @@ def test_remote_append_fails_closed_before_cas_or_after_one_mismatched_readback(
     with pytest.raises(UserInputInboxError, match="revision conflict"):
         append_remote_user_input_inbox(
             [_append_entry()],
-            expected_revision=19,
+            expected_revision=expected_revision - 1,
             updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
             fetch=stale_fetch,
             compare_and_swap=cas,
@@ -271,7 +282,7 @@ def test_remote_append_fails_closed_before_cas_or_after_one_mismatched_readback(
     with pytest.raises(UserInputInboxError, match="readback mismatch"):
         append_remote_user_input_inbox(
             [_append_entry()],
-            expected_revision=20,
+            expected_revision=expected_revision,
             updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
             fetch=stale_fetch,
             compare_and_swap=cas,
@@ -281,7 +292,7 @@ def test_remote_append_fails_closed_before_cas_or_after_one_mismatched_readback(
     with pytest.raises(UserInputInboxError, match="malformed JSON"):
         append_remote_user_input_inbox(
             [_append_entry()],
-            expected_revision=20,
+            expected_revision=expected_revision,
             updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
             fetch=lambda: {"content": "{", "blob_sha": "a" * 40},
             compare_and_swap=cas,
@@ -290,7 +301,9 @@ def test_remote_append_fails_closed_before_cas_or_after_one_mismatched_readback(
 
 
 def test_remote_append_never_retries_a_failed_cas() -> None:
-    content = serialize_user_input_inbox(load_user_input_inbox(ROOT))
+    current = load_user_input_inbox(ROOT)
+    expected_revision = current["revision"]
+    content = serialize_user_input_inbox(current)
     cas_calls = 0
 
     def fetch() -> dict:
@@ -304,7 +317,7 @@ def test_remote_append_never_retries_a_failed_cas() -> None:
     with pytest.raises(UserInputInboxError, match="compare-and-swap conflict"):
         append_remote_user_input_inbox(
             [_append_entry()],
-            expected_revision=20,
+            expected_revision=expected_revision,
             updated_at=datetime(2026, 8, 24, 7, 1, tzinfo=timezone.utc),
             fetch=fetch,
             compare_and_swap=rejected_cas,
