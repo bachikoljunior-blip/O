@@ -8,8 +8,8 @@
   "lease_generation": 15,
   "fence_token": "work-recovery-fence-v15-0002f5e95b9489d5fe811b3629dd4d9a0fb77bd31127cd3dc2ca22c84946ca33",
   "started_at": "2026-08-25T16:57:05.952Z",
-  "heartbeat_at": "2026-08-25T16:58:13.086Z",
-  "last_progress_at": "2026-08-25T16:58:13.086Z",
+  "heartbeat_at": "2026-08-25T17:02:54.688Z",
+  "last_progress_at": "2026-08-25T17:02:54.688Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "67e71492fee51a2f2dab5133c090c40e112a595c",
-  "working_branch": "work/recovery-gen11-rev22-native-lifecycle-v1",
+  "source_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
+  "working_branch": "work/recovery-gen15-revision22-public-inputs-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_public_paired_route_precommit_inputs_pending",
+  "active_component": "revision22_public_paired_route_inputs_publication_pending",
   "active_unit_id": "unit-revision22-public-paired-route-precommit-inputs",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "From latest main fdedb213be8a271345fe59d0b73b28effe166f42, recover by generation+1 two-phase state-only CAS. Re-read control, authority, inbox revision 24, the frozen request on cbb8619f4d7dd6a12fed740fe80764c3c971c71e, and the merged paired-route module blobs. Materialize the public two-route/three-scenario precommit inputs for the already-frozen revision-22 Execute using current Context Kernel versus manifest-free control, identical task text/tools/budget/executor/model/judge, sealed rubrics, balanced order, and no results. Keep the measurement and every later conclusion scoped to those exact routes, scenarios, configuration, executor/model binding, budget, and conditions. Reuse established equivalent positive controls. Do not recreate or answer the immutable request until all six child bindings and actual action traces can be produced under the frozen protocol. Do not publish generated invocation records, prompt/model output, responses, or native lifecycle records without explicit permission; this is an individual publication blocker, not project completion or monitor-stop.",
+    "next_action": "After exact readback of the generation-15 public-input publication precommit, publish the reviewed five-path branch, require unchanged exact-head CI and fresh conflict/authority/inbox checks, then merge with expected-head protection and exact blob readback. The trusted coordinator must seal all three rubric commitments before creating the paired-route precommit; answers and nonces remain absent from public child-visible inputs. Do not recreate or answer frozen Execute invoke-248450c08547af10470c50e6 and do not publish generated invocation/prompt/model/native records without explicit permission.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2937,5 +2937,44 @@
     "self_disable_attempted": false,
     "monitor_must_remain_enabled": true,
     "exact_continuation_persisted": true
+  },
+  "revision22_public_inputs_publication_precommit": {
+    "status": "state_only_precommit_pending_remote_publication",
+    "prepared_at": "2026-08-25T17:02:54.688Z",
+    "branch": "work/recovery-gen15-revision22-public-inputs-v1",
+    "base_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
+    "expected_state_blob_sha": "88d0e390886f47d90d305915f0d5f19c13acaafe",
+    "local_commit_sha": "ef445a3af5c1b2f77e5ea42a06ded7d15998e5bb",
+    "local_tree_sha": "6d55066cd89b94f31315eed8254a87da9c4dcb1d",
+    "changed_path_count": 5,
+    "changed_path_list_sha256": "300d5fee931c16a7770701f8b057cb1189f4fe67cc8f995e4f53b416224566d9",
+    "reviewed_blobs": {
+      "agi/evaluations/revision22_action_adherence/public_inputs.json": "c2da2e2530814270621c89690fe8c1d32d465f37",
+      "agi/evaluations/revision22_action_adherence/routes/current-context-kernel.json": "ebe2d32ea9b4c7e8b7c22948518ff45940ccd378",
+      "agi/evaluations/revision22_action_adherence/routes/manifest-free-control.json": "4046f6eed6048d1c73bd61ea9e08ec950a147074",
+      "src/continual/revision22_paired_route_inputs.py": "fa10e2a6fdc255693a5160d8815fe2894de0f766",
+      "tests/test_revision22_paired_route_inputs.py": "b65e953e7bd9bd1a6825dd3a5441c0a3109e0c90"
+    },
+    "local_validation": {
+      "compileall_passed": true,
+      "deterministic_loader_and_prepare_smoke_passed": true,
+      "diff_check_passed": true,
+      "pytest_available": false,
+      "pytest_note": "Current runtime lacks pytest; no local pytest PASS is claimed."
+    },
+    "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
+    "exact_routes": [
+      "current-context-kernel",
+      "manifest-free-control"
+    ],
+    "exact_scenarios": [
+      "stale-authority-effect",
+      "safe-supersede-boundary",
+      "fresh-path-disjoint-main-advance"
+    ],
+    "rubric_answers_or_nonces_published": false,
+    "route_outputs_or_results_published": false,
+    "claim_boundary": "Public precommit input specification and loader only. No rubric answer/nonce, child output, observation, score, judgment, negative result, family inference, external-production evidence, AGI evidence, or completion claim.",
+    "publication_rule": "After exact readback of this state CAS, publish only the reviewed five-path commit to the named isolated branch. Require unchanged exact-head CI, fresh generation-15/inbox/control/head/path-disjoint checks, expected-head merge, and exact main blob readback."
   }
 }
