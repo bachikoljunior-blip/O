@@ -8,15 +8,15 @@
   "lease_generation": 10,
   "fence_token": "work-recovery-fence-v10-fe2c9328bf8912a1fbb5cfdd4d2aebe25b9bd38a1d738c3db8851c9379fe592f",
   "started_at": "2026-08-25T04:54:11.386Z",
-  "heartbeat_at": "2026-08-25T04:54:11.386Z",
-  "last_progress_at": "2026-08-25T04:54:11.386Z",
+  "heartbeat_at": "2026-08-25T04:54:58.654Z",
+  "last_progress_at": "2026-08-25T04:54:58.654Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
     "instruction": "Generation 9 exceeded stale_after_seconds with no later same-owner remote commit, PR/workflow progress, running local process, or completed pending invocation. Recover strictly from latest remote main and the existing immutable Work Execute request.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 10 phase-one acquisition is state-only expected-blob CAS from observed generation-9 blob 62de40fcf89df680d1df3dc6e48a7d845e912b55; no development mutation is authorized before second-phase finalization and exact remote readback."
+    "note": "Generation 10 phase-one acquisition commit/blob matched exact remote readback. This second state-only CAS binds that proof; mutation remains unauthorized until its own finalization commit/blob are read back and authorize_work_mode_recovery accepts the complete proof."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -24,7 +24,7 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "recovery_generation10_phase1_pending_readback",
+  "active_component": "recovery_generation10_finalization_pending_readback",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -107,12 +107,12 @@
     "note": "Run the newly frozen paired held-out action-outcome comparison. Do not replay or answer orphan invocations, repeat checkpoint-inheritance controls, or generalize any result beyond the exact tested routes/configuration/conditions."
   },
   "expected_blob_sha": "62de40fcf89df680d1df3dc6e48a7d845e912b55",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
-  "acquisition_phase": "phase1_acquired_pending_remote_readback",
+  "result_commit_sha": "9fc0bb9a140a5dc4e356d85946dcc85f50c95ef5",
+  "result_blob_sha": "ff7e45764cf47d1efe1aae5feabcf301016cb544",
+  "finalize_expected_blob_sha": "ff7e45764cf47d1efe1aae5feabcf301016cb544",
+  "readback_of_commit_sha": "9fc0bb9a140a5dc4e356d85946dcc85f50c95ef5",
+  "verified_remote_readback": true,
+  "acquisition_phase": "phase2_finalized_pending_exact_readback",
   "recovery_observation": {
     "observed_at": "2026-08-25T04:54:11.386Z",
     "observed_state_blob_sha": "62de40fcf89df680d1df3dc6e48a7d845e912b55",
