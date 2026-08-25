@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T09:03:00.000Z",
-  "last_progress_at": "2026-08-25T09:03:00.000Z",
+  "heartbeat_at": "2026-08-25T09:06:00.000Z",
+  "last_progress_at": "2026-08-25T09:06:00.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -61,7 +61,7 @@
     "pending_request_ref": null,
     "pending_native_invocation_id": null,
     "durability_status": "PR 306 merged with expected head 27078f4420e91eab3902262df8e29b7f4cf9b6c9 as aa8374cb210d29f5342e89d34ef150b6a92494e7 after all four pytest shards plus aggregate succeeded. Main request/response blobs exactly match 24467625128504877a3bed00c5dc37da03a64385 and 88b5e67a8b21e0c0d66b938460be6360c052c23d. The superseded revision-20 Execute is durably closed with no effects and no result claims. A second pre-existing durability gap was found for completed publication Execute invoke-b810f007118d82a0565c33cb; its exact state-bound response has been recovered locally and is precommitted for isolated exact-head publication without repeating effects.",
-    "next_action": "Freshly re-read generation-11 authority, inbox revision 22, PR 307 exact head and five successful jobs, main path intersection, and merge-tree. Precommit a new expected-head authorization by state CAS, merge PR 307 only if unchanged, exact-read the restored response blob, then continue the native lifecycle into a fresh revision-22-bound Context Kernel held-out action-adherence unit.",
+    "next_action": "After exact readback of the fresh PR 307 merge authorization, re-read generation-11 authority, inbox revision 22, unchanged PR head and five successful jobs, clean_g1 cursor, main path intersection, and merge-tree. Merge only with expected-head protection, exact-read the restored response blob, then continue the native lifecycle into a fresh revision-22-bound Context Kernel held-out action-adherence unit.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_adherence_revision22"
   },
@@ -2420,10 +2420,10 @@
   "clean_g1_research_feed_cursor": {
     "repository": "bachikoljunior-blip/note",
     "path": "research_index_clean_g1/O_FEED.json",
-    "highest_acknowledged_revision": 2,
-    "content_digest_sha256": "756a336a7961eeb12204b66a19ac573fc010569d4273e110b0a36308a9cb0259",
-    "blob_sha": "a271501d57a17b0b183aa3a8851e8fa7c95d364a",
-    "polled_at": "2026-08-25T09:02:00.000Z",
+    "highest_acknowledged_revision": 3,
+    "content_digest_sha256": "d339314cfc52566ebba3db89501d2c16de07f0f2b35fce81460b1d451b932f90",
+    "blob_sha": "9ed59f3429f8ea65763a5df615146b1be1948058",
+    "polled_at": "2026-08-25T09:05:00.000Z",
     "item_count": 0,
     "ingestion_status": "empty_nonblocking_no_candidate_ingested",
     "legacy_cursor_is_distinct": true
@@ -2514,7 +2514,7 @@
     "invocation_id": "invoke-b810f007118d82a0565c33cb",
     "original_generation": 9,
     "current_generation": 11,
-    "status": "exact_head_ci_success_merge_deferred_until_revision22_reconciled",
+    "status": "expected_head_merge_precommitted_after_revision22",
     "discovered_at": "2026-08-25T07:44:00.000Z",
     "reason": "WORK_EXECUTION_STATE recorded the publication Execute as completed with response digest cc4812da6ecd134ee4887aaf89b6f0ab11c23775dbe65d636d58ea5871ed3fb0, but latest main retained only its request. The exact response survived in a prior isolated worktree and matches the durable state digest and completed PR 303 facts.",
     "effects_repeated": false,
@@ -2541,7 +2541,7 @@
     "exact_head_sha": "a6612d909435b763405e0a7e5ae0f938716a548d",
     "exact_head_workflow_run": 32823475772,
     "exact_head_workflow_status": "success_four_shards_and_dependent_aggregate",
-    "last_ci_observed_at": "2026-08-25T08:28:00.000Z",
+    "last_ci_observed_at": "2026-08-25T09:05:00.000Z",
     "local_full_pytest_observation": "main-aligned full pytest reached at least 69 percent with no observed failure; still running",
     "exact_head_jobs": [
       {
@@ -2574,7 +2574,34 @@
         "status": "completed",
         "conclusion": "success"
       }
-    ]
+    ],
+    "merge_authorization": {
+      "prepared_at": "2026-08-25T09:06:00.000Z",
+      "expected_head_sha": "a6612d909435b763405e0a7e5ae0f938716a548d",
+      "expected_head_tree_sha": "b6b2401c9a84e5e07d903043d7f1f5336ffb4360",
+      "exact_head_workflow_run": 32823475772,
+      "required_jobs_success": 5,
+      "observed_main_sha": "62bc5256453df663b28286534bb630c509141cde",
+      "merge_base_sha": "3580a4cb5d3ac42415a39c317e36e3270dbd1ac9",
+      "main_changes_since_merge_base": [
+        "agi/USER_DIRECTIVE_EVENTS.json",
+        "agi/USER_INPUT_INBOX.json",
+        "agi/WORK_EXECUTION_STATE.json",
+        "agi/WORK_STRATEGY.json",
+        "note/research_workers_clean_g1/open_source/CHECKPOINT.json",
+        "tests/test_effective_directives.py",
+        "tests/test_user_input_inbox.py"
+      ],
+      "changed_path_intersection": [],
+      "predicted_merge_tree_sha": "85cca965fc960178d4778920f9252d2aebab868f",
+      "expected_response_blob_sha": "48c8d97258ff0512a2a2a4d8f2a2379ad8beefe1",
+      "expected_inbox_revision": 22,
+      "expected_inbox_blob_sha": "5c1e9390b87821b191edf11b7c7e3a2b01f1bba1",
+      "expected_clean_g1_feed_revision": 3,
+      "expected_clean_g1_feed_digest": "d339314cfc52566ebba3db89501d2c16de07f0f2b35fce81460b1d451b932f90",
+      "scope": "Durability repair only; do not repeat effects, recompute semantics, or widen the exact tested claim boundary.",
+      "dispatch_rule": "After exact readback of this CAS, freshly re-read generation 11 authority, inbox revision 22, unchanged PR head and five successful jobs, clean_g1 cursor, main path intersection, and merge-tree. Merge only with expected-head protection; any change invalidates this authorization."
+    }
   },
   "inbox_revision22_reconciliation_precommit": {
     "entry_id": "user-direction-clean-g1-research-feed-poll-20260825-v22",
