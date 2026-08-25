@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "active_falsifiable_policy",
-  "source_user_input_revision": 23,
+  "source_user_input_revision": 24,
   "objective": "Minimize defensible expected elapsed time until real-world AGI is actually achieved, without lowering the user's achievement standard or overstating evidence.",
   "strategy_is_assumed_correct": false,
   "system_choice": {
@@ -59,19 +59,12 @@
     "validated_execution_results_destination": "main",
     "main_integration_rule": "isolated branch -> exact-head CI -> unchanged passing head -> merge",
     "state_only_control_plane_updates": "expected-blob CAS on main",
-    "work_handoff_policy": "only_irreducibly_work_exclusive",
-    "handoff_route_classes": [
-      "ordinary_chat_reasoning_sufficient",
-      "connected_read_write_tool_or_api_sufficient",
-      "automation_sufficient",
-      "repository_or_github_action_sufficient",
-      "work_exclusive"
-    ],
-    "reasoning_planning_review_and_routing_stay_outside_work_when_adequate": true,
+    "primary_o_work_routing_policy": "pre_revision23_behavior",
+    "revision23_least_work_routing_applies_to_primary_o": false,
     "interrupt_valid_frozen_work_exclusive_invocation_for_routing_change": false
   },
   "context_management": {
-    "source_user_input_revision": 23,
+    "source_user_input_revision": 24,
     "decision_authority": "O Engine owns the observation ledger, source clocks, decision projections, inclusion and exclusion decisions, invalidation, and context-bound action authorization.",
     "raw_source_authority": "GitHub, CI, providers, files, and other source systems remain authoritative for the raw facts they produce; O stores provenance-bound references, projections, and receipts rather than copying everything.",
     "outer_session_role": "Execute O-requested observations and effects and return receipts. Untracked outer-session memory is not decision authority.",
@@ -88,7 +81,7 @@
     "effect_rule": "Bind plans and authorizations to the decision manifest, and recheck critical lease, revocation, and action-constraint sources immediately before dispatch.",
     "copy_all_raw_context": false,
     "architecture_path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
-    "current_stage": "revision23_least_work_routing_reconciliation"
+    "current_stage": "revision24_targeting_correction_and_revision22_action_adherence_resume"
   },
   "research_feed": {
     "source_user_input_revision": 22,
@@ -186,7 +179,7 @@
     }
   ],
   "immediate_sequence": [
-    "Apply revision 23 at this safe semantic boundary: classify every new handoff, keep ordinary reasoning and capable connected-tool, automation, and repository actions outside Work, and send only an irreducibly Work-exclusive remainder to Work without interrupting a valid frozen Work-exclusive invocation.",
+    "Apply revision 24 at this safe semantic boundary: exclude revision 23 from primary O routing, recovery, and context reconstruction; restore pre-revision-23 routing; and resume the already-frozen revision-22 Context Kernel action-adherence Execute without discarding valid progress.",
     "Retain the merged Root-only O-owned DecisionContextManifest as the protected context-control baseline.",
     "Retain the merged source-bound typed effective-directive compiler and partial-supersede preservation as the protected user-authority baseline.",
     "Retain the exact-head verified O-requested connected-GitHub observation receipt as the first bounded external-source ingestion baseline; extend it separately to decision-relevant CI, provider, tool, and research facts.",
@@ -208,5 +201,5 @@
     "strategy_success_is_external_evidence": false
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "updated_at": "2026-08-25T12:55:52.450Z"
+  "updated_at": "2026-08-25T14:23:35.989Z"
 }
