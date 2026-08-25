@@ -8,15 +8,15 @@
   "lease_generation": 18,
   "fence_token": "work-recovery-fence-v18-6fad7881af5a2c939e5404f0399f191f9d2789881d87e3f02f96a4e605b85249",
   "started_at": "2026-08-25T20:03:59.429Z",
-  "heartbeat_at": "2026-08-25T20:03:59.429Z",
-  "last_progress_at": "2026-08-25T20:03:59.429Z",
+  "heartbeat_at": "2026-08-25T20:04:25.050Z",
+  "last_progress_at": "2026-08-25T20:04:25.050Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
     "instruction": "Continue generation 18 from the exact generation-17 checkpoint. Preserve frozen Execute invoke-248450c08547af10470c50e6 and PR 314 exact head a0c45c91c74cdb7f7e852d1dcfba5c4df257f4dd. Finalize two-phase recovery authorization before any merge mutation.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Phase-one acquisition must receive exact remote readback before phase-two finalization and local authorization validation."
+    "note": "Generation 18 phase-two finalization records exact phase-one acquisition commit/blob readback; local authorize_work_mode_recovery validation remains required before merge mutation."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -291,12 +291,12 @@
   },
   "remote_persistence": {
     "published_on_main": true,
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "expected_blob_sha": "cdc5a607a32a8b6f858c35ae827569c1d32b85f3",
-    "result_commit_sha": null,
-    "result_blob_sha": null,
-    "finalization_expected_blob_sha": null,
-    "note": "Generation 18 phase-one acquisition pending remote readback and finalization."
+    "result_commit_sha": "d333ef0db182c8fc8c5eaa3d7263a4f298ad0676",
+    "result_blob_sha": "1020c2678a8e96e1f6eb57d8adce05fd78520147",
+    "finalization_expected_blob_sha": "1020c2678a8e96e1f6eb57d8adce05fd78520147",
+    "note": "Generation 18 two-phase acquisition proof finalized from exact remote readback; finalization commit/blob readback and local authorization validation follow."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -316,11 +316,11 @@
     "note": "Revision 24 corrects revision 23 as not applicable to primary O. Preserve and resume the existing revision-22-bound Execute without a new Work handoff or routing detour. The paired-route harness remains valid support only if freshly revalidated against that frozen Execute after the correction is main-durable. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, publish unapproved generated records, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
   },
   "expected_blob_sha": "cdc5a607a32a8b6f858c35ae827569c1d32b85f3",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
+  "result_commit_sha": "d333ef0db182c8fc8c5eaa3d7263a4f298ad0676",
+  "result_blob_sha": "1020c2678a8e96e1f6eb57d8adce05fd78520147",
+  "finalize_expected_blob_sha": "1020c2678a8e96e1f6eb57d8adce05fd78520147",
+  "readback_of_commit_sha": "d333ef0db182c8fc8c5eaa3d7263a4f298ad0676",
+  "verified_remote_readback": true,
   "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-25T18:00:39.978Z",
