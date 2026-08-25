@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T07:12:29.000Z",
-  "last_progress_at": "2026-08-25T07:12:29.000Z",
+  "heartbeat_at": "2026-08-25T07:27:28.000Z",
+  "last_progress_at": "2026-08-25T07:27:28.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -60,7 +60,7 @@
     "pending_work_invocation_id": null,
     "pending_request_ref": null,
     "pending_native_invocation_id": null,
-    "durability_status": "Revision-20 Execute invoke-445821c809a6ca734fb1b97e was closed fail-closed after revision 21 became main-durable. Its exact request and response are isolated in PR 306 at head 27078f4420e91eab3902262df8e29b7f4cf9b6c9; workflow 32820424960 is queued. Main does not yet contain these records.",
+    "durability_status": "PR 306 exact head 27078f4420e91eab3902262df8e29b7f4cf9b6c9 has successful shard 3 in workflow 32820424960; shards 0, 1, and 2 remain in progress and aggregate has not started. Main still lacks the exact closure records.",
     "next_action": "Monitor exact-head workflow 32820424960. On all required jobs success, repeat fresh authority/inbox/head/conflict checks, expected-head merge PR 306, read back request blob 24467625128504877a3bed00c5dc37da03a64385 and response blob 88b5e67a8b21e0c0d66b938460be6360c052c23d, then issue a revision-21-bound Context Kernel continuation.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
@@ -2434,7 +2434,33 @@
     "exact_head_sha": "27078f4420e91eab3902262df8e29b7f4cf9b6c9",
     "exact_head_tree": "c52e59a2a09349878c7f5b7dfd7d66a4a40222c8",
     "exact_head_workflow_run": 32820424960,
-    "exact_head_workflow_status": "queued",
-    "main_readback_verified": false
+    "exact_head_workflow_status": "in_progress_1_of_4_shards_success",
+    "main_readback_verified": false,
+    "exact_head_jobs": [
+      {
+        "id": 97717157974,
+        "name": "pytest shard 3 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97717158184,
+        "name": "pytest shard 0 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 97717158195,
+        "name": "pytest shard 1 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 97717158262,
+        "name": "pytest shard 2 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ]
   }
 }
