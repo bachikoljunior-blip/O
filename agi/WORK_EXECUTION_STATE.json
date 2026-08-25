@@ -8,8 +8,8 @@
   "lease_generation": 17,
   "fence_token": "work-recovery-fence-v17-bba6a14577a0410bd5d5500b9c6092b5a66b989ecef708d2a234547147bbbe77",
   "started_at": "2026-08-25T18:53:53.707Z",
-  "heartbeat_at": "2026-08-25T18:55:19.285Z",
-  "last_progress_at": "2026-08-25T18:55:19.285Z",
+  "heartbeat_at": "2026-08-25T19:01:19.013Z",
+  "last_progress_at": "2026-08-25T19:01:19.013Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,8 +21,8 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "c5df800cf0831ce08f891aabfc09654d7a309b02",
-  "working_branch": "work/recovery-gen15-revision22-public-inputs-v1",
+  "source_main_sha": "27da90c94a7f83a163254f3609dd37c645320ca9",
+  "working_branch": "work/recovery-gen17-paired-route-finalization-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_component": "revision22_private_reveal_response_judgment_instrumentation",
   "active_unit_id": "unit-revision22-private-reveal-response-finalization-harness",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Recover with generation+1 two-phase state-only CAS from this exact checkpoint. Preserve frozen Execute invoke-248450c08547af10470c50e6 and merged public inputs at 74d14c6fd0d208d97a68370229ff9a57c73e771c. Implement only immutable six-child response recording plus post-all-responses private rubric reveal verification/deterministic judgment; never persist or publish expected answers, nonces, generated prompt/model/native records, or route outputs without explicit permission. Precommit and validate on an isolated branch before any publication.",
+    "next_action": "After exact readback of the generation-17 instrumentation precommit, publish only local commit bf656f4f2ad69adc769bcfb09d4e9cacd14e2850 to work/recovery-gen17-paired-route-finalization-v1, open a PR, and require exact-head CI. Do not execute or persist real child outputs or private rubric reveals without explicit permission.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -3209,5 +3209,39 @@
         "tests/test_revision22_paired_route_inputs.py": "58cbe7efb41f3cf1bbacd1c731dc8f6777f9b141"
       }
     }
+  },
+  "paired_route_response_finalization_precommit": {
+    "status": "prepared_local_validated_not_published",
+    "prepared_at": "2026-08-25T19:01:19.013Z",
+    "branch": "work/recovery-gen17-paired-route-finalization-v1",
+    "base_main_sha": "27da90c94a7f83a163254f3609dd37c645320ca9",
+    "expected_state_blob_sha": "4d32a21c6114d04ac23d768564a3d167390e88a1",
+    "local_commit_sha": "bf656f4f2ad69adc769bcfb09d4e9cacd14e2850",
+    "local_tree_sha": "34ddd207f3f99933da3cb0bd2c9b50e9644e7f49",
+    "changed_paths": [
+      "src/continual/paired_route_isolation.py",
+      "tests/test_paired_route_isolation.py"
+    ],
+    "reviewed_blobs": {
+      "src/continual/paired_route_isolation.py": "9eb70b17eee7def3ff9aac35477ea97a9430699b",
+      "tests/test_paired_route_isolation.py": "256299179826fdd55031b1e46ac52252bd838d6a"
+    },
+    "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
+    "response_absent_at_frozen_continuation": true,
+    "rubric_answers_or_nonces_persisted_or_published": false,
+    "real_child_responses_or_route_outputs_persisted_or_published": false,
+    "implementation_scope": "Generic runtime-agnostic write-once six-child response records, all-six-before-reveal enforcement, commitment verification, exact canonical deterministic judgments, and reveal-free finalization records.",
+    "local_validation": {
+      "compileall_passed": true,
+      "diff_check_passed": true,
+      "deterministic_smoke_passed": true,
+      "successor_generation_idempotent_replay_passed": true,
+      "smoke_response_count": 6,
+      "smoke_judgment_count": 6,
+      "pytest_available": false,
+      "pytest_note": "Current runtime lacks pytest; no pytest PASS is claimed. Exact-head CI is required after publication."
+    },
+    "claim_boundary": "Instrumentation and deterministic synthetic smoke only. No real route execution, real observation, behavioral result, route winner, negative evidence, scientist-agent-family inference, external-production evidence, AGI evidence, or completion claim.",
+    "publication_rule": "After exact readback of this state-only CAS, publish only the reviewed two-path commit to the named isolated branch. Require exact-head CI and a fresh generation-17/control/inbox/head/path-disjoint check before any merge."
   }
 }
