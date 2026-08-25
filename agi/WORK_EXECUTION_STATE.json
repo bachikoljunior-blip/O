@@ -8,8 +8,8 @@
   "lease_generation": 18,
   "fence_token": "work-recovery-fence-v18-6fad7881af5a2c939e5404f0399f191f9d2789881d87e3f02f96a4e605b85249",
   "started_at": "2026-08-25T20:03:59.429Z",
-  "heartbeat_at": "2026-08-25T20:04:25.050Z",
-  "last_progress_at": "2026-08-25T20:04:25.050Z",
+  "heartbeat_at": "2026-08-25T20:06:07.361Z",
+  "last_progress_at": "2026-08-25T20:06:07.361Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,7 +21,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "a70a1b43132727d0015ccac33d5bd58a7fd2ca8b",
+  "source_main_sha": "28cc6008ddbb15f3705b1dd721f2dafa63216794",
   "working_branch": "work/recovery-gen17-paired-route-finalization-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_component": "revision22_private_reveal_response_judgment_instrumentation",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Complete generation-18 phase-two CAS from the exact acquisition commit/blob and run authorize_work_mode_recovery locally. Then freshly verify PR 314 exact-head CI 5/5, control revision 4, inbox revision 24, absent frozen response, latest main changed-path intersection, and clean merge tree before recording merge authorization.",
+    "next_action": "After exact readback of this authorization state, perform the required final fresh read. If every bound value is unchanged, merge PR 314 only with expected head a0c45c91c74cdb7f7e852d1dcfba5c4df257f4dd, then read back both reviewed blobs on main. Do not execute or persist real child outputs or private rubric reveals without explicit permission.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -3211,7 +3211,7 @@
     }
   },
   "paired_route_response_finalization_precommit": {
-    "status": "published_pr_exact_head_ci_in_progress_checkpointed",
+    "status": "merge_authorized_pending_final_fresh_read",
     "prepared_at": "2026-08-25T19:01:19.013Z",
     "branch": "work/recovery-gen17-paired-route-finalization-v1",
     "base_main_sha": "27da90c94a7f83a163254f3609dd37c645320ca9",
@@ -3250,7 +3250,7 @@
     "pull_request": 314,
     "pr_url": "https://github.com/bachikoljunior-blip/O/pull/314",
     "exact_head_ci_run": 32887368936,
-    "exact_head_ci_status": "four_shards_in_progress",
+    "exact_head_ci_status": "success_four_shards_and_dependent_aggregate",
     "exact_head_job_ids": [
       97930860866,
       97930861063,
@@ -3258,6 +3258,80 @@
       97930861285
     ],
     "published_at": "2026-08-25T19:03:13Z",
-    "last_ci_observed_at": "2026-08-25T19:06:00.253Z"
+    "last_ci_observed_at": "2026-08-25T19:06:00.253Z",
+    "exact_head_ci_jobs": [
+      {
+        "id": 97930860866,
+        "name": "pytest shard 0 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97930861063,
+        "name": "pytest shard 2 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97930861175,
+        "name": "pytest shard 1 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97930861285,
+        "name": "pytest shard 3 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 97942996613,
+        "name": "test",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "merge_authorization": {
+      "authorized_at": "2026-08-25T20:06:07.361Z",
+      "expected_state_blob_sha": "d00cb60d455e25414d9a432c0f4fa8b7ab8dda94",
+      "expected_control_blob_sha": "0236f9a9ccdc5727595c45c21b8430cd30c65406",
+      "expected_control_revision": 4,
+      "expected_inbox_revision": 24,
+      "expected_inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8",
+      "expected_pr": 314,
+      "expected_head_sha": "a0c45c91c74cdb7f7e852d1dcfba5c4df257f4dd",
+      "expected_head_tree_sha": "34ddd207f3f99933da3cb0bd2c9b50e9644e7f49",
+      "exact_head_workflow_run": 32887368936,
+      "required_jobs_success": 5,
+      "required_job_ids": [
+        97930860866,
+        97930861063,
+        97930861175,
+        97930861285,
+        97942996613
+      ],
+      "observed_main_sha": "28cc6008ddbb15f3705b1dd721f2dafa63216794",
+      "merge_base_sha": "27da90c94a7f83a163254f3609dd37c645320ca9",
+      "main_changes_since_merge_base": [
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "reviewed_paths": [
+        "src/continual/paired_route_isolation.py",
+        "tests/test_paired_route_isolation.py"
+      ],
+      "changed_path_intersection": [],
+      "merge_tree_clean": true,
+      "predicted_merge_tree_sha": "ee50a667d66bce72f7c4452e00c54da6e32a92ac",
+      "expected_main_blobs": {
+        "src/continual/paired_route_isolation.py": "9eb70b17eee7def3ff9aac35477ea97a9430699b",
+        "tests/test_paired_route_isolation.py": "256299179826fdd55031b1e46ac52252bd838d6a"
+      },
+      "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
+      "response_absent": true,
+      "merge_method": "merge",
+      "require_second_fresh_read": true,
+      "claim_boundary": "Exact-head repository validation only. No real route execution, result, score, negative evidence, scientist-agent-family inference, untested-mechanism inference, AGI evidence, or completion claim.",
+      "dispatch_rule": "After exact readback of this state-only CAS, freshly re-read control revision 4, generation-18 authority/fence, inbox revision 24, unchanged PR head/tree, all five successful jobs, absent frozen response, latest main path intersection, and merge tree. Merge only with expected-head protection; any change invalidates authorization."
+    }
   }
 }
