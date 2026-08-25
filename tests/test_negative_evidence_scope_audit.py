@@ -30,8 +30,8 @@ def test_checked_in_scope_ledger_is_source_bound_and_complete() -> None:
         "classification_counts": {
             "adaptation_or_ablation_loss": 0,
             "original_baseline_reproduction_failure": 0,
-            "tested_variant_failure": 1,
-            "untested_mechanism": 3,
+            "tested_variant_failure": 2,
+            "untested_mechanism": 2,
         },
         "repair_required_count": 1,
         "family_wide_negative_count": 0,

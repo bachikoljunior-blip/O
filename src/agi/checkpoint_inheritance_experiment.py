@@ -278,6 +278,22 @@ def validate_checkpoint_measurement_readiness(
         "adaptation_or_ablation_loss_established": False,
     }:
         raise ValueError("negative evidence scope must remain exact")
+    measurement_state = value.get("measurement_state")
+    measurement_result = value.get("measurement_result")
+    if measurement_state is None:
+        if measurement_result is not None:
+            raise ValueError("measurement_result requires a measurement_state")
+    elif measurement_state != "MEASURED_RECONCILED":
+        raise ValueError("unknown checkpoint measurement_state")
+    elif measurement_result != {
+        "path": "agi/CHECKPOINT_INHERITANCE_MEASUREMENT_RESULT.json",
+        "record_type": "checkpoint_measurement_reconciliation",
+        "status": "MEASURED_RECONCILED",
+        "run_id": "run-work-mode-handoff-v2",
+        "measurement_receipt_count": 12,
+        "new_attempts_executed_during_reconciliation": 0,
+    }:
+        raise ValueError("reconciled measurement_result binding is invalid")
     return deepcopy(dict(value))
 
 
@@ -296,6 +312,8 @@ def prepare_checkpoint_measurement_requests(
     """Prepare all exact task-arm attempts without recording an observation."""
 
     plan = validate_checkpoint_measurement_readiness(readiness, experiment)
+    if plan.get("measurement_state") == "MEASURED_RECONCILED":
+        raise ValueError("measurement already reconciled; duplicate preparation is forbidden")
     protocol_digest = checkpoint_protocol_digest(experiment)
     readiness_digest = checkpoint_measurement_readiness_digest(plan)
     if set(private_rubrics) != _READINESS_TASK_IDS:
