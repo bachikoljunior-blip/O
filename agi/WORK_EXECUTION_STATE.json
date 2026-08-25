@@ -8,8 +8,8 @@
   "lease_generation": 16,
   "fence_token": "work-recovery-fence-v16-51b3fc3aa7d1e2ac59d151fe91c25a425a38a66efc2cd66a4dc122b1ea287d5f",
   "started_at": "2026-08-25T18:00:39.978Z",
-  "heartbeat_at": "2026-08-25T18:41:41.250Z",
-  "last_progress_at": "2026-08-25T18:41:41.250Z",
+  "heartbeat_at": "2026-08-25T18:44:05.987Z",
+  "last_progress_at": "2026-08-25T18:44:05.987Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,8 +24,8 @@
   "source_main_sha": "66f65428fb988c497fc456afead3962aeaab1089",
   "working_branch": "work/recovery-gen15-revision22-public-inputs-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_public_inputs_exact_failure_repair_precommitted",
-  "active_unit_id": "unit-revision22-public-paired-route-precommit-inputs",
+  "active_component": "revision22_private_reveal_response_judgment_instrumentation",
+  "active_unit_id": "unit-revision22-private-reveal-response-finalization-harness",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 24,
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Read back this merge-authorization CAS, then perform the required second fresh control/authority/inbox/PR/jobs/response/conflict read. If unchanged, merge PR 313 with expected head 4a6efaed77d4f3122a030c757895f24e8e517919 and read back all five reviewed blobs on main.",
+    "next_action": "Implement only the missing frozen-unit instrumentation for immutable six-child response recording and post-response private rubric reveal verification/judgment. The implementation must accept reveal data only at runtime after all six responses, never persist or publish expected answers/nonces, preserve exact two-route/three-scenario bindings and generation-16 authority, and produce no route result until complete.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2939,11 +2939,11 @@
       "blocks_monitor": false,
       "blocks_public_fixture_and_harness_work": false,
       "unpublished_data_authoritative": false,
-      "safe_alternative": "Continue public fixture/precommit preparation and repository validation without publishing generated invocation, prompt, model-output, response, or native lifecycle records."
+      "safe_alternative": "Continue public runtime-agnostic instrumentation and tests without publishing generated invocation, prompt, model output, response, native lifecycle records, rubric answers, nonces, or route outputs."
     }
   },
   "termination": {
-    "kind": "physical_run_boundary_checkpoint",
+    "kind": "active_execution_continues",
     "global_completion": false,
     "user_objective_met": false,
     "explicit_user_stop": false,
@@ -2951,7 +2951,7 @@
     "monitor_should_remain_enabled": true
   },
   "revision22_public_inputs_publication_precommit": {
-    "status": "repair_head_published_exact_head_ci_queued",
+    "status": "merged_main_durable_exact_readback",
     "prepared_at": "2026-08-25T17:02:54.688Z",
     "branch": "work/recovery-gen15-revision22-public-inputs-v1",
     "base_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
@@ -3179,6 +3179,22 @@
         "claim_boundary": "Exact-head repository validation only. No route execution, result, score, negative evidence, scientist-agent-family inference, untested-mechanism inference, AGI, or completion claim.",
         "require_second_fresh_read": true,
         "dispatch_rule": "After exact readback of this state-only CAS, freshly re-read control revision 4, generation-16 authority/fence, inbox revision 24, unchanged PR head/tree, all five successful jobs, absent frozen response, and latest main. Recompute path intersection and merge tree. Merge only with expected-head protection; any change invalidates authorization."
+      }
+    },
+    "merge_sha": "74d14c6fd0d208d97a68370229ff9a57c73e771c",
+    "merge_tree_sha": "506a562e4e097def15d8cb816da004f0c2c30f3a",
+    "merged_at": "2026-08-25T18:42:32Z",
+    "main_readback": {
+      "verified_at": "2026-08-25T18:44:05.987Z",
+      "reviewed_blob_count": 5,
+      "mismatch_count": 0,
+      "all_reviewed_blobs_match": true,
+      "blobs": {
+        "agi/evaluations/revision22_action_adherence/public_inputs.json": "639b1861b7a3369ad9e863633d7daacf413aeecf",
+        "agi/evaluations/revision22_action_adherence/routes/current-context-kernel.json": "ebe2d32ea9b4c7e8b7c22948518ff45940ccd378",
+        "agi/evaluations/revision22_action_adherence/routes/manifest-free-control.json": "4046f6eed6048d1c73bd61ea9e08ec950a147074",
+        "src/continual/revision22_paired_route_inputs.py": "bf33f905963ce58bb9d2483b63e1061b18dc4a85",
+        "tests/test_revision22_paired_route_inputs.py": "58cbe7efb41f3cf1bbacd1c731dc8f6777f9b141"
       }
     }
   }
