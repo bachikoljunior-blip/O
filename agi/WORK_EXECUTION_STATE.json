@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T07:42:14.000Z",
-  "last_progress_at": "2026-08-25T07:42:14.000Z",
+  "heartbeat_at": "2026-08-25T07:47:13.000Z",
+  "last_progress_at": "2026-08-25T07:47:13.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "aa8374cb210d29f5342e89d34ef150b6a92494e7",
   "working_branch": "work/recovery-gen11-inbox21-feed-policy-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "context_kernel_held_out_action_adherence_revision21_planning",
+  "active_component": "missing_publication_response_durability_repair_precommitted",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -60,8 +60,8 @@
     "pending_work_invocation_id": null,
     "pending_request_ref": null,
     "pending_native_invocation_id": null,
-    "durability_status": "PR 306 merged with expected head 27078f4420e91eab3902262df8e29b7f4cf9b6c9 as aa8374cb210d29f5342e89d34ef150b6a92494e7 after all four pytest shards plus aggregate succeeded. Main request/response blobs exactly match 24467625128504877a3bed00c5dc37da03a64385 and 88b5e67a8b21e0c0d66b938460be6360c052c23d. The superseded revision-20 Execute is durably closed with no effects and no result claims.",
-    "next_action": "At the next safe Root/equivalent boundary, re-read main authority, inbox revision 21, and the persisted research-feed cursor. Then issue one fresh revision-21-bound Context Kernel held-out action-adherence unit. Treat feed item goal_knowledge_vs_action_adherence only as a provenance-bound candidate scoped to its reported simulated stock-trading and ER-triage conditions; do not generalize negative evidence to scientist-agent family or untested mechanisms, and do not duplicate an already-equivalent positive control.",
+    "durability_status": "PR 306 merged with expected head 27078f4420e91eab3902262df8e29b7f4cf9b6c9 as aa8374cb210d29f5342e89d34ef150b6a92494e7 after all four pytest shards plus aggregate succeeded. Main request/response blobs exactly match 24467625128504877a3bed00c5dc37da03a64385 and 88b5e67a8b21e0c0d66b938460be6360c052c23d. The superseded revision-20 Execute is durably closed with no effects and no result claims. A second pre-existing durability gap was found for completed publication Execute invoke-b810f007118d82a0565c33cb; its exact state-bound response has been recovered locally and is precommitted for isolated exact-head publication without repeating effects.",
+    "next_action": "Publish only the exact recovered invoke-b810f007118d82a0565c33cb response on work/recovery-gen11-missing-publication-response-v1, require unchanged exact-head CI and expected-head merge with main blob readback, then issue the fresh revision-21-bound Context Kernel held-out action-adherence unit.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_adherence_revision21"
   },
@@ -2497,5 +2497,28 @@
       "response_blob_sha": "88b5e67a8b21e0c0d66b938460be6360c052c23d",
       "exact_blob_match": true
     }
+  },
+  "missing_publication_response_repair": {
+    "invocation_id": "invoke-b810f007118d82a0565c33cb",
+    "original_generation": 9,
+    "current_generation": 11,
+    "status": "authorized_for_isolated_publication",
+    "discovered_at": "2026-08-25T07:44:00.000Z",
+    "reason": "WORK_EXECUTION_STATE recorded the publication Execute as completed with response digest cc4812da6ecd134ee4887aaf89b6f0ab11c23775dbe65d636d58ea5871ed3fb0, but latest main retained only its request. The exact response survived in a prior isolated worktree and matches the durable state digest and completed PR 303 facts.",
+    "effects_repeated": false,
+    "semantic_result_recomputed": false,
+    "source_response_digest": "cc4812da6ecd134ee4887aaf89b6f0ab11c23775dbe65d636d58ea5871ed3fb0",
+    "source_output_digest": "c18ff89dfd50ed3dce2e85776ac052738a0dabf092a20e8fa07f35ab9d8863ff",
+    "response_blob_sha": "48c8d97258ff0512a2a2a4d8f2a2379ad8beefe1",
+    "branch": "work/recovery-gen11-missing-publication-response-v1",
+    "publication_parent": "3580a4cb5d3ac42415a39c317e36e3270dbd1ac9",
+    "local_commit": "f4a625b512170440eccac7def26eb6791c23730d",
+    "local_tree": "b6b2401c9a84e5e07d903043d7f1f5336ffb4360",
+    "changed_paths": [
+      ".continual/work-model/invocations/invoke-b810f007118d82a0565c33cb/response.json"
+    ],
+    "validation": "Exact byte comparison to the preserved response succeeded; work-verify for run-work-recovery-gen9-durability-repair reports valid=true, requests=48, responses=48, pending=0; git diff check passed.",
+    "publication_rule": "After exact readback of this state CAS, publish only the exact response blob on the named isolated branch, require unchanged exact-head CI, fresh authority/inbox/head/path-disjoint checks, expected-head merge, and exact main blob readback.",
+    "claim_boundary": "Durability repair only. No external effect is repeated, no semantic result is recomputed, and no AGI, scientist-agent-family, untested-mechanism, or user-objective-completion inference is added."
   }
 }
