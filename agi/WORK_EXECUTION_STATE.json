@@ -8,8 +8,8 @@
   "lease_generation": 15,
   "fence_token": "work-recovery-fence-v15-0002f5e95b9489d5fe811b3629dd4d9a0fb77bd31127cd3dc2ca22c84946ca33",
   "started_at": "2026-08-25T16:57:05.952Z",
-  "heartbeat_at": "2026-08-25T17:08:00.000Z",
-  "last_progress_at": "2026-08-25T17:08:00.000Z",
+  "heartbeat_at": "2026-08-25T17:10:00.000Z",
+  "last_progress_at": "2026-08-25T17:10:00.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "After exact readback of this replacement-head state precommit, update PR 313 to remote tree 229880a2d047b5d8e589b5709950eafff8c8137d, require a new exact-head workflow, and disregard every result from superseded head a8ba737f47a68fa1dc3b35eb79458f88ba0c7a88.",
+    "next_action": "Wait for the pull_request workflow dispatched for exact head ffa00be1ae8f7791530f6074d83b8f33012b28ab. Require all four pytest shards and the dependent aggregate to succeed; no result from superseded head a8ba737f47a68fa1dc3b35eb79458f88ba0c7a88 is admissible.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2939,7 +2939,7 @@
     "exact_continuation_persisted": true
   },
   "revision22_public_inputs_publication_precommit": {
-    "status": "replacement_head_state_precommitted_before_remote_ref_update",
+    "status": "hardened_remote_head_published_waiting_exact_head_ci",
     "prepared_at": "2026-08-25T17:02:54.688Z",
     "branch": "work/recovery-gen15-revision22-public-inputs-v1",
     "base_main_sha": "9132d3d735d17192d16414ef6434ffc2a692a917",
@@ -2982,12 +2982,12 @@
       "prior_unverified_value": "ef445a3af5c1b2f77e5ea42a06ded7d15998e5bb",
       "remote_publication_had_occurred": false
     },
-    "remote_commit_sha": null,
-    "remote_tree_sha": null,
+    "remote_commit_sha": "ffa00be1ae8f7791530f6074d83b8f33012b28ab",
+    "remote_tree_sha": "229880a2d047b5d8e589b5709950eafff8c8137d",
     "remote_blob_match_count": 5,
     "pull_request": 313,
     "exact_head_ci_run": null,
-    "exact_head_ci_status": "not_dispatched_for_replacement_head",
+    "exact_head_ci_status": "dispatch_pending",
     "mergeable": true,
     "mergeable_state": "unstable_pending_required_ci",
     "published_at": "2026-08-25T17:04:32Z",
@@ -2995,6 +2995,7 @@
     "previous_exact_head_ci_run": 32875729952,
     "previous_ci_status_at_invalidation": "in_progress_or_queued",
     "previous_head_evidence_admissible": false,
-    "hardening_note": "Bind both the public-input file and the two public route files to exact SHA-256 digests so same-identity tampering fails closed before precommit."
+    "hardening_note": "Bind both the public-input file and the two public route files to exact SHA-256 digests so same-identity tampering fails closed before precommit.",
+    "replacement_published_at": "2026-08-25T17:09:30Z"
   }
 }
