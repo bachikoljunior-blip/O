@@ -8,15 +8,15 @@
   "lease_generation": 10,
   "fence_token": "work-recovery-fence-v10-fe2c9328bf8912a1fbb5cfdd4d2aebe25b9bd38a1d738c3db8851c9379fe592f",
   "started_at": "2026-08-25T04:54:11.386Z",
-  "heartbeat_at": "2026-08-25T04:54:58.654Z",
-  "last_progress_at": "2026-08-25T04:54:58.654Z",
+  "heartbeat_at": "2026-08-25T04:55:20.000Z",
+  "last_progress_at": "2026-08-25T04:55:20.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
     "instruction": "Generation 9 exceeded stale_after_seconds with no later same-owner remote commit, PR/workflow progress, running local process, or completed pending invocation. Recover strictly from latest remote main and the existing immutable Work Execute request.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 10 phase-one acquisition commit/blob matched exact remote readback. This second state-only CAS binds that proof; mutation remains unauthorized until its own finalization commit/blob are read back and authorize_work_mode_recovery accepts the complete proof."
+    "note": "Generation 10 two-phase expected-blob CAS and both exact remote readbacks were verified. authorize_work_mode_recovery accepted the proof at 2026-08-25T04:55:20.000Z; this fenced owner may resume only the existing immutable Execute and idempotent continuation."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -24,7 +24,7 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "recovery_generation10_finalization_pending_readback",
+  "active_component": "context_kernel_held_out_action_outcome_execute_pending",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -59,7 +59,7 @@
     "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "PR 303 was merged with expected head protection as b3acabfcaabd48e4b58824661d5493f77fafba15 after exact-head workflow 32803793697 succeeded. All 107 reviewed path blobs matched exact main readback. The publication Execute response, refreshed Work/CI source receipts, Root selection, Candidate NOT_APPLICABLE decision, and new immutable Execute request are durable in the local run and this state records their exact continuation.",
+    "durability_status": "Generation 10 recovery was authorized by exact generation+1 two-phase CAS and remote readback. Existing immutable Work Execute invoke-445821c809a6ca734fb1b97e remains the sole next semantic action; inbox revision remains 20.",
     "next_action": "Execute only immutable Work invocation invoke-445821c809a6ca734fb1b97e for unit-context-kernel-held-out-action-outcomes-v1. Freeze the three held-out scenarios and mechanical rubric before either arm begins; compare only the manifest-free control and current provenance-bound Context Kernel route under equal conditions; fail closed on identity, authority, provenance, budget, or replay mismatch; limit every result to the exact tested routes and conditions.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
@@ -112,7 +112,7 @@
   "finalize_expected_blob_sha": "ff7e45764cf47d1efe1aae5feabcf301016cb544",
   "readback_of_commit_sha": "9fc0bb9a140a5dc4e356d85946dcc85f50c95ef5",
   "verified_remote_readback": true,
-  "acquisition_phase": "phase2_finalized_pending_exact_readback",
+  "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-25T04:54:11.386Z",
     "observed_state_blob_sha": "62de40fcf89df680d1df3dc6e48a7d845e912b55",
@@ -2256,5 +2256,8 @@
     "next_unit_scope": "agi/context-kernel/held-out-action-outcome-comparison-v1",
     "next_execute_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "next_execute_request_digest": "fd25431ea8e0bcfd910ebcd8f53f6040a4984987412845949904284fcbf25b86"
-  }
+  },
+  "finalization_commit_sha": "c4ef9f93774bf60a5aa0430814ff839f7f10a841",
+  "finalization_blob_sha": "5648fe56d990f025acb3952b72b4c07a912289f7",
+  "finalization_readback_verified": true
 }
