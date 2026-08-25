@@ -8,15 +8,15 @@
   "lease_generation": 15,
   "fence_token": "work-recovery-fence-v15-0002f5e95b9489d5fe811b3629dd4d9a0fb77bd31127cd3dc2ca22c84946ca33",
   "started_at": "2026-08-25T16:57:05.952Z",
-  "heartbeat_at": "2026-08-25T16:57:05.952Z",
-  "last_progress_at": "2026-08-25T16:57:05.952Z",
+  "heartbeat_at": "2026-08-25T16:58:13.086Z",
+  "last_progress_at": "2026-08-25T16:58:13.086Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
     "instruction": "Continue generation 15 from latest remote main and the exact checkpointed generation-14 continuation. Preserve pre-revision-23 primary-O routing, revision-5 constraints, inbox revision 24, the frozen revision-22 Execute invoke-248450c08547af10470c50e6, and all single-writer/fence/CAS bindings. Materialize only public paired-route precommit inputs; do not recreate or answer the frozen request, inject the separate work_delegation_gate policy, or publish generated invocation/prompt/model/native records without explicit permission.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 15 acquisition is the first state-only CAS phase from an explicit checkpointed predecessor. No later same-owner commit, PR, workflow, branch, or tool progress was observed. Semantic mutation remains frozen until acquisition readback and finalization CAS are verified."
+    "note": "Generation 15 acquisition commit 24f1205eeb5c84a08d98048e56fe9954320c9924 and blob c0170337331dfc81fa9aad043798a5d7ab91d5a4 matched exact remote readback. This finalization state records the proof; semantic execution remains frozen until the finalization commit/blob are read back and authorization is validated."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -232,7 +232,7 @@
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 15 acquisition is state-only and not yet mutation-authorized. Generation 14 ended at an explicit durable checkpoint; no other writer is authorized.",
+    "primary": "Generation 15 is the sole owner after acquisition commit/blob exact readback. Semantic mutation begins only after this finalization CAS is read back and the fence bindings validate.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 14 checkpoint commit 67e71492fee51a2f2dab5133c090c40e112a595c is the sole continuation source; generation 8 and generation 6 orphan invocations remain untouched."
@@ -304,12 +304,12 @@
     "note": "Revision 24 corrects revision 23 as not applicable to primary O. Preserve and resume the existing revision-22-bound Execute without a new Work handoff or routing detour. The paired-route harness remains valid support only if freshly revalidated against that frozen Execute after the correction is main-durable. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, publish unapproved generated records, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
   },
   "expected_blob_sha": "7f153bf9229945e70ca74b46145323447961eb11",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
-  "acquisition_phase": "state_only_cas_pending_readback",
+  "result_commit_sha": "24f1205eeb5c84a08d98048e56fe9954320c9924",
+  "result_blob_sha": "c0170337331dfc81fa9aad043798a5d7ab91d5a4",
+  "finalize_expected_blob_sha": "c0170337331dfc81fa9aad043798a5d7ab91d5a4",
+  "readback_of_commit_sha": "24f1205eeb5c84a08d98048e56fe9954320c9924",
+  "verified_remote_readback": true,
+  "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-25T16:57:05.952Z",
     "predecessor_execution_id": "work-recovery-20260825T161308Z-07da90af972aa0815a5a0d42b40c7fe9",
