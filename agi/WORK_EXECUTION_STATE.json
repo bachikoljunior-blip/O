@@ -8,8 +8,8 @@
   "lease_generation": 9,
   "fence_token": "work-recovery-fence-v9-42631febacea086b4a2b12d664ff294368ff882ec81858d574498fabf4b55664",
   "started_at": "2026-08-24T21:04:35.100Z",
-  "heartbeat_at": "2026-08-25T00:56:51.181Z",
-  "last_progress_at": "2026-08-25T00:56:51.181Z",
+  "heartbeat_at": "2026-08-25T00:59:04.645Z",
+  "last_progress_at": "2026-08-25T00:59:04.645Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-postmerge-lifecycle-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "merge_authorized_pr301_exact_head_ci_success",
+  "active_component": "pr301_merge_source_receipts_bound",
   "active_unit_id": "unit-b48ec4eac9ae9df0610b7015",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -106,7 +106,7 @@
     "pending_invocation": "invoke-24234ae442ad535d7eabf06f (Execute) bound to Work invoke-847ffe9d2c90abfd2229d3dc; request and native record are main-durable after PR 300.",
     "note": "Continue the hidden-rubric three-case behavioral outcome measurement. Do not replay or answer orphan invocations; do not generalize negative evidence beyond exact tested target/configuration/conditions."
   },
-  "expected_blob_sha": "354edf65b627b715f6b309846acb32b366259b52",
+  "expected_blob_sha": "7907027c7002710c71723cc375eb4fa19de7b865",
   "result_commit_sha": "ffc255b9a51da0f163cc96422618bcb5554cfe9e",
   "result_blob_sha": "875f3a9ad9bf8868d67471dd3ea8d5e1cc4ec3bd",
   "finalize_expected_blob_sha": "875f3a9ad9bf8868d67471dd3ea8d5e1cc4ec3bd",
@@ -1952,7 +1952,7 @@
   "hidden_rubric_lifecycle_publication_precommit": {
     "effect_id": "publish-generation9-hidden-rubric-lifecycle-v1",
     "idempotency_key": "bachikoljunior-blip/O:generation9:hidden-rubric-lifecycle:e9e18bd48a0f73e4474e31bb4b4f3abece68f0da361b214f71e72e42ad1f7773:v1",
-    "status": "merge_authorized_exact_head_ci_success",
+    "status": "merge_source_receipts_bound_before_final_read",
     "prepared_at": "2026-08-25T00:12:16.667Z",
     "expected_state_blob": "16e8a467d69b444ce888d560b8a8040724b31419",
     "branch": "work/recovery-gen9-hidden-rubric-lifecycle-v1",
@@ -1993,7 +1993,7 @@
     "changed_path_intersection": [],
     "predicted_merge_tree": "4b6cd272f4852b8243af19bd4bf7ddf6db500bf3",
     "conflict_proof": "git merge-tree --write-tree completed with exit 0 against main 3120d6340ea5544bb9121bf96f18727a8ec3beba; all main changes since the common base are state-only and path-disjoint from the 45 reviewed record paths.",
-    "next_action": "Prepare fresh Work-state and CI-source receipts against this exact state/policy, re-read generation-9 authority, inbox revision 20, PR head and all five jobs, recompute conflict proof on latest main, then merge PR 301 with expected head and read back all 45 reviewed blobs.",
+    "next_action": "Read back this state, recompute latest-main conflict proof, prepare and record a new exact-state Work receipt, then perform one final authority/inbox/PR-head/jobs read and expected-head merge PR 301; read back all 45 reviewed blobs.",
     "ci_observed_at": "2026-08-25T00:56:51.181Z",
     "ci_job_statuses": {
       "97637818025": "success",
@@ -2007,6 +2007,26 @@
     "merge_authorization_merge_base": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
     "merge_authorization_changed_path_intersection": [],
     "merge_authorization_predicted_tree": "aab7e83fa887ad8523cc5db56fcead5a8a2e7c00",
-    "merge_authorization_rule": "Only merge PR 301 with expected head 988a9a6d90c1babe2f2ea7a40ad7c69cd2b08649 after fresh Work and CI source receipts, final authority/inbox/head/jobs read, and unchanged conflict proof."
+    "merge_authorization_rule": "Only merge PR 301 with expected head 988a9a6d90c1babe2f2ea7a40ad7c69cd2b08649 after fresh Work and CI source receipts, final authority/inbox/head/jobs read, and unchanged conflict proof.",
+    "merge_source_receipts": {
+      "work": {
+        "observation_id": "work-state-19524e489f5a34174d1ea5f7",
+        "request_digest": "20144e9d4e778864ca47d3658a808216497be7042bf2aa9b43f0d7287b66cadc",
+        "receipt_digest": "23bd61f64e3025c8142fda5aada77bd1806a454bbe0d3cc6bf19ab3e4e3f36ca",
+        "source_commit_sha": "ee1f56f77248d3ecb2f73f1ec31af139a38d4ff4",
+        "source_blob_sha": "7907027c7002710c71723cc375eb4fa19de7b865",
+        "observed_at": "2026-08-25T00:58:07.241Z",
+        "note": "This pre-binding Work receipt is immutable evidence for the observed authorization state; a new exact-state Work receipt is required after this CAS."
+      },
+      "ci": {
+        "observation_id": "ci-run-d533bdf2ef3fc687467e3266",
+        "request_digest": "d15288647a8c25d6fcbadf6b1d1c013bcec4ceec0de39745fc7490a96f72e6b1",
+        "receipt_digest": "b1bb75f01d6961ea1cf8203536294b67525a9a80fbcbc8654ff4cc0ad7c65398",
+        "exact_head_sha": "988a9a6d90c1babe2f2ea7a40ad7c69cd2b08649",
+        "workflow_run_id": 32792843736,
+        "observed_at": "2026-08-25T00:58:07.241Z"
+      }
+    },
+    "receipts_bound_at": "2026-08-25T00:59:04.645Z"
   }
 }
