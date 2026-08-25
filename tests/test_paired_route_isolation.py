@@ -11,8 +11,10 @@ from continual.paired_route_isolation import (
     CLAIM_SCOPE,
     PairedRouteIsolationError,
     compute_rubric_commitment_digest,
+    finalize_paired_route_comparison,
     paired_route_child_binding,
     prepare_paired_route_isolation,
+    record_paired_route_child_response,
     verify_paired_route_precommit,
 )
 from continual.store import Store
@@ -35,6 +37,14 @@ def _state(*, heartbeat: str = NOW) -> dict:
         "stale_after_seconds": 900,
         "user_input_inbox": {"highest_acknowledged_revision": 23},
     }
+
+
+def _successor_state(*, heartbeat: str) -> dict:
+    value = _state(heartbeat=heartbeat)
+    value["execution_id"] = "work-recovery-gen14-test"
+    value["lease_generation"] = 14
+    value["fence_token"] = "opaque-successor-fence-token"
+    return value
 
 
 def _routes() -> list[dict]:
@@ -299,4 +309,185 @@ def test_commitment_requires_a_strong_nonce_and_canonical_public_answer() -> Non
             scenario_id="private-answer-scenario",
             expected_answer={"hidden_reasoning": "do not persist this"},
             nonce="x" * 32,
+        )
+
+
+def _reveals() -> dict[str, dict]:
+    answers = (
+        {"skus": ["a", "b"], "total": 5},
+        {"decision": "allow", "action": "read"},
+        {"state": {"count": 6}},
+    )
+    return {
+        scenario_id: {
+            "expected_answer": answer,
+            "nonce": f"sealed-rubric-nonce-{index}-" + "x" * 40,
+        }
+        for index, (scenario_id, answer) in enumerate(zip(SCENARIO_IDS, answers))
+    }
+
+
+def _record_all(tmp_path: Path, record: dict, *, one_wrong: bool = False) -> None:
+    reveals = _reveals()
+    for scenario_id in SCENARIO_IDS:
+        for route_id in ROUTE_IDS:
+            binding = paired_route_child_binding(
+                tmp_path,
+                run_id=RUN_ID,
+                comparison_id=record["comparison_id"],
+                scenario_id=scenario_id,
+                route_id=route_id,
+            )
+            answer = deepcopy(reveals[scenario_id]["expected_answer"])
+            if one_wrong and scenario_id == SCENARIO_IDS[0] and route_id == ROUTE_IDS[1]:
+                answer = {"skus": ["b", "a"], "total": 5}
+            record_paired_route_child_response(
+                tmp_path,
+                run_id=RUN_ID,
+                comparison_id=record["comparison_id"],
+                scenario_id=scenario_id,
+                route_id=route_id,
+                binding_digest=binding["binding_digest"],
+                response={"result": {"behavioral_answer": answer}},
+                state=_state(),
+                now=NOW,
+            )
+
+
+def test_six_responses_are_write_once_and_reveal_cannot_run_early(
+    tmp_path: Path,
+) -> None:
+    record = _prepare(tmp_path)
+    binding = paired_route_child_binding(
+        tmp_path,
+        run_id=RUN_ID,
+        comparison_id=record["comparison_id"],
+        scenario_id=SCENARIO_IDS[0],
+        route_id=ROUTE_IDS[0],
+    )
+    first = record_paired_route_child_response(
+        tmp_path,
+        run_id=RUN_ID,
+        comparison_id=record["comparison_id"],
+        scenario_id=SCENARIO_IDS[0],
+        route_id=ROUTE_IDS[0],
+        binding_digest=binding["binding_digest"],
+        response={"result": {"behavioral_answer": {"skus": ["a", "b"], "total": 5}}},
+        state=_state(),
+        now=NOW,
+    )
+    replay = record_paired_route_child_response(
+        tmp_path,
+        run_id=RUN_ID,
+        comparison_id=record["comparison_id"],
+        scenario_id=SCENARIO_IDS[0],
+        route_id=ROUTE_IDS[0],
+        binding_digest=binding["binding_digest"],
+        response={"result": {"behavioral_answer": {"skus": ["a", "b"], "total": 5}}},
+        state=_successor_state(heartbeat="2026-08-25T13:11:00Z"),
+        now="2026-08-25T13:11:00Z",
+    )
+    assert replay == first
+    with pytest.raises(PairedRouteIsolationError, match="immutable child response conflict"):
+        record_paired_route_child_response(
+            tmp_path,
+            run_id=RUN_ID,
+            comparison_id=record["comparison_id"],
+            scenario_id=SCENARIO_IDS[0],
+            route_id=ROUTE_IDS[0],
+            binding_digest=binding["binding_digest"],
+            response={"result": {"behavioral_answer": {"wrong": True}}},
+            state=_state(),
+            now=NOW,
+        )
+    with pytest.raises(PairedRouteIsolationError, match="all six immutable"):
+        finalize_paired_route_comparison(
+            tmp_path,
+            run_id=RUN_ID,
+            comparison_id=record["comparison_id"],
+            rubric_reveals=_reveals(),
+            state=_state(),
+            now=NOW,
+        )
+
+
+def test_finalization_verifies_reveals_after_all_responses_and_never_persists_them(
+    tmp_path: Path,
+) -> None:
+    record = _prepare(tmp_path)
+    _record_all(tmp_path, record, one_wrong=True)
+    final = finalize_paired_route_comparison(
+        tmp_path,
+        run_id=RUN_ID,
+        comparison_id=record["comparison_id"],
+        rubric_reveals=_reveals(),
+        state=_state(),
+        now=NOW,
+    )
+    assert final["status"] == "FINALIZED_DETERMINISTIC_EXACT_JUDGMENTS"
+    assert len(final["response_digests"]) == 6
+    assert len(final["judgments"]) == 6
+    assert [row["passed_count"] for row in final["route_summaries"]] == [3, 2]
+    final_path = _record_path(tmp_path, record).parent / "finalization.json"
+    persisted = final_path.read_text(encoding="utf-8")
+    assert "expected_answer" not in persisted
+    assert "sealed-rubric-nonce" not in persisted
+    assert "behavioral_answer" not in persisted
+    replay = finalize_paired_route_comparison(
+        tmp_path,
+        run_id=RUN_ID,
+        comparison_id=record["comparison_id"],
+        rubric_reveals=_reveals(),
+        state=_successor_state(heartbeat="2026-08-25T13:11:00Z"),
+        now="2026-08-25T13:11:00Z",
+    )
+    assert replay == final
+
+
+def test_response_binding_private_fields_and_tampered_reveal_fail_closed(
+    tmp_path: Path,
+) -> None:
+    record = _prepare(tmp_path)
+    binding = paired_route_child_binding(
+        tmp_path,
+        run_id=RUN_ID,
+        comparison_id=record["comparison_id"],
+        scenario_id=SCENARIO_IDS[0],
+        route_id=ROUTE_IDS[0],
+    )
+    with pytest.raises(PairedRouteIsolationError, match="binding digest mismatch"):
+        record_paired_route_child_response(
+            tmp_path,
+            run_id=RUN_ID,
+            comparison_id=record["comparison_id"],
+            scenario_id=SCENARIO_IDS[0],
+            route_id=ROUTE_IDS[0],
+            binding_digest="f" * 64,
+            response={"result": {"behavioral_answer": {"ok": True}}},
+            state=_state(),
+            now=NOW,
+        )
+    with pytest.raises(PairedRouteIsolationError, match="forbidden private field"):
+        record_paired_route_child_response(
+            tmp_path,
+            run_id=RUN_ID,
+            comparison_id=record["comparison_id"],
+            scenario_id=SCENARIO_IDS[0],
+            route_id=ROUTE_IDS[0],
+            binding_digest=binding["binding_digest"],
+            response={"result": {"behavioral_answer": {"secret": "no"}}},
+            state=_state(),
+            now=NOW,
+        )
+    _record_all(tmp_path, record)
+    bad = _reveals()
+    bad[SCENARIO_IDS[0]]["expected_answer"] = {"wrong": True}
+    with pytest.raises(PairedRouteIsolationError, match="commitment mismatch"):
+        finalize_paired_route_comparison(
+            tmp_path,
+            run_id=RUN_ID,
+            comparison_id=record["comparison_id"],
+            rubric_reveals=bad,
+            state=_state(),
+            now=NOW,
         )

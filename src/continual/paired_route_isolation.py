@@ -79,6 +79,38 @@ _FINALIZATION_REQUIREMENTS = {
     "require_deterministic_judgments": True,
     "permit_precommit_score_or_route_claim": False,
 }
+_RESPONSE_KEYS = {
+    "schema_version",
+    "record_type",
+    "run_id",
+    "comparison_id",
+    "precommit_digest",
+    "scenario_id",
+    "route_id",
+    "binding_digest",
+    "response",
+    "authority",
+    "recorded_at",
+    "claim_scope",
+    "response_digest",
+}
+_FINALIZATION_KEYS = {
+    "schema_version",
+    "record_type",
+    "run_id",
+    "comparison_id",
+    "precommit_digest",
+    "status",
+    "required_child_count",
+    "response_digests",
+    "judgments",
+    "route_summaries",
+    "authority",
+    "finalized_at",
+    "claim_scope",
+    "finalization_digest",
+}
+_FINALIZED_STATUS = "FINALIZED_DETERMINISTIC_EXACT_JUDGMENTS"
 
 
 def _text(value: Any, label: str, *, maximum: int | None = None) -> str:
@@ -526,6 +558,22 @@ def _write_once(path: Path, value: Mapping[str, Any], store: Store) -> dict[str,
     return deepcopy(dict(value))
 
 
+def _atomic_create(path: Path, value: Mapping[str, Any]) -> bool:
+    encoded = (
+        json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        return False
+    with os.fdopen(fd, "wb") as handle:
+        handle.write(encoded)
+        handle.flush()
+        os.fsync(handle.fileno())
+    return True
+
+
 def _frozen_fields(value: Mapping[str, Any]) -> dict[str, Any]:
     return {
         key: deepcopy(value[key])
@@ -781,3 +829,320 @@ def verify_paired_route_precommit(
         "comparison_ready": False,
         "claim_scope": CLAIM_SCOPE,
     }
+
+
+def _response_path(
+    root: Path,
+    *,
+    run_id: str,
+    comparison_id: str,
+    scenario_id: str,
+    route_id: str,
+) -> Path:
+    return (
+        _directory(root, run_id, comparison_id)
+        / "responses"
+        / f"{scenario_id}--{route_id}.json"
+    )
+
+
+def _read_response(path: Path, store: Store) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
+        raise PairedRouteIsolationError(
+            "missing or malformed paired route child response"
+        ) from exc
+    if not isinstance(value, dict) or set(value) != _RESPONSE_KEYS:
+        raise PairedRouteIsolationError(
+            "paired route child response has an unexpected schema"
+        )
+    if value.get("schema_version") != 1 or value.get("record_type") != (
+        "paired_route_child_response"
+    ):
+        raise PairedRouteIsolationError("paired route child response type mismatch")
+    body = deepcopy(value)
+    supplied = body.pop("response_digest", None)
+    if supplied != store.stable_digest(body, length=64):
+        raise PairedRouteIsolationError("tampered paired route child response")
+    _timestamp(value.get("recorded_at"), "recorded_at")
+    _loaded_authority(value.get("authority"), prepared=False)
+    response = value.get("response")
+    if not isinstance(response, Mapping) or set(response) != {"result"}:
+        raise PairedRouteIsolationError("child response must contain only result")
+    result = response.get("result")
+    if not isinstance(result, Mapping) or set(result) != {"behavioral_answer"}:
+        raise PairedRouteIsolationError(
+            "child result must contain only behavioral_answer"
+        )
+    _walk_public(response, "child_response")
+    return value
+
+
+def _current_finalization_authority(
+    state: Mapping[str, Any],
+    store: Store,
+    precommit: Mapping[str, Any],
+    *,
+    now: str,
+) -> dict[str, Any]:
+    current = _authority(state, store, now=now)
+    prepared = _loaded_authority(precommit.get("authority"), prepared=False)
+    if current["highest_acknowledged_inbox_revision"] != prepared[
+        "highest_acknowledged_inbox_revision"
+    ]:
+        raise PairedRouteIsolationError(
+            "current inbox revision differs from frozen authority"
+        )
+    if current["lease_generation"] < prepared["lease_generation"]:
+        raise PairedRouteIsolationError(
+            "current lease generation predates frozen authority"
+        )
+    return _stable_authority(current)
+
+
+def record_paired_route_child_response(
+    root: Path,
+    *,
+    run_id: str,
+    comparison_id: str,
+    scenario_id: str,
+    route_id: str,
+    binding_digest: str,
+    response: Mapping[str, Any],
+    state: Mapping[str, Any],
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Record one exact child response once, without any rubric reveal data."""
+
+    root = root.resolve()
+    store, precommit = _load_precommit(
+        root, run_id=run_id, comparison_id=comparison_id
+    )
+    current = now or store.utc_now()
+    authority = _current_finalization_authority(
+        state, store, precommit, now=current
+    )
+    binding = paired_route_child_binding(
+        root,
+        run_id=run_id,
+        comparison_id=comparison_id,
+        scenario_id=scenario_id,
+        route_id=route_id,
+    )
+    exact_binding_digest = _digest(binding_digest, "binding_digest")
+    if exact_binding_digest != binding["binding_digest"]:
+        raise PairedRouteIsolationError("child binding digest mismatch")
+    exact_response = deepcopy(response)
+    if not isinstance(exact_response, Mapping) or set(exact_response) != {"result"}:
+        raise PairedRouteIsolationError("child response must contain only result")
+    result = exact_response.get("result")
+    if not isinstance(result, Mapping) or set(result) != {"behavioral_answer"}:
+        raise PairedRouteIsolationError(
+            "child result must contain only behavioral_answer"
+        )
+    _walk_public(exact_response, "child_response")
+    if len(_canonical_bytes(exact_response)) > precommit["shared_budget"][
+        "max_response_bytes"
+    ]:
+        raise PairedRouteIsolationError("child response exceeds its byte budget")
+    value = {
+        "schema_version": 1,
+        "record_type": "paired_route_child_response",
+        "run_id": precommit["run_id"],
+        "comparison_id": precommit["comparison_id"],
+        "precommit_digest": precommit["precommit_digest"],
+        "scenario_id": binding["scenario"]["scenario_id"],
+        "route_id": binding["route"]["route_id"],
+        "binding_digest": exact_binding_digest,
+        "response": exact_response,
+        "authority": authority,
+        "recorded_at": current,
+        "claim_scope": CLAIM_SCOPE,
+    }
+    value["response_digest"] = store.stable_digest(value, length=64)
+    path = _response_path(
+        root,
+        run_id=precommit["run_id"],
+        comparison_id=precommit["comparison_id"],
+        scenario_id=value["scenario_id"],
+        route_id=value["route_id"],
+    )
+    if _atomic_create(path, value):
+        return deepcopy(value)
+    existing = _read_response(path, store)
+    if existing["response_digest"] != value["response_digest"]:
+        comparable_existing = deepcopy(existing)
+        comparable_value = deepcopy(value)
+        for item in (comparable_existing, comparable_value):
+            item.pop("recorded_at", None)
+            item.pop("authority", None)
+            item.pop("response_digest", None)
+        if comparable_existing != comparable_value:
+            raise PairedRouteIsolationError("immutable child response conflict")
+    return existing
+
+
+def _read_all_responses(
+    root: Path,
+    store: Store,
+    precommit: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    expected = [
+        (row["scenario_id"], route_id)
+        for row in precommit["execution_order"]
+        for route_id in row["route_ids"]
+    ]
+    paths = [
+        _response_path(
+            root,
+            run_id=precommit["run_id"],
+            comparison_id=precommit["comparison_id"],
+            scenario_id=scenario_id,
+            route_id=route_id,
+        )
+        for scenario_id, route_id in expected
+    ]
+    if len(paths) != 6 or not all(path.is_file() for path in paths):
+        raise PairedRouteIsolationError(
+            "all six immutable child responses are required before rubric reveal"
+        )
+    responses = [_read_response(path, store) for path in paths]
+    observed = [(item["scenario_id"], item["route_id"]) for item in responses]
+    if observed != expected or len({item["response_digest"] for item in responses}) != 6:
+        raise PairedRouteIsolationError("exact child response set mismatch")
+    for response in responses:
+        binding = paired_route_child_binding(
+            root,
+            run_id=precommit["run_id"],
+            comparison_id=precommit["comparison_id"],
+            scenario_id=response["scenario_id"],
+            route_id=response["route_id"],
+        )
+        if response["binding_digest"] != binding["binding_digest"]:
+            raise PairedRouteIsolationError("stored child binding digest mismatch")
+        if response["precommit_digest"] != precommit["precommit_digest"]:
+            raise PairedRouteIsolationError("stored response precommit mismatch")
+    return responses
+
+
+def finalize_paired_route_comparison(
+    root: Path,
+    *,
+    run_id: str,
+    comparison_id: str,
+    rubric_reveals: Mapping[str, Mapping[str, Any]],
+    state: Mapping[str, Any],
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Verify private reveals only after six responses and persist judgments only."""
+
+    root = root.resolve()
+    store, precommit = _load_precommit(
+        root, run_id=run_id, comparison_id=comparison_id
+    )
+    responses = _read_all_responses(root, store, precommit)
+    current = now or store.utc_now()
+    authority = _current_finalization_authority(
+        state, store, precommit, now=current
+    )
+    scenario_ids = [item["scenario_id"] for item in precommit["scenarios"]]
+    if not isinstance(rubric_reveals, Mapping) or set(rubric_reveals) != set(
+        scenario_ids
+    ):
+        raise PairedRouteIsolationError("all and only three rubric reveals are required")
+    expected_answers: dict[str, Any] = {}
+    for scenario in precommit["scenarios"]:
+        scenario_id = scenario["scenario_id"]
+        reveal = rubric_reveals[scenario_id]
+        if not isinstance(reveal, Mapping) or set(reveal) != {
+            "expected_answer",
+            "nonce",
+        }:
+            raise PairedRouteIsolationError("rubric reveal has an unexpected schema")
+        expected_answer = deepcopy(reveal.get("expected_answer"))
+        _walk_public(expected_answer, "expected_answer")
+        supplied = compute_rubric_commitment_digest(
+            scenario_id=scenario_id,
+            expected_answer=expected_answer,
+            nonce=reveal.get("nonce"),
+            store=store,
+        )
+        if supplied != scenario["rubric_commitment"]["commitment_digest"]:
+            raise PairedRouteIsolationError("rubric reveal commitment mismatch")
+        expected_answers[scenario_id] = expected_answer
+    judgments = []
+    for response in responses:
+        answer = response["response"]["result"]["behavioral_answer"]
+        passed = _canonical_bytes(answer) == _canonical_bytes(
+            expected_answers[response["scenario_id"]]
+        )
+        judgments.append(
+            {
+                "scenario_id": response["scenario_id"],
+                "route_id": response["route_id"],
+                "response_digest": response["response_digest"],
+                "passed": passed,
+                "score": 1.0 if passed else 0.0,
+                "judge_kind": "exact_canonical_json",
+                "judge_version": "exact-canonical-json-v1",
+            }
+        )
+    route_summaries = []
+    for route in precommit["routes"]:
+        route_judgments = [
+            item for item in judgments if item["route_id"] == route["route_id"]
+        ]
+        passed_count = sum(item["passed"] for item in route_judgments)
+        route_summaries.append(
+            {
+                "route_id": route["route_id"],
+                "scenario_count": 3,
+                "passed_count": passed_count,
+                "exact_score": passed_count / 3,
+            }
+        )
+    value = {
+        "schema_version": 1,
+        "record_type": "paired_route_finalization",
+        "run_id": precommit["run_id"],
+        "comparison_id": precommit["comparison_id"],
+        "precommit_digest": precommit["precommit_digest"],
+        "status": _FINALIZED_STATUS,
+        "required_child_count": 6,
+        "response_digests": [item["response_digest"] for item in responses],
+        "judgments": judgments,
+        "route_summaries": route_summaries,
+        "authority": authority,
+        "finalized_at": current,
+        "claim_scope": (
+            "exact_two_route_three_scenario_judgments_only_"
+            "not_behavioral_family_or_completion_evidence"
+        ),
+    }
+    _walk_public(value, "finalization")
+    value["finalization_digest"] = store.stable_digest(value, length=64)
+    path = _directory(root, precommit["run_id"], precommit["comparison_id"]) / (
+        "finalization.json"
+    )
+    if _atomic_create(path, value):
+        return deepcopy(value)
+    try:
+        existing = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
+        raise PairedRouteIsolationError("malformed paired route finalization") from exc
+    if not isinstance(existing, dict) or set(existing) != _FINALIZATION_KEYS:
+        raise PairedRouteIsolationError("paired route finalization has unexpected schema")
+    body = deepcopy(existing)
+    supplied = body.pop("finalization_digest", None)
+    if supplied != store.stable_digest(body, length=64):
+        raise PairedRouteIsolationError("tampered paired route finalization")
+    comparable_existing = deepcopy(existing)
+    comparable_value = deepcopy(value)
+    for item in (comparable_existing, comparable_value):
+        item.pop("finalized_at", None)
+        item.pop("authority", None)
+        item.pop("finalization_digest", None)
+    if comparable_existing != comparable_value:
+        raise PairedRouteIsolationError("immutable paired route finalization conflict")
+    return existing
