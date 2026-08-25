@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T09:06:58.000Z",
-  "last_progress_at": "2026-08-25T09:06:58.000Z",
+  "heartbeat_at": "2026-08-25T09:15:57.000Z",
+  "last_progress_at": "2026-08-25T09:15:57.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -22,10 +22,10 @@
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "074b9117430ceae9d491ef8cd936d667e626288e",
-  "working_branch": "work/recovery-gen11-inbox22-clean-g1-v1",
+  "working_branch": "work/recovery-gen11-rev22-native-lifecycle-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_native_lifecycle_continuation",
-  "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
+  "active_component": "revision22_action_adherence_execute_pending",
+  "active_unit_id": "unit-3d61e557b2542d07c83fa354",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 22,
@@ -48,22 +48,27 @@
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 11 is the sole fenced main writer. Inbox revision 22 is merged and acknowledged; PR 307 remains isolated and requires a fresh post-revision-22 merge authorization.",
+    "primary": "Generation 11 is the sole fenced main writer. Inbox revision 22 is merged and acknowledged; PR 307 is merged and its restored response is exact-read on main.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
-    "pending_native_execute": "Execute invoke-445821c809a6ca734fb1b97e is locally closed fail-closed under response digest ed50e6d59b6c3004e01962f73929b22cc7243c6a93ef3ffb24d95d839d489b81. No effects or claims were produced. Request/response publication is pending exact-head PR 306 CI.",
+    "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 is the only current immutable semantic request. It is revision-22-bound, has no response, external effect, scenario result, or partial success claim, and is durably checkpointed on branch work/recovery-gen11-rev22-native-lifecycle-v1.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-    "snapshot_branch": "work/recovery-gen11-inbox21-feed-policy-v1",
-    "snapshot_head_sha": "8c03f19f79b982dfdead4c265c4df4d9899c744d",
-    "pending_work_invocation_id": null,
-    "pending_request_ref": null,
-    "pending_native_invocation_id": null,
-    "durability_status": "PR 306 remains durably closed. PR 307 exact head a6612d909435b763405e0a7e5ae0f938716a548d passed all four pytest shards plus the dependent aggregate, was freshly reauthorized against inbox revision 22 and clean_g1 feed revision 3, and merged with expected-head protection as 074b9117430ceae9d491ef8cd936d667e626288e. The restored main response blob exactly matches 48c8d97258ff0512a2a2a4d8f2a2379ad8beefe1. No external effect was repeated, no semantic result was recomputed, and no claim scope was widened.",
-    "next_action": "Continue run-work-recovery-gen9-durability-repair through its remaining native Task Evaluate, Candidate Evaluate, Consolidate, Learn, and Root phases, then freeze a fresh revision-22-bound Context Kernel held-out action-adherence unit. Compare only the named routes/configurations/conditions; do not generalize negative evidence or duplicate equivalent positive controls.",
+    "snapshot_branch": "work/recovery-gen11-rev22-native-lifecycle-v1",
+    "snapshot_head_sha": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
+    "snapshot_tree_sha": "ced01225faead09cf8390e12d7cf2dcccd56b812",
+    "snapshot_blob_sha": "8f86a6e152cc6ab1fd088803c41975f373a40953",
+    "snapshot_revision": 55,
+    "pending_work_invocation_id": "invoke-248450c08547af10470c50e6",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-248450c08547af10470c50e6/request.json",
+    "pending_request_digest": "e8d9e30cf7f46c8ad50bfd0ca1f4a9b3636c60d636064d2386c97bd1c3ccc143",
+    "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
+    "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
+    "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
+    "next_action": "Answer only invoke-248450c08547af10470c50e6. Freeze the three scenarios, rubric, route configurations, source clock, identical budget, and judge before any route output; collect actual action traces for the current Context Kernel and manifest-free control. If comparable execution cannot be preserved, return exact-scope INSUFFICIENT_EVIDENCE. Do not generalize negative evidence or duplicate equivalent positive controls.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
-    "next_native_phase": "context_kernel_held_out_action_adherence_revision22"
+    "next_native_phase": "execute_revision22_action_adherence_measurement"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -102,10 +107,12 @@
     "executor_binding": "current_chatgpt_work_session",
     "model_identity": "chatgpt-work-model-unverified",
     "answered_invocations": [
-      "invoke-9296e4697f286f75ec0e9f9a (Entry)"
+      "invoke-9296e4697f286f75ec0e9f9a (Entry)",
+      "invoke-0b128cf077e179a6130f2a8b (Root revision-22 unit selection)",
+      "invoke-7100b70e41324428ec748123 (Candidate Evaluate NOT_APPLICABLE)"
     ],
-    "pending_invocation": "Work invoke-445821c809a6ca734fb1b97e (Execute) for unit-context-kernel-held-out-action-outcomes-v1; no unrelated candidate was applied.",
-    "note": "Run the newly frozen paired held-out action-outcome comparison. Do not replay or answer orphan invocations, repeat checkpoint-inheritance controls, or generalize any result beyond the exact tested routes/configuration/conditions."
+    "pending_invocation": "Work invoke-248450c08547af10470c50e6 (Execute) for unit-3d61e557b2542d07c83fa354; no unrelated Candidate is applied.",
+    "note": "Execute the frozen paired held-out action-adherence comparison. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
   },
   "expected_blob_sha": "1a142de77db4d5a32ee62b2551984d4df386d600",
   "result_commit_sha": "433cab7761d49aa42c0504b8b9d927e007b5ba07",
@@ -2261,13 +2268,16 @@
   "finalization_blob_sha": "3cb4ca1be8249e310da83049256a7dfb8daa4a71",
   "finalization_readback_verified": true,
   "checkpoint": {
-    "checkpointed_at": "2026-08-25T04:57:40.361Z",
-    "reason": "physical automation execution boundary after safe generation-10 recovery; the semantic Execute was not answered or partially claimed",
-    "exact_pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
-    "exact_pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
-    "exact_pending_request_digest": "fd25431ea8e0bcfd910ebcd8f53f6040a4984987412845949904284fcbf25b86",
-    "next_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
-    "next_scope": "agi/context-kernel/held-out-action-outcome-comparison-v1",
+    "checkpointed_at": "2026-08-25T09:15:57.000Z",
+    "reason": "physical automation execution boundary after completing the prior native publication lifecycle and freezing the fresh revision-22 action-adherence Execute; no measurement result exists yet",
+    "exact_pending_work_invocation_id": "invoke-248450c08547af10470c50e6",
+    "exact_pending_request_ref": ".continual/work-model/invocations/invoke-248450c08547af10470c50e6/request.json",
+    "exact_pending_request_digest": "e8d9e30cf7f46c8ad50bfd0ca1f4a9b3636c60d636064d2386c97bd1c3ccc143",
+    "exact_pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
+    "remote_checkpoint_commit": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
+    "remote_checkpoint_tree": "ced01225faead09cf8390e12d7cf2dcccd56b812",
+    "next_unit_id": "unit-3d61e557b2542d07c83fa354",
+    "next_scope": "agi/context-kernel/held-out-action-adherence-revision22-v1",
     "no_partial_result_claimed": true,
     "user_level_objective_met": false,
     "agi_claim_supported": false
