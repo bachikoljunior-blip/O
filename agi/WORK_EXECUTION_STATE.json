@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T06:24:30.000Z",
-  "last_progress_at": "2026-08-25T06:24:30.000Z",
+  "heartbeat_at": "2026-08-25T06:34:54.000Z",
+  "last_progress_at": "2026-08-25T06:34:54.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -21,10 +21,10 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
-  "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
+  "source_main_sha": "6bd30e195445185179e325343207abc879fe37e4",
+  "working_branch": "work/recovery-gen11-inbox21-feed-policy-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "inbox_revision21_reconciliation_pr305_ci_pending",
+  "active_component": "inbox_revision21_reconciliation_pr305_exact_head_ci_pending",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -47,20 +47,20 @@
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 9 remains the sole fenced main writer. PR 303 is merged and read back; the same owner has selected and preflighted the next held-out Context Kernel action-outcome unit.",
+    "primary": "Generation 11 is the sole fenced main writer. Inbox revision 21 reconciliation is isolated in PR 305 and remains unmerged pending exact-head CI.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
-    "pending_native_execute": "Current immutable Work Execute invoke-445821c809a6ca734fb1b97e targets unit-context-kernel-held-out-action-outcomes-v1. No unrelated candidate is applied; orphan generation-8 and generation-6 invocations remain untouched.",
+    "pending_native_execute": "Immutable Work Execute invoke-445821c809a6ca734fb1b97e was frozen under revision 20. It is preserved without effects or answer and will be closed fail-closed only after revision 21 is main-durable.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-    "snapshot_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
-    "snapshot_head_sha": "local_unpublished_reconciliation_records",
+    "snapshot_branch": "work/recovery-gen11-inbox21-feed-policy-v1",
+    "snapshot_head_sha": "8c03f19f79b982dfdead4c265c4df4d9899c744d",
     "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "Inbox revision 21 canonical reconciliation is open as PR 305 at exact minimal-diff head e55ea0b41594d105bd5fbdfb66e57e70b510cd9c. Exact-head workflow 32816863473 is queued; merge and inbox acknowledgement remain forbidden until all required jobs succeed and fresh authority/inbox/conflict checks pass.",
-    "next_action": "Monitor workflow 32816863473 for exact head e55ea0b41594d105bd5fbdfb66e57e70b510cd9c. On success, precommit fresh merge proof, expected-head merge PR 305, read back both blobs, then acknowledge inbox revision 21/feed revision 1 by state-only CAS and close stale revision-20 Execute fail-closed.",
+    "durability_status": "Inbox revision 21 canonical reconciliation and revision-independent append tests are open as PR 305 at exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d. Exact-head workflow 32817489674 is queued; merge and inbox acknowledgement remain forbidden until all required jobs succeed and fresh authority, inbox, head, and conflict checks pass.",
+    "next_action": "Monitor workflow 32817489674 for exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d. On success, precommit fresh merge proof, expected-head merge PR 305, read back all three blobs, then acknowledge inbox revision 21 and feed revision 1 by state-only CAS and close stale revision-20 Execute fail-closed.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
   },
@@ -2288,11 +2288,12 @@
     "exact_candidate_tree": "971dafa57ffcad62bf688fbf48bd1c28c2d19d08",
     "changed_paths": [
       "agi/USER_DIRECTIVE_EVENTS.json",
-      "agi/WORK_STRATEGY.json"
+      "agi/WORK_STRATEGY.json",
+      "tests/test_user_input_inbox.py"
     ],
-    "changed_path_list_sha256": "4847b7d0447296525be37f41ff381035260ddfa183fb25b86484cc8b795fddc9",
-    "blob_manifest_sha256": "b62f3844405547d306f4fb9d7730739212bd0e6ebc8697b8e2d5734549fa0b24",
-    "validation": "USER_INPUT_INBOX and both reconciled JSON files parsed; compile_effective_directives produced effective policy digest 0d7311459ade262f34bf2dca325e63cbfde266bb2462e49053ceb16c27698f73; 65 effective-directive and Context Kernel tests passed; git diff check passed.",
+    "changed_path_list_sha256": "8a6603610111a1ffc921d98abe67f407e1420ae5eb20ad59af46b6f332d4f8b2",
+    "blob_manifest_sha256": "71643268b1b85812aee35a0fa6976743f5b8bb0f7274077686ce112ee1201782",
+    "validation": "USER_INPUT_INBOX and both reconciled JSON files parsed; compile_effective_directives produced effective policy digest 0d7311459ade262f34bf2dca325e63cbfde266bb2462e49053ceb16c27698f73; 76 user-input-inbox, effective-directive, and Context Kernel tests passed; git diff check passed.",
     "research_feed_observation": {
       "repository": "bachikoljunior-blip/note",
       "path": "research_index/O_FEED.json",
@@ -2303,23 +2304,28 @@
       "decision_relevant_novel_item_count": 0,
       "action": "acknowledge_cursor_and_continue_without_extra_work_invocation"
     },
-    "publication_rule": "After exact readback of this state-only CAS, publish only the reviewed two paths on the named branch, require unchanged exact-head CI, fresh authority/inbox/head/conflict checks, expected-head merge, both-blob main readback, then acknowledge inbox revision 21 and feed cursor by expected-blob state CAS.",
+    "publication_rule": "After exact readback of this state-only CAS, publish only the reviewed three paths on the named branch, require unchanged exact-head CI, fresh authority/inbox/head/conflict checks, expected-head merge, all-three-blob main readback, then acknowledge inbox revision 21 and feed cursor by expected-blob state CAS.",
     "semantic_rule": "The pre-existing Execute invoke-445821c809a6ca734fb1b97e remains immutable but its revision-20 context is superseded at this safe boundary. Do not use it for external effects or claim completion; close it fail-closed only after canonical revision-21 reconciliation is main-durable.",
     "remote_unattached_commit": "02d974af08cbe83a0d81a632ce0bfcae07b0cd6b",
     "remote_unattached_commit_tree": "3b46ec9fda6f2fffe971547685f80d666a902228",
     "remote_ledger_blob": "6758d4319c6730e9d5a20d02714a68a7204a14e2",
     "remote_strategy_blob": "70b9a66b67f2749d88ef05df858f3f8c1bd40e70",
-    "remote_commit_readback_verified": false,
+    "remote_commit_readback_verified": true,
     "format_note": "Remote canonical JSON formatting differs from the local reference commit but parses to the same validated objects; the exact remote tree and blobs are now authoritative for publication.",
-    "remote_minimal_diff_commit": "e55ea0b41594d105bd5fbdfb66e57e70b510cd9c",
-    "remote_minimal_diff_tree": "3b42489e32b4c637a65a2c6759e09ed2eedd765f",
-    "branch_ref_readback_sha": "e55ea0b41594d105bd5fbdfb66e57e70b510cd9c",
+    "remote_minimal_diff_commit": "8c03f19f79b982dfdead4c265c4df4d9899c744d",
+    "remote_minimal_diff_tree": "41ef2fa30ef24db32320439cf73ff2dfabead667",
+    "branch_ref_readback_sha": "8c03f19f79b982dfdead4c265c4df4d9899c744d",
     "pull_request": 305,
     "pr_url": "https://github.com/bachikoljunior-blip/O/pull/305",
-    "pr_changed_paths": 2,
-    "pr_additions": 70,
-    "pr_deletions": 5,
-    "exact_head_workflow_run": 32816863473,
-    "exact_head_workflow_status": "queued"
+    "pr_changed_paths": 3,
+    "pr_additions": 108,
+    "pr_deletions": 30,
+    "exact_head_workflow_run": 32817489674,
+    "exact_head_workflow_status": "queued",
+    "remote_test_blob": "40389a0f5b953b612939a85ec171866529a3898c",
+    "superseded_exact_head_workflow_runs": [
+      32816712708,
+      32816863473
+    ]
   }
 }
