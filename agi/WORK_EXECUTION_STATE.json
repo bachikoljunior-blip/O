@@ -8,15 +8,15 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T09:00:00.000Z",
-  "last_progress_at": "2026-08-25T09:00:00.000Z",
+  "heartbeat_at": "2026-08-25T09:03:00.000Z",
+  "last_progress_at": "2026-08-25T09:03:00.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
-    "instruction": "Generation 10 is checkpointed with an exact unanswered Execute. Recover from latest remote main; observe inbox revision 21 and the compact research feed at this safe boundary before selecting further semantic work.",
+    "instruction": "Continue generation 11 from latest remote main. Inbox revision 22 supersedes revision 21: use only the clean_g1 research feed at safe boundaries, keep legacy research historical-only, and preserve exact claim scope before selecting further semantic work.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 11 two-phase CAS and exact readback were accepted by authorize_work_mode_recovery at 2026-08-25T06:16:00Z. Apply inbox revision 21 at this safe boundary before further semantic execution."
+    "note": "Generation 11 two-phase CAS and exact readback were accepted by authorize_work_mode_recovery at 2026-08-25T06:16:00Z. Revision 22 was reconciled by exact-head PR 308 and acknowledged after exact main readback; continue with clean_g1-only feed policy."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -24,31 +24,31 @@
   "source_main_sha": "a25480f4ea287179959cf8bb9e394c18f81d2777",
   "working_branch": "work/recovery-gen11-inbox22-clean-g1-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "inbox_revision22_clean_g1_reconciliation",
+  "active_component": "missing_publication_response_pr307_fresh_merge_authorization",
   "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 21,
-    "acknowledged_at": "2026-08-25T07:08:59.000Z",
-    "application_note": "Revision 21 is acknowledged after PR 305 exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d passed workflow 32817489674 with four successful pytest shards plus the dependent aggregate, merged with expected-head protection as 7f94273615ae81577a577988bb331fa1c6ffcd66, and all three reviewed blobs matched exact main readback. The research feed is polled only at safe Root/equivalent boundaries; only novel decision-relevant provenance-bound candidates may enter decision context; polling does not create an extra Work invocation; missing, stale, unreadable, empty, or non-novel feeds are nonblocking.",
+    "highest_acknowledged_revision": 22,
+    "acknowledged_at": "2026-08-25T09:03:00.000Z",
+    "application_note": "Revision 22 is acknowledged after PR 308 exact head d03fd0bdaf7ec6386a0e2c283ac8ee8d509c33a1 passed workflow 32826741340 with four successful pytest shards plus the dependent aggregate, merged with expected-head protection as 8e38d40e57d158e3c2e7bedf2755ac818d680f97, and all four reviewed blobs matched exact main readback. Only research_index_clean_g1/O_FEED.json is the current research bridge; legacy and pre-independence research is historical-only. Polling remains nonblocking and creates no extra Work invocation solely for feed handling.",
     "last_acknowledged_input": {
-      "revision": 21,
-      "acknowledged_at": "2026-08-25T07:08:59.000Z",
-      "inbox_blob_sha": "6a60ef74ce1dc37a906e5dd67affc0ddf612f005",
-      "directive_ledger_blob_sha": "6758d4319c6730e9d5a20d02714a68a7204a14e2",
-      "strategy_blob_sha": "70b9a66b67f2749d88ef05df858f3f8c1bd40e70",
-      "continuation_blob_sha": "c3bf896b5e4a04d8da059fd1b08233f2aa6a3ef5",
-      "test_blob_sha": "40389a0f5b953b612939a85ec171866529a3898c",
-      "pull_request": 305,
-      "exact_head_sha": "8c03f19f79b982dfdead4c265c4df4d9899c744d",
-      "exact_head_ci_run": 32817489674,
-      "merge_sha": "7f94273615ae81577a577988bb331fa1c6ffcd66",
+      "revision": 22,
+      "acknowledged_at": "2026-08-25T09:03:00.000Z",
+      "inbox_blob_sha": "5c1e9390b87821b191edf11b7c7e3a2b01f1bba1",
+      "directive_ledger_blob_sha": "2a8175dca803a46733e95a65a662af752f439c7a",
+      "strategy_blob_sha": "b0205de3a95cdc0c595cf765f0b700a8c9614d81",
+      "effective_directives_test_blob_sha": "ea3742e07b9905cccd85de5203643a40ab124dd4",
+      "inbox_test_blob_sha": "2cfccb702c5e6179b0a6264f20cae6dcba20ef38",
+      "pull_request": 308,
+      "exact_head_sha": "d03fd0bdaf7ec6386a0e2c283ac8ee8d509c33a1",
+      "exact_head_ci_run": 32826741340,
+      "merge_sha": "8e38d40e57d158e3c2e7bedf2755ac818d680f97",
       "verified_remote_readback": true,
-      "interpretation": "Poll the compact external research feed at safe Root or equivalent logical-unit boundaries, ingest only novel decision-relevant provenance-bound items, persist a revision/digest cursor, do not create extra Work solely for polling, and continue normal work on unavailable, stale, empty, unreadable, or non-novel feed results."
+      "interpretation": "Use only the clean_g1 feed at safe Root or equivalent boundaries. Do not bridge legacy or pre-independence research as clean evidence. Ingest only novel or materially under-evaluated decision-relevant items with traceable provenance, uncertainty, contradictory evidence, and exact claim scope; do not add Work solely for polling, and continue normally when the feed is unavailable or non-qualifying."
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 11 is the sole fenced main writer. Inbox revision 21 reconciliation is isolated in PR 305 and remains unmerged pending exact-head CI.",
+    "primary": "Generation 11 is the sole fenced main writer. Inbox revision 22 is merged and acknowledged; PR 307 remains isolated and requires a fresh post-revision-22 merge authorization.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-445821c809a6ca734fb1b97e is locally closed fail-closed under response digest ed50e6d59b6c3004e01962f73929b22cc7243c6a93ef3ffb24d95d839d489b81. No effects or claims were produced. Request/response publication is pending exact-head PR 306 CI.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
@@ -61,7 +61,7 @@
     "pending_request_ref": null,
     "pending_native_invocation_id": null,
     "durability_status": "PR 306 merged with expected head 27078f4420e91eab3902262df8e29b7f4cf9b6c9 as aa8374cb210d29f5342e89d34ef150b6a92494e7 after all four pytest shards plus aggregate succeeded. Main request/response blobs exactly match 24467625128504877a3bed00c5dc37da03a64385 and 88b5e67a8b21e0c0d66b938460be6360c052c23d. The superseded revision-20 Execute is durably closed with no effects and no result claims. A second pre-existing durability gap was found for completed publication Execute invoke-b810f007118d82a0565c33cb; its exact state-bound response has been recovered locally and is precommitted for isolated exact-head publication without repeating effects.",
-    "next_action": "Publish and validate the isolated revision-22 clean_g1 reconciliation first. Revision 22 supersedes revision 21, so the prior PR 307 merge authorization is invalidated. After revision 22 is merged and acknowledged by state CAS, freshly re-read generation-11 authority, inbox revision 22, PR 307 exact head and jobs, and path-disjointness before any expected-head merge; then issue a fresh revision-22-bound Context Kernel held-out action-adherence unit.",
+    "next_action": "Freshly re-read generation-11 authority, inbox revision 22, PR 307 exact head and five successful jobs, main path intersection, and merge-tree. Precommit a new expected-head authorization by state CAS, merge PR 307 only if unchanged, exact-read the restored response blob, then continue the native lifecycle into a fresh revision-22-bound Context Kernel held-out action-adherence unit.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_adherence_revision22"
   },
@@ -2387,6 +2387,7 @@
   "research_feed_cursor": {
     "repository": "bachikoljunior-blip/note",
     "path": "research_index/O_FEED.json",
+    "status": "historical_legacy_cursor_not_clean_g1_bridge_evidence",
     "highest_acknowledged_feed_revision": 3,
     "feed_digest_sha256": "4feb58d8258169c8cd4ccb144ea7f283b7603f86e6f4dd7b165b5c9f129fbadc",
     "blob_sha": "55e7ed0181823c18e24a571460724319f5717cae",
@@ -2415,6 +2416,17 @@
     ],
     "global_novelty_claim": false,
     "decision_rule": "Preserve provenance, quantitative evidence, contradictory evidence, and claim scope; validate on the named O target/configuration/conditions before treating any candidate as evidence."
+  },
+  "clean_g1_research_feed_cursor": {
+    "repository": "bachikoljunior-blip/note",
+    "path": "research_index_clean_g1/O_FEED.json",
+    "highest_acknowledged_revision": 2,
+    "content_digest_sha256": "756a336a7961eeb12204b66a19ac573fc010569d4273e110b0a36308a9cb0259",
+    "blob_sha": "a271501d57a17b0b183aa3a8851e8fa7c95d364a",
+    "polled_at": "2026-08-25T09:02:00.000Z",
+    "item_count": 0,
+    "ingestion_status": "empty_nonblocking_no_candidate_ingested",
+    "legacy_cursor_is_distinct": true
   },
   "superseded_execute_closure": {
     "invocation_id": "invoke-445821c809a6ca734fb1b97e",
@@ -2566,7 +2578,7 @@
   },
   "inbox_revision22_reconciliation_precommit": {
     "entry_id": "user-direction-clean-g1-research-feed-poll-20260825-v22",
-    "status": "expected_head_merge_precommitted",
+    "status": "merged_main_durable_and_revision22_acknowledged",
     "observed_at": "2026-08-25T08:25:36.592Z",
     "expected_inbox_revision": 22,
     "expected_inbox_blob_sha": "5c1e9390b87821b191edf11b7c7e3a2b01f1bba1",
@@ -2666,6 +2678,14 @@
       "expected_clean_g1_feed_revision": 2,
       "expected_clean_g1_feed_digest": "756a336a7961eeb12204b66a19ac573fc010569d4273e110b0a36308a9cb0259",
       "dispatch_rule": "After exact readback of this CAS, freshly re-read generation 11 authority, inbox revision 22, unchanged PR head and five successful jobs, main path intersection, and clean_g1 feed. Merge only with expected-head protection; any change invalidates this authorization."
+    },
+    "merge_sha": "8e38d40e57d158e3c2e7bedf2755ac818d680f97",
+    "merged_at": "2026-08-25T09:00:55.000Z",
+    "main_readback": {
+      "verified_at": "2026-08-25T09:02:00.000Z",
+      "reviewed_blob_count": 4,
+      "mismatch_count": 0,
+      "all_reviewed_blobs_match": true
     }
   }
 }
