@@ -8,8 +8,8 @@
   "lease_generation": 16,
   "fence_token": "work-recovery-fence-v16-51b3fc3aa7d1e2ac59d151fe91c25a425a38a66efc2cd66a4dc122b1ea287d5f",
   "started_at": "2026-08-25T18:00:39.978Z",
-  "heartbeat_at": "2026-08-25T18:06:00.000Z",
-  "last_progress_at": "2026-08-25T18:06:00.000Z",
+  "heartbeat_at": "2026-08-25T18:17:23.741Z",
+  "last_progress_at": "2026-08-25T18:17:23.741Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Monitor exact-head workflow 32881528014 for repair head 4a6efaed77d4f3122a030c757895f24e8e517919. Require all four shards and the dependent aggregate to succeed. Then freshly re-read control revision 4, generation-16 fence, inbox revision 24, PR head/tree, main advance and changed-path intersection before expected-head merge.",
+    "next_action": "Continue monitoring exact-head workflow 32881528014 for repair head 4a6efaed77d4f3122a030c757895f24e8e517919. Shard 1 has succeeded; require shards 0/2/3 and the dependent aggregate to succeed before fresh control/authority/inbox/head/conflict checks and expected-head merge.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -3078,15 +3078,15 @@
       "remote_tree_sha": "0c0bd789cf1487a734bf03a76e69ddb13de8ee9d",
       "pull_request": 313,
       "exact_head_ci_run": 32881528014,
-      "exact_head_ci_status": "four_shards_in_progress",
+      "exact_head_ci_status": "one_shard_success_three_in_progress",
       "remote_blob_match": true,
       "published_at": "2026-08-25T18:03:28Z",
       "exact_head_ci_jobs": [
         {
           "id": 97911931581,
           "name": "pytest shard 1 of 4",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         },
         {
           "id": 97911931930,
