@@ -517,7 +517,7 @@ def validate_context_method_comparison(
     boundary = value.get("next_measurement_boundary")
     expected_boundary = {
         "routing_executor": "fresh_unexposed_executor_required",
-        "scientist_control": "separate_fidelity_preserving_receipt_required",
+        "scientist_control": "Reuse an already recorded positive control when adequate provenance establishes equivalence to the frozen task, rubric, replay, budget, provider, and model criteria; otherwise retain control as missing without demanding duplicate merely because candidate is O-adapted.",
         "mutation_rule": "append_receipts_without_rewriting_protocol",
         "unavailable_evidence_action": "retain_insufficient_evidence_and_continue_independent_work",
     }
