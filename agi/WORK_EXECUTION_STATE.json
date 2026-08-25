@@ -8,8 +8,8 @@
   "lease_generation": 9,
   "fence_token": "work-recovery-fence-v9-42631febacea086b4a2b12d664ff294368ff882ec81858d574498fabf4b55664",
   "started_at": "2026-08-24T21:04:35.100Z",
-  "heartbeat_at": "2026-08-25T03:57:25.890Z",
-  "last_progress_at": "2026-08-25T03:57:25.890Z",
+  "heartbeat_at": "2026-08-25T04:07:41.072Z",
+  "last_progress_at": "2026-08-25T04:07:41.072Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_stale_owner_recovery",
@@ -24,8 +24,8 @@
   "source_main_sha": "4e679fb8dfc3d7517ecf50fab0d53095b702aba9",
   "working_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "checkpoint_measurement_reconciliation_pr303_merge_precommit_pending_readback",
-  "active_unit_id": "unit-2bfa35279c57f76d48f13d4b",
+  "active_component": "context_kernel_held_out_action_outcome_execute_pending",
+  "active_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 20,
@@ -47,22 +47,22 @@
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 9 remains the sole fenced main writer. The completed PR 299 lifecycle, fresh source receipts, next Root selection, Candidate preflight, and pending behavioral Execute are being checkpointed through an isolated records-only PR.",
+    "primary": "Generation 9 remains the sole fenced main writer. PR 303 is merged and read back; the same owner has selected and preflighted the next held-out Context Kernel action-outcome unit.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
-    "pending_native_execute": "Current next Work Execute invoke-847ffe9d2c90abfd2229d3dc and native invoke-24234ae442ad535d7eabf06f are main-durable after PR 300 merge and all 64 blob readback; authorized next action is execution by this same generation-9 owner.",
+    "pending_native_execute": "Current immutable Work Execute invoke-445821c809a6ca734fb1b97e targets unit-context-kernel-held-out-action-outcomes-v1. No unrelated candidate is applied; orphan generation-8 and generation-6 invocations remain untouched.",
     "predecessor": "Generation 8's missing request/response durability inconsistency remains a fail-closed input to the validator unit."
   },
   "exact_continuation": {
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
     "snapshot_head_sha": "local_unpublished_reconciliation_records",
-    "pending_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-b810f007118d82a0565c33cb/request.json",
+    "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "PR 303 exact head a175150e05452f28d6b32a78260ad3e65dbfa7d6 passed workflow 32803793697 with four successful pytest shards plus the dependent aggregate. Fresh authority/inbox and state-only main-delta conflict proof are recorded in the merge precommit; merge remains forbidden until this expected-blob CAS is read back exactly.",
-    "next_action": "CAS this merge precommit against state blob 76e1c9140796f7e0bdf5f86321e54961e2f9549d, verify exact remote readback, then re-read main/authority/inbox/PR head/jobs/compare. Merge PR 303 only with expected head a175150e05452f28d6b32a78260ad3e65dbfa7d6 and verify all 107 reviewed blobs on main.",
-    "completed_work_invocation_id": "invoke-d3c3b79d43f40c33511a9e92",
-    "next_native_phase": "checkpoint_measurement_reconciliation_publication_execute"
+    "durability_status": "PR 303 was merged with expected head protection as b3acabfcaabd48e4b58824661d5493f77fafba15 after exact-head workflow 32803793697 succeeded. All 107 reviewed path blobs matched exact main readback. The publication Execute response, refreshed Work/CI source receipts, Root selection, Candidate NOT_APPLICABLE decision, and new immutable Execute request are durable in the local run and this state records their exact continuation.",
+    "next_action": "Execute only immutable Work invocation invoke-445821c809a6ca734fb1b97e for unit-context-kernel-held-out-action-outcomes-v1. Freeze the three held-out scenarios and mechanical rubric before either arm begins; compare only the manifest-free control and current provenance-bound Context Kernel route under equal conditions; fail closed on identity, authority, provenance, budget, or replay mismatch; limit every result to the exact tested routes and conditions.",
+    "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
+    "next_native_phase": "context_kernel_held_out_action_outcome_execute"
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -103,8 +103,8 @@
     "answered_invocations": [
       "invoke-9296e4697f286f75ec0e9f9a (Entry)"
     ],
-    "pending_invocation": "invoke-24234ae442ad535d7eabf06f (Execute) bound to Work invoke-847ffe9d2c90abfd2229d3dc; request and native record are main-durable after PR 300.",
-    "note": "Continue the hidden-rubric three-case behavioral outcome measurement. Do not replay or answer orphan invocations; do not generalize negative evidence beyond exact tested target/configuration/conditions."
+    "pending_invocation": "Work invoke-445821c809a6ca734fb1b97e (Execute) for unit-context-kernel-held-out-action-outcomes-v1; no unrelated candidate was applied.",
+    "note": "Run the newly frozen paired held-out action-outcome comparison. Do not replay or answer orphan invocations, repeat checkpoint-inheritance controls, or generalize any result beyond the exact tested routes/configuration/conditions."
   },
   "expected_blob_sha": "e8c5534849e173bdfd91ca5e1c47a3f192bb1fef",
   "result_commit_sha": "ffc255b9a51da0f163cc96422618bcb5554cfe9e",
@@ -2137,7 +2137,7 @@
   "checkpoint_measurement_reconciliation_publication_precommit": {
     "effect_id": "publish-checkpoint-measurement-reconciliation-v1",
     "idempotency_key": "bachikoljunior-blip/O:gen9:checkpoint-measurement-reconciliation:107:d7315722d98cdf251156bfd39be9756e5c0c25cf717a883dd9ab66dc61dfe686:64a145d564dc3b14d8bdaba8edc4fd3c3bfe51f75091fd901fcb0608dfec1b3d:v1",
-    "status": "merge_authorization_prepared_pending_state_cas_readback",
+    "status": "completed_merged_and_all_107_blobs_readback_verified",
     "prepared_at": "2026-08-25T02:55:13.170Z",
     "branch": "work/recovery-gen9-checkpoint-reconciliation-v1",
     "observed_main_commit": "7ed7f190702c731a744c87a142e9a9717a057e02",
@@ -2168,11 +2168,11 @@
     "exact_head_workflow_run": 32803793697,
     "exact_head_workflow_id": 335420036,
     "exact_head_workflow_status": "success_four_shards_and_dependent_aggregate",
-    "merge_authorized": false,
+    "merge_authorized": true,
     "merge_authorization": {
       "effect_id": "merge-pr303-checkpoint-reconciliation-v1",
       "idempotency_key": "bachikoljunior-blip/O:pr303:a175150e05452f28d6b32a78260ad3e65dbfa7d6:merge:v1",
-      "status": "prepared_pending_state_cas_readback",
+      "status": "completed_merged_and_readback_verified",
       "prepared_at": "2026-08-25T03:57:25.890Z",
       "expected_head_sha": "a175150e05452f28d6b32a78260ad3e65dbfa7d6",
       "expected_head_tree": "20a71e11004963bab7f956d517fb2501766faf35",
@@ -2217,6 +2217,40 @@
     "claim_boundary": "The reconciled negative applies only to the exact tested bounded_stage_checkpoint_inheritance candidate/configuration/executor/model/budget/tasks/rubric/conditions. No scientist-agent-family, original-method, adaptation-loss, other-configuration, untested-mechanism, AGI, independent-production, or user-objective-completion inference.",
     "new_measurement_attempts": 0,
     "duplicate_positive_controls": 0,
-    "provenance_equivalent_controls_reused": 3
+    "provenance_equivalent_controls_reused": 3,
+    "merge_dispatch_state_commit": "2612a3182e829f4dd95d48f3ec46e40212081bd7",
+    "merge_dispatch_state_blob": "21f96f9eb5a56a13a35fb8e01e67918bf3014cb4",
+    "merge_dispatch_state_readback_verified": true,
+    "final_reconstructed_main_tree": "ca334edbe55357e42ade8f8d02addaaa049b0a91",
+    "final_predicted_merge_tree": "243cf5cf11cccb356214cfbdeb3c71403499b673",
+    "final_changed_path_intersection": [],
+    "merge_sha": "b3acabfcaabd48e4b58824661d5493f77fafba15",
+    "merged_at_observed": "2026-08-25T04:01:00.000Z",
+    "reviewed_blob_count": 107,
+    "reviewed_blob_mismatch_count": 0,
+    "all_reviewed_blobs_match": true,
+    "publication_execute_response_digest": "cc4812da6ecd134ee4887aaf89b6f0ab11c23775dbe65d636d58ea5871ed3fb0",
+    "publication_execute_output_digest": "c18ff89dfd50ed3dce2e85776ac052738a0dabf092a20e8fa07f35ab9d8863ff",
+    "post_merge_source_receipts": {
+      "work": {
+        "observation_id": "work-state-3b4dbadc416a2098b6325e3e",
+        "request_digest": "2d8b79be921d45ccc3c0554b316838220c5c4fec0f79f8db88551e4a70adac9a",
+        "receipt_digest": "7bd166ba212776c32f31d3cd4658cefaa522e6a15292549fd797b414d898b532"
+      },
+      "ci": {
+        "observation_id": "ci-run-9b0539d53f68bd0a242ec15a",
+        "request_digest": "5fd641b7bf71a8642070962c4db433ea7a5a33484e64cead1b0c9052c76339ec",
+        "receipt_digest": "2c62862f7d21a4fb0a15f6ec3fde94d37c7d3142b7602caac629a8145946b13f"
+      }
+    },
+    "next_root_work_invocation_id": "invoke-067530a15ae7445fec813fb5",
+    "next_root_response_digest": "a6d375c0bd13de2537edc33dcf425671f59c0ac7780a957428b36dbb424295f1",
+    "next_candidate_preflight_work_invocation_id": "invoke-5ab4188f6290d58c72b86f50",
+    "next_candidate_preflight_decision": "NOT_APPLICABLE",
+    "next_candidate_preflight_response_digest": "b645593000ca50ee2592fa896de10882051158b4a11eb9681eb3ca2ade9ec35d",
+    "next_unit_id": "unit-context-kernel-held-out-action-outcomes-v1",
+    "next_unit_scope": "agi/context-kernel/held-out-action-outcome-comparison-v1",
+    "next_execute_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
+    "next_execute_request_digest": "fd25431ea8e0bcfd910ebcd8f53f6040a4984987412845949904284fcbf25b86"
   }
 }
