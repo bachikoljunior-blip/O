@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "running",
+  "status": "checkpointed",
   "owner_kind": "work_recovery_automation",
   "execution_id": "work-recovery-20260825T180039Z-e8fd68700725b9ed52619eb400dd446c",
   "predecessor_execution_id": "work-recovery-20260825T165705Z-6a8d35c32da082b54c16386a0abdbb2f",
   "lease_generation": 16,
   "fence_token": "work-recovery-fence-v16-51b3fc3aa7d1e2ac59d151fe91c25a425a38a66efc2cd66a4dc122b1ea287d5f",
   "started_at": "2026-08-25T18:00:39.978Z",
-  "heartbeat_at": "2026-08-25T18:44:05.987Z",
-  "last_progress_at": "2026-08-25T18:44:05.987Z",
+  "heartbeat_at": "2026-08-25T18:45:13.065Z",
+  "last_progress_at": "2026-08-25T18:45:13.065Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -250,14 +250,26 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Implement only the missing frozen-unit instrumentation for immutable six-child response recording and post-response private rubric reveal verification/judgment. The implementation must accept reveal data only at runtime after all six responses, never persist or publish expected answers/nonces, preserve exact two-route/three-scenario bindings and generation-16 authority, and produce no route result until complete.",
+    "next_action": "Recover with generation+1 two-phase state-only CAS from this exact checkpoint. Preserve frozen Execute invoke-248450c08547af10470c50e6 and merged public inputs at 74d14c6fd0d208d97a68370229ff9a57c73e771c. Implement only immutable six-child response recording plus post-all-responses private rubric reveal verification/deterministic judgment; never persist or publish expected answers, nonces, generated prompt/model/native records, or route outputs without explicit permission. Precommit and validate on an isolated branch before any publication.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
     "harness_source_blob_sha": "baf8506cbaca0e7f35d5b4522d32c8c78895554d",
     "harness_test_blob_sha": "1d1e26f92ebcead6a7d0428f83a8fe8134170aa3",
     "inbox_revision": 24,
-    "inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8"
+    "inbox_blob_sha": "5085d21eab3cd088f31b2cc26472635859ebc6d8",
+    "checkpoint_parent_commit": "2061c7293febd623c7519095150fb3409ad09222",
+    "checkpoint_expected_state_blob_sha": "5a5c34f665101c1d3141b50d42a110135dd89945",
+    "pr313_merge_sha": "74d14c6fd0d208d97a68370229ff9a57c73e771c",
+    "pr313_exact_head_sha": "4a6efaed77d4f3122a030c757895f24e8e517919",
+    "pr313_exact_head_ci_run": 32881528014,
+    "pr313_ci_success_job_ids": [
+      97911931581,
+      97911931930,
+      97911931947,
+      97911932260,
+      97923405440
+    ]
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -2943,12 +2955,13 @@
     }
   },
   "termination": {
-    "kind": "active_execution_continues",
+    "kind": "physical_run_boundary_checkpoint",
     "global_completion": false,
     "user_objective_met": false,
     "explicit_user_stop": false,
     "self_disable_attempted": false,
-    "monitor_should_remain_enabled": true
+    "monitor_should_remain_enabled": true,
+    "checkpointed_at": "2026-08-25T18:45:13.065Z"
   },
   "revision22_public_inputs_publication_precommit": {
     "status": "merged_main_durable_exact_readback",
