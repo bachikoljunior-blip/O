@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T06:47:50.000Z",
-  "last_progress_at": "2026-08-25T06:47:50.000Z",
+  "heartbeat_at": "2026-08-25T06:58:51.000Z",
+  "last_progress_at": "2026-08-25T06:58:51.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -59,7 +59,7 @@
     "pending_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "pending_request_ref": ".continual/work-model/invocations/invoke-445821c809a6ca734fb1b97e/request.json",
     "pending_native_invocation_id": null,
-    "durability_status": "Inbox revision 21 canonical reconciliation and revision-independent append tests are open as PR 305 at exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d. All four exact-head workflow 32817489674 shards are in progress; merge and inbox acknowledgement remain forbidden until all required jobs and the dependent aggregate succeed and fresh authority, inbox, head, and conflict checks pass.",
+    "durability_status": "PR 305 exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d has successful shards 0, 2, and 3 in workflow 32817489674; shard 1 remains in progress and the dependent aggregate has not started. Merge and inbox acknowledgement remain forbidden.",
     "next_action": "Monitor workflow 32817489674 for exact head 8c03f19f79b982dfdead4c265c4df4d9899c744d. On success, precommit fresh merge proof, expected-head merge PR 305, read back all three blobs, then acknowledge inbox revision 21 and feed revision 1 by state-only CAS and close stale revision-20 Execute fail-closed.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "context_kernel_held_out_action_outcome_execute"
@@ -2321,7 +2321,7 @@
     "pr_additions": 108,
     "pr_deletions": 30,
     "exact_head_workflow_run": 32817489674,
-    "exact_head_workflow_status": "in_progress",
+    "exact_head_workflow_status": "in_progress_3_of_4_shards_success",
     "remote_test_blob": "40389a0f5b953b612939a85ec171866529a3898c",
     "superseded_exact_head_workflow_runs": [
       32816712708,
@@ -2331,22 +2331,26 @@
       {
         "id": 97708616204,
         "name": "pytest shard 3 of 4",
-        "status": "in_progress"
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 97708616257,
         "name": "pytest shard 1 of 4",
-        "status": "in_progress"
+        "status": "in_progress",
+        "conclusion": null
       },
       {
         "id": 97708616270,
         "name": "pytest shard 0 of 4",
-        "status": "in_progress"
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 97708616418,
         "name": "pytest shard 2 of 4",
-        "status": "in_progress"
+        "status": "completed",
+        "conclusion": "success"
       }
     ]
   }
