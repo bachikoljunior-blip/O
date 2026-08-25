@@ -8,8 +8,8 @@
   "lease_generation": 11,
   "fence_token": "work-recovery-fence-v11-a7b33fe54d08eaacae5f6b41546ab596ac3f7a96453d590295ab89abaa7ab50e",
   "started_at": "2026-08-25T06:15:06.804Z",
-  "heartbeat_at": "2026-08-25T08:56:00.000Z",
-  "last_progress_at": "2026-08-25T08:27:00.000Z",
+  "heartbeat_at": "2026-08-25T09:00:00.000Z",
+  "last_progress_at": "2026-08-25T09:00:00.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -2566,7 +2566,7 @@
   },
   "inbox_revision22_reconciliation_precommit": {
     "entry_id": "user-direction-clean-g1-research-feed-poll-20260825-v22",
-    "status": "pull_request_exact_head_ci_in_progress",
+    "status": "expected_head_merge_precommitted",
     "observed_at": "2026-08-25T08:25:36.592Z",
     "expected_inbox_revision": 22,
     "expected_inbox_blob_sha": "5c1e9390b87821b191edf11b7c7e3a2b01f1bba1",
@@ -2583,8 +2583,8 @@
     "pr_url": "https://github.com/bachikoljunior-blip/O/pull/308",
     "exact_head_sha": "d03fd0bdaf7ec6386a0e2c283ac8ee8d509c33a1",
     "exact_head_workflow_run": 32826741340,
-    "exact_head_workflow_status": "in_progress",
-    "last_ci_observed_at": "2026-08-25T08:56:00.000Z",
+    "exact_head_workflow_status": "success_four_shards_and_dependent_aggregate",
+    "last_ci_observed_at": "2026-08-25T08:59:00.000Z",
     "exact_head_jobs": [
       {
         "id": 97736317333,
@@ -2595,8 +2595,8 @@
       {
         "id": 97736317550,
         "name": "pytest shard 1 of 4",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 97736317629,
@@ -2609,15 +2609,21 @@
         "name": "pytest shard 3 of 4",
         "status": "completed",
         "conclusion": "success"
+      },
+      {
+        "id": 97744311743,
+        "name": "test",
+        "status": "completed",
+        "conclusion": "success"
       }
     ],
     "clean_g1_feed_observation": {
       "repository": "bachikoljunior-blip/note",
       "path": "research_index_clean_g1/O_FEED.json",
       "observed_at": "2026-08-25T08:29:13.005Z",
-      "blob_sha": "55087fdc0b215ae0e1ddcc7e3c25dd138b468805",
-      "revision": 1,
-      "content_digest_sha256": "97302f909ae3ee20b9b17138fa1af7302e23f64e7008abca524de682a4fc4a2b",
+      "blob_sha": "a271501d57a17b0b183aa3a8851e8fa7c95d364a",
+      "revision": 2,
+      "content_digest_sha256": "756a336a7961eeb12204b66a19ac573fc010569d4273e110b0a36308a9cb0259",
       "item_count": 0,
       "decision": "nonblocking_empty_feed_no_candidate_ingested"
     },
@@ -2629,6 +2635,37 @@
     ],
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed.",
     "publication_rule": "After exact readback of this state-only CAS, publish only the reviewed four-path commit on the named isolated branch. Require unchanged exact-head CI, fresh generation-11/inbox/head/path-disjoint checks, expected-head merge, and exact main blob readback before acknowledging revision 22.",
-    "parallel_pr307_rule": "PR 307 may continue CI, but revision 22 invalidates its earlier merge authorization. Do not merge PR 307 until revision 22 is durably reconciled and a new fresh authorization is recorded."
+    "parallel_pr307_rule": "PR 307 exact-head CI succeeded, but revision 22 invalidated its earlier merge authorization. Do not merge PR 307 until revision 22 is durably reconciled and a new fresh authorization is recorded.",
+    "merge_authorization": {
+      "prepared_at": "2026-08-25T09:00:00.000Z",
+      "expected_head_sha": "d03fd0bdaf7ec6386a0e2c283ac8ee8d509c33a1",
+      "expected_head_tree_sha": "a441c0f7de8b3406d2d988ec383d84c352b03505",
+      "exact_head_workflow_run": 32826741340,
+      "required_jobs_success": 5,
+      "observed_main_sha": "32d11831b7719c5555fe1e2bbed8ad5517d63666",
+      "merge_base_sha": "a25480f4ea287179959cf8bb9e394c18f81d2777",
+      "main_changes_since_merge_base": [
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "reviewed_paths": [
+        "agi/USER_DIRECTIVE_EVENTS.json",
+        "agi/WORK_STRATEGY.json",
+        "tests/test_effective_directives.py",
+        "tests/test_user_input_inbox.py"
+      ],
+      "changed_path_intersection": [],
+      "predicted_merge_tree_sha": "4911a47f4dfbd3961d4900d06f1f08e9d7bc4098",
+      "expected_main_blobs": {
+        "agi/USER_DIRECTIVE_EVENTS.json": "2a8175dca803a46733e95a65a662af752f439c7a",
+        "agi/WORK_STRATEGY.json": "b0205de3a95cdc0c595cf765f0b700a8c9614d81",
+        "tests/test_effective_directives.py": "ea3742e07b9905cccd85de5203643a40ab124dd4",
+        "tests/test_user_input_inbox.py": "2cfccb702c5e6179b0a6264f20cae6dcba20ef38"
+      },
+      "expected_inbox_revision": 22,
+      "expected_inbox_blob_sha": "5c1e9390b87821b191edf11b7c7e3a2b01f1bba1",
+      "expected_clean_g1_feed_revision": 2,
+      "expected_clean_g1_feed_digest": "756a336a7961eeb12204b66a19ac573fc010569d4273e110b0a36308a9cb0259",
+      "dispatch_rule": "After exact readback of this CAS, freshly re-read generation 11 authority, inbox revision 22, unchanged PR head and five successful jobs, main path intersection, and clean_g1 feed. Merge only with expected-head protection; any change invalidates this authorization."
+    }
   }
 }
