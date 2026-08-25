@@ -82,6 +82,11 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
     assert effective["r20-external-method-failure-attribution"]["value"] == (
         "distinguish_tested_variant_failure_adaptation_or_ablation_loss_baseline_reproduction_failure_and_untested_mechanisms"
     )
+    assert effective["r5-smartphone-operator"]["source_directive_indices"] == list(range(8))
+    assert "r23-least-work-routing" not in effective
+    assert effective["r23-misdirected-routing-provenance"]["slot"] == "input.provenance"
+    assert effective["r23-misdirected-constraint-provenance"]["slot"] == "input.provenance"
+    assert effective["r23-misdirected-handoff-provenance"]["slot"] == "input.provenance"
     assert "r4-input-provenance" in effective
     assert superseded == {
         "r13-primary-executor": "r14-primary-executor",
@@ -100,6 +105,7 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
     }
     rendered = json.dumps(first, ensure_ascii=False)
     assert "strict independent external production evidence gate" not in rendered
+    assert "classify_each_new_handoff_and_use_work_only_for_irreducibly_work_exclusive_remainder" not in rendered
     assert first["source_content_digest"] == ledger["source"]["content_digest"]
     assert all(
         atom["activation_status"] == "superseded"
