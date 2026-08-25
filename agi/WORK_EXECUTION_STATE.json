@@ -8,8 +8,8 @@
   "lease_generation": 15,
   "fence_token": "work-recovery-fence-v15-0002f5e95b9489d5fe811b3629dd4d9a0fb77bd31127cd3dc2ca22c84946ca33",
   "started_at": "2026-08-25T16:57:05.952Z",
-  "heartbeat_at": "2026-08-25T17:11:00.000Z",
-  "last_progress_at": "2026-08-25T17:11:00.000Z",
+  "heartbeat_at": "2026-08-25T17:14:30.000Z",
+  "last_progress_at": "2026-08-25T17:14:30.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -250,7 +250,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Poll exact-head workflow 32875956360 for head ffa00be1ae8f7791530f6074d83b8f33012b28ab. Require four successful pytest shards and the successful dependent aggregate. Then freshly re-read control revision 4, generation-15 fence, inbox revision 24, PR head/tree, main advance and changed-path intersection before any merge.",
+    "next_action": "Continue monitoring exact-head workflow 32875956360. Current state: shard 0 in progress; shards 1/2/3 queued behind superseded-head capacity. Require the exact current head and all five successful jobs before any merge.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -2960,7 +2960,9 @@
       "deterministic_loader_and_prepare_smoke_passed": true,
       "diff_check_passed": true,
       "pytest_available": false,
-      "pytest_note": "Current runtime lacks pytest; no local pytest PASS is claimed."
+      "pytest_note": "Current runtime lacks pytest; no local pytest PASS is claimed.",
+      "manual_contract_checks": "PASS: loader, six child bindings, zero results, missing commitment rejection, tampered route rejection",
+      "pytest_install_attempt": "blocked_by_transient_network_approval_disconnect; no PASS claimed"
     },
     "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
     "exact_routes": [
@@ -2987,7 +2989,7 @@
     "remote_blob_match_count": 5,
     "pull_request": 313,
     "exact_head_ci_run": 32875956360,
-    "exact_head_ci_status": "queued_four_shards",
+    "exact_head_ci_status": "one_shard_in_progress_three_queued",
     "mergeable": true,
     "mergeable_state": "unstable_pending_required_ci",
     "published_at": "2026-08-25T17:04:32Z",
@@ -3001,7 +3003,7 @@
       {
         "id": 97893768140,
         "name": "pytest shard 0 of 4",
-        "status": "queued",
+        "status": "in_progress",
         "conclusion": null
       },
       {
