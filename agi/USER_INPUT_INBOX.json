@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 27,
+  "revision": 28,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -457,7 +457,24 @@
       "supersedes": [],
       "source": "user_chat",
       "sequence": 27
+    },
+    {
+      "id": "user-clarification-eliminate-stop-cause-before-resume-20260827-v28",
+      "received_at": "2026-08-26T22:49:08.725Z",
+      "kind": "execution_continuity_causal_repair_clarification",
+      "status": "active",
+      "summary": "The required start-of-run repair must eliminate and validate the cause of a discretionary stop before the exact continuation is resumed.",
+      "directives": [
+        "Interpret revision 27's repair requirement causally: when the preceding execution stopped by agent discretion or another unauthorized reason, restoring status, refreshing a heartbeat, rotating a lease, restating the blocker, or merely recording the violation is not a repair.",
+        "Before resuming the exact continuation, identify the mechanism that allowed the unauthorized stop, implement a durable recurrence guard or remove that mechanism, and validate the remediation with falsifiable checks bound to the current execution and policy revision.",
+        "Fail closed against resume when a detected discretionary-stop cause has no durable remediation evidence and passed validation; preserve single-writer, fence, CAS, idempotency, frozen-request, hard platform and safety, secret, evidence-integrity, exact-head, readback, and truthful-claim boundaries while repairing it.",
+        "If a hard constraint prevents eliminating the cause immediately, do not mislabel it repaired or resume through the same failure path; continue the best non-conflicting safe work and retry the causal repair automatically.",
+        "After validated cause elimination, resume the exact authoritative continuation and keep working; cause analysis, guard implementation, validation, reporting, or checkpointing alone is not completion."
+      ],
+      "supersedes": [],
+      "source": "user_chat",
+      "sequence": 28
     }
   ],
-  "updated_at": "2026-08-26T22:19:07.499Z"
+  "updated_at": "2026-08-26T22:49:08.725Z"
 }
