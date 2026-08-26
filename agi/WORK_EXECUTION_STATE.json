@@ -8,8 +8,8 @@
   "lease_generation": 21,
   "fence_token": "work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de",
   "started_at": "2026-08-26T11:22:46.061Z",
-  "heartbeat_at": "2026-08-26T13:11:46.605Z",
-  "last_progress_at": "2026-08-26T13:11:46.605Z",
+  "heartbeat_at": "2026-08-26T13:24:18.531Z",
+  "last_progress_at": "2026-08-26T13:24:18.531Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -610,11 +610,13 @@
     "claim_boundary": "Records-only durability repair for one already-completed Execute. No effect repetition, semantic recomputation, AGI evidence, family-level inference, untested-mechanism inference, or user-objective completion claim."
   },
   "local_combined_regression": {
-    "result": "515 passed",
-    "duration_seconds": 2913.11,
+    "result": "750 passed",
+    "duration_seconds": 5015.98,
     "completed": true,
-    "scope": "combined latest-main candidate integration regression",
-    "claim_boundary": "Internal regression evidence only."
+    "scope": "Generation-21 execution workspace after stage-2 main merge and stage-3 records creation; this is local internal regression evidence, not exact-head GitHub proof.",
+    "observed_at": "2026-08-26T13:24:18.531Z",
+    "command": "pytest -q",
+    "claim_boundary": "Internal regression evidence only; PR #318 exact-head CI remains independently required."
   },
   "in_flight_integrations": {
     "held_out_context_routing": {
@@ -3532,7 +3534,7 @@
   },
   "publication_effect": {
     "schema_version": 1,
-    "status": "stage3_precommitted_before_remote_effect",
+    "status": "stage3_exact_head_ci_in_progress_after_local_regression_success",
     "idempotency_key": "o-work-publication:g21:51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e:unit-b2698e1aa6dad8f3da3d783a:b7b588f0b25e3543193fb21684c4643c847fd806e7ce73b83f11d50ff69d0482:continuation-and-lifecycle-v1",
     "generation": 21,
     "fence_token_digest": "51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e",
@@ -3575,7 +3577,7 @@
     },
     "stage3": {
       "idempotency_key": "o-work-publication-execute-records:g21:51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e:invoke-ff60e9306310c18395b20938:tree-3146b8a892946a0f9550e12ad0edd7ad56b1c65e:v1",
-      "status": "corrected_precommit_before_remote_ref_dispatch",
+      "status": "exact_head_ci_in_progress_after_local_regression_success",
       "branch": "work/recovery-gen21-publication-execute-records-v1",
       "base_sha": "a605c7bbdad9205e02f7843263c695c7405b03d4",
       "local_reference_head_sha": "b350f90b14165dd2c62a6d94d6f4e275d77d85d8",
@@ -3603,13 +3605,66 @@
       "claim_boundary": "Protocol-required records for the already-submitted publication Execute and its native Root transition only. This is not external production evidence, AGI evidence, or user-objective completion evidence.",
       "prepared_at": "2026-08-26T13:09:31.254Z",
       "corrected_at": "2026-08-26T13:11:46.605Z",
-      "correction_reason": "The runtime has read-only git transport credentials. The connector-created commit has the exact precommitted tree and parent but a connector-authored commit identity; no branch/ref or PR was dispatched before this correction."
+      "correction_reason": "The runtime has read-only git transport credentials. The connector-created commit has the exact precommitted tree and parent but a connector-authored commit identity; no branch/ref or PR was dispatched before this correction.",
+      "pull_request": 318,
+      "exact_head_workflow_runs": [
+        32972879530,
+        32972879540
+      ],
+      "exact_head_ci": {
+        "test_run": {
+          "id": 32972879530,
+          "workflow_id": 335420036,
+          "status": "in_progress",
+          "conclusion": null
+        },
+        "directive_preflight": {
+          "id": 32972879540,
+          "workflow_id": 342801498,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        "shard_jobs": [
+          {
+            "id": 98190515458,
+            "name": "pytest shard 2 of 4",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "id": 98190515591,
+            "name": "pytest shard 3 of 4",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "id": 98190515656,
+            "name": "pytest shard 0 of 4",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "id": 98190515689,
+            "name": "pytest shard 1 of 4",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      "local_combined_regression": {
+        "result": "750 passed",
+        "duration_seconds": 5015.98,
+        "command": "pytest -q",
+        "observed_at": "2026-08-26T13:24:18.531Z",
+        "exact_head_substitute": false
+      },
+      "ci_observed_at": "2026-08-26T13:24:18.531Z"
     },
     "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
     "frozen_response_digest": "d16aebc1469512d1c28f4d0131cdb0b7ca22276fdd19260ec454206610dadee1",
     "request_recreated": false,
     "created_at": "2026-08-26T11:58:10.000Z",
-    "updated_at": "2026-08-26T13:11:46.605Z"
+    "updated_at": "2026-08-26T13:24:18.531Z"
   },
   "refire": {
     "schema_version": 1,
