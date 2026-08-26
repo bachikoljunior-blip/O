@@ -8,15 +8,15 @@
   "lease_generation": 19,
   "fence_token": "work-recovery-fence-v19-4bf549962d183cfddc51f0be39beff858aac2fc356593d1c6d2c23f2bb6bb9b3",
   "started_at": "2026-08-26T03:49:11.916Z",
-  "heartbeat_at": "2026-08-26T03:49:11.916Z",
-  "last_progress_at": "2026-08-26T03:49:11.916Z",
+  "heartbeat_at": "2026-08-26T03:49:42.451Z",
+  "last_progress_at": "2026-08-26T03:49:42.451Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
     "instruction": "Continue generation 19 from the exact generation-18 checkpoint after authoritative user-input revision 25 granted permission. Preserve and answer only frozen Execute invoke-248450c08547af10470c50e6. Record six immutable isolated child responses before any private rubric reveal, then verify commitments and perform deterministic judgment. Preserve existing claim boundaries and idempotency.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Phase-one acquisition must receive exact remote readback before phase-two finalization and local authorize_work_mode_recovery validation."
+    "note": "Generation 19 phase-two finalization records exact phase-one acquisition commit/blob readback; local authorize_work_mode_recovery validation remains required before native Work mutation."
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
@@ -223,7 +223,7 @@
     }
   },
   "parallel_execution_coordination": {
-    "primary": "Generation 19 phase-one recovery acquisition is the sole owner candidate. Do not execute the frozen response until phase-two finalization, exact remote readback, and local recovery authorization validation succeed.",
+    "primary": "Generation 19 is the sole owner after two-phase acquisition finalization and exact remote readback. Preserve and execute only frozen Work-exclusive Execute invoke-248450c08547af10470c50e6 after local authorization validation.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered.",
     "pending_native_execute": "Execute invoke-248450c08547af10470c50e6 remains the only current immutable semantic request. Revision 25 authorizes its exact six-child-response/private-reveal unit; it still has no response or result at acquisition.",
     "predecessor": "Generation 18 checkpoint c1558a13c7b272fbd47ba0c7e57c8e3b7241ae70 and frozen continuation cbb8619f4d7dd6a12fed740fe80764c3c971c71e are the sole continuation sources."
@@ -282,12 +282,12 @@
   },
   "remote_persistence": {
     "published_on_main": true,
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "expected_blob_sha": "a7b5d451ec22b0ba06c1c38c1f7260b1286a345a",
-    "result_commit_sha": null,
-    "result_blob_sha": null,
-    "finalization_expected_blob_sha": null,
-    "note": "Generation 19 phase-one acquisition pending remote readback and finalization."
+    "result_commit_sha": "1eb9a52c63e2892ec05dc925289870d337a4c91d",
+    "result_blob_sha": "8a5c779cd50c6e025679d7242b35ef137e9ef893",
+    "finalization_expected_blob_sha": "8a5c779cd50c6e025679d7242b35ef137e9ef893",
+    "note": "Generation 19 two-phase acquisition proof finalized from exact remote readback; finalization commit/blob readback and local authorization validation follow."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -307,11 +307,11 @@
     "note": "Revision 24 corrects revision 23 as not applicable to primary O. Preserve and resume the existing revision-22-bound Execute without a new Work handoff or routing detour. The paired-route harness remains valid support only if freshly revalidated against that frozen Execute after the correction is main-durable. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, publish unapproved generated records, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
   },
   "expected_blob_sha": "a7b5d451ec22b0ba06c1c38c1f7260b1286a345a",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
+  "result_commit_sha": "1eb9a52c63e2892ec05dc925289870d337a4c91d",
+  "result_blob_sha": "8a5c779cd50c6e025679d7242b35ef137e9ef893",
+  "finalize_expected_blob_sha": "8a5c779cd50c6e025679d7242b35ef137e9ef893",
+  "readback_of_commit_sha": "1eb9a52c63e2892ec05dc925289870d337a4c91d",
+  "verified_remote_readback": true,
   "acquisition_phase": "authorized_running",
   "recovery_observation": {
     "observed_at": "2026-08-26T03:49:11.916Z",
