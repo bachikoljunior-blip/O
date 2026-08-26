@@ -8,8 +8,8 @@
   "lease_generation": 21,
   "fence_token": "work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de",
   "started_at": "2026-08-26T11:22:46.061Z",
-  "heartbeat_at": "2026-08-26T14:33:20.942181Z",
-  "last_progress_at": "2026-08-26T14:33:20.942181Z",
+  "heartbeat_at": "2026-08-26T14:52:02.625487Z",
+  "last_progress_at": "2026-08-26T14:52:02.625487Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -24,10 +24,10 @@
   "source_main_sha": "11051ccdfaa63844bf47c0f4a8b7091f144d08aa",
   "working_branch": "main",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "root_route_recovery_intervention_audit_consolidate",
+  "active_component": "root_route_recovery_intervention_audit_publication_blocked",
   "active_unit_id": "unit-331ced957fab6261189dba57",
   "recovery_intervention_audit_progress": {
-    "status": "task_evaluate_pass_consolidate_pending",
+    "status": "publication_execute_frozen_push_blocked",
     "unit_id": "unit-331ced957fab6261189dba57",
     "execute_invocation_id": "invoke-78c850f8b88fe970e5bf3394",
     "execute_request_digest": "8061af0d9fbe953f4dfc656d461e44e139324dd49e1fcf68e1ce65c0f8b0637d",
@@ -41,13 +41,13 @@
     "execute_reported_audit_result_digest": "769a2c8e47f7c6ea942f4b152c415d6c2b4129129df4d70db720e01e56374d52",
     "current_repaired_audit_result_digest": "2c0e744016c9bdaa8d2efbb067f170b84c430bdef8caa684de470c2951c311f0",
     "post_execute_correction": "The initial result bound validation to the mutable live WORK_EXECUTION_STATE path. Before Task Evaluate or publication, the exact 11051cc state blob was copied byte-for-byte to an immutable evidence path and the result was regenerated. Event classifications, metrics, verdict qualification, and claim boundary did not change; Task Evaluate must explicitly adjudicate the changed source binding and digest.",
-    "local_snapshot_revision": 78,
-    "local_native_phase": "consolidate_pending",
+    "local_snapshot_revision": 88,
+    "local_native_phase": "execute_pending_external_effect",
     "local_validation": "Corrected artifact reproduced; all four SHA-256 and Git blob bindings matched; 10 focused tests passed; Python compile and git diff check passed",
     "durability": "local_in_flight_records_are_not_authoritative_until_isolated_exact_head_publication",
     "remote_fallback": "The main-durable revision-67 root_pending continuation remains authoritative if the in-flight workspace disappears.",
-    "next_action": "Consolidate and Learn the adjudicated corrected audit without rewriting the Execute response; then publish all reviewed artifacts and protocol-required records through unchanged exact-head CI, expected-head merge, and exact main readback.",
-    "updated_at": "2026-08-26T14:33:20.942181Z"
+    "next_action": "Preserve frozen publication Execute invoke-2602f966d842137290e5e2c5 unanswered. Retry the exact generation/fence/continuation-bound publication only after explicit user approval covers publishing the newly generated recovery-audit implementation and execution-record payload to GitHub; do not workaround or duplicate the branch.",
+    "updated_at": "2026-08-26T14:52:02.625487Z"
   },
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -3587,5 +3587,30 @@
       "unintended_request_answered": false,
       "authority_mutated_by_unintended_request": false
     }
+  },
+  "recovery_intervention_audit_publication": {
+    "status": "blocked_explicit_user_approval_required",
+    "observed_at": "2026-08-26T14:52:02.625487Z",
+    "publication_execute_unit_id": "unit-gen21-recovery-audit-publication-v1",
+    "publication_execute_invocation_id": "invoke-2602f966d842137290e5e2c5",
+    "publication_execute_request_digest": "a17ce7bf4c43a72c6f5a715236d19660ee3f99c7c7c994ff7f3c12a2db5a10ec",
+    "publication_execute_response_status": "not_created_or_submitted",
+    "idempotency_key": "o-work-publication:g21:51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e:unit-gen21-recovery-audit-publication-v1:a17ce7bf4c43a72c6f5a715236d19660ee3f99c7c7c994ff7f3c12a2db5a10ec:audit-correction-publication-v1",
+    "attempted_effect": "push_exact_precommitted_commit_to_new_non_force_branch",
+    "local_candidate_commit": "bfc13c73f03802ef454c3f96be5edd19171e4820",
+    "local_candidate_tree": "9246dcf25ff1c65f856b31a30f0b691ba6e766a9",
+    "reviewed_path_count": 105,
+    "branch": "work/recovery-gen21-intervention-audit-v1",
+    "remote_branch_created": false,
+    "pull_request_created": false,
+    "exact_head_workflow_started": false,
+    "blocker_kind": "github_write_safety_review_requires_payload_specific_user_approval",
+    "blocker": "The GitHub push was rejected because revision 25 authorizes publication for the earlier frozen six-child unit, but does not explicitly cover the newly generated recovery-audit implementation and execution records. GitHub is not trusted by default for this additional payload.",
+    "retry_condition": "A user-authored instruction explicitly approves publishing the newly generated recovery-audit implementation and execution records to bachikoljunior-blip/O on GitHub after being informed of the risk.",
+    "workaround_attempted": false,
+    "durability": "candidate commit remains local and non-authoritative; latest remote main is the authoritative fallback",
+    "source_main_sha": "1e7522e8c334ca4aaf664b926579de1465b4a466",
+    "same_owner_liveness_event": "fresh failed publication tool activity plus durable exact blocker checkpoint",
+    "claim_boundary": "This records a publication blocker and exact continuation only. It is not publication success, exact-head CI, merge/readback, user-objective completion, external-production evidence, AGI evidence, or a broader reliability claim."
   }
 }
