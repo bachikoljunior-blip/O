@@ -21,10 +21,14 @@ def _load(path: str) -> dict:
 
 
 def _inputs() -> tuple[dict, dict, dict, dict]:
+    state = _load("agi/WORK_EXECUTION_STATE.json")
+    if state.get("status") in {"checkpointed", "interrupted", "released"}:
+        state = deepcopy(state)
+        state["status"] = "running"
     return (
         _load("agi/USER_INPUT_INBOX.json"),
         _load("agi/USER_DIRECTIVE_EVENTS.json"),
-        _load("agi/WORK_EXECUTION_STATE.json"),
+        state,
         _load("agi/WORK_STRATEGY.json"),
     )
 
@@ -93,6 +97,14 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
     )
     assert "r24-revision5-constraint-authority" in effective
     assert "r24-recovery-context-targeting" in effective
+    assert effective["r25-resume-frozen-revision22-execute"]["value"] == (
+        "authorize_exact_frozen_revision22_execute_without_recreate_duplicate_or_discard"
+    )
+    assert effective["r25-protocol-record-publication-permission"]["value"] == (
+        "authorize_nonsecret_protocol_records_in_write_once_six_before_reveal_then_deterministic_judgment_order"
+    )
+    assert "r25-preserve-safety-and-claim-boundaries" in effective
+    assert "r25-continuous-lifecycle-not-narrow-completion" in effective
     assert "r23-least-work-routing" not in effective
     assert "r23-retain-smartphone-and-account-constraints" not in effective
     assert "r23-preserve-frozen-work-contracts" not in effective
