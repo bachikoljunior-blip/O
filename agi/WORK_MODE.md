@@ -18,6 +18,14 @@ The model is connected to O through the checked-in `continual work-start`, `work
 
 The primary run may stop normally only when the user's actual upper-level objective is truthfully satisfied or the user explicitly stops it. The repository-authored strict independent external production evidence gate remains available as conservative verification machinery, but it is not the user's completion criterion or the monitor-stop condition. If the platform or process forces an end first, persist the exact continuation and mark the lease `interrupted` or `checkpointed`; that is recovery state, not completion.
 
+## Standing continuous execution authorization
+
+`agi/CONTINUOUS_EXECUTION_AUTHORIZATION.json` is the durable standing user authorization for primary O and successor recoveries. Ordinary safe research, implementation, evaluation, protocol-required non-secret record generation, repository publication, CI/PR/merge handling, checkpoint recovery, and follow-on work do not require a fresh user approval before execution. Do not create a permission-wait checkpoint for such work.
+
+A checkpoint is only a durable handoff when the platform or process must end; it is never a request for permission to continue. While the upper-level objective remains unmet, a successor watchdog generation should recover the exact continuation under the existing generation+1 CAS, fence, single-writer, idempotency, executor-binding, and readback rules without waiting for another user message.
+
+Hard platform or safety constraints remain in force. Secrets, credentials, and hidden chain-of-thought remain forbidden. Material paid spend or an irreducibly account-holder-only operation may still require the user, but that blocker is local to that action: persist it if needed and continue the best safe non-conflicting work instead of stopping the primary project. No approval requirement may be invented merely because an action creates ordinary protocol-required model output, evaluation records, GitHub commits, branches, PRs, CI runs, merges, readbacks, or durable O state.
+
 ## Expected-time strategy
 
 `agi/WORK_STRATEGY.json` is the durable, falsifiable strategy contract. Root selects work by expected reduction in defensible elapsed time to real-world AGI, probability of producing decision-changing evidence, information value, dependency latency, reuse, and protected-regression risk. O and any repository-authored gate are replaceable means, not the terminal objective. Root may change, replace, or abandon O when a scoped comparison favors a materially different safe route. Held-out mechanical evidence and genuinely independent production evidence outrank self-evaluation and architecture claims.
