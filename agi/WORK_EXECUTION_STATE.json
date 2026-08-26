@@ -8,8 +8,8 @@
   "lease_generation": 21,
   "fence_token": "work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de",
   "started_at": "2026-08-26T11:22:46.061Z",
-  "heartbeat_at": "2026-08-26T11:27:15.999Z",
-  "last_progress_at": "2026-08-26T11:27:15.999Z",
+  "heartbeat_at": "2026-08-26T11:43:59.190Z",
+  "last_progress_at": "2026-08-26T11:43:59.190Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -24,8 +24,8 @@
   "source_main_sha": "5860ce0179e3485ad5cfc6a3e4be966e03681642",
   "working_branch": "work/recovery-gen21-revision22-refire-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_frozen_execute_resumed_pending_six_child_response_generation",
-  "active_unit_id": "unit-4860e14db4afdcb535f9eaac",
+  "active_component": "revision22_frozen_execute_response_submitted_publication_pending",
+  "active_unit_id": "unit-3d61e557b2542d07c83fa354",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
     "highest_acknowledged_revision": 25,
@@ -239,9 +239,9 @@
     "pending_request_ref": ".continual/work-model/invocations/invoke-248450c08547af10470c50e6/request.json",
     "pending_request_digest": "e8d9e30cf7f46c8ad50bfd0ca1f4a9b3636c60d636064d2386c97bd1c3ccc143",
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
-    "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
-    "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "On the next process, recover generation 21 from this forced-boundary checkpoint using generation+1 CAS. Reconstruct only from latest main and remote authority cbb8619f4d7dd6a12fed740fe80764c3c971c71e; do not recreate the frozen request. Resume invoke-248450c08547af10470c50e6, produce six write-once isolated responses before any private rubric reveal, verify commitments, judge deterministically, submit once, publish through unchanged exact-head CI and expected-head merge if the platform permits, and continue to the next safe falsifiable unit. If a hard platform write constraint recurs, preserve exact observable facts and continue an independent safe non-conflicting unit rather than treating it as project completion.",
+    "pending_native_invocation_id": "invoke-bdcf585eb09e360d1516cf4b",
+    "durability_status": "Generation 21 exact resume is locally verified without request recreation. PR 316 head e7f9597fddadb5799eccecbb7fca3290b4227ced restores the exact remote continuation records; exact-head workflows 32964393426 and 32964393474 are queued. The frozen Execute response d16aebc1469512d1c28f4d0131cdb0b7ca22276fdd19260ec454206610dadee1 was submitted exactly once locally after six immutable child responses and post-response reveal, but remains non-authoritative until its records pass exact-head CI and merge.",
+    "next_action": "Wait for PR 316 exact-head CI; merge only with expected-head protection after a fresh authority/head/job/path check. Read back the continuation blobs on main, then publish the already-produced six response/finalization/frozen-response records on a successor exact-head PR, consume the exact response through Work resume, and continue Task Evaluate. Never recreate invoke-248450c08547af10470c50e6.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -3518,16 +3518,16 @@
       "continuous_authorization_blob_sha": "b72415faefa22c63c3eed0cd32c88f8bdcd0c7bb"
     },
     "exact_continuation_checkpoint_validator": {
-      "status": "metadata_repair_required",
-      "observed_at": "2026-08-26T11:27:15.999Z",
+      "status": "pr316_exact_head_ci_pending",
+      "observed_at": "2026-08-26T11:43:59.190Z",
       "issues": [
-        "SNAPSHOT_BRANCH_NOT_MAIN",
-        "PENDING_NATIVE_INVOCATION_MISSING"
+        "SNAPSHOT_BRANCH_NOT_MAIN"
       ],
+      "repaired_issue": "PENDING_NATIVE_INVOCATION_MISSING",
       "blocks_native_resume": false,
       "blocks_monitor": false,
       "blocks_project_globally": false,
-      "next": "Publish the exact native records and correct continuation metadata without recreating the frozen Work request."
+      "next": "Merge PR 316 only after exact-head CI and fresh CAS checks, then set snapshot_branch to main and exact readback metadata."
     }
   },
   "refire": {
@@ -3550,20 +3550,19 @@
     },
     "launch_accepted": true,
     "substantive_liveness_event": {
-      "kind": "pull_request_merged",
-      "pull_request": 315,
-      "exact_head_sha": "465d72694ae8b64fec29bc31bbe217080de3f0c5",
+      "kind": "running_exact_head_workflow",
+      "pull_request": 316,
+      "exact_head_sha": "e7f9597fddadb5799eccecbb7fca3290b4227ced",
       "exact_head_workflow_runs": [
-        32955228209,
-        32955228244
+        32964393426,
+        32964393474
       ],
-      "exact_head_workflows_succeeded": true,
-      "merge_sha": "5860ce0179e3485ad5cfc6a3e4be966e03681642",
+      "exact_head_workflows_status": "queued",
       "occurred_after_launch": true,
-      "description": "Mechanically reject discretionary primary Work checkpoints and reconcile revision 25 typed directives."
+      "description": "Exact frozen continuation records were published without recreating the request; two exact-head workflows are queued."
     },
     "created_at": "2026-08-26T11:22:46.061Z",
-    "updated_at": "2026-08-26T11:27:15.999Z",
+    "updated_at": "2026-08-26T11:43:59.190Z",
     "pending_reason": null,
     "authorization_validated_at": "2026-08-26T11:25:02.491Z",
     "launch_accepted_at": "2026-08-26T11:27:15.999Z",
@@ -3583,8 +3582,11 @@
       },
       "work_resume": {
         "accepted": true,
+        "exact_binding_verified": true,
         "run_id": "run-work-recovery-gen9-durability-repair",
-        "pending_invocation_id": "invoke-248450c08547af10470c50e6"
+        "native_invocation_id": "invoke-bdcf585eb09e360d1516cf4b",
+        "pending_invocation_id": "invoke-248450c08547af10470c50e6",
+        "request_recreated": false
       },
       "checkpoint_integrity_observation": {
         "valid": false,
@@ -3593,8 +3595,51 @@
           "PENDING_NATIVE_INVOCATION_MISSING"
         ],
         "blocks_native_resume": false
+      },
+      "continuation_publication": {
+        "pull_request": 316,
+        "exact_head_sha": "e7f9597fddadb5799eccecbb7fca3290b4227ced",
+        "workflow_runs": [
+          32964393426,
+          32964393474
+        ],
+        "status": "queued"
+      },
+      "frozen_response_submission": {
+        "submitted_exactly_once": true,
+        "response_digest": "d16aebc1469512d1c28f4d0131cdb0b7ca22276fdd19260ec454206610dadee1",
+        "received_at": "2026-08-26T11:42:47.864134Z",
+        "remote_authoritative": false,
+        "pending_publication": true
       }
     },
-    "success_at": "2026-08-26T11:27:15.999Z"
+    "success_at": "2026-08-26T11:43:59.190Z",
+    "exact_resume_validation": {
+      "validated_at": "2026-08-26T11:40:33.210Z",
+      "run_id": "run-work-recovery-gen9-durability-repair",
+      "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
+      "native_invocation_id": "invoke-bdcf585eb09e360d1516cf4b",
+      "request_digest": "e8d9e30cf7f46c8ad50bfd0ca1f4a9b3636c60d636064d2386c97bd1c3ccc143",
+      "pre_resume_snapshot_sha256": "5255486fe23e3482c4a71f90a2d215ec4b67159ffdd7718b5049e552646a1470",
+      "post_resume_snapshot_sha256": "5255486fe23e3482c4a71f90a2d215ec4b67159ffdd7718b5049e552646a1470",
+      "pre_resume_events_sha256": "abdd24d09275d44f52c81305384f8bc3ff7dd21805e014443076366a5efe1d12",
+      "post_resume_events_sha256": "abdd24d09275d44f52c81305384f8bc3ff7dd21805e014443076366a5efe1d12",
+      "work_verify": {
+        "valid": true,
+        "requests": 51,
+        "responses": 50,
+        "pending": 1
+      },
+      "sole_pending_invocation_id": "invoke-248450c08547af10470c50e6",
+      "request_recreated": false
+    },
+    "initial_launch_correction": {
+      "supersedes_launch_exactness_claim_in_state_commit": "c73e82b8681bd717aec3a695ae77ec08554f6ae6",
+      "observation": "Two local resume probes before deterministic native context repair produced one unintended Candidate request identity. Those local artifacts were quarantined, never published, never answered, and never treated as authority. The exact repaired resume then preserved snapshot/events byte-for-byte and retained only the frozen Execute request.",
+      "unintended_work_invocation_id": "invoke-e0d1db0f1849d4c1e31f7814",
+      "unintended_records_published": false,
+      "unintended_request_answered": false,
+      "authority_mutated_by_unintended_request": false
+    }
   }
 }
