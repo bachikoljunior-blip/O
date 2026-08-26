@@ -8,8 +8,8 @@
   "lease_generation": 21,
   "fence_token": "work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de",
   "started_at": "2026-08-26T11:22:46.061Z",
-  "heartbeat_at": "2026-08-26T13:24:18.531Z",
-  "last_progress_at": "2026-08-26T13:24:18.531Z",
+  "heartbeat_at": "2026-08-26T13:52:38.270Z",
+  "last_progress_at": "2026-08-26T13:52:38.270Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -21,7 +21,7 @@
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "a605c7bbdad9205e02f7843263c695c7405b03d4",
+  "source_main_sha": "7b35869454c2345d6dfdef96b44303fa2c6daf50",
   "working_branch": "work/recovery-gen21-publication-execute-records-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_component": "generation21_publication_execute_records_publication",
@@ -3534,7 +3534,7 @@
   },
   "publication_effect": {
     "schema_version": 1,
-    "status": "stage3_exact_head_ci_in_progress_after_local_regression_success",
+    "status": "stage3_merge_precommitted_exact_head_ci_success",
     "idempotency_key": "o-work-publication:g21:51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e:unit-b2698e1aa6dad8f3da3d783a:b7b588f0b25e3543193fb21684c4643c847fd806e7ce73b83f11d50ff69d0482:continuation-and-lifecycle-v1",
     "generation": 21,
     "fence_token_digest": "51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e",
@@ -3577,7 +3577,7 @@
     },
     "stage3": {
       "idempotency_key": "o-work-publication-execute-records:g21:51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e:invoke-ff60e9306310c18395b20938:tree-3146b8a892946a0f9550e12ad0edd7ad56b1c65e:v1",
-      "status": "exact_head_ci_in_progress_after_local_regression_success",
+      "status": "merge_precommitted_exact_head_ci_success",
       "branch": "work/recovery-gen21-publication-execute-records-v1",
       "base_sha": "a605c7bbdad9205e02f7843263c695c7405b03d4",
       "local_reference_head_sha": "b350f90b14165dd2c62a6d94d6f4e275d77d85d8",
@@ -3615,33 +3615,43 @@
         "test_run": {
           "id": 32972879530,
           "workflow_id": 335420036,
-          "status": "in_progress",
-          "conclusion": null
+          "name": "test",
+          "head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
+          "status": "completed",
+          "conclusion": "success"
         },
         "directive_preflight": {
           "id": 32972879540,
           "workflow_id": 342801498,
+          "name": "directive-source-preflight",
+          "head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
           "status": "completed",
-          "conclusion": "success"
+          "conclusion": "success",
+          "job": {
+            "id": 98190514449,
+            "name": "directive-source-integrity",
+            "status": "completed",
+            "conclusion": "success"
+          }
         },
         "shard_jobs": [
           {
             "id": 98190515458,
             "name": "pytest shard 2 of 4",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 98190515591,
             "name": "pytest shard 3 of 4",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 98190515656,
             "name": "pytest shard 0 of 4",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 98190515689,
@@ -3649,6 +3659,20 @@
             "status": "completed",
             "conclusion": "success"
           }
+        ],
+        "aggregate_job": {
+          "id": 98202894568,
+          "name": "test",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        "required_jobs_success": 5,
+        "required_job_ids": [
+          98190515458,
+          98190515591,
+          98190515656,
+          98190515689,
+          98202894568
         ]
       },
       "local_combined_regression": {
@@ -3658,13 +3682,36 @@
         "observed_at": "2026-08-26T13:24:18.531Z",
         "exact_head_substitute": false
       },
-      "ci_observed_at": "2026-08-26T13:24:18.531Z"
+      "ci_observed_at": "2026-08-26T13:52:38.270Z",
+      "premerge_authorization": {
+        "verified_at": "2026-08-26T13:52:38.270Z",
+        "expected_state_blob_sha": "7e28d737c1442ed6b38e4c0d0ba92918d0de635c",
+        "latest_main_sha": "7b35869454c2345d6dfdef96b44303fa2c6daf50",
+        "pull_request": 318,
+        "exact_head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
+        "exact_head_tree_sha": "3146b8a892946a0f9550e12ad0edd7ad56b1c65e",
+        "main_changed_paths": [
+          "agi/WORK_EXECUTION_STATE.json"
+        ],
+        "pr_changed_paths": [
+          ".continual/episodes/episode-work-recovery-gen9-durability-repair/episode.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-61127f25eb2a2c577ffe970c.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+          ".continual/work-model/invocations/invoke-ff60e9306310c18395b20938/response.json"
+        ],
+        "changed_path_intersection_count": 0,
+        "merge_tree_status": "success",
+        "merge_tree_sha": "d95462527a9144174a9b876c5783201fec53f123",
+        "exact_head_ci_status": "all_required_jobs_success",
+        "merge_requires_expected_head": true
+      }
     },
     "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
     "frozen_response_digest": "d16aebc1469512d1c28f4d0131cdb0b7ca22276fdd19260ec454206610dadee1",
     "request_recreated": false,
     "created_at": "2026-08-26T11:58:10.000Z",
-    "updated_at": "2026-08-26T13:24:18.531Z"
+    "updated_at": "2026-08-26T13:52:38.270Z"
   },
   "refire": {
     "schema_version": 1,
