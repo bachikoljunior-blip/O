@@ -8,8 +8,8 @@
   "lease_generation": 22,
   "fence_token": "work-recovery-fence-v22-45f0fd11afbd944c3c49bd370d0a5739894734581e2ad7b235250a1286211256",
   "started_at": "2026-08-26T21:33:31.746Z",
-  "heartbeat_at": "2026-08-26T21:33:31.746Z",
-  "last_progress_at": "2026-08-26T21:33:31.746Z",
+  "heartbeat_at": "2026-08-26T21:35:04.000Z",
+  "last_progress_at": "2026-08-26T21:35:04.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -25,7 +25,7 @@
   "source_main_sha": "f859c0f2a86cb9f5d57574f94e6c9e6e7086013f",
   "working_branch": "work/recovery-gen22-recovery-audit-reconstruction-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "generation22_refire_phase_one_acquired_pending_readback",
+  "active_component": "generation22_refire_two_phase_authorized_pending_native_launch",
   "active_unit_id": "unit-b2698e1aa6dad8f3da3d783a",
   "recovery_intervention_audit_progress": {
     "status": "revision26_authorized_remote_reconstruction_required",
@@ -308,12 +308,12 @@
   },
   "remote_persistence": {
     "published_on_main": true,
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "expected_blob_sha": "fc15014487f41a0b98f57dcad055b0d055974de8",
-    "result_commit_sha": null,
-    "result_blob_sha": null,
-    "finalization_expected_blob_sha": null,
-    "note": "Generation 22 phase-one acquisition pending exact remote readback and phase-two finalization. State-only mutation is not refire success."
+    "result_commit_sha": "e81e0b65b1f862174e42329f28499b64e9d0ac5d",
+    "result_blob_sha": "0bacf5ed28aae34e64e17472430284ebda0f41d6",
+    "finalization_expected_blob_sha": "0bacf5ed28aae34e64e17472430284ebda0f41d6",
+    "note": "Generation 22 phase-one acquisition commit/blob exactly read back; phase-two finalization submitted. Native launch remains required."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -335,12 +335,12 @@
     "note": "Revision 24 remains a targeting correction for a separate automation. The revision-22 frozen invocation was resumed without request recreation, answered once, published through PRs 316-318, and is main-durable. Native snapshot revision 67 is root_pending; refresh mandatory source receipts before the next Root semantic freeze."
   },
   "expected_blob_sha": "fc15014487f41a0b98f57dcad055b0d055974de8",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
-  "acquisition_phase": "phase_one_acquired_pending_remote_readback",
+  "result_commit_sha": "e81e0b65b1f862174e42329f28499b64e9d0ac5d",
+  "result_blob_sha": "0bacf5ed28aae34e64e17472430284ebda0f41d6",
+  "finalize_expected_blob_sha": "0bacf5ed28aae34e64e17472430284ebda0f41d6",
+  "readback_of_commit_sha": "e81e0b65b1f862174e42329f28499b64e9d0ac5d",
+  "verified_remote_readback": true,
+  "acquisition_phase": "two_phase_finalization_submitted_pending_exact_readback",
   "recovery_observation": {
     "observed_at": "2026-08-26T21:33:31.746Z",
     "predecessor_execution_id": "work-recovery-20260826T112246061Z-0cf9bce76a217ac818b03612850e9dfc",
@@ -3478,7 +3478,7 @@
   },
   "refire": {
     "schema_version": 1,
-    "status": "acquisition_in_progress",
+    "status": "refire_pending",
     "idempotency_key": "o-work-refire:g22:c4c692a09256832c6df2824bdda51b1d0f90ac814b60b7f6bd43d6b100c96e31:f859c0f2a86cb9f5d57574f94e6c9e6e7086013f:run-work-recovery-gen9-durability-repair:revision67-root-v1",
     "attempt_id": "work-recovery-20260826T213331747Z-e52ebacf244e3612dc86f26b692dac27",
     "target_generation": 22,
@@ -3500,7 +3500,8 @@
     "launch_accepted": false,
     "substantive_liveness_event": null,
     "created_at": "2026-08-26T21:33:31.746Z",
-    "updated_at": "2026-08-26T21:33:31.746Z"
+    "updated_at": "2026-08-26T21:35:04.000Z",
+    "pending_reason": "phase-two finalization requires exact remote readback and authorize_work_mode_recovery validation before native launch"
   },
   "recovery_intervention_audit_publication": {
     "status": "revision26_authorized_prior_local_candidate_lost_reconstruction_pending",
