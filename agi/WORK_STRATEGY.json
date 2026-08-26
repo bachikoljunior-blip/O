@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "active_falsifiable_policy",
-  "source_user_input_revision": 25,
+  "source_user_input_revision": 28,
   "objective": "Minimize defensible expected elapsed time until real-world AGI is actually achieved, without lowering the user's achievement standard or overstating evidence.",
   "strategy_is_assumed_correct": false,
   "system_choice": {
@@ -63,10 +63,20 @@
     "revision23_least_work_routing_applies_to_primary_o": false,
     "interrupt_valid_frozen_work_exclusive_invocation_for_routing_change": false,
     "frozen_revision22_protocol_publication_authorized": true,
-    "ordinary_protocol_records_require_additional_user_approval": false
+    "ordinary_protocol_records_require_additional_user_approval": false,
+    "routine_safe_nonsecret_work_requires_additional_user_approval": false,
+    "agent_discretion_is_stop_authority": false,
+    "local_blocker_is_project_completion": false,
+    "reviewed_recovery_audit_payload_publication_authorized": true,
+    "monitor_disable_authority": "explicit_user_instruction_only",
+    "start_of_run_continuity_preflight_required": true,
+    "repair_discretionary_stop_before_unrelated_work": true,
+    "preflight_repair_report_or_checkpoint_is_completion": false,
+    "eliminate_discretionary_stop_cause_before_resume": true,
+    "resume_without_validated_causal_remediation": false
   },
   "context_management": {
-    "source_user_input_revision": 25,
+    "source_user_input_revision": 28,
     "decision_authority": "O Engine owns the observation ledger, source clocks, decision projections, inclusion and exclusion decisions, invalidation, and context-bound action authorization.",
     "raw_source_authority": "GitHub, CI, providers, files, and other source systems remain authoritative for the raw facts they produce; O stores provenance-bound references, projections, and receipts rather than copying everything.",
     "outer_session_role": "Execute O-requested observations and effects and return receipts. Untracked outer-session memory is not decision authority.",
@@ -83,7 +93,7 @@
     "effect_rule": "Bind plans and authorizations to the decision manifest, and recheck critical lease, revocation, and action-constraint sources immediately before dispatch.",
     "copy_all_raw_context": false,
     "architecture_path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
-    "current_stage": "revision25_frozen_execute_authorized_and_revision22_action_adherence_resume"
+    "current_stage": "revision28_causal_stop_remediation_guard_required_before_resume"
   },
   "research_feed": {
     "source_user_input_revision": 22,
@@ -181,7 +191,9 @@
     }
   ],
   "immediate_sequence": [
-    "Apply revision 25 to the exact frozen revision-22 Execute: preserve its identity, generate and persist the six write-once child responses before private reveal, perform deterministic judgment, publish through exact-head validation, and continue subsequent safe work without treating a narrow result as completion.",
+    "When the start-of-run audit detects a discretionary or unauthorized stop, identify and eliminate the mechanism that allowed it, install a durable recurrence guard, and pass execution- and policy-bound validation before resuming; a status reset, heartbeat, lease change, blocker restatement, or violation record alone is not repair.",
+    "At every run start, audit the latest authoritative prior termination, checkpoint, blocker, continuation, and liveness evidence for a discretionary or unauthorized stop; if found, record and repair it under the existing single-writer, fence, CAS, and idempotency contracts, then resume the exact continuation before unrelated work.",
+    "Apply revision 26 continuously: do not stop for agent discretion or ordinary approval waiting, reconstruct the authorized recovery-audit unit only from latest remote main because the old local candidate was lost, publish only a freshly reviewed non-secret payload through exact-head validation, and continue follow-on safe work without treating a narrow result or local blocker as completion.",
     "Retain the merged Root-only O-owned DecisionContextManifest as the protected context-control baseline.",
     "Retain the merged source-bound typed effective-directive compiler and partial-supersede preservation as the protected user-authority baseline.",
     "Retain the exact-head verified O-requested connected-GitHub observation receipt as the first bounded external-source ingestion baseline; extend it separately to decision-relevant CI, provider, tool, and research facts.",
@@ -203,5 +215,5 @@
     "strategy_success_is_external_evidence": false
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "updated_at": "2026-08-26T03:49:11.916Z"
+  "updated_at": "2026-08-26T22:49:08.725Z"
 }
