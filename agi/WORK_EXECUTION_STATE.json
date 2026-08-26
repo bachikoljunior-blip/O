@@ -8,8 +8,8 @@
   "lease_generation": 22,
   "fence_token": "work-recovery-fence-v22-45f0fd11afbd944c3c49bd370d0a5739894734581e2ad7b235250a1286211256",
   "started_at": "2026-08-26T21:33:31.746Z",
-  "heartbeat_at": "2026-08-26T21:35:44.819Z",
-  "last_progress_at": "2026-08-26T21:35:44.819Z",
+  "heartbeat_at": "2026-08-26T21:52:19.830Z",
+  "last_progress_at": "2026-08-26T21:52:19.830Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -25,10 +25,10 @@
   "source_main_sha": "f859c0f2a86cb9f5d57574f94e6c9e6e7086013f",
   "working_branch": "work/recovery-gen22-recovery-audit-reconstruction-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "generation22_refire_authorized_native_launch_pending",
+  "active_component": "generation22_refire_failed_revision26_directive_ledger_publication_safety_review",
   "active_unit_id": "unit-b2698e1aa6dad8f3da3d783a",
   "recovery_intervention_audit_progress": {
-    "status": "revision26_authorized_remote_reconstruction_required",
+    "status": "revision26_authorized_reconstruction_blocked_on_typed_directive_publication",
     "unit_id": "unit-331ced957fab6261189dba57",
     "execute_invocation_id": "invoke-78c850f8b88fe970e5bf3394",
     "execute_request_digest": "8061af0d9fbe953f4dfc656d461e44e139324dd49e1fcf68e1ce65c0f8b0637d",
@@ -47,8 +47,8 @@
     "local_validation": "Corrected artifact reproduced; all four SHA-256 and Git blob bindings matched; 10 focused tests passed; Python compile and git diff check passed",
     "durability": "local_in_flight_records_are_not_authoritative_until_isolated_exact_head_publication",
     "remote_fallback": "Latest remote main f859c0f2a86cb9f5d57574f94e6c9e6e7086013f with native revision-67 root_pending is authoritative.",
-    "next_action": "After generation-22 two-phase authorization, resume native Root once from main revision 67 and reconstruct the recovery-audit publication as a new generation/fence-bound unit. Do not recreate lost local-only invoke-2602f966d842137290e5bf3394 or claim its unpublished output.",
-    "updated_at": "2026-08-26T21:33:31.746Z",
+    "next_action": "Retry publication of the two reviewed revision-26 policy files only after the GitHub safety gate accepts payload-specific user authorization. Then obtain fresh Work-state and CI receipts, resume revision-67 Root exactly once, and reconstruct the audit from main. Do not recreate lost invoke-2602f966d842137290e5bf3394.",
+    "updated_at": "2026-08-26T21:52:19.830Z",
     "local_candidate_available": false,
     "prior_local_candidate_authoritative": false,
     "revision26_authorization": {
@@ -282,8 +282,8 @@
     "prior_frozen_request_recreated": false,
     "prior_frozen_response_submitted_exactly_once": true,
     "response_exists_on_authoritative_remote": true,
-    "durability_status": "Main-durable revision-67 root_pending verified with 60 requests, 60 responses, pending 0. The lost generation-21 local audit candidate is not authoritative.",
-    "next_action": "After generation-22 CAS authorization, invoke work-resume once with the current Work executor binding to freeze a fresh Root request, answer it exactly once, and continue the authorized recovery-audit reconstruction.",
+    "durability_status": "Main-durable revision-67 root_pending remains authoritative with 60/60 responses and pending 0. Three generation-22 resume attempts failed before semantic freeze, so no request was recreated or added.",
+    "next_action": "Publish the reviewed revision-26 typed policy files after payload-specific GitHub authorization is accepted; then renew Work/CI receipts and resume Root exactly once from revision 67.",
     "inbox_revision": 25,
     "inbox_blob_sha": "e3a26f0f7c0ca5793a670aaac23cff230969355a",
     "reconciled_at": "2026-08-26T13:55:34.467Z"
@@ -343,7 +343,7 @@
   "finalize_expected_blob_sha": "0bacf5ed28aae34e64e17472430284ebda0f41d6",
   "readback_of_commit_sha": "e81e0b65b1f862174e42329f28499b64e9d0ac5d",
   "verified_remote_readback": true,
-  "acquisition_phase": "authorized_running_pending_native_launch",
+  "acquisition_phase": "authorized_running_refire_failed_retry_required",
   "recovery_observation": {
     "observed_at": "2026-08-26T21:33:31.746Z",
     "predecessor_execution_id": "work-recovery-20260826T112246061Z-0cf9bce76a217ac818b03612850e9dfc",
@@ -2743,11 +2743,12 @@
     }
   },
   "termination": {
-    "kind": "not_terminated_refire_in_progress",
+    "kind": "refire_failed_retry_required_not_complete",
     "normal_completion": false,
     "user_objective_met": false,
     "explicit_user_stop": false,
-    "monitor_should_remain_enabled": true
+    "monitor_should_remain_enabled": true,
+    "retry_automatically": true
   },
   "revision22_public_inputs_publication_precommit": {
     "status": "merged_main_durable_exact_readback",
@@ -3292,6 +3293,19 @@
       "resolved_at": "2026-08-26T13:55:34.467Z",
       "resolution_pr": 318,
       "resolution_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da"
+    },
+    "revision26_typed_policy_publication": {
+      "status": "hard_github_write_safety_review_blocker",
+      "observed_at": "2026-08-26T21:52:19.830Z",
+      "scope": "individual_required_preflight_repair",
+      "blocks_native_root_resume": true,
+      "blocks_monitor": false,
+      "blocks_project_globally": false,
+      "local_commit_authoritative": false,
+      "remote_branch_created": false,
+      "workaround_attempted": false,
+      "exact_missing_authorization": "User-authored approval to publish agi/USER_DIRECTIVE_EVENTS.json and agi/WORK_STRATEGY.json revision-26 policy changes to bachikoljunior-blip/O on GitHub.",
+      "automatic_retry": true
     }
   },
   "publication_effect": {
@@ -3495,7 +3509,7 @@
   },
   "refire": {
     "schema_version": 1,
-    "status": "refire_pending",
+    "status": "refire_failed",
     "idempotency_key": "o-work-refire:g22:c4c692a09256832c6df2824bdda51b1d0f90ac814b60b7f6bd43d6b100c96e31:f859c0f2a86cb9f5d57574f94e6c9e6e7086013f:run-work-recovery-gen9-durability-repair:revision67-root-v1",
     "attempt_id": "work-recovery-20260826T213331747Z-e52ebacf244e3612dc86f26b692dac27",
     "target_generation": 22,
@@ -3515,14 +3529,82 @@
       "capability_proof": "latest remote main is cloned and PYTHONPATH=src python -m continual.cli work-verify/work-pending/work-resume/work-submit are executable"
     },
     "launch_accepted": false,
-    "substantive_liveness_event": null,
+    "substantive_liveness_event": {
+      "kind": "fresh_tool_activity_and_failed_native_launch_preflight",
+      "generation": 22,
+      "execution_id": "work-recovery-20260826T213331747Z-e52ebacf244e3612dc86f26b692dac27",
+      "occurred_after_launch": true,
+      "remote_state_readbacks": 3,
+      "connector_reads": [
+        "WORK_EXECUTION_STATE exact blob readback",
+        "PR 318 exact-head workflow and five required jobs"
+      ],
+      "native_resume_attempts": 3,
+      "semantic_request_created": false,
+      "claim_boundary": "This proves the recovered execution performed fresh tool and launch-preflight activity. It is not native semantic progress, audit reconstruction, publication, CI, merge, objective completion, external-production evidence, or AGI evidence."
+    },
     "created_at": "2026-08-26T21:33:31.746Z",
-    "updated_at": "2026-08-26T21:35:44.819Z",
-    "pending_reason": "authorization validated; invoke native work-resume exactly once from main revision-67 root_pending",
-    "authorization_validated_at": "2026-08-26T21:35:44.819Z"
+    "updated_at": "2026-08-26T21:52:19.830Z",
+    "pending_reason": null,
+    "authorization_validated_at": "2026-08-26T21:35:44.819Z",
+    "failure": {
+      "kind": "github_write_safety_review_requires_explicit_policy_state_approval",
+      "observed_at": "2026-08-26T21:52:19.830Z",
+      "attempted_effect": "publish agi/USER_DIRECTIVE_EVENTS.json and agi/WORK_STRATEGY.json on isolated branch work/recovery-gen22-revision26-directives-v1",
+      "local_commit": "0f4d73c",
+      "remote_branch_created": false,
+      "pull_request_created": false,
+      "workflow_started": false,
+      "exact_error": "The push was rejected because the publication authorization was judged specific to the reviewed generation-21 audit payload and not sufficiently explicit for separate internal directive and strategy files.",
+      "workaround_attempted": false,
+      "retry_automatic": true,
+      "exact_missing_authorization": "Explicit user approval to publish the revision-26 typed directive ledger and WORK_STRATEGY changes to bachikoljunior-blip/O on GitHub.",
+      "local_records_authoritative": false
+    },
+    "launch_attempts": [
+      {
+        "attempted_at": "2026-08-26T21:36:00Z",
+        "result": "failed_preflight",
+        "blocker": "mandatory Work source lacks a matching fresh authoritative observation",
+        "native_request_created": false
+      },
+      {
+        "attempted_at": "2026-08-26T21:41:00Z",
+        "result": "failed_preflight",
+        "blocker": "no matching fresh CI source observation receipt",
+        "native_request_created": false
+      },
+      {
+        "attempted_at": "2026-08-26T21:47:00Z",
+        "result": "failed_preflight",
+        "blocker": "effective directive compilation failed: directive ledger source revision mismatch",
+        "native_request_created": false
+      }
+    ],
+    "connector_observations": {
+      "work_source": {
+        "observation_id": "work-state-ecacf524fc6953bfaaa439ae",
+        "request_digest": "d9b1aec106bebc1b4983b5f62a805e08e7f6db19986cf6263d826f11287def06",
+        "receipt_digest": "4798a6efbeff25a77bdd810da7551c1eba122767fb9ed19c6944cdca823da4a3",
+        "source_commit": "c866a0ea3fd9620ae9eada699d84b6c170eea21b",
+        "source_blob": "224e3ccc7d980a15519ff7666009ef38c0ed5fc9",
+        "observed_at": "2026-08-26T21:46:59.585Z",
+        "locally_persisted_not_yet_remote": true
+      },
+      "ci_source": {
+        "observation_id": "ci-run-62a72967cadb8d02cb9591ec",
+        "request_digest": "19660eb81cb7d9c0963eaccbe5a1956dd1eb52f86935395bb738d6b6f63eb6fa",
+        "receipt_digest": "9c844df2f97bca482888de235329fbd1e42f81a3cbce236603515703a73240e2",
+        "workflow_run_id": 32972879530,
+        "exact_head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
+        "required_jobs_success": 5,
+        "observed_at": "2026-08-26T21:45:46.724Z",
+        "locally_persisted_not_yet_remote": true
+      }
+    }
   },
   "recovery_intervention_audit_publication": {
-    "status": "revision26_authorized_prior_local_candidate_lost_reconstruction_pending",
+    "status": "revision26_authorized_reconstruction_waiting_on_typed_policy_publication",
     "observed_at": "2026-08-26T14:52:02.625487Z",
     "publication_execute_unit_id": "unit-gen21-recovery-audit-publication-v1",
     "publication_execute_invocation_id": "invoke-2602f966d842137290e5e2c5",
@@ -3550,6 +3632,17 @@
     "authorization_inbox_blob_sha": "0ce3bd5048c1b653212033632985bb18d800abae",
     "prior_local_candidate_available": false,
     "prior_local_candidate_authoritative": false,
-    "updated_at": "2026-08-26T21:33:31.746Z"
+    "updated_at": "2026-08-26T21:52:19.830Z"
+  },
+  "post_acquisition_progress_contract": {
+    "generation": 22,
+    "concrete_effect_selected": "resume main-durable revision-67 Root and reconstruct the revision-26-authorized recovery audit",
+    "effect_attempted": true,
+    "state_only_success_claimed": false,
+    "native_request_created": false,
+    "new_exact_blocker_reached": true,
+    "new_exact_blocker_persisted": true,
+    "progress_contract_result": "attempted_effect_reached_new_exact_platform_blocker",
+    "observed_at": "2026-08-26T21:52:19.830Z"
   }
 }
