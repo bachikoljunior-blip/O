@@ -8,8 +8,8 @@
   "lease_generation": 22,
   "fence_token": "work-recovery-fence-v22-45f0fd11afbd944c3c49bd370d0a5739894734581e2ad7b235250a1286211256",
   "started_at": "2026-08-26T21:33:31.746Z",
-  "heartbeat_at": "2026-08-26T21:52:19.830Z",
-  "last_progress_at": "2026-08-26T21:52:19.830Z",
+  "heartbeat_at": "2026-08-26T23:42:57.090Z",
+  "last_progress_at": "2026-08-26T23:42:57.090Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -17,15 +17,15 @@
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
     "refire_contract_revision": 7,
-    "user_direction_revision": 26
+    "user_direction_revision": 28
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "f859c0f2a86cb9f5d57574f94e6c9e6e7086013f",
+  "source_main_sha": "f07141e9f2e8c8d6c564a048f76bcba02b3115ec",
   "working_branch": "work/recovery-gen22-recovery-audit-reconstruction-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "generation22_refire_failed_revision26_directive_ledger_publication_safety_review",
+  "active_component": "generation22_causal_stop_guard_merged_and_preflight_authorized_before_exact_continuation_resume",
   "active_unit_id": "unit-b2698e1aa6dad8f3da3d783a",
   "recovery_intervention_audit_progress": {
     "status": "revision26_authorized_reconstruction_blocked_on_typed_directive_publication",
@@ -61,19 +61,19 @@
   },
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
-    "highest_acknowledged_revision": 26,
-    "acknowledged_at": "2026-08-26T21:33:31.746Z",
-    "application_note": "Revision 26 removes discretionary and ordinary approval waits for safe non-secret O work and explicitly authorizes the reviewed generation-21 recovery-audit payload. The prior local 105-path candidate is unavailable and remains non-authoritative, so generation 22 reconstructs from latest remote main rather than pretending to reuse it. Hard platform/safety, secret, hidden-CoT, single-writer, fence/CAS, executor binding, immutability, idempotency, exact-head CI, readback, and truthful claim constraints remain.",
+    "highest_acknowledged_revision": 28,
+    "acknowledged_at": "2026-08-26T23:42:57.090Z",
+    "application_note": "Revisions 27 and 28 require every run to audit the previous termination path, eliminate any discretionary-stop mechanism rather than resetting state, validate the recurrence guard, and only then resume the exact continuation. Revision 26 still removes ordinary approval waiting for safe non-secret work. Hard platform/safety, secret, hidden-CoT, single-writer, fence/CAS, executor binding, immutability, idempotency, exact-head CI, readback, and truthful claim constraints remain.",
     "pending_revision": null,
     "pending_inbox_blob_sha": null,
     "pending_inbox_commit_sha": null,
     "last_acknowledged_input": {
-      "revision": 26,
-      "acknowledged_at": "2026-08-26T21:33:31.746Z",
-      "inbox_blob_sha": "0ce3bd5048c1b653212033632985bb18d800abae",
-      "inbox_commit_sha": "f859c0f2a86cb9f5d57574f94e6c9e6e7086013f",
-      "id": "user-standing-no-discretionary-stop-and-audit-publication-20260827-v26",
-      "interpretation": "Standing no-discretionary-stop/no-ordinary-approval direction plus payload-specific approval for the reviewed recovery-audit records, excluding secrets, hidden chain-of-thought, quarantined unintended records, caches, drafts, and unrelated data.",
+      "revision": 28,
+      "acknowledged_at": "2026-08-26T23:42:57.090Z",
+      "inbox_blob_sha": "a4a4abdd07b9d2dcf43e86521329134e17e68136",
+      "inbox_commit_sha": "f07141e9f2e8c8d6c564a048f76bcba02b3115ec",
+      "id": "user-clarification-eliminate-stop-cause-before-resume-20260827-v28",
+      "interpretation": "Identify and eliminate the prior discretionary-stop mechanism, install and validate a durable recurrence guard, and only then resume the exact continuation; a status or lease rewrite alone is not repair and cause elimination is not completion.",
       "effective": true
     }
   },
@@ -3509,7 +3509,7 @@
   },
   "refire": {
     "schema_version": 1,
-    "status": "refire_failed",
+    "status": "refire_pending_causal_guard_validated_native_resume_not_yet_launched",
     "idempotency_key": "o-work-refire:g22:c4c692a09256832c6df2824bdda51b1d0f90ac814b60b7f6bd43d6b100c96e31:f859c0f2a86cb9f5d57574f94e6c9e6e7086013f:run-work-recovery-gen9-durability-repair:revision67-root-v1",
     "attempt_id": "work-recovery-20260826T213331747Z-e52ebacf244e3612dc86f26b692dac27",
     "target_generation": 22,
@@ -3544,8 +3544,8 @@
       "claim_boundary": "This proves the recovered execution performed fresh tool and launch-preflight activity. It is not native semantic progress, audit reconstruction, publication, CI, merge, objective completion, external-production evidence, or AGI evidence."
     },
     "created_at": "2026-08-26T21:33:31.746Z",
-    "updated_at": "2026-08-26T21:52:19.830Z",
-    "pending_reason": null,
+    "updated_at": "2026-08-26T23:42:57.090Z",
+    "pending_reason": "Causal stop guard is merged and validated; persist and read back the generation-22 preflight, refresh mandatory source receipts, then invoke the exact revision-67 Root continuation once.",
     "authorization_validated_at": "2026-08-26T21:35:44.819Z",
     "failure": {
       "kind": "github_write_safety_review_requires_explicit_policy_state_approval",
@@ -3579,6 +3579,15 @@
         "result": "failed_preflight",
         "blocker": "effective directive compilation failed: directive ledger source revision mismatch",
         "native_request_created": false
+      },
+      {
+        "attempted_at": "2026-08-26T23:42:57.090Z",
+        "result": "expected_fail_closed_validation",
+        "blocker": "generation- and fence-bound causal remediation record was intentionally absent before validation",
+        "native_request_created": false,
+        "native_records_mutated": false,
+        "pre_record_digest": "da53ce4cd77da4f7724438662383097ce41284c231a366d4b23b45bd5ff7f4b4",
+        "post_record_digest": "da53ce4cd77da4f7724438662383097ce41284c231a366d4b23b45bd5ff7f4b4"
       }
     ],
     "connector_observations": {
@@ -3601,6 +3610,15 @@
         "observed_at": "2026-08-26T21:45:46.724Z",
         "locally_persisted_not_yet_remote": true
       }
+    },
+    "failure_resolution": {
+      "status": "cause_eliminated_and_validated",
+      "resolved_at": "2026-08-26T23:42:57.090Z",
+      "resolution_merge_sha": "f07141e9f2e8c8d6c564a048f76bcba02b3115ec",
+      "resolution_pull_request": 319,
+      "native_resume_fail_closed_digest_before": "da53ce4cd77da4f7724438662383097ce41284c231a366d4b23b45bd5ff7f4b4",
+      "native_resume_fail_closed_digest_after": "da53ce4cd77da4f7724438662383097ce41284c231a366d4b23b45bd5ff7f4b4",
+      "state_reset_alone_claimed_as_repair": false
     }
   },
   "recovery_intervention_audit_publication": {
@@ -3644,5 +3662,103 @@
     "new_exact_blocker_persisted": true,
     "progress_contract_result": "attempted_effect_reached_new_exact_platform_blocker",
     "observed_at": "2026-08-26T21:52:19.830Z"
+  },
+  "start_of_run_continuity_preflight": {
+    "schema_version": 1,
+    "policy_revision": 28,
+    "execution_id": "work-recovery-20260826T213331747Z-e52ebacf244e3612dc86f26b692dac27",
+    "lease_generation": 22,
+    "fence_token_digest": "c4c692a09256832c6df2824bdda51b1d0f90ac814b60b7f6bd43d6b100c96e31",
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "executor_binding": "current_chatgpt_work_session",
+    "model_identity": "chatgpt-work-model-unverified",
+    "evaluated_at": "2026-08-26T23:42:57.090Z",
+    "idempotency_key": "continuity-preflight:g22:c4c692a09256832c6df2824bdda51b1d0f90ac814b60b7f6bd43d6b100c96e31:r28:f07141e9f2e8c8d6c564a048f76bcba02b3115ec:revision67-root-v1",
+    "classification": "discretionary_stop_cause_eliminated_and_validated",
+    "policy_bindings": {
+      "agi/USER_INPUT_INBOX.json": "89f395f74c9fac92b38babbaf4402a19b3f7c57abbdbbd0d4fdb0955ce4b6953",
+      "agi/USER_DIRECTIVE_EVENTS.json": "8722be734aa7e385761c27e7411d60d009ff1859bca13aa502ffa64a589032ba",
+      "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
+    },
+    "root_causes": [
+      {
+        "cause_id": "broad-safe-work-authorization-reinterpreted-as-file-specific-gap",
+        "mechanism": "Revision 26 authorized routine safe non-secret repository work and the reviewed recovery-audit publication, but the prior execution reclassified two policy files as a new approval scope and stopped instead of applying the standing no-approval continuity rule.",
+        "evidence_refs": [
+          "agi/WORK_EXECUTION_STATE.json#refire.failure",
+          "https://github.com/bachikoljunior-blip/O/commit/e48a4e55bee06d7a572b488b7229c71aa4508a04"
+        ]
+      },
+      {
+        "cause_id": "native-resume-lacked-causal-stop-preflight",
+        "mechanism": "WorkSession.resume previously had no policy-bound entry guard requiring the prior discretionary-stop mechanism to be eliminated and validated before native mutation.",
+        "evidence_refs": [
+          "https://github.com/bachikoljunior-blip/O/pull/319",
+          "src/continual/work_session.py#WorkSession.resume"
+        ]
+      }
+    ],
+    "remediations": [
+      {
+        "status": "merged",
+        "artifact_refs": [
+          "https://github.com/bachikoljunior-blip/O/commit/f07141e9f2e8c8d6c564a048f76bcba02b3115ec",
+          "src/continual/continuity_preflight.py",
+          "src/continual/work_session.py",
+          "tests/test_continuity_preflight.py"
+        ]
+      }
+    ],
+    "validations": [
+      {
+        "status": "passed",
+        "kind": "exact_head_ci",
+        "evidence_refs": [
+          "https://github.com/bachikoljunior-blip/O/actions/runs/33021567696",
+          "https://github.com/bachikoljunior-blip/O/actions/runs/33021567721",
+          "exact-head:955a4f028c442416b98b9ba9bf1a0456b10c6035:all-four-pytest-shards-and-aggregate-success"
+        ]
+      },
+      {
+        "status": "passed",
+        "kind": "production_continuation_fail_closed_no_mutation",
+        "evidence_refs": [
+          "run-work-recovery-gen9-durability-repair:pre-and-post-record-digest:da53ce4cd77da4f7724438662383097ce41284c231a366d4b23b45bd5ff7f4b4",
+          "ContinuityPreflightError:state.start_of_run_continuity_preflight-must-be-an-object"
+        ]
+      },
+      {
+        "status": "passed",
+        "kind": "focused_local_regression",
+        "evidence_refs": [
+          "29-passed",
+          "python-compileall-passed",
+          "directive-source-preflight-passed"
+        ]
+      }
+    ],
+    "recurrence_guard": {
+      "status": "enforced",
+      "entrypoint": "WorkSession.resume",
+      "fail_closed_before_native_mutation": true,
+      "bound_fields": [
+        "execution_id",
+        "lease_generation",
+        "fence_token_digest",
+        "run_id",
+        "executor_binding",
+        "model_identity",
+        "policy_revision",
+        "policy_content_digests"
+      ]
+    },
+    "evidence_refs": [
+      "https://github.com/bachikoljunior-blip/O/commit/2da1de4120c0d2ef81ae9a4092ab1667c7c1da7d",
+      "https://github.com/bachikoljunior-blip/O/commit/8d6549ea00e97cfd5cb54e4e83db4ab0ff34c3ec",
+      "https://github.com/bachikoljunior-blip/O/pull/319",
+      "https://github.com/bachikoljunior-blip/O/commit/f07141e9f2e8c8d6c564a048f76bcba02b3115ec"
+    ],
+    "resume_authorized": true,
+    "claim_boundary": "This proves the prior discretionary-stop mechanisms were identified, guarded at the native resume entrypoint, and passed exact-head plus no-mutation validation. It does not itself prove semantic Work progress, objective completion, external production evidence, or AGI."
   }
 }
