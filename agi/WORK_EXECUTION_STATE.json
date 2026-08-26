@@ -8,8 +8,8 @@
   "lease_generation": 21,
   "fence_token": "work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de",
   "started_at": "2026-08-26T11:22:46.061Z",
-  "heartbeat_at": "2026-08-26T11:24:16.137Z",
-  "last_progress_at": "2026-08-26T11:24:16.137Z",
+  "heartbeat_at": "2026-08-26T11:25:02.491Z",
+  "last_progress_at": "2026-08-26T11:25:02.491Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -24,7 +24,7 @@
   "source_main_sha": "27758322ad5eeb68fdcd82c59cc94348481ad514",
   "working_branch": "work/recovery-gen21-revision22-refire-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "generation21_refire_two_phase_authorized_pending_native_launch",
+  "active_component": "generation21_refire_authorized_native_launch_pending",
   "active_unit_id": "unit-4860e14db4afdcb535f9eaac",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -293,7 +293,10 @@
     "result_commit_sha": "33f06c949854b15e5f311e4b126ef60285b22543",
     "result_blob_sha": "8a57a49fd08dce876d938eb861aa9e5e3f247e52",
     "finalization_expected_blob_sha": "8a57a49fd08dce876d938eb861aa9e5e3f247e52",
-    "note": "Generation 21 phase-one acquisition commit/blob exactly read back; phase-two finalization submitted. State-only mutation remains insufficient for refire success."
+    "note": "Generation 21 two-phase acquisition/finalization and exact remote readback are validated. Native launch is still required; state-only mutation is not refire success.",
+    "finalization_commit_sha": "2815fa1cff9ce05efe28f460ef893986ea0c42e1",
+    "finalization_blob_sha": "1602fb5461e6ab799b044faed0fd077bdd8fe8df",
+    "finalization_readback_verified": true
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -318,7 +321,7 @@
   "finalize_expected_blob_sha": "8a57a49fd08dce876d938eb861aa9e5e3f247e52",
   "readback_of_commit_sha": "33f06c949854b15e5f311e4b126ef60285b22543",
   "verified_remote_readback": true,
-  "acquisition_phase": "two_phase_finalization_submitted_pending_exact_readback",
+  "acquisition_phase": "authorized_running_pending_native_launch",
   "recovery_observation": {
     "observed_at": "2026-08-26T11:22:46.061Z",
     "predecessor_execution_id": "work-recovery-20260826T085839Z-53dc776e2bbcf2d362d3a414b2e13437",
@@ -2475,9 +2478,9 @@
     "next_execute_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "next_execute_request_digest": "fd25431ea8e0bcfd910ebcd8f53f6040a4984987412845949904284fcbf25b86"
   },
-  "finalization_commit_sha": null,
-  "finalization_blob_sha": null,
-  "finalization_readback_verified": false,
+  "finalization_commit_sha": "2815fa1cff9ce05efe28f460ef893986ea0c42e1",
+  "finalization_blob_sha": "1602fb5461e6ab799b044faed0fd077bdd8fe8df",
+  "finalization_readback_verified": true,
   "checkpoint": {
     "checkpointed_at": "2026-08-26T09:00:27.301Z",
     "reason": "Forced process boundary immediately after safe generation-20 recovery and exact authorization readback. This is not a permission wait, discretionary stop, completion, or claim of progress on the frozen semantic unit.",
@@ -3484,7 +3487,21 @@
     "applied_at": "2026-08-26T08:58:39.785Z",
     "interpretation": "No discretionary stop or ordinary permission checkpoint while the upper objective is unmet and safe non-conflicting work exists; hard platform and safety constraints remain."
   },
-  "authorization_validation": null,
+  "authorization_validation": {
+    "validated_at": "2026-08-26T11:25:02.491Z",
+    "implementation_contract": "src/agi/work_mode_monitor.py:authorize_work_mode_recovery",
+    "authorized": true,
+    "reason": "exact generation+1 lease and two-phase remote readback were verified",
+    "proof": {
+      "observed_blob_sha": "d6b0d0c4fa6c987d1c682e8d91f021894db7ea44",
+      "acquisition_commit_sha": "33f06c949854b15e5f311e4b126ef60285b22543",
+      "acquisition_blob_sha": "8a57a49fd08dce876d938eb861aa9e5e3f247e52",
+      "finalization_commit_sha": "2815fa1cff9ce05efe28f460ef893986ea0c42e1",
+      "finalization_blob_sha": "1602fb5461e6ab799b044faed0fd077bdd8fe8df",
+      "readback_commit_sha": "2815fa1cff9ce05efe28f460ef893986ea0c42e1",
+      "readback_blob_sha": "1602fb5461e6ab799b044faed0fd077bdd8fe8df"
+    }
+  },
   "current_blockers": {
     "revision22_generated_records_github_publication": {
       "status": "hard_platform_write_constraint_last_observed; standing_authorization_v2_now_main_durable; must_be_retested_by_successor_without_workaround",
@@ -3522,7 +3539,8 @@
     "launch_accepted": false,
     "substantive_liveness_event": null,
     "created_at": "2026-08-26T11:22:46.061Z",
-    "updated_at": "2026-08-26T11:24:16.137Z",
-    "pending_reason": "two-phase finalization requires exact remote readback and authorize_work_mode_recovery validation before native launch"
+    "updated_at": "2026-08-26T11:25:02.491Z",
+    "pending_reason": "authorization validated; reconstruct exact remote continuation and invoke continual work-resume without recreating request",
+    "authorization_validated_at": "2026-08-26T11:25:02.491Z"
   }
 }
