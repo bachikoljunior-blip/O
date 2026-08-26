@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 26,
+  "revision": 27,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -440,7 +440,24 @@
       ],
       "source": "user_chat",
       "sequence": 26
+    },
+    {
+      "id": "user-direction-preflight-discretionary-stop-audit-20260827-v27",
+      "received_at": "2026-08-26T22:19:07.499Z",
+      "kind": "execution_continuity_preflight_direction",
+      "status": "active",
+      "summary": "Before starting work on every run, audit whether the preceding execution ended by agent discretion, repair any such continuity violation, and then continue actual work.",
+      "directives": [
+        "At the beginning of every primary O or successor recovery run, before selecting or executing a new work unit, inspect the latest authoritative termination, checkpoint, blocker, continuation, and liveness records to determine whether the preceding execution stopped because of agent discretion, uncertainty, voluntary reassessment, routine approval waiting, a narrow milestone, or a local blocker while safe executable work remained.",
+        "If that preflight finds a discretionary or otherwise unauthorized stop, record the continuity violation, repair the authoritative execution and continuation state under the existing generation, fence, CAS, lease, and idempotency contracts, and resume the exact safe continuation before starting unrelated work.",
+        "The preflight and repair must never create a duplicate writer, duplicate an already-durable external side effect, recreate a valid frozen Work request, or weaken hard platform, safety, secret, executor-binding, evidence-integrity, exact-head, readback, or truthful-claim boundaries.",
+        "A fresh different writer, a proven hard platform or safety prohibition, an actually running exact-head workflow, or a genuinely completed upper-level objective is not an agent-discretion stop; preserve the corresponding safe no-op, wait, or truthful completion behavior while keeping the monitor lifecycle governed by explicit user instructions.",
+        "After the preflight and any required repair, continue the best safe executable work in the same run; preflight, repair, reporting, or checkpointing alone is not completion."
+      ],
+      "supersedes": [],
+      "source": "user_chat",
+      "sequence": 27
     }
   ],
-  "updated_at": "2026-08-26T21:28:11.469Z"
+  "updated_at": "2026-08-26T22:19:07.499Z"
 }
