@@ -182,12 +182,17 @@ def test_generation_fence_and_remote_readback_mismatches_are_rejected() -> None:
     ).authorized
 
 
-def test_checked_in_work_state_is_a_fresh_single_writer_lease() -> None:
+def test_checked_in_work_state_is_fresh_or_fenced_recovery_eligible() -> None:
     state = json.loads(
         (ROOT / "agi" / "WORK_EXECUTION_STATE.json").read_text(encoding="utf-8")
     )
     strategy = json.loads(
         (ROOT / state["strategy_path"]).read_text(encoding="utf-8")
+    )
+    continuity = json.loads(
+        (ROOT / "agi" / "CONTINUOUS_EXECUTION_AUTHORIZATION.json").read_text(
+            encoding="utf-8"
+        )
     )
     heartbeat = datetime.fromisoformat(state["heartbeat_at"].replace("Z", "+00:00"))
 
@@ -210,6 +215,19 @@ def test_checked_in_work_state_is_a_fresh_single_writer_lease() -> None:
     assert strategy["strategy_is_assumed_correct"] is False
     assert strategy["execution_rules"]["unbounded_deferral_allowed"] is False
     assert strategy["claim_boundary"]["strategy_may_weaken_gate"] is False
-    assert decision.action == "suppress_duplicate"
-    assert decision.recovery_eligible is False
+    assert continuity["status"] == "active"
+    assert continuity["mechanical_enforcement"][
+        "checkpoint_transition_requires_guard_allow"
+    ] is True
+    assert continuity["mechanical_enforcement"][
+        "state_local_forced_boundary_claim_is_evidence"
+    ] is False
+
+    if state["status"] == "running":
+        assert decision.action == "suppress_duplicate"
+        assert decision.recovery_eligible is False
+    else:
+        assert state["status"] in {"checkpointed", "interrupted", "released"}
+        assert decision.action == "recover_checkpoint"
+        assert decision.recovery_eligible is True
     assert decision.mutation_authorized is False
