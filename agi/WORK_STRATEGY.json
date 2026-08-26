@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "active_falsifiable_policy",
-  "source_user_input_revision": 27,
+  "source_user_input_revision": 28,
   "objective": "Minimize defensible expected elapsed time until real-world AGI is actually achieved, without lowering the user's achievement standard or overstating evidence.",
   "strategy_is_assumed_correct": false,
   "system_choice": {
@@ -71,10 +71,12 @@
     "monitor_disable_authority": "explicit_user_instruction_only",
     "start_of_run_continuity_preflight_required": true,
     "repair_discretionary_stop_before_unrelated_work": true,
-    "preflight_repair_report_or_checkpoint_is_completion": false
+    "preflight_repair_report_or_checkpoint_is_completion": false,
+    "eliminate_discretionary_stop_cause_before_resume": true,
+    "resume_without_validated_causal_remediation": false
   },
   "context_management": {
-    "source_user_input_revision": 27,
+    "source_user_input_revision": 28,
     "decision_authority": "O Engine owns the observation ledger, source clocks, decision projections, inclusion and exclusion decisions, invalidation, and context-bound action authorization.",
     "raw_source_authority": "GitHub, CI, providers, files, and other source systems remain authoritative for the raw facts they produce; O stores provenance-bound references, projections, and receipts rather than copying everything.",
     "outer_session_role": "Execute O-requested observations and effects and return receipts. Untracked outer-session memory is not decision authority.",
@@ -91,7 +93,7 @@
     "effect_rule": "Bind plans and authorizations to the decision manifest, and recheck critical lease, revocation, and action-constraint sources immediately before dispatch.",
     "copy_all_raw_context": false,
     "architecture_path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
-    "current_stage": "revision27_start_of_run_discretionary_stop_preflight_and_repair_required"
+    "current_stage": "revision28_causal_stop_remediation_guard_required_before_resume"
   },
   "research_feed": {
     "source_user_input_revision": 22,
@@ -189,6 +191,7 @@
     }
   ],
   "immediate_sequence": [
+    "When the start-of-run audit detects a discretionary or unauthorized stop, identify and eliminate the mechanism that allowed it, install a durable recurrence guard, and pass execution- and policy-bound validation before resuming; a status reset, heartbeat, lease change, blocker restatement, or violation record alone is not repair.",
     "At every run start, audit the latest authoritative prior termination, checkpoint, blocker, continuation, and liveness evidence for a discretionary or unauthorized stop; if found, record and repair it under the existing single-writer, fence, CAS, and idempotency contracts, then resume the exact continuation before unrelated work.",
     "Apply revision 26 continuously: do not stop for agent discretion or ordinary approval waiting, reconstruct the authorized recovery-audit unit only from latest remote main because the old local candidate was lost, publish only a freshly reviewed non-secret payload through exact-head validation, and continue follow-on safe work without treating a narrow result or local blocker as completion.",
     "Retain the merged Root-only O-owned DecisionContextManifest as the protected context-control baseline.",
@@ -212,5 +215,5 @@
     "strategy_success_is_external_evidence": false
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "updated_at": "2026-08-26T22:19:07.499Z"
+  "updated_at": "2026-08-26T22:49:08.725Z"
 }

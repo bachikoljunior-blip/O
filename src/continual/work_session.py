@@ -13,6 +13,7 @@ from .context_kernel import (
     verify_decision_context_manifest,
 )
 from .contracts import validate_component_output
+from .continuity_preflight import assert_work_resume_continuity_preflight
 from .store import Store
 
 
@@ -588,6 +589,12 @@ class WorkSession:
         }
 
     def resume(self, run_id: str, *, max_steps: int = 64) -> dict[str, Any]:
+        assert_work_resume_continuity_preflight(
+            self.root,
+            run_id=run_id,
+            executor_binding=self.executor_binding,
+            model_identity=self.model_identity,
+        )
         self._assert_resume_identity(run_id)
         engine = self._engine(run_id)
         snapshot = engine.resume(run_id, max_steps=max_steps)
