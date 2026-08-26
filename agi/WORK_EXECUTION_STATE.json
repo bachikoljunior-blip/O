@@ -8,8 +8,8 @@
   "lease_generation": 19,
   "fence_token": "work-recovery-fence-v19-4bf549962d183cfddc51f0be39beff858aac2fc356593d1c6d2c23f2bb6bb9b3",
   "started_at": "2026-08-26T03:49:11.916Z",
-  "heartbeat_at": "2026-08-26T06:10:25.241Z",
-  "last_progress_at": "2026-08-26T06:10:25.241Z",
+  "heartbeat_at": "2026-08-26T06:11:39.012Z",
+  "last_progress_at": "2026-08-26T06:11:39.012Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "1772a5ee44311d1e464a99207c73f64104f45989",
   "working_branch": "work/recovery-gen19-revision22-real-responses-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_action_adherence_exact_head_publication",
+  "active_component": "revision22_action_adherence_publication_blocked_safe_checkpoint",
   "active_unit_id": "unit-4860e14db4afdcb535f9eaac",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -772,12 +772,14 @@
       "observed_at": "2026-08-24T07:19:36.636Z"
     },
     "revision22_action_adherence": {
-      "status": "local_commit_prepared_pending_push_and_exact_head_ci",
+      "status": "local_complete_publication_blocked_not_remote_authoritative",
       "branch": "work/recovery-gen19-revision22-real-responses-v1",
       "head_sha": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
       "tree_sha": "74c87ed9e6224cf6541176fc367cca2e4ecb377c",
-      "base_main_sha": "5773af15c5c4653cba2010456aa672e52bd312ea",
-      "updated_at": "2026-08-26T06:10:25.241Z"
+      "remote_branch_confirmed": false,
+      "pull_request": null,
+      "exact_head_ci": null,
+      "updated_at": "2026-08-26T06:11:39.012Z"
     }
   },
   "pending_user_input": null,
@@ -2951,10 +2953,21 @@
       "safe_alternative": "Preserve the frozen Execute and merged harness; recheck permission and remote health next run without fabricating or publishing outputs.",
       "resolved_at": "2026-08-26T03:49:11.916Z",
       "permission_revision": 25
+    },
+    "revision22_generated_records_github_publication": {
+      "status": "blocked_by_explicit_sensitive_publication_authorization_requirement",
+      "observed_at": "2026-08-26T06:11:39.012Z",
+      "scope": "individual_operation",
+      "blocks_monitor": false,
+      "blocks_project_globally": false,
+      "unpublished_data_authoritative": false,
+      "safe_alternative": "Retain exact remote frozen continuation, recheck authorization and remote health next run, and proceed only with independent non-conflicting work.",
+      "rejected_push_head_sha": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
+      "rejected_push_tree_sha": "74c87ed9e6224cf6541176fc367cca2e4ecb377c"
     }
   },
   "termination": {
-    "kind": "active_execution_continues",
+    "kind": "active_monitor_and_execution_continue_with_individual_publication_blocker",
     "global_completion": false,
     "user_objective_met": false,
     "explicit_user_stop": false,
@@ -3347,7 +3360,7 @@
     }
   },
   "revision22_action_adherence_publication_precommit": {
-    "status": "prepared_local_exact_head_pending_remote_publication",
+    "status": "local_complete_push_blocked_not_remote_authoritative",
     "prepared_at": "2026-08-26T06:10:25.241Z",
     "branch": "work/recovery-gen19-revision22-real-responses-v1",
     "base_main_sha": "5773af15c5c4653cba2010456aa672e52bd312ea",
@@ -3407,6 +3420,31 @@
     "user_level_objective_met": false,
     "agi_claim_supported": false,
     "claim_boundary": "Only the named two routes, three frozen revision-22 scenarios, executor/model classes, budgets, exact judge, source bindings, and recorded conditions. No scientist-agent-family, original-system, untested-mechanism, external-production, AGI, or user-objective-completion inference.",
-    "publication_rule": "After exact readback of this state-only CAS, push only commit 5c7f4898f4987ccfcf06c5a91a90227b82ce06eb to the named branch, open a PR, require exact unchanged-head CI, re-read control/state/inbox/main/PR/head/jobs, and merge only under a second state-only expected-blob authorization plus expected-head protection."
+    "publication_rule": "After exact readback of this state-only CAS, push only commit 5c7f4898f4987ccfcf06c5a91a90227b82ce06eb to the named branch, open a PR, require exact unchanged-head CI, re-read control/state/inbox/main/PR/head/jobs, and merge only under a second state-only expected-blob authorization plus expected-head protection.",
+    "push_attempted_at": "2026-08-26T06:11:39.012Z",
+    "push_succeeded": false,
+    "remote_branch_confirmed": false,
+    "blocker": {
+      "kind": "explicit_sensitive_publication_authorization_required",
+      "scope": "individual_git_publication_operation",
+      "monitor_blocked": false,
+      "project_globally_blocked": false,
+      "transient_or_recheckable": true,
+      "rejected_action": "git push --set-upstream origin work/recovery-gen19-revision22-real-responses-v1",
+      "reason": "Safety review requires an end-user-authored authorization that explicitly names GitHub as the destination and the generated invocation, prompt, model-output, response, and native lifecycle payload before this 81-file branch may be published.",
+      "workaround_attempted": false,
+      "unpublished_records_authoritative": false,
+      "safe_next_action": "Preserve the exact remote frozen invocation and current main authority. Recheck remote health and explicit authorization next run. Publish this exact unchanged head only after the required authorization exists; otherwise continue only independent non-conflicting work."
+    },
+    "exact_local_continuation": {
+      "workspace_branch": "work/recovery-gen19-revision22-real-responses-v1",
+      "local_commit_sha": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
+      "local_tree_sha": "74c87ed9e6224cf6541176fc367cca2e4ecb377c",
+      "base_main_sha": "5773af15c5c4653cba2010456aa672e52bd312ea",
+      "remote_authoritative_continuation_remains": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
+      "remote_frozen_invocation_id": "invoke-248450c08547af10470c50e6",
+      "local_records_must_not_be_recreated_or_submitted_twice_if_workspace_survives": true,
+      "if_workspace_lost": "Revert to the remote frozen request as sole authority; do not infer successful execution from this state-only record."
+    }
   }
 }
