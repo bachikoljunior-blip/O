@@ -1,30 +1,30 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "checkpointed",
+  "status": "running",
   "owner_kind": "work_recovery_automation",
-  "execution_id": "work-recovery-20260826T085839Z-53dc776e2bbcf2d362d3a414b2e13437",
-  "predecessor_execution_id": "work-recovery-20260826T034911916Z-4bf549962d183cfddc51f0be39beff85",
-  "lease_generation": 20,
-  "fence_token": "work-recovery-fence-v20-53dc776e2bbcf2d362d3a414b2e134379d18710c9fa3681fd8be10852b550ff2",
-  "started_at": "2026-08-26T08:58:39.785Z",
-  "heartbeat_at": "2026-08-26T09:00:27.301Z",
-  "last_progress_at": "2026-08-26T09:00:27.301Z",
+  "execution_id": "work-recovery-20260826T112246061Z-0cf9bce76a217ac818b03612850e9dfc",
+  "predecessor_execution_id": "work-recovery-20260826T085839Z-53dc776e2bbcf2d362d3a414b2e13437",
+  "lease_generation": 21,
+  "fence_token": "work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de",
+  "started_at": "2026-08-26T11:22:46.061Z",
+  "heartbeat_at": "2026-08-26T11:22:46.061Z",
+  "last_progress_at": "2026-08-26T11:22:46.061Z",
   "stale_after_seconds": 900,
   "authorization": {
-    "kind": "fenced_checkpoint_recovery",
-    "instruction": "Recover generation 20 because generation 19 has no owner progress after 2026-08-26T06:54:58.354Z and main commit f71c491f611889529dddcd55a6d7e8ecfec9a4fb materially strengthens standing continuous-execution authorization. Preserve frozen Execute invoke-248450c08547af10470c50e6, do not recreate it, keep the lost unpublished generation-19 records non-authoritative, and continue only safe non-conflicting work under existing safety, fence, CAS, idempotency, executor-binding, and claim boundaries.",
+    "kind": "fenced_checkpoint_recovery_and_primary_refire",
+    "instruction": "Recover generation 21 only after generation 20 checkpoint and all same-owner post-checkpoint PR/workflow activity are stale. Preserve frozen Execute invoke-248450c08547af10470c50e6 and its exact remote-authority request; never recreate it. After two-phase CAS/readback authorization, launch the Work-capable primary from the exact continuation and require a substantive post-launch liveness event before declaring refire success.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
-    "note": "Generation 20 phase-two finalization records exact phase-one acquisition commit/blob readback; authorize_work_mode_recovery validation remains required before native Work mutation."
+    "refire_contract_revision": 7
   },
   "continuation_source": "repository_latest_main_only",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "source_main_sha": "f71c491f611889529dddcd55a6d7e8ecfec9a4fb",
-  "working_branch": "work/recovery-gen20-revision22-authorized-continuation-v1",
+  "source_main_sha": "27758322ad5eeb68fdcd82c59cc94348481ad514",
+  "working_branch": "work/recovery-gen21-revision22-refire-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_frozen_remote_authority_generation20_forced_boundary_checkpoint",
+  "active_component": "generation21_refire_phase_one_acquired_pending_readback",
   "active_unit_id": "unit-4860e14db4afdcb535f9eaac",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -288,12 +288,12 @@
   },
   "remote_persistence": {
     "published_on_main": true,
-    "verified_remote_readback": true,
-    "expected_blob_sha": "cc6039c475ad46f4f643c228f3b32b7e0a5c5090",
-    "result_commit_sha": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
-    "result_blob_sha": "d27753c97c050a956dbad17679a39ebf440be9b4",
-    "finalization_expected_blob_sha": "d27753c97c050a956dbad17679a39ebf440be9b4",
-    "note": "Generation 20 two-phase acquisition proof finalized from exact remote readback; finalization commit/blob readback and recovery authorization validation follow."
+    "verified_remote_readback": false,
+    "expected_blob_sha": "d6b0d0c4fa6c987d1c682e8d91f021894db7ea44",
+    "result_commit_sha": null,
+    "result_blob_sha": null,
+    "finalization_expected_blob_sha": null,
+    "note": "Generation 21 phase-one acquisition pending exact remote readback and phase-two finalization; state-only mutation is not refire success."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -312,31 +312,34 @@
     "pending_invocation": "Work invoke-248450c08547af10470c50e6 (Execute) for unit-3d61e557b2542d07c83fa354; no unrelated Candidate is applied.",
     "note": "Revision 24 corrects revision 23 as not applicable to primary O. Preserve and resume the existing revision-22-bound Execute without a new Work handoff or routing detour. The paired-route harness remains valid support only if freshly revalidated against that frozen Execute after the correction is main-durable. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, publish unapproved generated records, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
   },
-  "expected_blob_sha": "cc6039c475ad46f4f643c228f3b32b7e0a5c5090",
-  "result_commit_sha": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
-  "result_blob_sha": "d27753c97c050a956dbad17679a39ebf440be9b4",
-  "finalize_expected_blob_sha": "d27753c97c050a956dbad17679a39ebf440be9b4",
-  "readback_of_commit_sha": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
-  "verified_remote_readback": true,
-  "acquisition_phase": "authorized_running",
+  "expected_blob_sha": "d6b0d0c4fa6c987d1c682e8d91f021894db7ea44",
+  "result_commit_sha": null,
+  "result_blob_sha": null,
+  "finalize_expected_blob_sha": null,
+  "readback_of_commit_sha": null,
+  "verified_remote_readback": false,
+  "acquisition_phase": "phase_one_acquired_pending_remote_readback",
   "recovery_observation": {
-    "observed_at": "2026-08-26T08:58:39.785Z",
-    "predecessor_execution_id": "work-recovery-20260826T034911916Z-4bf549962d183cfddc51f0be39beff85",
-    "predecessor_generation": 19,
-    "observed_state_blob_sha": "cc6039c475ad46f4f643c228f3b32b7e0a5c5090",
-    "predecessor_status": "running",
-    "predecessor_heartbeat_at": "2026-08-26T06:54:58.354Z",
-    "predecessor_last_progress_at": "2026-08-26T06:54:58.354Z",
-    "latest_same_owner_main_commit": "22b12fa7e49a6c403fd3e1d9d632055f5a1f81d7",
-    "latest_authorization_commit": "f71c491f611889529dddcd55a6d7e8ecfec9a4fb",
-    "authorization_path": "agi/CONTINUOUS_EXECUTION_AUTHORIZATION.json",
-    "authorization_blob_sha": "b72415faefa22c63c3eed0cd32c88f8bdcd0c7bb",
-    "working_branch_absent": true,
-    "matching_pull_request_absent": true,
-    "rejected_unpublished_head_workflow_absent": true,
-    "no_same_owner_progress_after_checkpoint": true,
+    "observed_at": "2026-08-26T11:22:46.061Z",
+    "predecessor_execution_id": "work-recovery-20260826T085839Z-53dc776e2bbcf2d362d3a414b2e13437",
+    "predecessor_generation": 20,
+    "observed_state_blob_sha": "d6b0d0c4fa6c987d1c682e8d91f021894db7ea44",
+    "predecessor_status": "checkpointed",
+    "predecessor_heartbeat_at": "2026-08-26T09:00:27.301Z",
+    "predecessor_last_progress_at": "2026-08-26T09:00:27.301Z",
+    "latest_same_owner_main_commit": "27758322ad5eeb68fdcd82c59cc94348481ad514",
+    "latest_post_checkpoint_pull_request": 315,
+    "latest_post_checkpoint_head_sha": "465d72694ae8b64fec29bc31bbe217080de3f0c5",
+    "latest_post_checkpoint_activity_at": "2026-08-26T09:52:39Z",
+    "latest_post_checkpoint_exact_head_workflows": [
+      32955228209,
+      32955228244
+    ],
+    "latest_post_checkpoint_exact_head_workflows_succeeded": true,
+    "activity_stale_at_observation": true,
+    "no_newer_owner_progress_observed": true,
     "frozen_invocation_preserved": "invoke-248450c08547af10470c50e6",
-    "recovery_reason": "new main-durable standing authorization removed discretionary permission-wait as a valid project stop and requires safe non-conflicting continuation"
+    "recovery_reason": "checkpointed generation 20 and all same-owner substantive activity exceeded the 900-second stale threshold"
   },
   "result_publication_policy": {
     "destination": "main",
@@ -2472,9 +2475,9 @@
     "next_execute_work_invocation_id": "invoke-445821c809a6ca734fb1b97e",
     "next_execute_request_digest": "fd25431ea8e0bcfd910ebcd8f53f6040a4984987412845949904284fcbf25b86"
   },
-  "finalization_commit_sha": "0d9653c86f8318d0b9544f2c896ee1b978a5ce67",
-  "finalization_blob_sha": "3cb4ca1be8249e310da83049256a7dfb8daa4a71",
-  "finalization_readback_verified": true,
+  "finalization_commit_sha": null,
+  "finalization_blob_sha": null,
+  "finalization_readback_verified": false,
   "checkpoint": {
     "checkpointed_at": "2026-08-26T09:00:27.301Z",
     "reason": "Forced process boundary immediately after safe generation-20 recovery and exact authorization readback. This is not a permission wait, discretionary stop, completion, or claim of progress on the frozen semantic unit.",
@@ -2980,11 +2983,11 @@
     }
   },
   "termination": {
-    "kind": "forced_process_boundary",
-    "observed_at": "2026-08-26T09:00:27.301Z",
+    "kind": "not_terminated_refire_in_progress",
     "normal_completion": false,
-    "automation_remains_enabled": true,
-    "exact_resume_condition": "next scheduled monitor run; recover from latest main with generation+1 fenced CAS if no fresher owner activity exists"
+    "user_objective_met": false,
+    "explicit_user_stop": false,
+    "monitor_should_remain_enabled": true
   },
   "revision22_public_inputs_publication_precommit": {
     "status": "merged_main_durable_exact_readback",
@@ -3481,21 +3484,7 @@
     "applied_at": "2026-08-26T08:58:39.785Z",
     "interpretation": "No discretionary stop or ordinary permission checkpoint while the upper objective is unmet and safe non-conflicting work exists; hard platform and safety constraints remain."
   },
-  "authorization_validation": {
-    "validated_at": "2026-08-26T09:00:27.301Z",
-    "implementation_contract": "src/agi/work_mode_monitor.py:authorize_work_mode_recovery",
-    "authorized": true,
-    "reason": "exact generation+1 lease and two-phase remote readback were verified",
-    "proof": {
-      "observed_blob_sha": "cc6039c475ad46f4f643c228f3b32b7e0a5c5090",
-      "acquisition_commit_sha": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
-      "acquisition_blob_sha": "d27753c97c050a956dbad17679a39ebf440be9b4",
-      "finalization_commit_sha": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
-      "finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
-      "readback_commit_sha": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
-      "readback_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34"
-    }
-  },
+  "authorization_validation": null,
   "current_blockers": {
     "revision22_generated_records_github_publication": {
       "status": "hard_platform_write_constraint_last_observed; standing_authorization_v2_now_main_durable; must_be_retested_by_successor_without_workaround",
@@ -3511,5 +3500,28 @@
       "continuous_authorization_commit": "f71c491f611889529dddcd55a6d7e8ecfec9a4fb",
       "continuous_authorization_blob_sha": "b72415faefa22c63c3eed0cd32c88f8bdcd0c7bb"
     }
+  },
+  "refire": {
+    "schema_version": 1,
+    "status": "acquisition_in_progress",
+    "idempotency_key": "o-work-refire:g21:work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de:cbb8619f4d7dd6a12fed740fe80764c3c971c71e:invoke-248450c08547af10470c50e6",
+    "attempt_id": "work-recovery-20260826T112246061Z-0cf9bce76a217ac818b03612850e9dfc",
+    "target_generation": 21,
+    "target_fence_token": "work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de",
+    "predecessor_execution_id": "work-recovery-20260826T085839Z-53dc776e2bbcf2d362d3a414b2e13437",
+    "continuation_commit": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
+    "continuation_snapshot_blob_sha": "8f86a6e152cc6ab1fd088803c41975f373a40953",
+    "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
+    "frozen_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
+    "request_recreated": false,
+    "launch_surface": {
+      "kind": "scheduled_task_work_runtime_local_remote_reconstruction",
+      "available": true,
+      "capability_proof": "latest remote main cloned successfully and PYTHONPATH=src python -m continual.cli exposes work-pending, work-verify, work-resume, and work-submit"
+    },
+    "launch_accepted": false,
+    "substantive_liveness_event": null,
+    "created_at": "2026-08-26T11:22:46.061Z",
+    "updated_at": "2026-08-26T11:22:46.061Z"
   }
 }
