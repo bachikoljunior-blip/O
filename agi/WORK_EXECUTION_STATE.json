@@ -8,8 +8,8 @@
   "lease_generation": 19,
   "fence_token": "work-recovery-fence-v19-4bf549962d183cfddc51f0be39beff858aac2fc356593d1c6d2c23f2bb6bb9b3",
   "started_at": "2026-08-26T03:49:11.916Z",
-  "heartbeat_at": "2026-08-26T06:11:39.012Z",
-  "last_progress_at": "2026-08-26T06:11:39.012Z",
+  "heartbeat_at": "2026-08-26T06:54:58.354Z",
+  "last_progress_at": "2026-08-26T06:54:58.354Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "1772a5ee44311d1e464a99207c73f64104f45989",
   "working_branch": "work/recovery-gen19-revision22-real-responses-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "revision22_action_adherence_publication_blocked_safe_checkpoint",
+  "active_component": "revision22_action_adherence_remote_frozen_authority_publication_blocked",
   "active_unit_id": "unit-4860e14db4afdcb535f9eaac",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -772,14 +772,14 @@
       "observed_at": "2026-08-24T07:19:36.636Z"
     },
     "revision22_action_adherence": {
-      "status": "local_complete_publication_blocked_not_remote_authoritative",
-      "branch": "work/recovery-gen19-revision22-real-responses-v1",
-      "head_sha": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
-      "tree_sha": "74c87ed9e6224cf6541176fc367cca2e4ecb377c",
+      "status": "unpublished_local_head_lost_remote_frozen_authority_only",
+      "prior_branch": "work/recovery-gen19-revision22-real-responses-v1",
+      "prior_head_sha": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
+      "prior_tree_sha": "74c87ed9e6224cf6541176fc367cca2e4ecb377c",
       "remote_branch_confirmed": false,
-      "pull_request": null,
-      "exact_head_ci": null,
-      "updated_at": "2026-08-26T06:11:39.012Z"
+      "local_workspace_available": false,
+      "result_authoritative": false,
+      "updated_at": "2026-08-26T06:54:58.354Z"
     }
   },
   "pending_user_input": null,
@@ -2955,19 +2955,22 @@
       "permission_revision": 25
     },
     "revision22_generated_records_github_publication": {
-      "status": "blocked_by_explicit_sensitive_publication_authorization_requirement",
-      "observed_at": "2026-08-26T06:11:39.012Z",
+      "status": "blocked_and_prior_local_records_lost",
+      "observed_at": "2026-08-26T06:54:58.354Z",
       "scope": "individual_operation",
       "blocks_monitor": false,
       "blocks_project_globally": false,
       "unpublished_data_authoritative": false,
-      "safe_alternative": "Retain exact remote frozen continuation, recheck authorization and remote health next run, and proceed only with independent non-conflicting work.",
+      "safe_alternative": "Retain exact remote frozen continuation and retry monitoring. Do not regenerate or publish until explicit destination-and-payload authorization exists.",
       "rejected_push_head_sha": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
-      "rejected_push_tree_sha": "74c87ed9e6224cf6541176fc367cca2e4ecb377c"
+      "rejected_push_tree_sha": "74c87ed9e6224cf6541176fc367cca2e4ecb377c",
+      "local_workspace_available": false,
+      "prior_local_records_recoverable": false,
+      "remote_frozen_request_authoritative": true
     }
   },
   "termination": {
-    "kind": "active_monitor_and_execution_continue_with_individual_publication_blocker",
+    "kind": "deliberate_publication_blocked_checkpoint_monitor_continues",
     "global_completion": false,
     "user_objective_met": false,
     "explicit_user_stop": false,
@@ -3360,7 +3363,7 @@
     }
   },
   "revision22_action_adherence_publication_precommit": {
-    "status": "local_complete_push_blocked_not_remote_authoritative",
+    "status": "local_workspace_lost_unpublished_records_unavailable_remote_frozen_authority_restored",
     "prepared_at": "2026-08-26T06:10:25.241Z",
     "branch": "work/recovery-gen19-revision22-real-responses-v1",
     "base_main_sha": "5773af15c5c4653cba2010456aa672e52bd312ea",
@@ -3434,17 +3437,30 @@
       "reason": "Safety review requires an end-user-authored authorization that explicitly names GitHub as the destination and the generated invocation, prompt, model-output, response, and native lifecycle payload before this 81-file branch may be published.",
       "workaround_attempted": false,
       "unpublished_records_authoritative": false,
-      "safe_next_action": "Preserve the exact remote frozen invocation and current main authority. Recheck remote health and explicit authorization next run. Publish this exact unchanged head only after the required authorization exists; otherwise continue only independent non-conflicting work."
+      "safe_next_action": "Preserve the exact remote frozen request and current generation-19 checkpoint. Do not reacquire or re-execute solely to restate the unchanged publication blocker. Recheck authorization and remote health next run.",
+      "local_workspace_lost": true,
+      "local_workspace_observed_missing_at": "2026-08-26T06:54:58.354Z"
     },
     "exact_local_continuation": {
       "workspace_branch": "work/recovery-gen19-revision22-real-responses-v1",
       "local_commit_sha": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
       "local_tree_sha": "74c87ed9e6224cf6541176fc367cca2e4ecb377c",
-      "base_main_sha": "5773af15c5c4653cba2010456aa672e52bd312ea",
+      "local_workspace_available": false,
+      "local_records_recoverable": false,
       "remote_authoritative_continuation_remains": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
       "remote_frozen_invocation_id": "invoke-248450c08547af10470c50e6",
-      "local_records_must_not_be_recreated_or_submitted_twice_if_workspace_survives": true,
-      "if_workspace_lost": "Revert to the remote frozen request as sole authority; do not infer successful execution from this state-only record."
+      "next_action": "Re-read explicit publication authorization and remote state on a later run. Only after destination-and-payload authorization is present may a valid owner re-execute the exact remote frozen request once under the existing idempotency/fence contracts; never reconstruct answers from the lost state-only summary."
+    },
+    "local_workspace_checked_at": "2026-08-26T06:54:58.354Z",
+    "local_workspace_available": false,
+    "pull_request": null,
+    "exact_head_ci": null,
+    "result_authority": {
+      "remote_authoritative_result_exists": false,
+      "unpublished_local_result_available": false,
+      "prior_local_summary_is_non_authoritative": true,
+      "prior_local_head_reusable": false,
+      "rule": "Do not infer successful execution, response durability, or tested-route outcome from the state-only summary. The remote frozen request remains the only executable authority."
     }
   }
 }
