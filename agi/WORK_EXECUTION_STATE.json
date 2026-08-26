@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "mode": "work_o_engine_single_writer",
-  "status": "running",
+  "status": "checkpointed",
   "owner_kind": "work_recovery_automation",
   "execution_id": "work-recovery-20260826T085839Z-53dc776e2bbcf2d362d3a414b2e13437",
   "predecessor_execution_id": "work-recovery-20260826T034911916Z-4bf549962d183cfddc51f0be39beff85",
   "lease_generation": 20,
   "fence_token": "work-recovery-fence-v20-53dc776e2bbcf2d362d3a414b2e134379d18710c9fa3681fd8be10852b550ff2",
   "started_at": "2026-08-26T08:58:39.785Z",
-  "heartbeat_at": "2026-08-26T08:58:58.962Z",
-  "last_progress_at": "2026-08-26T08:58:58.962Z",
+  "heartbeat_at": "2026-08-26T09:00:27.301Z",
+  "last_progress_at": "2026-08-26T09:00:27.301Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery",
@@ -24,7 +24,7 @@
   "source_main_sha": "f71c491f611889529dddcd55a6d7e8ecfec9a4fb",
   "working_branch": "work/recovery-gen20-revision22-authorized-continuation-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "generation20_recovery_authorization_refresh_and_safe_continuation_selection",
+  "active_component": "revision22_frozen_remote_authority_generation20_forced_boundary_checkpoint",
   "active_unit_id": "unit-4860e14db4afdcb535f9eaac",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -241,7 +241,7 @@
     "pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "pending_native_invocation_id": "invoke-248450c08547af10470c50e6",
     "durability_status": "PR 306 and PR 307 are main-durable with exact readback. The prior publication lifecycle reached fresh Root under revision 22. Root and pre-application Candidate Evaluate responses plus the new immutable Execute request are checkpointed on remote commit cbb8619f4d7dd6a12fed740fe80764c3c971c71e with exact tree ced01225faead09cf8390e12d7cf2dcccd56b812. Work verification is valid with 51 requests, 50 responses, and exactly one pending request.",
-    "next_action": "Complete generation-19 phase-two CAS from the exact phase-one commit/blob and run authorize_work_mode_recovery locally. Then resume only frozen Execute invoke-248450c08547af10470c50e6: produce six isolated immutable child responses, reveal the private rubric only after all six are durable, verify commitments, perform deterministic judgment, submit the Execute response exactly once, and continue its native O lifecycle.",
+    "next_action": "On the next process, recover generation 21 from this forced-boundary checkpoint using generation+1 CAS. Reconstruct only from latest main and remote authority cbb8619f4d7dd6a12fed740fe80764c3c971c71e; do not recreate the frozen request. Resume invoke-248450c08547af10470c50e6, produce six write-once isolated responses before any private rubric reveal, verify commitments, judge deterministically, submit once, publish through unchanged exact-head CI and expected-head merge if the platform permits, and continue to the next safe falsifiable unit. If a hard platform write constraint recurs, preserve exact observable facts and continue an independent safe non-conflicting unit rather than treating it as project completion.",
     "completed_work_invocation_id": "invoke-b810f007118d82a0565c33cb",
     "next_native_phase": "execute_revision22_action_adherence_measurement",
     "harness_main_merge_sha": "fdedb213be8a271345fe59d0b73b28effe166f42",
@@ -260,7 +260,13 @@
       97911931947,
       97911932260,
       97923405440
-    ]
+    ],
+    "remote_authority_commit": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
+    "remote_authority_snapshot_blob_sha": "8f86a6e152cc6ab1fd088803c41975f373a40953",
+    "unpublished_generation19_head": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
+    "unpublished_generation19_head_authoritative": false,
+    "unpublished_generation19_workspace_available": false,
+    "response_exists_on_authoritative_remote": false
   },
   "model": {
     "required": "highest_performance_model_available_to_work",
@@ -2470,19 +2476,21 @@
   "finalization_blob_sha": "3cb4ca1be8249e310da83049256a7dfb8daa4a71",
   "finalization_readback_verified": true,
   "checkpoint": {
-    "checkpointed_at": "2026-08-25T17:15:28.696Z",
-    "reason": "Physical run boundary while exact-head CI for the hardened public-input head is still in progress. No merge, rubric reveal, route execution, result, or partial success claim occurred.",
+    "checkpointed_at": "2026-08-26T09:00:27.301Z",
+    "reason": "Forced process boundary immediately after safe generation-20 recovery and exact authorization readback. This is not a permission wait, discretionary stop, completion, or claim of progress on the frozen semantic unit.",
+    "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
+    "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
+    "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "exact_pending_work_invocation_id": "invoke-248450c08547af10470c50e6",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-248450c08547af10470c50e6/request.json",
     "exact_pending_request_digest": "e8d9e30cf7f46c8ad50bfd0ca1f4a9b3636c60d636064d2386c97bd1c3ccc143",
     "exact_pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
-    "remote_checkpoint_commit": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
-    "remote_checkpoint_tree": "ced01225faead09cf8390e12d7cf2dcccd56b812",
-    "next_unit_id": "unit-revision22-public-paired-route-precommit-inputs",
-    "next_scope": "agi/context-kernel/held-out-action-adherence-revision22-v1",
+    "remote_authority_commit": "cbb8619f4d7dd6a12fed740fe80764c3c971c71e",
+    "no_response_on_authoritative_remote": true,
     "no_partial_result_claimed": true,
     "user_level_objective_met": false,
-    "agi_claim_supported": false
+    "agi_claim_supported": false,
+    "successor_recovery_required": true
   },
   "inbox_revision21_reconciliation": {
     "status": "merged_acknowledged_main_durable",
@@ -2972,12 +2980,11 @@
     }
   },
   "termination": {
-    "kind": "deliberate_publication_blocked_checkpoint_monitor_continues",
-    "global_completion": false,
-    "user_objective_met": false,
-    "explicit_user_stop": false,
-    "self_disable_attempted": false,
-    "monitor_should_remain_enabled": true
+    "kind": "forced_process_boundary",
+    "observed_at": "2026-08-26T09:00:27.301Z",
+    "normal_completion": false,
+    "automation_remains_enabled": true,
+    "exact_resume_condition": "next scheduled monitor run; recover from latest main with generation+1 fenced CAS if no fresher owner activity exists"
   },
   "revision22_public_inputs_publication_precommit": {
     "status": "merged_main_durable_exact_readback",
@@ -3473,5 +3480,36 @@
     "status": "active",
     "applied_at": "2026-08-26T08:58:39.785Z",
     "interpretation": "No discretionary stop or ordinary permission checkpoint while the upper objective is unmet and safe non-conflicting work exists; hard platform and safety constraints remain."
+  },
+  "authorization_validation": {
+    "validated_at": "2026-08-26T09:00:27.301Z",
+    "implementation_contract": "src/agi/work_mode_monitor.py:authorize_work_mode_recovery",
+    "authorized": true,
+    "reason": "exact generation+1 lease and two-phase remote readback were verified",
+    "proof": {
+      "observed_blob_sha": "cc6039c475ad46f4f643c228f3b32b7e0a5c5090",
+      "acquisition_commit_sha": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
+      "acquisition_blob_sha": "d27753c97c050a956dbad17679a39ebf440be9b4",
+      "finalization_commit_sha": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
+      "finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
+      "readback_commit_sha": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
+      "readback_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34"
+    }
+  },
+  "current_blockers": {
+    "revision22_generated_records_github_publication": {
+      "status": "hard_platform_write_constraint_last_observed; standing_authorization_v2_now_main_durable; must_be_retested_by_successor_without_workaround",
+      "observed_at": "2026-08-26T09:00:27.301Z",
+      "scope": "individual_operation",
+      "blocks_monitor": false,
+      "blocks_project_globally": false,
+      "unpublished_data_authoritative": false,
+      "safe_alternative": "Reconstruct the frozen unit from authoritative remote state and retry the ordinary safe publication path once under the new main-durable authorization. If the platform still denies it, record the denial and continue independent safe work; do not retain unverifiable local success claims.",
+      "rejected_push_head_sha": "5c7f4898f4987ccfcf06c5a91a90227b82ce06eb",
+      "prior_local_records_recoverable": false,
+      "remote_frozen_request_authoritative": true,
+      "continuous_authorization_commit": "f71c491f611889529dddcd55a6d7e8ecfec9a4fb",
+      "continuous_authorization_blob_sha": "b72415faefa22c63c3eed0cd32c88f8bdcd0c7bb"
+    }
   }
 }
