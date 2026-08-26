@@ -8,8 +8,8 @@
   "lease_generation": 21,
   "fence_token": "work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de",
   "started_at": "2026-08-26T11:22:46.061Z",
-  "heartbeat_at": "2026-08-26T11:22:46.061Z",
-  "last_progress_at": "2026-08-26T11:22:46.061Z",
+  "heartbeat_at": "2026-08-26T11:24:16.137Z",
+  "last_progress_at": "2026-08-26T11:24:16.137Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -24,7 +24,7 @@
   "source_main_sha": "27758322ad5eeb68fdcd82c59cc94348481ad514",
   "working_branch": "work/recovery-gen21-revision22-refire-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "generation21_refire_phase_one_acquired_pending_readback",
+  "active_component": "generation21_refire_two_phase_authorized_pending_native_launch",
   "active_unit_id": "unit-4860e14db4afdcb535f9eaac",
   "user_input_inbox": {
     "path": "agi/USER_INPUT_INBOX.json",
@@ -288,12 +288,12 @@
   },
   "remote_persistence": {
     "published_on_main": true,
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "expected_blob_sha": "d6b0d0c4fa6c987d1c682e8d91f021894db7ea44",
-    "result_commit_sha": null,
-    "result_blob_sha": null,
-    "finalization_expected_blob_sha": null,
-    "note": "Generation 21 phase-one acquisition pending exact remote readback and phase-two finalization; state-only mutation is not refire success."
+    "result_commit_sha": "33f06c949854b15e5f311e4b126ef60285b22543",
+    "result_blob_sha": "8a57a49fd08dce876d938eb861aa9e5e3f247e52",
+    "finalization_expected_blob_sha": "8a57a49fd08dce876d938eb861aa9e5e3f247e52",
+    "note": "Generation 21 phase-one acquisition commit/blob exactly read back; phase-two finalization submitted. State-only mutation remains insufficient for refire success."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -313,12 +313,12 @@
     "note": "Revision 24 corrects revision 23 as not applicable to primary O. Preserve and resume the existing revision-22-bound Execute without a new Work handoff or routing detour. The paired-route harness remains valid support only if freshly revalidated against that frozen Execute after the correction is main-durable. Do not replay superseded or orphan invocations, repeat checkpoint-inheritance controls, treat verbal comprehension as behavior, publish unapproved generated records, or generalize any result beyond the exact tested routes, three scenarios, revision, executor/model binding, budget, judge, and conditions."
   },
   "expected_blob_sha": "d6b0d0c4fa6c987d1c682e8d91f021894db7ea44",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
-  "acquisition_phase": "phase_one_acquired_pending_remote_readback",
+  "result_commit_sha": "33f06c949854b15e5f311e4b126ef60285b22543",
+  "result_blob_sha": "8a57a49fd08dce876d938eb861aa9e5e3f247e52",
+  "finalize_expected_blob_sha": "8a57a49fd08dce876d938eb861aa9e5e3f247e52",
+  "readback_of_commit_sha": "33f06c949854b15e5f311e4b126ef60285b22543",
+  "verified_remote_readback": true,
+  "acquisition_phase": "two_phase_finalization_submitted_pending_exact_readback",
   "recovery_observation": {
     "observed_at": "2026-08-26T11:22:46.061Z",
     "predecessor_execution_id": "work-recovery-20260826T085839Z-53dc776e2bbcf2d362d3a414b2e13437",
@@ -3503,7 +3503,7 @@
   },
   "refire": {
     "schema_version": 1,
-    "status": "acquisition_in_progress",
+    "status": "refire_pending",
     "idempotency_key": "o-work-refire:g21:work-recovery-fence-v21-fbb10c9dd134d99ef16aa628bb60e9add12734bbed5d615bd9b6510b466a12de:cbb8619f4d7dd6a12fed740fe80764c3c971c71e:invoke-248450c08547af10470c50e6",
     "attempt_id": "work-recovery-20260826T112246061Z-0cf9bce76a217ac818b03612850e9dfc",
     "target_generation": 21,
@@ -3522,6 +3522,7 @@
     "launch_accepted": false,
     "substantive_liveness_event": null,
     "created_at": "2026-08-26T11:22:46.061Z",
-    "updated_at": "2026-08-26T11:22:46.061Z"
+    "updated_at": "2026-08-26T11:24:16.137Z",
+    "pending_reason": "two-phase finalization requires exact remote readback and authorize_work_mode_recovery validation before native launch"
   }
 }
