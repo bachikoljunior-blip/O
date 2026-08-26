@@ -1,9 +1,9 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "status": "active",
   "source": "user_chat",
   "received_at": "2026-08-26T05:15:30Z",
-  "strengthened_at": "2026-08-26T08:38:02Z",
+  "strengthened_at": "2026-08-26T09:17:34Z",
   "scope": "primary_o_and_successor_recovery_execution",
   "authorization": {
     "routine_safe_technical_execution_requires_further_user_approval": false,
@@ -17,6 +17,16 @@
     "lack_of_confidence_local_saturation_or_desire_to_reassess_is_not_a_stop_condition": true,
     "report_completion_or_checkpoint_creation_is_not_a_stop_condition": true
   },
+  "mechanical_enforcement": {
+    "guard_module": "agi.work_continuity_guard",
+    "checkpoint_transition_requires_guard_allow": true,
+    "state_local_forced_boundary_claim_is_evidence": false,
+    "safe_work_checkpoint_requires_fresh_external_runtime_receipt": true,
+    "receipt_must_bind_execution_id_and_lease_generation": true,
+    "no_safe_work_checkpoint_requires_external_blocking_receipts_attempted_alternatives_and_machine_resume_condition": true,
+    "denied_transition_action": "continue_running_or_select_next_unit",
+    "generation20_self_attested_forced_boundary_is_not_precedent": true
+  },
   "discretionary_stop_policy": {
     "forbidden_reasons": [
       "the_current_unit_finished",
@@ -26,10 +36,11 @@
       "the_model_prefers_to_pause_or_reassess_later",
       "the_current_method_is_uncertain_or_saturated_while_another_safe_unit_can_be_selected",
       "a_nonessential_user_response_is_absent",
-      "a_checkpoint_has_been_written"
+      "a_checkpoint_has_been_written",
+      "the_primary_model_declares_its_own_process_boundary_without_external_runtime_attestation"
     ],
     "required_behavior": "If the upper-level objective remains unmet, immediately choose and execute the best available safe non-conflicting next unit. If the present path is blocked, switch to another useful path rather than voluntarily ending the primary execution. Preserve finite reevaluation conditions for deferred work and continue elsewhere.",
-    "no_safe_work_behavior": "If genuinely no safe executable work exists, persist the exact blocking facts, attempted alternatives, and a machine-checkable or externally observable resumption condition. Do not mislabel this as completion."
+    "no_safe_work_behavior": "If genuinely no safe executable work exists, persist exact blocking facts, externally observable receipts, attempted alternatives, and a machine-checkable resumption condition. Do not mislabel this as completion."
   },
   "non_blocking_exceptions": {
     "hard_platform_or_safety_constraints_remain": true,
@@ -37,6 +48,6 @@
     "material_paid_spend_or_irreducibly_account_holder_actions_may_still_require_the_user": true,
     "when_an_exception_is_pending_continue_best_safe_non_conflicting_work_instead_of_stopping_primary_execution": true
   },
-  "instruction": "Do not create a user-permission checkpoint or discretionary stop for ordinary safe O research, implementation, evaluation, repository publication, recovery, or protocol-required execution records. While the upper-level objective is unmet, finishing one unit must transition directly to the next safe falsifiable unit. If the platform forces a run to end, persist exact continuation and leave the lease recoverable; the next authorized watchdog generation should resume automatically. A user-only blocker is local to that action and is not a project-wide stop condition while safe executable work remains.",
+  "instruction": "Do not create a user-permission checkpoint or discretionary stop for ordinary safe O research, implementation, evaluation, repository publication, recovery, or protocol-required execution records. Before writing checkpointed, interrupted, or released status while the objective is unmet, run the mechanical continuity guard against the running and proposed states. A denial means remain running and continue the present unit or select the next safe falsifiable unit. A model-authored claim that the process boundary was forced is not evidence. If the platform actually kills the process without a verified boundary receipt, leave the running lease to become stale so the watchdog can recover it rather than manufacturing a checkpoint. A user-only blocker is local to that action and is not a project-wide stop condition while safe executable work remains.",
   "claim_boundary": "This is execution-continuity authorization only. It does not waive hard safety/platform constraints, single-writer, fence, CAS, idempotency, secret handling, truthful reporting, evidence integrity, executor binding, or AGI claim standards."
 }

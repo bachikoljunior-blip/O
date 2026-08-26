@@ -1,0 +1,49 @@
+name: directive-source-preflight
+
+on:
+  push:
+    branches: [main, 'agent/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  directive-source-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify typed directive source binding
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          inbox = json.loads(Path('agi/USER_INPUT_INBOX.json').read_text(encoding='utf-8'))
+          ledger = json.loads(Path('agi/USER_DIRECTIVE_EVENTS.json').read_text(encoding='utf-8'))
+
+          def digest(value):
+              encoded = json.dumps(
+                  value,
+                  ensure_ascii=False,
+                  sort_keys=True,
+                  separators=(',', ':'),
+                  default=str,
+              ).encode('utf-8')
+              return hashlib.sha256(encoded).hexdigest()
+
+          expected_revision = inbox['revision']
+          expected_digest = digest(inbox)
+          actual_revision = ledger.get('source', {}).get('revision')
+          actual_digest = ledger.get('source', {}).get('content_digest')
+          print(f'expected_revision={expected_revision}')
+          print(f'expected_content_digest={expected_digest}')
+          print(f'actual_revision={actual_revision}')
+          print(f'actual_content_digest={actual_digest}')
+          if inbox.get('entries'):
+              print(f'latest_entry_digest={digest(inbox["entries"][-1])}')
+          if actual_revision != expected_revision or actual_digest != expected_digest:
+              raise SystemExit('typed directive source binding is stale')
+          PY
