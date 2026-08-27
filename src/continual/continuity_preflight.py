@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 
-_POLICY_REVISION = 28
+_POLICY_REVISION = 29
 _POLICY_PATHS = (
     "agi/USER_INPUT_INBOX.json",
     "agi/USER_DIRECTIVE_EVENTS.json",
@@ -21,6 +21,10 @@ _REQUIRED_ATOMS = {
     "r27-repair-unauthorized-stop-before-new-work",
     "r28-eliminate-and-validate-cause-before-resume",
     "r28-resume-fails-closed-without-causal-remediation",
+    "r29-task-chat-input-exactly-once-cas",
+    "r29-remove-stop-recurrence-causes",
+    "r29-never-fabricate-lost-local-continuation",
+    "r29-general-repair-is-not-payload-authorization",
 }
 _STOP_SIGNALS = (
     "approval",
@@ -228,6 +232,22 @@ def _legitimate_stop(state: Mapping[str, Any]) -> PriorStopClassification | None
         "hard_platform_safety_prohibition",
         "secret_or_account_holder_only_blocker",
     }:
+        action_local = (
+            termination.get("scope") in {
+                "individual_effect",
+                "individual_operation",
+                "action_local",
+            }
+            or termination.get("blocks_project_globally") is False
+            or termination.get("blocker_type")
+            == "payload_specific_github_publication_authorization"
+        )
+        if action_local:
+            return PriorStopClassification(
+                "discretionary_stop_detected",
+                "an action-local blocker was misclassified as a global execution stop",
+                refs or (),
+            )
         valid = valid and termination.get("non_overridable") is True
     elif kind == "fresh_different_writer_detected":
         valid = (
@@ -266,7 +286,7 @@ def _legitimate_stop(state: Mapping[str, Any]) -> PriorStopClassification | None
 
 
 def classify_prior_stop(state: Mapping[str, Any]) -> PriorStopClassification:
-    """Classify only the bounded stop categories used by the revision-28 guard.
+    """Classify only the bounded stop categories used by the revision-29 guard.
 
     Legitimate stops must be active and structurally corroborated. Merely placing
     safety-like words in an error string cannot override discretionary-stop repair.
@@ -469,7 +489,7 @@ def assert_work_resume_continuity_preflight(
     """Fail closed unless a detected prior stop cause was eliminated before resume.
 
     Repositories without O's authoritative Work execution state are unaffected. Once
-    inbox revision 28 is active, however, every resume is bound to a generation- and
+    inbox revision 29 is active, however, every resume is bound to a generation- and
     fence-specific causal preflight. A heartbeat, lease rotation, blocker restatement,
     or status rewrite cannot satisfy this check.
     """
@@ -517,6 +537,23 @@ def assert_work_resume_continuity_preflight(
         raise ContinuityPreflightError("causal continuity strategy is not enabled")
     if rules.get("resume_without_validated_causal_remediation") is not False:
         raise ContinuityPreflightError("strategy does not fail closed against unsafe resume")
+
+    input_state = _mapping(
+        state.get("user_input_inbox"),
+        "state.user_input_inbox",
+    )
+    acknowledged_revision = input_state.get("highest_acknowledged_revision")
+    if (
+        not isinstance(acknowledged_revision, int)
+        or isinstance(acknowledged_revision, bool)
+    ):
+        raise ContinuityPreflightError(
+            "state user-input acknowledgement revision must be an integer"
+        )
+    if acknowledged_revision != revision:
+        raise ContinuityPreflightError(
+            "current inbox revision is unacknowledged; ingest it before native resume"
+        )
 
     preflight = _mapping(
         state.get("start_of_run_continuity_preflight"),

@@ -25,16 +25,20 @@ def _digest(path: Path) -> str:
 
 
 def _install_policy(root: Path, run_id: str, scenario_state: dict) -> None:
-    _write(root / "agi/USER_INPUT_INBOX.json", {"revision": 28})
+    _write(root / "agi/USER_INPUT_INBOX.json", {"revision": 29})
     _write(
         root / "agi/USER_DIRECTIVE_EVENTS.json",
         {
-            "source": {"revision": 28},
+            "source": {"revision": 29},
             "atoms": [
                 {"atom_id": "r27-start-of-run-discretionary-stop-preflight"},
                 {"atom_id": "r27-repair-unauthorized-stop-before-new-work"},
                 {"atom_id": "r28-eliminate-and-validate-cause-before-resume"},
                 {"atom_id": "r28-resume-fails-closed-without-causal-remediation"},
+                {"atom_id": "r29-task-chat-input-exactly-once-cas"},
+                {"atom_id": "r29-remove-stop-recurrence-causes"},
+                {"atom_id": "r29-never-fabricate-lost-local-continuation"},
+                {"atom_id": "r29-general-repair-is-not-payload-authorization"},
             ],
         },
     )
@@ -55,10 +59,11 @@ def _install_policy(root: Path, run_id: str, scenario_state: dict) -> None:
         "lease_generation": 28,
         "fence_token": "adversarial-fence",
         "active_run_id": run_id,
+        "user_input_inbox": {"highest_acknowledged_revision": 29},
     }
     state["start_of_run_continuity_preflight"] = {
         "schema_version": 1,
-        "policy_revision": 28,
+        "policy_revision": 29,
         "execution_id": state["execution_id"],
         "lease_generation": state["lease_generation"],
         "fence_token_digest": hashlib.sha256(state["fence_token"].encode()).hexdigest(),
@@ -94,8 +99,8 @@ def test_adversarial_matrix_is_exact_and_deterministic() -> None:
     first = run_adversarial_classification_matrix()
     second = run_adversarial_classification_matrix()
     assert first == second
-    assert first["scenario_count"] == 8
-    assert first["passed_count"] == 8
+    assert first["scenario_count"] == 9
+    assert first["passed_count"] == 9
     assert first["failed_count"] == 0
 
 
