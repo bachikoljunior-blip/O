@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -90,6 +91,49 @@ def _safe_reference(root: Path, reference: str, field: str) -> Path:
     if resolved != root and root not in resolved.parents:
         raise ContinuityPreflightError(f"{field} escapes the repository")
     return resolved
+
+
+def _git_blob_at_commit(
+    root: Path,
+    commit_sha: str,
+    reference: str,
+    field: str,
+) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "ls-tree", "-z", commit_sha, "--", reference],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ContinuityPreflightError(
+            f"cannot verify {field} in continuation source commit"
+        ) from exc
+    entries = [entry for entry in completed.stdout.split(b"\0") if entry]
+    if completed.returncode != 0 or len(entries) != 1:
+        raise ContinuityPreflightError(
+            f"{field} is not present in continuation source commit"
+        )
+    try:
+        metadata, raw_path = entries[0].split(b"\t", 1)
+        mode, object_type, blob_sha = metadata.decode("ascii").split()
+        actual_path = raw_path.decode("utf-8")
+    except (UnicodeError, ValueError) as exc:
+        raise ContinuityPreflightError(
+            f"cannot parse {field} from continuation source commit"
+        ) from exc
+    if (
+        mode not in {"100644", "100755"}
+        or object_type != "blob"
+        or _GIT_OBJECT_SHA.fullmatch(blob_sha) is None
+        or actual_path != reference
+    ):
+        raise ContinuityPreflightError(
+            f"{field} has an invalid continuation source tree entry"
+        )
+    return blob_sha
 
 
 def _fence_digest(value: Any) -> str:
@@ -324,6 +368,30 @@ def _assert_remote_durable_continuation(
         raise ContinuityPreflightError("continuation durability fence mismatch")
     if proof.get("source_main_sha") != snapshot_head:
         raise ContinuityPreflightError("continuation durability main commit mismatch")
+    if (
+        _git_blob_at_commit(
+            root,
+            snapshot_head,
+            expected_request_ref,
+            "pending Work request",
+        )
+        != request_blob
+    ):
+        raise ContinuityPreflightError(
+            "pending Work request source-commit blob mismatch"
+        )
+    if (
+        _git_blob_at_commit(
+            root,
+            snapshot_head,
+            snapshot_ref,
+            "continuation snapshot",
+        )
+        != snapshot_blob
+    ):
+        raise ContinuityPreflightError(
+            "continuation snapshot source-commit blob mismatch"
+        )
     if proof.get("pending_work_invocation_id") != pending_id:
         raise ContinuityPreflightError("continuation durability invocation mismatch")
     if proof.get("pending_request_ref") != expected_request_ref:
