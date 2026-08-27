@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation24_authorized_causal_repair_in_progress",
+  "active_component": "generation24_causal_repair_pr323_exact_head_ci_running",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation24-stalled-work-control-repair-v1",
   "authoritative_source_observation": {
@@ -25,19 +25,19 @@
     "user_direction_revision": 29
   },
   "authorization_validation": {
-    "authorized": true,
+    "validated_at": "2026-08-27T23:31:55.816Z",
     "implementation_contract": "src/agi/work_mode_monitor.py:authorize_work_mode_recovery",
-    "proof": {
-      "acquisition_blob_sha": "15dbd0a41d43b51944b153b5822b647f81cbf08c",
-      "acquisition_commit_sha": "67f38d68c7a5bfa8755383cf19086e400220850f",
-      "finalization_blob_sha": "9c3a4fcd3c240d49cc2ce7da81bbeafadcc8e835",
-      "finalization_commit_sha": "cce8e299471a25a46b6acecfd0034c1ae7d502cc",
-      "observed_blob_sha": "ed6578feb9374b6752fd4b360f15735284cd6625",
-      "readback_blob_sha": "9c3a4fcd3c240d49cc2ce7da81bbeafadcc8e835",
-      "readback_commit_sha": "cce8e299471a25a46b6acecfd0034c1ae7d502cc"
-    },
+    "authorized": true,
     "reason": "exact generation+1 lease and two-phase remote readback were verified",
-    "validated_at": "2026-08-27T02:41:00.000Z"
+    "proof": {
+      "observed_blob_sha": "bc99b8696b03ef39bb1a5285ecb9f9f5be64b6b6",
+      "acquisition_commit_sha": "da0546aaf57b52bbb60334a4c51abfdd790b66c4",
+      "acquisition_blob_sha": "5096edf82ee8fc293aaddcb7fa9cab8d895b5511",
+      "finalization_commit_sha": "b4a04e2b7530353445ef7847828a85856d21d21c",
+      "finalization_blob_sha": "3fc1d16e6d01cba96c26b79a61f45bc0f2e57e55",
+      "readback_commit_sha": "b4a04e2b7530353445ef7847828a85856d21d21c",
+      "readback_blob_sha": "3fc1d16e6d01cba96c26b79a61f45bc0f2e57e55"
+    }
   },
   "behavioral_source_renewal_integration": {
     "authorized_at": "2026-08-24T04:56:21.012Z",
@@ -1272,13 +1272,38 @@
     },
     "request_recreated": false,
     "schema_version": 1,
-    "status": "lease_finalized_causal_repair_pending",
+    "status": "causal_repair_pr323_exact_head_ci_running",
     "substantive_liveness_event": null,
     "target_fence_token": "work-recovery-fence-v24-ccaff5cbbc62767b80cce935050cb27f4050bb69c54ba3eb20fe572b0118682f",
     "target_generation": 24,
-    "updated_at": "2026-08-27T23:18:07.812Z"
+    "updated_at": "2026-08-27T23:31:55.816Z",
+    "cause_repair_publication": {
+      "status": "exact_head_ci_running",
+      "pull_request": 323,
+      "exact_head_sha": "970c543ff1c13713b920030fa00c0269b4f95c63",
+      "base_sha": "b4a04e2b7530353445ef7847828a85856d21d21c",
+      "test_workflow_run_id": 33126120572,
+      "test_status": "in_progress",
+      "directive_workflow_run_id": 33126120627,
+      "directive_status": "completed_success",
+      "local_validation": {
+        "focused_tests_passed": 26,
+        "compileall_passed": true,
+        "json_validation_passed": true,
+        "diff_check_passed": true
+      },
+      "native_mutation_before_repair_merge": false
+    },
+    "cause_repair_liveness_event": {
+      "kind": "branch_pr_ci_progress",
+      "occurred_after_acquisition": true,
+      "pull_request": 323,
+      "exact_head_sha": "970c543ff1c13713b920030fa00c0269b4f95c63",
+      "occurred_at": "2026-08-27T23:31:55.816Z",
+      "claim_boundary": "This is generation-24 causal-repair publication progress, not native Work refire or user-objective completion."
+    }
   },
-  "heartbeat_at": "2026-08-27T23:18:07.812Z",
+  "heartbeat_at": "2026-08-27T23:31:55.816Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2107,7 +2132,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-27T04:13:33.000Z",
+  "last_progress_at": "2026-08-27T23:31:55.816Z",
   "lease_generation": 24,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -2548,13 +2573,13 @@
   "pending_user_input": null,
   "post_acquisition_progress_contract": {
     "concrete_effect_selected": "Implement and exact-head validate revision-29 guards for action-local blocker classification and unacknowledged input; record irreversible generation-23 local-only loss; bind the remote-durable revision-85 Execute request; submit one evidence-based response without repeating PR 321; resume native O through a substantive next-boundary event.",
-    "effect_attempted": false,
+    "effect_attempted": true,
     "generation": 24,
     "native_request_created": false,
     "new_exact_blocker_persisted": false,
     "new_exact_blocker_reached": false,
-    "observed_at": "2026-08-27T23:17:45.430Z",
-    "progress_contract_result": "acquisition_pending_two_phase_readback",
+    "observed_at": "2026-08-27T23:31:55.816Z",
+    "progress_contract_result": "causal_repair_pr_created_exact_head_ci_running",
     "state_only_success_claimed": false
   },
   "postmerge_lifecycle_publication_precommit": {
@@ -3189,10 +3214,10 @@
     "result_commit_sha": "da0546aaf57b52bbb60334a4c51abfdd790b66c4",
     "result_blob_sha": "5096edf82ee8fc293aaddcb7fa9cab8d895b5511",
     "finalization_expected_blob_sha": "5096edf82ee8fc293aaddcb7fa9cab8d895b5511",
-    "finalization_commit_sha": null,
-    "finalization_blob_sha": null,
-    "finalization_readback_verified": false,
-    "note": "Generation 24 acquisition was read back exactly. This finalization records the acquisition proof; finalization commit/blob readback follows before causal repair mutation."
+    "finalization_commit_sha": "b4a04e2b7530353445ef7847828a85856d21d21c",
+    "finalization_blob_sha": "3fc1d16e6d01cba96c26b79a61f45bc0f2e57e55",
+    "finalization_readback_verified": true,
+    "note": "Generation 24 two-phase acquisition/finalization and exact remote readback are validated. PR 323 is the substantive causal-repair effect."
   },
   "research_feed_cursor": {
     "additional_candidate_ids": [
