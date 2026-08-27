@@ -273,3 +273,13 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
     assert result["continuation_durability"]["pending_request_blob_sha"] == (
         request_blob
     )
+
+    state["exact_continuation"]["run_snapshot_ref"] = "../../outside.json"
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+    with pytest.raises(ContinuityPreflightError, match="escapes the repository"):
+        assert_work_resume_continuity_preflight(
+            root,
+            run_id=run_id,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="chatgpt-work-model-unverified",
+        )
