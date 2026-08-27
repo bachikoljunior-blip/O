@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "policy_revision": 29,
+  "scenario_count": 9,
+  "passed_count": 9,
+  "failed_count": 0,
+  "new_recurrence_guards": [
+    {
+      "id": "action_local_payload_hold_not_global_stop",
+      "result": "passed",
+      "evidence": "A payload-specific GitHub publication safety-review hold scoped to one effect is classified as a discretionary global-stop defect, even when its legacy kind says secret_or_account_holder_only_blocker."
+    },
+    {
+      "id": "unacknowledged_input_blocks_native_resume",
+      "result": "passed",
+      "evidence": "Native resume raises before snapshot mutation when USER_INPUT_INBOX revision 29 exceeds the execution state's acknowledged revision."
+    }
+  ],
+  "validation": {
+    "command": "uv run --with pytest pytest -q tests/test_continuity_preflight.py tests/test_continuity_preflight_adversarial.py tests/test_recovery_audit.py tests/test_work_mode_monitor.py",
+    "result": "26 passed",
+    "duration_seconds": 1.55
+  },
+  "claim_boundary": "This validates only the declared revision-29 stop-classification and pre-resume input-acknowledgement guards. It does not prove general recovery reliability, external production capability, AGI, or completion of the user's objective."
+}

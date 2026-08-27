@@ -11,6 +11,7 @@ import pytest
 from continual.continuity_preflight import (
     ContinuityPreflightError,
     assert_work_resume_continuity_preflight,
+    classify_prior_stop,
 )
 from continual.work_session import WorkSession, submit_work_response
 
@@ -55,15 +56,19 @@ def _entry_output(request: dict) -> dict:
 
 
 def _install_policy(root: Path, run_id: str) -> dict:
-    inbox = {"schema_version": 1, "revision": 28, "entries": []}
+    inbox = {"schema_version": 1, "revision": 29, "entries": []}
     ledger = {
         "schema_version": 1,
-        "source": {"revision": 28},
+        "source": {"revision": 29},
         "atoms": [
             {"atom_id": "r27-start-of-run-discretionary-stop-preflight"},
             {"atom_id": "r27-repair-unauthorized-stop-before-new-work"},
             {"atom_id": "r28-eliminate-and-validate-cause-before-resume"},
             {"atom_id": "r28-resume-fails-closed-without-causal-remediation"},
+            {"atom_id": "r29-task-chat-input-exactly-once-cas"},
+            {"atom_id": "r29-remove-stop-recurrence-causes"},
+            {"atom_id": "r29-never-fabricate-lost-local-continuation"},
+            {"atom_id": "r29-general-repair-is-not-payload-authorization"},
         ],
     }
     strategy = {
@@ -85,6 +90,7 @@ def _install_policy(root: Path, run_id: str) -> dict:
         "lease_generation": 28,
         "fence_token": fence,
         "active_run_id": run_id,
+        "user_input_inbox": {"highest_acknowledged_revision": 29},
         "termination": {"kind": "refire_failed_retry_required_not_complete"},
         "refire": {
             "failure": {
@@ -99,7 +105,7 @@ def _install_policy(root: Path, run_id: str) -> dict:
 def _valid_preflight(root: Path, state: dict, run_id: str) -> dict:
     return {
         "schema_version": 1,
-        "policy_revision": 28,
+        "policy_revision": 29,
         "execution_id": state["execution_id"],
         "lease_generation": state["lease_generation"],
         "fence_token_digest": hashlib.sha256(state["fence_token"].encode()).hexdigest(),
@@ -193,6 +199,59 @@ def test_resume_proceeds_only_after_cause_elimination_validation(tmp_path: Path)
     resumed = session.resume(run_id, max_steps=1)
     assert resumed["snapshot"]["phase"] == "root_pending"
     assert resumed["pending"] == []
+
+
+def test_action_local_publication_hold_is_not_a_global_legitimate_stop() -> None:
+    classification = classify_prior_stop(
+        {
+            "status": "running",
+            "termination": {
+                "active": True,
+                "kind": "secret_or_account_holder_only_blocker",
+                "non_overridable": True,
+                "scope": "individual_effect",
+                "blocks_project_globally": False,
+                "blocker_type": "payload_specific_github_publication_authorization",
+                "evidence_refs": ["receipt:payload-review-denial"],
+            },
+        }
+    )
+
+    assert classification.kind == "discretionary_stop_detected"
+    assert "action-local blocker" in classification.reason
+
+
+def test_unacknowledged_current_inbox_revision_rejects_before_native_mutation(
+    tmp_path: Path,
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-unacknowledged-input"
+    session = WorkSession(root)
+    started = session.start("freeze entry before input acknowledgement", run_id=run_id)
+    request = started["pending"][0]
+    submit_work_response(
+        root,
+        request["invocation_id"],
+        _entry_output(request),
+        executor_binding="current_chatgpt_work_session",
+        model_identity="chatgpt-work-model-unverified",
+    )
+    state = _install_policy(root, run_id)
+    state["start_of_run_continuity_preflight"] = _valid_preflight(
+        root, state, run_id
+    )
+    state["user_input_inbox"]["highest_acknowledged_revision"] = 28
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+    snapshot_path = root / ".continual" / "runs" / run_id / "snapshot.json"
+    before = snapshot_path.read_bytes()
+
+    with pytest.raises(
+        ContinuityPreflightError,
+        match="current inbox revision is unacknowledged",
+    ):
+        session.resume(run_id)
+
+    assert snapshot_path.read_bytes() == before
 
 
 def test_pending_resume_requires_remote_durable_request_and_snapshot(
