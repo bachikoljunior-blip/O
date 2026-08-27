@@ -47,7 +47,7 @@ def _proof() -> WorkModeCASProof:
 
 
 def _acquired(observed: dict) -> dict:
-    return {
+    acquired = {
         "schema_version": 1,
         "status": "running",
         "owner_kind": "work_recovery_automation",
@@ -64,6 +64,9 @@ def _acquired(observed: dict) -> dict:
         "readback_of_commit_sha": ACQUIRE_COMMIT,
         "verified_remote_readback": True,
     }
+    if "user_input_inbox" in observed:
+        acquired["user_input_inbox"] = deepcopy(observed["user_input_inbox"])
+    return acquired
 
 
 def test_fresh_owner_suppresses_duplicate_and_never_authorizes_mutation() -> None:
@@ -72,6 +75,52 @@ def test_fresh_owner_suppresses_duplicate_and_never_authorizes_mutation() -> Non
     assert decision.action == "suppress_duplicate"
     assert decision.recovery_eligible is False
     assert decision.mutation_authorized is False
+
+
+def test_fresh_owner_surfaces_new_user_input_without_allowing_a_duplicate() -> None:
+    state = _state()
+    state["user_input_inbox"] = {"highest_acknowledged_revision": 7}
+
+    pending = evaluate_work_mode_monitor(
+        state,
+        now=NOW,
+        migration_present=True,
+        latest_user_input_revision=8,
+    )
+    caught_up = evaluate_work_mode_monitor(
+        state,
+        now=NOW,
+        migration_present=True,
+        latest_user_input_revision=7,
+    )
+
+    assert pending.action == "suppress_duplicate_surface_user_input"
+    assert pending.recovery_eligible is False
+    assert pending.mutation_authorized is False
+    assert pending.latest_user_input_revision == 8
+    assert pending.acknowledged_user_input_revision == 7
+    assert pending.unacknowledged_user_input is True
+    assert caught_up.action == "suppress_duplicate"
+    assert caught_up.unacknowledged_user_input is False
+
+
+def test_stale_owner_keeps_new_user_input_visible_while_remaining_recoverable() -> None:
+    state = _state(age_seconds=901)
+    state["user_input_inbox"] = {"highest_acknowledged_revision": 7}
+
+    decision = evaluate_work_mode_monitor(
+        state,
+        now=NOW,
+        migration_present=True,
+        latest_user_input_revision=8,
+    )
+
+    assert decision.action == "recover_stale"
+    assert decision.recovery_eligible is True
+    assert decision.mutation_authorized is False
+    assert decision.latest_user_input_revision == 8
+    assert decision.acknowledged_user_input_revision == 7
+    assert decision.unacknowledged_user_input is True
 
 
 def test_stale_and_checkpointed_states_are_only_recovery_eligible() -> None:
@@ -156,6 +205,57 @@ def test_exact_two_phase_cas_proof_authorizes_recovery() -> None:
     assert authorization.fence_token == acquired["fence_token"]
 
 
+def test_recovery_acquisition_must_preserve_the_user_input_cursor() -> None:
+    observed = _state(status="checkpointed")
+    observed["user_input_inbox"] = {"highest_acknowledged_revision": 7}
+    preserved = _acquired(observed)
+
+    authorized = authorize_work_mode_recovery(
+        observed,
+        preserved,
+        _proof(),
+        now=NOW,
+        latest_user_input_revision=8,
+    )
+    assert authorized.authorized is True
+
+    silently_dropped = _acquired(observed)
+    silently_dropped["user_input_inbox"]["highest_acknowledged_revision"] = 8
+    dropped = authorize_work_mode_recovery(
+        observed,
+        silently_dropped,
+        _proof(),
+        now=NOW,
+        latest_user_input_revision=8,
+    )
+    assert dropped.authorized is False
+    assert "changed the acknowledged user input revision" in dropped.reason
+
+    regressed = _acquired(observed)
+    regressed["user_input_inbox"]["highest_acknowledged_revision"] = 6
+    retreated = authorize_work_mode_recovery(
+        observed,
+        regressed,
+        _proof(),
+        now=NOW,
+        latest_user_input_revision=8,
+    )
+    assert retreated.authorized is False
+    assert "changed the acknowledged user input revision" in retreated.reason
+
+    missing = _acquired(observed)
+    del missing["user_input_inbox"]
+    omitted = authorize_work_mode_recovery(
+        observed,
+        missing,
+        _proof(),
+        now=NOW,
+        latest_user_input_revision=8,
+    )
+    assert omitted.authorized is False
+    assert "user_input_inbox must be an object" in omitted.reason
+
+
 def test_generation_fence_and_remote_readback_mismatches_are_rejected() -> None:
     observed = _state(status="checkpointed")
 
@@ -182,9 +282,30 @@ def test_generation_fence_and_remote_readback_mismatches_are_rejected() -> None:
     ).authorized
 
 
+def test_checked_in_monitor_targets_same_task_chat_before_hold_backoff() -> None:
+    monitor = json.loads(
+        (ROOT / "agi" / "WORK_MODE_MONITOR.json").read_text(encoding="utf-8")
+    )
+
+    automation = monitor["configured_automation"]
+    policy = monitor["user_input_policy"]
+    assert automation["id"] == "6a902927853481919931a1a1a1a7072d"
+    assert automation["same_work_project_chat"] is True
+    assert automation["destination_mode"] == "existing_task_chat"
+    assert policy["task_chat_user_input_ingress_required"] is True
+    assert policy["ingress_precedes_unchanged_hold_backoff"] is True
+    assert policy["append_requires_expected_revision_and_blob_cas"] is True
+    assert policy["append_requires_exact_remote_readback"] is True
+    assert policy["new_input_forces_full_refresh"] is True
+    assert policy["new_input_does_not_authorize_duplicate_writer"] is True
+
+
 def test_checked_in_work_state_is_fresh_or_fenced_recovery_eligible() -> None:
     state = json.loads(
         (ROOT / "agi" / "WORK_EXECUTION_STATE.json").read_text(encoding="utf-8")
+    )
+    inbox = json.loads(
+        (ROOT / "agi" / "USER_INPUT_INBOX.json").read_text(encoding="utf-8")
     )
     strategy = json.loads(
         (ROOT / state["strategy_path"]).read_text(encoding="utf-8")
@@ -200,6 +321,7 @@ def test_checked_in_work_state_is_fresh_or_fenced_recovery_eligible() -> None:
         state,
         now=heartbeat + timedelta(seconds=60),
         migration_present=True,
+        latest_user_input_revision=inbox["revision"],
     )
 
     assert state["owner_kind"] in {"work_primary", "work_recovery_automation"}
@@ -224,7 +346,16 @@ def test_checked_in_work_state_is_fresh_or_fenced_recovery_eligible() -> None:
     ] is False
 
     if state["status"] == "running":
-        assert decision.action == "suppress_duplicate"
+        acknowledged = state["user_input_inbox"]["highest_acknowledged_revision"]
+        expected_action = (
+            "suppress_duplicate_surface_user_input"
+            if inbox["revision"] > acknowledged
+            else "suppress_duplicate"
+        )
+        assert decision.action == expected_action
+        assert decision.unacknowledged_user_input is (
+            inbox["revision"] > acknowledged
+        )
         assert decision.recovery_eligible is False
     else:
         assert state["status"] in {"checkpointed", "interrupted", "released"}

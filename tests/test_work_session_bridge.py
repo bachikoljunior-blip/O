@@ -84,6 +84,42 @@ def test_work_start_freezes_without_counting_a_model_error(tmp_path: Path):
     assert native_journal["attempt"] == 1
 
 
+def test_work_start_cannot_bypass_an_active_authoritative_run(tmp_path: Path) -> None:
+    root = _root(tmp_path)
+    session = WorkSession(root)
+    active_run_id = "run-authoritative-active"
+    session.start("freeze the authoritative request", run_id=active_run_id)
+    state_path = root / "agi" / "WORK_EXECUTION_STATE.json"
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(
+        json.dumps(
+            {
+                "status": "running",
+                "active_run_id": active_run_id,
+                "exact_continuation": {
+                    "pending_work_invocation_id": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    before = {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in (root / ".continual").rglob("*")
+        if path.is_file()
+    }
+    with pytest.raises(WorkSessionError, match="cannot start a new Work run"):
+        session.start("bypass the broken continuation", run_id="run-unsafe-successor")
+
+    assert not (root / ".continual" / "runs" / "run-unsafe-successor").exists()
+    assert {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in (root / ".continual").rglob("*")
+        if path.is_file()
+    } == before
+
+
 def test_engine_resume_consumes_the_native_bound_request(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

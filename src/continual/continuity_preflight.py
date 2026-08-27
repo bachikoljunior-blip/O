@@ -9,6 +9,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
+from .native_continuation import (
+    NativeContinuationBindingError,
+    bind_unique_awaiting_native_continuation,
+)
+
 
 _POLICY_REVISION = 29
 _POLICY_PATHS = (
@@ -35,6 +40,12 @@ _STOP_SIGNALS = (
     "uncertainty",
     "saturation",
 )
+_SECRET_OR_ACCOUNT_HOLDER_BLOCKER_TYPES = {
+    "secret_or_credential_required",
+    "material_paid_spend_required",
+    "irreducibly_account_holder_action_required",
+    "irreducibly_account_holder_only_operation",
+}
 _INVOCATION_ID = re.compile(r"^invoke-[0-9a-f]{24}$")
 _GIT_OBJECT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
@@ -212,6 +223,39 @@ def _optional_refs(value: Any) -> tuple[str, ...] | None:
     return tuple(item.strip() for item in value)
 
 
+def _inactive_stop_record(value: Any) -> bool:
+    """Return whether a historical stop record is explicitly inactive.
+
+    Historical records remain useful evidence, but their old wording must not
+    become a new live stop merely because it contains words such as
+    ``approval`` or ``permission``.
+    """
+
+    return isinstance(value, Mapping) and value.get("active") is False
+
+
+def _refire_failure_was_causally_resolved(refire: Any) -> bool:
+    """Recognize the existing fail-closed causal-resolution record shape."""
+
+    if not isinstance(refire, Mapping):
+        return False
+    resolution = refire.get("failure_resolution")
+    if not isinstance(resolution, Mapping):
+        return False
+    before = resolution.get("native_resume_fail_closed_digest_before")
+    after = resolution.get("native_resume_fail_closed_digest_after")
+    merge_sha = resolution.get("resolution_merge_sha")
+    return (
+        resolution.get("status") == "cause_eliminated_and_validated"
+        and resolution.get("state_reset_alone_claimed_as_repair") is False
+        and isinstance(before, str)
+        and bool(before)
+        and before == after
+        and isinstance(merge_sha, str)
+        and _GIT_OBJECT_SHA.fullmatch(merge_sha) is not None
+    )
+
+
 def _legitimate_stop(state: Mapping[str, Any]) -> PriorStopClassification | None:
     termination = state.get("termination")
     if not isinstance(termination, Mapping) or termination.get("active") is not True:
@@ -248,7 +292,17 @@ def _legitimate_stop(state: Mapping[str, Any]) -> PriorStopClassification | None
                 "an action-local blocker was misclassified as a global execution stop",
                 refs or (),
             )
+    if kind == "hard_platform_safety_prohibition":
         valid = valid and termination.get("non_overridable") is True
+    elif kind == "secret_or_account_holder_only_blocker":
+        valid = (
+            valid
+            and termination.get("non_overridable") is True
+            and termination.get("scope") == "global_execution"
+            and termination.get("blocks_project_globally") is True
+            and termination.get("blocker_type")
+            in _SECRET_OR_ACCOUNT_HOLDER_BLOCKER_TYPES
+        )
     elif kind == "fresh_different_writer_detected":
         valid = (
             valid
@@ -295,13 +349,17 @@ def classify_prior_stop(state: Mapping[str, Any]) -> PriorStopClassification:
     legitimate = _legitimate_stop(state)
     if legitimate is not None:
         return legitimate
+    termination = state.get("termination")
+    refire = state.get("refire")
+    refire_failure = None
+    if (
+        isinstance(refire, Mapping)
+        and not _refire_failure_was_causally_resolved(refire)
+    ):
+        refire_failure = refire.get("failure")
     relevant = {
-        "termination": state.get("termination"),
-        "refire_failure": (
-            state.get("refire", {}).get("failure")
-            if isinstance(state.get("refire"), Mapping)
-            else None
-        ),
+        "termination": None if _inactive_stop_record(termination) else termination,
+        "refire_failure": refire_failure,
     }
     serialized = json.dumps(relevant, ensure_ascii=False, sort_keys=True).lower()
     if any(signal in serialized for signal in _STOP_SIGNALS):
@@ -335,12 +393,24 @@ def _assert_remote_durable_continuation(
     """
 
     exact_value = state.get("exact_continuation")
+    try:
+        native_binding = bind_unique_awaiting_native_continuation(
+            root,
+            run_id=run_id,
+            exact_continuation=exact_value,
+        )
+    except NativeContinuationBindingError as exc:
+        raise ContinuityPreflightError(str(exc)) from exc
     if exact_value is None:
         return {"required": False, "reason": "no_exact_continuation"}
     exact = _mapping(exact_value, "state.exact_continuation")
     pending_id = exact.get("pending_work_invocation_id")
     if pending_id is None:
         return {"required": False, "reason": "no_pending_work_invocation"}
+    if native_binding is None:
+        raise ContinuityPreflightError(
+            "pending Work continuation has no bound native invocation"
+        )
     if not isinstance(pending_id, str) or _INVOCATION_ID.fullmatch(pending_id) is None:
         raise ContinuityPreflightError(
             "state.exact_continuation.pending_work_invocation_id is malformed"
@@ -375,6 +445,16 @@ def _assert_remote_durable_continuation(
         raise ContinuityPreflightError("pending Work request blob SHA is malformed")
     if _git_blob_digest(request_path, "pending Work request") != request_blob:
         raise ContinuityPreflightError("pending Work request blob mismatch")
+    if (
+        _git_blob_digest(
+            native_binding.native_path,
+            "pending native invocation journal",
+        )
+        != native_binding.native_blob_sha
+    ):
+        raise ContinuityPreflightError(
+            "pending native invocation journal changed during preflight"
+        )
 
     snapshot_ref = _text(
         exact.get("run_snapshot_ref"),
@@ -452,6 +532,30 @@ def _assert_remote_durable_continuation(
         raise ContinuityPreflightError(
             "continuation snapshot source-commit blob mismatch"
         )
+    native_blob = _text(
+        proof.get("pending_native_invocation_blob_sha"),
+        "continuation durability pending_native_invocation_blob_sha",
+    )
+    if _GIT_OBJECT_SHA.fullmatch(native_blob) is None:
+        raise ContinuityPreflightError(
+            "continuation durability native invocation blob SHA is malformed"
+        )
+    if native_blob != native_binding.native_blob_sha:
+        raise ContinuityPreflightError(
+            "continuation durability native invocation blob mismatch"
+        )
+    if (
+        _git_blob_at_commit(
+            root,
+            snapshot_head,
+            native_binding.native_ref,
+            "pending native invocation journal",
+        )
+        != native_blob
+    ):
+        raise ContinuityPreflightError(
+            "pending native invocation source-commit blob mismatch"
+        )
     if proof.get("pending_work_invocation_id") != pending_id:
         raise ContinuityPreflightError("continuation durability invocation mismatch")
     if proof.get("pending_request_ref") != expected_request_ref:
@@ -460,6 +564,17 @@ def _assert_remote_durable_continuation(
         raise ContinuityPreflightError("continuation durability request digest mismatch")
     if proof.get("pending_request_blob_sha") != request_blob:
         raise ContinuityPreflightError("continuation durability request blob mismatch")
+    if (
+        proof.get("pending_native_invocation_id")
+        != native_binding.native_invocation_id
+    ):
+        raise ContinuityPreflightError(
+            "continuation durability native invocation identity mismatch"
+        )
+    if proof.get("pending_native_invocation_ref") != native_binding.native_ref:
+        raise ContinuityPreflightError(
+            "continuation durability native invocation reference mismatch"
+        )
     if proof.get("run_snapshot_ref") != snapshot_ref:
         raise ContinuityPreflightError("continuation durability snapshot reference mismatch")
     if proof.get("snapshot_blob_sha") != snapshot_blob:
@@ -475,6 +590,8 @@ def _assert_remote_durable_continuation(
         "source_main_sha": snapshot_head,
         "pending_work_invocation_id": pending_id,
         "pending_request_blob_sha": request_blob,
+        "pending_native_invocation_id": native_binding.native_invocation_id,
+        "pending_native_invocation_blob_sha": native_blob,
         "snapshot_blob_sha": snapshot_blob,
     }
 
