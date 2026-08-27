@@ -8,8 +8,8 @@
   "lease_generation": 23,
   "fence_token": "work-recovery-fence-v23-705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4",
   "started_at": "2026-08-27T02:38:52.792Z",
-  "heartbeat_at": "2026-08-27T02:41:00.000Z",
-  "last_progress_at": "2026-08-27T02:41:00.000Z",
+  "heartbeat_at": "2026-08-27T03:31:44.000Z",
+  "last_progress_at": "2026-08-27T03:31:44.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -23,9 +23,9 @@
   "strategy_path": "agi/WORK_STRATEGY.json",
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "source_main_sha": "77661637dedccc41c88325cab25d1683bf282221",
-  "working_branch": "work/recovery-gen23-durable-continuation-v1",
+  "working_branch": "work/recovery-gen23-continuation-guard-v1",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
-  "active_component": "generation23_local_only_continuation_cause_repair_before_consolidate_resume",
+  "active_component": "generation23_remote_durability_guard_pr322_updated_exact_head_ci_running",
   "active_unit_id": "unit-generation23-remote-durable-continuation-repair-v1",
   "recovery_intervention_audit_progress": {
     "status": "revision26_authorized_reconstruction_blocked_on_typed_directive_publication",
@@ -346,7 +346,7 @@
   "finalize_expected_blob_sha": "15dbd0a41d43b51944b153b5822b647f81cbf08c",
   "readback_of_commit_sha": "67f38d68c7a5bfa8755383cf19086e400220850f",
   "verified_remote_readback": true,
-  "acquisition_phase": "authorized_running_cause_repair_required_before_resume",
+  "acquisition_phase": "authorized_running_cause_guard_ci_in_progress",
   "recovery_observation": {
     "observed_at": "2026-08-26T21:33:31.746Z",
     "predecessor_execution_id": "work-recovery-20260826T112246061Z-0cf9bce76a217ac818b03612850e9dfc",
@@ -1699,24 +1699,16 @@
     }
   },
   "exact_head_ci_observation": {
-    "pull_request": 318,
-    "head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
-    "workflow_run": 32972879530,
-    "workflow_id": 335420036,
-    "directive_preflight_run": 32972879540,
-    "observed_at": "2026-08-26T13:55:34.467Z",
-    "status": "success_four_pytest_shards_and_dependent_aggregate",
-    "successful_jobs": {
-      "98190515458": "pytest shard 2 of 4",
-      "98190515591": "pytest shard 3 of 4",
-      "98190515656": "pytest shard 0 of 4",
-      "98190515689": "pytest shard 1 of 4",
-      "98202894568": "test"
-    },
-    "merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
-    "reviewed_blob_count": 5,
-    "reviewed_blob_mismatch_count": 0,
-    "all_reviewed_blobs_match": true
+    "pull_request": 322,
+    "exact_head_sha": "f7d12135059daefd3a5b69e534cf057b8f5da621",
+    "workflow_runs": [
+      33035013077,
+      33035013091
+    ],
+    "status": "in_progress_all_four_pytest_shards",
+    "observed_at": "2026-08-27T03:10:39.080Z",
+    "prior_superseded_head_sha": "33d0aa5d1a4f2038e49cac32a2cdfa44a91a8e4d",
+    "head_update_reason": "added fail-closed repository path isolation before merge"
   },
   "checkpoint_integrity_publication_precommit": {
     "effect_id": "publish-work-checkpoint-integrity-v1",
@@ -2746,8 +2738,16 @@
     }
   },
   "termination": {
-    "kind": "generation23_recovery_in_progress_not_complete",
-    "active": false,
+    "kind": "running_exact_head_workflow",
+    "active": true,
+    "workflow_run_id": 33036610181,
+    "workflow_status": "queued",
+    "exact_head_sha": "a04a2bb563aefcaae722c6b1dbb2fbcce6b5b4b6",
+    "evidence_refs": [
+      "https://github.com/bachikoljunior-blip/O/pull/322",
+      "https://github.com/bachikoljunior-blip/O/actions/runs/33036610181",
+      "https://github.com/bachikoljunior-blip/O/actions/runs/33036610241"
+    ],
     "normal_completion": false,
     "user_objective_met": false,
     "explicit_user_stop": false,
@@ -3701,13 +3701,13 @@
   "post_acquisition_progress_contract": {
     "generation": 23,
     "concrete_effect_selected": "publish exact revision-94 snapshot and frozen Consolidate request with a remote-durability recurrence guard, then resume invoke-748f38dc8ef56693dba2f7b7 exactly once",
-    "effect_attempted": false,
+    "effect_attempted": true,
     "state_only_success_claimed": false,
     "native_request_created": false,
     "new_exact_blocker_reached": false,
     "new_exact_blocker_persisted": false,
-    "progress_contract_result": "pending_after_two_phase_authorization",
-    "observed_at": "2026-08-27T02:38:52.792Z"
+    "progress_contract_result": "cause_guard_pr_created_exact_head_ci_running_payload_hold_bound",
+    "observed_at": "2026-08-27T02:52:22.721Z"
   },
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
@@ -3748,7 +3748,7 @@
   },
   "generation23_refire": {
     "schema_version": 1,
-    "status": "authorized_cause_repair_pending_before_launch",
+    "status": "cause_guard_exact_head_ci_running_payload_publication_hold",
     "idempotency_key": "o-work-refire:g23:705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4:77661637dedccc41c88325cab25d1683bf282221:invoke-748f38dc8ef56693dba2f7b7:remote-durability-v1",
     "target_generation": 23,
     "target_fence_token": "work-recovery-fence-v23-705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4",
@@ -3767,6 +3767,64 @@
     "launch_accepted": false,
     "substantive_liveness_event": null,
     "created_at": "2026-08-27T02:38:52.792Z",
-    "updated_at": "2026-08-27T02:41:00.000Z"
+    "updated_at": "2026-08-27T03:31:44.000Z",
+    "cause_guard_publication": {
+      "status": "exact_head_ci_running",
+      "pull_request": 322,
+      "head_sha": "a04a2bb563aefcaae722c6b1dbb2fbcce6b5b4b6",
+      "prior_ci_head_sha": "cfd1bb8e707abbf44008bc7c9bde316252063494",
+      "root_cause": "a running heartbeat and digest-only state could outlive local-only continuation bytes",
+      "remediation": "require exact request and snapshot blob identities to exist at their exact paths in the bound Git source commit tree; isolate the historical generation-22 audit from mutable current state",
+      "local_validation": {
+        "focused_tests_passed": 31,
+        "compileall_passed": true,
+        "native_mutation_on_local_only_rejection": 0,
+        "fabricated_state_only_durability_proof_rejected": true,
+        "repository_path_escape_rejected": true
+      },
+      "test_workflow_run_id": 33036610181,
+      "directive_workflow_run_id": 33036610241,
+      "updated_at": "2026-08-27T03:31:44.000Z"
+    }
+  },
+  "generation23_payload_publication_hold": {
+    "schema_version": 1,
+    "status": "hard_github_write_safety_review_hold",
+    "observed_at": "2026-08-27T02:52:22.721Z",
+    "generation": 23,
+    "execution_id": "work-recovery-20260827T023852792Z-6de87b9a2a6c4f2affc10c988ee09af6",
+    "fence_token_digest": "b750027d273301cdd7d05d08f8de4cd61f5bdcb147a3bc5b07110ad2199a6eb4",
+    "continuation_invocation_id": "invoke-748f38dc8ef56693dba2f7b7",
+    "continuation_request_digest": "372669333d5e8b452b72b0701e4324ac4a768741af177023ad5c1e1b26814f23",
+    "payload_local_commit": "8199fa7c4d676729e10c1b4a14316785149cefe2",
+    "payload_tree_sha": "ccf1ea79ef614b570a531623788a0b0404f056b3",
+    "payload_path_count": 30,
+    "payload_path_list_sha256": "656991f80f5e51136be7543144c9f40580f60cc9ef5bda9eff05d32f68059ed8",
+    "inbox_revision": 28,
+    "idempotency_key": "o-work-publish:g23:b750027d273301cdd7d05d08f8de4cd61f5bdcb147a3bc5b07110ad2199a6eb4:invoke-748f38dc8ef56693dba2f7b7:tree-ccf1ea79ef614b570a531623788a0b0404f056b3:v1",
+    "exact_error": "Git push safety review rejected publishing the 30-path local invocation/evidence payload because this specific export was not considered explicitly authorized.",
+    "retry_automatic": true,
+    "retry_only_after_material_approval_input_payload_or_blocker_change": true,
+    "workaround_attempted": false,
+    "independent_safe_effect": "PR 322 exact head a04a2bb563aefcaae722c6b1dbb2fbcce6b5b4b6 has test workflow 33036610181 and directive workflow 33036610241 running.",
+    "minimized_attempt": {
+      "attempted_at": "2026-08-27T02:55:00.000Z",
+      "payload_path_count": 8,
+      "payload_scope": "exact snapshot, events, native binding, frozen Consolidate request, two already-existing responses, and the immediately completed checkpoint request/response only",
+      "work_verify": "83 requests / 82 responses / exactly 1 pending; valid",
+      "checkpoint_integrity": "valid with zero issues",
+      "secret_hidden_reasoning_scan": "passed",
+      "result": "hard_github_write_safety_review_hold",
+      "exact_error": "The minimized push was still rejected because exporting the frozen Work request and invocation/response execution records was not considered explicitly authorized.",
+      "workaround_attempted": false,
+      "local_branch": "work/recovery-gen23-minimal-continuation-v1",
+      "local_commit": "cf7f034",
+      "tree_sha": "dbb42253eb58f72ae312fa1e5fa1b53b9f05e53d",
+      "path_list_sha256": "97a92322e591df34a25d21b5c5d8ebfb2ce3ade23de4b5e02497ef1d3a994eca",
+      "idempotency_key": "o-work-publish:g23:b750027d273301cdd7d05d08f8de4cd61f5bdcb147a3bc5b07110ad2199a6eb4:invoke-748f38dc8ef56693dba2f7b7:tree-dbb42253eb58f72ae312fa1e5fa1b53b9f05e53d:minimal-v1",
+      "inbox_revision": 28,
+      "retry_only_after_material_approval_input_payload_or_blocker_change": true
+    },
+    "updated_at": "2026-08-27T03:31:44.000Z"
   }
 }
