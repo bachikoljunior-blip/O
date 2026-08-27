@@ -272,9 +272,15 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
     }
     _write(root / "agi/WORK_EXECUTION_STATE.json", state)
 
+    _git(root, "init", "--quiet")
+    _git(root, "config", "user.name", "Continuity Test")
+    _git(root, "config", "user.email", "continuity-test@example.invalid")
+    _git(root, "commit", "--quiet", "--allow-empty", "-m", "Remote main baseline")
+    _git(root, "update-ref", "refs/remotes/origin/main", _git(root, "rev-parse", "HEAD"))
+
     with pytest.raises(
         ContinuityPreflightError,
-        match="pending Work request is not present in continuation source commit",
+        match="continuation source commit is not reachable from origin/main",
     ):
         assert_work_resume_continuity_preflight(
             root,
@@ -288,9 +294,6 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
         if path.is_file()
     } == before
 
-    _git(root, "init", "--quiet")
-    _git(root, "config", "user.name", "Continuity Test")
-    _git(root, "config", "user.email", "continuity-test@example.invalid")
     _git(
         root,
         "add",
@@ -303,6 +306,18 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
     state["exact_continuation"]["snapshot_head_sha"] = source_main_sha
     state["continuation_durability"]["source_main_sha"] = source_main_sha
     _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+
+    with pytest.raises(
+        ContinuityPreflightError,
+        match="continuation source commit is not reachable from origin/main",
+    ):
+        assert_work_resume_continuity_preflight(
+            root,
+            run_id=run_id,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="chatgpt-work-model-unverified",
+        )
+    _git(root, "update-ref", "refs/remotes/origin/main", source_main_sha)
 
     result = assert_work_resume_continuity_preflight(
         root,
