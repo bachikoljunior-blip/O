@@ -8,8 +8,8 @@
   "lease_generation": 23,
   "fence_token": "work-recovery-fence-v23-705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4",
   "started_at": "2026-08-27T02:38:52.792Z",
-  "heartbeat_at": "2026-08-27T03:27:34.000Z",
-  "last_progress_at": "2026-08-27T03:27:34.000Z",
+  "heartbeat_at": "2026-08-27T03:31:44.000Z",
+  "last_progress_at": "2026-08-27T03:31:44.000Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -2740,13 +2740,13 @@
   "termination": {
     "kind": "running_exact_head_workflow",
     "active": true,
-    "workflow_run_id": 33036265180,
+    "workflow_run_id": 33036610181,
     "workflow_status": "queued",
-    "exact_head_sha": "cfd1bb8e707abbf44008bc7c9bde316252063494",
+    "exact_head_sha": "a04a2bb563aefcaae722c6b1dbb2fbcce6b5b4b6",
     "evidence_refs": [
       "https://github.com/bachikoljunior-blip/O/pull/322",
-      "https://github.com/bachikoljunior-blip/O/actions/runs/33036265180",
-      "https://github.com/bachikoljunior-blip/O/actions/runs/33036265253"
+      "https://github.com/bachikoljunior-blip/O/actions/runs/33036610181",
+      "https://github.com/bachikoljunior-blip/O/actions/runs/33036610241"
     ],
     "normal_completion": false,
     "user_objective_met": false,
@@ -3748,7 +3748,7 @@
   },
   "generation23_refire": {
     "schema_version": 1,
-    "status": "cause_guard_ci_retry_running_payload_publication_hold",
+    "status": "cause_guard_exact_head_ci_running_payload_publication_hold",
     "idempotency_key": "o-work-refire:g23:705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4:77661637dedccc41c88325cab25d1683bf282221:invoke-748f38dc8ef56693dba2f7b7:remote-durability-v1",
     "target_generation": 23,
     "target_fence_token": "work-recovery-fence-v23-705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4",
@@ -3767,22 +3767,24 @@
     "launch_accepted": false,
     "substantive_liveness_event": null,
     "created_at": "2026-08-27T02:38:52.792Z",
-    "updated_at": "2026-08-27T03:27:34.000Z",
+    "updated_at": "2026-08-27T03:31:44.000Z",
     "cause_guard_publication": {
-      "status": "exact_head_ci_retry_running",
+      "status": "exact_head_ci_running",
       "pull_request": 322,
-      "head_sha": "cfd1bb8e707abbf44008bc7c9bde316252063494",
-      "previous_failed_head_sha": "f7d12135059daefd3a5b69e534cf057b8f5da621",
-      "previous_failure_cause": "historical generation-22 recovery audit tests read the mutable current Work state after ownership advanced to generation 23",
-      "remediation": "materialize isolated immutable generation-22 audit inputs while preserving the new remote-durability resume guard",
+      "head_sha": "a04a2bb563aefcaae722c6b1dbb2fbcce6b5b4b6",
+      "prior_ci_head_sha": "cfd1bb8e707abbf44008bc7c9bde316252063494",
+      "root_cause": "a running heartbeat and digest-only state could outlive local-only continuation bytes",
+      "remediation": "require exact request and snapshot blob identities to exist at their exact paths in the bound Git source commit tree; isolate the historical generation-22 audit from mutable current state",
       "local_validation": {
         "focused_tests_passed": 31,
         "compileall_passed": true,
-        "native_mutation_on_local_only_rejection": 0
+        "native_mutation_on_local_only_rejection": 0,
+        "fabricated_state_only_durability_proof_rejected": true,
+        "repository_path_escape_rejected": true
       },
-      "test_workflow_run_id": 33036265180,
-      "directive_workflow_run_id": 33036265253,
-      "updated_at": "2026-08-27T03:25:03.000Z"
+      "test_workflow_run_id": 33036610181,
+      "directive_workflow_run_id": 33036610241,
+      "updated_at": "2026-08-27T03:31:44.000Z"
     }
   },
   "generation23_payload_publication_hold": {
@@ -3804,7 +3806,7 @@
     "retry_automatic": true,
     "retry_only_after_material_approval_input_payload_or_blocker_change": true,
     "workaround_attempted": false,
-    "independent_safe_effect": "PR 322 exact head cfd1bb8e707abbf44008bc7c9bde316252063494: directive workflow 33036265253 succeeded and test workflow 33036265180 is running.",
+    "independent_safe_effect": "PR 322 exact head a04a2bb563aefcaae722c6b1dbb2fbcce6b5b4b6 has test workflow 33036610181 and directive workflow 33036610241 running.",
     "minimized_attempt": {
       "attempted_at": "2026-08-27T02:55:00.000Z",
       "payload_path_count": 8,
@@ -3823,6 +3825,6 @@
       "inbox_revision": 28,
       "retry_only_after_material_approval_input_payload_or_blocker_change": true
     },
-    "updated_at": "2026-08-27T03:27:34.000Z"
+    "updated_at": "2026-08-27T03:31:44.000Z"
   }
 }
