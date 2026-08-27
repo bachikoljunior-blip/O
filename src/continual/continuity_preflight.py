@@ -82,6 +82,16 @@ def _git_blob_digest(path: Path, field: str) -> str:
     return hashlib.sha1(header + payload).hexdigest()
 
 
+def _safe_reference(root: Path, reference: str, field: str) -> Path:
+    candidate = Path(reference)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        raise ContinuityPreflightError(f"{field} escapes the repository")
+    resolved = (root / candidate).resolve()
+    if resolved != root and root not in resolved.parents:
+        raise ContinuityPreflightError(f"{field} escapes the repository")
+    return resolved
+
+
 def _fence_digest(value: Any) -> str:
     return hashlib.sha256(_text(value, "state.fence_token").encode("utf-8")).hexdigest()
 
@@ -267,7 +277,11 @@ def _assert_remote_durable_continuation(
         exact.get("run_snapshot_ref"),
         "state.exact_continuation.run_snapshot_ref",
     )
-    snapshot_path = root / snapshot_ref
+    snapshot_path = _safe_reference(
+        root,
+        snapshot_ref,
+        "state.exact_continuation.run_snapshot_ref",
+    )
     snapshot = _load(snapshot_path)
     if snapshot.get("run_id") != run_id:
         raise ContinuityPreflightError("continuation snapshot run mismatch")
