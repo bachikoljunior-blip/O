@@ -1,0 +1,290 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-26T23:58:33.744644Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-d69419928548fe8ae3ddfde7",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "NEED_MORE_EVIDENCE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-c6c462472386c57b124d",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/campaign-authoring",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-c6c462472386c57b124d/prompt.md",
+          "scope_states": {},
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/bounded-stage-checkpoint-inheritance/research-unit-a-matched-measurement-v1": "REMAIN_CANDIDATE",
+            "agi/bounded-stage-checkpoint-inheritance/research-unit-b-matched-measurement-v1": "REMAIN_CANDIDATE",
+            "agi/bounded-stage-checkpoint-inheritance/research-unit-c-matched-measurement-v1": "REMAIN_CANDIDATE",
+            "agi/repository-development": "REMAIN_CANDIDATE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "schema_version": 2
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "execute",
+        "evidence_needed": [
+          "one isolated branch whose diff contains only reviewed implementation, result, tests, exact native lifecycle, snapshot/events, and consolidated episode records",
+          "secret and hidden-chain-of-thought exclusions plus exact file/digest review before dispatch",
+          "all required workflows and jobs succeeding on one unchanged exact head",
+          "fresh execution, generation, fence, inbox, main, head, path-intersection, and mergeability checks immediately before merge",
+          "expected-head merge and exact remote-main blob readback for every reviewed path",
+          "post-publication Work journal verification and an exact continuation that keeps user-level FAIL"
+        ],
+        "expected_outputs": [
+          "a pull request containing the reviewed causal recovery audit publication unit",
+          "exact-head CI evidence and expected-head merge receipt",
+          "remote readback manifest with zero blob mismatches",
+          "updated generation-22 refire state proving native Root/Execute/Task Evaluate/Learn and publication liveness",
+          "a durable monitor receipt and continuation to materially different safe work"
+        ],
+        "failure_conditions": [
+          "main, execution, generation, fence, inbox, PR head, reviewed file, or path-intersection drift",
+          "any required CI failure or incomplete job",
+          "a secret, hidden chain-of-thought, temporary connector payload, response draft, cache, quarantined record, or unrelated path enters the diff",
+          "any invocation is recreated, answered twice, or loses executor/model binding",
+          "any merge or readback claim lacks expected-head or exact-blob proof"
+        ],
+        "goal": "Publish the Task-Evaluated generation-22 causal recovery audit and its exact non-secret native lifecycle records on one isolated branch, require unchanged exact-head CI, merge only with expected-head protection, and verify every reviewed main blob without treating publication as completion.",
+        "inputs": [
+          "the Task-Evaluated unit-7b3aa9ba21cea8210aff00b9 implementation, audit artifact, tests, episode, and immutable Work lifecycle through Learn",
+          "latest remote main cdf150658f093964ffc1e5a7930c46f25666a929 and generation-22 execution/fence authority",
+          "the closed reviewed allowlist derived from latest-main reconstruction, excluding all temporary connector payloads and response drafts",
+          "the repository exact-head CI, expected-head merge, fresh-main intersection, and remote readback contracts"
+        ],
+        "parent_continuation": "After exact-head publication and readback, Task Evaluate only the publication effect, Consolidate and Learn, update the durable monitor receipt, return to Root, and select materially different safe executable work; never treat audit publication or a local blocker as completion.",
+        "rollback": "Do not merge a changed or failing head. Preserve the current main-durable state and frozen invocation, repair the exact failed condition on a new isolated branch if necessary, rerun exact-head validation, and continue under the same generation-22 idempotency scope.",
+        "scope": "generation22/revision28-causal-recovery-audit-publication-v1",
+        "success_conditions": [
+          "the branch begins at current main and contains no unrelated, temporary, secret, private-reasoning, cache, draft, or lost-candidate path",
+          "every required exact-head job succeeds and the PR head remains unchanged",
+          "expected-head merge succeeds only after fresh single-writer and path checks",
+          "every reviewed main blob matches the published content and Work verification remains valid",
+          "publication is reported only as this bounded recovery-audit integration, not AGI or user-level completion"
+        ],
+        "unit_id": "unit-fe513cb6da1cf8978ad8ef27"
+      },
+      "snapshot": {
+        "continuation_stack": [
+          {
+            "continuation": "Task Evaluate, Consolidate Episode, and Learn this reconciliation; publish through unchanged exact-head CI; then return to Root and select a materially different behavioral or independent-evidence unit rather than rerunning this measurement.",
+            "parent_unit_id": "unit-455ecaedec5dd37d0793f60e",
+            "result_ref": "artifacts/unit-455ecaedec5dd37d0793f60e-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact six-response protocol and bounded judgments, then Consolidate, Learn, and return to Root. Publish only through unchanged exact-head CI and expected-head merge, and continue to a materially different safe executable unit rather than stopping on this bounded result.",
+            "parent_unit_id": "unit-3d61e557b2542d07c83fa354",
+            "result_ref": "artifacts/unit-3d61e557b2542d07c83fa354-result.json"
+          }
+        ],
+        "created_at": "2026-08-24T21:08:07.556157Z",
+        "current_component": "execute",
+        "current_unit": "unit-fe513cb6da1cf8978ad8ef27",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+          "runner": "python-engine-v2"
+        },
+        "episode_id": "episode-work-recovery-gen9-durability-repair",
+        "error_count": 21,
+        "last_evaluation": {
+          "agi_claim_supported": false,
+          "claim_boundary": "PASS is limited to the exact generation-22 revision-28 causal recovery audit, its recorded source receipts, no-mutation validation, current guard implementation, and immutable native request/response records. It does not generalize to all recovery paths, external production capability, AGI, or completion of the user's objective.",
+          "evaluated_goal": "Evaluate whether the generation-22 recovery audit identified and eliminated the prior discretionary-stop mechanisms, reproduced from latest-main durable records, preserved native identity and no-mutation safety, and retained its bounded claim and publication scope.",
+          "evidence": [
+            {
+              "finding": "The checked artifact matched regenerated output exactly and bound main cdf150658f093964ffc1e5a7930c46f25666a929 plus exact CI head 955a4f028c442416b98b9ba9bf1a0456b10c6035.",
+              "source": "agi/evidence/generation22-revision28-recovery-audit.json and deterministic adapter replay"
+            },
+            {
+              "finding": "Resume without causal evidence raised ContinuityPreflightError and left the aggregate native record digest unchanged at da53ce4cd77da4f7724438662383097ce41284c231a366d4b23b45bd5ff7f4b4.",
+              "source": "production-continuation fail-closed validation"
+            },
+            {
+              "finding": "The positive preflight is bound to execution work-recovery-20260826T213331747Z-e52ebacf244e3612dc86f26b692dac27, generation 22, the exact fence digest, native run, executor, model, policy revision 28, and all three policy content digests.",
+              "source": "agi/WORK_EXECUTION_STATE.json#start_of_run_continuity_preflight"
+            },
+            {
+              "finding": "Root invoke-4f67668fbf0f833b6421d09e has a matching request/response digest pair and was followed by Candidate Evaluate and Execute progress without request recreation.",
+              "source": "immutable Work journal"
+            },
+            {
+              "finding": "32 tests passed; compileall, state/result JSON, exact audit reproduction, git diff check, and Work journal verification passed.",
+              "source": "focused protected validation"
+            }
+          ],
+          "negative_evidence": [
+            "The previous execution did stop on an agent-level approval-scope reinterpretation despite standing safe-work authorization.",
+            "Before PR 319, WorkSession.resume had no causal-remediation entry guard.",
+            "The bounded implementation, audit result, tests, and new lifecycle records have not yet passed their own isolated exact-head publication and remote main readback.",
+            "No evidence in this unit establishes broader recovery reliability, external production capability, AGI, or user-level completion."
+          ],
+          "repair_information": {
+            "do_not_do": "Do not treat the unit PASS as publication success, recreate any invocation, reuse the lost local 105-path candidate, weaken the causal guard, or enlarge the claim.",
+            "next": "Consolidate and Learn, then publish the reviewed implementation, audit artifact, tests, and exact lifecycle records through unchanged exact-head CI and expected-head merge with remote readback; continue safe work afterward."
+          },
+          "unit_verdict": "PASS",
+          "unit_verdict_reason": "The audit reproduces exactly from the recorded main and source receipts; it detects both the approval-scope reinterpretation and the missing native resume preflight; the guard rejects missing or state-only remediation before mutation; the positive record is bound to execution, generation, fence, run, executor, model, revision, and policy digests; the Root request has one matching response; the lost local candidate was not used; and the focused protected set passed 32 tests.",
+          "unmet_conditions": [
+            "Consolidate and Learn this Task Evaluate result.",
+            "Publish only the reviewed non-secret paths through isolated unchanged exact-head CI, expected-head merge, and exact remote readback.",
+            "Return to Root and continue materially different safe executable work.",
+            "The user's upper objective remains unmet."
+          ],
+          "user_level_verdict": "FAIL",
+          "verdict": "FAIL",
+          "verdict_reason": "The bounded local audit unit passes, but publication, main readback, remaining O lifecycle, follow-on work, and the user's upper objective remain incomplete. Internal audit, tests, and CI are not evidence that AGI or external production capability exists."
+        },
+        "last_result_ref": "artifacts/unit-2efbee8b63cd2c91c11b8fc7-result.json",
+        "phase": "unit_pending",
+        "produced_candidates": [],
+        "revision": 74,
+        "run_id": "run-work-recovery-gen9-durability-repair",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "PASS",
+        "updated_at": "2026-08-26T23:58:33.741577Z"
+      }
+    },
+    "mode": "pre-application",
+    "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "target_component": "execute"
+  },
+  "payload_digest": "b090670cfde26773c22f04d9dcf485638ee2c05348145df810d3a109998171e9",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "24d19a7983ade7b28284c4631e6fa87e5b23924ac9f6b1d602a9598d35e0fd0e",
+  "run_id": "run-work-recovery-gen9-durability-repair",
+  "schema_version": 1
+}
