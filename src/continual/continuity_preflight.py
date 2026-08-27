@@ -136,6 +136,45 @@ def _git_blob_at_commit(
     return blob_sha
 
 
+def _assert_source_commit_on_remote_main(root: Path, commit_sha: str) -> None:
+    remote_main = "refs/remotes/origin/main"
+    try:
+        remote_ref = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--verify", f"{remote_main}^{{commit}}"],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+        )
+        ancestor = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "merge-base",
+                "--is-ancestor",
+                commit_sha,
+                remote_main,
+            ],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ContinuityPreflightError(
+            "cannot verify continuation source against origin/main"
+        ) from exc
+    if remote_ref.returncode != 0:
+        raise ContinuityPreflightError(
+            "origin/main is unavailable for continuation source verification"
+        )
+    if ancestor.returncode != 0:
+        raise ContinuityPreflightError(
+            "continuation source commit is not reachable from origin/main"
+        )
+
+
 def _fence_digest(value: Any) -> str:
     return hashlib.sha256(_text(value, "state.fence_token").encode("utf-8")).hexdigest()
 
@@ -368,6 +407,7 @@ def _assert_remote_durable_continuation(
         raise ContinuityPreflightError("continuation durability fence mismatch")
     if proof.get("source_main_sha") != snapshot_head:
         raise ContinuityPreflightError("continuation durability main commit mismatch")
+    _assert_source_commit_on_remote_main(root, snapshot_head)
     if (
         _git_blob_at_commit(
             root,
