@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,6 +31,8 @@ _STOP_SIGNALS = (
     "uncertainty",
     "saturation",
 )
+_INVOCATION_ID = re.compile(r"^invoke-[0-9a-f]{24}$")
+_GIT_OBJECT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
 
 class ContinuityPreflightError(ValueError):
@@ -69,6 +72,107 @@ def _load(path: Path) -> dict[str, Any]:
 
 def _digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _git_blob_digest(path: Path, field: str) -> str:
+    try:
+        payload = path.read_bytes()
+    except (OSError, UnicodeError) as exc:
+        raise ContinuityPreflightError(f"cannot read {field}: {path}") from exc
+    header = f"blob {len(payload)}\0".encode("ascii")
+    return hashlib.sha1(header + payload).hexdigest()
+
+
+def _safe_reference(root: Path, reference: str, field: str) -> Path:
+    candidate = Path(reference)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        raise ContinuityPreflightError(f"{field} escapes the repository")
+    resolved = (root / candidate).resolve()
+    if resolved != root and root not in resolved.parents:
+        raise ContinuityPreflightError(f"{field} escapes the repository")
+    return resolved
+
+
+def _git_blob_at_commit(
+    root: Path,
+    commit_sha: str,
+    reference: str,
+    field: str,
+) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "ls-tree", "-z", commit_sha, "--", reference],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ContinuityPreflightError(
+            f"cannot verify {field} in continuation source commit"
+        ) from exc
+    entries = [entry for entry in completed.stdout.split(b"\0") if entry]
+    if completed.returncode != 0 or len(entries) != 1:
+        raise ContinuityPreflightError(
+            f"{field} is not present in continuation source commit"
+        )
+    try:
+        metadata, raw_path = entries[0].split(b"\t", 1)
+        mode, object_type, blob_sha = metadata.decode("ascii").split()
+        actual_path = raw_path.decode("utf-8")
+    except (UnicodeError, ValueError) as exc:
+        raise ContinuityPreflightError(
+            f"cannot parse {field} from continuation source commit"
+        ) from exc
+    if (
+        mode not in {"100644", "100755"}
+        or object_type != "blob"
+        or _GIT_OBJECT_SHA.fullmatch(blob_sha) is None
+        or actual_path != reference
+    ):
+        raise ContinuityPreflightError(
+            f"{field} has an invalid continuation source tree entry"
+        )
+    return blob_sha
+
+
+def _assert_source_commit_on_remote_main(root: Path, commit_sha: str) -> None:
+    remote_main = "refs/remotes/origin/main"
+    try:
+        remote_ref = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--verify", f"{remote_main}^{{commit}}"],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+        )
+        ancestor = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "merge-base",
+                "--is-ancestor",
+                commit_sha,
+                remote_main,
+            ],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ContinuityPreflightError(
+            "cannot verify continuation source against origin/main"
+        ) from exc
+    if remote_ref.returncode != 0:
+        raise ContinuityPreflightError(
+            "origin/main is unavailable for continuation source verification"
+        )
+    if ancestor.returncode != 0:
+        raise ContinuityPreflightError(
+            "continuation source commit is not reachable from origin/main"
+        )
 
 
 def _fence_digest(value: Any) -> str:
@@ -192,6 +296,169 @@ def _detected_discretionary_stop(state: Mapping[str, Any]) -> bool:
     return classify_prior_stop(state).kind == "discretionary_stop_detected"
 
 
+def _assert_remote_durable_continuation(
+    root: Path,
+    *,
+    state: Mapping[str, Any],
+    run_id: str,
+    executor_binding: str,
+    model_identity: str,
+) -> dict[str, Any]:
+    """Bind a pending semantic resume to bytes proven durable on remote main.
+
+    The outer recovery process performs the authoritative remote readback and
+    records its exact commit/blob proof in ``continuation_durability``.  This
+    local entry guard independently recomputes both Git blob identities and
+    cross-checks every request/snapshot binding before native mutation.  A
+    state-only heartbeat therefore cannot make a local-only frozen request
+    resumable.
+    """
+
+    exact_value = state.get("exact_continuation")
+    if exact_value is None:
+        return {"required": False, "reason": "no_exact_continuation"}
+    exact = _mapping(exact_value, "state.exact_continuation")
+    pending_id = exact.get("pending_work_invocation_id")
+    if pending_id is None:
+        return {"required": False, "reason": "no_pending_work_invocation"}
+    if not isinstance(pending_id, str) or _INVOCATION_ID.fullmatch(pending_id) is None:
+        raise ContinuityPreflightError(
+            "state.exact_continuation.pending_work_invocation_id is malformed"
+        )
+
+    expected_request_ref = (
+        f".continual/work-model/invocations/{pending_id}/request.json"
+    )
+    if exact.get("pending_request_ref") != expected_request_ref:
+        raise ContinuityPreflightError("pending Work request reference mismatch")
+    request_path = root / expected_request_ref
+    request = _load(request_path)
+    if request.get("invocation_id") != pending_id:
+        raise ContinuityPreflightError("pending Work request identity mismatch")
+    request_digest = _text(
+        exact.get("pending_request_digest"),
+        "state.exact_continuation.pending_request_digest",
+    )
+    if request.get("request_digest") != request_digest:
+        raise ContinuityPreflightError("pending Work request digest mismatch")
+    if request.get("run_id") != run_id:
+        raise ContinuityPreflightError("pending Work request run mismatch")
+    if request.get("executor_binding") != executor_binding:
+        raise ContinuityPreflightError("pending Work request executor binding mismatch")
+    if request.get("model_identity") != model_identity:
+        raise ContinuityPreflightError("pending Work request model identity mismatch")
+    request_blob = _text(
+        exact.get("pending_request_blob_sha"),
+        "state.exact_continuation.pending_request_blob_sha",
+    )
+    if _GIT_OBJECT_SHA.fullmatch(request_blob) is None:
+        raise ContinuityPreflightError("pending Work request blob SHA is malformed")
+    if _git_blob_digest(request_path, "pending Work request") != request_blob:
+        raise ContinuityPreflightError("pending Work request blob mismatch")
+
+    snapshot_ref = _text(
+        exact.get("run_snapshot_ref"),
+        "state.exact_continuation.run_snapshot_ref",
+    )
+    snapshot_path = _safe_reference(
+        root,
+        snapshot_ref,
+        "state.exact_continuation.run_snapshot_ref",
+    )
+    snapshot = _load(snapshot_path)
+    if snapshot.get("run_id") != run_id:
+        raise ContinuityPreflightError("continuation snapshot run mismatch")
+    if snapshot.get("revision") != exact.get("snapshot_revision"):
+        raise ContinuityPreflightError("continuation snapshot revision mismatch")
+    if snapshot.get("phase") != exact.get("native_phase"):
+        raise ContinuityPreflightError("continuation snapshot phase mismatch")
+    snapshot_blob = _text(
+        exact.get("snapshot_blob_sha"),
+        "state.exact_continuation.snapshot_blob_sha",
+    )
+    if _GIT_OBJECT_SHA.fullmatch(snapshot_blob) is None:
+        raise ContinuityPreflightError("continuation snapshot blob SHA is malformed")
+    if _git_blob_digest(snapshot_path, "continuation snapshot") != snapshot_blob:
+        raise ContinuityPreflightError("continuation snapshot blob mismatch")
+    if exact.get("snapshot_branch") != "main":
+        raise ContinuityPreflightError("continuation snapshot is not bound to main")
+    snapshot_head = _text(
+        exact.get("snapshot_head_sha"),
+        "state.exact_continuation.snapshot_head_sha",
+    )
+    if _GIT_OBJECT_SHA.fullmatch(snapshot_head) is None:
+        raise ContinuityPreflightError("continuation snapshot head SHA is malformed")
+
+    proof = _mapping(
+        state.get("continuation_durability"),
+        "state.continuation_durability",
+    )
+    if proof.get("schema_version") != 1:
+        raise ContinuityPreflightError("continuation durability schema_version must equal 1")
+    if proof.get("status") != "remote_main_readback_verified":
+        raise ContinuityPreflightError("continuation is not remote-main durable")
+    if proof.get("verified_remote_readback") is not True:
+        raise ContinuityPreflightError("continuation remote readback is not verified")
+    if proof.get("execution_id") != state.get("execution_id"):
+        raise ContinuityPreflightError("continuation durability execution mismatch")
+    if proof.get("lease_generation") != state.get("lease_generation"):
+        raise ContinuityPreflightError("continuation durability generation mismatch")
+    if proof.get("fence_token_digest") != _fence_digest(state.get("fence_token")):
+        raise ContinuityPreflightError("continuation durability fence mismatch")
+    if proof.get("source_main_sha") != snapshot_head:
+        raise ContinuityPreflightError("continuation durability main commit mismatch")
+    _assert_source_commit_on_remote_main(root, snapshot_head)
+    if (
+        _git_blob_at_commit(
+            root,
+            snapshot_head,
+            expected_request_ref,
+            "pending Work request",
+        )
+        != request_blob
+    ):
+        raise ContinuityPreflightError(
+            "pending Work request source-commit blob mismatch"
+        )
+    if (
+        _git_blob_at_commit(
+            root,
+            snapshot_head,
+            snapshot_ref,
+            "continuation snapshot",
+        )
+        != snapshot_blob
+    ):
+        raise ContinuityPreflightError(
+            "continuation snapshot source-commit blob mismatch"
+        )
+    if proof.get("pending_work_invocation_id") != pending_id:
+        raise ContinuityPreflightError("continuation durability invocation mismatch")
+    if proof.get("pending_request_ref") != expected_request_ref:
+        raise ContinuityPreflightError("continuation durability request reference mismatch")
+    if proof.get("pending_request_digest") != request_digest:
+        raise ContinuityPreflightError("continuation durability request digest mismatch")
+    if proof.get("pending_request_blob_sha") != request_blob:
+        raise ContinuityPreflightError("continuation durability request blob mismatch")
+    if proof.get("run_snapshot_ref") != snapshot_ref:
+        raise ContinuityPreflightError("continuation durability snapshot reference mismatch")
+    if proof.get("snapshot_blob_sha") != snapshot_blob:
+        raise ContinuityPreflightError("continuation durability snapshot blob mismatch")
+    if proof.get("snapshot_revision") != snapshot.get("revision"):
+        raise ContinuityPreflightError("continuation durability snapshot revision mismatch")
+    if proof.get("native_phase") != snapshot.get("phase"):
+        raise ContinuityPreflightError("continuation durability snapshot phase mismatch")
+    _timestamp(proof.get("verified_at"), "continuation durability verified_at")
+    return {
+        "required": True,
+        "status": "remote_main_readback_verified",
+        "source_main_sha": snapshot_head,
+        "pending_work_invocation_id": pending_id,
+        "pending_request_blob_sha": request_blob,
+        "snapshot_blob_sha": snapshot_blob,
+    }
+
+
 def assert_work_resume_continuity_preflight(
     root: Path,
     *,
@@ -282,6 +549,14 @@ def assert_work_resume_continuity_preflight(
     if preflight.get("resume_authorized") is not True:
         raise ContinuityPreflightError("continuity preflight has not authorized resume")
 
+    continuation_durability = _assert_remote_durable_continuation(
+        root,
+        state=state,
+        run_id=run_id,
+        executor_binding=executor_binding,
+        model_identity=model_identity,
+    )
+
     prior_stop = classify_prior_stop(state)
     if prior_stop.kind == "malformed_legitimate_stop":
         raise ContinuityPreflightError(prior_stop.reason)
@@ -343,5 +618,6 @@ def assert_work_resume_continuity_preflight(
         "prior_stop_classification": prior_stop.kind,
         "execution_id": state.get("execution_id"),
         "lease_generation": state.get("lease_generation"),
+        "continuation_durability": continuation_durability,
         "resume_authorized": True,
     }
