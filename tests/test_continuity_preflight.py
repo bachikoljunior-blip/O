@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -27,6 +28,17 @@ def _git_blob_digest(path: Path) -> str:
     payload = path.read_bytes()
     header = f"blob {len(payload)}\0".encode("ascii")
     return hashlib.sha1(header + payload).hexdigest()
+
+
+def _git(root: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    return completed.stdout.strip()
 
 
 def _root(tmp_path: Path) -> Path:
@@ -258,6 +270,38 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
         "snapshot_revision": snapshot["revision"],
         "native_phase": snapshot["phase"],
     }
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+
+    with pytest.raises(
+        ContinuityPreflightError,
+        match="pending Work request is not present in continuation source commit",
+    ):
+        assert_work_resume_continuity_preflight(
+            root,
+            run_id=run_id,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="chatgpt-work-model-unverified",
+        )
+    assert {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in (root / ".continual").rglob("*")
+        if path.is_file()
+    } == before
+
+    _git(root, "init", "--quiet")
+    _git(root, "config", "user.name", "Continuity Test")
+    _git(root, "config", "user.email", "continuity-test@example.invalid")
+    _git(
+        root,
+        "add",
+        "--",
+        request_ref,
+        state["exact_continuation"]["run_snapshot_ref"],
+    )
+    _git(root, "commit", "--quiet", "-m", "Persist exact continuation")
+    source_main_sha = _git(root, "rev-parse", "HEAD")
+    state["exact_continuation"]["snapshot_head_sha"] = source_main_sha
+    state["continuation_durability"]["source_main_sha"] = source_main_sha
     _write(root / "agi/WORK_EXECUTION_STATE.json", state)
 
     result = assert_work_resume_continuity_preflight(
