@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 28,
+  "revision": 29,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -474,7 +474,25 @@
       "supersedes": [],
       "source": "user_chat",
       "sequence": 28
+    },
+    {
+      "sequence": 29,
+      "id": "user-direction-repair-stalled-work-session-20260827-v29",
+      "received_at": "2026-08-27T22:34:00Z",
+      "kind": "execution_repair_direction",
+      "status": "active",
+      "summary": "Repair the primary O execution because user messages in its Work session no longer advance it.",
+      "directives": [
+        "Diagnose and repair the transport and execution-control defects that cause the primary O Work session to ignore user messages and make no progress.",
+        "Make new non-secret user directions from the same Work task chat durably enter USER_INPUT_INBOX exactly once through expected-revision/blob CAS and remote readback, and surface unacknowledged input without authorizing a duplicate writer.",
+        "Remove the recurrence causes before resuming: do not treat an action-local GitHub publication permission hold as a secret/account-holder global stop, do not hide unresolved input behind a fresh heartbeat, and preserve generation/fence/CAS/frozen-request/idempotency/exact-readback safeguards.",
+        "The lost local-only generation-23 continuation must not be fabricated. Recover only from remote-durable evidence, record any irreversible local-only loss, and do not repeat already-durable external effects.",
+        "This repair request is not payload-specific authorization for an unavailable or different Git tree and does not authorize secrets, credentials, paid actions, or weakening safety/integrity boundaries.",
+        "After tested causal repair and a valid remote-durable checkpoint, continue primary O work automatically; repair or reporting alone is not completion."
+      ],
+      "supersedes": [],
+      "source": "user_chat"
     }
   ],
-  "updated_at": "2026-08-26T22:49:08.725Z"
+  "updated_at": "2026-08-27T22:34:00Z"
 }
