@@ -7,7 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from continual.continuity_preflight import ContinuityPreflightError
+from continual.continuity_preflight import (
+    ContinuityPreflightError,
+    assert_work_resume_continuity_preflight,
+)
 from continual.work_session import WorkSession, submit_work_response
 
 
@@ -18,6 +21,12 @@ def _write(path: Path, value: dict) -> None:
 
 def _digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _git_blob_digest(path: Path) -> str:
+    payload = path.read_bytes()
+    header = f"blob {len(payload)}\0".encode("ascii")
+    return hashlib.sha1(header + payload).hexdigest()
 
 
 def _root(tmp_path: Path) -> Path:
@@ -172,3 +181,95 @@ def test_resume_proceeds_only_after_cause_elimination_validation(tmp_path: Path)
     resumed = session.resume(run_id, max_steps=1)
     assert resumed["snapshot"]["phase"] == "root_pending"
     assert resumed["pending"] == []
+
+
+def test_pending_resume_requires_remote_durable_request_and_snapshot(
+    tmp_path: Path,
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-remote-durable-continuation"
+    session = WorkSession(root)
+    started = session.start("freeze one exact request", run_id=run_id)
+    request = started["pending"][0]
+    state = _install_policy(root, run_id)
+    state["start_of_run_continuity_preflight"] = _valid_preflight(
+        root, state, run_id
+    )
+    snapshot_path = root / ".continual" / "runs" / run_id / "snapshot.json"
+    request_ref = (
+        f'.continual/work-model/invocations/{request["invocation_id"]}/request.json'
+    )
+    request_path = root / request_ref
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    state["exact_continuation"] = {
+        "run_snapshot_ref": snapshot_path.relative_to(root).as_posix(),
+        "snapshot_branch": "main",
+        "snapshot_head_sha": "c" * 40,
+        "snapshot_blob_sha": _git_blob_digest(snapshot_path),
+        "snapshot_revision": snapshot["revision"],
+        "native_phase": snapshot["phase"],
+        "pending_work_invocation_id": request["invocation_id"],
+        "pending_request_ref": request_ref,
+        "pending_request_digest": request["request_digest"],
+        "pending_request_blob_sha": None,
+    }
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+    before = {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in (root / ".continual").rglob("*")
+        if path.is_file()
+    }
+
+    with pytest.raises(
+        ContinuityPreflightError,
+        match="pending_request_blob_sha must be a non-empty string",
+    ):
+        assert_work_resume_continuity_preflight(
+            root,
+            run_id=run_id,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="chatgpt-work-model-unverified",
+        )
+    assert {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in (root / ".continual").rglob("*")
+        if path.is_file()
+    } == before
+
+    request_blob = _git_blob_digest(request_path)
+    state["exact_continuation"]["pending_request_blob_sha"] = request_blob
+    state["continuation_durability"] = {
+        "schema_version": 1,
+        "status": "remote_main_readback_verified",
+        "verified_remote_readback": True,
+        "verified_at": "2026-08-27T02:45:00Z",
+        "execution_id": state["execution_id"],
+        "lease_generation": state["lease_generation"],
+        "fence_token_digest": hashlib.sha256(
+            state["fence_token"].encode("utf-8")
+        ).hexdigest(),
+        "source_main_sha": state["exact_continuation"]["snapshot_head_sha"],
+        "pending_work_invocation_id": request["invocation_id"],
+        "pending_request_ref": request_ref,
+        "pending_request_digest": request["request_digest"],
+        "pending_request_blob_sha": request_blob,
+        "run_snapshot_ref": state["exact_continuation"]["run_snapshot_ref"],
+        "snapshot_blob_sha": state["exact_continuation"]["snapshot_blob_sha"],
+        "snapshot_revision": snapshot["revision"],
+        "native_phase": snapshot["phase"],
+    }
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+
+    result = assert_work_resume_continuity_preflight(
+        root,
+        run_id=run_id,
+        executor_binding="current_chatgpt_work_session",
+        model_identity="chatgpt-work-model-unverified",
+    )
+
+    assert result["continuation_durability"]["status"] == (
+        "remote_main_readback_verified"
+    )
+    assert result["continuation_durability"]["pending_request_blob_sha"] == (
+        request_blob
+    )
