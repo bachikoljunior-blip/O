@@ -1,0 +1,54 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-27T01:02:32.146285Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-9be4fec079e73caeedc32c21-candidate_evaluate.json",
+  "invocation_id": "invoke-9be4fec079e73caeedc32c21",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "observations": [
+        "The generic unit-versus-task verdict overlay is directly applicable.",
+        "No candidate modifies the adversarial evidence or classifier under evaluation."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE"
+    },
+    "result": {
+      "baseline": "The active Task Evaluate prompt remains the evidence-adjudication baseline; the candidate is a narrow verdict-shape overlay.",
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "conflicts": [],
+      "costs": {
+        "external": "none",
+        "failure_risk": "low; bounded by explicit regression checks",
+        "latency": "negligible",
+        "quality": "improves claim separation",
+        "token": "small verdict-shape overhead",
+        "tool": "no additional external effect"
+      },
+      "decision": "USE_CANDIDATE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "eight exact expected-versus-observed rows",
+        "eight byte-identical pre/post native snapshots",
+        "104 passing protected tests with zero failures",
+        "immutable Execute request/response digest pairing",
+        "bounded claim language"
+      ],
+      "reason": "The upcoming component must separate the bounded eight-scenario unit verdict from the still-unmet user-level objective; the candidate adds exactly that distinction without changing evidence or classifier behavior.",
+      "regression_checks": [
+        "do not convert a local unit PASS into publication success",
+        "do not convert the unit PASS into user-level completion",
+        "preserve all negative evidence and missing exact-head CI/readback",
+        "require repair if any scenario, mutation proof, or digest fails"
+      ],
+      "rollback": "If the overlay obscures the evidence or verdict separation, use the active Task Evaluate prompt and explicitly emit both bounded and user-level verdicts.",
+      "scope": "generation22/revision28-continuity-preflight-adversarial-generalization-v1/task-evaluate"
+    }
+  },
+  "payload_digest": "24168ffd78709c6c83ff2a5d",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

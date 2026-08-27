@@ -1,0 +1,35 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "observations": [
+      "All indexed candidates are outside the exact publication scope."
+    ]
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE"
+  },
+  "result": {
+    "baseline": "Use the active Execute contract and the repository publication policy.",
+    "conflicts": [],
+    "decision": "NOT_APPLICABLE",
+    "dependencies": [],
+    "evidence_to_collect": [
+      "reviewed-path manifest",
+      "exact branch head",
+      "required CI jobs",
+      "expected-head merge",
+      "remote main blob readback"
+    ],
+    "reason": "No indexed Execute Candidate targets bounded GitHub publication, expected-head protection, exact-head CI, or remote blob readback. Applying benchmark, campaign, provider, or context-hygiene overlays would add unrelated behavior and risk widening the reviewed path set.",
+    "regression_checks": [
+      "no secret or private-reasoning content",
+      "no unrelated paths",
+      "no force push",
+      "no claim widening",
+      "no duplicate Work request"
+    ],
+    "rollback": "Abandon the isolated branch if its head or reviewed path set differs; leave main unchanged.",
+    "scope": "generation22/revision28-continuity-preflight-adversarial-publication-v1"
+  }
+}

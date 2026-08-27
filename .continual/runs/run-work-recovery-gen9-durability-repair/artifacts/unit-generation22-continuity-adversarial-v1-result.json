@@ -1,0 +1,29 @@
+{
+  "artifacts": [
+    "src/continual/continuity_preflight.py",
+    "src/continual/continuity_adversarial.py",
+    "tests/test_continuity_preflight_adversarial.py",
+    "evidence/continuity_preflight_adversarial_v1.json"
+  ],
+  "claim_boundary": "PASS is limited to the eight declared synthetic revision-28 stop-classification scenarios and their pre-mutation rejection checks. It is not evidence of general recovery reliability, production capability, AGI, or user-level completion.",
+  "matrix": {
+    "failed_count": 0,
+    "passed_count": 8,
+    "rejected_before_native_mutation_count": 8,
+    "scenario_count": 8
+  },
+  "observations": [
+    "The original classifier scanned serialized termination and refire-failure text for broad tokens, so legitimate hard-stop descriptions containing approval-like text could be mislabeled as discretionary.",
+    "The classifier now recognizes only five active, structurally corroborated legitimate stop categories and rejects incomplete legitimate-stop markers fail-closed.",
+    "Two discretionary scenarios, five legitimate non-discretionary scenarios, and one malformed hard-stop marker produced the exact expected classifications.",
+    "All eight unresolved-stop scenarios were rejected with the native snapshot byte-identical before and after WorkSession.resume.",
+    "The focused protected set passed 104 tests with zero failures."
+  ],
+  "scope": "generation22/revision28-continuity-preflight-adversarial-generalization-v1",
+  "status": "PASS",
+  "unit_id": "unit-generation22-continuity-adversarial-v1",
+  "validation": {
+    "failed": 0,
+    "passed": 104
+  }
+}

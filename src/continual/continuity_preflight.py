@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -32,6 +34,15 @@ _STOP_SIGNALS = (
 
 class ContinuityPreflightError(ValueError):
     """Raised before Work resume when causal stop remediation is not proven."""
+
+
+@dataclass(frozen=True)
+class PriorStopClassification:
+    """Bounded, deterministic classification of an active prior-stop record."""
+
+    kind: str
+    reason: str
+    evidence_refs: tuple[str, ...] = ()
 
 
 def _mapping(value: Any, field: str) -> Mapping[str, Any]:
@@ -85,7 +96,81 @@ def _nonempty_refs(value: Any, field: str) -> list[str]:
     return [item.strip() for item in value]
 
 
-def _detected_discretionary_stop(state: Mapping[str, Any]) -> bool:
+def _optional_refs(value: Any) -> tuple[str, ...] | None:
+    if not isinstance(value, list) or not value or not all(
+        isinstance(item, str) and item.strip() for item in value
+    ):
+        return None
+    return tuple(item.strip() for item in value)
+
+
+def _legitimate_stop(state: Mapping[str, Any]) -> PriorStopClassification | None:
+    termination = state.get("termination")
+    if not isinstance(termination, Mapping) or termination.get("active") is not True:
+        return None
+    kind = termination.get("kind")
+    legitimate_kinds = {
+        "hard_platform_safety_prohibition",
+        "secret_or_account_holder_only_blocker",
+        "fresh_different_writer_detected",
+        "running_exact_head_workflow",
+        "user_level_objective_met",
+    }
+    if kind not in legitimate_kinds:
+        return None
+    refs = _optional_refs(termination.get("evidence_refs"))
+    valid = refs is not None
+    if kind in {
+        "hard_platform_safety_prohibition",
+        "secret_or_account_holder_only_blocker",
+    }:
+        valid = valid and termination.get("non_overridable") is True
+    elif kind == "fresh_different_writer_detected":
+        valid = (
+            valid
+            and isinstance(termination.get("different_execution_id"), str)
+            and bool(termination["different_execution_id"].strip())
+            and termination.get("fresh_activity_observed") is True
+        )
+    elif kind == "running_exact_head_workflow":
+        head = termination.get("exact_head_sha")
+        valid = (
+            valid
+            and termination.get("workflow_status") in {"queued", "in_progress"}
+            and isinstance(termination.get("workflow_run_id"), (str, int))
+            and bool(str(termination["workflow_run_id"]).strip())
+            and isinstance(head, str)
+            and re.fullmatch(r"[0-9a-f]{40}", head) is not None
+        )
+    elif kind == "user_level_objective_met":
+        valid = (
+            valid
+            and state.get("status") == "completed"
+            and termination.get("normal_completion") is True
+            and termination.get("user_objective_met") is True
+        )
+    if not valid:
+        return PriorStopClassification(
+            "malformed_legitimate_stop",
+            f"{kind} lacks required structured corroboration",
+        )
+    return PriorStopClassification(
+        "legitimate_non_discretionary_stop",
+        str(kind),
+        refs or (),
+    )
+
+
+def classify_prior_stop(state: Mapping[str, Any]) -> PriorStopClassification:
+    """Classify only the bounded stop categories used by the revision-28 guard.
+
+    Legitimate stops must be active and structurally corroborated. Merely placing
+    safety-like words in an error string cannot override discretionary-stop repair.
+    """
+
+    legitimate = _legitimate_stop(state)
+    if legitimate is not None:
+        return legitimate
     relevant = {
         "termination": state.get("termination"),
         "refire_failure": (
@@ -95,7 +180,16 @@ def _detected_discretionary_stop(state: Mapping[str, Any]) -> bool:
         ),
     }
     serialized = json.dumps(relevant, ensure_ascii=False, sort_keys=True).lower()
-    return any(signal in serialized for signal in _STOP_SIGNALS)
+    if any(signal in serialized for signal in _STOP_SIGNALS):
+        return PriorStopClassification(
+            "discretionary_stop_detected",
+            "bounded discretionary-stop signal detected",
+        )
+    return PriorStopClassification("no_stop_detected", "no bounded stop signal detected")
+
+
+def _detected_discretionary_stop(state: Mapping[str, Any]) -> bool:
+    return classify_prior_stop(state).kind == "discretionary_stop_detected"
 
 
 def assert_work_resume_continuity_preflight(
@@ -188,7 +282,14 @@ def assert_work_resume_continuity_preflight(
     if preflight.get("resume_authorized") is not True:
         raise ContinuityPreflightError("continuity preflight has not authorized resume")
 
-    detected = _detected_discretionary_stop(state)
+    prior_stop = classify_prior_stop(state)
+    if prior_stop.kind == "malformed_legitimate_stop":
+        raise ContinuityPreflightError(prior_stop.reason)
+    if prior_stop.kind == "legitimate_non_discretionary_stop":
+        raise ContinuityPreflightError(
+            "legitimate non-discretionary stop remains active: " + prior_stop.reason
+        )
+    detected = prior_stop.kind == "discretionary_stop_detected"
     classification = preflight.get("classification")
     if detected:
         if classification != "discretionary_stop_cause_eliminated_and_validated":
@@ -239,6 +340,7 @@ def assert_work_resume_continuity_preflight(
         "required": True,
         "policy_revision": revision,
         "classification": classification,
+        "prior_stop_classification": prior_stop.kind,
         "execution_id": state.get("execution_id"),
         "lease_generation": state.get("lease_generation"),
         "resume_authorized": True,
