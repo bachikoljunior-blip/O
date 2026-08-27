@@ -8,8 +8,8 @@
   "lease_generation": 23,
   "fence_token": "work-recovery-fence-v23-705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4",
   "started_at": "2026-08-27T02:38:52.792Z",
-  "heartbeat_at": "2026-08-27T02:38:52.792Z",
-  "last_progress_at": "2026-08-27T02:38:52.792Z",
+  "heartbeat_at": "2026-08-27T02:40:32.737Z",
+  "last_progress_at": "2026-08-27T02:40:32.737Z",
   "stale_after_seconds": 900,
   "authorization": {
     "kind": "fenced_checkpoint_recovery_and_primary_refire",
@@ -310,16 +310,16 @@
     "recovery_eligibility_is_mutation_authority": false
   },
   "remote_persistence": {
-    "published_on_main": false,
-    "verified_remote_readback": false,
+    "published_on_main": true,
+    "verified_remote_readback": true,
     "expected_blob_sha": "ed6578feb9374b6752fd4b360f15735284cd6625",
-    "result_commit_sha": null,
-    "result_blob_sha": null,
-    "finalization_expected_blob_sha": null,
+    "result_commit_sha": "67f38d68c7a5bfa8755383cf19086e400220850f",
+    "result_blob_sha": "15dbd0a41d43b51944b153b5822b647f81cbf08c",
+    "finalization_expected_blob_sha": "15dbd0a41d43b51944b153b5822b647f81cbf08c",
     "finalization_commit_sha": null,
     "finalization_blob_sha": null,
     "finalization_readback_verified": false,
-    "note": "Generation 23 acquisition is pending two-phase finalization; no development mutation or resume is authorized yet."
+    "note": "Generation 23 acquisition read back exactly; second CAS submitted and awaits finalization readback."
   },
   "external_evidence_state": {
     "agi_claim_supported": false,
@@ -341,12 +341,12 @@
     "note": "Revision 24 remains a targeting correction for a separate automation. The revision-22 frozen invocation was resumed without request recreation, answered once, published through PRs 316-318, and is main-durable. Native snapshot revision 67 is root_pending; refresh mandatory source receipts before the next Root semantic freeze."
   },
   "expected_blob_sha": "ed6578feb9374b6752fd4b360f15735284cd6625",
-  "result_commit_sha": null,
-  "result_blob_sha": null,
-  "finalize_expected_blob_sha": null,
-  "readback_of_commit_sha": null,
-  "verified_remote_readback": false,
-  "acquisition_phase": "generation23_acquisition_pending_remote_readback",
+  "result_commit_sha": "67f38d68c7a5bfa8755383cf19086e400220850f",
+  "result_blob_sha": "15dbd0a41d43b51944b153b5822b647f81cbf08c",
+  "finalize_expected_blob_sha": "15dbd0a41d43b51944b153b5822b647f81cbf08c",
+  "readback_of_commit_sha": "67f38d68c7a5bfa8755383cf19086e400220850f",
+  "verified_remote_readback": true,
+  "acquisition_phase": "generation23_two_phase_finalized_pending_authorization_readback",
   "recovery_observation": {
     "observed_at": "2026-08-26T21:33:31.746Z",
     "predecessor_execution_id": "work-recovery-20260826T112246061Z-0cf9bce76a217ac818b03612850e9dfc",
@@ -3253,8 +3253,16 @@
     "validated_at": null,
     "implementation_contract": "src/agi/work_mode_monitor.py:authorize_work_mode_recovery",
     "authorized": false,
-    "reason": "acquisition commit pending remote readback and second CAS",
-    "proof": null
+    "reason": "finalization commit pending exact remote readback",
+    "proof": {
+      "observed_blob_sha": "ed6578feb9374b6752fd4b360f15735284cd6625",
+      "acquisition_commit_sha": "67f38d68c7a5bfa8755383cf19086e400220850f",
+      "acquisition_blob_sha": "15dbd0a41d43b51944b153b5822b647f81cbf08c",
+      "finalization_commit_sha": null,
+      "finalization_blob_sha": null,
+      "readback_commit_sha": null,
+      "readback_blob_sha": null
+    }
   },
   "current_blockers": {
     "revision22_generated_records_github_publication": {
@@ -3706,7 +3714,7 @@
     "policy_revision": 28,
     "execution_id": "work-recovery-20260827T023852792Z-6de87b9a2a6c4f2affc10c988ee09af6",
     "lease_generation": 23,
-    "fence_token_digest": "pending_validation_after_two_phase_cas",
+    "fence_token_digest": "b750027d273301cdd7d05d08f8de4cd61f5bdcb147a3bc5b07110ad2199a6eb4",
     "run_id": "run-work-recovery-gen9-durability-repair",
     "executor_binding": "current_chatgpt_work_session",
     "model_identity": "chatgpt-work-model-unverified",
@@ -3744,7 +3752,7 @@
     "idempotency_key": "o-work-refire:g23:705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4:77661637dedccc41c88325cab25d1683bf282221:invoke-748f38dc8ef56693dba2f7b7:remote-durability-v1",
     "target_generation": 23,
     "target_fence_token": "work-recovery-fence-v23-705a5ae95354e59008a93f3fc2946dceebbc6cffdd2b30c22f03c7aeebc1feb4",
-    "target_fence_digest": "pending_after_finalization",
+    "target_fence_digest": "b750027d273301cdd7d05d08f8de4cd61f5bdcb147a3bc5b07110ad2199a6eb4",
     "continuation_commit": "77661637dedccc41c88325cab25d1683bf282221",
     "continuation_snapshot_revision": 94,
     "continuation_phase": "consolidate_pending",
@@ -3759,6 +3767,6 @@
     "launch_accepted": false,
     "substantive_liveness_event": null,
     "created_at": "2026-08-27T02:38:52.792Z",
-    "updated_at": "2026-08-27T02:38:52.792Z"
+    "updated_at": "2026-08-27T02:40:32.737Z"
   }
 }
