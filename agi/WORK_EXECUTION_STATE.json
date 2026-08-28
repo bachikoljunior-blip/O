@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation27_recovery_finalization_pending_readback",
+  "active_component": "generation27_authorized_revision30_ingested_pending_candidate_response_consume",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -26,10 +26,17 @@
     "repository_control_revision": 15
   },
   "authorization_validation": {
-    "authorized": false,
-    "validated_at": null,
+    "authorized": true,
+    "validated_at": "2026-08-28T10:14:25.879Z",
     "implementation": "src/agi/work_mode_monitor.py#authorize_work_mode_recovery",
-    "reason": "finalization committed; pending exact finalization remote readback and authorization check"
+    "reason": "exact generation+1 lease and two-phase remote readback were verified",
+    "observed_blob_sha": "f2e7c4513f5f28cc5c21b21fa385759bbf0ced1e",
+    "acquisition_commit_sha": "86916e325bdc2ec59ddcddeff92d956bcf76b4b3",
+    "acquisition_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
+    "finalization_commit_sha": "6a8bd9c49c34f3f295a8b2718435ca8cc7b19361",
+    "finalization_blob_sha": "8e05da5c92fb21207d84b62551328a04a919807e",
+    "latest_user_input_revision_during_authorization": 30,
+    "acknowledged_revision_during_authorization": 29
   },
   "behavioral_source_renewal_integration": {
     "authorized_at": "2026-08-24T04:56:21.012Z",
@@ -1429,7 +1436,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T10:13:28.471Z",
+  "heartbeat_at": "2026-08-28T10:14:25.879Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2258,7 +2265,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T10:13:28.471Z",
+  "last_progress_at": "2026-08-28T10:14:25.879Z",
   "lease_generation": 27,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -2696,23 +2703,15 @@
     "primary": "Generation 19 is the sole owner after two-phase acquisition finalization and exact remote readback. Preserve and execute only frozen Work-exclusive Execute invoke-248450c08547af10470c50e6 after local authorization validation.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered."
   },
-  "pending_user_input": {
-    "revision": 30,
-    "inbox_blob_sha": "28ba61da742defb437b4a28ee404c87865126987",
-    "inbox_commit_sha": "f88f25eca0c6758aad37306137cc9af3004a6a32",
-    "event_id": "user-input-event-sha256-42b741c304fdf373813333a5b6f2547964dc27584817be6744c702bd22ca358f",
-    "detected_at": "2026-08-28T10:13:13.204Z",
-    "apply_at": "safe_unit_boundary_before_candidate_response_consume",
-    "duplicate_writer_authorized": false
-  },
+  "pending_user_input": null,
   "post_acquisition_progress_contract": {
     "generation": 27,
     "concrete_effect_selected": "Acknowledge inbox revision 30 at the safe boundary, consume the existing Candidate response exactly once, freeze and answer Execute for the selected recursive-context retrieval ablation, validate and publish its substantive result, then continue to the next safe effect.",
-    "effect_attempted": false,
+    "effect_attempted": true,
     "native_request_created": false,
     "new_exact_blocker_persisted": false,
     "new_exact_blocker_reached": false,
-    "progress_contract_result": "pending_substantive_effect",
+    "progress_contract_result": "authorization_and_revision30_ingress_durable_pending_native_consume",
     "state_only_success_claimed": false,
     "observed_at": "2026-08-28T10:13:13.204Z"
   },
@@ -3957,7 +3956,7 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "f88f25eca0c6758aad37306137cc9af3004a6a32",
+  "source_main_sha": "6a8bd9c49c34f3f295a8b2718435ca8cc7b19361",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
@@ -4110,22 +4109,22 @@
     "user_objective_met": false
   },
   "user_input_inbox": {
-    "acknowledged_at": "2026-08-28T00:16:05.750Z",
-    "application_note": "Revision 29 was ingested at the repaired safe boundary after PR 323 exact-head CI, merge, and remote readback. The lost generation-23 local-only request was not recreated; native resume is bound only to the remote-durable revision-85 request.",
-    "highest_acknowledged_revision": 29,
-    "last_acknowledged_input": {
-      "acknowledged_at": "2026-08-28T00:16:05.750Z",
-      "effective": true,
-      "id": "user-direction-repair-stalled-work-session-20260827-v29",
-      "inbox_blob_sha": "f7754de4f6bb78b38173e3d17bf73cd55adfd337",
-      "inbox_commit_sha": "eaa57e25f87cd42156e5a752d41a0e1b9dd901a3",
-      "interpretation": "Repair same-task-chat ingress and action-local stop classification, never fabricate the lost local-only continuation, reconstruct only remote-durable evidence, and continue primary work after validated causal repair.",
-      "revision": 29
-    },
     "path": "agi/USER_INPUT_INBOX.json",
+    "highest_acknowledged_revision": 30,
+    "acknowledged_at": "2026-08-28T10:14:25.879Z",
+    "pending_revision": null,
     "pending_inbox_blob_sha": null,
     "pending_inbox_commit_sha": null,
-    "pending_revision": null
+    "last_acknowledged_input": {
+      "revision": 30,
+      "id": "user-input-event-sha256-42b741c304fdf373813333a5b6f2547964dc27584817be6744c702bd22ca358f",
+      "acknowledged_at": "2026-08-28T10:14:25.879Z",
+      "effective": true,
+      "inbox_blob_sha": "28ba61da742defb437b4a28ee404c87865126987",
+      "inbox_commit_sha": "f88f25eca0c6758aad37306137cc9af3004a6a32",
+      "interpretation": "Every physical trigger must remain in the same authoritative execution loop until the upper objective is durably achieved or a true hard termination condition applies. Pending native work, one effect, one PR/merge/CI/milestone, short-circuit, backoff, checkpoint, no-change, or report cannot end the invocation; preserve single-writer exact continuation and resume-first handoff."
+    },
+    "application_note": "Revision 30 was ingested at the safe unit boundary after generation-27 two-phase recovery authorization. It does not rewrite the already-frozen Candidate request; it governs same-run consumption, the next Execute freeze, subsequent effects, and forced-runtime handoff."
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_remote_readback": true,
@@ -4537,9 +4536,9 @@
   },
   "generation27_refire": {
     "schema_version": 1,
-    "status": "lease_finalized_pending_authorization",
+    "status": "authorized_pending_native_consume",
     "created_at": "2026-08-28T10:13:13.204Z",
-    "updated_at": "2026-08-28T10:13:28.471Z",
+    "updated_at": "2026-08-28T10:14:25.879Z",
     "target_generation": 27,
     "target_fence_token": "work-recovery-fence-v27-4c4489944fc3c028dc998223c20aeb21edb31e0593ce2131895c1f6f5bb37c5f",
     "idempotency_key": "o-work-refire:g27:4c4489944fc3c028dc998223c20aeb21edb31e0593ce2131895c1f6f5bb37c5f:f88f25ec:revision91-candidate-consume-execute-ablation-v1",
@@ -4560,7 +4559,11 @@
       "acquisition_commit_sha": "86916e325bdc2ec59ddcddeff92d956bcf76b4b3",
       "acquisition_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
       "acquisition_remote_readback_verified": true,
-      "finalization_expected_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac"
+      "finalization_expected_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
+      "finalization_commit_sha": "6a8bd9c49c34f3f295a8b2718435ca8cc7b19361",
+      "finalization_blob_sha": "8e05da5c92fb21207d84b62551328a04a919807e",
+      "finalization_remote_readback_verified": true,
+      "authorization_validated": true
     }
   }
 }
