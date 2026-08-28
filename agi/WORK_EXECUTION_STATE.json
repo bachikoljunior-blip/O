@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation28_revision31_continuity_preflight_refresh",
+  "active_component": "generation28_candidate_evaluate_pending_remote_durability",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -156,19 +156,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-28T12:09:00.000Z",
-    "exact_pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
-    "exact_pending_request_digest": "d0a8327fcfef6f0cfcb8c4b4fb9debd987bd932256ce18ff2448b81fd4d98cd5",
-    "exact_pending_request_ref": ".continual/work-model/invocations/invoke-248450c08547af10470c50e6/request.json",
-    "exact_pending_work_invocation_id": null,
+    "checkpointed_at": "2026-08-28T12:12:00.000Z",
+    "exact_pending_request_blob_sha": "c75d243520d375f9e7bb4aad0908f99e9a79ac86",
+    "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
+    "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
+    "exact_pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "reason": "Forced process boundary immediately after safe generation-20 recovery and exact authorization readback. This is not a permission wait, discretionary stop, completion, or claim of progress on the frozen semantic unit.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
-    "remote_authority_commit": "d707f15834f925eb897ceb00ce76db997485f8ba",
-    "status": "generation28_revision31_continuity_preflight_refresh_resume_required",
+    "remote_authority_commit": "2b46edd1a8f8c306888c2a8700f5d81e98430f2d",
+    "status": "generation28_candidate_evaluate_frozen_pending_remote_durability",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -178,14 +178,14 @@
     "execution_id": "work-recovery-20260828T103145759Z-e3ede154f4c0e4ae14f6432415e7e99f",
     "lease_generation": 28,
     "fence_token_digest": "978aee9dc57f03c89fe205bdac642752d4308fb797c2c00b6d0e2d587df568d7",
-    "exact_pending_native_invocation_id": null,
+    "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "CAS and exact-readback this revision31 continuity preflight refresh, renew mandatory source receipts for the new state blob, then freeze Execute exactly once from remote-main revision92",
-    "last_verified_effect": "PR334 exact-head CI passed, exact unchanged head merged as d707f15, and all four repair blobs matched remote main; work-checkpoint-verify valid",
-    "completed_effect_receipt": "pr334 merge d707f15 Candidate fragment/local-learn durability repaired and revision31 ledger main durable blobs 4/4 matched",
+    "next_action": "Publish the exact frozen Candidate Evaluate Work request, native journal, event, and this checkpoint from remote main 2b46edd through unchanged exact-head CI and exact readback; then answer invoke-f1cb0996ce0ff71a28d0dd58 exactly once and continue into Execute.",
+    "last_verified_effect": "Revision31 continuity preflight refresh was CASed and exactly read back on remote main commit 2b46edd; work-resume then froze Candidate Evaluate exactly once without consuming it.",
+    "completed_effect_receipt": "remote-main state blob 499cad1 matched revision31 preflight; Candidate Evaluate Work invoke-f1cb0996ce0ff71a28d0dd58/native invoke-453dfc3b5b74ddb7d9e4fdee frozen once with request digest 4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-refire:g28:77f0480c3ed73bcc7100f1d58d1970ac5f45510e4c6ce4ceb2f8769e1cb859b3:320857ab:revision91-candidate-consume-execute-ablation-v1",
-    "exact_frontier": "remote-main revision92 unit_pending selected recursive-context retrieval ablation; Candidate complete and fully durable; revision31 continuity preflight refresh then Execute freeze"
+    "idempotency_key": "o-work-freeze:g28:978aee9dc57f03c89fe205bdac642752d4308fb797c2c00b6d0e2d587df568d7:revision92:invoke-f1cb0996ce0ff71a28d0dd58:candidate-evaluate-v1",
+    "exact_frontier": "local revision92 unit_pending with immutable Candidate Evaluate pending; remote main 2b46edd has authority/preflight but not yet the new request/native/event checkpoint"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1442,7 +1442,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T12:09:00.000Z",
+  "heartbeat_at": "2026-08-28T12:12:00.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2271,7 +2271,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T12:09:00.000Z",
+  "last_progress_at": "2026-08-28T12:12:00.000Z",
   "lease_generation": 28,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
