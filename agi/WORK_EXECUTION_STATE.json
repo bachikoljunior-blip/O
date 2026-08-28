@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_preflight_bound_pending_source_observation",
+  "active_component": "generation29_candidate_preflight_response_checkpointed_pending_source_observation",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -156,7 +156,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-28T12:31:37.483Z",
+    "checkpointed_at": "2026-08-28T12:36:10.267Z",
     "exact_pending_request_blob_sha": null,
     "exact_pending_request_digest": null,
     "exact_pending_request_ref": null,
@@ -168,7 +168,7 @@
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "generation29_preflight_bound_source_observation_pending_resume_required",
+    "status": "generation29_candidate_preflight_response_checkpointed_source_observation_pending_resume_required",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -180,12 +180,12 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": null,
     "resume_required": true,
-    "next_action": "exact-readback this generation29 revision31 preflight binding, renew mandatory authoritative and CI source receipts for the new state blob, then freeze Execute exactly once from remote-main revision92",
-    "last_verified_effect": "generation29 exact two-phase CAS authorized and recorded at 0d1e96e without changing revision92 native continuation",
-    "completed_effect_receipt": "generation29 acquisition 51686d4/f2639a1 and finalization 652463b/e26f474 exact-readback validator authorized",
+    "next_action": "exact-readback this checkpoint, renew mandatory authoritative and CI source receipts for its exact state blob, then resume revision92 to consume the completed Candidate Evaluate response and freeze Execute exactly once",
+    "last_verified_effect": "Candidate Evaluate Work invoke-f1cb0996ce0ff71a28d0dd58 was frozen once and answered once with BASELINE_FIRST; immutable response d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642 and journal verification succeeded",
+    "completed_effect_receipt": "request 4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500 blob fe1ca1ec1074d577a709b3fbf4881faa7a171280; response d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642 blob 2e885226a19c11c98c98fad7172354edae2901d1",
     "pending_job_ids": [],
     "idempotency_key": "o-work-refire:g29:9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781:2b46edd1:revision92-source-refresh-execute-ablation-v1",
-    "exact_frontier": "remote-main revision92 unit_pending selected recursive-context retrieval ablation; no pending Work request; generation29 source observation refresh then one-time Execute freeze"
+    "exact_frontier": "revision92 unit_pending selected recursive-context retrieval ablation; Candidate Evaluate native invoke-453dfc3b5b74ddb7d9e4fdee / Work invoke-f1cb0996ce0ff71a28d0dd58 has one immutable BASELINE_FIRST response; source receipt refresh then engine consume and one-time Execute freeze"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1442,7 +1442,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T12:31:37.483Z",
+  "heartbeat_at": "2026-08-28T12:36:10.267Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2271,7 +2271,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T12:31:37.483Z",
+  "last_progress_at": "2026-08-28T12:36:10.267Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -4801,9 +4801,9 @@
   },
   "generation29_refire": {
     "schema_version": 1,
-    "status": "preflight_bound_pending_source_observation",
+    "status": "candidate_preflight_response_checkpointed_pending_source_observation",
     "created_at": "2026-08-28T12:27:59.401Z",
-    "updated_at": "2026-08-28T12:31:37.483Z",
+    "updated_at": "2026-08-28T12:36:10.267Z",
     "target_generation": 29,
     "target_fence_token": "work-recovery-fence-v29-9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781",
     "idempotency_key": "o-work-refire:g29:9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781:2b46edd1:revision92-source-refresh-execute-ablation-v1",
@@ -4813,7 +4813,25 @@
       "native_phase": "unit_pending",
       "pending_work_invocation_id": null,
       "pending_native_invocation_id": null,
-      "selected_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1"
+      "selected_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
+      "completed_candidate_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
+      "completed_candidate_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
+      "completed_candidate_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
+      "completed_candidate_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
+      "candidate_decision": "BASELINE_FIRST"
+    },
+    "candidate_preflight_progress": {
+      "status": "response_completed_local_and_checkpointed_remote_state_only",
+      "native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
+      "work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
+      "request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
+      "request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
+      "response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
+      "response_blob_sha": "2e885226a19c11c98c98fad7172354edae2901d1",
+      "decision": "BASELINE_FIRST",
+      "request_recreated": false,
+      "response_repeated": false,
+      "journal_valid": true
     },
     "launch_accepted": false,
     "request_recreated": false,
