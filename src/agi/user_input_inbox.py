@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import re
 from typing import Any, Mapping
 
 
@@ -22,6 +23,35 @@ FORBIDDEN_SECRET_KEYS = {
     "secret",
     "token",
 }
+INGRESS_EVENT_FIELDS = {
+    "directives",
+    "kind",
+    "received_at",
+    "source",
+    "source_event_id",
+    "summary",
+    "supersedes",
+}
+RAW_CHAT_FIELDS = {
+    "chat_transcript",
+    "content",
+    "message",
+    "message_text",
+    "raw_chat",
+    "raw_message",
+    "raw_text",
+    "text",
+}
+SECRET_LIKE_TEXT_PATTERNS = (
+    re.compile(r"(?i)\bbearer\s+\S+"),
+    re.compile(r"(?i)\bgh[opsu]_[a-z0-9_]+"),
+    re.compile(r"(?i)\bgithub_pat_[a-z0-9_]+"),
+    re.compile(r"(?i)\bsk-[a-z0-9_-]+"),
+    re.compile(r"(?i)\bglpat-[a-z0-9_-]+"),
+    re.compile(r"(?i)\bxox[baprs]-[a-z0-9-]+"),
+    re.compile(r"\bAKIA[0-9A-Z]{12,}\b"),
+    re.compile(r"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----"),
+)
 
 
 class UserInputInboxError(RuntimeError):
@@ -60,6 +90,45 @@ def _forbidden_secret_fields(value: Any, path: str = "inbox") -> list[str]:
         for index, child in enumerate(value):
             errors.extend(_forbidden_secret_fields(child, f"{path}[{index}]"))
     return errors
+
+
+def _secret_like_text_locations(value: Any, path: str = "value") -> list[str]:
+    """Return locations containing credential-shaped text without echoing it."""
+
+    errors: list[str] = []
+    if isinstance(value, Mapping):
+        for raw_key, child in value.items():
+            errors.extend(_secret_like_text_locations(child, f"{path}.{raw_key}"))
+    elif isinstance(value, (list, tuple)):
+        for index, child in enumerate(value):
+            errors.extend(_secret_like_text_locations(child, f"{path}[{index}]"))
+    elif isinstance(value, str) and any(
+        pattern.search(value) for pattern in SECRET_LIKE_TEXT_PATTERNS
+    ):
+        errors.append(path)
+    return errors
+
+
+def _lowercase_git_sha(value: Any, *, field: str) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) != 40
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise UserInputInboxError(f"{field} must be a lowercase 40-hex Git SHA")
+    return value
+
+
+def _canonical_timestamp(value: Any, *, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise UserInputInboxError(f"{field} must be a non-empty ISO-8601 string")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise UserInputInboxError(f"{field} must be a valid ISO-8601 timestamp") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise UserInputInboxError(f"{field} must include a timezone")
+    return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def validate_user_input_inbox(value: Mapping[str, Any]) -> list[str]:
@@ -237,6 +306,15 @@ def prepare_user_input_inbox_append(
                 "entry_ids": [entry["id"] for entry in prepared],
                 "value": deepcopy(dict(current)),
             }
+        conflicting_ids = [
+            entry["id"]
+            for entry in prepared
+            if entry["id"] in existing_by_id and existing_by_id[entry["id"]] != entry
+        ]
+        if conflicting_ids:
+            raise UserInputInboxError(
+                "entry id content conflict: " + ", ".join(conflicting_ids)
+            )
         raise UserInputInboxError(
             "inbox revision conflict: "
             f"expected {expected_revision}, observed {current_revision}"
@@ -300,6 +378,7 @@ def append_remote_user_input_inbox(
     entries: Sequence[Mapping[str, Any]],
     *,
     expected_revision: int,
+    expected_blob_sha: str | None = None,
     updated_at: datetime,
     fetch: RemoteInboxFetch,
     compare_and_swap: RemoteInboxCompareAndSwap,
@@ -320,6 +399,8 @@ def append_remote_user_input_inbox(
         or readback_attempts < 1
     ):
         raise UserInputInboxError("readback_attempts must be a positive integer")
+    if expected_blob_sha is not None:
+        _lowercase_git_sha(expected_blob_sha, field="expected_blob_sha")
     before = _remote_inbox_snapshot(fetch)
     prepared = prepare_user_input_inbox_append(
         before["value"],
@@ -340,6 +421,12 @@ def append_remote_user_input_inbox(
             "remote_readback_verified": True,
             "readback_attempts": 1,
         }
+
+    if expected_blob_sha is not None:
+        if before["blob_sha"] != expected_blob_sha:
+            raise UserInputInboxError(
+                "inbox blob conflict: expected blob does not match remote preimage"
+            )
 
     content = serialize_user_input_inbox(prepared["value"])
     result = compare_and_swap(before["blob_sha"], content)
@@ -381,6 +468,135 @@ def append_remote_user_input_inbox(
         "content_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
         "remote_readback_verified": True,
         "readback_attempts": verified_attempt,
+    }
+
+
+def stable_user_input_event_id(*, source: str, source_event_id: str) -> str:
+    """Derive a non-reversible, stable inbox id from provider event identity."""
+
+    for field, value in (("source", source), ("source_event_id", source_event_id)):
+        if not isinstance(value, str) or not value.strip():
+            raise UserInputInboxError(f"{field} must be a non-empty string")
+    secret_locations = _secret_like_text_locations(
+        {"source": source, "source_event_id": source_event_id}, path="event"
+    )
+    if secret_locations:
+        raise UserInputInboxError(
+            "secret-like text is forbidden in user-input ingress at: "
+            + ", ".join(secret_locations)
+        )
+    identity = json.dumps(
+        {"source": source, "source_event_id": source_event_id},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return "user-input-event-sha256-" + hashlib.sha256(identity).hexdigest()
+
+
+def ingest_remote_user_input_event(
+    event: Mapping[str, Any],
+    *,
+    expected_revision: int,
+    expected_blob_sha: str,
+    updated_at: datetime,
+    fetch: RemoteInboxFetch,
+    compare_and_swap: RemoteInboxCompareAndSwap,
+    readback_attempts: int = 3,
+    readback_wait: RemoteInboxReadbackWait | None = None,
+) -> dict[str, Any]:
+    """Persist one distilled task-chat event through the authoritative inbox.
+
+    The ingress schema deliberately has no raw-chat field. Callers must provide
+    a concise summary plus explicit directives and a provider-stable event id.
+    The provider id is hashed rather than persisted. Replaying the same event
+    with identical structured content is exactly-once; reusing its identity for
+    different content fails closed.
+    """
+
+    if not isinstance(event, Mapping):
+        raise UserInputInboxError("user-input ingress event must be an object")
+    supplied_fields = {str(field) for field in event}
+    raw_fields = sorted(supplied_fields & RAW_CHAT_FIELDS)
+    if raw_fields:
+        raise UserInputInboxError(
+            "raw chat must not be supplied or persisted; use distilled summary and directives"
+        )
+    unknown_fields = sorted(supplied_fields - INGRESS_EVENT_FIELDS)
+    if unknown_fields:
+        raise UserInputInboxError(
+            "unsupported user-input ingress fields: " + ", ".join(unknown_fields)
+        )
+
+    missing_fields = sorted(
+        {"directives", "kind", "received_at", "source", "source_event_id", "summary"}
+        - supplied_fields
+    )
+    if missing_fields:
+        raise UserInputInboxError(
+            "missing user-input ingress fields: " + ", ".join(missing_fields)
+        )
+
+    source = event.get("source")
+    source_event_id = event.get("source_event_id")
+    if not isinstance(source, str) or not source.strip():
+        raise UserInputInboxError("event.source must be a non-empty string")
+    if not isinstance(source_event_id, str) or not source_event_id.strip():
+        raise UserInputInboxError("event.source_event_id must be a non-empty string")
+    kind = event.get("kind")
+    summary = event.get("summary")
+    if not isinstance(kind, str) or not kind.strip():
+        raise UserInputInboxError("event.kind must be a non-empty string")
+    if not isinstance(summary, str) or not summary.strip():
+        raise UserInputInboxError("event.summary must be a non-empty string")
+    directives = event.get("directives")
+    if isinstance(directives, (str, bytes)) or not isinstance(directives, Sequence):
+        raise UserInputInboxError("event.directives must be a non-empty sequence of strings")
+    directives = list(directives)
+    if not directives or not all(isinstance(item, str) and item.strip() for item in directives):
+        raise UserInputInboxError("event.directives must contain non-empty strings")
+    supersedes = event.get("supersedes", [])
+    if isinstance(supersedes, (str, bytes)) or not isinstance(supersedes, Sequence):
+        raise UserInputInboxError("event.supersedes must be a sequence of ids")
+    supersedes = list(supersedes)
+    if not all(isinstance(item, str) and item.strip() for item in supersedes):
+        raise UserInputInboxError("event.supersedes must contain non-empty ids")
+
+    secret_locations = _secret_like_text_locations(event, path="event")
+    if secret_locations:
+        raise UserInputInboxError(
+            "secret-like text is forbidden in user-input ingress at: "
+            + ", ".join(secret_locations)
+        )
+    _lowercase_git_sha(expected_blob_sha, field="expected_blob_sha")
+
+    entry = {
+        "id": stable_user_input_event_id(
+            source=source,
+            source_event_id=source_event_id,
+        ),
+        "received_at": _canonical_timestamp(event.get("received_at"), field="event.received_at"),
+        "kind": kind,
+        "status": "active",
+        "summary": summary,
+        "directives": directives,
+        "supersedes": supersedes,
+        "source": source,
+    }
+    receipt = append_remote_user_input_inbox(
+        [entry],
+        expected_revision=expected_revision,
+        expected_blob_sha=expected_blob_sha,
+        updated_at=updated_at,
+        fetch=fetch,
+        compare_and_swap=compare_and_swap,
+        readback_attempts=readback_attempts,
+        readback_wait=readback_wait,
+    )
+    return {
+        **receipt,
+        "event_id": entry["id"],
+        "source_event_id_persisted": False,
     }
 
 

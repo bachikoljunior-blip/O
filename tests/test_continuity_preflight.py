@@ -151,6 +151,134 @@ def _valid_preflight(root: Path, state: dict, run_id: str) -> dict:
     }
 
 
+def _awaiting_native_journal(root: Path, run_id: str) -> tuple[Path, dict]:
+    journal_root = root / ".continual" / "runs" / run_id / "invocations"
+    awaiting = []
+    for path in sorted(journal_root.glob("*.json")):
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if value.get("status") == "awaiting_work_model":
+            awaiting.append((path, value))
+    assert len(awaiting) == 1
+    return awaiting[0]
+
+
+def _install_remote_durable_continuation(
+    root: Path,
+    state: dict,
+    run_id: str,
+    request: dict,
+) -> None:
+    snapshot_path = root / ".continual" / "runs" / run_id / "snapshot.json"
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    request_ref = (
+        f'.continual/work-model/invocations/{request["invocation_id"]}/request.json'
+    )
+    request_path = root / request_ref
+    native_path, native = _awaiting_native_journal(root, run_id)
+    native_ref = native_path.relative_to(root).as_posix()
+
+    _git(root, "init", "--quiet")
+    _git(root, "config", "user.name", "Continuity Test")
+    _git(root, "config", "user.email", "continuity-test@example.invalid")
+    _git(
+        root,
+        "add",
+        "--",
+        request_ref,
+        snapshot_path.relative_to(root).as_posix(),
+        native_ref,
+    )
+    _git(root, "commit", "--quiet", "-m", "Persist exact continuation")
+    source_main_sha = _git(root, "rev-parse", "HEAD")
+    _git(root, "update-ref", "refs/remotes/origin/main", source_main_sha)
+
+    request_blob = _git_blob_digest(request_path)
+    snapshot_blob = _git_blob_digest(snapshot_path)
+    native_blob = _git_blob_digest(native_path)
+    state["exact_continuation"] = {
+        "run_snapshot_ref": snapshot_path.relative_to(root).as_posix(),
+        "snapshot_branch": "main",
+        "snapshot_head_sha": source_main_sha,
+        "snapshot_blob_sha": snapshot_blob,
+        "snapshot_revision": snapshot["revision"],
+        "native_phase": snapshot["phase"],
+        "pending_work_invocation_id": request["invocation_id"],
+        "pending_request_ref": request_ref,
+        "pending_request_digest": request["request_digest"],
+        "pending_request_blob_sha": request_blob,
+        "pending_native_invocation_id": native["invocation_id"],
+    }
+    state["continuation_durability"] = {
+        "schema_version": 1,
+        "status": "remote_main_readback_verified",
+        "verified_remote_readback": True,
+        "verified_at": "2026-08-27T02:45:00Z",
+        "execution_id": state["execution_id"],
+        "lease_generation": state["lease_generation"],
+        "fence_token_digest": hashlib.sha256(
+            state["fence_token"].encode("utf-8")
+        ).hexdigest(),
+        "source_main_sha": source_main_sha,
+        "pending_work_invocation_id": request["invocation_id"],
+        "pending_request_ref": request_ref,
+        "pending_request_digest": request["request_digest"],
+        "pending_request_blob_sha": request_blob,
+        "pending_native_invocation_id": native["invocation_id"],
+        "pending_native_invocation_ref": native_ref,
+        "pending_native_invocation_blob_sha": native_blob,
+        "run_snapshot_ref": snapshot_path.relative_to(root).as_posix(),
+        "snapshot_blob_sha": snapshot_blob,
+        "snapshot_revision": snapshot["revision"],
+        "native_phase": snapshot["phase"],
+    }
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+
+
+def test_publication_authorization_cannot_self_declare_secret_hard_stop() -> None:
+    state = {
+        "status": "running",
+        "termination": {
+            "active": True,
+            "kind": "secret_or_account_holder_only_blocker",
+            "non_overridable": True,
+            "blocker_type": "payload_specific_github_publication_authorization",
+            "evidence_refs": ["state:self-authored-publication-hold"],
+        },
+    }
+
+    classification = classify_prior_stop(state)
+
+    assert classification.kind == "discretionary_stop_detected"
+    assert "action-local blocker" in classification.reason
+
+
+def test_inactive_stop_and_causally_resolved_failure_are_history_only() -> None:
+    state = {
+        "status": "running",
+        "termination": {
+            "active": False,
+            "kind": "refire_failed_retry_required_not_complete",
+            "retry_only_after_material_approval_input": True,
+        },
+        "refire": {
+            "failure": {
+                "kind": "github_write_requires_explicit_policy_approval",
+            },
+            "failure_resolution": {
+                "status": "cause_eliminated_and_validated",
+                "resolution_merge_sha": "f" * 40,
+                "native_resume_fail_closed_digest_before": "native-digest",
+                "native_resume_fail_closed_digest_after": "native-digest",
+                "state_reset_alone_claimed_as_repair": False,
+            },
+        },
+    }
+
+    classification = classify_prior_stop(state)
+
+    assert classification.kind == "no_stop_detected"
+
+
 def test_resume_fails_before_native_mutation_without_causal_remediation(tmp_path: Path) -> None:
     root = _root(tmp_path)
     run_id = "run-causal-preflight"
@@ -173,7 +301,7 @@ def test_resume_fails_before_native_mutation_without_causal_remediation(tmp_path
 
     state["start_of_run_continuity_preflight"] = _valid_preflight(root, state, run_id)
     state["start_of_run_continuity_preflight"]["remediations"] = []
-    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+    _install_remote_durable_continuation(root, state, run_id, request)
     with pytest.raises(ContinuityPreflightError, match="remediation evidence"):
         session.resume(run_id)
     assert (root / ".continual/runs" / run_id / "snapshot.json").read_bytes() == before
@@ -194,7 +322,7 @@ def test_resume_proceeds_only_after_cause_elimination_validation(tmp_path: Path)
     )
     state = _install_policy(root, run_id)
     state["start_of_run_continuity_preflight"] = _valid_preflight(root, state, run_id)
-    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+    _install_remote_durable_continuation(root, state, run_id, request)
 
     resumed = session.resume(run_id, max_steps=1)
     assert resumed["snapshot"]["phase"] == "root_pending"
@@ -272,6 +400,8 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
     )
     request_path = root / request_ref
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    native_path, native = _awaiting_native_journal(root, run_id)
+    native_ref = native_path.relative_to(root).as_posix()
     state["exact_continuation"] = {
         "run_snapshot_ref": snapshot_path.relative_to(root).as_posix(),
         "snapshot_branch": "main",
@@ -283,6 +413,7 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
         "pending_request_ref": request_ref,
         "pending_request_digest": request["request_digest"],
         "pending_request_blob_sha": None,
+        "pending_native_invocation_id": native["invocation_id"],
     }
     _write(root / "agi/WORK_EXECUTION_STATE.json", state)
     before = {
@@ -324,6 +455,9 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
         "pending_request_ref": request_ref,
         "pending_request_digest": request["request_digest"],
         "pending_request_blob_sha": request_blob,
+        "pending_native_invocation_id": native["invocation_id"],
+        "pending_native_invocation_ref": native_ref,
+        "pending_native_invocation_blob_sha": _git_blob_digest(native_path),
         "run_snapshot_ref": state["exact_continuation"]["run_snapshot_ref"],
         "snapshot_blob_sha": state["exact_continuation"]["snapshot_blob_sha"],
         "snapshot_revision": snapshot["revision"],
@@ -378,6 +512,25 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
         )
     _git(root, "update-ref", "refs/remotes/origin/main", source_main_sha)
 
+    with pytest.raises(
+        ContinuityPreflightError,
+        match="pending native invocation journal is not present",
+    ):
+        assert_work_resume_continuity_preflight(
+            root,
+            run_id=run_id,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="chatgpt-work-model-unverified",
+        )
+
+    _git(root, "add", "--", native_ref)
+    _git(root, "commit", "--quiet", "-m", "Persist native continuation journal")
+    source_main_sha = _git(root, "rev-parse", "HEAD")
+    state["exact_continuation"]["snapshot_head_sha"] = source_main_sha
+    state["continuation_durability"]["source_main_sha"] = source_main_sha
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+    _git(root, "update-ref", "refs/remotes/origin/main", source_main_sha)
+
     result = assert_work_resume_continuity_preflight(
         root,
         run_id=run_id,
@@ -391,10 +544,142 @@ def test_pending_resume_requires_remote_durable_request_and_snapshot(
     assert result["continuation_durability"]["pending_request_blob_sha"] == (
         request_blob
     )
+    assert result["continuation_durability"]["pending_native_invocation_id"] == (
+        native["invocation_id"]
+    )
 
     state["exact_continuation"]["run_snapshot_ref"] = "../../outside.json"
     _write(root / "agi/WORK_EXECUTION_STATE.json", state)
     with pytest.raises(ContinuityPreflightError, match="escapes the repository"):
+        assert_work_resume_continuity_preflight(
+            root,
+            run_id=run_id,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="chatgpt-work-model-unverified",
+        )
+
+
+@pytest.mark.parametrize(
+    ("exact_continuation", "message"),
+    (
+        (None, "exact_continuation is absent"),
+        ({"pending_work_invocation_id": None}, "pending_work_invocation_id is null"),
+    ),
+)
+def test_awaiting_native_journal_cannot_be_hidden_by_state_early_return(
+    tmp_path: Path,
+    exact_continuation: dict | None,
+    message: str,
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-native-awaiting-early-return"
+    WorkSession(root).start("freeze a request before state", run_id=run_id)
+    state = _install_policy(root, run_id)
+    state["start_of_run_continuity_preflight"] = _valid_preflight(root, state, run_id)
+    if exact_continuation is not None:
+        state["exact_continuation"] = exact_continuation
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+
+    before = {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in (root / ".continual").rglob("*")
+        if path.is_file()
+    }
+    with pytest.raises(ContinuityPreflightError, match=message):
+        assert_work_resume_continuity_preflight(
+            root,
+            run_id=run_id,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="chatgpt-work-model-unverified",
+        )
+    assert {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in (root / ".continual").rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    ("field", "bad_value", "message"),
+    (
+        (
+            "pending_native_invocation_id",
+            "invoke-111111111111111111111111",
+            "native invocation identity mismatch",
+        ),
+        (
+            "pending_work_invocation_id",
+            "invoke-222222222222222222222222",
+            "Work invocation identity mismatch",
+        ),
+        (
+            "pending_request_ref",
+            ".continual/work-model/invocations/invoke-333333333333333333333333/request.json",
+            "request reference mismatch",
+        ),
+        (
+            "pending_request_digest",
+            "4" * 64,
+            "request digest mismatch",
+        ),
+    ),
+)
+def test_state_pending_binding_must_match_unique_native_journal(
+    tmp_path: Path,
+    field: str,
+    bad_value: str,
+    message: str,
+) -> None:
+    root = _root(tmp_path)
+    run_id = f"run-native-binding-{field}"
+    started = WorkSession(root).start("freeze exact native binding", run_id=run_id)
+    request = started["pending"][0]
+    native_path, native = _awaiting_native_journal(root, run_id)
+    state = _install_policy(root, run_id)
+    state["start_of_run_continuity_preflight"] = _valid_preflight(root, state, run_id)
+    state["exact_continuation"] = {
+        "pending_native_invocation_id": native_path.stem,
+        "pending_work_invocation_id": request["invocation_id"],
+        "pending_request_ref": native["work_request_ref"],
+        "pending_request_digest": native["work_request_digest"],
+    }
+    state["exact_continuation"][field] = bad_value
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+
+    with pytest.raises(ContinuityPreflightError, match=message):
+        assert_work_resume_continuity_preflight(
+            root,
+            run_id=run_id,
+            executor_binding="current_chatgpt_work_session",
+            model_identity="chatgpt-work-model-unverified",
+        )
+
+
+def test_multiple_awaiting_native_journals_fail_closed(tmp_path: Path) -> None:
+    root = _root(tmp_path)
+    run_id = "run-multiple-native-awaiting"
+    started = WorkSession(root).start("freeze the first native request", run_id=run_id)
+    request = started["pending"][0]
+    native_path, native = _awaiting_native_journal(root, run_id)
+    duplicate_id = "invoke-555555555555555555555555"
+    duplicate = dict(native)
+    duplicate["invocation_id"] = duplicate_id
+    _write(native_path.with_name(f"{duplicate_id}.json"), duplicate)
+
+    state = _install_policy(root, run_id)
+    state["start_of_run_continuity_preflight"] = _valid_preflight(root, state, run_id)
+    state["exact_continuation"] = {
+        "pending_native_invocation_id": native["invocation_id"],
+        "pending_work_invocation_id": request["invocation_id"],
+        "pending_request_ref": native["work_request_ref"],
+        "pending_request_digest": native["work_request_digest"],
+    }
+    _write(root / "agi/WORK_EXECUTION_STATE.json", state)
+
+    with pytest.raises(
+        ContinuityPreflightError,
+        match="exactly one awaiting Work journal",
+    ):
         assert_work_resume_continuity_preflight(
             root,
             run_id=run_id,

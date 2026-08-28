@@ -18,6 +18,12 @@ from .store import Store
 
 
 _INVOCATION_ID = re.compile(r"^invoke-[0-9a-f]{24}$")
+_ACTIVE_AUTHORITATIVE_STATUSES = {
+    "running",
+    "checkpointed",
+    "interrupted",
+    "released",
+}
 _FORBIDDEN_KEYS = {
     "api_key",
     "authorization",
@@ -580,6 +586,25 @@ class WorkSession:
         run_id: str | None = None,
     ) -> dict[str, Any]:
         run_id = run_id or self.store.new_id("run")
+        state_path = self.root / "agi" / "WORK_EXECUTION_STATE.json"
+        if state_path.exists():
+            state = self.store.read_json(state_path, None)
+            if not isinstance(state, Mapping):
+                raise WorkSessionError(
+                    "authoritative Work execution state must be an object"
+                )
+            status = state.get("status")
+            if status in _ACTIVE_AUTHORITATIVE_STATUSES:
+                active_run_id = state.get("active_run_id")
+                if not isinstance(active_run_id, str) or not active_run_id.strip():
+                    raise WorkSessionError(
+                        "active authoritative Work state has no native run identity"
+                    )
+                raise WorkSessionError(
+                    "cannot start a new Work run while authoritative run "
+                    f"{active_run_id} is {status}; repair or resume its exact "
+                    "continuation, or durably supersede it first"
+                )
         engine = self._engine(run_id)
         engine.start(request, max_steps=max_steps, run_id=run_id)
         return {
