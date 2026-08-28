@@ -15,6 +15,9 @@ from .model import (
 )
 from .session import ProblemSolvingSession
 from .store import Store
+from .target_admission import install as _install_target_admission
+
+_install_target_admission()
 
 __all__ = [
     "ALL_PHASES", "OBSERVE_PHASES", "EXCLUSIVE_PHASES", "ClaimConflictError",
