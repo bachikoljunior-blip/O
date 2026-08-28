@@ -22,10 +22,19 @@ from typing import Any, Mapping, Protocol, Sequence
 UTC = timezone.utc
 ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
 OBSERVE_PHASES = frozenset({"forecast", "select_leaf", "existing_solution_audit"})
-EXCLUSIVE_PHASES = frozenset({
-    "attempt_solution", "decompose", "evaluate", "integrate_children",
-    "solve_parent", "solve_root", "update_problem_tree", "publish", "merge",
-})
+EXCLUSIVE_PHASES = frozenset(
+    {
+        "attempt_solution",
+        "decompose",
+        "evaluate",
+        "integrate_children",
+        "solve_parent",
+        "solve_root",
+        "update_problem_tree",
+        "publish",
+        "merge",
+    }
+)
 ALL_PHASES = OBSERVE_PHASES | EXCLUSIVE_PHASES
 UNFINISHED = {"active", "interrupted", "completing", "abandoning"}
 TERMINAL = {"completed", "abandoned"}
@@ -88,6 +97,12 @@ def _path(value: str) -> str:
     if path.is_absolute() or not path.parts or any(x in {"", ".", ".."} for x in path.parts):
         raise ValueError(f"unsafe repository path: {value!r}")
     return path.as_posix()
+
+
+def _target(value: str) -> str:
+    if not isinstance(value, str) or not value.strip() or len(value.strip()) > 256:
+        raise ValueError("target must be a non-empty string of at most 256 characters")
+    return value.strip()
 
 
 def _overlap(left: str, right: str) -> bool:
