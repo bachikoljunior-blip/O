@@ -20,6 +20,7 @@ from .model import (
     _id,
     _now,
     _path,
+    _target,
     _time,
 )
 
@@ -161,8 +162,15 @@ class Store:
             raise EvidenceReplayError(f"admission path is unsafe: {exc}") from exc
         if normalized_paths != paths:
             raise EvidenceReplayError("admission paths are not canonical")
+        target = admission.get("target")
+        if target is not None:
+            try:
+                normalized_target = _target(target)
+            except ValueError as exc:
+                raise EvidenceReplayError(f"admission target is invalid: {exc}") from exc
+            if normalized_target != target:
+                raise EvidenceReplayError("admission target is not canonical")
 
-        # Reconstruct the exact in-memory state on which _admit computed its digest.
         admission_state = copy.deepcopy(dict(state))
         admission_state["event_count"] = int(admission_state["event_count"]) - 1
         admission_state["updated_at"] = (
@@ -189,6 +197,8 @@ class Store:
             raise EvidenceReplayError("admission claim snapshot differs from session state")
         if claim.get("status") != "active":
             raise EvidenceReplayError("admission claim is not active")
+        if target != claim.get("target"):
+            raise EvidenceReplayError("admission target differs from claim")
         recorded_at = _time(str(record.get("recorded_at")))
         expires_at = _time(str(claim.get("heartbeat_at"))) + timedelta(
             seconds=int(claim.get("stale_after_seconds", 0))
