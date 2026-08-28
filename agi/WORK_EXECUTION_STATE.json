@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision33_payload_exact_head_ci_pending",
+  "active_component": "generation29_revision33_directive_binding_repair_ci_pending",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -200,12 +200,12 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Recheck exact-head workflows without changing the head. After all required runs/jobs succeed, re-read generation29 authority, inbox revision33, PR head, latest main, path intersection, and mergeability; merge only expected head c96cf815. Exact-readback all four blobs on main, then inspect the pre-existing accepted pending Execute before native resume and never duplicate it.",
+    "next_action": "Wait boundedly for PR338 exact-head test jobs; if all succeed, re-read authority/inbox/head/main/mergeability and merge only unchanged head 8ab21fb. Exact-readback the revision33 directive ledger on main, then rebuild PR337 head from that main plus the exact same four frozen blobs and rerun all exact-head checks.",
     "last_verified_effect": "PR336 repaired exact head d62bc08 passed directive preflight, all four pytest shards, and dependent aggregate; expected-head merge produced main 4d7eeea and exact-readback verified all four blobs. Fresh alternate-route review found feed revision10 unchanged, issue222 comments=0, verifiers=0, challenges/disclosures/attestations=0, while native revision92 remains the exact frozen Execute continuation. The continuity guard returned allowed=true for persist_externally_blocked_checkpoint.",
     "completed_effect_receipt": "PR336 merged main 4d7eeea9d8106782bc7b6603e30145fac3f3cf18 from repaired head d62bc08786a6679157d76b0f81cdc47bf15711ff tree 75610cf; blobs e0c4ca3e, 9d0a7a92, e9c3939f, a99374fd exact-readback; report digest 8314097b8e31f40d22bb702c4e81bbd751fcdc15fcfed5f26b6168271f0b8c8f; blocked lifecycle head 2351597 remains unpublished",
     "pending_job_ids": [],
     "idempotency_key": "o-work-refire:g29:9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781:2b46edd1:revision92-source-refresh-execute-ablation-v1",
-    "exact_frontier": "PR337 exact head c96cf815 with four exact-readback lifecycle blobs; exact-head workflows recorded; native accepted-pending query recorded"
+    "exact_frontier": "PR338 repairs the concrete revision31-to-33 typed directive binding drift; directive-source-preflight succeeded; test workflow is running; PR337 remains unmerged and its exact four blobs are preserved."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1462,7 +1462,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T23:31:18.841Z",
+  "heartbeat_at": "2026-08-28T23:34:46.660Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2291,7 +2291,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T23:31:18.841Z",
+  "last_progress_at": "2026-08-28T23:34:46.660Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -5117,7 +5117,7 @@
   },
   "generation29_refire": {
     "schema_version": 1,
-    "status": "revision33_payload_pr337_exact_head_ci_pending",
+    "status": "revision33_directive_binding_repair_pr338_ci_pending",
     "created_at": "2026-08-28T12:27:59.401Z",
     "updated_at": "2026-08-28T23:27:35.789Z",
     "target_generation": 29,
@@ -5219,7 +5219,7 @@
   },
   "generation29_revision33_resume": {
     "schema_version": 1,
-    "status": "payload_branch_published_exact_readback_pr337_ci_pending",
+    "status": "directive_source_stop_cause_repaired_pr338_ci_pending",
     "prepared_at": "2026-08-28T23:27:35.789Z",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
@@ -5283,8 +5283,8 @@
       "decision": "BASELINE_FIRST"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision33:invoke-f1cb0996ce0ff71a28d0dd58:four-file-publication:v1",
-    "next_action": "Recheck exact-head workflows without changing the head. After all required runs/jobs succeed, re-read generation29 authority, inbox revision33, PR head, latest main, path intersection, and mergeability; merge only expected head c96cf815. Exact-readback all four blobs on main, then inspect the pre-existing accepted pending Execute before native resume and never duplicate it.",
-    "updated_at": "2026-08-28T23:31:18.841Z",
+    "next_action": "Wait boundedly for PR338 exact-head test jobs; if all succeed, re-read authority/inbox/head/main/mergeability and merge only unchanged head 8ab21fb. Exact-readback the revision33 directive ledger on main, then rebuild PR337 head from that main plus the exact same four frozen blobs and rerun all exact-head checks.",
+    "updated_at": "2026-08-28T23:34:46.660Z",
     "publication": {
       "branch": "work/recovery-gen29-candidate-preflight-durability-v1",
       "head_sha": "c96cf815a0914ea8839bd540b2879f3793b88819",
@@ -5338,6 +5338,39 @@
         "conclusion": "failure",
         "head_sha": "c96cf815a0914ea8839bd540b2879f3793b88819"
       }
-    ]
+    ],
+    "ci_failure_repair": {
+      "failed_pr": 337,
+      "failed_head": "c96cf815a0914ea8839bd540b2879f3793b88819",
+      "failed_workflow_run": 33220652660,
+      "failed_job": 99013794982,
+      "concrete_cause": "agi/USER_INPUT_INBOX.json was revision33 but agi/USER_DIRECTIVE_EVENTS.json remained bound to revision31 and digest 1eb7e23f, so directive-source-preflight failed closed.",
+      "repair_scope": "Advance only the typed directive ledger binding through revision33 and add four narrow atoms covering the two revision32 and two revision33 directives.",
+      "local_validation": {
+        "directive_source_binding": true,
+        "focused_tests_passed": 44,
+        "diff_check": true
+      },
+      "repair_branch": "work/recovery-gen29-directive-revision33-binding-v1",
+      "repair_head": "8ab21fb43c2e53f02ac85d0c4ac8196d928d475b",
+      "repair_tree": "9d747115bd10716c1620e89bb3809f31976345aa",
+      "repair_blob": "85803a83ff5de343029a082538e46b8bb7311928",
+      "repair_pr": 338,
+      "workflows": [
+        {
+          "id": 33220865715,
+          "name": "directive-source-preflight",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 33220865757,
+          "name": "test",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "recurrence_validation": "After PR338 exact-head test success and unchanged-head merge, rebase the exact four payload blobs onto the resulting main and require a fresh successful directive-source-preflight plus all test jobs."
+    }
   }
 }
