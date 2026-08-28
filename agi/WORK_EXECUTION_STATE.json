@@ -1,6 +1,6 @@
 {
-  "acquisition_phase": "acquired_pending_remote_readback",
-  "active_component": "generation27_recovery_acquisition_pending_readback",
+  "acquisition_phase": "verified_two_phase_remote_readback",
+  "active_component": "generation27_recovery_finalization_pending_readback",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -29,7 +29,7 @@
     "authorized": false,
     "validated_at": null,
     "implementation": "src/agi/work_mode_monitor.py#authorize_work_mode_recovery",
-    "reason": "pending exact two-phase remote readback"
+    "reason": "finalization committed; pending exact finalization remote readback and authorization check"
   },
   "behavioral_source_renewal_integration": {
     "authorized_at": "2026-08-24T04:56:21.012Z",
@@ -1096,7 +1096,7 @@
   "finalization_blob_sha": "a94fa253ef8bc9d7b2ac6571054008d9eba0fb29",
   "finalization_commit_sha": "4f9b07a4ebd9c29012d2d4c3fdff841b3521d0d8",
   "finalization_readback_verified": true,
-  "finalize_expected_blob_sha": null,
+  "finalize_expected_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
   "generation23_payload_publication_hold": {
     "cause_guard_merge_sha": "e6a9b8f1bbe5887035019362f7dc0a7f4d6c991c",
     "continuation_invocation_id": "invoke-748f38dc8ef56693dba2f7b7",
@@ -1429,7 +1429,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T10:13:13.204Z",
+  "heartbeat_at": "2026-08-28T10:13:28.471Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2258,7 +2258,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T10:13:13.204Z",
+  "last_progress_at": "2026-08-28T10:13:28.471Z",
   "lease_generation": 27,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -3073,7 +3073,7 @@
     "unit_id": "unit-b2698e1aa6dad8f3da3d783a",
     "updated_at": "2026-08-26T13:55:34.467Z"
   },
-  "readback_of_commit_sha": null,
+  "readback_of_commit_sha": "86916e325bdc2ec59ddcddeff92d956bcf76b4b3",
   "recent_main_integration": {
     "claim_boundary": "Generation-26 Candidate preflight lifecycle only; no Candidate activation, production routing change, AGI claim, or user-level completion.",
     "exact_head_ci_result": "success",
@@ -3410,8 +3410,8 @@
     "resolved_at": "2026-08-24T04:54:31.496Z",
     "status": "resolved_by_pr_287_exact_readback"
   },
-  "result_blob_sha": null,
-  "result_commit_sha": null,
+  "result_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
+  "result_commit_sha": "86916e325bdc2ec59ddcddeff92d956bcf76b4b3",
   "result_publication_policy": {
     "destination": "main",
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z",
@@ -4128,7 +4128,7 @@
     "pending_revision": null
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "verified_remote_readback": false,
+  "verified_remote_readback": true,
   "working_branch": "work/recovery-gen27-run-to-achievement-v1",
   "generation25_recovery_observation": {
     "schema_version": 1,
@@ -4537,9 +4537,9 @@
   },
   "generation27_refire": {
     "schema_version": 1,
-    "status": "acquisition_pending_finalization",
+    "status": "lease_finalized_pending_authorization",
     "created_at": "2026-08-28T10:13:13.204Z",
-    "updated_at": "2026-08-28T10:13:13.204Z",
+    "updated_at": "2026-08-28T10:13:28.471Z",
     "target_generation": 27,
     "target_fence_token": "work-recovery-fence-v27-4c4489944fc3c028dc998223c20aeb21edb31e0593ce2131895c1f6f5bb37c5f",
     "idempotency_key": "o-work-refire:g27:4c4489944fc3c028dc998223c20aeb21edb31e0593ce2131895c1f6f5bb37c5f:f88f25ec:revision91-candidate-consume-execute-ablation-v1",
@@ -4554,6 +4554,13 @@
     "launch_accepted": false,
     "request_recreated": false,
     "response_repeated": false,
-    "side_effect_repeated": false
+    "side_effect_repeated": false,
+    "acquisition_receipt": {
+      "observed_blob_sha": "f2e7c4513f5f28cc5c21b21fa385759bbf0ced1e",
+      "acquisition_commit_sha": "86916e325bdc2ec59ddcddeff92d956bcf76b4b3",
+      "acquisition_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
+      "acquisition_remote_readback_verified": true,
+      "finalization_expected_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac"
+    }
   }
 }
