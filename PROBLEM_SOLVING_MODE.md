@@ -46,10 +46,15 @@ A controller root contains:
 - `sessions/<session>.json` — a repairable projection rebuilt from the event log.
 
 The event log is authoritative. Recovery verifies every predecessor and event digest,
-reconstructs the latest state, repairs a missing or damaged projection, and resumes an
-interrupted session without treating chat history as state. An interrupted session
-remains in problem-solving mode; it is not silently reported as complete and the
-normal role is not restored early.
+then deterministically replays every persisted phase admission against the exact
+historical session state. It checks the phase/mode, session and node identity, canonical
+paths, pre-transition state digest, coordinator authority or exact claim snapshot,
+claim freshness, subtree ownership, and reserved-path coverage. A record can therefore
+have a valid hash chain and still fail closed when its admission semantics were altered.
+Recovery reconstructs the latest state, repairs a missing or damaged projection, and
+resumes an interrupted session without treating chat history as state. An interrupted
+session remains in problem-solving mode; it is not silently reported as complete and
+the normal role is not restored early.
 
 Role entry and restoration use deterministic operation IDs. A concrete
 `OptimizerRoleAdapter` must treat them idempotently so a process restart cannot repeat
@@ -58,10 +63,12 @@ an external side effect.
 ## Session-scoped parallel work
 
 `claim_work` reserves a problem subtree, hierarchical scope, and repository paths for
-one worker. Fresh claims reject overlapping nodes, scopes, or paths. Observation may
-cross claims, while a parallel exclusive phase must present the matching fresh claim.
-Claims have no authority outside their session and are closed automatically on
-completion or abandonment.
+one worker. Fresh claims reject overlapping nodes, scopes, or paths. `heartbeat_claim`
+persists liveness; before a new claim or heartbeat, expired active claims are durably
+marked `stale`, allowing a later worker to take over without treating an old owner as
+live. Observation may cross claims, while a parallel exclusive phase must present the
+matching fresh claim. Claims have no authority outside their session and are closed
+automatically on completion or abandonment.
 
 There is no coordination-only permanent branch and no global claim registry in this
 mechanism.
