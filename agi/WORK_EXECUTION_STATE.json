@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation26_authorized_refreshing_source_receipts",
+  "active_component": "generation26_continuity_preflight_rebound_source_receipts_ready",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -1419,7 +1419,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T05:40:25.507Z",
+  "heartbeat_at": "2026-08-28T05:43:59.529Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2248,7 +2248,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T05:40:25.507Z",
+  "last_progress_at": "2026-08-28T05:43:59.529Z",
   "lease_generation": 26,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -2690,7 +2690,7 @@
   "post_acquisition_progress_contract": {
     "generation": 26,
     "concrete_effect_selected": "Refresh mandatory Work/CI source receipts for exact main, freeze and answer the selected recursive-context-retrieval Execute unit once, and continue into a reviewed experiment artifact or exact-head workflow.",
-    "effect_attempted": false,
+    "effect_attempted": true,
     "native_request_created": false,
     "new_exact_blocker_persisted": false,
     "new_exact_blocker_reached": false,
@@ -3939,81 +3939,43 @@
   "source_main_sha": "19343affadff373b4e128ac616eaf87d973e5bfe",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
-    "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-08-28T02:59:25.426Z",
-    "evidence_refs": [
-      "agi/USER_INPUT_INBOX.json#user-direction-repair-stalled-work-session-20260827-v29",
-      "https://github.com/bachikoljunior-blip/O/pull/323",
-      "https://github.com/bachikoljunior-blip/O/pull/329",
-      "https://github.com/bachikoljunior-blip/O/actions/runs/33135926415",
-      "https://github.com/bachikoljunior-blip/O/actions/runs/33135926422",
-      "github://bachikoljunior-blip/O@5570af45c109744aefb2d83ab447a24d9214180f/src/continual/work_session.py"
-    ],
-    "execution_id": "work-recovery-20260828T021338770Z-abf948fb58f492f5e5405d3a12aff4d7",
+    "schema_version": 1,
+    "policy_revision": 29,
+    "execution_id": "work-recovery-20260828T053845882Z-ee77772b1c891f467ffd8b6496f66090",
+    "lease_generation": 26,
+    "fence_token_digest": "ba2cd997e644ddc5bada0221364d84a48a459fe2ff09361d74d5aed8b2c5ce56",
+    "run_id": "run-work-recovery-gen9-durability-repair",
     "executor_binding": "current_chatgpt_work_session",
-    "fence_token_digest": "0fa6c11949bf131457167b6047dbbd7d4af274b0bdb3670c85ebb0e9e9a6b8da",
-    "idempotency_key": "o-work-preflight:g25:0fa6c11949bf131457167b6047dbbd7d4af274b0bdb3670c85ebb0e9e9a6b8da:revision29:pr329-5570af4:v1",
-    "lease_generation": 25,
     "model_identity": "chatgpt-work-model-unverified",
+    "evaluated_at": "2026-08-28T05:43:59.529Z",
+    "idempotency_key": "o-work-preflight:g26:ba2cd997e644ddc5bada0221364d84a48a459fe2ff09361d74d5aed8b2c5ce56:revision29:revision91-execute-v1",
+    "classification": "no_discretionary_stop_detected",
     "policy_bindings": {
-      "agi/USER_DIRECTIVE_EVENTS.json": "3b5bfe8118d441e0745935dbf1a2a526938affea06cb361fd0a50fde7006cdfd",
       "agi/USER_INPUT_INBOX.json": "6dfee4bee7ded262ad78d4d4d458ba8fb2fdbd194b7b887fed69c4a100087deb",
+      "agi/USER_DIRECTIVE_EVENTS.json": "3b5bfe8118d441e0745935dbf1a2a526938affea06cb361fd0a50fde7006cdfd",
       "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
     },
-    "policy_revision": 29,
-    "recurrence_guard": {
-      "entrypoint": "src/continual/continuity_preflight.py:assert_work_resume_continuity_preflight",
-      "status": "enforced"
-    },
-    "remediations": [
-      {
-        "artifact_refs": [
-          "src/continual/continuity_preflight.py",
-          "src/continual/continuity_adversarial.py",
-          "tests/test_continuity_preflight.py",
-          "tests/test_continuity_preflight_adversarial.py",
-          "evidence/continuity_preflight_adversarial_v2.json"
-        ],
-        "status": "merged"
-      }
-    ],
-    "resume_authorized": true,
-    "root_causes": [
-      {
-        "cause_id": "action_local_payload_hold_misclassified_as_global_stop",
-        "evidence_refs": [
-          "agi/WORK_EXECUTION_STATE.json#generation23_payload_publication_hold",
-          "agi/USER_INPUT_INBOX.json#user-direction-repair-stalled-work-session-20260827-v29"
-        ],
-        "mechanism": "A payload-specific GitHub publication hold was allowed to terminate the whole primary execution while safe remote-durable continuation work remained."
-      },
-      {
-        "cause_id": "native_resume_before_current_input_acknowledgement",
-        "evidence_refs": [
-          "agi/USER_INPUT_INBOX.json#revision-29",
-          "tests/test_continuity_preflight.py#test_unacknowledged_current_inbox_revision_rejects_before_native_mutation"
-        ],
-        "mechanism": "The native entry guard did not previously require execution state to acknowledge the current inbox revision before mutation."
-      }
-    ],
-    "run_id": "run-work-recovery-gen9-durability-repair",
-    "schema_version": 1,
+    "root_causes": [],
+    "remediations": [],
     "validations": [
       {
+        "status": "passed",
         "evidence_refs": [
-          "github://bachikoljunior-blip/O/actions/runs/33126120572@970c543ff1c13713b920030fa00c0269b4f95c63",
-          "github://bachikoljunior-blip/O/actions/runs/33126120627@970c543ff1c13713b920030fa00c0269b4f95c63"
-        ],
-        "status": "passed"
-      },
-      {
-        "evidence_refs": [
-          "github://bachikoljunior-blip/O@c2133b53f9641df4045515ae0de051e05718a8ab/src/continual/continuity_preflight.py",
-          "github://bachikoljunior-blip/O@c2133b53f9641df4045515ae0de051e05718a8ab/evidence/continuity_preflight_adversarial_v2.json"
-        ],
-        "status": "passed"
+          "src/continual/continuity_preflight.py#assert_work_resume_continuity_preflight",
+          "generation-26 exact two-phase CAS validator authorization"
+        ]
       }
-    ]
+    ],
+    "recurrence_guard": {
+      "status": "enforced",
+      "entrypoint": "src/continual/continuity_preflight.py:assert_work_resume_continuity_preflight"
+    },
+    "evidence_refs": [
+      "agi/WORK_EXECUTION_STATE.json#generation26_recovery_observation",
+      "https://github.com/bachikoljunior-blip/O/pull/331",
+      "github://bachikoljunior-blip/O@698bf7aaf754fb4531b0734ad8ab8eee87d15544/agi/WORK_EXECUTION_STATE.json"
+    ],
+    "resume_authorized": true
   },
   "started_at": "2026-08-28T05:38:45.882Z",
   "status": "running",
@@ -4390,9 +4352,9 @@
   },
   "generation26_refire": {
     "schema_version": 1,
-    "status": "authorized_refreshing_source_receipts",
+    "status": "continuity_preflight_rebound_source_receipts_ready",
     "created_at": "2026-08-28T05:38:45.882Z",
-    "updated_at": "2026-08-28T05:40:25.507Z",
+    "updated_at": "2026-08-28T05:43:59.529Z",
     "target_generation": 26,
     "target_fence_token": "work-recovery-fence-v26-4bb656e65e35b021ce44b43b7938e1f5ff2204afe1459617be188702567b2c7f",
     "idempotency_key": "o-work-refire:g26:4bb656e65e35b021ce44b43b7938e1f5ff2204afe1459617be188702567b2c7f:19343aff:revision91-recursive-context-ablation-v1",
@@ -4413,6 +4375,17 @@
       "acquisition_blob_sha": "13c6cd51b5fd35600ce8a1c623b639631db2060a",
       "acquisition_remote_readback_verified": true,
       "finalization_expected_blob_sha": "13c6cd51b5fd35600ce8a1c623b639631db2060a"
-    }
+    },
+    "launch_attempts": [
+      {
+        "attempted_at": "2026-08-28T05:43:31.000Z",
+        "status": "failed_before_native_mutation",
+        "error": "ContinuityPreflightError: continuity preflight execution_id mismatch",
+        "cause": "generation-25 preflight binding had not yet been rebound to the newly authorized generation-26 execution",
+        "repair": "rebind the same validated revision-29 preflight to generation 26 execution/fence and exact policy digests",
+        "native_mutation": false,
+        "duplicate_request_created": false
+      }
+    ]
   }
 }
