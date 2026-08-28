@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation24_native_refire_pr325_exact_head_ci_running",
+  "active_component": "generation24_native_refire_main_durable_root_pending_checkpoint_valid",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation24-stalled-work-control-repair-v1",
   "authoritative_source_observation": {
@@ -1015,44 +1015,37 @@
       "workaround_attempted": false
     }
   },
-  "continuation_durability": {
-    "execution_id": "work-recovery-20260827T231745430Z-ab7830729697fabe75362ac4",
-    "fence_token_digest": "35b8634ea5c2b7af394ca8364ceeeda467673b45fef2a494cf7f9735759c323e",
-    "lease_generation": 24,
-    "native_phase": "unit_pending",
-    "pending_request_blob_sha": "fe04fbaad1b1aa3f2f28a0fdae633e5c856cd5ed",
-    "pending_request_digest": "13b94732d0637b45c0f0fba2ced1e59cc563103a7b44d3a64f9ed1a5921f5afe",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-d0728c9ab228fa241aa705cc/request.json",
-    "pending_work_invocation_id": "invoke-d0728c9ab228fa241aa705cc",
-    "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-    "schema_version": 1,
-    "snapshot_blob_sha": "170b4a05d1cf71fc7fc59943380eda7f213a09f9",
-    "snapshot_revision": 85,
-    "source_main_sha": "c2133b53f9641df4045515ae0de051e05718a8ab",
-    "status": "remote_main_readback_verified",
-    "verified_at": "2026-08-28T00:16:05.750Z",
-    "verified_remote_readback": true
-  },
+  "continuation_durability": null,
   "exact_continuation": {
-    "durability_status": "remote_main_readback_verified",
+    "completed_native_invocation_blob_sha": "087d23639ca71cf40dec5649b0cd0becff5da940",
+    "completed_native_invocation_id": "invoke-ad8b79f3d172420e722cf30f",
+    "completed_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-ad8b79f3d172420e722cf30f.json",
+    "completed_request_blob_sha": "fe04fbaad1b1aa3f2f28a0fdae633e5c856cd5ed",
+    "completed_request_digest": "13b94732d0637b45c0f0fba2ced1e59cc563103a7b44d3a64f9ed1a5921f5afe",
+    "completed_request_ref": ".continual/work-model/invocations/invoke-d0728c9ab228fa241aa705cc/request.json",
+    "completed_response_blob_sha": "2e5a69edf237ef976e8785c2904d8e4391c0e184",
+    "completed_response_digest": "aa07651617ed1beeacf9f0bc78b01ac141424b470630f920080e9102eb34d816",
+    "completed_response_ref": ".continual/work-model/invocations/invoke-d0728c9ab228fa241aa705cc/response.json",
+    "completed_work_invocation_id": "invoke-d0728c9ab228fa241aa705cc",
+    "durability_status": "completed_remote_main_readback_verified",
     "inbox_blob_sha": "f7754de4f6bb78b38173e3d17bf73cd55adfd337",
     "inbox_revision": 29,
-    "native_phase": "unit_pending",
-    "next_action": "Answer invoke-d0728c9ab228fa241aa705cc exactly once from its unchanged remote-durable request, observe the already-durable PR 321 effect without repeating it, then resume the native run and continue beyond launch.",
-    "pending_native_invocation_id": "invoke-d0728c9ab228fa241aa705cc",
-    "pending_request_blob_sha": "fe04fbaad1b1aa3f2f28a0fdae633e5c856cd5ed",
-    "pending_request_digest": "13b94732d0637b45c0f0fba2ced1e59cc563103a7b44d3a64f9ed1a5921f5afe",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-d0728c9ab228fa241aa705cc/request.json",
-    "pending_work_invocation_id": "invoke-d0728c9ab228fa241aa705cc",
+    "native_phase": "root_pending",
+    "next_action": "Resume normal Root processing from remote-durable snapshot revision 87 after refreshing mandatory source receipts; do not recreate invoke-d0728c9ab228fa241aa705cc or repeat the already-durable PR 321 effect.",
+    "pending_native_invocation_id": null,
+    "pending_request_blob_sha": null,
+    "pending_request_digest": null,
+    "pending_request_ref": null,
+    "pending_work_invocation_id": null,
     "prior_requests_recreated": false,
-    "reconciled_at": "2026-08-28T00:16:05.750Z",
+    "reconciled_at": "2026-08-28T01:45:22.000Z",
     "request_recreated": false,
-    "response_exists_on_authoritative_remote": false,
+    "response_exists_on_authoritative_remote": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-    "snapshot_blob_sha": "170b4a05d1cf71fc7fc59943380eda7f213a09f9",
+    "snapshot_blob_sha": "be171c95da547fb3053a974ec57dedc30144b1b5",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "c2133b53f9641df4045515ae0de051e05718a8ab",
-    "snapshot_revision": 85
+    "snapshot_head_sha": "5926cf6fcc851da26dd77d51c65fb3c9e0529325",
+    "snapshot_revision": 87
   },
   "exact_head_ci_observation": {
     "exact_head_sha": "f7d12135059daefd3a5b69e534cf057b8f5da621",
@@ -1266,9 +1259,9 @@
     "stop_cause": "Transport did not automatically surface same-task-chat input and the execution control misclassified an action-local payload publication safety-review hold as a secret/account-holder global termination while the generation-23 continuation remained local-only and was lost."
   },
   "generation24_refire": {
-    "continuation_commit": "c2133b53f9641df4045515ae0de051e05718a8ab",
-    "continuation_phase": "unit_pending",
-    "continuation_snapshot_revision": 85,
+    "continuation_commit": "5926cf6fcc851da26dd77d51c65fb3c9e0529325",
+    "continuation_phase": "root_pending",
+    "continuation_snapshot_revision": 87,
     "created_at": "2026-08-27T23:17:45.430Z",
     "frozen_invocation_id": "invoke-d0728c9ab228fa241aa705cc",
     "frozen_request_digest": "13b94732d0637b45c0f0fba2ced1e59cc563103a7b44d3a64f9ed1a5921f5afe",
@@ -1281,10 +1274,10 @@
     },
     "request_recreated": false,
     "schema_version": 1,
-    "status": "refire_pending_pr325_exact_head_ci_running",
+    "status": "refire_succeeded_native_progress_main_durable",
     "substantive_liveness_event": {
       "branch": "work/recovery-gen24-native-refire-progress-v1",
-      "exact_head_sha": "b8cb643d9de53ba0857b4f4453c2132800312ba7",
+      "exact_head_sha": "42488ab2da1fff506efe41ca81a0ce213466ffdb",
       "frozen_invocation_id": "invoke-d0728c9ab228fa241aa705cc",
       "frozen_response_digest": "aa07651617ed1beeacf9f0bc78b01ac141424b470630f920080e9102eb34d816",
       "kind": "native_request_response_and_branch_pr_progress",
@@ -1297,7 +1290,7 @@
     },
     "target_fence_token": "work-recovery-fence-v24-ccaff5cbbc62767b80cce935050cb27f4050bb69c54ba3eb20fe572b0118682f",
     "target_generation": 24,
-    "updated_at": "2026-08-28T00:24:10.000Z",
+    "updated_at": "2026-08-28T01:45:22.000Z",
     "cause_repair_publication": {
       "status": "merged_and_exact_readback_verified",
       "pull_request": 323,
@@ -1371,9 +1364,46 @@
           "status": "in_progress"
         }
       ]
+    },
+    "main_durable_completion_receipt": {
+      "completed_native_invocation_blob_sha": "087d23639ca71cf40dec5649b0cd0becff5da940",
+      "completed_native_invocation_id": "invoke-ad8b79f3d172420e722cf30f",
+      "events_blob_sha": "9b9b6c133d66bc393805735051bc4deb758e08d7",
+      "exact_head_sha": "42488ab2da1fff506efe41ca81a0ce213466ffdb",
+      "exact_tree_sha": "05aaec2a05c70fd5e147169f7d9baa9ff3be8696",
+      "frozen_invocation_id": "invoke-d0728c9ab228fa241aa705cc",
+      "frozen_request_blob_sha": "fe04fbaad1b1aa3f2f28a0fdae633e5c856cd5ed",
+      "frozen_request_digest": "13b94732d0637b45c0f0fba2ced1e59cc563103a7b44d3a64f9ed1a5921f5afe",
+      "frozen_response_blob_sha": "2e5a69edf237ef976e8785c2904d8e4391c0e184",
+      "frozen_response_digest": "aa07651617ed1beeacf9f0bc78b01ac141424b470630f920080e9102eb34d816",
+      "merge_commit_sha": "5926cf6fcc851da26dd77d51c65fb3c9e0529325",
+      "merged_at": "2026-08-28T01:44:49Z",
+      "native_phase": "root_pending",
+      "native_snapshot_blob_sha": "be171c95da547fb3053a974ec57dedc30144b1b5",
+      "native_snapshot_revision": 87,
+      "pull_request": 325,
+      "remote_main_readback_verified": true,
+      "request_recreated": false,
+      "side_effect_repeated": false,
+      "status": "merged_main_durable_exact_readback",
+      "verified_at": "2026-08-28T01:45:22.000Z",
+      "workflow_runs": [
+        {
+          "conclusion": "success",
+          "id": 33132095107,
+          "name": "directive-source-preflight",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 33132095125,
+          "name": "test",
+          "status": "completed"
+        }
+      ]
     }
   },
-  "heartbeat_at": "2026-08-28T00:24:10.000Z",
+  "heartbeat_at": "2026-08-28T01:45:22.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2202,7 +2232,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T00:24:10.000Z",
+  "last_progress_at": "2026-08-28T01:45:22.000Z",
   "lease_generation": 24,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -2648,8 +2678,8 @@
     "native_request_created": false,
     "new_exact_blocker_persisted": false,
     "new_exact_blocker_reached": false,
-    "observed_at": "2026-08-27T23:31:55.816Z",
-    "progress_contract_result": "causal_repair_pr_created_exact_head_ci_running",
+    "observed_at": "2026-08-28T01:45:22.000Z",
+    "progress_contract_result": "native_request_response_and_snapshot_advance_remote_main_durable",
     "state_only_success_claimed": false
   },
   "postmerge_lifecycle_publication_precommit": {
@@ -2789,11 +2819,12 @@
       "invoke-0b128cf077e179a6130f2a8b (Root revision-22 unit selection)",
       "invoke-7100b70e41324428ec748123 (Candidate Evaluate NOT_APPLICABLE)",
       "invoke-248450c08547af10470c50e6 (Execute revision-22 paired-route measurement)",
-      "invoke-ff60e9306310c18395b20938 (Execute generation-21 publication)"
+      "invoke-ff60e9306310c18395b20938 (Execute generation-21 publication)",
+      "invoke-d0728c9ab228fa241aa705cc (Execute generation-24 recovered publication observation)"
     ],
     "executor_binding": "current_chatgpt_work_session",
     "model_identity": "chatgpt-work-model-unverified",
-    "note": "Revision 24 remains a targeting correction for a separate automation. The revision-22 frozen invocation was resumed without request recreation, answered once, published through PRs 316-318, and is main-durable. Native snapshot revision 67 is root_pending; refresh mandatory source receipts before the next Root semantic freeze.",
+    "note": "Generation 24 resumed the exact remote-durable Work request invoke-d0728c9ab228fa241aa705cc without recreation, completed native invocation invoke-ad8b79f3d172420e722cf30f, observed the already-durable PR 321 effect without repeating it, and advanced the main-durable native snapshot from revision 85 unit_pending to revision 87 root_pending. Refresh mandatory source receipts before the next Root semantic freeze.",
     "pending_invocation": null,
     "run_id": "run-work-recovery-gen9-durability-repair"
   },
@@ -3888,7 +3919,7 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "c2133b53f9641df4045515ae0de051e05718a8ab",
+  "source_main_sha": "5926cf6fcc851da26dd77d51c65fb3c9e0529325",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "discretionary_stop_cause_eliminated_and_validated",
