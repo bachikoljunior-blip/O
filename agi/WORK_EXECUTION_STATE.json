@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation28_continuation_durability_rebound_pending_fresh_source_observation",
+  "active_component": "generation28_candidate_consumed_revision92_pr333_ci_queued",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -156,19 +156,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-28T10:46:26.984Z",
+    "checkpointed_at": "2026-08-28T10:50:59.495Z",
     "exact_pending_request_blob_sha": "60911c5f1afbcd6b16bc7f1ccad392190d3d611b",
     "exact_pending_request_digest": "d0a8327fcfef6f0cfcb8c4b4fb9debd987bd932256ce18ff2448b81fd4d98cd5",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-248450c08547af10470c50e6/request.json",
-    "exact_pending_work_invocation_id": "invoke-a5c82a8fdb7916d0a16b72cf",
+    "exact_pending_work_invocation_id": null,
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "reason": "Forced process boundary immediately after safe generation-20 recovery and exact authorization readback. This is not a permission wait, discretionary stop, completion, or claim of progress on the frozen semantic unit.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
-    "remote_authority_commit": "fd22c99f02e156d0bb874519207b83c62cbb0d80",
-    "status": "generation28_continuation_proof_rebound_resume_required",
+    "remote_authority_commit": "425103efc1ba3a75a5fd0f211ee108ae5207df2b",
+    "status": "generation28_candidate_consumed_revision92_ci_queued_resume_required",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -178,10 +178,17 @@
     "execution_id": "work-recovery-20260828T103145759Z-e3ede154f4c0e4ae14f6432415e7e99f",
     "lease_generation": 28,
     "fence_token_digest": "978aee9dc57f03c89fe205bdac642752d4308fb797c2c00b6d0e2d587df568d7",
-    "exact_pending_native_invocation_id": "invoke-1dbf071f57e8c7d48d2262ce",
+    "exact_pending_native_invocation_id": null,
     "resume_required": true,
-    "next_action": "refresh source observation at new exact state then consume existing Candidate response exactly once",
-    "last_verified_effect": "revision30 ledger exact-readback and generation28 continuation proof rebound"
+    "next_action": "wait boundedly for exact-head CI, merge/readback, then freeze Execute and run three-fixture ablation",
+    "last_verified_effect": "revision30 ledger exact-readback and generation28 continuation proof rebound",
+    "completed_effect_receipt": "pr333 head 2b50de5 candidate response consumed once snapshot revision92",
+    "pending_job_ids": [
+      33164879348,
+      33164879375
+    ],
+    "idempotency_key": "o-work-refire:g28:77f0480c3ed73bcc7100f1d58d1970ac5f45510e4c6ce4ceb2f8769e1cb859b3:320857ab:revision91-candidate-consume-execute-ablation-v1",
+    "exact_frontier": "revision92 unit_pending selected recursive-context retrieval ablation; Candidate complete; Execute not yet frozen"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1443,7 +1450,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T10:46:26.984Z",
+  "heartbeat_at": "2026-08-28T10:50:59.495Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2272,7 +2279,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T10:46:26.984Z",
+  "last_progress_at": "2026-08-28T10:50:59.495Z",
   "lease_generation": 28,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -2713,11 +2720,11 @@
   "post_acquisition_progress_contract": {
     "generation": 28,
     "concrete_effect_selected": "Consume the existing Candidate response exactly once, freeze and answer Execute for the selected recursive-context retrieval ablation, validate and publish its substantive result, then continue to the next safe effect.",
-    "effect_attempted": false,
+    "effect_attempted": true,
     "native_request_created": false,
     "new_exact_blocker_persisted": false,
     "new_exact_blocker_reached": false,
-    "progress_contract_result": "pending_substantive_effect",
+    "progress_contract_result": "substantive_liveness_floor_met_continue_same_invocation",
     "state_only_success_claimed": false,
     "observed_at": "2026-08-28T10:34:50.207Z"
   },
@@ -4614,7 +4621,7 @@
       ]
     },
     "causal_repair": {
-      "status": "in_progress_same_invocation_continuation_required",
+      "status": "recurrence_validation_in_progress_post_launch_effect_visible",
       "repository_control_revision": 15,
       "user_direction_revision": 30,
       "repair_effect": "Generation 28 must continue past acquisition/finalization into exact Candidate consumption and a substantive durable effect; state-only acquisition is not accepted as recovery.",
@@ -4640,9 +4647,9 @@
   },
   "generation28_refire": {
     "schema_version": 1,
-    "status": "continuation_durability_rebound_pending_source_observation",
+    "status": "candidate_consumed_revision92_exact_head_ci_queued",
     "created_at": "2026-08-28T10:34:50.207Z",
-    "updated_at": "2026-08-28T10:46:26.984Z",
+    "updated_at": "2026-08-28T10:50:59.495Z",
     "target_generation": 28,
     "target_fence_token": "work-recovery-fence-v28-77f0480c3ed73bcc7100f1d58d1970ac5f45510e4c6ce4ceb2f8769e1cb859b3",
     "idempotency_key": "o-work-refire:g28:77f0480c3ed73bcc7100f1d58d1970ac5f45510e4c6ce4ceb2f8769e1cb859b3:320857ab:revision91-candidate-consume-execute-ablation-v1",
@@ -4654,7 +4661,7 @@
       "pending_native_invocation_id": "invoke-1dbf071f57e8c7d48d2262ce",
       "selected_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1"
     },
-    "launch_accepted": false,
+    "launch_accepted": true,
     "request_recreated": false,
     "response_repeated": false,
     "side_effect_repeated": false,
@@ -4688,6 +4695,68 @@
         "native_mutation": false,
         "duplicate_request_created": false
       }
-    ]
+    ],
+    "launch_receipt": {
+      "accepted_at": "2026-08-28T10:47:45.632972Z",
+      "work_request_id": "invoke-a5c82a8fdb7916d0a16b72cf",
+      "work_request_digest": "d0a8327fcfef6f0cfcb8c4b4fb9debd987bd932256ce18ff2448b81fd4d98cd5",
+      "work_response_digest": "242b174473ef00a9da93576a40073639b1a9b8cdfa0c20249f1e282d05976242",
+      "native_invocation_id": "invoke-1dbf071f57e8c7d48d2262ce",
+      "snapshot_revision": 92,
+      "snapshot_blob_sha": "48e919441f25db4a7e89d88c04888dff4d590e4f",
+      "remote_branch": "work/recovery-gen28-candidate-consume-v1",
+      "remote_head_sha": "2b50de5e488b3a996c544b4e173d04cda9fb6712",
+      "remote_tree_sha": "45839a26168b14cc9358d0697b673399d273be9a",
+      "pull_request": 333,
+      "changed_paths": 3,
+      "publication_status": "exact_head_ci_queued",
+      "workflow_runs": [
+        {
+          "id": 33164879348,
+          "name": "directive-source-preflight",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 33164879375,
+          "name": "test",
+          "status": "queued",
+          "conclusion": null
+        }
+      ],
+      "request_recreated": false,
+      "response_repeated": false,
+      "side_effect_repeated": false
+    },
+    "substantive_liveness_event": {
+      "kind": "candidate_response_consumed_and_exact_head_workflow_queued",
+      "occurred_at": "2026-08-28T10:47:45.632972Z",
+      "work_request_id": "invoke-a5c82a8fdb7916d0a16b72cf",
+      "native_invocation_id": "invoke-1dbf071f57e8c7d48d2262ce",
+      "snapshot_revision": 92,
+      "pull_request": 333,
+      "exact_head_sha": "2b50de5e488b3a996c544b4e173d04cda9fb6712",
+      "workflow_run_id": 33164879375,
+      "request_recreated": false,
+      "response_repeated": false,
+      "side_effect_repeated": false,
+      "claim_boundary": "The existing Candidate response was consumed exactly once and three lifecycle files entered exact-head CI. Execute and the three-fixture ablation remain pending; this is not AGI or objective completion."
+    },
+    "native_continuation_progress": {
+      "status": "candidate_consumed_revision92_publication_ci_queued",
+      "completed_work_invocation_id": "invoke-a5c82a8fdb7916d0a16b72cf",
+      "completed_native_invocation_id": "invoke-1dbf071f57e8c7d48d2262ce",
+      "snapshot_revision": 92,
+      "snapshot_phase": "unit_pending",
+      "selected_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
+      "branch": "work/recovery-gen28-candidate-consume-v1",
+      "head_sha": "2b50de5e488b3a996c544b4e173d04cda9fb6712",
+      "tree_sha": "45839a26168b14cc9358d0697b673399d273be9a",
+      "pull_request": 333,
+      "changed_paths": 3,
+      "request_recreated": false,
+      "response_repeated": false,
+      "publication_status": "exact_head_ci_queued"
+    }
   }
 }
