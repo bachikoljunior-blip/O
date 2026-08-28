@@ -583,3 +583,42 @@ def test_work_model_consolidates_passing_unit_then_continues_unmet_task(tmp_path
     assert verification["valid"] is True
     assert verification["responses"] == len(seen)
     assert verification["pending"] == 1
+
+
+def test_work_verify_fails_closed_on_missing_completed_native_artifacts(
+    tmp_path: Path,
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-work-artifact-integrity"
+    session = WorkSession(root, model_identity="work-model-under-test")
+    started = session.start("verify completed native artifacts", run_id=run_id)
+    request = started["pending"][0]
+    submit_work_response(
+        root,
+        request["invocation_id"],
+        _output("entry", request),
+        executor_binding="current_chatgpt_work_session",
+        model_identity="work-model-under-test",
+    )
+    session.resume(run_id, max_steps=1)
+
+    journal = next((root / ".continual" / "runs" / run_id / "invocations").glob("*.json"))
+    completed = json.loads(journal.read_text(encoding="utf-8"))
+    fragment = root / completed["fragment_ref"]
+    fragment_bytes = fragment.read_bytes()
+    fragment.unlink()
+    with pytest.raises(WorkSessionError, match="fragment is missing"):
+        verify_work_invocations(root, run_id=run_id)
+
+    fragment.write_bytes(fragment_bytes)
+    local_learn = (
+        root
+        / ".continual"
+        / "runs"
+        / run_id
+        / "local-learn"
+        / f"{completed['invocation_id']}-{completed['component']}.json"
+    )
+    local_learn.unlink()
+    with pytest.raises(WorkSessionError, match="Local Learn artifact is missing"):
+        verify_work_invocations(root, run_id=run_id)
