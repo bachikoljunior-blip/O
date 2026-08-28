@@ -1,0 +1,401 @@
+{
+  "base_commit": "523f17119b5e32e0526c235bc52bb3db626fafa9",
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "candidate_activated": false,
+    "current_context_kernel_modified": false,
+    "external_independent_evidence": false,
+    "production_routing_activated": false,
+    "scope": "three frozen repository fixtures at base commit 523f171; non-production ablation only",
+    "user_goal_completed": false
+  },
+  "decision": {
+    "reason": "The bounded two-hop variant recovered every declared transitive source that the flat selector missed across all three fixtures, while admitting zero non-required sources and rejecting the exact stale and authority-conflicting competitors.",
+    "verdict": "PASS"
+  },
+  "experiment_id": "recursive-context-retrieval-ablation-v1",
+  "fixture_manifest_digest": "72b9ddd96248c640ac202a0c613becefcbb497514b3eb5236981029d6064f7dc",
+  "fixtures": [
+    {
+      "baseline": {
+        "manifest_digest": "ab4defaf45b4ab63210de47e6abaac89f9e286a016f5e811548fee39fa144775",
+        "method": "flat",
+        "missing_required_source_ids": [
+          "context-kernel-architecture",
+          "work-source-observation-contract"
+        ],
+        "recovered_required_source_ids": [
+          "work-strategy"
+        ],
+        "rejected_sources": [
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
+            "source_id": "context-kernel-architecture"
+          },
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "agi/SCIENTIST_AGENT_BASELINE.json",
+            "source_id": "unrelated-scientist-baseline"
+          },
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "src/continual/work_source_observation.py",
+            "source_id": "work-source-observation-contract"
+          }
+        ],
+        "required_source_ids": [
+          "context-kernel-architecture",
+          "work-source-observation-contract",
+          "work-strategy"
+        ],
+        "required_source_recall": 0.3333333333333333,
+        "selected_content_bytes": 17433,
+        "selected_source_count": 1,
+        "selected_sources": [
+          {
+            "content_bytes": 17433,
+            "content_sha256": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b",
+            "depth": 0,
+            "parent_source_id": null,
+            "repository_path": "agi/WORK_STRATEGY.json",
+            "selection_reason": "entry_source",
+            "source_id": "work-strategy"
+          }
+        ],
+        "unsafe_admission_count": 0,
+        "unsafe_admitted_source_ids": []
+      },
+      "deterministic_replay_verified": true,
+      "deterministic_replays": 2,
+      "fixture_id": "missing-transitive-dependency",
+      "guard_verified": true,
+      "recall_delta": 0.6666666666666667,
+      "recursive": {
+        "manifest_digest": "615e7d6630be2f8d0178c7ab7d139d1a501671f985abfe25df27137f723ee666",
+        "method": "recursive_two_hop",
+        "missing_required_source_ids": [],
+        "recovered_required_source_ids": [
+          "context-kernel-architecture",
+          "work-source-observation-contract",
+          "work-strategy"
+        ],
+        "rejected_sources": [
+          {
+            "reasons": [
+              "not_reached_within_two_hops"
+            ],
+            "repository_path": "agi/SCIENTIST_AGENT_BASELINE.json",
+            "source_id": "unrelated-scientist-baseline"
+          }
+        ],
+        "required_source_ids": [
+          "context-kernel-architecture",
+          "work-source-observation-contract",
+          "work-strategy"
+        ],
+        "required_source_recall": 1.0,
+        "selected_content_bytes": 51989,
+        "selected_source_count": 3,
+        "selected_sources": [
+          {
+            "content_bytes": 17433,
+            "content_sha256": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b",
+            "depth": 0,
+            "parent_source_id": null,
+            "repository_path": "agi/WORK_STRATEGY.json",
+            "selection_reason": "entry_source",
+            "source_id": "work-strategy"
+          },
+          {
+            "content_bytes": 18976,
+            "content_sha256": "b5b33bfe8eae940aa4a1001fd7ead18840d9d81c6896fa6231cfc9e6dc254bcb",
+            "depth": 1,
+            "parent_source_id": "work-strategy",
+            "repository_path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
+            "selection_reason": "declared_dependency",
+            "source_id": "context-kernel-architecture"
+          },
+          {
+            "content_bytes": 15580,
+            "content_sha256": "ddfaf829b4920ed0949d61f7c84de0cc246b776f8649bc58afc401dd5401d515",
+            "depth": 2,
+            "parent_source_id": "context-kernel-architecture",
+            "repository_path": "src/continual/work_source_observation.py",
+            "selection_reason": "declared_dependency",
+            "source_id": "work-source-observation-contract"
+          }
+        ],
+        "unsafe_admission_count": 0,
+        "unsafe_admitted_source_ids": []
+      },
+      "unsafe_admission_delta": 0,
+      "verdict": "PASS"
+    },
+    {
+      "baseline": {
+        "manifest_digest": "6b1c10a0af605850fcd43d91c046f6a2e82dec954915f14618da96e94e499cc1",
+        "method": "flat",
+        "missing_required_source_ids": [
+          "fresh-ci-observation-contract",
+          "observation-ledger"
+        ],
+        "recovered_required_source_ids": [
+          "context-kernel"
+        ],
+        "rejected_sources": [
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "src/continual/ci_source_observation.py",
+            "source_id": "fresh-ci-observation-contract"
+          },
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "agi/CONTEXT_OBSERVATION_LEDGER.json",
+            "source_id": "observation-ledger"
+          },
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "agi/WORK_MODE_HANDOFF.json",
+            "source_id": "stale-ci-observation"
+          }
+        ],
+        "required_source_ids": [
+          "context-kernel",
+          "fresh-ci-observation-contract",
+          "observation-ledger"
+        ],
+        "required_source_recall": 0.3333333333333333,
+        "selected_content_bytes": 47603,
+        "selected_source_count": 1,
+        "selected_sources": [
+          {
+            "content_bytes": 47603,
+            "content_sha256": "1eee8748667a072b479caba871495b21bde096813d5f397c763f36f74cac31f2",
+            "depth": 0,
+            "parent_source_id": null,
+            "repository_path": "src/continual/context_kernel.py",
+            "selection_reason": "entry_source",
+            "source_id": "context-kernel"
+          }
+        ],
+        "unsafe_admission_count": 0,
+        "unsafe_admitted_source_ids": []
+      },
+      "deterministic_replay_verified": true,
+      "deterministic_replays": 2,
+      "fixture_id": "stale-competing-source",
+      "guard_verified": true,
+      "recall_delta": 0.6666666666666667,
+      "recursive": {
+        "manifest_digest": "e1112a1ce421f65ce6b88dcb690aef4933a690263dce4abad5937546bac58f1c",
+        "method": "recursive_two_hop",
+        "missing_required_source_ids": [],
+        "recovered_required_source_ids": [
+          "context-kernel",
+          "fresh-ci-observation-contract",
+          "observation-ledger"
+        ],
+        "rejected_sources": [
+          {
+            "reasons": [
+              "stale_at_decision_time"
+            ],
+            "repository_path": "agi/WORK_MODE_HANDOFF.json",
+            "source_id": "stale-ci-observation"
+          }
+        ],
+        "required_source_ids": [
+          "context-kernel",
+          "fresh-ci-observation-contract",
+          "observation-ledger"
+        ],
+        "required_source_recall": 1.0,
+        "selected_content_bytes": 68239,
+        "selected_source_count": 3,
+        "selected_sources": [
+          {
+            "content_bytes": 47603,
+            "content_sha256": "1eee8748667a072b479caba871495b21bde096813d5f397c763f36f74cac31f2",
+            "depth": 0,
+            "parent_source_id": null,
+            "repository_path": "src/continual/context_kernel.py",
+            "selection_reason": "entry_source",
+            "source_id": "context-kernel"
+          },
+          {
+            "content_bytes": 1614,
+            "content_sha256": "085c5043d81ee8efd300004ee30392e0cae7d60bc4747504ac35e32cbe6e7764",
+            "depth": 1,
+            "parent_source_id": "context-kernel",
+            "repository_path": "agi/CONTEXT_OBSERVATION_LEDGER.json",
+            "selection_reason": "declared_dependency",
+            "source_id": "observation-ledger"
+          },
+          {
+            "content_bytes": 19022,
+            "content_sha256": "205194b6f0e6d5d1ce19aeff1c4db3477d05e725d0d0750611d6c436a34eb62b",
+            "depth": 2,
+            "parent_source_id": "observation-ledger",
+            "repository_path": "src/continual/ci_source_observation.py",
+            "selection_reason": "declared_dependency",
+            "source_id": "fresh-ci-observation-contract"
+          }
+        ],
+        "unsafe_admission_count": 0,
+        "unsafe_admitted_source_ids": []
+      },
+      "unsafe_admission_delta": 0,
+      "verdict": "PASS"
+    },
+    {
+      "baseline": {
+        "manifest_digest": "79e76a5b62f1a4001981ce98d745fbe10d974b44249e133d981a964de674e20b",
+        "method": "flat",
+        "missing_required_source_ids": [
+          "authoritative-monitor-state",
+          "continuous-authorization"
+        ],
+        "recovered_required_source_ids": [
+          "work-mode-contract"
+        ],
+        "rejected_sources": [
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "agi/WORK_MODE_MONITOR.json",
+            "source_id": "authoritative-monitor-state"
+          },
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "agi/CONTINUOUS_EXECUTION_AUTHORIZATION.json",
+            "source_id": "continuous-authorization"
+          },
+          {
+            "reasons": [
+              "not_reached_by_flat_selector"
+            ],
+            "repository_path": "agi/AUTONOMY_STATE.json",
+            "source_id": "legacy-autonomy-state"
+          }
+        ],
+        "required_source_ids": [
+          "authoritative-monitor-state",
+          "continuous-authorization",
+          "work-mode-contract"
+        ],
+        "required_source_recall": 0.3333333333333333,
+        "selected_content_bytes": 14129,
+        "selected_source_count": 1,
+        "selected_sources": [
+          {
+            "content_bytes": 14129,
+            "content_sha256": "d2cff7165ebbb1a485af74dd7e903708b14a9277395d65288a1818b236bc85f8",
+            "depth": 0,
+            "parent_source_id": null,
+            "repository_path": "agi/WORK_MODE.md",
+            "selection_reason": "entry_source",
+            "source_id": "work-mode-contract"
+          }
+        ],
+        "unsafe_admission_count": 0,
+        "unsafe_admitted_source_ids": []
+      },
+      "deterministic_replay_verified": true,
+      "deterministic_replays": 2,
+      "fixture_id": "authority-conflicting-source",
+      "guard_verified": true,
+      "recall_delta": 0.6666666666666667,
+      "recursive": {
+        "manifest_digest": "feaad3d6fd47544a5a2ae5b04f169d5874ab48a8429ede15c42cd1f9d96403be",
+        "method": "recursive_two_hop",
+        "missing_required_source_ids": [],
+        "recovered_required_source_ids": [
+          "authoritative-monitor-state",
+          "continuous-authorization",
+          "work-mode-contract"
+        ],
+        "rejected_sources": [
+          {
+            "reasons": [
+              "authority_conflict:work-state->o-work-mode-monitor"
+            ],
+            "repository_path": "agi/AUTONOMY_STATE.json",
+            "source_id": "legacy-autonomy-state"
+          }
+        ],
+        "required_source_ids": [
+          "authoritative-monitor-state",
+          "continuous-authorization",
+          "work-mode-contract"
+        ],
+        "required_source_recall": 1.0,
+        "selected_content_bytes": 22133,
+        "selected_source_count": 3,
+        "selected_sources": [
+          {
+            "content_bytes": 14129,
+            "content_sha256": "d2cff7165ebbb1a485af74dd7e903708b14a9277395d65288a1818b236bc85f8",
+            "depth": 0,
+            "parent_source_id": null,
+            "repository_path": "agi/WORK_MODE.md",
+            "selection_reason": "entry_source",
+            "source_id": "work-mode-contract"
+          },
+          {
+            "content_bytes": 4353,
+            "content_sha256": "a1a4d34642e8fe3d3bc4de86ed6650d5a5a5a9582bf8809b85341acd50f83b79",
+            "depth": 1,
+            "parent_source_id": "work-mode-contract",
+            "repository_path": "agi/CONTINUOUS_EXECUTION_AUTHORIZATION.json",
+            "selection_reason": "declared_dependency",
+            "source_id": "continuous-authorization"
+          },
+          {
+            "content_bytes": 3651,
+            "content_sha256": "990761dda08a569528cd43fffb9f054e12441da192314a08c4b9edd1ab51f8c2",
+            "depth": 2,
+            "parent_source_id": "continuous-authorization",
+            "repository_path": "agi/WORK_MODE_MONITOR.json",
+            "selection_reason": "declared_dependency",
+            "source_id": "authoritative-monitor-state"
+          }
+        ],
+        "unsafe_admission_count": 0,
+        "unsafe_admitted_source_ids": []
+      },
+      "unsafe_admission_delta": 0,
+      "verdict": "PASS"
+    }
+  ],
+  "mechanism": "bounded-deterministic-two-hop-recursive-context-retrieval-ablation",
+  "production_activation": false,
+  "report_digest": "8314097b8e31f40d22bb702c4e81bbd751fcdc15fcfed5f26b6168271f0b8c8f",
+  "schema_version": 1,
+  "status": "MEASURED",
+  "summary": {
+    "authority_conflict_rejection_count": 1,
+    "baseline_mean_required_source_recall": 0.3333333333333333,
+    "deterministic_replay_count": 6,
+    "fixture_count": 3,
+    "mean_recall_delta": 0.6666666666666667,
+    "recursive_mean_required_source_recall": 1.0,
+    "recursive_unsafe_admission_count": 0,
+    "stale_source_rejection_count": 1
+  }
+}
