@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision33_payload_publication_precommit",
+  "active_component": "generation29_revision33_payload_exact_head_ci_pending",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -200,12 +200,12 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Publish the exact four frozen lifecycle blobs once on a branch based on the revision33 state-precommit main, exact-readback them, run exact-head CI, merge only the unchanged head, then query and consume native revision92 without recreating the Work request or response.",
+    "next_action": "Recheck exact-head workflows without changing the head. After all required runs/jobs succeed, re-read generation29 authority, inbox revision33, PR head, latest main, path intersection, and mergeability; merge only expected head c96cf815. Exact-readback all four blobs on main, then inspect the pre-existing accepted pending Execute before native resume and never duplicate it.",
     "last_verified_effect": "PR336 repaired exact head d62bc08 passed directive preflight, all four pytest shards, and dependent aggregate; expected-head merge produced main 4d7eeea and exact-readback verified all four blobs. Fresh alternate-route review found feed revision10 unchanged, issue222 comments=0, verifiers=0, challenges/disclosures/attestations=0, while native revision92 remains the exact frozen Execute continuation. The continuity guard returned allowed=true for persist_externally_blocked_checkpoint.",
     "completed_effect_receipt": "PR336 merged main 4d7eeea9d8106782bc7b6603e30145fac3f3cf18 from repaired head d62bc08786a6679157d76b0f81cdc47bf15711ff tree 75610cf; blobs e0c4ca3e, 9d0a7a92, e9c3939f, a99374fd exact-readback; report digest 8314097b8e31f40d22bb702c4e81bbd751fcdc15fcfed5f26b6168271f0b8c8f; blocked lifecycle head 2351597 remains unpublished",
     "pending_job_ids": [],
     "idempotency_key": "o-work-refire:g29:9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781:2b46edd1:revision92-source-refresh-execute-ablation-v1",
-    "exact_frontier": "generation29 revision92 exact frozen continuation; revision33 acknowledged; four-file payload validated locally and authorized for one-time remote publication; publication precommit is being made"
+    "exact_frontier": "PR337 exact head c96cf815 with four exact-readback lifecycle blobs; exact-head workflows recorded; native accepted-pending query recorded"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1462,7 +1462,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T23:27:35.789Z",
+  "heartbeat_at": "2026-08-28T23:31:18.841Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2291,7 +2291,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T23:27:35.789Z",
+  "last_progress_at": "2026-08-28T23:31:18.841Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -5117,7 +5117,7 @@
   },
   "generation29_refire": {
     "schema_version": 1,
-    "status": "revision33_exact_payload_publication_precommit",
+    "status": "revision33_payload_pr337_exact_head_ci_pending",
     "created_at": "2026-08-28T12:27:59.401Z",
     "updated_at": "2026-08-28T23:27:35.789Z",
     "target_generation": 29,
@@ -5219,7 +5219,7 @@
   },
   "generation29_revision33_resume": {
     "schema_version": 1,
-    "status": "payload_publication_precommit",
+    "status": "payload_branch_published_exact_readback_pr337_ci_pending",
     "prepared_at": "2026-08-28T23:27:35.789Z",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
@@ -5283,6 +5283,61 @@
       "decision": "BASELINE_FIRST"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision33:invoke-f1cb0996ce0ff71a28d0dd58:four-file-publication:v1",
-    "next_action": "Exact-readback this state CAS, overlay only the four reviewed blobs on the resulting latest main, create/push the existing named branch, open a PR, require exact-head CI and unchanged-head merge, then resume native revision92."
+    "next_action": "Recheck exact-head workflows without changing the head. After all required runs/jobs succeed, re-read generation29 authority, inbox revision33, PR head, latest main, path intersection, and mergeability; merge only expected head c96cf815. Exact-readback all four blobs on main, then inspect the pre-existing accepted pending Execute before native resume and never duplicate it.",
+    "updated_at": "2026-08-28T23:31:18.841Z",
+    "publication": {
+      "branch": "work/recovery-gen29-candidate-preflight-durability-v1",
+      "head_sha": "c96cf815a0914ea8839bd540b2879f3793b88819",
+      "tree_sha": "464b754cc002a68ca1dc366b8b6944ea9567ec8e",
+      "parent_main_sha": "03b24c5b51503f0efe49e623fae0a3fbb0066e06",
+      "changed_path_count": 4,
+      "exact_remote_blob_readback": true,
+      "remote_blobs_match": true,
+      "git_push_attempt": {
+        "status": "failed_no_https_credentials",
+        "durable_effect": false,
+        "duplicate_launch": false
+      },
+      "connector_publication": {
+        "status": "succeeded",
+        "exact_tree_match": true,
+        "exact_blob_match": true
+      }
+    },
+    "pull_request": {
+      "number": 337,
+      "url": "https://github.com/bachikoljunior-blip/O/pull/337",
+      "head_sha": "c96cf815a0914ea8839bd540b2879f3793b88819",
+      "changed_files": 4,
+      "status": "open_ci_pending"
+    },
+    "validation": {
+      "json_and_jsonl_valid": true,
+      "secret_pattern_match_count": 0,
+      "work_verify_valid": true,
+      "work_verify_requests": 84,
+      "work_verify_responses": 83,
+      "work_verify_pending": 1,
+      "pending_work_invocation_id": "invoke-bc7f7bd24f16124de10ad4ac",
+      "pending_work_invocation_classification": "pre-existing accepted pending Execute from revision74; must be queried and resolved without duplicate launch before native resume",
+      "checkpoint_verify_valid": true,
+      "checkpoint_issue_count": 0
+    },
+    "workflows": [
+      {
+        "id": 33220652655,
+        "name": "test",
+        "status": "in_progress",
+        "conclusion": null,
+        "head_sha": "c96cf815a0914ea8839bd540b2879f3793b88819"
+      },
+      {
+        "id": 33220652660,
+        "name": "directive-source-preflight",
+        "status": "completed",
+        "conclusion": "failure",
+        "head_sha": "c96cf815a0914ea8839bd540b2879f3793b88819"
+      }
+    ]
   }
 }
