@@ -676,13 +676,116 @@ def verify_work_invocations(root: Path, *, run_id: str | None = None) -> dict[st
             responses += 1
         else:
             pending += 1
-    return {
+    result = {
         "valid": True,
         "run_id": run_id,
         "requests": requests,
         "responses": responses,
         "pending": pending,
         "invocation_ids": invocation_ids,
+    }
+    if run_id is not None:
+        result.update(_verify_completed_native_artifacts(root, run_id=run_id))
+    return result
+
+
+def _verify_completed_native_artifacts(root: Path, *, run_id: str) -> dict[str, int]:
+    """Fail closed when a completed native journal lost Engine-owned artifacts.
+
+    A reconstructed Work response is not a complete native lifecycle by itself.
+    The Engine persists the semantic fragment and, for non-Learn components,
+    Local Learn before it marks the native journal complete.  Recovery and
+    publication verification must preserve that ordering invariant too.
+    """
+
+    if re.fullmatch(r"run-[A-Za-z0-9._-]{6,128}", run_id) is None:
+        raise WorkSessionError("invalid native run_id")
+    run_dir = (root / ".continual" / "runs" / run_id).resolve()
+    expected_run_dir = root / ".continual" / "runs" / run_id
+    if run_dir != expected_run_dir.resolve() or not run_dir.is_dir():
+        raise WorkSessionError(f"native run does not exist: {run_id}")
+
+    completed = 0
+    fragments = 0
+    local_learn = 0
+    for journal_path in sorted((run_dir / "invocations").glob("*.json")):
+        journal = Store(root).read_json(journal_path, None)
+        if not isinstance(journal, Mapping):
+            raise WorkSessionError(
+                f"malformed native invocation journal: {journal_path.name}"
+            )
+        if journal.get("status") != "complete":
+            continue
+        completed += 1
+        invocation_id = journal.get("invocation_id")
+        component = journal.get("component")
+        output = journal.get("output")
+        if (
+            not isinstance(invocation_id, str)
+            or _INVOCATION_ID.fullmatch(invocation_id) is None
+            or journal_path.stem != invocation_id
+            or not isinstance(component, str)
+            or not component
+            or not isinstance(output, Mapping)
+        ):
+            raise WorkSessionError(
+                f"malformed completed native invocation: {journal_path.name}"
+            )
+
+        expected_fragment_ref = (
+            f".continual/runs/{run_id}/fragments/"
+            f"{invocation_id}-{component}.json"
+        )
+        if journal.get("fragment_ref") != expected_fragment_ref:
+            raise WorkSessionError(
+                f"completed native fragment_ref mismatch: {invocation_id}"
+            )
+        fragment_path = root / expected_fragment_ref
+        fragment = Store(root).read_json(fragment_path, None)
+        if not isinstance(fragment, Mapping):
+            raise WorkSessionError(
+                f"completed native fragment is missing or malformed: {invocation_id}"
+            )
+        expected_fragment = output.get("fragment") or {
+            "component": component,
+            "missing": True,
+        }
+        if not isinstance(expected_fragment, Mapping):
+            raise WorkSessionError(
+                f"completed native output fragment is malformed: {invocation_id}"
+            )
+        if any(fragment.get(key) != value for key, value in expected_fragment.items()):
+            raise WorkSessionError(
+                f"completed native fragment differs from frozen output: {invocation_id}"
+            )
+        if (
+            fragment.get("component") != component
+            or fragment.get("invocation_id") != invocation_id
+            or not isinstance(fragment.get("environment"), Mapping)
+        ):
+            raise WorkSessionError(
+                f"completed native fragment binding is malformed: {invocation_id}"
+            )
+        fragments += 1
+
+        if component != "learn" and "local_learn" in output:
+            learn_path = (
+                run_dir
+                / "local-learn"
+                / f"{invocation_id}-{component}.json"
+            )
+            learned = Store(root).read_json(learn_path, None)
+            if learned != output["local_learn"]:
+                raise WorkSessionError(
+                    "completed native Local Learn artifact is missing or differs "
+                    f"from frozen output: {invocation_id}"
+                )
+            local_learn += 1
+
+    return {
+        "native_completed": completed,
+        "native_fragments": fragments,
+        "native_local_learn": local_learn,
     }
 
 
