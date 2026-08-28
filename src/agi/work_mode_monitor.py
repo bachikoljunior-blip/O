@@ -32,6 +32,9 @@ class WorkModeMonitorDecision:
     verified_external_goal: bool
     user_objective_met: bool
     explicit_user_stop: bool
+    latest_user_input_revision: int | None
+    acknowledged_user_input_revision: int | None
+    unacknowledged_user_input: bool
 
     def descriptor(self) -> dict[str, Any]:
         return asdict(self)
@@ -94,6 +97,24 @@ def _generation(value: Any) -> int:
     return value
 
 
+def _user_input_revision(value: Any, *, field: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise WorkModeMonitorError(f"{field} must be a non-negative integer")
+    return value
+
+
+def _acknowledged_user_input_revision(state: Mapping[str, Any]) -> int:
+    inbox = state.get("user_input_inbox")
+    if not isinstance(inbox, Mapping):
+        raise WorkModeMonitorError(
+            "user_input_inbox must be an object when latest user input is observed"
+        )
+    return _user_input_revision(
+        inbox.get("highest_acknowledged_revision"),
+        field="user_input_inbox.highest_acknowledged_revision",
+    )
+
+
 def _required_text(state: Mapping[str, Any], key: str) -> str:
     value = state.get(key)
     if not isinstance(value, str) or not value.strip():
@@ -130,6 +151,9 @@ def _decision(
     verified_external_goal: bool = False,
     user_objective_met: bool = False,
     explicit_user_stop: bool = False,
+    latest_user_input_revision: int | None = None,
+    acknowledged_user_input_revision: int | None = None,
+    unacknowledged_user_input: bool = False,
 ) -> WorkModeMonitorDecision:
     return WorkModeMonitorDecision(
         action=action,
@@ -146,6 +170,9 @@ def _decision(
         verified_external_goal=verified_external_goal,
         user_objective_met=user_objective_met,
         explicit_user_stop=explicit_user_stop,
+        latest_user_input_revision=latest_user_input_revision,
+        acknowledged_user_input_revision=acknowledged_user_input_revision,
+        unacknowledged_user_input=unacknowledged_user_input,
     )
 
 
@@ -157,6 +184,7 @@ def evaluate_work_mode_monitor(
     verified_external_goal: bool = False,
     user_objective_met: bool = False,
     explicit_user_stop: bool = False,
+    latest_user_input_revision: int | None = None,
     max_future_heartbeat_skew_seconds: int = 120,
 ) -> WorkModeMonitorDecision:
     """Classify Work-mode liveness without granting mutation authority.
@@ -183,6 +211,11 @@ def evaluate_work_mode_monitor(
         raise WorkModeMonitorError(
             "max_future_heartbeat_skew_seconds must be an integer from 0 through 3600"
         )
+    if latest_user_input_revision is not None:
+        latest_user_input_revision = _user_input_revision(
+            latest_user_input_revision,
+            field="latest_user_input_revision",
+        )
     now_utc = _parse_now(now)
 
     if explicit_user_stop:
@@ -191,6 +224,7 @@ def evaluate_work_mode_monitor(
             reason="the user explicitly stopped the Work execution",
             verified_external_goal=verified_external_goal,
             explicit_user_stop=True,
+            latest_user_input_revision=latest_user_input_revision,
         )
     if user_objective_met:
         return _decision(
@@ -198,6 +232,7 @@ def evaluate_work_mode_monitor(
             reason="the user's actual upper-level objective was independently established as met",
             verified_external_goal=verified_external_goal,
             user_objective_met=True,
+            latest_user_input_revision=latest_user_input_revision,
         )
 
     if not migration_present or state is None:
@@ -206,6 +241,7 @@ def evaluate_work_mode_monitor(
             reason="Work migration or execution state is absent and requires non-duplicating bootstrap",
             status="missing",
             recovery_eligible=True,
+            latest_user_input_revision=latest_user_input_revision,
         )
     if not isinstance(state, Mapping):
         return _decision(action="unsafe_state", reason="Work execution state must be an object")
@@ -222,8 +258,36 @@ def evaluate_work_mode_monitor(
         _fence_token(state)
         stale_after = _stale_after(state.get("stale_after_seconds"))
         heartbeat = _parse_timestamp(state.get("heartbeat_at"), field="heartbeat_at")
+        acknowledged_user_input_revision = (
+            _acknowledged_user_input_revision(state)
+            if latest_user_input_revision is not None
+            else None
+        )
     except WorkModeMonitorError as exc:
-        return _decision(action="unsafe_state", reason=str(exc), status=status)
+        return _decision(
+            action="unsafe_state",
+            reason=str(exc),
+            status=status,
+            latest_user_input_revision=latest_user_input_revision,
+        )
+
+    if (
+        latest_user_input_revision is not None
+        and acknowledged_user_input_revision is not None
+        and acknowledged_user_input_revision > latest_user_input_revision
+    ):
+        return _decision(
+            action="unsafe_state",
+            reason="acknowledged user input revision exceeds the latest observed revision",
+            status=status,
+            latest_user_input_revision=latest_user_input_revision,
+            acknowledged_user_input_revision=acknowledged_user_input_revision,
+        )
+    unacknowledged_user_input = bool(
+        latest_user_input_revision is not None
+        and acknowledged_user_input_revision is not None
+        and latest_user_input_revision > acknowledged_user_input_revision
+    )
 
     age = (now_utc - heartbeat).total_seconds()
     common = {
@@ -234,6 +298,9 @@ def evaluate_work_mode_monitor(
         "lease_generation": lease_generation,
         "execution_id": execution_id,
         "owner_kind": owner_kind,
+        "latest_user_input_revision": latest_user_input_revision,
+        "acknowledged_user_input_revision": acknowledged_user_input_revision,
+        "unacknowledged_user_input": unacknowledged_user_input,
     }
     if age < -max_future_heartbeat_skew_seconds:
         return _decision(
@@ -244,6 +311,15 @@ def evaluate_work_mode_monitor(
 
     if status == "running":
         if age <= stale_after:
+            if unacknowledged_user_input:
+                return _decision(
+                    action="suppress_duplicate_surface_user_input",
+                    reason=(
+                        "the running Work owner has a fresh heartbeat, so no duplicate "
+                        "writer is allowed, but newer user input must be surfaced to it"
+                    ),
+                    **common,
+                )
             return _decision(
                 action="suppress_duplicate",
                 reason="the running Work owner has a fresh heartbeat",
@@ -311,6 +387,7 @@ def authorize_work_mode_recovery(
     proof: WorkModeCASProof,
     *,
     now: datetime | str,
+    latest_user_input_revision: int | None = None,
     max_acquisition_age_seconds: int = 300,
 ) -> WorkModeRecoveryAuthorization:
     """Authorize a recovered writer only after exact two-phase CAS readback.
@@ -344,6 +421,7 @@ def authorize_work_mode_recovery(
         now=now,
         migration_present=True,
         verified_external_goal=False,
+        latest_user_input_revision=latest_user_input_revision,
     )
     if not observed.recovery_eligible:
         return _denied(
@@ -354,16 +432,32 @@ def authorize_work_mode_recovery(
         now=now,
         migration_present=True,
         verified_external_goal=False,
+        latest_user_input_revision=latest_user_input_revision,
     )
-    if acquired.action != "suppress_duplicate":
+    if acquired.action not in {
+        "suppress_duplicate",
+        "suppress_duplicate_surface_user_input",
+    }:
         return _denied(
-            f"acquired state is not a fresh running lease: {acquired.action}",
+            (
+                "acquired state is not a fresh running lease: "
+                f"{acquired.action}: {acquired.reason}"
+            ),
             state=acquired_state,
         )
     if acquired.heartbeat_age_seconds is None or acquired.heartbeat_age_seconds < 0:
         return _denied("acquired heartbeat must not be in the future", state=acquired_state)
     if acquired.heartbeat_age_seconds > max_acquisition_age_seconds:
         return _denied("acquired heartbeat is too old for authorization", state=acquired_state)
+
+    if latest_user_input_revision is not None:
+        observed_acknowledged = observed.acknowledged_user_input_revision
+        acquired_acknowledged = acquired.acknowledged_user_input_revision
+        if acquired_acknowledged != observed_acknowledged:
+            return _denied(
+                "recovery acquisition changed the acknowledged user input revision",
+                state=acquired_state,
+            )
 
     observed_generation = observed_state.get("lease_generation")
     acquired_generation = acquired_state.get("lease_generation")

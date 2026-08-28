@@ -11,9 +11,11 @@ import pytest
 from agi.user_input_inbox import (
     UserInputInboxError,
     append_remote_user_input_inbox,
+    ingest_remote_user_input_event,
     load_user_input_inbox,
     prepare_user_input_inbox_append,
     serialize_user_input_inbox,
+    stable_user_input_event_id,
     unapplied_user_inputs,
     validate_user_input_inbox,
 )
@@ -172,6 +174,21 @@ def _append_entry(entry_id: str = "new-user-input") -> dict:
         "directives": ["Preserve expected-revision and provider readback safety."],
         "supersedes": [],
         "source": "user_chat",
+    }
+
+
+def _ingress_event() -> dict:
+    return {
+        "source_event_id": "task-chat-message-0000042",
+        "received_at": "2026-08-27T20:15:30+00:00",
+        "kind": "user_direction",
+        "summary": "Repair the stalled primary Work execution.",
+        "directives": [
+            "Restore durable user-input ingress before unchanged-hold backoff.",
+            "Do not broaden publication authorization.",
+        ],
+        "supersedes": [],
+        "source": "chatgpt_work_task_chat",
     }
 
 
@@ -396,6 +413,162 @@ def test_remote_append_never_retries_a_failed_cas() -> None:
             compare_and_swap=rejected_cas,
         )
     assert cas_calls == 1
+
+
+def test_structured_ingress_is_exactly_once_with_stable_non_raw_identity() -> None:
+    current = load_user_input_inbox(ROOT)
+    expected_revision = current["revision"]
+    state = {
+        "content": serialize_user_input_inbox(current),
+        "blob_sha": "a" * 40,
+    }
+    cas_calls = 0
+
+    def fetch() -> dict:
+        return deepcopy(state)
+
+    def compare_and_swap(expected_blob_sha: str, content: str) -> dict:
+        nonlocal cas_calls
+        cas_calls += 1
+        assert expected_blob_sha == "a" * 40
+        state["content"] = content
+        state["blob_sha"] = "b" * 40
+        return {"commit_sha": "c" * 40, "content_sha": "b" * 40}
+
+    event = _ingress_event()
+    event_id = stable_user_input_event_id(
+        source=event["source"], source_event_id=event["source_event_id"]
+    )
+    first = ingest_remote_user_input_event(
+        event,
+        expected_revision=expected_revision,
+        expected_blob_sha="a" * 40,
+        updated_at=datetime(2026, 8, 27, 20, 16, tzinfo=timezone.utc),
+        fetch=fetch,
+        compare_and_swap=compare_and_swap,
+    )
+
+    persisted = json.loads(state["content"])
+    entry = persisted["entries"][-1]
+    assert first["status"] == "appended"
+    assert first["event_id"] == event_id
+    assert first["source_event_id_persisted"] is False
+    assert first["remote_readback_verified"] is True
+    assert entry["id"] == event_id
+    assert entry["received_at"] == "2026-08-27T20:15:30Z"
+    assert event["source_event_id"] not in state["content"]
+    assert set(entry) == {
+        "id",
+        "received_at",
+        "kind",
+        "status",
+        "summary",
+        "directives",
+        "supersedes",
+        "source",
+        "sequence",
+    }
+
+    retry = ingest_remote_user_input_event(
+        event,
+        expected_revision=expected_revision,
+        expected_blob_sha="a" * 40,
+        updated_at=datetime(2026, 8, 27, 20, 17, tzinfo=timezone.utc),
+        fetch=fetch,
+        compare_and_swap=compare_and_swap,
+    )
+    assert retry["status"] == "already_applied"
+    assert retry["event_id"] == event_id
+    assert cas_calls == 1
+
+
+def test_structured_ingress_rejects_reused_event_identity_with_different_content() -> None:
+    current = load_user_input_inbox(ROOT)
+    expected_revision = current["revision"]
+    state = {
+        "content": serialize_user_input_inbox(current),
+        "blob_sha": "a" * 40,
+    }
+    cas_calls = 0
+
+    def fetch() -> dict:
+        return deepcopy(state)
+
+    def compare_and_swap(_: str, content: str) -> dict:
+        nonlocal cas_calls
+        cas_calls += 1
+        state["content"] = content
+        state["blob_sha"] = "b" * 40
+        return {"commit_sha": "c" * 40, "content_sha": "b" * 40}
+
+    ingest_remote_user_input_event(
+        _ingress_event(),
+        expected_revision=expected_revision,
+        expected_blob_sha="a" * 40,
+        updated_at=datetime(2026, 8, 27, 20, 16, tzinfo=timezone.utc),
+        fetch=fetch,
+        compare_and_swap=compare_and_swap,
+    )
+    changed = {**_ingress_event(), "summary": "A different instruction."}
+    with pytest.raises(UserInputInboxError, match="entry id content conflict"):
+        ingest_remote_user_input_event(
+            changed,
+            expected_revision=expected_revision,
+            expected_blob_sha="a" * 40,
+            updated_at=datetime(2026, 8, 27, 20, 17, tzinfo=timezone.utc),
+            fetch=fetch,
+            compare_and_swap=compare_and_swap,
+        )
+    assert cas_calls == 1
+
+
+def test_structured_ingress_requires_exact_blob_and_rejects_raw_or_secret_text_pre_io() -> None:
+    current = load_user_input_inbox(ROOT)
+    content = serialize_user_input_inbox(current)
+    fetch_calls = 0
+    cas_calls = 0
+
+    def fetch() -> dict:
+        nonlocal fetch_calls
+        fetch_calls += 1
+        return {"content": content, "blob_sha": "a" * 40}
+
+    def compare_and_swap(_: str, __: str) -> dict:
+        nonlocal cas_calls
+        cas_calls += 1
+        return {"commit_sha": "c" * 40, "content_sha": "b" * 40}
+
+    with pytest.raises(UserInputInboxError, match="blob conflict"):
+        ingest_remote_user_input_event(
+            _ingress_event(),
+            expected_revision=current["revision"],
+            expected_blob_sha="d" * 40,
+            updated_at=datetime(2026, 8, 27, 20, 16, tzinfo=timezone.utc),
+            fetch=fetch,
+            compare_and_swap=compare_and_swap,
+        )
+    assert fetch_calls == 1
+    assert cas_calls == 0
+
+    unsafe_events = [
+        {**_ingress_event(), "raw_chat": "Store this complete transcript."},
+        {**_ingress_event(), "summary": "Use Bearer definitely-not-safe"},
+        {**_ingress_event(), "directives": ["Use ghp_not_safe"]},
+        {**_ingress_event(), "directives": ["Use github_pat_not_safe"]},
+        {**_ingress_event(), "directives": ["Use sk-not-safe"]},
+    ]
+    for unsafe in unsafe_events:
+        with pytest.raises(UserInputInboxError, match="raw chat|secret-like text"):
+            ingest_remote_user_input_event(
+                unsafe,
+                expected_revision=current["revision"],
+                expected_blob_sha="a" * 40,
+                updated_at=datetime(2026, 8, 27, 20, 16, tzinfo=timezone.utc),
+                fetch=fetch,
+                compare_and_swap=compare_and_swap,
+            )
+    assert fetch_calls == 1
+    assert cas_calls == 0
 
 def test_user_input_inbox_rejects_secret_bearing_fields_and_sequence_gaps() -> None:
     inbox = load_user_input_inbox(ROOT)
