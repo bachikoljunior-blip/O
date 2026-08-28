@@ -1,6 +1,6 @@
 {
-  "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation27_authorized_revision30_ingested_pending_candidate_response_consume",
+  "acquisition_phase": "acquired_pending_remote_readback",
+  "active_component": "generation28_recovery_acquisition_pending_readback",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -18,7 +18,7 @@
   },
   "authorization": {
     "kind": "fenced_stale_recovery_and_run_to_achievement_primary_resume",
-    "instruction": "Recover the actually stopped generation 26 from remote-main revision 91, ingest inbox revision 30 at the safe unit boundary, consume the existing Candidate Evaluate response exactly once, freeze Execute, perform the bounded recursive-context retrieval ablation, publish verified effects, and continue selecting subsequent safe effects until the upper objective is durably achieved or a hard runtime boundary forces an exact resumable handoff.",
+    "instruction": "Recover the actually stopped generation 27 from remote-main revision 91, preserve acknowledged inbox revision 30, consume the existing Candidate Evaluate response exactly once, freeze Execute, perform the bounded recursive-context retrieval ablation, publish verified effects, and continue selecting subsequent safe effects until the upper objective is durably achieved or a hard runtime boundary forces an exact resumable handoff.",
     "recovery_cas_required_for_this_initial_owner": true,
     "recovery_cas_required_for_successors": true,
     "refire_contract_revision": 9,
@@ -26,17 +26,10 @@
     "repository_control_revision": 15
   },
   "authorization_validation": {
-    "authorized": true,
-    "validated_at": "2026-08-28T10:14:25.879Z",
+    "authorized": false,
+    "validated_at": null,
     "implementation": "src/agi/work_mode_monitor.py#authorize_work_mode_recovery",
-    "reason": "exact generation+1 lease and two-phase remote readback were verified",
-    "observed_blob_sha": "f2e7c4513f5f28cc5c21b21fa385759bbf0ced1e",
-    "acquisition_commit_sha": "86916e325bdc2ec59ddcddeff92d956bcf76b4b3",
-    "acquisition_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
-    "finalization_commit_sha": "6a8bd9c49c34f3f295a8b2718435ca8cc7b19361",
-    "finalization_blob_sha": "8e05da5c92fb21207d84b62551328a04a919807e",
-    "latest_user_input_revision_during_authorization": 30,
-    "acknowledged_revision_during_authorization": 29
+    "reason": "pending exact two-phase remote readback"
   },
   "behavioral_source_renewal_integration": {
     "authorized_at": "2026-08-24T04:56:21.012Z",
@@ -1092,18 +1085,18 @@
       }
     ]
   },
-  "execution_id": "work-recovery-20260828T101103335Z-3071f8d46cf390ccdbab2737081b0b80",
-  "expected_blob_sha": "f2e7c4513f5f28cc5c21b21fa385759bbf0ced1e",
+  "execution_id": "work-recovery-20260828T103145759Z-e3ede154f4c0e4ae14f6432415e7e99f",
+  "expected_blob_sha": "fa5720b4bc35024e740aeafa32e684fa24a59247",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
     "strict_gate_passed": false
   },
-  "fence_token": "work-recovery-fence-v27-4c4489944fc3c028dc998223c20aeb21edb31e0593ce2131895c1f6f5bb37c5f",
+  "fence_token": "work-recovery-fence-v28-77f0480c3ed73bcc7100f1d58d1970ac5f45510e4c6ce4ceb2f8769e1cb859b3",
   "finalization_blob_sha": "a94fa253ef8bc9d7b2ac6571054008d9eba0fb29",
   "finalization_commit_sha": "4f9b07a4ebd9c29012d2d4c3fdff841b3521d0d8",
   "finalization_readback_verified": true,
-  "finalize_expected_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
+  "finalize_expected_blob_sha": null,
   "generation23_payload_publication_hold": {
     "cause_guard_merge_sha": "e6a9b8f1bbe5887035019362f7dc0a7f4d6c991c",
     "continuation_invocation_id": "invoke-748f38dc8ef56693dba2f7b7",
@@ -1436,7 +1429,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-28T10:14:25.879Z",
+  "heartbeat_at": "2026-08-28T10:34:50.207Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2265,8 +2258,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-28T10:14:25.879Z",
-  "lease_generation": 27,
+  "last_progress_at": "2026-08-28T10:34:50.207Z",
+  "lease_generation": 28,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
     "reason": "bind PR 291 exact-head CI source observation policy",
@@ -2703,17 +2696,16 @@
     "primary": "Generation 19 is the sole owner after two-phase acquisition finalization and exact remote readback. Preserve and execute only frozen Work-exclusive Execute invoke-248450c08547af10470c50e6 after local authorization validation.",
     "secondary": "The generation-8 and generation-6 orphan Execute invocations remain untouched and unanswered."
   },
-  "pending_user_input": null,
   "post_acquisition_progress_contract": {
-    "generation": 27,
-    "concrete_effect_selected": "Acknowledge inbox revision 30 at the safe boundary, consume the existing Candidate response exactly once, freeze and answer Execute for the selected recursive-context retrieval ablation, validate and publish its substantive result, then continue to the next safe effect.",
-    "effect_attempted": true,
+    "generation": 28,
+    "concrete_effect_selected": "Consume the existing Candidate response exactly once, freeze and answer Execute for the selected recursive-context retrieval ablation, validate and publish its substantive result, then continue to the next safe effect.",
+    "effect_attempted": false,
     "native_request_created": false,
     "new_exact_blocker_persisted": false,
     "new_exact_blocker_reached": false,
-    "progress_contract_result": "authorization_and_revision30_ingress_durable_pending_native_consume",
+    "progress_contract_result": "pending_substantive_effect",
     "state_only_success_claimed": false,
-    "observed_at": "2026-08-28T10:13:13.204Z"
+    "observed_at": "2026-08-28T10:34:50.207Z"
   },
   "postmerge_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -2845,7 +2837,7 @@
     "responses_before": 151,
     "status": "failed_closed_no_matching_generation_7_work_receipt"
   },
-  "predecessor_execution_id": "work-recovery-20260828T053845882Z-ee77772b1c891f467ffd8b6496f66090",
+  "predecessor_execution_id": "work-recovery-20260828T101103335Z-3071f8d46cf390ccdbab2737081b0b80",
   "primary_native_run": {
     "answered_invocations": [
       "invoke-9296e4697f286f75ec0e9f9a (Entry)",
@@ -3072,7 +3064,7 @@
     "unit_id": "unit-b2698e1aa6dad8f3da3d783a",
     "updated_at": "2026-08-26T13:55:34.467Z"
   },
-  "readback_of_commit_sha": "86916e325bdc2ec59ddcddeff92d956bcf76b4b3",
+  "readback_of_commit_sha": null,
   "recent_main_integration": {
     "claim_boundary": "Generation-26 Candidate preflight lifecycle only; no Candidate activation, production routing change, AGI claim, or user-level completion.",
     "exact_head_ci_result": "success",
@@ -3409,8 +3401,8 @@
     "resolved_at": "2026-08-24T04:54:31.496Z",
     "status": "resolved_by_pr_287_exact_readback"
   },
-  "result_blob_sha": "a9549b3ec9fad5f8adb016402b625ce20abf46ac",
-  "result_commit_sha": "86916e325bdc2ec59ddcddeff92d956bcf76b4b3",
+  "result_blob_sha": null,
+  "result_commit_sha": null,
   "result_publication_policy": {
     "destination": "main",
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z",
@@ -3956,7 +3948,7 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "6a8bd9c49c34f3f295a8b2718435ca8cc7b19361",
+  "source_main_sha": "320857abc21778b6e429436773bd3085cf16dbf7",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
@@ -4127,8 +4119,8 @@
     "application_note": "Revision 30 was ingested at the safe unit boundary after generation-27 two-phase recovery authorization. It does not rewrite the already-frozen Candidate request; it governs same-run consumption, the next Execute freeze, subsequent effects, and forced-runtime handoff."
   },
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "verified_remote_readback": true,
-  "working_branch": "work/recovery-gen27-run-to-achievement-v1",
+  "verified_remote_readback": false,
+  "working_branch": "work/recovery-gen28-run-to-achievement-v1",
   "generation25_recovery_observation": {
     "schema_version": 1,
     "observed_at": "2026-08-28T02:14:13.855Z",
@@ -4565,5 +4557,72 @@
       "finalization_remote_readback_verified": true,
       "authorization_validated": true
     }
+  },
+  "resume_required": true,
+  "generation28_recovery_observation": {
+    "schema_version": 1,
+    "observed_at": "2026-08-28T10:34:50.207Z",
+    "actual_stop_established": true,
+    "prior_execution_id": "work-recovery-20260828T101103335Z-3071f8d46cf390ccdbab2737081b0b80",
+    "prior_generation": 27,
+    "prior_state_blob_sha": "fa5720b4bc35024e740aeafa32e684fa24a59247",
+    "observed_main_sha": "320857abc21778b6e429436773bd3085cf16dbf7",
+    "latest_primary_progress_commit": "320857abc21778b6e429436773bd3085cf16dbf7",
+    "last_substantive_activity_at": "2026-08-28T10:14:25.879Z",
+    "stale_after_seconds": 900,
+    "stop_cause": {
+      "mechanism": "The physical generation-27 invocation ended immediately after recovery authorization and inbox revision-30 acknowledgment, before consuming the already-durable Candidate response or creating any post-launch substantive effect. Four bounded rechecks through 2026-08-28T10:31:01Z found no later same-owner commit, branch, pull request, workflow, tool activity, or state progress.",
+      "stale_heartbeat_alone_used": false,
+      "evidence_refs": [
+        "github://bachikoljunior-blip/O@320857abc21778b6e429436773bd3085cf16dbf7/agi/WORK_EXECUTION_STATE.json",
+        "github://bachikoljunior-blip/O@320857abc21778b6e429436773bd3085cf16dbf7",
+        "https://github.com/bachikoljunior-blip/O/pull/332"
+      ]
+    },
+    "causal_repair": {
+      "status": "in_progress_same_invocation_continuation_required",
+      "repository_control_revision": 15,
+      "user_direction_revision": 30,
+      "repair_effect": "Generation 28 must continue past acquisition/finalization into exact Candidate consumption and a substantive durable effect; state-only acquisition is not accepted as recovery.",
+      "recurrence_validation_required": "post-launch native progress plus durable reviewed effect under the same execution_id/generation/fence"
+    },
+    "same_owner_progress_recheck": {
+      "probe_times": [
+        "2026-08-28T10:16:46Z",
+        "2026-08-28T10:20:00Z",
+        "2026-08-28T10:25:10Z",
+        "2026-08-28T10:31:01Z"
+      ],
+      "open_generation27_branch": false,
+      "open_generation27_pull_request": false,
+      "running_generation27_workflow": false,
+      "later_generation27_commit": false
+    },
+    "concrete_continuation_effect": {
+      "identified": true,
+      "action": "Consume invoke-a5c82a8fdb7916d0a16b72cf into native invoke-1dbf071f57e8c7d48d2262ce exactly once, freeze Execute for unit-generation25-recursive-context-retrieval-ablation-v1, run the bounded three-fixture ablation, and publish reviewed artifacts.",
+      "launch_surface": "current_same_task_chat_work_runtime_native_continual_resume"
+    }
+  },
+  "generation28_refire": {
+    "schema_version": 1,
+    "status": "acquisition_pending_finalization",
+    "created_at": "2026-08-28T10:34:50.207Z",
+    "updated_at": "2026-08-28T10:34:50.207Z",
+    "target_generation": 28,
+    "target_fence_token": "work-recovery-fence-v28-77f0480c3ed73bcc7100f1d58d1970ac5f45510e4c6ce4ceb2f8769e1cb859b3",
+    "idempotency_key": "o-work-refire:g28:77f0480c3ed73bcc7100f1d58d1970ac5f45510e4c6ce4ceb2f8769e1cb859b3:320857ab:revision91-candidate-consume-execute-ablation-v1",
+    "exact_continuation": {
+      "run_id": "run-work-recovery-gen9-durability-repair",
+      "snapshot_revision": 91,
+      "native_phase": "unit_pending",
+      "pending_work_invocation_id": "invoke-a5c82a8fdb7916d0a16b72cf",
+      "pending_native_invocation_id": "invoke-1dbf071f57e8c7d48d2262ce",
+      "selected_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1"
+    },
+    "launch_accepted": false,
+    "request_recreated": false,
+    "response_repeated": false,
+    "side_effect_repeated": false
   }
 }
