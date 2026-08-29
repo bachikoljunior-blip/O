@@ -1,0 +1,78 @@
+name: recover-bc7-response-byte
+
+on:
+  push:
+    branches:
+      - work/recovery-gen29-bc7-response-byte-diagnostic-v1
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: scan chunk ${{ matrix.chunk }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Recover exact received_at
+        env:
+          CHUNK: ${{ matrix.chunk }}
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import os
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+
+          target = bytes.fromhex("dabc940ed79023c3ac971d44a0a8fd1110b4ebce")
+          native_path = Path(".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-c4782dde9a7948b92cb15886.json")
+          native = json.loads(native_path.read_text(encoding="utf-8"))
+          response = {
+              "schema_version": 1,
+              "invocation_id": "invoke-bc7f7bd24f16124de10ad4ac",
+              "request_digest": "2595be250749b12251ae022c0ade474cf68332773f1da78bb3e6bbca3be772fd",
+              "executor_binding": "current_chatgpt_work_session",
+              "model_identity": "chatgpt-work-model-unverified",
+              "model_verified": False,
+              "output_digest": "2500c92325ccb777a0d9caefde14a140f790f071100f244794c1e3309064b7e8",
+              "output": native["output"],
+              "response_digest": "45e36d54d2921bd32516071c1e0c7b060130a8987ca4939b4371bf061e5dff58",
+          }
+
+          chunk = int(os.environ["CHUNK"])
+          first_offset = chunk * 9
+          last_offset = min(103, first_offset + 9)
+          origin = datetime(2026, 8, 27, 0, 43, 27, tzinfo=timezone.utc)
+          sentinel = "XXXXXX"
+
+          for offset in range(first_offset, last_offset):
+              second = origin + timedelta(seconds=offset)
+              second_text = second.strftime("%Y-%m-%dT%H:%M:%S")
+              response["received_at"] = f"{second_text}.{sentinel}Z"
+              body = (json.dumps(response, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+              raw = f"blob {len(body)}\0".encode("ascii") + body
+              marker = raw.index(sentinel.encode("ascii"))
+              base = hashlib.sha1(raw[:marker], usedforsecurity=False)
+              suffix = raw[marker + 6 :]
+              upper = 213573 if offset == 102 else 999999
+              for micros in range(upper + 1):
+                  digest = base.copy()
+                  digest.update(f"{micros:06d}".encode("ascii"))
+                  digest.update(suffix)
+                  if digest.digest() == target:
+                      received_at = f"{second_text}.{micros:06d}Z"
+                      print(f"FOUND_RECEIVED_AT={received_at}", flush=True)
+                      print("FOUND_BLOB=dabc940ed79023c3ac971d44a0a8fd1110b4ebce", flush=True)
+                      raise SystemExit(42)
+              print(f"SCANNED_SECOND={second_text}", flush=True)
+
+          print(f"NO_MATCH_CHUNK={chunk}", flush=True)
+          PY
