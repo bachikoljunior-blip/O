@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "role": "integrator",
+  "observed_at": "2026-08-29T10:53:42+09:00",
+  "prior_receipt": "note/automation_control/receipts/integrator/receipt_2026-08-29T1052_JST_control_missing.json",
+  "main_head_before_termination_receipt": "3f98fab8d113cc4b2ecf611ebfa0712c6853b293",
+  "termination": {
+    "status": "BLOCKED_CONTROL_MISSING",
+    "kind": "HARD_CONTROL_BLOCK",
+    "automation_action": "DISABLED_CURRENT_INTEGRATOR_AUTOMATION",
+    "automation_action_result": "SUCCESS",
+    "reason": "The authoritative bootstrap file note/automation_control/DESIRED_STATE.json is absent on the active main head and at the explicitly bound pre-write head, so the current integrator configuration cannot be resolved safely."
+  },
+  "preserved_non_mutations": {
+    "semantic_integration": true,
+    "candidate_semantics": true,
+    "index": true,
+    "active_wave": true,
+    "o_feed": true,
+    "exploration_feedback": true,
+    "desired_state": true
+  },
+  "exact_continuation": "Re-enable this integrator automation only after the authoritative bootstrap file exists again. On resumption, the first repository read must be note/automation_control/DESIRED_STATE.json from the then-current active head; do not reconstruct current control from historical artifacts or prior summaries."
+}
