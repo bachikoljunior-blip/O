@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision35_pending_native_consume_repair",
+  "active_component": "generation29_revision35_continuity_preflight_validation",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T06:44:11.339Z",
+    "checkpointed_at": "2026-08-29T06:45:16.753Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
     "exact_pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "The native journal has one awaiting_work_model invocation and its immutable Work response exists, but state had nulled the pending continuation; exact remote-main artifact bindings are repaired fail-closed.",
+    "reason": "Revision31 continuity policy bindings were stale after exactly-once revision35 ingress; revision35 raw-byte bindings and the repaired exact continuation are now state-bound.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "pending_native_consume_binding_repaired_work_verify_pending",
+    "status": "revision35_continuity_preflight_refreshed_guard_validation_pending",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,15 +200,15 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Await direct Work verifier result; then refresh revision35 raw policy bindings and source observation policies/receipts before one exact native consume.",
-    "last_verified_effect": "Rebound exact_continuation and continuation_durability to request fe1ca1ec, response 2e885226, native ab70f003, and snapshot 48e91944 at reachable main eaef5dee.",
-    "completed_effect_receipt": "No request or response was recreated or consumed; the unique native journal remains awaiting_work_model and diagnostic verifier run 33238964691 remains the only accepted verifier launch.",
+    "next_action": "Complete direct Work verifier, then execute assert_work_resume_continuity_preflight read-only against latest main; repair CI and Work source observation receipts before native resume.",
+    "last_verified_effect": "Updated start_of_run_continuity_preflight to policy revision35 with exact raw SHA-256 bindings while preserving generation29/fence and the one frozen native continuation.",
+    "completed_effect_receipt": "No native mutation or Work response replay occurred; direct verifier run 33238964691 remains accepted once and pending.",
     "pending_job_ids": [
       99064862244
     ],
-    "idempotency_key": "o-work-gen29:revision35:rebind-f1cb-453dfc-rev92:v1",
-    "exact_frontier": "Exact response durable; state pending-native-consume binding repaired; direct Work verifier pending; revision35 continuity/source receipts remain to refresh before native resume.",
-    "current_main_sha": "eaef5dee8cf2123e1727042adba70e0f8c7afc1b",
+    "idempotency_key": "o-work-gen29:revision35:continuity-preflight-raw-bindings:v1",
+    "exact_frontier": "Exact pending native binding repaired and revision35 preflight state-bound; direct verifier and source-observation repair remain before one native consume.",
+    "current_main_sha": "e9e8891b17f19181407fb4f1b6489a33bab8a501",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -216,7 +216,7 @@
     "pending_workflow_run_ids": [
       33238964691
     ],
-    "next_tool_action": "Track verifier 33238964691; independently compute revision35 policy bindings and prepare source-observation repair."
+    "next_tool_action": "Track verifier 33238964691; after success run read-only continuity guard on a latest-main-derived isolated workflow."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1484,7 +1484,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T06:44:11.339Z",
+  "heartbeat_at": "2026-08-29T06:45:16.753Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2313,7 +2313,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T06:44:11.339Z",
+  "last_progress_at": "2026-08-29T06:45:16.753Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -3999,53 +3999,40 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "eaef5dee8cf2123e1727042adba70e0f8c7afc1b",
+  "source_main_sha": "e9e8891b17f19181407fb4f1b6489a33bab8a501",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
-    "policy_revision": 31,
+    "policy_revision": 35,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "run_id": "run-work-recovery-gen9-durability-repair",
     "executor_binding": "current_chatgpt_work_session",
     "model_identity": "chatgpt-work-model-unverified",
-    "evaluated_at": "2026-08-28T12:31:37.483Z",
-    "idempotency_key": "o-work-preflight:g29:c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d:revision31:revision92-source-refresh-execute-v1",
+    "evaluated_at": "2026-08-29T06:45:16.753Z",
+    "idempotency_key": "o-work-preflight:g29:c03cdd410193ed:revision35:rev92-pending-native-consume-v1",
     "classification": "no_discretionary_stop_detected",
     "policy_bindings": {
-      "agi/USER_INPUT_INBOX.json": "3ec4ea9ad96b97bd43044b573faf7a233c7de52f4371d483d765865945dfea96",
-      "agi/USER_DIRECTIVE_EVENTS.json": "58b7c571eebc60d5fe62ced3d21718242008febcb2a1ad71e0960aab484826d3",
+      "agi/USER_INPUT_INBOX.json": "39b203f157db2fb42599b110871f8787cec0cacfbdea4ce15938ddbf764ddddf",
+      "agi/USER_DIRECTIVE_EVENTS.json": "ad35f70c657116b151568b627baaf235ccabd439b212f649188e2b085b84a7f0",
       "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
     },
     "root_causes": [
-      "generation28_physical_invocation_ended_at_revision31_preflight_refresh_boundary"
+      "generation29 revision31 preflight bindings became stale after exactly-once revision35 ingress",
+      "exact_continuation pending identity was nulled despite one awaiting native journal"
     ],
     "remediations": [
-      "generation29_same_invocation_must_continue_through_source_receipt_refresh_and_native_execute_effect"
+      "revision35 raw policy bindings exact-read back",
+      "exact request/response/native/snapshot continuation rebound to reachable remote main"
     ],
     "validations": [
       {
         "status": "passed",
         "evidence_refs": [
-          "src/continual/continuity_preflight.py#assert_work_resume_continuity_preflight",
-          "generation-29 exact two-phase CAS validator authorization",
-          "note/automation_control/O_OPERATIONS.json#revision15",
-          "agi/USER_INPUT_INBOX.json#revision31"
-        ]
-      },
-      {
-        "status": "passed",
-        "evidence_refs": [
-          "github://bachikoljunior-blip/O@d707f15834f925eb897ceb00ce76db997485f8ba/agi/USER_DIRECTIVE_EVENTS.json",
-          "PR334 exact-head five-job CI passed and revision31 effective directive compilation succeeded"
-        ]
-      },
-      {
-        "status": "passed",
-        "evidence_refs": [
-          "github://bachikoljunior-blip/O@d707f15834f925eb897ceb00ce76db997485f8ba/.continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-          "generation-29 continuation is revision92 unit_pending with no pending Work invocation and complete Candidate fragment/local-learn durability"
+          "agi/USER_INPUT_INBOX.json#revision35",
+          "agi/USER_DIRECTIVE_EVENTS.json#source-revision35",
+          "agi/WORK_EXECUTION_STATE.json#generation29_revision35_refresh.continuation_binding_repair"
         ]
       }
     ],
@@ -4054,9 +4041,9 @@
       "entrypoint": "src/continual/continuity_preflight.py:assert_work_resume_continuity_preflight"
     },
     "evidence_refs": [
-      "agi/WORK_EXECUTION_STATE.json#generation29_recovery_observation",
-      "https://github.com/bachikoljunior-blip/O/pull/334",
-      "github://bachikoljunior-blip/O@0d1e96eef79c1aed8f6a7ed050db123c73aeead0/agi/WORK_EXECUTION_STATE.json"
+      "github://bachikoljunior-blip/O@eaef5dee8cf2123e1727042adba70e0f8c7afc1b/.continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+      "github://bachikoljunior-blip/O@eaef5dee8cf2123e1727042adba70e0f8c7afc1b/.continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/response.json",
+      "note/automation_control/O_OPERATIONS.json#revision15"
     ],
     "resume_authorized": true
   },
@@ -7202,7 +7189,7 @@
   },
   "generation29_revision35_refresh": {
     "schema_version": 1,
-    "status": "exact_continuation_rebound_work_verify_pending",
+    "status": "revision35_continuity_preflight_refreshed_guard_validation_pending",
     "observed_at": "2026-08-29T05:17:28.646Z",
     "user_input": {
       "revision": 35,
@@ -7305,8 +7292,8 @@
       ]
     },
     "idempotency_key": "o-work-gen29:revision35:typed-ledger-refresh-and-pr339-revalidate-v1",
-    "next_action": "Await direct Work verifier result; then refresh revision35 raw policy bindings and source observation policies/receipts before one exact native consume.",
-    "updated_at": "2026-08-29T06:44:11.339Z",
+    "next_action": "Complete direct Work verifier, then execute assert_work_resume_continuity_preflight read-only against latest main; repair CI and Work source observation receipts before native resume.",
+    "updated_at": "2026-08-29T06:45:16.753Z",
     "pr339_revalidation": {
       "status": "merged_main_exact_response_readback_verified",
       "pull_request": 339,
@@ -7408,6 +7395,20 @@
       "response_repeated": false,
       "observed_at": "2026-08-29T06:44:11.339Z",
       "idempotency_key": "o-work-gen29:revision35:rebind-f1cb-453dfc-rev92:v1"
+    },
+    "continuity_preflight_refresh": {
+      "status": "state_bound_guard_validation_pending",
+      "policy_revision": 35,
+      "policy_bindings": {
+        "agi/USER_INPUT_INBOX.json": "39b203f157db2fb42599b110871f8787cec0cacfbdea4ce15938ddbf764ddddf",
+        "agi/USER_DIRECTIVE_EVENTS.json": "ad35f70c657116b151568b627baaf235ccabd439b212f649188e2b085b84a7f0",
+        "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
+      },
+      "exact_continuation_source_main_sha": "eaef5dee8cf2123e1727042adba70e0f8c7afc1b",
+      "pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
+      "pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
+      "observed_at": "2026-08-29T06:45:16.753Z",
+      "idempotency_key": "o-work-preflight:g29:c03cdd410193ed:revision35:rev92-pending-native-consume-v1"
     }
   }
 }
