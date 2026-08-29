@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T07:50:50.566Z",
+    "checkpointed_at": "2026-08-29T07:59:30.744Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -188,7 +188,7 @@
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_consume_result_candidate_exact_head_ci_pending",
+    "status": "native_consume_result_exact_head_ci_in_progress",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,28 +200,26 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Track accepted exact-head runs 33241718961 and 33241718966 without relaunch; if all required jobs pass on unchanged d9e4e8d4, open and expected-head merge one PR, exact-readback main, then bind and answer Work invoke-e750825 exactly once.",
-    "last_verified_effect": "Run 33241612743/job 99071814920 succeeded and pushed result commit 7d954740; clean head d9e4e8d4 retains exactly 12 reviewed lifecycle paths and removes the one-shot workflow.",
-    "completed_effect_receipt": "Old native invoke-453dfc completed from exact response f1cb once; candidate next native invoke-46f383 and Work request invoke-e750825 verify 85/84/pending1 with native 78/78/72 on isolated branch only.",
+    "next_action": "Continue bounded owner-bound observation of run 33241718961; on any failure repair the concrete cause, otherwise PR/merge only unchanged passing d9e4e8d4.",
+    "last_verified_effect": "Exact-head directive run 33241718966/job 99072090539 completed successfully; test run 33241718961 has shard 2 job 99072090469 executing pytest and three accepted queued shards.",
+    "completed_effect_receipt": "No branch head move, failure, duplicate launch, lifecycle mutation, authority change, inbox change, or new response occurred during bounded CI observation.",
     "pending_job_ids": [
       99072090469,
       99072090528,
       99072090532,
-      99072090566,
-      99072090539
+      99072090566
     ],
-    "idempotency_key": "o-work-gen29:native-consume-result-d9e4e8d4:exact-head-ci-and-merge:v1",
-    "exact_frontier": "Authoritative main still has the old pending native until the validated 12-path result branch is merged; do not consume or answer candidate Work invoke-e750825 before exact main readback.",
-    "current_main_sha": "581cab539bb7034f8609bf19f69fb0b08c4211dd",
+    "idempotency_key": "o-work-gen29:native-consume-result-d9e4e8d4:ci-recheck-directive-success:v1",
+    "exact_frontier": "Clean lifecycle result head d9e4e8d4 has successful directive integrity and an accepted full test topology with one active shard; wait and verify all four shards plus aggregate.",
+    "current_main_sha": "65340224fe4ced3fefe5b545e415f9f8f1426204",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
     "pending_workflow_run_ids": [
-      33241718961,
-      33241718966
+      33241718961
     ],
-    "next_tool_action": "Bounded-recheck the accepted exact-head CI runs and verify unchanged branch/main authority before PR creation."
+    "next_tool_action": "Fetch exact workflow jobs for 33241718961 without relaunch."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1510,7 +1508,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T07:50:50.566Z",
+  "heartbeat_at": "2026-08-29T07:59:30.744Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2339,12 +2337,12 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T07:50:50.566Z",
+  "last_progress_at": "2026-08-29T07:59:30.744Z",
   "lease_generation": 29,
   "lease_renewal": {
-    "expected_blob_sha": "5f72c6e982d681a9b8d0c5a39b0e721650772169",
-    "reason": "checkpoint exact native-consume result candidate and accepted exact-head CI without changing authoritative frozen continuation before merge",
-    "requested_at": "2026-08-29T07:50:50.566Z",
+    "expected_blob_sha": "8204414a29d9d7694deb67c026982a2d36843b53",
+    "reason": "bounded recheck checkpoint while accepted exact-head test run has one active pytest shard",
+    "requested_at": "2026-08-29T07:59:30.744Z",
     "verified_remote_readback": false
   },
   "local_combined_regression": {
@@ -7605,10 +7603,41 @@
         "native_local_learn": 72
       },
       "exact_head_ci": {
-        "test_run_id": 33241718961,
+        "head_sha": "d9e4e8d4d2c247efca094197bddd549e547e4070",
         "directive_run_id": 33241718966,
-        "status": "queued",
-        "head_sha": "d9e4e8d4d2c247efca094197bddd549e547e4070"
+        "directive_status": "completed",
+        "directive_conclusion": "success",
+        "directive_job_id": 99072090539,
+        "test_run_id": 33241718961,
+        "test_status": "queued",
+        "test_conclusion": null,
+        "jobs": [
+          {
+            "id": 99072090469,
+            "name": "pytest shard 2 of 4",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "id": 99072090528,
+            "name": "pytest shard 0 of 4",
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "id": 99072090532,
+            "name": "pytest shard 3 of 4",
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "id": 99072090566,
+            "name": "pytest shard 1 of 4",
+            "status": "queued",
+            "conclusion": null
+          }
+        ],
+        "observed_at": "2026-08-29T07:59:30.744Z"
       },
       "authoritative_main_effect": false,
       "request_recreated": false,
