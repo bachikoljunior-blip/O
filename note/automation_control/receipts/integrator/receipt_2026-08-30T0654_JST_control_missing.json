@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "role": "integrator",
+  "observed_at": "2026-08-30T06:54:15+09:00",
+  "bootstrap_valid": false,
+  "required_control": "note/automation_control/DESIRED_STATE.json",
+  "required_control_fetch_result": "404_NOT_FOUND",
+  "required_control_fetch_attempts": 2,
+  "automation_control_directory_observed_entries": [
+    "receipts/"
+  ],
+  "active_main_head_observed": "82f5ac4661d57de31457e7316eb59dc4e451eca0",
+  "active_main_head_message_observed": "evidence_comparator: record hard stop for missing control",
+  "pre_control_repository_resolution_only": true,
+  "bootstrap_order_note": "Repository identity/tool availability were resolved before the first direct DESIRED_STATE fetch because no repository identifier was present in the invocation. Repository-resolution search exposed filename/snippet metadata, but no repository semantic artifact was intentionally opened or used before the required control fetch attempt.",
+  "post_failure_diagnostics_only": true,
+  "post_failure_diagnostic_reads": [
+    "note/automation_control/receipts/integrator/receipt_2026-08-30T0558_JST_control_missing.json",
+    "note/automation_control/ directory listing",
+    "main branch head",
+    "prospective receipt path existence check",
+    "automation scheduler state for current task"
+  ],
+  "semantic_work_started": false,
+  "downstream_integration_started": false,
+  "exploration_feedback_written": false,
+  "desired_state_edited": false,
+  "other_repository_state_mutated": false,
+  "receipt_write_is_only_repository_mutation": true,
+  "termination": "BLOCKED_CONTROL_MISSING",
+  "phase1_objective_status": "OPEN_OR_UNASSESSABLE_UNDER_MISSING_CONTROL",
+  "scheduler_state_at_observation": {
+    "task_title": "Research Index Integrator",
+    "task_id": "6a8d2b85b4c881919ee438cddab06eb2",
+    "enabled": true
+  },
+  "runtime_stop_requirement": "The automation runtime requires disabling this recurring task when fully blocked by a persistent non-transient missing required control. This scheduler mutation is external to repository semantic state and is not Phase-1 evidence or closure.",
+  "exact_continuation": "Re-enable the Research Index Integrator automation only after note/automation_control/DESIRED_STATE.json exists on active main. On resume, fetch DESIRED_STATE.json before any semantic artifact read, resolve and validate the current integrator role config and referenced control tuple, honor enabled_desired=false as logical no-op plus receipt, and only then resume downstream integration."
+}
