@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T15:57:21.086Z",
+    "checkpointed_at": "2026-08-29T16:05:47.402Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "Accepted Root-freeze run 33260870910/job 99122472852 remain queued; second state-only heartbeat refresh, no relaunch.",
+    "reason": "Root-freeze run remains accepted/queued. Repository backlog growth from state-only heartbeats is repaired by marking this and future heartbeat commits [skip ci], preserving authority without spawning redundant full test/directive runs.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_boundary_next_root_freeze_run_accepted_queued_heartbeat_refreshed_2",
+    "status": "root_boundary_next_root_freeze_queued_heartbeat_skip_ci_repair",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,13 +200,13 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Continue bounded rechecks; workflow runtime will bind the latest same-owner state blob at start.",
+    "next_action": "Exact-readback state and confirm zero workflow runs for the [skip ci] heartbeat head; then continue bounded rechecks of run 33260870910.",
     "last_verified_effect": "Created branch agent/recovery-gen29-root-freeze-v1 from exact main e7ab41c, added only workflow blob afe4bf1e, and observed accepted native Root-freeze run 33260870910 on exact head 0373091f.",
     "completed_effect_receipt": "Branch/file/compare and Actions head-sha readback at 2026-08-29T15:40:16.528Z.",
     "pending_job_ids": [],
     "idempotency_key": "o-work-gen29:root-revision94:freeze-next-work-request-once:v1",
-    "exact_frontier": "Same accepted Root-freeze run remains queued; no native mutation and no duplicate launch.",
-    "current_main_sha": "7b434c773ebc11514e0234099b0d0bc2c3799439",
+    "exact_frontier": "Same accepted Root-freeze run 33260870910 remains queued. Heartbeat CI amplification repair is being recurrence-validated on this state-only commit.",
+    "current_main_sha": "b5f043c65a262fa303d13561ca78c079646033cc",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -1503,7 +1503,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T15:57:21.086Z",
+  "heartbeat_at": "2026-08-29T16:05:47.402Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -8420,9 +8420,21 @@
     ],
     "duplicate_launch_forbidden": true,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T15:57:21.086Z",
+    "last_observed_at": "2026-08-29T16:05:47.402Z",
     "job_id": 99122472852,
     "job_status": "queued",
-    "heartbeat_refresh_count": 2
+    "heartbeat_refresh_count": 3
+  },
+  "generation29_ci_queue_amplification_repair": {
+    "identified_at": "2026-08-29T15:28:32.834Z",
+    "repaired_at": "2026-08-29T16:05:47.402Z",
+    "stop_cause": "state-only heartbeat commits matched unrestricted push triggers for test.yml and directive-source-preflight.yml, amplifying an existing GitHub Actions capacity backlog",
+    "repair": "Use GitHub Actions-supported [skip ci] commit marker for authority-only WORK_EXECUTION_STATE heartbeat/checkpoint commits while preserving full CI for executable result heads",
+    "protected_workflow_edited": false,
+    "target_run_id": 33260870910,
+    "target_job_id": 99122472852,
+    "target_run_preserved": true,
+    "recurrence_validation": "pending exact head workflow-run absence readback",
+    "resume_required": true
   }
 }
