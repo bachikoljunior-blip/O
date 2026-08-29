@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T14:34:41.607Z",
+    "checkpointed_at": "2026-08-29T14:44:07.858Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "All four shards and directive remain successful; aggregate job 99109467768 remains accepted and queued on b5ac47d3; fifth aggregate-wait heartbeat refresh preserves lease.",
+    "reason": "Exact clean head b5ac47d3 passed directive, four pytest shards, and dependent aggregate; compare remains exactly eleven reviewed paths with all expected blobs exact-readback.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_boundary_clean_head_aggregate_queued_heartbeat_refreshed_5",
+    "status": "root_boundary_clean_head_exact_ci_success_pr_preflight",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,23 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Continue observing aggregate job; on success exact-readback branch and prepare expected-head PR.",
-    "last_verified_effect": "Pytest shard 2 job 99099955405 completed success at 2026-08-29T13:47:30Z with 199 passed and 596 deselected; all four shards are now successful.",
-    "completed_effect_receipt": "GitHub Actions run 33252294603 exact jobs readback: shard jobs 99099955296, 99099955354, 99099955405, 99099955434 all completed success; aggregate 99109467768 queued.",
-    "pending_job_ids": [
-      99109467768
-    ],
+    "next_action": "Re-read authority, inbox, exact branch head and changed filenames; create one PR for unchanged b5ac47d3, then verify mergeability and expected-head merge.",
+    "last_verified_effect": "Test run 33252294603 completed success with four shard jobs and aggregate 99109467768; directive run 33252294698 completed success, all on b5ac47d30736aced079bc58e81be27d8ed7db3a0.",
+    "completed_effect_receipt": "Exact GitHub Actions run/job/step readbacks plus compare 2b69e2eef5449cd97524eed1244ec9a86e7edf47...b5ac47d30736aced079bc58e81be27d8ed7db3a0 and eleven exact blob readbacks.",
+    "pending_job_ids": [],
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v8-install-artifact-filter",
-    "exact_frontier": "Aggregate job 99109467768 is the only remaining exact-head gate; prerequisites all succeeded.",
-    "current_main_sha": "6458407549fec2a01d6e0810781f758805bef4f0",
+    "exact_frontier": "Immutable candidate b5ac47d30736aced079bc58e81be27d8ed7db3a0 is ahead 3/behind 0 from reviewed base with exactly eleven reviewed lifecycle paths and complete exact-head CI success.",
+    "current_main_sha": "e386de1db3859b08bc5affe7384abc839cdfc0a6",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [
-      33252294603
-    ],
-    "next_tool_action": "Fetch aggregate job/run without rerun or head replacement."
+    "pending_workflow_run_ids": [],
+    "next_tool_action": "Fetch latest main/state/inbox, exact branch/commit, then create PR from agent/recovery-gen29-resume-after-execute-v8 to main only if all bindings remain exact."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1505,7 +1501,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T14:34:41.607Z",
+  "heartbeat_at": "2026-08-29T14:44:07.858Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2334,7 +2330,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T13:47:30Z",
+  "last_progress_at": "2026-08-29T14:42:17Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -7866,8 +7862,8 @@
   },
   "generation29_native_after_execute": {
     "schema_version": 1,
-    "status": "v8_clean_head_aggregate_queued_heartbeat_refreshed_5",
-    "observed_at": "2026-08-29T14:34:41.607Z",
+    "status": "v8_clean_head_exact_readback_ci_success_pr_preflight",
+    "observed_at": "2026-08-29T14:44:07.858Z",
     "native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "native_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
     "native_status": "awaiting_work_model",
@@ -8125,7 +8121,7 @@
       "duplicate_launch": false
     },
     "result_candidate": {
-      "status": "clean_head_exact_readback_ci_pending",
+      "status": "clean_head_exact_readback_ci_success_pr_preflight",
       "branch": "agent/recovery-gen29-resume-after-execute-v8",
       "launch_head_sha": "ece6ba8d96b4efc38a5158d7eabbd05b4e1b6f7a",
       "result_commit_sha": "8e0d59c446d0f930d4d279f31656a83330b5ef4d",
@@ -8165,84 +8161,76 @@
         "head_sha": "b5ac47d30736aced079bc58e81be27d8ed7db3a0",
         "test_run_id": 33252294603,
         "directive_run_id": 33252294698,
-        "status": "directive_all_shards_success_aggregate_queued",
-        "heartbeat_refreshed_at": "2026-08-29T12:33:13.154Z",
-        "run_statuses": {
-          "33252294603": "in_progress",
-          "33252294698": "completed_success"
-        },
-        "heartbeat_refreshed_at_2": "2026-08-29T12:43:20.460Z",
-        "heartbeat_refreshed_at_3": "2026-08-29T12:51:17.722Z",
-        "pending_job_ids": [
-          99109467768
+        "status": "success",
+        "jobs": [
+          {
+            "id": 99099955296,
+            "name": "pytest shard 3 of 4",
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-08-29T13:18:30Z"
+          },
+          {
+            "id": 99099955354,
+            "name": "pytest shard 0 of 4",
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-08-29T13:21:04Z"
+          },
+          {
+            "id": 99099955405,
+            "name": "pytest shard 2 of 4",
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-08-29T13:47:30Z"
+          },
+          {
+            "id": 99099955434,
+            "name": "pytest shard 1 of 4",
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-08-29T13:24:27Z"
+          },
+          {
+            "id": 99109467768,
+            "name": "test",
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-08-29T14:42:17Z"
+          },
+          {
+            "id": 99099955603,
+            "name": "directive-source-integrity",
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-08-29T13:14:25Z"
+          }
         ],
-        "heartbeat_refreshed_at_4": "2026-08-29T13:01:10.450Z",
-        "heartbeat_refreshed_at_5": "2026-08-29T13:10:09.451Z",
-        "directive": {
-          "run_id": 33252294698,
-          "job_id": 99099955603,
-          "status": "completed",
-          "conclusion": "success",
-          "completed_at": "2026-08-29T13:14:25Z"
-        },
-        "test": {
-          "run_id": 33252294603,
-          "status": "queued",
-          "conclusion": null,
-          "jobs": [
-            {
-              "id": 99099955296,
-              "name": "pytest shard 3 of 4",
-              "status": "completed",
-              "conclusion": "success",
-              "started_at": "2026-08-29T13:06:07Z",
-              "completed_at": "2026-08-29T13:18:30Z"
-            },
-            {
-              "id": 99099955354,
-              "name": "pytest shard 0 of 4",
-              "status": "completed",
-              "conclusion": "success",
-              "started_at": "2026-08-29T13:07:30Z",
-              "completed_at": "2026-08-29T13:21:04Z"
-            },
-            {
-              "id": 99099955405,
-              "name": "pytest shard 2 of 4",
-              "status": "completed",
-              "conclusion": "success",
-              "started_at": "2026-08-29T13:10:23Z",
-              "completed_at": "2026-08-29T13:47:30Z"
-            },
-            {
-              "id": 99099955434,
-              "name": "pytest shard 1 of 4",
-              "status": "completed",
-              "conclusion": "success",
-              "started_at": "2026-08-29T13:13:57Z",
-              "completed_at": "2026-08-29T13:24:27Z"
-            },
-            {
-              "id": 99109467768,
-              "name": "test",
-              "status": "queued",
-              "conclusion": null,
-              "started_at": "2026-08-29T13:47:30Z",
-              "completed_at": null
-            }
-          ]
-        },
-        "substantive_liveness_event_at": "2026-08-29T13:14:25Z",
-        "last_substantive_liveness_event_at": "2026-08-29T13:47:30Z",
-        "shard2_heartbeat_refreshed_at": "2026-08-29T13:35:24.249Z",
-        "shard2_heartbeat_refreshed_at_2": "2026-08-29T13:44:34.323Z",
-        "aggregate_job_id": 99109467768,
-        "all_shards_success_at": "2026-08-29T13:47:30Z",
-        "aggregate_queue_heartbeat_refreshed_at": "2026-08-29T13:57:52.565Z",
-        "aggregate_queue_heartbeat_refreshed_at_2": "2026-08-29T14:07:26.252Z",
-        "aggregate_queue_heartbeat_refreshed_at_3": "2026-08-29T14:16:34.864Z",
-        "aggregate_queue_heartbeat_refreshed_at_4": "2026-08-29T14:25:27.235Z",
-        "aggregate_queue_heartbeat_refreshed_at_5": "2026-08-29T14:34:41.607Z"
+        "completed_at": "2026-08-29T14:42:17Z"
+      },
+      "clean_head_readback": {
+        "commit_sha": "b5ac47d30736aced079bc58e81be27d8ed7db3a0",
+        "tree_sha": "b183f83b20b9443b29383c9b22d31201460c2f96",
+        "compare_base": "2b69e2eef5449cd97524eed1244ec9a86e7edf47",
+        "status": "ahead",
+        "ahead_by": 3,
+        "behind_by": 0,
+        "changed_path_count": 11,
+        "changed_paths": [
+          ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation25-recursive-context-retrieval-ablation-v1-result.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-5dd023f01ffd0e67d68d5bcd/receipt.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-5dd023f01ffd0e67d68d5bcd/request.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-46f38354bc1b6c8a4d6b6564-execute.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-46f38354bc1b6c8a4d6b6564.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-46f38354bc1b6c8a4d6b6564-execute.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-native-after-execute-2b69e2ee-v8.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-6cf39015abb7269ff0e64834/receipt.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-6cf39015abb7269ff0e64834/request.json"
+        ],
+        "all_expected_blobs_match": true,
+        "verified_at": "2026-08-29T14:44:07.858Z"
       }
     }
   }
