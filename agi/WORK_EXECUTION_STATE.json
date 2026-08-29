@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T11:34:41.094Z",
+    "checkpointed_at": "2026-08-29T11:42:43.786Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "v7 run 33249191953 remains accepted and queued in repository-wide runner congestion. Refresh only the same generation/fence heartbeat so the eventual causal preflight observes live authority; query the accepted run before any further mutation.",
+    "reason": "v7 passed authority, continuity, Work/CI observations, exact response consumption, revision94 Root topology, completed journal/output/fragment/local-learn/artifact validation. Persistence failed before staging because the mutation scanner intentionally included all ignored files and therefore treated editable-install __pycache__ and egg-info products as native mutations.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_resume_v7_accepted_queue_heartbeat_refreshed",
+    "status": "native_resume_v7_install_artifact_filter_bug_repaired_pending_v8",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,23 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Poll v7 frequently; once in_progress, stop all state refreshes and observe it to terminal branch-effect readback.",
-    "last_verified_effect": "v6 run 33248586657 job 99090215388 passed steps 1-9. Step 10 work-resume returned status continue, phase root_pending, revision 94, checkpoint_reason step_budget_exhausted, pending []; the immediately following stale EXPECTED_SNAPSHOT_BLOB test exited 1. Result validation/persistence/push were skipped and branch head remained 1dc0a617.",
-    "completed_effect_receipt": "The v6 ephemeral transition proves exact response consumption and native engine progress are executable after all repaired gates. Remote main remains at the pre-consume native blob 1d5b358b and snapshot blob 48e91944, so no durable effect or duplicate response consumption exists.",
-    "pending_job_ids": [
-      99091799011
-    ],
-    "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v7-root-boundary",
-    "exact_frontier": "v7 remains the only accepted launch. No relaunch or response duplication. The queue heartbeat refresh preserves the same execution_id/generation/fence and frozen continuation.",
-    "current_main_sha": "784f47aa3e5b62e28f33e8d59d46242b7cbefe74",
+    "next_action": "Launch v8 once after exact-readback; never rerun v1-v7.",
+    "last_verified_effect": "v7 run 33249191953 job 99091799011 passed steps 1-11. Step 12 generated the exact receipt and lifecycle locally, then rejected only src/agi/__pycache__, src/continual/__pycache__, and src/continual_chatgpt.egg-info install artifacts. No git add/commit/push occurred; branch stayed 99e8e45c.",
+    "completed_effect_receipt": "v7 NATIVE_RESULT exact: requests85 responses85 pending0 native_completed79 fragments79 local_learn73, snapshot revision94 root_pending, response digest 9ad64d8f. This is ephemeral recurrence proof only; authoritative remote native remains awaiting.",
+    "pending_job_ids": [],
+    "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v8-install-artifact-filter",
+    "exact_frontier": "v1-v7 are terminal with no durable branch-native mutation. v8 repeats the exact response from remote main once, ignores only observed untracked editable-install artifacts, still requires and stages exactly the same eleven reviewed lifecycle paths, then pushes once.",
+    "current_main_sha": "bef72a79beee715eee5c6a1ee4ac84944eff255d",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [
-      33249191953
-    ],
-    "next_tool_action": "Fetch run 33249191953 within a bounded interval; never update state after it enters in_progress."
+    "pending_workflow_run_ids": [],
+    "next_tool_action": "Create v8 with the exact install-artifact filter and fresh main/state bindings, launch once, preserve queue heartbeat until in_progress."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1505,7 +1501,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T11:34:41.094Z",
+  "heartbeat_at": "2026-08-29T11:42:43.786Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2334,7 +2330,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T11:03:07.694Z",
+  "last_progress_at": "2026-08-29T11:42:43.786Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -7866,8 +7862,8 @@
   },
   "generation29_native_after_execute": {
     "schema_version": 1,
-    "status": "v7_accepted_queue_heartbeat_refreshed",
-    "observed_at": "2026-08-29T11:34:41.094Z",
+    "status": "v7_full_native_validation_install_artifact_filter_bug_repaired_pending_v8",
+    "observed_at": "2026-08-29T11:42:43.786Z",
     "native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "native_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
     "native_status": "awaiting_work_model",
@@ -7879,7 +7875,7 @@
     "snapshot_revision": 92,
     "snapshot_blob_sha": "48e919441f25db4a7e89d88c04888dff4d590e4f",
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v1",
-    "next_action": "Poll v7; stop refreshing immediately at in_progress; never duplicate launch.",
+    "next_action": "Launch v8 once; v1-v7 are terminal and must never be rerun.",
     "v1_failure": {
       "workflow_run_id": 33246239646,
       "job_id": 99084082158,
@@ -8048,6 +8044,41 @@
       "generation": 29,
       "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
       "duplicate_launch": false
+    },
+    "v7_failure": {
+      "workflow_run_id": 33249191953,
+      "job_id": 99091799011,
+      "branch_head": "99e8e45c65d1380c160d52ae9ab2acae267b00da",
+      "passed_steps": [
+        "all authority and source gates",
+        "exact Execute response consumption",
+        "revision94 Root checkpoint validation",
+        "exact journal/output/fragment/local-learn/artifact validation"
+      ],
+      "failed_step": "Persist exact Root-boundary result and push once (pre-stage mutation-set guard)",
+      "cause": "The scanner unioned every ignored untracked file, including editable-install __pycache__ and src/continual_chatgpt.egg-info products created by pip install -e ., and compared them to the exact lifecycle allowlist.",
+      "observed_build_artifact_classes": [
+        "src/agi/__pycache__/",
+        "src/continual/__pycache__/",
+        "src/continual_chatgpt.egg-info/"
+      ],
+      "git_add_started": false,
+      "commit_created": false,
+      "push_started": false,
+      "durable_branch_mutation": false,
+      "authoritative_remote_native_blob": "1d5b358bd9a563218611ead73cb57d56256625b5",
+      "authoritative_remote_snapshot_blob": "48e919441f25db4a7e89d88c04888dff4d590e4f"
+    },
+    "v8_repair": {
+      "exclude_only_untracked_ignored_install_artifacts": [
+        "src/agi/__pycache__/",
+        "src/continual/__pycache__/",
+        "src/continual_chatgpt.egg-info/"
+      ],
+      "tracked_install_artifact_change_forbidden": true,
+      "exact_required_lifecycle_path_count": 11,
+      "staging_rule": "staged set must equal the eleven reviewed paths exactly; install artifacts are neither staged nor committed",
+      "recurrence_evidence": "v7 exact native validation and root topology passed before the scanner-only failure"
     }
   }
 }
