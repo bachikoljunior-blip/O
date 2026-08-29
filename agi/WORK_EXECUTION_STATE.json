@@ -176,14 +176,14 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T20:04:16.440Z",
+    "checkpointed_at": "2026-08-29T20:09:36.455Z",
     "exact_pending_request_blob_sha": null,
     "exact_pending_request_digest": null,
     "exact_pending_request_ref": null,
     "exact_pending_work_invocation_id": null,
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "Three exact-head shards remain successful; shard 2 has approximately 30 minutes of active pytest execution, within the recent 34–37 minute successful range, with no failure.",
+    "reason": "Authoritative push run still has shard 2 active and three shards successful. Independent PR-event run on the identical head now has all four shards successful and its aggregate queued; no test failure exists.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
@@ -208,7 +208,7 @@
     ],
     "idempotency_key": "o-work-gen29:root-revision94:recover-exact-invoke-91f2cb57cf0f69a5d9abfce6:v1:validation-v5",
     "exact_frontier": "PR344 open; three exact-head pytest shards succeeded and shard 2 is running.",
-    "current_main_sha": "c8f26cccd1c06efe71134021553cf6aa960642dc",
+    "current_main_sha": "c39379089976eea35bef95c9d1dea635b3b75fb9",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -246,22 +246,29 @@
     "pull_request_number": 344,
     "pull_request_head_sha": "8cd9f9a5c29a953937635440961b0e3e525e83e9",
     "test_progress": {
-      "observed_at": "2026-08-29T20:04:16.440Z",
-      "run_id": 33270788885,
-      "succeeded_shards": [
+      "observed_at": "2026-08-29T20:09:36.455Z",
+      "authoritative_run_id": 33270788885,
+      "authoritative_succeeded_shards": [
         0,
         1,
         3
       ],
-      "in_progress_shards": [
+      "authoritative_in_progress_shards": [
         2
       ],
-      "active_step": "Run pytest -q",
       "failed_shards": [],
-      "recent_success_duration_range_minutes": [
-        34,
-        37
-      ]
+      "same_head_corroborating_pr_run": {
+        "run_id": 33270968142,
+        "head_sha": "8cd9f9a5c29a953937635440961b0e3e525e83e9",
+        "succeeded_shards": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "aggregate_status": "queued",
+        "aggregate_job_id": 99153793458
+      }
     }
   },
   "checkpoint_integrity_publication_precommit": {
@@ -1553,7 +1560,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T20:04:16.440Z",
+  "heartbeat_at": "2026-08-29T20:09:36.455Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -8455,7 +8462,7 @@
     ],
     "duplicate_launch_forbidden": true,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T20:04:16.440Z",
+    "last_observed_at": "2026-08-29T20:09:36.455Z",
     "job_id": 99140671439,
     "job_status": "completed",
     "heartbeat_refresh_count": 24,
@@ -8606,5 +8613,5 @@
     "validation_head_workflow_run_count": 0,
     "repair_validated": true
   },
-  "last_activity_at": "2026-08-29T20:04:16.440Z"
+  "last_activity_at": "2026-08-29T20:09:36.455Z"
 }
