@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "role": "integrator",
+  "observed_at": "2026-08-30T00:53:35+09:00",
+  "bootstrap_valid": false,
+  "prior_run_receipt": "note/automation_control/receipts/integrator/receipt_2026-08-30T0052_JST_control_missing.json",
+  "prior_run_receipt_blob_sha": "65cb4d8e3bbcb29dc0283ea754187be5ebeb75cd",
+  "required_control": "note/automation_control/DESIRED_STATE.json",
+  "required_control_status": "404_NOT_FOUND_ON_TWO_DIRECT_FETCHES",
+  "semantic_work_started": false,
+  "downstream_integration_started": false,
+  "desired_state_edited": false,
+  "scheduler_action": {
+    "automation_title": "Research Index Integrator",
+    "automation_id": "6a8d2b85b4c881919ee438cddab06eb2",
+    "action": "disabled",
+    "reason": "Automation runtime requires disabling the current recurring task when fully blocked by a non-transient missing prerequisite. DESIRED_STATE.json remained absent and prior integrator missing-control receipts show the blocker persisted across multiple runs."
+  },
+  "termination": "BLOCKED_CONTROL_MISSING_AUTOMATION_DISABLED",
+  "exact_continuation": "Manual re-enable is required after note/automation_control/DESIRED_STATE.json is restored on active main. The first resumed invocation must fetch DESIRED_STATE.json before semantic artifact reads, validate the current integrator role config and referenced controls, honor enabled_desired=false as logical no-op plus receipt, and only then resume downstream integration."
+}
