@@ -10,29 +10,28 @@ permissions:
 
 jobs:
   scan:
-    name: scan generation29 hold checkpoint gap chunk ${{ matrix.chunk }}
+    name: scan generation22 post-native remainder chunk ${{ matrix.chunk }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     steps:
       - uses: actions/checkout@v5
-      - name: Recover exact preserved repair received_at
+      - name: Build and validate optimized exact-target scanner
         env:
           CHUNK: ${{ matrix.chunk }}
         run: |
+          set -euo pipefail
           python - <<'PY'
           from __future__ import annotations
 
           import hashlib
           import json
-          import os
-          from datetime import datetime, timedelta, timezone
+          from datetime import datetime, timezone
           from pathlib import Path
 
-          target = bytes.fromhex("dabc940ed79023c3ac971d44a0a8fd1110b4ebce")
           native_path = Path(".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-c4782dde9a7948b92cb15886.json")
           native = json.loads(native_path.read_text(encoding="utf-8"))
           response = {
@@ -46,35 +45,174 @@ jobs:
               "output": native["output"],
               "response_digest": "45e36d54d2921bd32516071c1e0c7b060130a8987ca4939b4371bf061e5dff58",
           }
+          placeholder = "2000-01-01T00:00:00.000000Z"
+          response["received_at"] = placeholder
+          body = (json.dumps(response, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+          raw = f"blob {len(body)}\0".encode("ascii") + body
+          marker = raw.index(placeholder.encode("ascii"))
+          Path("prefix.bin").write_bytes(raw[:marker])
+          Path("suffix.bin").write_bytes(raw[marker + len(placeholder):])
 
-          chunk = int(os.environ["CHUNK"])
-          total_seconds = 211
-          first_offset = chunk * total_seconds // 12
-          last_offset = (chunk + 1) * total_seconds // 12
-          origin = datetime(2026, 8, 28, 14, 19, 20, tzinfo=timezone.utc)
-          sentinel = "XXXXXX"
-
-          for offset in range(first_offset, last_offset):
-              second = origin + timedelta(seconds=offset)
-              second_text = second.strftime("%Y-%m-%dT%H:%M:%S")
-              response["received_at"] = f"{second_text}.{sentinel}Z"
-              body = (json.dumps(response, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
-              raw = f"blob {len(body)}\0".encode("ascii") + body
-              marker = raw.index(sentinel.encode("ascii"))
-              base = hashlib.sha1(raw[:marker], usedforsecurity=False)
-              suffix = raw[marker + 6 :]
-              micro_start = 932_711 if offset == 0 else 0
-              micro_end = 1_000_000
-              for micros in range(micro_start, micro_end):
-                  digest = base.copy()
-                  digest.update(f"{micros:06d}".encode("ascii"))
-                  digest.update(suffix)
-                  if digest.digest() == target:
-                      received_at = f"{second_text}.{micros:06d}Z"
-                      print(f"FOUND_RECEIVED_AT={received_at}", flush=True)
-                      print("FOUND_BLOB=dabc940ed79023c3ac971d44a0a8fd1110b4ebce", flush=True)
-                      raise SystemExit(42)
-              print(f"SCANNED_SECOND={second_text}", flush=True)
-
-          print(f"NO_MATCH_CHUNK={chunk}", flush=True)
+          self_timestamp = "2026-08-27T00:46:13.000001Z"
+          response["received_at"] = self_timestamp
+          self_body = (json.dumps(response, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+          self_raw = f"blob {len(self_body)}\0".encode("ascii") + self_body
+          Path("self_target.txt").write_text(hashlib.sha1(self_raw, usedforsecurity=False).hexdigest() + "\n", encoding="ascii")
+          origin = datetime(2026, 8, 27, 0, 46, 13, tzinfo=timezone.utc)
+          Path("origin_epoch.txt").write_text(str(int(origin.timestamp())) + "\n", encoding="ascii")
           PY
+
+          cat > scanner.c <<'C'
+          #define _POSIX_C_SOURCE 200809L
+          #include <errno.h>
+          #include <openssl/sha.h>
+          #include <stdint.h>
+          #include <stdio.h>
+          #include <stdlib.h>
+          #include <string.h>
+          #include <time.h>
+
+          static unsigned char *read_all(const char *path, size_t *size_out) {
+              FILE *fp = fopen(path, "rb");
+              if (!fp) {
+                  fprintf(stderr, "open %s: %s\n", path, strerror(errno));
+                  exit(2);
+              }
+              if (fseek(fp, 0, SEEK_END) != 0) exit(2);
+              long length = ftell(fp);
+              if (length < 0 || fseek(fp, 0, SEEK_SET) != 0) exit(2);
+              unsigned char *data = malloc((size_t)length + 1);
+              if (!data) exit(2);
+              if (fread(data, 1, (size_t)length, fp) != (size_t)length) exit(2);
+              fclose(fp);
+              *size_out = (size_t)length;
+              return data;
+          }
+
+          static int hex_value(char c) {
+              if (c >= '0' && c <= '9') return c - '0';
+              if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+              if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+              return -1;
+          }
+
+          static void parse_target(const char *text, unsigned char target[SHA_DIGEST_LENGTH]) {
+              if (strlen(text) != SHA_DIGEST_LENGTH * 2) exit(2);
+              for (int i = 0; i < SHA_DIGEST_LENGTH; ++i) {
+                  int high = hex_value(text[i * 2]);
+                  int low = hex_value(text[i * 2 + 1]);
+                  if (high < 0 || low < 0) exit(2);
+                  target[i] = (unsigned char)((high << 4) | low);
+              }
+          }
+
+          int main(int argc, char **argv) {
+              if (argc != 10) {
+                  fprintf(stderr, "usage: scanner prefix suffix origin first last total start_micro end_micro target\n");
+                  return 2;
+              }
+              size_t prefix_size = 0, suffix_size = 0;
+              unsigned char *prefix = read_all(argv[1], &prefix_size);
+              unsigned char *suffix = read_all(argv[2], &suffix_size);
+              long long origin = strtoll(argv[3], NULL, 10);
+              long long first_offset = strtoll(argv[4], NULL, 10);
+              long long last_offset = strtoll(argv[5], NULL, 10);
+              long long total_seconds = strtoll(argv[6], NULL, 10);
+              int start_micro = atoi(argv[7]);
+              int end_micro = atoi(argv[8]);
+              unsigned char target[SHA_DIGEST_LENGTH];
+              parse_target(argv[9], target);
+              if (first_offset < 0 || last_offset < first_offset || last_offset > total_seconds) return 2;
+              if (start_micro < 0 || start_micro > 1000000 || end_micro < 0 || end_micro > 1000000) return 2;
+
+              for (long long offset = first_offset; offset < last_offset; ++offset) {
+                  time_t current = (time_t)(origin + offset);
+                  struct tm utc;
+                  if (!gmtime_r(&current, &utc)) return 2;
+                  char second_prefix[32];
+                  if (strftime(second_prefix, sizeof(second_prefix), "%Y-%m-%dT%H:%M:%S.", &utc) != 20) return 2;
+
+                  int micro_first = offset == 0 ? start_micro : 0;
+                  int micro_last = offset == total_seconds - 1 ? end_micro : 1000000;
+                  SHA_CTX base;
+                  if (!SHA1_Init(&base) || !SHA1_Update(&base, prefix, prefix_size) || !SHA1_Update(&base, second_prefix, 20)) return 2;
+
+                  char variable[7];
+                  int value = micro_first;
+                  for (int pos = 5; pos >= 0; --pos) {
+                      variable[pos] = (char)('0' + value % 10);
+                      value /= 10;
+                  }
+                  variable[6] = 'Z';
+
+                  for (int micros = micro_first; micros < micro_last; ++micros) {
+                      SHA_CTX ctx = base;
+                      unsigned char digest[SHA_DIGEST_LENGTH];
+                      if (!SHA1_Update(&ctx, variable, sizeof(variable)) ||
+                          !SHA1_Update(&ctx, suffix, suffix_size) ||
+                          !SHA1_Final(digest, &ctx)) return 2;
+                      if (memcmp(digest, target, SHA_DIGEST_LENGTH) == 0) {
+                          printf("FOUND_RECEIVED_AT=%s%.*s\n", second_prefix, 7, variable);
+                          printf("FOUND_BLOB=%s\n", argv[9]);
+                          fflush(stdout);
+                          free(prefix);
+                          free(suffix);
+                          return 42;
+                      }
+                      for (int pos = 5; pos >= 0; --pos) {
+                          if (variable[pos] < '9') {
+                              variable[pos]++;
+                              break;
+                          }
+                          variable[pos] = '0';
+                      }
+                  }
+                  if ((offset - first_offset) % 60 == 0) {
+                      printf("SCANNED_SECOND=%s\n", second_prefix);
+                      fflush(stdout);
+                  }
+              }
+              printf("NO_MATCH_OFFSET_RANGE=%lld..%lld\n", first_offset, last_offset);
+              free(prefix);
+              free(suffix);
+              return 0;
+          }
+          C
+
+          cc -O3 -march=native -Wno-deprecated-declarations scanner.c -lcrypto -o scanner
+          origin_epoch=$(tr -d '\n' < origin_epoch.txt)
+          self_target=$(tr -d '\n' < self_target.txt)
+
+          set +e
+          ./scanner prefix.bin suffix.bin "$origin_epoch" 0 1 1 1 2 "$self_target" > self-test.log 2>&1
+          self_code=$?
+          set -e
+          cat self-test.log
+          test "$self_code" -eq 42
+          grep -F "FOUND_RECEIVED_AT=2026-08-27T00:46:13.000001Z" self-test.log
+          grep -F "FOUND_BLOB=$self_target" self-test.log
+
+          total_seconds=4908
+          first_offset=$(( CHUNK * total_seconds / 12 ))
+          last_offset=$(( (CHUNK + 1) * total_seconds / 12 ))
+          middle_offset=$(( (first_offset + last_offset) / 2 ))
+          real_target=dabc940ed79023c3ac971d44a0a8fd1110b4ebce
+
+          set +e
+          ./scanner prefix.bin suffix.bin "$origin_epoch" "$first_offset" "$middle_offset" "$total_seconds" 1 1 "$real_target" > scan-a.log 2>&1 &
+          pid_a=$!
+          ./scanner prefix.bin suffix.bin "$origin_epoch" "$middle_offset" "$last_offset" "$total_seconds" 1 1 "$real_target" > scan-b.log 2>&1 &
+          pid_b=$!
+          wait "$pid_a"
+          code_a=$?
+          wait "$pid_b"
+          code_b=$?
+          set -e
+
+          cat scan-a.log
+          cat scan-b.log
+          if [ "$code_a" -eq 42 ] || [ "$code_b" -eq 42 ]; then
+            exit 42
+          fi
+          test "$code_a" -eq 0
+          test "$code_b" -eq 0
