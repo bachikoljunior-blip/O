@@ -1,0 +1,21 @@
+{
+  "role": "long_horizon",
+  "observed_at": "2026-08-29T21:22:00+09:00",
+  "status": "blocked_control_missing",
+  "logical_action": "no_substantive_work",
+  "control_path": "note/automation_control/DESIRED_STATE.json",
+  "control_read": {
+    "result": "404_not_found_on_default_branch",
+    "default_branch": "main",
+    "observed_main_head": "cdceb7d3ad5862ddbf7e193249e0784445428e74",
+    "rechecked_after_head_observation": true
+  },
+  "evidence": [
+    "GitHub fetch of note/automation_control/DESIRED_STATE.json at ref main returned 404",
+    "main head observed as cdceb7d3ad5862ddbf7e193249e0784445428e74",
+    "control path was re-read after observing the current main head and remained 404"
+  ],
+  "reason": "Desired-state control is mandatory and its absence prevents determining enabled_desired or the exact role configuration. No clean-exploration substantive semantics were executed.",
+  "continuation": "Restore note/automation_control/DESIRED_STATE.json on the authoritative control branch, then restart long_horizon and read it before any substantive work.",
+  "desired_state_edited": false
+}
