@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T19:28:19.613Z",
+    "checkpointed_at": "2026-08-29T19:29:11.147Z",
     "exact_pending_request_blob_sha": null,
     "exact_pending_request_digest": null,
     "exact_pending_request_ref": null,
     "exact_pending_work_invocation_id": null,
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "v5 exact-head recovery validation and directive preflight passed. The standard full test workflow for the same unchanged head remains queued.",
+    "reason": "Exact-head lifecycle and focused tests passed; PR344 opened at unchanged head 8cd9f9a5. Push and PR standard test runs are queued; no merge until required exact-head success.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_request_recovered_exact_head_validation_pass_full_test_queued_skip_ci",
+    "status": "root_request_recovery_pr344_exact_head_tests_queued_skip_ci",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,26 +200,23 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": null,
     "resume_required": true,
-    "next_action": "Boundedly observe standard test 33270788885 without duplicate launch; on success open/merge expected-head PR and update authority state to the merged pending request.",
-    "last_verified_effect": "Exact-head v5 proved immutable Root request digest/blob, native identity/journal, snapshot94/root_pending, one canonical event append, lifecycle counts, 26 focused tests, and no Root reinvocation.",
-    "completed_effect_receipt": "github-actions:run/33270788879/job/99148771128@head-8cd9f9a5c29a953937635440961b0e3e525e83e9",
-    "pending_job_ids": [
-      99148771010,
-      99148771029,
-      99148771033,
-      99148771049
-    ],
+    "next_action": "Observe exact-head standard test and PR mergeability; merge expected head only after success.",
+    "last_verified_effect": "Opened PR344 with exact recovered Root lifecycle head after v5 recovery validation and directive preflight success.",
+    "completed_effect_receipt": "github:pull/344@8cd9f9a5c29a953937635440961b0e3e525e83e9",
+    "pending_job_ids": [],
     "idempotency_key": "o-work-gen29:root-revision94:recover-exact-invoke-91f2cb57cf0f69a5d9abfce6:v1:validation-v5",
-    "exact_frontier": "Recovered Root request is unique pending on branch and exact-head recovery validation passed; standard full test has not started.",
-    "current_main_sha": "11f178a33d84fb6ce8f7df16f36d89397e3f623f",
+    "exact_frontier": "PR344 open on exact recovered lifecycle head; standard test contexts pending.",
+    "current_main_sha": "20fc129ea5f8162d641ae32dfe16b42a01618378",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
     "pending_workflow_run_ids": [
-      33270788885
+      33270788885,
+      33270968142,
+      33270968159
     ],
-    "next_tool_action": "Fetch test run 33270788885 jobs and terminal conclusion.",
+    "next_tool_action": "Fetch runs 33270788885/33270968142 and PR344; do not relaunch or merge early.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -243,7 +240,9 @@
       33270788879,
       33270788877
     ],
-    "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c"
+    "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c",
+    "pull_request_number": 344,
+    "pull_request_head_sha": "8cd9f9a5c29a953937635440961b0e3e525e83e9"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1534,7 +1533,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T19:28:19.613Z",
+  "heartbeat_at": "2026-08-29T19:29:11.147Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2363,7 +2362,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T19:28:19.613Z",
+  "last_progress_at": "2026-08-29T19:29:11.147Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -8434,7 +8433,7 @@
     ],
     "duplicate_launch_forbidden": true,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T19:28:19.613Z",
+    "last_observed_at": "2026-08-29T19:29:11.147Z",
     "job_id": 99140671439,
     "job_status": "completed",
     "heartbeat_refresh_count": 23,
@@ -8490,7 +8489,7 @@
     "recovered_request_canonical_bytes": 146195,
     "recovered_request_on_authoritative_remote": false,
     "request_recreated": false,
-    "next_action": "Wait boundedly for exact-head standard test run 33270788885; then integrate expected head and bind main state to the unique pending request.",
+    "next_action": "Wait for an exact-head standard test success, then re-read PR mergeability/base/head and merge only expected head 8cd9f9a5.",
     "recovery_branch_head_sha": "8cd9f9a5c29a953937635440961b0e3e525e83e9",
     "recovery_workflow_blob_sha": "bff48538d80c8a71d1f65b126eb6398f0ebd4008",
     "recovered_frozen_request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
@@ -8556,7 +8555,16 @@
         "duration_seconds": 1.63
       }
     },
-    "recovery_validated_at": "2026-08-29T19:28:19.613Z"
+    "recovery_validated_at": "2026-08-29T19:28:19.613Z",
+    "pull_request_number": 344,
+    "pull_request_url": "https://github.com/bachikoljunior-blip/O/pull/344",
+    "pull_request_head_sha": "8cd9f9a5c29a953937635440961b0e3e525e83e9",
+    "pull_request_base_sha_at_open": "20fc129ea5f8162d641ae32dfe16b42a01618378",
+    "pull_request_state": "open",
+    "pull_request_mergeable": false,
+    "pull_request_created_at": "2026-08-29T19:28:48Z",
+    "pull_request_test_workflow_run_id": 33270968142,
+    "pull_request_directive_preflight_run_id": 33270968159
   },
   "generation29_ci_queue_amplification_repair": {
     "identified_at": "2026-08-29T15:28:32.834Z",
