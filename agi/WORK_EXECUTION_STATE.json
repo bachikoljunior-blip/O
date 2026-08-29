@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision35_source_ci_wait",
+  "active_component": "generation29_native_consume_reconstruct_after_unrelated_main_advance",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T07:32:44.441Z",
+    "checkpointed_at": "2026-08-29T07:45:52.172Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
     "exact_pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "Two workflow-only stop causes are exact: completed journals intentionally drop awaiting fields, and new reviewed .continual artifacts require explicit allowlisted force-staging. Both prior runs ended before push, leaving authoritative remote continuation unchanged.",
+    "reason": "Three additional workflow attempts ended before any durable lifecycle push: explicit ignored staging was repaired, the unignored next Work request omission was repaired, and the latest retry fail-closed detected an unrelated evidence-comparator receipt advancing main.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_consume_retry_precommit_after_validated_ephemeral_dry_run",
+    "status": "native_consume_reconstruct_from_exact_latest_main",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,19 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Exact-read back this refreshed policy main, create one corrected isolated workflow branch, force-stage only reviewed ignored lifecycle paths, validate staged diff, and push once.",
-    "last_verified_effect": "Run 33240717405 passed continuity, fresh Work/CI source receipts, exact frozen response consumption, Work verify 85/84/pending1, and unique next execute binding; it failed only when ordinary git add rejected ignored generated paths.",
-    "completed_effect_receipt": "Concrete retry stop causes identified with job-log evidence; no remote lifecycle request, response, native journal, snapshot, or branch result was duplicated or mutated.",
+    "next_action": "Exact-read back this checkpoint, create one v3 workflow branch from the resulting exact main, validate only the workflow launch delta, and track one accepted run through durable push.",
+    "last_verified_effect": "Run 33241273440 again proved exact old response consumption, fresh source receipts, Work verify 85/84/pending1, and native 78/78/72; its only failure was the pre-push omission of the unignored next Work request from staging.",
+    "completed_effect_receipt": "Run 33241439158 then rejected stale expected-main before semantic mutation after main advanced to 7d376369; no old response was consumed durably and no lifecycle result was pushed.",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:native-consume-retry:allowlisted-force-stage:v1",
-    "exact_frontier": "Authoritative main still has old native invoke-453 awaiting exact Work response f1cb; corrected retry must consume it once and persist one next execute request.",
-    "current_main_sha": "c2cf70f2156dc7af3debe071b4c6ea1b41d4cef9",
+    "idempotency_key": "o-work-gen29:native-consume-reconstruct-after-main-7d376369:v1",
+    "exact_frontier": "Latest main still has native invoke-453dfc awaiting the exact durable Work response invoke-f1cb; reconstruct a corrected isolated workflow from exact latest main and consume once.",
+    "current_main_sha": "7d376369370eefb6465dcabea1641c2f4eae5e60",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
     "pending_workflow_run_ids": [],
-    "next_tool_action": "CAS-readback state, then create corrected native-consume branch from the refreshed exact main."
+    "next_tool_action": "Exact-readback checkpoint commit/blob, then create v3 native-consume branch from that exact main."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1501,7 +1501,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T07:32:44.441Z",
+  "heartbeat_at": "2026-08-29T07:45:52.172Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2330,12 +2330,12 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T07:32:44.441Z",
+  "last_progress_at": "2026-08-29T07:45:52.172Z",
   "lease_generation": 29,
   "lease_renewal": {
-    "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
-    "reason": "bind PR 291 exact-head CI source observation policy",
-    "requested_at": "2026-08-24T11:20:39.689Z",
+    "expected_blob_sha": "333d0e7df273cf3a26cc4d50f3f877cca9b52882",
+    "reason": "same-authority exact checkpoint after workflow stop-cause repair and unrelated non-state main advance",
+    "requested_at": "2026-08-29T07:45:52.172Z",
     "verified_remote_readback": false
   },
   "local_combined_regression": {
@@ -7502,7 +7502,7 @@
     }
   },
   "generation29_native_consume_recovery": {
-    "observed_at": "2026-08-29T07:32:44.441Z",
+    "observed_at": "2026-08-29T07:45:52.172Z",
     "failed_runs": [
       {
         "workflow_run_id": 33240657367,
@@ -7523,6 +7523,36 @@
         "concrete_stop_cause": "new .continual lifecycle and receipt paths are intentionally gitignored, so ordinary git add rejected them after all semantic validations passed",
         "repair": "force-stage only ignored untracked paths under the exact reviewed lifecycle/receipt allowlist, then validate the staged diff before push",
         "recurrence_validation": "ephemeral run proved continuity, source receipts, exact old response consumption, 85/84/pending1 topology, and unique next execute binding before the staging-only failure"
+      },
+      {
+        "workflow_run_id": 33241129509,
+        "job_id": 99070549023,
+        "branch_head": "e50d56f99687896774c16c73fd6b4eb2f4cfc34c",
+        "conclusion": "failure",
+        "durable_branch_mutation": false,
+        "concrete_stop_cause": "the two explicit old lifecycle paths still used ordinary git add after the dynamic allowlist used force-staging",
+        "repair": "force-stage the exact old events and native journal paths too",
+        "recurrence_validation": "run 33241273440 passed those explicit staging commands and all semantic validations"
+      },
+      {
+        "workflow_run_id": 33241273440,
+        "job_id": 99070921466,
+        "branch_head": "d5580816147bbfe577d3dbd47fb7cc9c246a4845",
+        "conclusion": "failure",
+        "durable_branch_mutation": false,
+        "concrete_stop_cause": "the staging iterator enumerated only ignored untracked files and omitted the unignored newly frozen Work request",
+        "repair": "enumerate the union of normal untracked and ignored untracked reviewed lifecycle paths, force-stage only the allowlist, then validate the exact staged set",
+        "recurrence_validation": "the workflow source was exact-read back at blob 2e2ffa21191b60728673f5acf2da225adfc2bfd1; the next retry was prevented before mutation by an independent main-head advance"
+      },
+      {
+        "workflow_run_id": 33241439158,
+        "job_id": 99071362155,
+        "branch_head": "97b6132dd5e5c6f2f805d231b7832691f1b03bab",
+        "conclusion": "failure",
+        "durable_branch_mutation": false,
+        "concrete_stop_cause": "an unrelated evidence-comparator receipt advanced main from f37eefe9 to 7d376369 before the retry CAS guard",
+        "repair": "discard the stale branch plan and reconstruct from exact latest main while preserving generation, fence, and frozen invocation",
+        "recurrence_validation": "the run failed in Assert exact policy main and frozen inputs before continuity preflight or native mutation"
       }
     ],
     "ephemeral_verified_transition": {
@@ -7530,11 +7560,11 @@
       "old_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
       "old_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642f",
       "observed_next_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
-      "observed_next_work_invocation_id": "invoke-3bb107bd60dea81a1c4c0fa8",
-      "observed_next_request_digest": "db7b85a91e48cb963f5fb1bb825d8660eb832a1e2d7f3db724095b808e4c3adb",
+      "observed_next_work_invocation_id": "invoke-237d636708a18f7db0b6aa11",
+      "observed_next_request_digest": "4365b83e0031ee48190ec0c49b0c91d3a6f060d7405c20034228cf8e6c9edc46",
       "authoritative_remote_effect": false,
-      "note": "IDs were ephemeral and are not continuation authority; the corrected retry must reconstruct from remote main and may produce fresh IDs."
+      "note": "IDs are ephemeral and are not continuation authority; exact latest remote main remains frozen before consume."
     },
-    "retry_status": "fresh_policy_main_required_before_corrected_retry"
+    "retry_status": "exact_latest_main_checkpoint_then_v3_reconstruct"
   }
 }
