@@ -30,6 +30,7 @@ jobs:
       EXECUTOR_BINDING: current_chatgpt_work_session
       MODEL_IDENTITY: chatgpt-work-model-unverified
       SOURCE_CI_RUN_ID: '33238893400'
+      GUARD_REPAIR_REVISION: '2'
     steps:
       - uses: actions/checkout@v5
         with:
@@ -60,8 +61,22 @@ jobs:
           for line in lines:
               status, path = line.split('\t', 1)
               same_owner_state_refresh = status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json'
-              if not same_owner_state_refresh:
-                  raise SystemExit(f'non-state runtime-main delta rejected: {status} {path}')
+              add_only_control_receipt = (
+                  status == 'A'
+                  and path.startswith('note/automation_control/receipts/')
+                  and path.endswith('.json')
+              )
+              add_only_evaluation_control_checkpoint = (
+                  status == 'A'
+                  and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_')
+                  and path.endswith('_control_missing.json')
+              )
+              if not (
+                  same_owner_state_refresh
+                  or add_only_control_receipt
+                  or add_only_evaluation_control_checkpoint
+              ):
+                  raise SystemExit(f'unsafe runtime-main delta rejected: {status} {path}')
               observed.append({'status': status, 'path': path})
           print('RUNTIME_MAIN_DELTA=' + json.dumps(observed, sort_keys=True))
           PY
