@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_bc7_generation25_window_excluded_post_native_gap_preflight",
+  "active_component": "generation29_bc7_post_native_gap_excluded_history_pending_audit",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T03:22:52.385Z",
+    "checkpointed_at": "2026-08-29T03:24:54.934Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -200,19 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Launch one isolated exact-target diagnostic for 2026-08-27T00:45:09.213574Z..2026-08-27T00:46:13.000000Z, then track only its accepted run.",
-    "last_verified_effect": "Workflow 33230254428 completed all 12 generation25 chunks successfully; exact target blob dabc940ed79023c3ac971d44a0a8fd1110b4ebce was absent from 8,614,362,001 candidates.",
-    "completed_effect_receipt": "Generation25 activity interval 2026-08-28T02:14:13.855000Z..2026-08-28T04:37:48.217000Z is durably excluded; no response candidate was published.",
+    "next_action": "Read exact end-state commits for generations 25-29 and determine when the accepted-pending response proof first became available; select the narrowest unsurveyed causal interval.",
+    "last_verified_effect": "Workflow 33231271235 completed all 12 post-native generation22 gap chunks successfully; target dabc940ed79023c3ac971d44a0a8fd1110b4ebce was absent from 63,786,427 candidates.",
+    "completed_effect_receipt": "Uncovered interval 2026-08-27T00:45:09.213574Z..2026-08-27T00:46:13.000000Z is durably excluded; no response candidate was published.",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:bc7-byte-recovery:run-33230254428:completed-no-match",
-    "exact_frontier": "Generation25 interval excluded; the uncovered 63.786427-second generation22 post-native gap is next.",
-    "current_main_sha": "d95e18e8a68a16db33e006acaa5dda5ed686a13c",
+    "idempotency_key": "o-work-gen29:bc7-byte-recovery:run-33231271235:completed-no-match",
+    "exact_frontier": "Generation25 and the immediate generation22 post-native gap are excluded; historical pending-count audit is next.",
+    "current_main_sha": "243a10e67e4adc52ceff9038f1d46ee10f9f491e",
     "goal_revision": 34,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
     "pending_workflow_run_ids": [],
-    "next_tool_action": "Replace the existing diagnostic workflow generation/interval constants on branch work/recovery-gen29-bc7-response-byte-diagnostic-v1 and exact-readback the resulting head/blob before accepting its run."
+    "next_tool_action": "Fetch agi/WORK_EXECUTION_STATE.json at generation end commits and compare work-verify request/response/pending evidence plus target blob occurrence."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1469,7 +1469,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T03:22:52.385Z",
+  "heartbeat_at": "2026-08-29T03:24:54.934Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2298,7 +2298,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T03:22:52.385Z",
+  "last_progress_at": "2026-08-29T03:24:54.934Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -5382,8 +5382,8 @@
   },
   "generation29_revision34_refresh": {
     "schema_version": 1,
-    "status": "bc7_generation25_window_excluded_post_native_gap_preflight",
-    "observed_at": "2026-08-29T03:22:52.385Z",
+    "status": "bc7_post_native_gap_excluded_history_pending_audit",
+    "observed_at": "2026-08-29T03:24:54.934Z",
     "user_input": {
       "revision": 34,
       "id": "user-reaffirmation-run-to-achievement-slot-integrity-20260828-v34",
@@ -5411,8 +5411,8 @@
       "blob_sha": "0a2e9b12f791f3d52b986de4fc321c2e085dcba7"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision34:typed-directive-refresh:v1",
-    "next_action": "Update the existing isolated diagnostic branch exactly once for the 63,786,427-candidate post-native gap, exact-readback it, and consume its single accepted workflow.",
-    "updated_at": "2026-08-29T03:22:52.385Z",
+    "next_action": "Inspect exact historical state commits for journal pending counts and target-response evidence before launching another diagnostic; preserve the exact target and publish nothing.",
+    "updated_at": "2026-08-29T03:24:54.934Z",
     "repair": {
       "pull_request": 338,
       "branch": "work/recovery-gen29-directive-revision33-binding-v1",
@@ -5510,7 +5510,7 @@
       "external_effect_repeated": false,
       "request_recreated": false,
       "response_repeated": false,
-      "status": "generation25_interval_excluded_post_native_generation22_gap_next",
+      "status": "post_native_generation22_gap_excluded_history_pending_audit",
       "rule": "Do not submit or regenerate this accepted-pending invocation. After the frozen generation29 Candidate lifecycle is main-durable, publish only the already-existing exact repair response with its prior proof, exact-readback it, and verify pending=0 before native revision92 resume.",
       "semantic_output_digest_recomputed_matches": true,
       "semantic_response_digest_recomputed_matches": true,
@@ -5519,7 +5519,7 @@
       "exact_target_blob_sha": "dabc940ed79023c3ac971d44a0a8fd1110b4ebce",
       "remote_target_blob_present": false,
       "no_new_response_generation": true,
-      "next_safe_action": "Launch one exact-target read-only diagnostic for the uncovered post-native generation22 gap 2026-08-27T00:45:09.213574Z..2026-08-27T00:46:13.000000Z; never publish unless Git blob dabc940ed79023c3ac971d44a0a8fd1110b4ebce matches.",
+      "next_safe_action": "Audit historical work-verify pending counts and first durable appearance of the preserved repair-response proof; then select the narrowest unsurveyed causal interval and launch only one exact-target diagnostic.",
       "diagnostic": {
         "branch": "work/recovery-gen29-bc7-response-byte-diagnostic-v1",
         "first_head_sha": "dc4014f8ecef44570b5079662b538f5dacf2d8f6",
@@ -6288,7 +6288,91 @@
         "tenth_response_candidate_published": false,
         "tenth_completed_job_count": 12,
         "tenth_conclusion": "success",
-        "tenth_completed_at": "2026-08-29T03:22:52.385Z"
+        "tenth_completed_at": "2026-08-29T03:22:52.385Z",
+        "eleventh_interval_start": "2026-08-27T00:45:09.213574Z",
+        "eleventh_interval_end": "2026-08-27T00:46:13.000000Z",
+        "eleventh_candidate_count": 63786427,
+        "eleventh_status": "completed_no_match",
+        "eleventh_conclusion": "success",
+        "eleventh_head_sha": "c881f85ba5f5288c6387b984525394b8c938c0e7",
+        "eleventh_workflow_blob_sha": "0faed5a9ba9e96600233b00aba1d72708d383239",
+        "eleventh_workflow_run_id": 33231271235,
+        "eleventh_jobs": [
+          {
+            "id": 99044429442,
+            "name": "scan generation22 post-native gap chunk 3",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429499,
+            "name": "scan generation22 post-native gap chunk 7",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429507,
+            "name": "scan generation22 post-native gap chunk 4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429515,
+            "name": "scan generation22 post-native gap chunk 1",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429520,
+            "name": "scan generation22 post-native gap chunk 2",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429534,
+            "name": "scan generation22 post-native gap chunk 0",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429540,
+            "name": "scan generation22 post-native gap chunk 6",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429553,
+            "name": "scan generation22 post-native gap chunk 11",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429560,
+            "name": "scan generation22 post-native gap chunk 10",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429567,
+            "name": "scan generation22 post-native gap chunk 8",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429580,
+            "name": "scan generation22 post-native gap chunk 5",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 99044429614,
+            "name": "scan generation22 post-native gap chunk 9",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ],
+        "eleventh_completed_at": "2026-08-29T03:24:54.934Z",
+        "eleventh_response_candidate_published": false
       }
     },
     "bounded_rechecks": [
