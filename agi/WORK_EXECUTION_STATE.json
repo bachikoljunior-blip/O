@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision34_directive_binding_exact_head_ci_passed_merge_pending",
+  "active_component": "generation29_revision34_directive_binding_main_durable_payload_pr337_rebuild_next",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T00:24:34.270Z",
+    "checkpointed_at": "2026-08-29T00:26:14.883Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -201,18 +201,18 @@
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
     "next_action": "Continue bounded exact-head rechecks without duplicate launch. Wait for shard 2 and the dependent aggregate, then fresh authority/inbox/head/latest-main/intersection/mergeability checks and expected-head merge.",
-    "last_verified_effect": "PR338 exact-head required workflows completed successfully for the revision34 directive ledger repair; no duplicate run was launched.",
-    "completed_effect_receipt": "PR338 exact head bf30435d618a50fc06fc1c5bcc98b578da2ac9f3 passed directive-source preflight, all four pytest shards, and dependent aggregate.",
+    "last_verified_effect": "Typed directive source now matches USER_INPUT_INBOX revision34 on main.",
+    "completed_effect_receipt": "PR338 merged at exact expected head bf30435d618a50fc06fc1c5bcc98b578da2ac9f3 as main d2e22d45a53859f3335cb0a7cfdbc60aea5da9c4; revision34 ledger blob f589a57a16aa577ccc9853509062a5faa3907281 exact-readback verified.",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:revision34-directive-ledger:merge-pr338:bf30435d",
-    "exact_frontier": "Fresh authority/inbox/ledger/head/changed-file/mergeability/CI checks passed; expected-head merge PR338 is next.",
-    "current_main_sha": "41e66735225097550d2c48caf390650261ec7418",
+    "idempotency_key": "o-work-gen29:revision34-directive-ledger:merged:d2e22d45",
+    "exact_frontier": "Directive stale-source stop cause eliminated and validated on main. PR337 still carries the exact four frozen lifecycle blobs on old base and must be rebuilt from latest main.",
+    "current_main_sha": "d2e22d45a53859f3335cb0a7cfdbc60aea5da9c4",
     "goal_revision": 34,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
     "pending_workflow_run_ids": [],
-    "next_tool_action": "Fetch latest main/state and PR338 once, then github_merge_pull_request expected_head_sha=bf30435d618a50fc06fc1c5bcc98b578da2ac9f3."
+    "next_tool_action": "Create latest-main-based tree with exact blobs 7c666d29, ab70f003, fe1ca1ec, 2e885226; create fast-forward merge commit with PR337 old head as parent and latest main as additional parent; update existing PR337 branch force=false."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1469,7 +1469,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T00:24:34.270Z",
+  "heartbeat_at": "2026-08-29T00:26:14.883Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2298,7 +2298,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T00:24:34.270Z",
+  "last_progress_at": "2026-08-29T00:26:14.883Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -5382,8 +5382,8 @@
   },
   "generation29_revision34_refresh": {
     "schema_version": 1,
-    "status": "revision34_pr338_exact_head_ci_passed_merge_pending",
-    "observed_at": "2026-08-29T00:24:34.270Z",
+    "status": "revision34_directive_ledger_main_durable_payload_pr337_rebuild_next",
+    "observed_at": "2026-08-29T00:26:14.883Z",
     "user_input": {
       "revision": 34,
       "id": "user-reaffirmation-run-to-achievement-slot-integrity-20260828-v34",
@@ -5411,7 +5411,7 @@
       "blob_sha": "0a2e9b12f791f3d52b986de4fc321c2e085dcba7"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision34:typed-directive-refresh:v1",
-    "next_action": "Freshly reread PR338 and main after this CAS, then merge PR338 with expected_head_sha bf30435d618a50fc06fc1c5bcc98b578da2ac9f3. Exact-readback revision34 ledger on main before rebuilding PR337.",
+    "next_action": "Rebuild PR337 head from latest main d2e22d45a53859f3335cb0a7cfdbc60aea5da9c4 while preserving the exact four frozen blob SHAs, update its existing branch by fast-forward merge commit, exact-readback all four files, then wait for exact-head workflows before expected-head merge.",
     "updated_at": "2026-08-29T00:09:26.215Z",
     "repair": {
       "pull_request": 338,
@@ -5644,7 +5644,13 @@
         }
       ],
       "ci_verified_at": "2026-08-29T00:24:34.270Z",
-      "merge_pending": true
+      "merge_pending": false,
+      "merged": true,
+      "merge_sha": "d2e22d45a53859f3335cb0a7cfdbc60aea5da9c4",
+      "merged_at": "2026-08-29T00:25:42Z",
+      "main_tree": "ab4e9f9d433958c4ba28aa3c77973695f4789c86",
+      "main_ledger_blob_sha": "f589a57a16aa577ccc9853509062a5faa3907281",
+      "main_exact_readback_verified": true
     }
   }
 }
