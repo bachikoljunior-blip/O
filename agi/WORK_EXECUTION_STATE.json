@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T21:30:03.715Z",
+    "checkpointed_at": "2026-08-29T21:39:50.307Z",
     "exact_pending_request_blob_sha": "f349684e68f5efdf15167b7b1236c34855da7cb9",
     "exact_pending_request_digest": "c1d053f03536c0f2dd0fa08159663ccc60e5848625eb2b2794069e4ce293e2dc",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-6fefa64dcaa56548bf1c3de0/request.json",
     "exact_pending_work_invocation_id": "invoke-6fefa64dcaa56548bf1c3de0",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "PR346 remains at exact head acdb5ccc. Directive-source integrity succeeded; all four pytest shards are running.",
+    "reason": "PR346 remains at exact head acdb5ccc. Directive preflight and pytest shard 1 succeeded; shards 0, 2, and 3 continue running.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "pr346_exact_head_tests_in_progress",
+    "status": "pr346_one_shard_passed_three_running",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,18 +200,17 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-61abdb4ae9df255613479431",
     "resume_required": true,
-    "next_action": "Bounded-wait and recheck run 33276198203; require all four shards and dependent aggregate success before expected-head merge.",
+    "next_action": "Bounded-wait and recheck the three remaining shards and dependent aggregate; merge only unchanged head after all succeed.",
     "last_verified_effect": "Exact-readback Candidate response, completed native, unchanged revision95 snapshot, recovery receipt, unique Task Evaluate request and bound native journal.",
-    "completed_effect_receipt": "github:actions/33276198212:directive-source-integrity-success",
+    "completed_effect_receipt": "github:actions/job/99163259342:success",
     "pending_job_ids": [
       99163259128,
       99163259257,
-      99163259326,
-      99163259342
+      99163259326
     ],
-    "idempotency_key": "o-work-gen29:pr346:acdb5ccc:test-run-33276198203:observe:v1",
+    "idempotency_key": "o-work-gen29:pr346:acdb5ccc:shard1-success:observe:v1",
     "exact_frontier": "PR346 is open at immutable expected head acdb5ccc; authoritative main still contains the unanswered Candidate request.",
-    "current_main_sha": "fe2d888200cca01cdd2111df20878e29d9456ce5",
+    "current_main_sha": "6f41b6eb4148911da948ca65b686470c5c2a93f0",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -219,7 +218,7 @@
     "pending_workflow_run_ids": [
       33276198203
     ],
-    "next_tool_action": "Bounded-wait and recheck run 33276198203; require all four shards and dependent aggregate success before expected-head merge.",
+    "next_tool_action": "Bounded-wait and recheck the three remaining shards and dependent aggregate; merge only unchanged head after all succeed.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -8985,7 +8984,7 @@
     "pull_request_head_sha": "acdb5ccc0b32d37dfee38e8c14a0907f22d3a098",
     "pull_request_base_sha": "355e7558a160b60bfc0c4285f08c54cea4401ec2",
     "pr_created_at": "2026-08-29T21:29:27Z",
-    "last_observed_at": "2026-08-29T21:30:03.715Z",
+    "last_observed_at": "2026-08-29T21:39:50.307Z",
     "directive_preflight": {
       "run_id": 33276198212,
       "job_id": 99163259115,
@@ -9020,8 +9019,9 @@
         {
           "id": 99163259342,
           "name": "pytest shard 1 of 4",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success",
+          "completed_at": "2026-08-29T21:39:11Z"
         }
       ]
     }
