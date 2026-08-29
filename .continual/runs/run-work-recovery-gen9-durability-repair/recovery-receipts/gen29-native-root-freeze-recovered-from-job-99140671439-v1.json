@@ -1,0 +1,69 @@
+{
+  "authority": {
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "lease_generation": 29
+  },
+  "claim_boundary": "This receipt proves recovery of the exact frozen request and its deterministic native binding from one durable workflow log. It is not a Root response, AGI evidence, or user-level completion.",
+  "exact_frozen_request": {
+    "canonical_bytes": 146195,
+    "component": "root",
+    "created_at": "2026-08-29T18:50:46.512405Z",
+    "decision_context_manifest_digest": "38a59e23bce361626a6929c96652b81668f2086dc7ba62136deb8c43261a7347",
+    "inbox_revision": 35,
+    "invocation_id": "invoke-91f2cb57cf0f69a5d9abfce6",
+    "request_digest": "3d51e513c72a35bf00ce0b5353c6174e6dcac843133bd9df7b4d2526953d56fe",
+    "request_ref": ".continual/work-model/invocations/invoke-91f2cb57cf0f69a5d9abfce6/request.json",
+    "snapshot_phase": "root_pending",
+    "snapshot_revision": 94
+  },
+  "idempotency_key": "o-work-gen29:root-revision94:recover-exact-invoke-91f2cb57cf0f69a5d9abfce6:v1",
+  "native_binding_reconstruction": {
+    "derivation": "Store.stable_digest({component:'root',prompt:'prompts/root.md',payload:exact_request.payload_without_decision_context})",
+    "event_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+    "event_timestamp_basis": "exact frozen request created_at",
+    "invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
+    "invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-863ecdb0bbb9da518791d7b7.json",
+    "payload_digest": "6afb53db635a4a21b08fd303",
+    "recomputed_invocation_id_matches_workflow_log": true,
+    "root_reinvoked": false,
+    "semantic_request_recreated": false
+  },
+  "next_action": "Validate this exact recovered lifecycle at unchanged branch head, merge it, bind authority state to the pending request, then consume the frozen Root request exactly once in the same task chat.",
+  "omitted_ephemeral_files": {
+    "durable_evidence": "immutable workflow run/job logs plus the exact internally verified decision-context manifest in the frozen request",
+    "exact_reconstruction_claimed": false,
+    "paths": [
+      ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-92513cd82cf82d3b0c93e9a9/request.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-92513cd82cf82d3b0c93e9a9/receipt.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-2927d4bf40f980854774c324/request.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-2927d4bf40f980854774c324/receipt.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-b397a396f087f0b727627523.json"
+    ],
+    "reason": "runner-local files were discarded before commit; no approximate bytes are manufactured"
+  },
+  "record_type": "generation29_native_root_freeze_log_recovery_receipt",
+  "recorded_at": "2026-08-29T18:58:00Z",
+  "request_recreated": false,
+  "resume_required": true,
+  "root_reinvoked": false,
+  "schema_version": 1,
+  "source_execution": {
+    "failed_step": "Persist exact Root freeze result and push once",
+    "failure": "allowlist omitted .continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-b397a396f087f0b727627523.json before staging",
+    "source_runtime_main_sha": "d221c6058a0de55db6117a535fa68c67748f8e37",
+    "source_state_blob_sha": "d43ecec7f5aad21a4eeca20823cf6fabdd5337fc",
+    "successful_steps": [
+      "Assert exact main, authority, inbox, and Root boundary",
+      "Assert causal continuity and capture before state",
+      "Precommit and record runtime latest GitHub main observation",
+      "Precommit and record exact fixed-policy successful CI observation",
+      "Verify fresh receipts and runtime authority before mutation",
+      "Invoke Root exactly once and freeze next Work request",
+      "Validate exactly one frozen Root request"
+    ],
+    "workflow_job_id": 99140671439,
+    "workflow_run_attempt": 2,
+    "workflow_run_id": 33264840298
+  }
+}
