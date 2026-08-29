@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_root_work_pending_native_consume",
+  "active_component": "generation29_root_response_ephemeral_recovery_candidate_preflight",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": null,
   "authoritative_source_observation": {
@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T20:19:14.204Z",
+    "checkpointed_at": "2026-08-29T20:24:06.122Z",
     "exact_pending_request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
     "exact_pending_request_digest": "3d51e513c72a35bf00ce0b5353c6174e6dcac843133bd9df7b4d2526953d56fe",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-91f2cb57cf0f69a5d9abfce6/request.json",
     "exact_pending_work_invocation_id": "invoke-91f2cb57cf0f69a5d9abfce6",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "The concrete CI observation selector cause was eliminated and exact-readback at repair head 813f68cc. Automatic run 33273154271 is accepted/queued on the same branch and frozen continuation; no duplicate semantic effect exists.",
+    "reason": "Root response and the correct scoped Candidate Evaluate preflight were produced exactly once in job 99155163645, but the workflow validation expected a direct Task Evaluate request and stopped before staging. Authoritative main remains unchanged.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_response_exact_once_repair_v2_queued_skip_ci",
+    "status": "root_response_ephemeral_effect_exact_log_recovery_required_skip_ci",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -201,20 +201,18 @@
     "exact_pending_native_invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
     "resume_required": true,
     "next_action": "Observe run 33273154271 without relaunch. Once it begins, avoid state mutation until its pre-mutation CAS and result persistence complete.",
-    "last_verified_effect": "Patched only the source CI run/head selectors to exact state policy values and observed the repaired workflow launch.",
-    "completed_effect_receipt": "github:actions/run/33273154271@813f68cc277eca082dd66f79aaf393e41395b59b:queued",
+    "last_verified_effect": "Recovered the exact Root response and exact first candidate_evaluate request bytes and digests from immutable job logs; verified authoritative main still has no Root response and the Root native journal remains awaiting.",
+    "completed_effect_receipt": "github:actions/job/99155163645:root-response-556918d45a894b94a9bd28b658157be6352a1b855c3609d08390f6ccc6aa6883:candidate-request-c1d053f03536c0f2dd0fa08159663ccc60e5848625eb2b2794069e4ce293e2dc:ephemeral",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:consume-root-invoke-91f2cb57cf0f69a5d9abfce6:repair-ci-policy-selector:v2:launch",
-    "exact_frontier": "Repaired Root-consume run accepted; response remains absent and native remains awaiting on authoritative main.",
-    "current_main_sha": "e5715235dc1a5be5843d20eea9d7089580742102",
+    "idempotency_key": "o-work-gen29:recover-ephemeral-root-and-candidate-preflight:job99155163645:v1",
+    "exact_frontier": "Authoritative main is revision94/root_pending with the original unanswered Root request; immutable logs hold the exact once-created Root response and candidate_evaluate request needed for no-duplicate recovery.",
+    "current_main_sha": "83402c8dd1c5d59e61bf0820cdc2938ba59e2f4e",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [
-      33273154271
-    ],
-    "next_tool_action": "Fetch workflow run 33273154271 jobs.",
+    "pending_workflow_run_ids": [],
+    "next_tool_action": "Patch existing workflow head 813f68cc into exact-log recovery mode and exact-readback before launch.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -1202,7 +1200,7 @@
     "reconciled_at": "2026-08-29T20:15:47.682Z",
     "request_recreated": false,
     "prior_requests_recreated": false,
-    "next_action": "Submit the exact frozen Root response to invoke-91f2cb57cf0f69a5d9abfce6 once, resume the bound native journal, and freeze the selected Task Evaluate request without duplicate launch."
+    "next_action": "Recover the exact first Root response and candidate_evaluate preflight request from job 99155163645 without rerunning semantic submission; persist and verify them, then consume the candidate preflight exactly once."
   },
   "exact_head_ci_observation": {
     "observed_at": "2026-08-29T07:16:43.191Z",
@@ -1590,7 +1588,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T20:19:14.204Z",
+  "heartbeat_at": "2026-08-29T20:24:06.122Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2419,7 +2417,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T19:29:11.147Z",
+  "last_progress_at": "2026-08-29T20:24:06.122Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -8684,7 +8682,7 @@
     "validation_head_workflow_run_count": 0,
     "repair_validated": true
   },
-  "last_activity_at": "2026-08-29T20:19:14.204Z",
+  "last_activity_at": "2026-08-29T20:24:06.122Z",
   "generation29_root_recovery_merge": {
     "schema_version": 1,
     "merged_at": "2026-08-29T20:14:30Z",
@@ -8715,7 +8713,7 @@
   },
   "generation29_root_response_consume_v1": {
     "schema_version": 1,
-    "status": "repair_v2_launch_accepted_queued",
+    "status": "ephemeral_root_response_and_candidate_preflight_recovered_remote_persistence_required",
     "launched_at": "2026-08-29T20:16:21Z",
     "branch": "work/gen29-root-response-task-evaluate-v1",
     "base_main_sha": "da307fe7f7541310d868f613d6be71a826f92e6c",
@@ -8734,21 +8732,21 @@
     "request_recreated": false,
     "root_reinvoked": false,
     "response_exists_on_main": false,
-    "refire_pending": true,
+    "refire_pending": false,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T20:19:14.204Z",
-    "next_action": "Observe repaired accepted run; do not relaunch while queued/in progress.",
+    "last_observed_at": "2026-08-29T20:24:06.122Z",
+    "next_action": "Patch the same workflow into immutable-log recovery mode, exact-readback it, and observe its single automatic run without duplicate semantic launch.",
     "failed_run_id": 33273043868,
     "failed_job_id": 99154871969,
-    "failed_step": "Record fresh exact main and successful exact-head CI observations",
-    "stop_cause": "Workflow supplied recovery-validation run 33270788885 to a CI observation request that was correctly precommitted to state policy run 33238893400.",
-    "stop_cause_evidence": "job 99154871969: CiSourceObservationError: workflow run id mismatch; all prior authority/request/checkpoint assertions passed.",
-    "mutation_started": false,
-    "root_response_submitted": false,
-    "native_consumed": false,
+    "failed_step": "Validate one Root consume and one new Task Evaluate freeze",
+    "stop_cause": "Validation assumed the next unanswered Work request would be task_evaluate, but Engine correctly runs the relevant scoped Candidate Evaluate preflight first; the exact first frozen request is candidate_evaluate.",
+    "stop_cause_evidence": "job 99155163645 reached valid counts requests=87 responses=86 pending=1 native_completed=80 fragments=80 local_learn=74, then failed only at 'next pending request is not Task Evaluate'.",
+    "mutation_started": true,
+    "root_response_submitted": true,
+    "native_consumed": true,
     "authoritative_native_blob_sha": "a1cdec9928329d80f02bfb69c4a0eec840e6450c",
     "authoritative_native_status": "awaiting_work_model",
-    "repair_action": "Change only SOURCE_CI_RUN_ID to 33238893400 and SOURCE_CI_HEAD to 614ead18e8adbeea313473b885a925a705e12afc in the same workflow.",
+    "repair_action": "Do not rerun Root submission or mint another semantic request. Materialize the exact logged Root response and exact first candidate_evaluate request, replay only the deterministic native consume against those immutable records, validate Candidate Evaluate preflight binding, then publish through exact-head CI and expected-head merge.",
     "repair_validation": {
       "state_policy_workflow_run_id": 33238893400,
       "workflow_id": 335420036,
@@ -8791,6 +8789,37 @@
     "repair_head_sha": "813f68cc277eca082dd66f79aaf393e41395b59b",
     "repair_workflow_blob_sha": "3ede4cb2ac7f82079bd1653e44102811b00ab9f5",
     "repair_run_id": 33273154271,
-    "repair_launched_at": "2026-08-29T20:18:50Z"
+    "repair_launched_at": "2026-08-29T20:18:50Z",
+    "repair_job_id": 99155163645,
+    "repair_run_conclusion": "failure_after_semantic_local_effect_before_git_persistence",
+    "authoritative_remote_mutation": false,
+    "remote_root_response_exists": false,
+    "remote_root_native_status": "awaiting_work_model",
+    "ephemeral_root_response": {
+      "invocation_id": "invoke-91f2cb57cf0f69a5d9abfce6",
+      "request_digest": "3d51e513c72a35bf00ce0b5353c6174e6dcac843133bd9df7b4d2526953d56fe",
+      "response_digest": "556918d45a894b94a9bd28b658157be6352a1b855c3609d08390f6ccc6aa6883",
+      "output_digest": "0a0bdeb603b059c85fd4d26ab1fb819cd7f321d1979bfb24902c7c91b418f27b",
+      "received_at": "2026-08-29T20:19:44.572136Z",
+      "immutable_job_log_id": 99155163645
+    },
+    "ephemeral_frozen_next_request": {
+      "component": "candidate_evaluate",
+      "invocation_id": "invoke-6fefa64dcaa56548bf1c3de0",
+      "request_digest": "c1d053f03536c0f2dd0fa08159663ccc60e5848625eb2b2794069e4ce293e2dc",
+      "created_at": "2026-08-29T20:19:45.287848Z",
+      "target_component": "task_evaluate",
+      "selected_unit_id": "unit-generation29-evaluate-recursive-context-retrieval-ablation-v1",
+      "request_recreated": false,
+      "response_exists": false
+    },
+    "repair_validation_required": [
+      "exact Root response digest and original received_at",
+      "exact candidate_evaluate request digest and original created_at",
+      "one completed Root native lifecycle",
+      "snapshot revision95 unit_pending task_evaluate",
+      "one awaiting candidate_evaluate native journal bound to invoke-6fefa64dcaa56548bf1c3de0",
+      "no second Root response or alternate Work request"
+    ]
   }
 }
