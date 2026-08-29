@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_slot_0812_native_consume_result_ci_in_progress",
+  "active_component": "generation29_native_consume_result_final_shard_wait",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T08:13:11.277Z",
+    "checkpointed_at": "2026-08-29T08:25:28.146Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -188,7 +188,7 @@
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "slot_0812_overlap_native_consume_result_ci_in_progress",
+    "status": "native_consume_result_three_shards_success_final_shard_in_progress",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,18 +200,15 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Persist immutable slot receipt, exact-readback it, then continue bounded CI observation through all four shards and aggregate without relaunch.",
-    "last_verified_effect": "08:12 slot is covered by the same generation29/fence invocation; task enabled/schedule readback is exact, directive CI is successful, and all four exact-head pytest shards are executing.",
-    "completed_effect_receipt": "No scheduler gap, duplicate writer, duplicate launch, head move, CI failure, authority change, inbox change, or lifecycle response duplication was observed.",
+    "next_action": "Continue bounded rechecks of run 33241718961; if shard 2 succeeds, track the aggregate job to terminal and then perform PR/expected-head merge checks.",
+    "last_verified_effect": "Exact-head test run 33241718961 has shards 0, 1, and 3 completed successfully; shard 2 job 99072090469 remains in progress within its 75-minute timeout and known ~37-minute duration.",
+    "completed_effect_receipt": "Directive integrity and three pytest shards are successful on unchanged head d9e4e8d4; no failure, duplicate launch, response duplication, authority change, or inbox change was observed.",
     "pending_job_ids": [
-      99072090469,
-      99072090528,
-      99072090532,
-      99072090566
+      99072090469
     ],
-    "idempotency_key": "o-work-gen29:slot-20260829T0812Z:d9e4e8d4-ci-overlap:v1",
-    "exact_frontier": "The isolated native-consume result head remains exact; all four required pytest shards are in progress and aggregate is not yet eligible.",
-    "current_main_sha": "4b1f66b85d050a6b798b35faa7725b5c0296b16d",
+    "idempotency_key": "o-work-gen29:native-consume-result-d9e4e8d4:three-shards-success-final-shard-wait:v1",
+    "exact_frontier": "One exact-head pytest shard remains before the aggregate job can start; the isolated result is not yet authorized for merge.",
+    "current_main_sha": "10a28bcd456011c6f493870b5dbf99391b3ad728",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -219,7 +216,7 @@
     "pending_workflow_run_ids": [
       33241718961
     ],
-    "next_tool_action": "Create and exact-readback the 08:12 note receipt, then fetch jobs for run 33241718961."
+    "next_tool_action": "Fetch exact workflow jobs for run 33241718961 without relaunch."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1508,7 +1505,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T08:13:11.277Z",
+  "heartbeat_at": "2026-08-29T08:25:28.146Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2337,12 +2334,12 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T08:13:11.277Z",
+  "last_progress_at": "2026-08-29T08:25:28.146Z",
   "lease_generation": 29,
   "lease_renewal": {
-    "expected_blob_sha": "e28022f577c505802aaaab0baa845657703b6777",
-    "reason": "correct the exact pre-slot heartbeat field before immutable slot receipt publication",
-    "requested_at": "2026-08-29T08:13:23.091Z",
+    "expected_blob_sha": "e359572ef4e8a52b4ce87b5ca9876d44ee926a78",
+    "reason": "bounded exact-head CI checkpoint with three shards successful and the known long shard still executing",
+    "requested_at": "2026-08-29T08:25:28.146Z",
     "verified_remote_readback": false
   },
   "local_combined_regression": {
@@ -7620,23 +7617,23 @@
           {
             "id": 99072090528,
             "name": "pytest shard 0 of 4",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99072090532,
             "name": "pytest shard 3 of 4",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99072090566,
             "name": "pytest shard 1 of 4",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           }
         ],
-        "observed_at": "2026-08-29T08:13:11.277Z"
+        "observed_at": "2026-08-29T08:25:28.146Z"
       },
       "authoritative_main_effect": false,
       "request_recreated": false,
