@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_native_consume_result_pr_creation",
+  "active_component": "generation29_native_consume_result_expected_head_merge",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T08:31:20.246Z",
+    "checkpointed_at": "2026-08-29T08:32:56.867Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -188,7 +188,7 @@
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_consume_result_exact_head_ci_success_pr_creation_authorized",
+    "status": "native_consume_result_pr341_expected_head_merge_authorization_precommit",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,19 +200,28 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Create one PR from the exact v3 branch, exact-readback PR head/base/changed filenames/mergeability, then checkpoint expected-head merge authorization before merging.",
-    "last_verified_effect": "Exact-head directive run 33241718966 and test run 33241718961 completed successfully on unchanged clean result head d9e4e8d4; all four pytest shards and dependent aggregate passed.",
-    "completed_effect_receipt": "Branch/main comparison is diverged only by 12 reviewed lifecycle-result paths ahead and 12 main-only checkpoint/receipt commits behind from merge base 581cab53; branch does not modify WORK_EXECUTION_STATE or inbox.",
-    "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:native-consume-result-d9e4e8d4:create-pr-after-exact-ci:v1",
-    "exact_frontier": "The 12-path isolated native-consume result has unchanged passing exact-head CI and is ready for one PR; it remains non-authoritative until expected-head merge and exact main readback.",
-    "current_main_sha": "8ee1d78c46f86a44b9a82e5d24aa60d088ad1239",
+    "next_action": "Exact-readback this merge authorization, reread latest main/state/inbox/PR/head/mergeability, and merge PR 341 only with expected head d9e4e8d4.",
+    "last_verified_effect": "PR 341 exact readback proves head d9e4e8d4, base main, mergeable=true, and exactly 12 reviewed lifecycle paths; push exact-head directive and full test runs are complete success.",
+    "completed_effect_receipt": "PR-triggered revalidation runs 33243367299 and 33243367318 were automatically accepted on the identical head after PR creation; they are tracked without relaunch and do not invalidate the already successful exact-head push CI.",
+    "pending_job_ids": [
+      99076411302,
+      99076411314,
+      99076411319,
+      99076411339,
+      99076411290
+    ],
+    "idempotency_key": "o-work-gen29:pr341:d9e4e8d4:expected-head-merge:v1",
+    "exact_frontier": "PR 341 is ready for expected-head merge after this state CAS and one final authority/head/mergeability readback; the next Work request is still branch-only.",
+    "current_main_sha": "0cbaf84bd5311a124f59b77d365a7bf0d76d308a",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
-    "pending_workflow_run_ids": [],
-    "next_tool_action": "Create PR with head agent/recovery-gen29-receipts-native-consume-v3 and base main."
+    "pending_workflow_run_ids": [
+      33243367299,
+      33243367318
+    ],
+    "next_tool_action": "Fetch main, state, inbox, PR 341, branch, and required CI; then call expected-head merge if unchanged."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1501,7 +1510,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T08:31:20.246Z",
+  "heartbeat_at": "2026-08-29T08:32:56.867Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2330,12 +2339,12 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T08:31:20.246Z",
+  "last_progress_at": "2026-08-29T08:32:56.867Z",
   "lease_generation": 29,
   "lease_renewal": {
-    "expected_blob_sha": "7b3280c557b73ba9cf14beacd560ef45482bca52",
-    "reason": "pre-PR checkpoint after unchanged exact-head directive and full CI success",
-    "requested_at": "2026-08-29T08:31:20.246Z",
+    "expected_blob_sha": "18c2d89f22a45e0cd63e1db503e74fa4d5ca7dd7",
+    "reason": "premerge expected-head authorization after exact PR readback and successful push exact-head CI",
+    "requested_at": "2026-08-29T08:32:56.867Z",
     "verified_remote_readback": false
   },
   "local_combined_regression": {
@@ -7653,6 +7662,79 @@
         "inbox_revision": 35,
         "inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
         "rule": "Create one PR only for the exact unchanged passing head; reread latest authority, PR head, all 12 paths, and mergeability before expected-head merge."
+      },
+      "pull_request": 341,
+      "pr_url": "https://github.com/bachikoljunior-blip/O/pull/341",
+      "merge_authorization": {
+        "status": "precommit_expected_head_merge_after_exact_pr_readback",
+        "prepared_at": "2026-08-29T08:32:56.867Z",
+        "expected_state_blob_sha": "18c2d89f22a45e0cd63e1db503e74fa4d5ca7dd7",
+        "observed_main_sha": "0cbaf84bd5311a124f59b77d365a7bf0d76d308a",
+        "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+        "lease_generation": 29,
+        "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+        "inbox_revision": 35,
+        "inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
+        "expected_head_sha": "d9e4e8d4d2c247efca094197bddd549e547e4070",
+        "pr_base_sha": "0cbaf84bd5311a124f59b77d365a7bf0d76d308a",
+        "mergeable": true,
+        "changed_path_count": 12,
+        "changed_paths": [
+          ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1b3f9427ae9ac6ed624d7bb4/receipt.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1b3f9427ae9ac6ed624d7bb4/request.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-453dfc3b5b74ddb7d9e4fdee-candidate_evaluate.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-453dfc3b5b74ddb7d9e4fdee.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-46f38354bc1b6c8a4d6b6564.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-453dfc3b5b74ddb7d9e4fdee-candidate_evaluate.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-execute-c7627eac0a4b17ebbff3fabd.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-native-consume-581cab53.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-54915a5239ae0b5ccef210d3/receipt.json",
+          ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-54915a5239ae0b5ccef210d3/request.json",
+          ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json"
+        ],
+        "required_workflow_runs": {
+          "33241718966": "directive-source-preflight push exact head: success",
+          "33241718961": "test push exact head four shards and aggregate: success"
+        },
+        "required_jobs": [
+          {
+            "id": 99072090469,
+            "name": "pytest shard 2 of 4",
+            "conclusion": "success"
+          },
+          {
+            "id": 99072090528,
+            "name": "pytest shard 0 of 4",
+            "conclusion": "success"
+          },
+          {
+            "id": 99072090532,
+            "name": "pytest shard 3 of 4",
+            "conclusion": "success"
+          },
+          {
+            "id": 99072090566,
+            "name": "pytest shard 1 of 4",
+            "conclusion": "success"
+          },
+          {
+            "id": 99076098738,
+            "name": "test",
+            "conclusion": "success"
+          },
+          {
+            "id": 99072090539,
+            "name": "directive-source-integrity",
+            "conclusion": "success"
+          }
+        ],
+        "accepted_revalidation_runs": {
+          "33243367299": "test pull_request same head: queued",
+          "33243367318": "directive-source-preflight pull_request same head: queued"
+        },
+        "idempotency_key": "bachikoljunior-blip/O:pr341:d9e4e8d4d2c247efca094197bddd549e547e4070:merge:v1",
+        "rule": "After exact readback of this CAS, reread latest authority, inbox, PR exact head, all 12 filenames, successful required push workflows, and mergeability; merge only unchanged head with expected-head protection."
       }
     }
   }
