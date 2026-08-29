@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T08:35:28.112Z",
+    "checkpointed_at": "2026-08-29T08:47:15.223Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "The corrected v3 run durably pushed one validated lifecycle transition to an isolated branch; the clean result head is awaiting exact-head directive and full test workflows before PR publication.",
+    "reason": "Execute response was produced exactly once, exact-read back, and cleaned to a one-file response-only branch. The directive gate is green and the already-launched full test run remains pending.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "pending_execute_work_response_remote_main_readback_verified",
+    "status": "response_branch_clean_exact_head_ci_pending",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,30 +200,26 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Create an isolated response branch from this exact state checkpoint, write one response bound to request digest 953e1139, exact-readback, validate, run exact-head CI, and merge; then resume native once.",
-    "last_verified_effect": "PR 341 merged with expected head d9e4e8d4 to main 42df5002; all 12 lifecycle blobs exact-read back, old native is complete, new native/Work binding is awaiting, snapshot blob/revision is unchanged, and the new response path is absent.",
-    "completed_effect_receipt": "The exactly-once consume is now authoritative main: 85 requests / 84 responses / 1 pending and native 78 completed / 78 fragments / 72 local-learn. This is unfinished Work, not completion.",
+    "next_action": "Consume workflow run 33243891671 to terminal without relaunch. On success create a one-file response PR at exact head abcadcc0, merge with expected-head CAS, exact-readback main, then resume native invoke-46f383 exactly once.",
+    "last_verified_effect": "Run 33243683027 produced response digest 9ad64d8f on result commit 1f2e8d63; cleanup head abcadcc0 compares against current main 375f86f as exactly one added response file. Directive run 33243891665 job 99077860627 succeeded.",
+    "completed_effect_receipt": "Clean isolated response blob 4b65ea2b binds request 953e1139, output 77901cf6 and response 9ad64d8f with PASS. It is branch-only and not yet authoritative main.",
     "pending_job_ids": [
-      99076411302,
-      99076411314,
-      99076411319,
-      99076411339,
-      99076411290
+      99077860436,
+      99077860532,
+      99077860554,
+      99077860607
     ],
     "idempotency_key": "o-work-gen29:invoke-e750825c4d5987ec613de791:response-once:v1",
-    "exact_frontier": "The exact Execute request invoke-e750825 is authoritative on main with no response; construct one schema-valid output from merged artifacts and publish once without recreating the request.",
-    "current_main_sha": "42df5002daf7cda4199742cd4060bff3c1190237",
+    "exact_frontier": "Wait on the accepted exact-head full-test run for abcadcc0; do not regenerate response or duplicate launch. Then publish the exact one-file change.",
+    "current_main_sha": "375f86f70a191ade67534595402b0152492a71a4",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
-    "exact_frozen_response_digest": null,
+    "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
     "pending_workflow_run_ids": [
-      33243367299,
-      33243367318,
-      33243448037,
-      33243448060
+      33243891671
     ],
-    "next_tool_action": "Exact-readback this state CAS and the request/response absence, then create the response branch."
+    "next_tool_action": "GET jobs for workflow run 33243891671 with bounded rechecks; create no duplicate run."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1512,7 +1508,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T08:35:28.112Z",
+  "heartbeat_at": "2026-08-29T08:47:15.223Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2341,7 +2337,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T08:35:28.112Z",
+  "last_progress_at": "2026-08-29T08:47:15.223Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -4027,7 +4023,7 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "42df5002daf7cda4199742cd4060bff3c1190237",
+  "source_main_sha": "375f86f70a191ade67534595402b0152492a71a4",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
@@ -7748,8 +7744,8 @@
   },
   "generation29_execute_response": {
     "schema_version": 1,
-    "status": "precommit_exact_request_bound_response_absent",
-    "observed_at": "2026-08-29T08:35:28.112Z",
+    "status": "response_branch_clean_exact_head_ci_pending",
+    "observed_at": "2026-08-29T08:47:15.223Z",
     "request": {
       "invocation_id": "invoke-e750825c4d5987ec613de791",
       "component": "execute",
@@ -7786,6 +7782,45 @@
       }
     },
     "idempotency_key": "o-work-gen29:invoke-e750825c4d5987ec613de791:response-once:v1",
-    "next_action": "Publish exactly one response on an isolated branch; no production routing or Candidate activation."
+    "next_action": "Consume accepted full-test run, publish one-file response PR, expected-head merge, exact main readback, then resume native exactly once.",
+    "response": {
+      "invocation_id": "invoke-e750825c4d5987ec613de791",
+      "branch": "agent/recovery-gen29-execute-response-v1",
+      "result_commit_sha": "1f2e8d636c8bb5c1818c043d34537b08a2b3adae",
+      "clean_head_sha": "abcadcc0e01dd7918d205d48ee6ff3be5aa60993",
+      "blob_sha": "4b65ea2b1b75afa62ebbfe4be1f1f14b599643d6",
+      "request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
+      "output_digest": "77901cf627381b42b96941c31e3cc14a5a4b409afd1d828672d942b41f08bdf7",
+      "response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
+      "status": "PASS",
+      "exact_main_compare_files": [
+        ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/response.json"
+      ]
+    },
+    "execution_receipt": {
+      "workflow_run_id": 33243683027,
+      "job_id": 99077280581,
+      "conclusion": "success",
+      "completed_at": "2026-08-29T08:43:16Z"
+    },
+    "exact_head_ci": {
+      "head_sha": "abcadcc0e01dd7918d205d48ee6ff3be5aa60993",
+      "directive": {
+        "run_id": 33243891665,
+        "job_id": 99077860627,
+        "conclusion": "success"
+      },
+      "test": {
+        "run_id": 33243891671,
+        "job_ids": [
+          99077860436,
+          99077860532,
+          99077860554,
+          99077860607
+        ],
+        "status": "queued"
+      },
+      "status": "pending"
+    }
   }
 }
