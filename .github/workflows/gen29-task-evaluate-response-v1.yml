@@ -425,7 +425,11 @@ jobs:
           if payload.get('actual_result') != expected_output.get('result'):
             raise SystemExit('post-result Candidate actual_result mismatch')
           original_payload = original_request.get('payload', {})
-          if payload.get('execution_unit') != original_payload.get('execution_unit'):
+          expected_post_unit = {
+            'snapshot': original_payload.get('snapshot'),
+            'execution_unit': original_payload.get('execution_unit'),
+          }
+          if payload.get('execution_unit') != expected_post_unit:
             raise SystemExit('post-result Candidate execution-unit mismatch')
           if payload.get('pre_application') != original_payload.get('preflight_selection'):
             raise SystemExit('post-result Candidate pre-application mismatch')
