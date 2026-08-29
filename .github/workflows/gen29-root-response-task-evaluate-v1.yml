@@ -1,4 +1,4 @@
-name: gen29 consume recovered Root response v1
+name: gen29 recover exact Root response and Candidate preflight v3
 
 on:
   push:
@@ -36,6 +36,11 @@ jobs:
       EXECUTOR_BINDING: current_chatgpt_work_session
       MODEL_IDENTITY: chatgpt-work-model-unverified
       RESULT_UNIT_ID: unit-generation29-evaluate-recursive-context-retrieval-ablation-v1
+      RECOVERED_NEXT_WORK_ID: invoke-6fefa64dcaa56548bf1c3de0
+      RECOVERED_NEXT_REQUEST_DIGEST: c1d053f03536c0f2dd0fa08159663ccc60e5848625eb2b2794069e4ce293e2dc
+      RECOVERED_NEXT_CREATED_AT: '2026-08-29T20:19:45.287848Z'
+      RECOVERED_ROOT_RESPONSE_DIGEST: 556918d45a894b94a9bd28b658157be6352a1b855c3609d08390f6ccc6aa6883
+      RECOVERY_LOG_JOB_ID: '99155163645'
     steps:
       - uses: actions/checkout@v5
         with:
@@ -280,73 +285,323 @@ jobs:
           continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-before.json
           continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-before.json
 
-      - name: Submit exact Root response once and freeze Task Evaluate
+      - name: Recover exact first Root response and Candidate Evaluate request without re-invocation
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
+          import base64
           import json
+          import os
           from pathlib import Path
-          raw = r'''{
-            "fragment": {
-              "component": "root",
-              "observations": [
-                "The recursive retrieval Execute result is present with bounded quantitative evidence, while the snapshot still carries the previous unit evaluation.",
-                "Root therefore schedules exactly one Task Evaluate unit before Consolidate, Learn, and a materially different next Root selection."
-              ]
-            },
-            "local_learn": {
-              "candidates": [],
-              "decision": "NO_CHANGE",
-              "observation": "The ready next boundary is independent bounded evaluation of the completed three-fixture ablation; method expansion or activation would be premature before that judgment."
-            },
-            "result": {
-              "component": "task_evaluate",
-              "evidence_needed": [
-                "independent deterministic recomputation of all three fixture outcomes from the frozen inputs",
-                "exact comparison of flat-baseline and recursive required-source recall",
-                "proof that stale and authority-conflicting candidates remain rejected for their declared reasons",
-                "proof of zero non-required source admissions and byte-stable repeated results",
-                "one-to-one Work request/response and completed native artifact verification",
-                "exact-head CI, expected-head merge, and remote blob readback for the reviewed artifacts"
-              ],
-              "expected_outputs": [
-                "a structured PASS, FAIL, or UNCERTAIN unit judgment",
-                "fixture-level expected-versus-observed findings",
-                "quantitative recall and unsafe-admission findings",
-                "contradictory and negative evidence retained explicitly",
-                "a narrow claim boundary that excludes production activation, general reliability, AGI, and user-level completion",
-                "repair information for every unmet or failed condition"
-              ],
-              "failure_conditions": [
-                "any fixture mismatch, nondeterminism, unsafe admission, weakened provenance/freshness/authority check, lifecycle mismatch, publication mismatch, or claim widening"
-              ],
-              "goal": "Independently adjudicate the exact three-fixture recursive context-retrieval ablation and its merged lifecycle evidence, deciding PASS, FAIL, or UNCERTAIN without widening the claim beyond the frozen non-production fixtures.",
-              "inputs": [
-                "agi/RECURSIVE_CONTEXT_RETRIEVAL_FIXTURES.json",
-                "agi/RECURSIVE_CONTEXT_RETRIEVAL_ABLATION.json",
-                "src/agi/recursive_context_retrieval_ablation.py",
-                "tests/test_recursive_context_retrieval_ablation.py",
-                "the immutable Execute request/response and native lifecycle for unit-generation25-recursive-context-retrieval-ablation-v1",
-                "the exact-head CI, expected-head merge, and remote-main readback receipts already bound in durable state"
-              ],
-              "parent_continuation": "After Task Evaluate, Consolidate Episode and Learn this bounded judgment, publish only if new reviewed artifacts require publication, then return to Root and select a materially different behavioral or independent-evidence unit. Do not stop on this judgment or treat it as AGI.",
-              "scope": "generation25/recursive-context-retrieval-ablation-v1; exact three frozen repository fixtures and checked-in merged evidence only",
-              "success_conditions": [
-                "all three frozen fixture results reproduce deterministically",
-                "the recursive variant recovers every declared required source while the flat baseline retains its measured misses",
-                "stale and authority-conflicting sources remain rejected with exact reasons",
-                "no non-required source is admitted and no production routing or Candidate activation occurred",
-                "the exact immutable lifecycle and publication receipts verify without mismatch"
-              ],
-              "unit_id": "unit-generation29-evaluate-recursive-context-retrieval-ablation-v1"
-            }
-          }'''
-          value = json.loads(raw)
-          Path('/tmp/root-response.json').write_text(json.dumps(value, indent=2, sort_keys=True) + '\n')
+
+          from continual.engine import Engine
+          from continual.store import Store
+          from continual.work_session import (
+              WorkModelClient,
+              pending_work_invocations,
+              verified_work_invocation,
+              verified_work_request,
+          )
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          root_work_id = os.environ['ROOT_WORK_ID']
+          next_work_id = os.environ['RECOVERED_NEXT_WORK_ID']
+          response_bytes = base64.b64decode("""
+          ewogICJleGVjdXRvcl9iaW5kaW5nIjogImN1cnJlbnRfY2hhdGdwdF93b3JrX3Nlc3Npb24iLAogICJpbnZvY2F0aW9uX2lkIjog
+          Imludm9rZS05MWYyY2I1N2NmMGY2OWE1ZDlhYmZjZTYiLAogICJtb2RlbF9pZGVudGl0eSI6ICJjaGF0Z3B0LXdvcmstbW9kZWwt
+          dW52ZXJpZmllZCIsCiAgIm1vZGVsX3ZlcmlmaWVkIjogZmFsc2UsCiAgIm91dHB1dCI6IHsKICAgICJmcmFnbWVudCI6IHsKICAg
+          ICAgImNvbXBvbmVudCI6ICJyb290IiwKICAgICAgIm9ic2VydmF0aW9ucyI6IFsKICAgICAgICAiVGhlIHJlY3Vyc2l2ZSByZXRy
+          aWV2YWwgRXhlY3V0ZSByZXN1bHQgaXMgcHJlc2VudCB3aXRoIGJvdW5kZWQgcXVhbnRpdGF0aXZlIGV2aWRlbmNlLCB3aGlsZSB0
+          aGUgc25hcHNob3Qgc3RpbGwgY2FycmllcyB0aGUgcHJldmlvdXMgdW5pdCBldmFsdWF0aW9uLiIsCiAgICAgICAgIlJvb3QgdGhl
+          cmVmb3JlIHNjaGVkdWxlcyBleGFjdGx5IG9uZSBUYXNrIEV2YWx1YXRlIHVuaXQgYmVmb3JlIENvbnNvbGlkYXRlLCBMZWFybiwg
+          YW5kIGEgbWF0ZXJpYWxseSBkaWZmZXJlbnQgbmV4dCBSb290IHNlbGVjdGlvbi4iCiAgICAgIF0KICAgIH0sCiAgICAibG9jYWxf
+          bGVhcm4iOiB7CiAgICAgICJjYW5kaWRhdGVzIjogW10sCiAgICAgICJkZWNpc2lvbiI6ICJOT19DSEFOR0UiLAogICAgICAib2Jz
+          ZXJ2YXRpb24iOiAiVGhlIHJlYWR5IG5leHQgYm91bmRhcnkgaXMgaW5kZXBlbmRlbnQgYm91bmRlZCBldmFsdWF0aW9uIG9mIHRo
+          ZSBjb21wbGV0ZWQgdGhyZWUtZml4dHVyZSBhYmxhdGlvbjsgbWV0aG9kIGV4cGFuc2lvbiBvciBhY3RpdmF0aW9uIHdvdWxkIGJl
+          IHByZW1hdHVyZSBiZWZvcmUgdGhhdCBqdWRnbWVudC4iCiAgICB9LAogICAgInJlc3VsdCI6IHsKICAgICAgImNvbXBvbmVudCI6
+          ICJ0YXNrX2V2YWx1YXRlIiwKICAgICAgImV2aWRlbmNlX25lZWRlZCI6IFsKICAgICAgICAiaW5kZXBlbmRlbnQgZGV0ZXJtaW5p
+          c3RpYyByZWNvbXB1dGF0aW9uIG9mIGFsbCB0aHJlZSBmaXh0dXJlIG91dGNvbWVzIGZyb20gdGhlIGZyb3plbiBpbnB1dHMiLAog
+          ICAgICAgICJleGFjdCBjb21wYXJpc29uIG9mIGZsYXQtYmFzZWxpbmUgYW5kIHJlY3Vyc2l2ZSByZXF1aXJlZC1zb3VyY2UgcmVj
+          YWxsIiwKICAgICAgICAicHJvb2YgdGhhdCBzdGFsZSBhbmQgYXV0aG9yaXR5LWNvbmZsaWN0aW5nIGNhbmRpZGF0ZXMgcmVtYWlu
+          IHJlamVjdGVkIGZvciB0aGVpciBkZWNsYXJlZCByZWFzb25zIiwKICAgICAgICAicHJvb2Ygb2YgemVybyBub24tcmVxdWlyZWQg
+          c291cmNlIGFkbWlzc2lvbnMgYW5kIGJ5dGUtc3RhYmxlIHJlcGVhdGVkIHJlc3VsdHMiLAogICAgICAgICJvbmUtdG8tb25lIFdv
+          cmsgcmVxdWVzdC9yZXNwb25zZSBhbmQgY29tcGxldGVkIG5hdGl2ZSBhcnRpZmFjdCB2ZXJpZmljYXRpb24iLAogICAgICAgICJl
+          eGFjdC1oZWFkIENJLCBleHBlY3RlZC1oZWFkIG1lcmdlLCBhbmQgcmVtb3RlIGJsb2IgcmVhZGJhY2sgZm9yIHRoZSByZXZpZXdl
+          ZCBhcnRpZmFjdHMiCiAgICAgIF0sCiAgICAgICJleHBlY3RlZF9vdXRwdXRzIjogWwogICAgICAgICJhIHN0cnVjdHVyZWQgUEFT
+          UywgRkFJTCwgb3IgVU5DRVJUQUlOIHVuaXQganVkZ21lbnQiLAogICAgICAgICJmaXh0dXJlLWxldmVsIGV4cGVjdGVkLXZlcnN1
+          cy1vYnNlcnZlZCBmaW5kaW5ncyIsCiAgICAgICAgInF1YW50aXRhdGl2ZSByZWNhbGwgYW5kIHVuc2FmZS1hZG1pc3Npb24gZmlu
+          ZGluZ3MiLAogICAgICAgICJjb250cmFkaWN0b3J5IGFuZCBuZWdhdGl2ZSBldmlkZW5jZSByZXRhaW5lZCBleHBsaWNpdGx5IiwK
+          ICAgICAgICAiYSBuYXJyb3cgY2xhaW0gYm91bmRhcnkgdGhhdCBleGNsdWRlcyBwcm9kdWN0aW9uIGFjdGl2YXRpb24sIGdlbmVy
+          YWwgcmVsaWFiaWxpdHksIEFHSSwgYW5kIHVzZXItbGV2ZWwgY29tcGxldGlvbiIsCiAgICAgICAgInJlcGFpciBpbmZvcm1hdGlv
+          biBmb3IgZXZlcnkgdW5tZXQgb3IgZmFpbGVkIGNvbmRpdGlvbiIKICAgICAgXSwKICAgICAgImZhaWx1cmVfY29uZGl0aW9ucyI6
+          IFsKICAgICAgICAiYW55IGZpeHR1cmUgbWlzbWF0Y2gsIG5vbmRldGVybWluaXNtLCB1bnNhZmUgYWRtaXNzaW9uLCB3ZWFrZW5l
+          ZCBwcm92ZW5hbmNlL2ZyZXNobmVzcy9hdXRob3JpdHkgY2hlY2ssIGxpZmVjeWNsZSBtaXNtYXRjaCwgcHVibGljYXRpb24gbWlz
+          bWF0Y2gsIG9yIGNsYWltIHdpZGVuaW5nIgogICAgICBdLAogICAgICAiZ29hbCI6ICJJbmRlcGVuZGVudGx5IGFkanVkaWNhdGUg
+          dGhlIGV4YWN0IHRocmVlLWZpeHR1cmUgcmVjdXJzaXZlIGNvbnRleHQtcmV0cmlldmFsIGFibGF0aW9uIGFuZCBpdHMgbWVyZ2Vk
+          IGxpZmVjeWNsZSBldmlkZW5jZSwgZGVjaWRpbmcgUEFTUywgRkFJTCwgb3IgVU5DRVJUQUlOIHdpdGhvdXQgd2lkZW5pbmcgdGhl
+          IGNsYWltIGJleW9uZCB0aGUgZnJvemVuIG5vbi1wcm9kdWN0aW9uIGZpeHR1cmVzLiIsCiAgICAgICJpbnB1dHMiOiBbCiAgICAg
+          ICAgImFnaS9SRUNVUlNJVkVfQ09OVEVYVF9SRVRSSUVWQUxfRklYVFVSRVMuanNvbiIsCiAgICAgICAgImFnaS9SRUNVUlNJVkVf
+          Q09OVEVYVF9SRVRSSUVWQUxfQUJMQVRJT04uanNvbiIsCiAgICAgICAgInNyYy9hZ2kvcmVjdXJzaXZlX2NvbnRleHRfcmV0cmll
+          dmFsX2FibGF0aW9uLnB5IiwKICAgICAgICAidGVzdHMvdGVzdF9yZWN1cnNpdmVfY29udGV4dF9yZXRyaWV2YWxfYWJsYXRpb24u
+          cHkiLAogICAgICAgICJ0aGUgaW1tdXRhYmxlIEV4ZWN1dGUgcmVxdWVzdC9yZXNwb25zZSBhbmQgbmF0aXZlIGxpZmVjeWNsZSBm
+          b3IgdW5pdC1nZW5lcmF0aW9uMjUtcmVjdXJzaXZlLWNvbnRleHQtcmV0cmlldmFsLWFibGF0aW9uLXYxIiwKICAgICAgICAidGhl
+          IGV4YWN0LWhlYWQgQ0ksIGV4cGVjdGVkLWhlYWQgbWVyZ2UsIGFuZCByZW1vdGUtbWFpbiByZWFkYmFjayByZWNlaXB0cyBhbHJl
+          YWR5IGJvdW5kIGluIGR1cmFibGUgc3RhdGUiCiAgICAgIF0sCiAgICAgICJwYXJlbnRfY29udGludWF0aW9uIjogIkFmdGVyIFRh
+          c2sgRXZhbHVhdGUsIENvbnNvbGlkYXRlIEVwaXNvZGUgYW5kIExlYXJuIHRoaXMgYm91bmRlZCBqdWRnbWVudCwgcHVibGlzaCBv
+          bmx5IGlmIG5ldyByZXZpZXdlZCBhcnRpZmFjdHMgcmVxdWlyZSBwdWJsaWNhdGlvbiwgdGhlbiByZXR1cm4gdG8gUm9vdCBhbmQg
+          c2VsZWN0IGEgbWF0ZXJpYWxseSBkaWZmZXJlbnQgYmVoYXZpb3JhbCBvciBpbmRlcGVuZGVudC1ldmlkZW5jZSB1bml0LiBEbyBu
+          b3Qgc3RvcCBvbiB0aGlzIGp1ZGdtZW50IG9yIHRyZWF0IGl0IGFzIEFHSS4iLAogICAgICAic2NvcGUiOiAiZ2VuZXJhdGlvbjI1
+          L3JlY3Vyc2l2ZS1jb250ZXh0LXJldHJpZXZhbC1hYmxhdGlvbi12MTsgZXhhY3QgdGhyZWUgZnJvemVuIHJlcG9zaXRvcnkgZml4
+          dHVyZXMgYW5kIGNoZWNrZWQtaW4gbWVyZ2VkIGV2aWRlbmNlIG9ubHkiLAogICAgICAic3VjY2Vzc19jb25kaXRpb25zIjogWwog
+          ICAgICAgICJhbGwgdGhyZWUgZnJvemVuIGZpeHR1cmUgcmVzdWx0cyByZXByb2R1Y2UgZGV0ZXJtaW5pc3RpY2FsbHkiLAogICAg
+          ICAgICJ0aGUgcmVjdXJzaXZlIHZhcmlhbnQgcmVjb3ZlcnMgZXZlcnkgZGVjbGFyZWQgcmVxdWlyZWQgc291cmNlIHdoaWxlIHRo
+          ZSBmbGF0IGJhc2VsaW5lIHJldGFpbnMgaXRzIG1lYXN1cmVkIG1pc3NlcyIsCiAgICAgICAgInN0YWxlIGFuZCBhdXRob3JpdHkt
+          Y29uZmxpY3Rpbmcgc291cmNlcyByZW1haW4gcmVqZWN0ZWQgd2l0aCBleGFjdCByZWFzb25zIiwKICAgICAgICAibm8gbm9uLXJl
+          cXVpcmVkIHNvdXJjZSBpcyBhZG1pdHRlZCBhbmQgbm8gcHJvZHVjdGlvbiByb3V0aW5nIG9yIENhbmRpZGF0ZSBhY3RpdmF0aW9u
+          IG9jY3VycmVkIiwKICAgICAgICAidGhlIGV4YWN0IGltbXV0YWJsZSBsaWZlY3ljbGUgYW5kIHB1YmxpY2F0aW9uIHJlY2VpcHRz
+          IHZlcmlmeSB3aXRob3V0IG1pc21hdGNoIgogICAgICBdLAogICAgICAidW5pdF9pZCI6ICJ1bml0LWdlbmVyYXRpb24yOS1ldmFs
+          dWF0ZS1yZWN1cnNpdmUtY29udGV4dC1yZXRyaWV2YWwtYWJsYXRpb24tdjEiCiAgICB9CiAgfSwKICAib3V0cHV0X2RpZ2VzdCI6
+          ICIwYTBiZGViNjAzYjA1OWM4NWZkNGQyNmFiMWZiODE5Y2Q3ZjMyMWQxOTc5YmZiMjQ5MDJjN2M5MWI0MThmMjdiIiwKICAicmVj
+          ZWl2ZWRfYXQiOiAiMjAyNi0wOC0yOVQyMDoxOTo0NC41NzIxMzZaIiwKICAicmVxdWVzdF9kaWdlc3QiOiAiM2Q1MWU1MTNjNzJh
+          MzViZjAwY2UwYjUzNTNjNjE3NGU2ZGNhYzg0MzEzM2JkOWRmN2I0ZDI1MjY5NTNkNTZmZSIsCiAgInJlc3BvbnNlX2RpZ2VzdCI6
+          ICI1NTY5MThkNDVhODk0Yjk0YTliZDI4YjY1ODE1N2JlNjM1MmExYjg1NWMzNjA5ZDA4MzkwZjZjY2M2YWE2ODgzIiwKICAic2No
+          ZW1hX3ZlcnNpb24iOiAxCn0K
+          """)
+          next_request_bytes = base64.b64decode("""
+          ewogICJjb21wb25lbnQiOiAiY2FuZGlkYXRlX2V2YWx1YXRlIiwKICAiY29udHJhY3QiOiB7CiAgICAicHJpdmF0ZV9yZWFzb25p
+          bmdfZm9yYmlkZGVuIjogdHJ1ZSwKICAgICJyZXNwb25zZV9zaGFwZSI6ICJjb21wb25lbnQgb3V0cHV0IHdpdGggcmVzdWx0LCBm
+          cmFnbWVudCwgYW5kIGxvY2FsX2xlYXJuIGV4Y2VwdCBMZWFybiIsCiAgICAic2VjcmV0c19mb3JiaWRkZW4iOiB0cnVlCiAgfSwK
+          ICAiY3JlYXRlZF9hdCI6ICIyMDI2LTA4LTI5VDIwOjE5OjQ1LjI4Nzg0OFoiLAogICJleGVjdXRvcl9iaW5kaW5nIjogImN1cnJl
+          bnRfY2hhdGdwdF93b3JrX3Nlc3Npb24iLAogICJpbnZvY2F0aW9uX2lkIjogImludm9rZS02ZmVmYTY0ZGNhYTU2NTQ4YmYxYzNk
+          ZTAiLAogICJtb2RlbF9pZGVudGl0eSI6ICJjaGF0Z3B0LXdvcmstbW9kZWwtdW52ZXJpZmllZCIsCiAgInBheWxvYWQiOiB7CiAg
+          ICAiY2FuZGlkYXRlX2luZGV4IjogewogICAgICAiY2FuZGlkYXRlcyI6IFsKICAgICAgICB7CiAgICAgICAgICAiY2FuZGlkYXRl
+          X2lkIjogImNhbmRpZGF0ZS10YXNrLWV2YWx1YXRlLXVuaXQtdmVyZGljdC12MSIsCiAgICAgICAgICAiY29uZmxpY3RzX3dpdGgi
+          OiBbXSwKICAgICAgICAgICJkZXBlbmRzX29uIjogW10sCiAgICAgICAgICAiZXhwZWN0ZWRfc2NvcGUiOiAiY29udGludWFsL2lu
+          Y3JlbWVudGFsLXRhc2stZXZhbHVhdGlvbiIsCiAgICAgICAgICAicHJvbXB0X21vZGUiOiAib3ZlcmxheSIsCiAgICAgICAgICAi
+          cHJvbXB0X3BhdGgiOiAiLmNvbnRpbnVhbC9jYW5kaWRhdGVzL2NhbmRpZGF0ZS10YXNrLWV2YWx1YXRlLXVuaXQtdmVyZGljdC12
+          MS9wcm9tcHQubWQiLAogICAgICAgICAgInNjb3BlX3N0YXRlcyI6IHsKICAgICAgICAgICAgImFnaS9iYWNrbG9nLWludGVncmF0
+          aW9uIjogIk5FRURfTU9SRV9FVklERU5DRSIsCiAgICAgICAgICAgICJhZ2kvYm91bmRlZC1zdGFnZS1jaGVja3BvaW50LWluaGVy
+          aXRhbmNlL2ZpbmFsLWV2YWx1YXRpb24tdjEiOiAiUFJPUE9TRV9BQ1RJVkFUSU9OIiwKICAgICAgICAgICAgImFnaS9ib3VuZGVk
+          LXN0YWdlLWNoZWNrcG9pbnQtaW5oZXJpdGFuY2UvcmVzZWFyY2gtdW5pdC1hLXBhcnRpYWwtZXZhbHVhdGlvbi12MSI6ICJQUk9Q
+          T1NFX0FDVElWQVRJT04iLAogICAgICAgICAgICAiYWdpL2JvdW5kZWQtc3RhZ2UtY2hlY2twb2ludC1pbmhlcml0YW5jZS9yZXNl
+          YXJjaC11bml0LWItcGFydGlhbC1ldmFsdWF0aW9uLXYxIjogIlBST1BPU0VfQUNUSVZBVElPTiIsCiAgICAgICAgICAgICJhZ2kv
+          ZXZpZGVuY2Utc2NvcGUvbmVnYXRpdmUtZXZpZGVuY2UtbGVkZ2VyLWF1ZGl0LXYxIjogIlJFTUFJTl9DQU5ESURBVEUiLAogICAg
+          ICAgICAgICAiY29udGludWFsL2luY3JlbWVudGFsLXRhc2stZXZhbHVhdGlvbiI6ICJQUk9QT1NFX0FDVElWQVRJT04iCiAgICAg
+          ICAgICB9LAogICAgICAgICAgInN0YXR1cyI6ICJjYW5kaWRhdGUiLAogICAgICAgICAgInRhcmdldF9jb21wb25lbnQiOiAidGFz
+          a19ldmFsdWF0ZSIKICAgICAgICB9CiAgICAgIF0sCiAgICAgICJzY2hlbWFfdmVyc2lvbiI6IDIKICAgIH0sCiAgICAiZW52aXJv
+          bm1lbnQiOiB7CiAgICAgICJhY3RpdmVfY29tcG9uZW50c19kaWdlc3QiOiAiMzk3NDgzM2QxNzBmNDM0MzJjOTQ4MDk1IiwKICAg
+          ICAgIm1vZGVsIjogImNoYXRncHQtd29yay1tb2RlbC11bnZlcmlmaWVkIiwKICAgICAgIm9zIjogIkxpbnV4LTYuMTguMzUteDg2
+          XzY0LXdpdGgtZ2xpYmMyLjM5IiwKICAgICAgInB5dGhvbiI6ICIzLjEyLjEzIiwKICAgICAgInJlcG9zaXRvcnlfY29tbWl0Ijog
+          Ijg0YTQ4Y2VjZjI0YmQ3NzUyNGUyODMzODVlMTViYmE2M2Y5Nzc5MmUiLAogICAgICAicnVubmVyIjogInB5dGhvbi1lbmdpbmUt
+          djIiCiAgICB9LAogICAgImV4ZWN1dGlvbl91bml0IjogewogICAgICAiZXhlY3V0aW9uX3VuaXQiOiB7CiAgICAgICAgImNvbXBv
+          bmVudCI6ICJ0YXNrX2V2YWx1YXRlIiwKICAgICAgICAiZXZpZGVuY2VfbmVlZGVkIjogWwogICAgICAgICAgImluZGVwZW5kZW50
+          IGRldGVybWluaXN0aWMgcmVjb21wdXRhdGlvbiBvZiBhbGwgdGhyZWUgZml4dHVyZSBvdXRjb21lcyBmcm9tIHRoZSBmcm96ZW4g
+          aW5wdXRzIiwKICAgICAgICAgICJleGFjdCBjb21wYXJpc29uIG9mIGZsYXQtYmFzZWxpbmUgYW5kIHJlY3Vyc2l2ZSByZXF1aXJl
+          ZC1zb3VyY2UgcmVjYWxsIiwKICAgICAgICAgICJwcm9vZiB0aGF0IHN0YWxlIGFuZCBhdXRob3JpdHktY29uZmxpY3RpbmcgY2Fu
+          ZGlkYXRlcyByZW1haW4gcmVqZWN0ZWQgZm9yIHRoZWlyIGRlY2xhcmVkIHJlYXNvbnMiLAogICAgICAgICAgInByb29mIG9mIHpl
+          cm8gbm9uLXJlcXVpcmVkIHNvdXJjZSBhZG1pc3Npb25zIGFuZCBieXRlLXN0YWJsZSByZXBlYXRlZCByZXN1bHRzIiwKICAgICAg
+          ICAgICJvbmUtdG8tb25lIFdvcmsgcmVxdWVzdC9yZXNwb25zZSBhbmQgY29tcGxldGVkIG5hdGl2ZSBhcnRpZmFjdCB2ZXJpZmlj
+          YXRpb24iLAogICAgICAgICAgImV4YWN0LWhlYWQgQ0ksIGV4cGVjdGVkLWhlYWQgbWVyZ2UsIGFuZCByZW1vdGUgYmxvYiByZWFk
+          YmFjayBmb3IgdGhlIHJldmlld2VkIGFydGlmYWN0cyIKICAgICAgICBdLAogICAgICAgICJleHBlY3RlZF9vdXRwdXRzIjogWwog
+          ICAgICAgICAgImEgc3RydWN0dXJlZCBQQVNTLCBGQUlMLCBvciBVTkNFUlRBSU4gdW5pdCBqdWRnbWVudCIsCiAgICAgICAgICAi
+          Zml4dHVyZS1sZXZlbCBleHBlY3RlZC12ZXJzdXMtb2JzZXJ2ZWQgZmluZGluZ3MiLAogICAgICAgICAgInF1YW50aXRhdGl2ZSBy
+          ZWNhbGwgYW5kIHVuc2FmZS1hZG1pc3Npb24gZmluZGluZ3MiLAogICAgICAgICAgImNvbnRyYWRpY3RvcnkgYW5kIG5lZ2F0aXZl
+          IGV2aWRlbmNlIHJldGFpbmVkIGV4cGxpY2l0bHkiLAogICAgICAgICAgImEgbmFycm93IGNsYWltIGJvdW5kYXJ5IHRoYXQgZXhj
+          bHVkZXMgcHJvZHVjdGlvbiBhY3RpdmF0aW9uLCBnZW5lcmFsIHJlbGlhYmlsaXR5LCBBR0ksIGFuZCB1c2VyLWxldmVsIGNvbXBs
+          ZXRpb24iLAogICAgICAgICAgInJlcGFpciBpbmZvcm1hdGlvbiBmb3IgZXZlcnkgdW5tZXQgb3IgZmFpbGVkIGNvbmRpdGlvbiIK
+          ICAgICAgICBdLAogICAgICAgICJmYWlsdXJlX2NvbmRpdGlvbnMiOiBbCiAgICAgICAgICAiYW55IGZpeHR1cmUgbWlzbWF0Y2gs
+          IG5vbmRldGVybWluaXNtLCB1bnNhZmUgYWRtaXNzaW9uLCB3ZWFrZW5lZCBwcm92ZW5hbmNlL2ZyZXNobmVzcy9hdXRob3JpdHkg
+          Y2hlY2ssIGxpZmVjeWNsZSBtaXNtYXRjaCwgcHVibGljYXRpb24gbWlzbWF0Y2gsIG9yIGNsYWltIHdpZGVuaW5nIgogICAgICAg
+          IF0sCiAgICAgICAgImdvYWwiOiAiSW5kZXBlbmRlbnRseSBhZGp1ZGljYXRlIHRoZSBleGFjdCB0aHJlZS1maXh0dXJlIHJlY3Vy
+          c2l2ZSBjb250ZXh0LXJldHJpZXZhbCBhYmxhdGlvbiBhbmQgaXRzIG1lcmdlZCBsaWZlY3ljbGUgZXZpZGVuY2UsIGRlY2lkaW5n
+          IFBBU1MsIEZBSUwsIG9yIFVOQ0VSVEFJTiB3aXRob3V0IHdpZGVuaW5nIHRoZSBjbGFpbSBiZXlvbmQgdGhlIGZyb3plbiBub24t
+          cHJvZHVjdGlvbiBmaXh0dXJlcy4iLAogICAgICAgICJpbnB1dHMiOiBbCiAgICAgICAgICAiYWdpL1JFQ1VSU0lWRV9DT05URVhU
+          X1JFVFJJRVZBTF9GSVhUVVJFUy5qc29uIiwKICAgICAgICAgICJhZ2kvUkVDVVJTSVZFX0NPTlRFWFRfUkVUUklFVkFMX0FCTEFU
+          SU9OLmpzb24iLAogICAgICAgICAgInNyYy9hZ2kvcmVjdXJzaXZlX2NvbnRleHRfcmV0cmlldmFsX2FibGF0aW9uLnB5IiwKICAg
+          ICAgICAgICJ0ZXN0cy90ZXN0X3JlY3Vyc2l2ZV9jb250ZXh0X3JldHJpZXZhbF9hYmxhdGlvbi5weSIsCiAgICAgICAgICAidGhl
+          IGltbXV0YWJsZSBFeGVjdXRlIHJlcXVlc3QvcmVzcG9uc2UgYW5kIG5hdGl2ZSBsaWZlY3ljbGUgZm9yIHVuaXQtZ2VuZXJhdGlv
+          bjI1LXJlY3Vyc2l2ZS1jb250ZXh0LXJldHJpZXZhbC1hYmxhdGlvbi12MSIsCiAgICAgICAgICAidGhlIGV4YWN0LWhlYWQgQ0ks
+          IGV4cGVjdGVkLWhlYWQgbWVyZ2UsIGFuZCByZW1vdGUtbWFpbiByZWFkYmFjayByZWNlaXB0cyBhbHJlYWR5IGJvdW5kIGluIGR1
+          cmFibGUgc3RhdGUiCiAgICAgICAgXSwKICAgICAgICAicGFyZW50X2NvbnRpbnVhdGlvbiI6ICJBZnRlciBUYXNrIEV2YWx1YXRl
+          LCBDb25zb2xpZGF0ZSBFcGlzb2RlIGFuZCBMZWFybiB0aGlzIGJvdW5kZWQganVkZ21lbnQsIHB1Ymxpc2ggb25seSBpZiBuZXcg
+          cmV2aWV3ZWQgYXJ0aWZhY3RzIHJlcXVpcmUgcHVibGljYXRpb24sIHRoZW4gcmV0dXJuIHRvIFJvb3QgYW5kIHNlbGVjdCBhIG1h
+          dGVyaWFsbHkgZGlmZmVyZW50IGJlaGF2aW9yYWwgb3IgaW5kZXBlbmRlbnQtZXZpZGVuY2UgdW5pdC4gRG8gbm90IHN0b3Agb24g
+          dGhpcyBqdWRnbWVudCBvciB0cmVhdCBpdCBhcyBBR0kuIiwKICAgICAgICAic2NvcGUiOiAiZ2VuZXJhdGlvbjI1L3JlY3Vyc2l2
+          ZS1jb250ZXh0LXJldHJpZXZhbC1hYmxhdGlvbi12MTsgZXhhY3QgdGhyZWUgZnJvemVuIHJlcG9zaXRvcnkgZml4dHVyZXMgYW5k
+          IGNoZWNrZWQtaW4gbWVyZ2VkIGV2aWRlbmNlIG9ubHkiLAogICAgICAgICJzdWNjZXNzX2NvbmRpdGlvbnMiOiBbCiAgICAgICAg
+          ICAiYWxsIHRocmVlIGZyb3plbiBmaXh0dXJlIHJlc3VsdHMgcmVwcm9kdWNlIGRldGVybWluaXN0aWNhbGx5IiwKICAgICAgICAg
+          ICJ0aGUgcmVjdXJzaXZlIHZhcmlhbnQgcmVjb3ZlcnMgZXZlcnkgZGVjbGFyZWQgcmVxdWlyZWQgc291cmNlIHdoaWxlIHRoZSBm
+          bGF0IGJhc2VsaW5lIHJldGFpbnMgaXRzIG1lYXN1cmVkIG1pc3NlcyIsCiAgICAgICAgICAic3RhbGUgYW5kIGF1dGhvcml0eS1j
+          b25mbGljdGluZyBzb3VyY2VzIHJlbWFpbiByZWplY3RlZCB3aXRoIGV4YWN0IHJlYXNvbnMiLAogICAgICAgICAgIm5vIG5vbi1y
+          ZXF1aXJlZCBzb3VyY2UgaXMgYWRtaXR0ZWQgYW5kIG5vIHByb2R1Y3Rpb24gcm91dGluZyBvciBDYW5kaWRhdGUgYWN0aXZhdGlv
+          biBvY2N1cnJlZCIsCiAgICAgICAgICAidGhlIGV4YWN0IGltbXV0YWJsZSBsaWZlY3ljbGUgYW5kIHB1YmxpY2F0aW9uIHJlY2Vp
+          cHRzIHZlcmlmeSB3aXRob3V0IG1pc21hdGNoIgogICAgICAgIF0sCiAgICAgICAgInVuaXRfaWQiOiAidW5pdC1nZW5lcmF0aW9u
+          MjktZXZhbHVhdGUtcmVjdXJzaXZlLWNvbnRleHQtcmV0cmlldmFsLWFibGF0aW9uLXYxIgogICAgICB9LAogICAgICAic25hcHNo
+          b3QiOiB7CiAgICAgICAgImNvbnRpbnVhdGlvbl9zdGFjayI6IFsKICAgICAgICAgIHsKICAgICAgICAgICAgImNvbnRpbnVhdGlv
+          biI6ICJUYXNrIEV2YWx1YXRlLCBDb25zb2xpZGF0ZSBFcGlzb2RlLCBhbmQgTGVhcm4gdGhpcyByZWNvbmNpbGlhdGlvbjsgcHVi
+          bGlzaCB0aHJvdWdoIHVuY2hhbmdlZCBleGFjdC1oZWFkIENJOyB0aGVuIHJldHVybiB0byBSb290IGFuZCBzZWxlY3QgYSBtYXRl
+          cmlhbGx5IGRpZmZlcmVudCBiZWhhdmlvcmFsIG9yIGluZGVwZW5kZW50LWV2aWRlbmNlIHVuaXQgcmF0aGVyIHRoYW4gcmVydW5u
+          aW5nIHRoaXMgbWVhc3VyZW1lbnQuIiwKICAgICAgICAgICAgInBhcmVudF91bml0X2lkIjogInVuaXQtNDU1ZWNhZWRlYzVkZDM3
+          ZDA3OTNmNjBlIiwKICAgICAgICAgICAgInJlc3VsdF9yZWYiOiAiYXJ0aWZhY3RzL3VuaXQtNDU1ZWNhZWRlYzVkZDM3ZDA3OTNm
+          NjBlLXJlc3VsdC5qc29uIgogICAgICAgICAgfSwKICAgICAgICAgIHsKICAgICAgICAgICAgImNvbnRpbnVhdGlvbiI6ICJUYXNr
+          IEV2YWx1YXRlIHRoZSBleGFjdCBzaXgtcmVzcG9uc2UgcHJvdG9jb2wgYW5kIGJvdW5kZWQganVkZ21lbnRzLCB0aGVuIENvbnNv
+          bGlkYXRlLCBMZWFybiwgYW5kIHJldHVybiB0byBSb290LiBQdWJsaXNoIG9ubHkgdGhyb3VnaCB1bmNoYW5nZWQgZXhhY3QtaGVh
+          ZCBDSSBhbmQgZXhwZWN0ZWQtaGVhZCBtZXJnZSwgYW5kIGNvbnRpbnVlIHRvIGEgbWF0ZXJpYWxseSBkaWZmZXJlbnQgc2FmZSBl
+          eGVjdXRhYmxlIHVuaXQgcmF0aGVyIHRoYW4gc3RvcHBpbmcgb24gdGhpcyBib3VuZGVkIHJlc3VsdC4iLAogICAgICAgICAgICAi
+          cGFyZW50X3VuaXRfaWQiOiAidW5pdC0zZDYxZTU1N2IyNTQyZDA3YzgzZmEzNTQiLAogICAgICAgICAgICAicmVzdWx0X3JlZiI6
+          ICJhcnRpZmFjdHMvdW5pdC0zZDYxZTU1N2IyNTQyZDA3YzgzZmEzNTQtcmVzdWx0Lmpzb24iCiAgICAgICAgICB9CiAgICAgICAg
+          XSwKICAgICAgICAiY3JlYXRlZF9hdCI6ICIyMDI2LTA4LTI0VDIxOjA4OjA3LjU1NjE1N1oiLAogICAgICAgICJjdXJyZW50X2Nv
+          bXBvbmVudCI6ICJ0YXNrX2V2YWx1YXRlIiwKICAgICAgICAiY3VycmVudF91bml0IjogInVuaXQtZ2VuZXJhdGlvbjI5LWV2YWx1
+          YXRlLXJlY3Vyc2l2ZS1jb250ZXh0LXJldHJpZXZhbC1hYmxhdGlvbi12MSIsCiAgICAgICAgImVudHJ5X3JlZiI6ICJhcnRpZmFj
+          dHMvZW50cnkuanNvbiIsCiAgICAgICAgImVudmlyb25tZW50IjogewogICAgICAgICAgImFjdGl2ZV9jb21wb25lbnRzX2RpZ2Vz
+          dCI6ICIzOTc0ODMzZDE3MGY0MzQzMmM5NDgwOTUiLAogICAgICAgICAgIm1vZGVsIjogImNoYXRncHQtd29yay1tb2RlbC11bnZl
+          cmlmaWVkIiwKICAgICAgICAgICJvcyI6ICJMaW51eC02LjE4LjM1LXg4Nl82NC13aXRoLWdsaWJjMi4zOSIsCiAgICAgICAgICAi
+          cHl0aG9uIjogIjMuMTIuMTMiLAogICAgICAgICAgInJlcG9zaXRvcnlfY29tbWl0IjogIjg0YTQ4Y2VjZjI0YmQ3NzUyNGUyODMz
+          ODVlMTViYmE2M2Y5Nzc5MmUiLAogICAgICAgICAgInJ1bm5lciI6ICJweXRob24tZW5naW5lLXYyIgogICAgICAgIH0sCiAgICAg
+          ICAgImVwaXNvZGVfaWQiOiAiZXBpc29kZS13b3JrLXJlY292ZXJ5LWdlbjktZHVyYWJpbGl0eS1yZXBhaXIiLAogICAgICAgICJl
+          cnJvcl9jb3VudCI6IDI3LAogICAgICAgICJsYXN0X2V2YWx1YXRpb24iOiB7CiAgICAgICAgICAiYWdpX2NsYWltX3N1cHBvcnRl
+          ZCI6IGZhbHNlLAogICAgICAgICAgImNsYWltX2JvdW5kYXJ5IjogIlBBU1MgaXMgbGltaXRlZCB0byB0aGUgZXhhY3QgZWlnaHQg
+          c3ludGhldGljIHJldmlzaW9uLTI4IHN0b3AtY2xhc3NpZmljYXRpb24gZml4dHVyZXMsIHRoZSBjdXJyZW50IHN0cnVjdHVyZWQt
+          Y29ycm9ib3JhdGlvbiBpbXBsZW1lbnRhdGlvbiwgdGhlIG9ic2VydmVkIHByb3RlY3RlZCB0ZXN0cywgYW5kIHByZS1tdXRhdGlv
+          biByZWplY3Rpb24gcHJvb2YuIEl0IGRvZXMgbm90IGdlbmVyYWxpemUgdG8gYWxsIHJlY292ZXJ5IHBhdGhzLCBwcm9kdWN0aW9u
+          IGNhcGFiaWxpdHksIEFHSSwgb3IgY29tcGxldGlvbiBvZiB0aGUgdXNlcidzIG9iamVjdGl2ZS4iLAogICAgICAgICAgImV2YWx1
+          YXRlZF9nb2FsIjogIkluZGVwZW5kZW50bHkgYWRqdWRpY2F0ZSB0aGUgZXhhY3QgZWlnaHQtc2NlbmFyaW8gcmV2aXNpb24tMjgg
+          c3RvcC1jbGFzc2lmaWNhdGlvbiBtYXRyaXgsIHRoZSBzdHJ1Y3R1cmVkLWNvcnJvYm9yYXRpb24gcmVwYWlyLCBhbmQgdGhlIGJ5
+          dGUtaWRlbnRpY2FsIG5vLW11dGF0aW9uIHJlamVjdGlvbiBwcm9vZiB3aXRob3V0IHdpZGVuaW5nIHRoZSBjbGFpbS4iLAogICAg
+          ICAgICAgImV2aWRlbmNlIjogWwogICAgICAgICAgICB7CiAgICAgICAgICAgICAgImZpbmRpbmciOiAiRWlnaHQgb2YgZWlnaHQg
+          ZXhwZWN0ZWQtdmVyc3VzLW9ic2VydmVkIHJvd3MgbWF0Y2ggd2l0aCB6ZXJvIGNsYXNzaWZpY2F0aW9uIGZhaWx1cmVzLiIsCiAg
+          ICAgICAgICAgICAgInNvdXJjZSI6ICJkZXRlcm1pbmlzdGljIGNsYXNzaWZpZXIgcmVwbGF5IGFuZCBldmlkZW5jZS9jb250aW51
+          aXR5X3ByZWZsaWdodF9hZHZlcnNhcmlhbF92MS5qc29uIgogICAgICAgICAgICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAg
+          ICAgImZpbmRpbmciOiAiRXZlcnkgb25lIG9mIHRoZSBlaWdodCB1bnJlc29sdmVkLXN0b3AgZml4dHVyZXMgcmFpc2VkIENvbnRp
+          bnVpdHlQcmVmbGlnaHRFcnJvciBiZWZvcmUgbXV0YXRpb24gYW5kIGxlZnQgc25hcHNob3QuanNvbiBieXRlLWlkZW50aWNhbC4i
+          LAogICAgICAgICAgICAgICJzb3VyY2UiOiAidGVzdHMvdGVzdF9jb250aW51aXR5X3ByZWZsaWdodF9hZHZlcnNhcmlhbC5weSIK
+          ICAgICAgICAgICAgfSwKICAgICAgICAgICAgewogICAgICAgICAgICAgICJmaW5kaW5nIjogIjEwNCB0ZXN0cyBwYXNzZWQgd2l0
+          aCB6ZXJvIGZhaWx1cmVzIGFjcm9zcyBjb250aW51aXR5IHByZWZsaWdodCwgYWR2ZXJzYXJpYWwgY2xhc3NpZmljYXRpb24sIHJl
+          Y292ZXJ5IGF1ZGl0LCBzb3VyY2Ugb2JzZXJ2YXRpb24sIGNvbnRleHQga2VybmVsLCBtb25pdG9yLCBhbmQgY29udGludWl0eSBn
+          dWFyZCBjb3ZlcmFnZS4iLAogICAgICAgICAgICAgICJzb3VyY2UiOiAiZm9jdXNlZCBwcm90ZWN0ZWQgcHl0ZXN0IHNldCIKICAg
+          ICAgICAgICAgfSwKICAgICAgICAgICAgewogICAgICAgICAgICAgICJmaW5kaW5nIjogIkV4ZWN1dGUgaW52b2tlLWIzOTUyMjVl
+          OTc4NWU1MTRiYWQ1NDUwYyByZXF1ZXN0IGRpZ2VzdCA4MWMxYzE3MjM4MzY3NjA5YjYyNmJlM2UyNGM5NDc2YzM5ODlmNTZiZDE5
+          MTQ2NjJmOTQ0M2EwMmFmMDIwZWEyIGhhcyBvbmUgcmVzcG9uc2UgZGlnZXN0IDQ0MjQ1ZmI0NjhkZmNiMjlmMjUyYzkzNWNiMmJj
+          NTk0ZGIxZDQwOWE1MjM2Y2RkOTE4YWFhM2MyYmZjOThkMDAsIGFuZCB0aGUgcnVuIHZlcmlmaWVzIDc0IHJlcXVlc3RzLzc0IHJl
+          c3BvbnNlcyB3aXRoIG5vIHBlbmRpbmcgaXRlbSBiZWZvcmUgdGhlIG5leHQgUm9vdCByZXF1ZXN0IHdhcyBmcm96ZW4uIiwKICAg
+          ICAgICAgICAgICAic291cmNlIjogImltbXV0YWJsZSBXb3JrIGpvdXJuYWwiCiAgICAgICAgICAgIH0KICAgICAgICAgIF0sCiAg
+          ICAgICAgICAibmVnYXRpdmVfZXZpZGVuY2UiOiBbCiAgICAgICAgICAgICJUaGUgbWF0cml4IHVzZXMgY2xvc2VkIHN5bnRoZXRp
+          YyBmaXh0dXJlcyBhbmQgZG9lcyBub3QgZXN0YWJsaXNoIGJlaGF2aW9yIGZvciBldmVyeSBwb3NzaWJsZSBleHRlcm5hbCBzdG9w
+          IHJlcHJlc2VudGF0aW9uLiIsCiAgICAgICAgICAgICJUaGUgc291cmNlIGNoYW5nZSBhbmQgbmV3IFdvcmsgbGlmZWN5Y2xlIGFy
+          ZSBub3QgeWV0IHJlbW90ZS1tYWluIGR1cmFibGUgb3IgZXhhY3QtaGVhZCBDSSB2YWxpZGF0ZWQuIiwKICAgICAgICAgICAgIk5v
+          IGV2aWRlbmNlIGhlcmUgZXN0YWJsaXNoZXMgZ2VuZXJhbCByZWNvdmVyeSByZWxpYWJpbGl0eSwgZXh0ZXJuYWwgcHJvZHVjdGlv
+          biBjYXBhYmlsaXR5LCBBR0ksIG9yIHVzZXItbGV2ZWwgY29tcGxldGlvbi4iCiAgICAgICAgICBdLAogICAgICAgICAgInJlcGFp
+          cl9pbmZvcm1hdGlvbiI6IHsKICAgICAgICAgICAgImRvX25vdF9kbyI6ICJEbyBub3Qgd2Vha2VuIHRoZSBjbGFzc2lmaWVyLCBj
+          bGFpbSB1bml2ZXJzYWwgcmVsaWFiaWxpdHksIHRyZWF0IGxvY2FsIHRlc3RzIGFzIHB1YmxpY2F0aW9uLCBvciB0cmVhdCBib3Vu
+          ZGVkIFBBU1MgYXMgdXNlci1sZXZlbCBjb21wbGV0aW9uLiIsCiAgICAgICAgICAgICJuZXh0IjogIkNvbnNvbGlkYXRlIGFuZCBM
+          ZWFybjsgdGhlbiBwZXJmb3JtIGlzb2xhdGVkIGV4YWN0LWhlYWQgcHVibGljYXRpb24gYW5kIHJlbW90ZSByZWFkYmFjay4gSWYg
+          Q0kgb3IgcmVhZGJhY2sgZGlmZmVycywgdHJlYXQgdGhlIHVuaXQgYXMgZmFpbGVkIGFuZCByZXBhaXIgdGhlIGV4YWN0IG1pc21h
+          dGNoIGJlZm9yZSBjb250aW51aW5nLiIKICAgICAgICAgIH0sCiAgICAgICAgICAidW5pdF92ZXJkaWN0IjogIlBBU1MiLAogICAg
+          ICAgICAgInVuaXRfdmVyZGljdF9yZWFzb24iOiAiQWxsIGVpZ2h0IGRlY2xhcmVkIGZpeHR1cmVzIHJlcHJvZHVjZWQgdGhlaXIg
+          ZXhhY3QgZXhwZWN0ZWQgY2xhc3NpZmljYXRpb247IGJvdGggZGlzY3JldGlvbmFyeSBzdG9wcyByZW1haW4gY2xhc3NpZmllZCBh
+          cyByZXF1aXJpbmcgY2F1c2FsIHJlcGFpciwgZml2ZSBjb3Jyb2JvcmF0ZWQgbGVnaXRpbWF0ZSBzdG9wcyBhcmUgcmVqZWN0ZWQg
+          d2l0aCB0aGVpciBzYWZlIHNlbWFudGljcyBpbnRhY3QsIHRoZSB1bmNvcnJvYm9yYXRlZCBoYXJkLXN0b3AgbWFya2VyIHJlamVj
+          dHMgZmFpbC1jbG9zZWQsIGFuZCBldmVyeSByZWplY3RlZCByZXN1bWUgcHJlc2VydmVkIHRoZSBuYXRpdmUgc25hcHNob3QgYnl0
+          ZS1mb3ItYnl0ZS4gVGhlIGZvY3VzZWQgcHJvdGVjdGVkIHNldCBwYXNzZWQgMTA0IHRlc3RzIHdpdGggemVybyBmYWlsdXJlcywg
+          YW5kIHRoZSBvcmlnaW5hbCBFeGVjdXRlIHJlcXVlc3QgaGFzIG9uZSBtYXRjaGluZyBpbW11dGFibGUgcmVzcG9uc2UuIiwKICAg
+          ICAgICAgICJ1bm1ldF9jb25kaXRpb25zIjogWwogICAgICAgICAgICAiQ29uc29saWRhdGUgYW5kIExlYXJuIHRoaXMgYm91bmRl
+          ZCBqdWRnbWVudC4iLAogICAgICAgICAgICAiUHVibGlzaCBvbmx5IHJldmlld2VkIG5vbi1zZWNyZXQgYXJ0aWZhY3RzIGFuZCBl
+          eGFjdCBsaWZlY3ljbGUgcmVjb3JkcyB0aHJvdWdoIGlzb2xhdGVkIHVuY2hhbmdlZCBleGFjdC1oZWFkIENJLCBleHBlY3RlZC1o
+          ZWFkIG1lcmdlLCBhbmQgcmVtb3RlIHJlYWRiYWNrLiIsCiAgICAgICAgICAgICJSZXR1cm4gdG8gUm9vdCBhbmQgY29udGludWUg
+          bWF0ZXJpYWxseSBkaWZmZXJlbnQgc2FmZSBleGVjdXRhYmxlIHdvcmsuIgogICAgICAgICAgXSwKICAgICAgICAgICJ1c2VyX2xl
+          dmVsX3ZlcmRpY3QiOiAiRkFJTCIsCiAgICAgICAgICAidmVyZGljdCI6ICJGQUlMIiwKICAgICAgICAgICJ2ZXJkaWN0X3JlYXNv
+          biI6ICJUaGUgYm91bmRlZCBhZHZlcnNhcmlhbCB1bml0IHBhc3NlcyBsb2NhbGx5LCBidXQgaXRzIHJldmlld2VkIGFydGlmYWN0
+          cyBhbmQgbGlmZWN5Y2xlIHJlY29yZHMgaGF2ZSBub3QgeWV0IHBhc3NlZCBpc29sYXRlZCBleGFjdC1oZWFkIENJLCBleHBlY3Rl
+          ZC1oZWFkIG1lcmdlLCBhbmQgcmVtb3RlIG1haW4gcmVhZGJhY2suIFRoZSB1c2VyJ3MgdXBwZXIgb2JqZWN0aXZlIGFsc28gcmVt
+          YWlucyB1bm1ldDsgdGhpcyBtYXRyaXggaXMgbm90IHByb2R1Y3Rpb24gb3IgQUdJIGV2aWRlbmNlLiIKICAgICAgICB9LAogICAg
+          ICAgICJsYXN0X3Jlc3VsdF9yZWYiOiAiYXJ0aWZhY3RzL3VuaXQtZ2VuZXJhdGlvbjI1LXJlY3Vyc2l2ZS1jb250ZXh0LXJldHJp
+          ZXZhbC1hYmxhdGlvbi12MS1yZXN1bHQuanNvbiIsCiAgICAgICAgInBoYXNlIjogInVuaXRfcGVuZGluZyIsCiAgICAgICAgInBy
+          b2R1Y2VkX2NhbmRpZGF0ZXMiOiBbXSwKICAgICAgICAicmV2aXNpb24iOiA5NSwKICAgICAgICAicnVuX2lkIjogInJ1bi13b3Jr
+          LXJlY292ZXJ5LWdlbjktZHVyYWJpbGl0eS1yZXBhaXIiLAogICAgICAgICJzdGF0dXMiOiAiY29udGludWUiLAogICAgICAgICJ0
+          YXNrX2NvbXBsZXRpb25fdmVyZGljdCI6ICJGQUlMIiwKICAgICAgICAidW5pdF9jb21wbGV0aW9uX3ZlcmRpY3QiOiAiUEFTUyIs
+          CiAgICAgICAgInVwZGF0ZWRfYXQiOiAiMjAyNi0wOC0yOVQyMDoxOTo0NS4yODU4MDlaIgogICAgICB9CiAgICB9LAogICAgIm1v
+          ZGUiOiAicHJlLWFwcGxpY2F0aW9uIiwKICAgICJydWxlIjogIkV2YWx1YXRlIG9ubHkgY2FuZGlkYXRlcyB0aGF0IGNhbiBhZmZl
+          Y3QgdGhpcyBleGFjdCB1cGNvbWluZyB1bml0LiIsCiAgICAicnVuX2lkIjogInJ1bi13b3JrLXJlY292ZXJ5LWdlbjktZHVyYWJp
+          bGl0eS1yZXBhaXIiLAogICAgInRhcmdldF9jb21wb25lbnQiOiAidGFza19ldmFsdWF0ZSIKICB9LAogICJwYXlsb2FkX2RpZ2Vz
+          dCI6ICJmYjRkZmRlYWZkNmJlYjkwZDQxZGI3OGJjOTRkMDdjZjA1YzFiZjFmZDBjYzNkZmYzYTA2MzQ2MWU3ZDRjMDEwIiwKICAi
+          cHJvbXB0X2NvbnRlbnQiOiAiIyBDQU5ESURBVEUgRVZBTFVBVEVcblxuWW91IGFyZSB0aGUgQ2FuZGlkYXRlIEV2YWx1YXRvci4g
+          RXZhbHVhdGUgb25seSBDYW5kaWRhdGVzIHRoYXQgY2FuIGFmZmVjdCB0aGUgZXhhY3QgdXBjb21pbmcgY29tcG9uZW50IHN1cHBs
+          aWVkIGluIHRoZSBwYXlsb2FkLlxuXG4jIyBwcmUtYXBwbGljYXRpb25cblxuRGVjaWRlIGFwcGxpY2FiaWxpdHksIGV4YWN0IHNj
+          b3BlLCBkZXBlbmRlbmN5L2NvbmZsaWN0IHN0YXR1cywgYWN0aXZlIHZlcnN1cyBDYW5kaWRhdGUgdmVyc2lvbiwgYmFzZWxpbmUg
+          bmVlZCwgZXZpZGVuY2UgdG8gY29sbGVjdCwgcmVncmVzc2lvbiBjaGVja3MsIHJvbGxiYWNrLCBhbmQgcmVsZXZhbnQgcXVhbGl0
+          eS9sYXRlbmN5L3Rva2VuL3Rvb2wvZXh0ZXJuYWwtY29zdC9mYWlsdXJlLXJpc2sgZGltZW5zaW9ucy4gVmFsaWQgZGVjaXNpb25z
+          IGluY2x1ZGUgYE5PVF9BUFBMSUNBQkxFYCwgYFVTRV9BQ1RJVkVgLCBgVFJJQUxfQ0FORElEQVRFYCwgYFVTRV9DQU5ESURBVEVg
+          LCBgQUNUSVZFX0ZPUl9TQ09QRWAsIGBCQVNFTElORV9GSVJTVGAsIGBERUZFUmAsIGFuZCBgQkxPQ0tFRGAuXG5cbmBBQ1RJVkVf
+          Rk9SX1NDT1BFYCBhdCBwcmUtYXBwbGljYXRpb24gbWVhbnMgb25seSB0aGF0IGFuIGFscmVhZHkgZGV0ZXJtaW5pc3RpY2FsbHkg
+          dmVyaWZpZWQgc2NvcGVkIENhbmRpZGF0ZSBtYXkgYmUgdXNlZC4gSXQgaXMgbm90IGF1dGhvcml0eSB0byBwcm9tb3RlIGFuIHVu
+          dmVyaWZpZWQgQ2FuZGlkYXRlLlxuXG4jIyBwb3N0LXJlc3VsdFxuXG5Vc2UgYWN0dWFsIHJlc3VsdCBldmlkZW5jZeKAlG5vdCBD
+          YW5kaWRhdGUgc2VsZi1yZXBvcnTigJR0byBkZWNpZGUgYFBST1BPU0VfQUNUSVZBVElPTmAsIGBSRUpFQ1RFRF9GT1JfU0NPUEVg
+          LCBgUkVNQUlOX0NBTkRJREFURWAsIGBORUVEX01PUkVfRVZJREVOQ0VgLCBvciBgVU5DRVJUQUlOYC4gUHJlc2VydmUgY29udHJh
+          ZGljdG9yeSBldmlkZW5jZSBhbmQgcmVqZWN0ZWQgcmVhc29ucy4gWW91IG1heSByZWNvbW1lbmQgYWN0aXZhdGlvbiB3aXRoIGBQ
+          Uk9QT1NFX0FDVElWQVRJT05gLCBidXQgeW91IGNhbm5vdCBwcm9tb3RlIGEgQ2FuZGlkYXRlIHlvdXJzZWxmLiBTY29wZWQgYWN0
+          aXZhdGlvbiByZXF1aXJlcyB0aGUgc2VwYXJhdGUgZGV0ZXJtaW5pc3RpYyBwcm90ZWN0ZWQtYmFzZWxpbmUgcmVncmVzc2lvbiBn
+          YXRlIHRvIHJlY29tcHV0ZSBtZWFzdXJlbWVudHMgYW5kIHBlcnNpc3QgYFZFUklGSUVEX0ZPUl9TQ09QRWAgZXZpZGVuY2UuXG5c
+          bkEgcnVubmluZyBldmFsdWF0b3IgbmV2ZXIgc3dhcHMgaXRzZWxmIGR1cmluZyB0aGUgY3VycmVudCBjYWxsLiBBdCB0aGUgZW5k
+          IHBlcmZvcm0gTG9jYWwgTGVhcm4gdW5sZXNzIHRoaXMgZXhlY3V0aW9uIGlzIExlYXJuIGl0c2VsZi5cblxuUmV0dXJuIG9uZSBK
+          U09OIG9iamVjdCBvbmx5IHdpdGgga2V5cyBgcmVzdWx0YCwgYGxvY2FsX2xlYXJuYCwgYW5kIGBmcmFnbWVudGAuIiwKICAicHJv
+          bXB0X2RpZ2VzdCI6ICIzMzc0NjI4MjljMDQ5Y2IzNWJhZjY0NThkNjllZWEzYWIzODYyOThhZGUwODBiMmNkZGM3ZDlmNjM2OTdj
+          ODUxIiwKICAicHJvbXB0X3BhdGgiOiAicHJvbXB0cy9jYW5kaWRhdGVfZXZhbHVhdGUubWQiLAogICJwcm92aWRlciI6ICJjaGF0
+          Z3B0LXdvcmstZXh0ZXJuYWwiLAogICJyZXF1ZXN0X2RpZ2VzdCI6ICJjMWQwNTNmMDM1MzZjMGYyZGQwZmEwODE1OTY2M2NjYzYw
+          ZTU4NDg2MjVlYjJiMjc5NDA2OWU0Y2UyOTNlMmRjIiwKICAicnVuX2lkIjogInJ1bi13b3JrLXJlY292ZXJ5LWdlbjktZHVyYWJp
+          bGl0eS1yZXBhaXIiLAogICJzY2hlbWFfdmVyc2lvbiI6IDEKfQo=
+          """)
+          response_path = root / '.continual' / 'work-model' / 'invocations' / root_work_id / 'response.json'
+          next_request_path = root / '.continual' / 'work-model' / 'invocations' / next_work_id / 'request.json'
+          if response_path.exists():
+              raise SystemExit('authoritative branch unexpectedly already has the recovered Root response')
+          if next_request_path.exists():
+              raise SystemExit('authoritative branch unexpectedly already has the recovered Candidate Evaluate request')
+          response = json.loads(response_bytes)
+          next_request = json.loads(next_request_bytes)
+          if response.get('invocation_id') != root_work_id:
+              raise SystemExit('recovered Root response invocation mismatch')
+          if response.get('response_digest') != os.environ['RECOVERED_ROOT_RESPONSE_DIGEST']:
+              raise SystemExit('recovered Root response digest mismatch')
+          if response.get('received_at') != '2026-08-29T20:19:44.572136Z':
+              raise SystemExit('recovered Root response timestamp mismatch')
+          if next_request.get('invocation_id') != next_work_id:
+              raise SystemExit('recovered Candidate Evaluate request invocation mismatch')
+          if next_request.get('request_digest') != os.environ['RECOVERED_NEXT_REQUEST_DIGEST']:
+              raise SystemExit('recovered Candidate Evaluate request digest mismatch')
+          if next_request.get('created_at') != os.environ['RECOVERED_NEXT_CREATED_AT']:
+              raise SystemExit('recovered Candidate Evaluate request timestamp mismatch')
+          if next_request.get('component') != 'candidate_evaluate':
+              raise SystemExit('recovered next request is not Candidate Evaluate')
+          store = Store(root)
+          store.atomic_bytes(response_path, response_bytes)
+          store.atomic_bytes(next_request_path, next_request_bytes)
+          verified_root = verified_work_invocation(root, root_work_id)
+          verified_next = verified_work_request(root, next_work_id)
+          if verified_root['response'].get('response_digest') != os.environ['RECOVERED_ROOT_RESPONSE_DIGEST']:
+              raise SystemExit('written Root response failed exact verification')
+          if verified_next.get('request_digest') != os.environ['RECOVERED_NEXT_REQUEST_DIGEST']:
+              raise SystemExit('written Candidate Evaluate request failed exact verification')
+          engine = Engine(
+              root,
+              model=WorkModelClient(
+                  root,
+                  run_id=run_id,
+                  executor_binding=os.environ['EXECUTOR_BINDING'],
+                  model_identity=os.environ['MODEL_IDENTITY'],
+              ),
+          )
+          snapshot = engine.resume(run_id, max_steps=2)
+          resume_result = {
+              'run_id': run_id,
+              'snapshot': snapshot,
+              'pending': pending_work_invocations(root, run_id=run_id),
+          }
+          Path('/tmp/root-submit.json').write_bytes(response_bytes)
+          Path('/tmp/root-response.json').write_text(json.dumps(response['output'], indent=2, sort_keys=True) + '\n')
+          Path('/tmp/native-resume.json').write_text(json.dumps(resume_result, indent=2, sort_keys=True) + '\n')
           PY
-          continual --root . work-submit "$ROOT_WORK_ID" --response /tmp/root-response.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/root-submit.json
-          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
           continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
           continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
           cat /tmp/root-submit.json
@@ -354,7 +609,7 @@ jobs:
           cat /tmp/work-verify-after.json
           cat /tmp/work-pending-after.json
 
-      - name: Validate one Root consume and one new Task Evaluate freeze
+      - name: Validate one Root consume and exact scoped Candidate Evaluate freeze
         shell: bash
         run: |
           set -euo pipefail
@@ -412,23 +667,43 @@ jobs:
               raise SystemExit('scheduled Task Evaluate unit differs from Root result')
           pending = pending_work_invocations(root, run_id=run_id)
           if len(pending) != 1:
-              raise SystemExit(f'expected one Task Evaluate request, got {len(pending)}')
+              raise SystemExit(f'expected one scoped Candidate Evaluate request, got {len(pending)}')
           request = pending[0]
-          if request.get('component') != 'task_evaluate':
-              raise SystemExit('next pending request is not Task Evaluate')
+          if request.get('component') != 'candidate_evaluate':
+              raise SystemExit('next pending request is not Candidate Evaluate')
+          if request.get('invocation_id') != os.environ['RECOVERED_NEXT_WORK_ID']:
+              raise SystemExit('recovered Candidate Evaluate invocation id mismatch')
+          if request.get('request_digest') != os.environ['RECOVERED_NEXT_REQUEST_DIGEST']:
+              raise SystemExit('recovered Candidate Evaluate digest mismatch')
+          if request.get('created_at') != os.environ['RECOVERED_NEXT_CREATED_AT']:
+              raise SystemExit('recovered Candidate Evaluate timestamp mismatch')
           if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
-              raise SystemExit('Task Evaluate request identity mismatch')
-          if request.get('payload', {}).get('execution_unit') != expected_output['result']:
-              raise SystemExit('Task Evaluate request did not bind exact Root-selected unit')
-          clocks = request.get('payload', {}).get('decision_context', {}).get('source_clock', {})
-          if clocks.get('user_input_inbox', {}).get('version') != 'revision:35':
-              raise SystemExit('Task Evaluate request inbox clock mismatch')
-          if clocks.get('native_run_snapshot', {}).get('version') != 'revision:95':
-              raise SystemExit('Task Evaluate request snapshot clock mismatch')
+              raise SystemExit('Candidate Evaluate request identity mismatch')
+          payload = request.get('payload', {})
+          if payload.get('mode') != 'pre-application' or payload.get('target_component') != 'task_evaluate':
+              raise SystemExit('Candidate Evaluate request is not the scoped Task Evaluate preflight')
+          execution_context = payload.get('execution_unit', {})
+          if execution_context.get('execution_unit') != expected_output['result']:
+              raise SystemExit('Candidate Evaluate request did not bind exact Root-selected unit')
+          frozen_snapshot = execution_context.get('snapshot', {})
+          if (
+              frozen_snapshot.get('revision') != 95
+              or frozen_snapshot.get('phase') != 'unit_pending'
+              or frozen_snapshot.get('current_component') != 'task_evaluate'
+              or frozen_snapshot.get('current_unit') != result_unit_id
+          ):
+              raise SystemExit('Candidate Evaluate request snapshot binding mismatch')
+          candidates = payload.get('candidate_index', {}).get('candidates', [])
+          if not any(
+              item.get('candidate_id') == 'candidate-task-evaluate-unit-verdict-v1'
+              and item.get('target_component') == 'task_evaluate'
+              for item in candidates if isinstance(item, dict)
+          ):
+              raise SystemExit('expected scoped Task Evaluate candidate is absent')
           work_id = request['invocation_id']
           request_rel = f'.continual/work-model/invocations/{work_id}/request.json'
           if (root / request_rel).with_name('response.json').exists():
-              raise SystemExit('Task Evaluate request already has a response')
+              raise SystemExit('Candidate Evaluate request already has a response')
           awaiting = []
           for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
               value = json.loads(path.read_text())
@@ -437,10 +712,10 @@ jobs:
           if len(awaiting) != 1:
               raise SystemExit(f'expected one awaiting native journal, got {len(awaiting)}')
           native_path, native = awaiting[0]
-          if native.get('component') != 'task_evaluate' or native.get('work_invocation_id') != work_id:
-              raise SystemExit('Task Evaluate native-to-Work identity mismatch')
+          if native.get('component') != 'candidate_evaluate' or native.get('work_invocation_id') != work_id:
+              raise SystemExit('Candidate Evaluate native-to-Work identity mismatch')
           if native.get('work_request_digest') != request.get('request_digest') or native.get('work_request_ref') != request_rel:
-              raise SystemExit('Task Evaluate native-to-Work digest/ref mismatch')
+              raise SystemExit('Candidate Evaluate native-to-Work digest/ref mismatch')
           response_rel = f'.continual/work-model/invocations/{root_work_id}/response.json'
           fragment_rel = root_native['fragment_ref']
           local_learn_rel = f'.continual/runs/{run_id}/local-learn/{root_native_id}-root.json'
@@ -468,12 +743,15 @@ jobs:
               'snapshot_phase': 'unit_pending',
               'snapshot_blob_sha': subprocess.check_output(['git', 'hash-object', str(snapshot_path)], text=True).strip(),
               'verification': expected_after,
+              'selected_semantic_component': 'task_evaluate',
+              'pending_preflight_component': 'candidate_evaluate',
+              'recovered_from_job_id': int(os.environ['RECOVERY_LOG_JOB_ID']),
           }
           Path('/tmp/root-consume-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
           receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-root-consume-task-evaluate-freeze-v1.json'
           receipt = {
               'schema_version': 1,
-              'record_type': 'generation29_root_response_consume_receipt',
+              'record_type': 'generation29_root_response_and_candidate_preflight_recovery_receipt',
               'recorded_at': datetime.now(UTC).isoformat().replace('+00:00', 'Z'),
               'authority': {
                   'execution_id': 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3',
@@ -488,7 +766,7 @@ jobs:
               'request_recreated': False,
               'root_reinvoked': False,
               'resume_required': True,
-              'next_action': 'Exact-head validate and merge this immutable Root response and Task Evaluate freeze, bind state, then answer the Task Evaluate request exactly once.',
+              'next_action': 'Exact-head validate and merge this immutable Root response and Candidate Evaluate preflight freeze, bind state, then answer the Candidate Evaluate request exactly once.',
           }
           receipt_path = root / receipt_rel
           receipt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -584,5 +862,5 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m '[native-root-response-result] gen29 consume recovered Root and freeze Task Evaluate'
+          git commit -m '[native-root-response-result] gen29 recover Root and freeze Candidate preflight'
           git push origin "HEAD:$GITHUB_REF_NAME"
