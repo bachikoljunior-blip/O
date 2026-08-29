@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T10:44:44.906Z",
+    "checkpointed_at": "2026-08-29T10:46:57.698Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "v5 passed exact runtime-main/state/frozen-response checks and the reconciled causal continuity preflight, then failed before mutation while recording the mandatory Work source receipt because its projection used the raw-token preflight fence digest instead of Store.stable_digest over the JSON string value.",
+    "reason": "v6 exact workflow head was read back and the single push-triggered native resume launch was accepted; query this run before any relaunch.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_resume_v5_work_source_authority_digest_mismatch_repaired_pending_v6",
+    "status": "native_resume_v6_launch_accepted_pending_progress",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,19 +200,21 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Launch v6 once from this exact-readback checkpoint; never rerun v1-v5.",
+    "next_action": "Observe run 33248586657, obtain its job id, then verify the branch/native result. Do not launch v6 again.",
     "last_verified_effect": "v5 run 33248238885 job 99089317666 passed steps 1-6 and failed at step 7 with WorkSourceObservationError: source observation authority mismatch. Steps 8-12 were skipped; branch head stayed d775ba8e and native blob remains 1d5b358b awaiting.",
     "completed_effect_receipt": "Repository code exact-readback proves continuity_preflight._fence_digest hashes raw UTF-8, while work_source_observation._authority calls Store.stable_digest on the fence string (canonical JSON encoding). The v5 projection mismatch is fully identified and no native mutation occurred.",
     "pending_job_ids": [],
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v6-dual-digest-repair",
-    "exact_frontier": "v1-v5 are terminal and mutation-free. v6 must preserve the exact response and use raw SHA-256 only for causal preflight assertions, but Store.stable_digest for the Work source authority projection.",
-    "current_main_sha": "db6187c4396ddb296eab804466a43457695f993c",
+    "exact_frontier": "v6 run 33248586657 accepted for exact head 1dc0a617; no duplicate launch is permitted while queued/in_progress or until terminal result and effect readback are known.",
+    "current_main_sha": "018d98bb6d960c2f2645b880fdc26666ee21e71d",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [],
-    "next_tool_action": "Exact-readback this state CAS, create v6 from its commit, change only the Work source projection digest algorithm plus expected main/state bindings, then launch once."
+    "pending_workflow_run_ids": [
+      33248586657
+    ],
+    "next_tool_action": "Fetch workflow run 33248586657 and jobs; if accepted-pending, bounded-wait and recheck without relaunch."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1501,7 +1503,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T10:44:44.906Z",
+  "heartbeat_at": "2026-08-29T10:46:57.698Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2330,7 +2332,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T10:44:44.906Z",
+  "last_progress_at": "2026-08-29T10:46:57.698Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -7862,8 +7864,8 @@
   },
   "generation29_native_after_execute": {
     "schema_version": 1,
-    "status": "v5_work_source_authority_digest_mismatch_no_mutation_repaired_pending_v6",
-    "observed_at": "2026-08-29T10:44:44.906Z",
+    "status": "v6_launch_accepted_pending_progress",
+    "observed_at": "2026-08-29T10:46:57.698Z",
     "native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "native_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
     "native_status": "awaiting_work_model",
@@ -7875,7 +7877,7 @@
     "snapshot_revision": 92,
     "snapshot_blob_sha": "48e919441f25db4a7e89d88c04888dff4d590e4f",
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v1",
-    "next_action": "Launch v6 once; v1-v5 are terminal and must never be rerun.",
+    "next_action": "Observe v6 run 33248586657; never duplicate it.",
     "v1_failure": {
       "workflow_run_id": 33246239646,
       "job_id": 99084082158,
@@ -7966,6 +7968,15 @@
       "source_receipt_persisted": false,
       "native_blob_after": "1d5b358bd9a563218611ead73cb57d56256625b5",
       "native_status_after": "awaiting_work_model"
+    },
+    "v6_launch": {
+      "workflow_run_id": 33248586657,
+      "exact_head_sha": "1dc0a61713d975b5421fba47f0e17b5af265e658",
+      "workflow_blob_sha": "c739a63891c5bd70d895d7709c0b66c264ff7efe",
+      "accepted_at": "2026-08-29T10:46:19Z",
+      "status_at_checkpoint": "queued",
+      "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v6-dual-digest-repair",
+      "duplicate_launch_forbidden": true
     }
   }
 }
