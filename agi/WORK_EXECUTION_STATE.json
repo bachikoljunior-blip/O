@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T11:03:07.694Z",
+    "checkpointed_at": "2026-08-29T11:34:41.094Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "v7 exact workflow head and actual Root-boundary postconditions were read back; the single launch is accepted and must be queried before any relaunch.",
+    "reason": "v7 run 33249191953 remains accepted and queued in repository-wide runner congestion. Refresh only the same generation/fence heartbeat so the eventual causal preflight observes live authority; query the accepted run before any further mutation.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_resume_v7_launch_accepted_pending_progress",
+    "status": "native_resume_v7_accepted_queue_heartbeat_refreshed",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,13 +200,15 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Observe run 33249191953, then exact-readback its branch result before any further action.",
+    "next_action": "Poll v7 frequently; once in_progress, stop all state refreshes and observe it to terminal branch-effect readback.",
     "last_verified_effect": "v6 run 33248586657 job 99090215388 passed steps 1-9. Step 10 work-resume returned status continue, phase root_pending, revision 94, checkpoint_reason step_budget_exhausted, pending []; the immediately following stale EXPECTED_SNAPSHOT_BLOB test exited 1. Result validation/persistence/push were skipped and branch head remained 1dc0a617.",
     "completed_effect_receipt": "The v6 ephemeral transition proves exact response consumption and native engine progress are executable after all repaired gates. Remote main remains at the pre-consume native blob 1d5b358b and snapshot blob 48e91944, so no durable effect or duplicate response consumption exists.",
-    "pending_job_ids": [],
+    "pending_job_ids": [
+      99091799011
+    ],
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v7-root-boundary",
-    "exact_frontier": "v7 run 33249191953 is accepted for exact head 99e8e45c. Do not duplicate while queued/in_progress or before terminal branch-effect readback.",
-    "current_main_sha": "573cfe647b0e10fe730b122625464b3371f4f330",
+    "exact_frontier": "v7 remains the only accepted launch. No relaunch or response duplication. The queue heartbeat refresh preserves the same execution_id/generation/fence and frozen continuation.",
+    "current_main_sha": "784f47aa3e5b62e28f33e8d59d46242b7cbefe74",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -214,7 +216,7 @@
     "pending_workflow_run_ids": [
       33249191953
     ],
-    "next_tool_action": "Fetch run 33249191953 and its consume job; bounded-wait without relaunch."
+    "next_tool_action": "Fetch run 33249191953 within a bounded interval; never update state after it enters in_progress."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1503,7 +1505,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T11:03:07.694Z",
+  "heartbeat_at": "2026-08-29T11:34:41.094Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -7864,8 +7866,8 @@
   },
   "generation29_native_after_execute": {
     "schema_version": 1,
-    "status": "v7_launch_accepted_pending_progress",
-    "observed_at": "2026-08-29T11:03:07.694Z",
+    "status": "v7_accepted_queue_heartbeat_refreshed",
+    "observed_at": "2026-08-29T11:34:41.094Z",
     "native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "native_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
     "native_status": "awaiting_work_model",
@@ -7877,7 +7879,7 @@
     "snapshot_revision": 92,
     "snapshot_blob_sha": "48e919441f25db4a7e89d88c04888dff4d590e4f",
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v1",
-    "next_action": "Observe v7 run 33249191953; never duplicate it.",
+    "next_action": "Poll v7; stop refreshing immediately at in_progress; never duplicate launch.",
     "v1_failure": {
       "workflow_run_id": 33246239646,
       "job_id": 99084082158,
@@ -8036,6 +8038,16 @@
       "status_at_checkpoint": "queued",
       "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v7-root-boundary",
       "duplicate_launch_forbidden": true
+    },
+    "v7_queue_heartbeat": {
+      "refreshed_at": "2026-08-29T11:34:41.094Z",
+      "workflow_run_id": 33249191953,
+      "job_id": 99091799011,
+      "status_before_refresh": "queued",
+      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+      "generation": 29,
+      "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+      "duplicate_launch": false
     }
   }
 }
