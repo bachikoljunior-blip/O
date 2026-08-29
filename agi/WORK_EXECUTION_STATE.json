@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T11:00:08.752Z",
+    "checkpointed_at": "2026-08-29T11:03:07.694Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "v6 passed all authority, causal continuity, Work-source, and CI-source gates. work-resume itself succeeded and deterministically moved the local snapshot from revision 92 unit_pending to revision 94 root_pending with no pending Work request. The workflow then failed because it incorrectly asserted the old snapshot blob and a Task Evaluate pending boundary.",
+    "reason": "v7 exact workflow head and actual Root-boundary postconditions were read back; the single launch is accepted and must be queried before any relaunch.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_resume_v6_actual_root_transition_postcondition_bug_repaired_pending_v7",
+    "status": "native_resume_v7_launch_accepted_pending_progress",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,19 +200,21 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Launch v7 once with actual root_pending postconditions and bounded staged paths; never rerun v1-v6.",
+    "next_action": "Observe run 33249191953, then exact-readback its branch result before any further action.",
     "last_verified_effect": "v6 run 33248586657 job 99090215388 passed steps 1-9. Step 10 work-resume returned status continue, phase root_pending, revision 94, checkpoint_reason step_budget_exhausted, pending []; the immediately following stale EXPECTED_SNAPSHOT_BLOB test exited 1. Result validation/persistence/push were skipped and branch head remained 1dc0a617.",
     "completed_effect_receipt": "The v6 ephemeral transition proves exact response consumption and native engine progress are executable after all repaired gates. Remote main remains at the pre-consume native blob 1d5b358b and snapshot blob 48e91944, so no durable effect or duplicate response consumption exists.",
     "pending_job_ids": [],
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v7-root-boundary",
-    "exact_frontier": "v1-v6 are terminal and have no durable branch-native mutation. v7 must replay the same exact response once from remote main, validate the real revision94 root_pending topology, stage the snapshot/artifact plus exact lifecycle receipts, and push once.",
-    "current_main_sha": "bd1b606f9cb1ad76ad41597fa03f8959d6afcfd7",
+    "exact_frontier": "v7 run 33249191953 is accepted for exact head 99e8e45c. Do not duplicate while queued/in_progress or before terminal branch-effect readback.",
+    "current_main_sha": "573cfe647b0e10fe730b122625464b3371f4f330",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [],
-    "next_tool_action": "Exact-readback this state CAS, create v7 with root_pending validation and snapshot/artifact staging, then launch once."
+    "pending_workflow_run_ids": [
+      33249191953
+    ],
+    "next_tool_action": "Fetch run 33249191953 and its consume job; bounded-wait without relaunch."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1501,7 +1503,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T11:00:08.752Z",
+  "heartbeat_at": "2026-08-29T11:03:07.694Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2330,7 +2332,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T11:00:08.752Z",
+  "last_progress_at": "2026-08-29T11:03:07.694Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -7862,8 +7864,8 @@
   },
   "generation29_native_after_execute": {
     "schema_version": 1,
-    "status": "v6_native_transition_ephemeral_postcondition_bug_repaired_pending_v7",
-    "observed_at": "2026-08-29T11:00:08.752Z",
+    "status": "v7_launch_accepted_pending_progress",
+    "observed_at": "2026-08-29T11:03:07.694Z",
     "native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "native_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
     "native_status": "awaiting_work_model",
@@ -7875,7 +7877,7 @@
     "snapshot_revision": 92,
     "snapshot_blob_sha": "48e919441f25db4a7e89d88c04888dff4d590e4f",
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v1",
-    "next_action": "Launch v7 once; v1-v6 are terminal and must never be rerun.",
+    "next_action": "Observe v7 run 33249191953; never duplicate it.",
     "v1_failure": {
       "workflow_run_id": 33246239646,
       "job_id": 99084082158,
@@ -8025,6 +8027,15 @@
       ],
       "next_native_boundary": "root_pending",
       "next_action_after_merge": "Resume Root exactly once to freeze the next Work-exclusive request, then consume it in the same authoritative loop."
+    },
+    "v7_launch": {
+      "workflow_run_id": 33249191953,
+      "exact_head_sha": "99e8e45c65d1380c160d52ae9ab2acae267b00da",
+      "workflow_blob_sha": "f6523bb30696a8bd310053d011dd6e1fb7b36508",
+      "accepted_at": "2026-08-29T11:02:46Z",
+      "status_at_checkpoint": "queued",
+      "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v7-root-boundary",
+      "duplicate_launch_forbidden": true
     }
   }
 }
