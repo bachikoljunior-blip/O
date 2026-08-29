@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T19:02:03.541Z",
+    "checkpointed_at": "2026-08-29T19:07:09.708Z",
     "exact_pending_request_blob_sha": null,
     "exact_pending_request_digest": null,
     "exact_pending_request_ref": null,
     "exact_pending_work_invocation_id": null,
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "The exact frozen Root request and deterministic awaiting native binding are durably exact-readback on the existing recovery branch. Three exact-head workflows are queued; Root was not reinvoked.",
+    "reason": "Exact recovered Root lifecycle remains unchanged at branch head 5db6d158; recovery validation, full test, and directive preflight are accepted queued amid repository-wide Actions saturation.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_request_recovered_branch_ci_pending_skip_ci",
+    "status": "root_request_recovered_branch_ci_queued_heartbeat_skip_ci",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,13 +200,20 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": null,
     "resume_required": true,
-    "next_action": "Observe the three exact-head workflows; repair exact failure if any, otherwise open/merge expected-head PR and bind state to the merged pending request.",
+    "next_action": "Boundedly recheck the accepted target runs without launching duplicates; on terminal failure repair only the concrete cause and preserve the same request.",
     "last_verified_effect": "Recovered exact 146195-byte Root request from job 99140671439, recomputed its original native invocation identity, and exact-readback all five lifecycle/recovery blobs at branch head 5db6d158 without Root reinvocation.",
     "completed_effect_receipt": "O:.continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-native-root-freeze-recovered-from-job-99140671439-v1.json@c2b57dd8db781b3570688d42c1f110bca3f58727",
-    "pending_job_ids": [],
+    "pending_job_ids": [
+      99146083797,
+      99146083715,
+      99146083735,
+      99146083766,
+      99146083806,
+      99146083554
+    ],
     "idempotency_key": "o-work-gen29:root-revision94:recover-exact-invoke-91f2cb57cf0f69a5d9abfce6:v1:branch-5db6d158",
-    "exact_frontier": "Exact Root request is durable on isolated branch; main remains revision94/root_pending with no pending Work request until exact-head validation and merge.",
-    "current_main_sha": "91678da900ee73cc73c7b8c5111c47aae0726d71",
+    "exact_frontier": "Exact recovered request and native binding durable on unchanged branch head; target exact-head workflows accepted but not yet scheduled.",
+    "current_main_sha": "1f542c54ef019af720838c52f5056a781797d352",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -216,7 +223,7 @@
       33269782470,
       33269782474
     ],
-    "next_tool_action": "GET Actions runs 33269782473, 33269782470, and 33269782474 until terminal without duplicate launches.",
+    "next_tool_action": "Fetch workflow jobs for recovery run 33269782473 and exact-head test/directive runs.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -229,7 +236,13 @@
     "recovered_frozen_request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
     "recovered_native_journal_blob_sha": "a1cdec9928329d80f02bfb69c4a0eec840e6450c",
     "branch": "agent/recovery-gen29-root-freeze-v1",
-    "branch_head_sha": "5db6d1584aa9f8038be6ad086fb63ee08e7eb638"
+    "branch_head_sha": "5db6d1584aa9f8038be6ad086fb63ee08e7eb638",
+    "queue_observation": {
+      "observed_at": "2026-08-29T19:07:09.708Z",
+      "repository_queued_runs": 62,
+      "repository_in_progress_runs": 10,
+      "target_runs_status": "queued"
+    }
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1520,7 +1533,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T19:02:03.541Z",
+  "heartbeat_at": "2026-08-29T19:07:09.708Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -8414,10 +8427,10 @@
     ],
     "duplicate_launch_forbidden": true,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T19:02:03.541Z",
+    "last_observed_at": "2026-08-29T19:07:09.708Z",
     "job_id": 99140671439,
     "job_status": "completed",
-    "heartbeat_refresh_count": 20,
+    "heartbeat_refresh_count": 21,
     "accepted_pending_elapsed_seconds": 2045,
     "job_conclusion": "failure",
     "failed_run_id": 33260870910,
@@ -8484,7 +8497,15 @@
     "recovery_validation_workflow_run_id": 33269782473,
     "exact_head_test_workflow_run_id": 33269782470,
     "directive_preflight_workflow_run_id": 33269782474,
-    "recovery_validation_status": "queued"
+    "recovery_validation_status": "queued",
+    "exact_head_test_status": "queued",
+    "directive_preflight_status": "queued",
+    "queue_observation": {
+      "observed_at": "2026-08-29T19:07:09.708Z",
+      "repository_queued_runs": 62,
+      "repository_in_progress_runs": 10,
+      "target_runs_status": "queued"
+    }
   },
   "generation29_ci_queue_amplification_repair": {
     "identified_at": "2026-08-29T15:28:32.834Z",
