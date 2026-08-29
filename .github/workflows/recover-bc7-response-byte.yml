@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   scan:
-    name: scan repair chunk ${{ matrix.chunk }}
+    name: scan pre-PR chunk ${{ matrix.chunk }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -48,9 +48,9 @@ jobs:
           }
 
           chunk = int(os.environ["CHUNK"])
-          first_offset = chunk * 65
-          last_offset = min(780, first_offset + 65)
-          origin = datetime(2026, 8, 28, 23, 30, 0, tzinfo=timezone.utc)
+          first_offset = chunk * 80
+          last_offset = min(960, first_offset + 80)
+          origin = datetime(2026, 8, 28, 23, 14, 0, tzinfo=timezone.utc)
           sentinel = "XXXXXX"
 
           for offset in range(first_offset, last_offset):
