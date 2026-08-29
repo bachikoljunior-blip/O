@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   scan:
-    name: scan generation22-to-generation25 repair window chunk ${{ matrix.chunk }}
+    name: scan generation25-to-proof final gap chunk ${{ matrix.chunk }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -53,12 +53,12 @@ jobs:
           Path("prefix.bin").write_bytes(raw[:marker])
           Path("suffix.bin").write_bytes(raw[marker + len(placeholder):])
 
-          self_timestamp = "2026-08-27T02:08:00.000001Z"
+          self_timestamp = "2026-08-28T04:37:48.217001Z"
           response["received_at"] = self_timestamp
           self_body = (json.dumps(response, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
           self_raw = f"blob {len(self_body)}\0".encode("ascii") + self_body
           Path("self_target.txt").write_text(hashlib.sha1(self_raw, usedforsecurity=False).hexdigest() + "\n", encoding="ascii")
-          origin = datetime(2026, 8, 27, 2, 8, 0, tzinfo=timezone.utc)
+          origin = datetime(2026, 8, 28, 4, 37, 48, tzinfo=timezone.utc)
           Path("origin_epoch.txt").write_text(str(int(origin.timestamp())) + "\n", encoding="ascii")
           PY
 
@@ -184,24 +184,24 @@ jobs:
           self_target=$(tr -d '\n' < self_target.txt)
 
           set +e
-          ./scanner prefix.bin suffix.bin "$origin_epoch" 0 1 1 1 2 "$self_target" > self-test.log 2>&1
+          ./scanner prefix.bin suffix.bin "$origin_epoch" 0 1 1 217001 217002 "$self_target" > self-test.log 2>&1
           self_code=$?
           set -e
           cat self-test.log
           test "$self_code" -eq 42
-          grep -F "FOUND_RECEIVED_AT=2026-08-27T02:08:00.000001Z" self-test.log
+          grep -F "FOUND_RECEIVED_AT=2026-08-28T04:37:48.217001Z" self-test.log
           grep -F "FOUND_BLOB=$self_target" self-test.log
 
-          total_seconds=86774
+          total_seconds=66972
           first_offset=$(( CHUNK * total_seconds / 12 ))
           last_offset=$(( (CHUNK + 1) * total_seconds / 12 ))
           middle_offset=$(( (first_offset + last_offset) / 2 ))
           real_target=dabc940ed79023c3ac971d44a0a8fd1110b4ebce
 
           set +e
-          ./scanner prefix.bin suffix.bin "$origin_epoch" "$first_offset" "$middle_offset" "$total_seconds" 1 855000 "$real_target" > scan-a.log 2>&1 &
+          ./scanner prefix.bin suffix.bin "$origin_epoch" "$first_offset" "$middle_offset" "$total_seconds" 217001 1000000 "$real_target" > scan-a.log 2>&1 &
           pid_a=$!
-          ./scanner prefix.bin suffix.bin "$origin_epoch" "$middle_offset" "$last_offset" "$total_seconds" 1 855000 "$real_target" > scan-b.log 2>&1 &
+          ./scanner prefix.bin suffix.bin "$origin_epoch" "$middle_offset" "$last_offset" "$total_seconds" 217001 1000000 "$real_target" > scan-b.log 2>&1 &
           pid_b=$!
           wait "$pid_a"
           code_a=$?
