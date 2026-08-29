@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   scan:
-    name: scan chunk ${{ matrix.chunk }}
+    name: scan repair chunk ${{ matrix.chunk }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -19,7 +19,7 @@ jobs:
         chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     steps:
       - uses: actions/checkout@v5
-      - name: Recover exact received_at
+      - name: Recover exact preserved repair received_at
         env:
           CHUNK: ${{ matrix.chunk }}
         run: |
@@ -48,9 +48,9 @@ jobs:
           }
 
           chunk = int(os.environ["CHUNK"])
-          first_offset = chunk * 9
-          last_offset = min(103, first_offset + 9)
-          origin = datetime(2026, 8, 27, 0, 43, 27, tzinfo=timezone.utc)
+          first_offset = chunk * 65
+          last_offset = min(780, first_offset + 65)
+          origin = datetime(2026, 8, 28, 23, 30, 0, tzinfo=timezone.utc)
           sentinel = "XXXXXX"
 
           for offset in range(first_offset, last_offset):
@@ -62,8 +62,7 @@ jobs:
               marker = raw.index(sentinel.encode("ascii"))
               base = hashlib.sha1(raw[:marker], usedforsecurity=False)
               suffix = raw[marker + 6 :]
-              upper = 213573 if offset == 102 else 999999
-              for micros in range(upper + 1):
+              for micros in range(1_000_000):
                   digest = base.copy()
                   digest.update(f"{micros:06d}".encode("ascii"))
                   digest.update(suffix)
