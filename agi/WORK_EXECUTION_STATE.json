@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_bc7_generation25_window_search_slot_0312_overlap",
+  "active_component": "generation29_bc7_generation25_window_excluded_post_native_gap_preflight",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T03:13:48.090Z",
+    "checkpointed_at": "2026-08-29T03:22:52.385Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -200,30 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Recheck accepted workflow 33230254428 to terminal state; verify failed logs before interpreting failure and never duplicate launch.",
-    "last_verified_effect": "The 03:12 scheduled slot is covered by this same fenced execution while workflow 33230254428 has 4 successful no-match chunks and 8 accepted pending chunks.",
-    "completed_effect_receipt": "Slot 2026-08-29T03:12:00Z overlap bound with exact enabled hourly task readback; no duplicate automation, writer, or diagnostic launch.",
-    "pending_job_ids": [
-      99041713954,
-      99041713956,
-      99041713966,
-      99041713967,
-      99041713971,
-      99041713992,
-      99041714014,
-      99041714019
-    ],
-    "idempotency_key": "o-work-gen29:slot-20260829T031200Z:run-33230254428:overlap",
-    "exact_frontier": "Generation25 diagnostic accepted: 4/12 successful no-match, 8/12 pending under exact head 21c1817a.",
-    "current_main_sha": "910e0e13188c117d9181eab7b611186d065dcfe9",
+    "next_action": "Launch one isolated exact-target diagnostic for 2026-08-27T00:45:09.213574Z..2026-08-27T00:46:13.000000Z, then track only its accepted run.",
+    "last_verified_effect": "Workflow 33230254428 completed all 12 generation25 chunks successfully; exact target blob dabc940ed79023c3ac971d44a0a8fd1110b4ebce was absent from 8,614,362,001 candidates.",
+    "completed_effect_receipt": "Generation25 activity interval 2026-08-28T02:14:13.855000Z..2026-08-28T04:37:48.217000Z is durably excluded; no response candidate was published.",
+    "pending_job_ids": [],
+    "idempotency_key": "o-work-gen29:bc7-byte-recovery:run-33230254428:completed-no-match",
+    "exact_frontier": "Generation25 interval excluded; the uncovered 63.786427-second generation22 post-native gap is next.",
+    "current_main_sha": "d95e18e8a68a16db33e006acaa5dda5ed686a13c",
     "goal_revision": 34,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
-    "pending_workflow_run_ids": [
-      33230254428
-    ],
-    "next_tool_action": "Fetch workflow 33230254428 jobs; if all success checkpoint interval exclusion, if a job fails fetch that exact job log."
+    "pending_workflow_run_ids": [],
+    "next_tool_action": "Replace the existing diagnostic workflow generation/interval constants on branch work/recovery-gen29-bc7-response-byte-diagnostic-v1 and exact-readback the resulting head/blob before accepting its run."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1480,7 +1469,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T03:13:48.090Z",
+  "heartbeat_at": "2026-08-29T03:22:52.385Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2309,7 +2298,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T03:13:48.090Z",
+  "last_progress_at": "2026-08-29T03:22:52.385Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -5393,8 +5382,8 @@
   },
   "generation29_revision34_refresh": {
     "schema_version": 1,
-    "status": "bc7_generation25_window_search_accepted_slot_0312_overlap",
-    "observed_at": "2026-08-29T03:13:48.090Z",
+    "status": "bc7_generation25_window_excluded_post_native_gap_preflight",
+    "observed_at": "2026-08-29T03:22:52.385Z",
     "user_input": {
       "revision": 34,
       "id": "user-reaffirmation-run-to-achievement-slot-integrity-20260828-v34",
@@ -5422,8 +5411,8 @@
       "blob_sha": "0a2e9b12f791f3d52b986de4fc321c2e085dcba7"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision34:typed-directive-refresh:v1",
-    "next_action": "Continue owner-bound rechecks of accepted workflow 33230254428; do not duplicate the run. Verify any failing job log as a possible exact target match.",
-    "updated_at": "2026-08-29T03:13:48.090Z",
+    "next_action": "Update the existing isolated diagnostic branch exactly once for the 63,786,427-candidate post-native gap, exact-readback it, and consume its single accepted workflow.",
+    "updated_at": "2026-08-29T03:22:52.385Z",
     "repair": {
       "pull_request": 338,
       "branch": "work/recovery-gen29-directive-revision33-binding-v1",
@@ -5521,7 +5510,7 @@
       "external_effect_repeated": false,
       "request_recreated": false,
       "response_repeated": false,
-      "status": "generation25_interval_accepted_in_progress",
+      "status": "generation25_interval_excluded_post_native_generation22_gap_next",
       "rule": "Do not submit or regenerate this accepted-pending invocation. After the frozen generation29 Candidate lifecycle is main-durable, publish only the already-existing exact repair response with its prior proof, exact-readback it, and verify pending=0 before native revision92 resume.",
       "semantic_output_digest_recomputed_matches": true,
       "semantic_response_digest_recomputed_matches": true,
@@ -5530,7 +5519,7 @@
       "exact_target_blob_sha": "dabc940ed79023c3ac971d44a0a8fd1110b4ebce",
       "remote_target_blob_present": false,
       "no_new_response_generation": true,
-      "next_safe_action": "Recheck accepted workflow 33230254428 and its exact 12 jobs without another launch; a failed job may be the intended SHA match and must be verified from its actual log.",
+      "next_safe_action": "Launch one exact-target read-only diagnostic for the uncovered post-native generation22 gap 2026-08-27T00:45:09.213574Z..2026-08-27T00:46:13.000000Z; never publish unless Git blob dabc940ed79023c3ac971d44a0a8fd1110b4ebce matches.",
       "diagnostic": {
         "branch": "work/recovery-gen29-bc7-response-byte-diagnostic-v1",
         "first_head_sha": "dc4014f8ecef44570b5079662b538f5dacf2d8f6",
@@ -6218,7 +6207,7 @@
         "tenth_interval_start": "2026-08-28T02:14:13.855000Z",
         "tenth_interval_end": "2026-08-28T04:37:48.217000Z",
         "tenth_candidate_count": 8614362001,
-        "tenth_status": "accepted_in_progress",
+        "tenth_status": "completed_no_match",
         "tenth_head_sha": "21c1817a37a5b2f399b0dcbd926ca9855e7de591",
         "tenth_workflow_blob_sha": "045d9002cf08092e9dfa9f3e00b6cc1ce6b50627",
         "tenth_workflow_run_id": 33230254428,
@@ -6244,14 +6233,14 @@
           {
             "id": 99041713954,
             "name": "scan generation25 chunk 6",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99041713956,
             "name": "scan generation25 chunk 1",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99041713959,
@@ -6262,42 +6251,44 @@
           {
             "id": 99041713966,
             "name": "scan generation25 chunk 4",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99041713967,
             "name": "scan generation25 chunk 3",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99041713971,
             "name": "scan generation25 chunk 11",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99041713992,
             "name": "scan generation25 chunk 2",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99041714014,
             "name": "scan generation25 chunk 10",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           },
           {
             "id": 99041714019,
             "name": "scan generation25 chunk 8",
-            "status": "in_progress",
-            "conclusion": null
+            "status": "completed",
+            "conclusion": "success"
           }
         ],
         "tenth_response_candidate_published": false,
-        "tenth_completed_job_count": 4
+        "tenth_completed_job_count": 12,
+        "tenth_conclusion": "success",
+        "tenth_completed_at": "2026-08-29T03:22:52.385Z"
       }
     },
     "bounded_rechecks": [
