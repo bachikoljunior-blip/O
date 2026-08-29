@@ -205,7 +205,7 @@
     "completed_effect_receipt": "PR336 merged main 4d7eeea9d8106782bc7b6603e30145fac3f3cf18 from repaired head d62bc08786a6679157d76b0f81cdc47bf15711ff tree 75610cf; blobs e0c4ca3e, 9d0a7a92, e9c3939f, a99374fd exact-readback; report digest 8314097b8e31f40d22bb702c4e81bbd751fcdc15fcfed5f26b6168271f0b8c8f; blocked lifecycle head 2351597 remains unpublished",
     "pending_job_ids": [],
     "idempotency_key": "o-work-refire:g29:9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781:2b46edd1:revision92-source-refresh-execute-ablation-v1",
-    "exact_frontier": "PR338 bf30435 directive preflight and pytest shards 0,1,3 succeeded; shard2 and aggregate pending; revision34/generation29/fence unchanged"
+    "exact_frontier": "PR338 bf30435 directive preflight and shards 0,1,3 succeeded; shard2 still in progress under workflow 33221561087; same task enabled and exact hourly schedule read back before 00:12 slot"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1462,7 +1462,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T00:00:28.109Z",
+  "heartbeat_at": "2026-08-29T00:09:26.215Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -5405,7 +5405,7 @@
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision34:typed-directive-refresh:v1",
     "next_action": "Continue bounded exact-head rechecks without duplicate launch. Wait for shard 2 and the dependent aggregate, then fresh authority/inbox/head/latest-main/intersection/mergeability checks and expected-head merge.",
-    "updated_at": "2026-08-29T00:00:28.109Z",
+    "updated_at": "2026-08-29T00:09:26.215Z",
     "repair": {
       "pull_request": 338,
       "branch": "work/recovery-gen29-directive-revision33-binding-v1",
@@ -5505,6 +5505,20 @@
       "response_repeated": false,
       "status": "exact_existing_response_identified_not_yet_remote_main_durable",
       "rule": "Do not submit or regenerate this accepted-pending invocation. After the frozen generation29 Candidate lifecycle is main-durable, publish only the already-existing exact repair response with its prior proof, exact-readback it, and verify pending=0 before native revision92 resume."
-    }
+    },
+    "bounded_rechecks": [
+      {
+        "observed_at": "2026-08-29T00:09:26.215Z",
+        "exact_head": "bf30435d618a50fc06fc1c5bcc98b578da2ac9f3",
+        "workflow_run": 33221561087,
+        "classification": "three_shards_success_one_shard_in_progress_no_failure_no_head_move_no_duplicate_launch",
+        "automation_task_readback": {
+          "task_id": "6a902927853481919931a1a1a1a7072d",
+          "enabled": true,
+          "schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
+          "last_run_time": "2026-08-28T23:18:15.356415Z"
+        }
+      }
+    ]
   }
 }
