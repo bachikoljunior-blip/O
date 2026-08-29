@@ -1,0 +1,38 @@
+{
+  "role": "evaluation",
+  "observed_at": "2026-08-30T04:32:46+09:00",
+  "repository": "bachikoljunior-blip/O",
+  "branch": "main",
+  "main_head_sha": "94e270c4b35df0cc758136d9d4f87d192ac678f0",
+  "bootstrap": {
+    "required_control_path": "note/automation_control/DESIRED_STATE.json",
+    "control_fetch_status": 404,
+    "control_present_on_main": false,
+    "control_directory_confirmation": "note/automation_control contains receipts/ only",
+    "enabled_desired": "UNAVAILABLE",
+    "role_config": "UNAVAILABLE"
+  },
+  "execution": {
+    "semantic_work_performed": false,
+    "checker_execution_count": 0,
+    "acceptance_execution_count": 0,
+    "new_acceptance_claims": 0,
+    "desired_state_edited": false
+  },
+  "clean_exploration": {
+    "status": "CONTAMINATED_DISCOVERY_ONLY",
+    "detail": "Before the required control fetch, a repository-discovery code search exposed unrelated receipt filenames/metadata. No exposed non-evaluation semantics were used for evaluation work. After the control 404, only control metadata and evaluation-owned receipt metadata were inspected.",
+    "semantic_evidence_usable": false
+  },
+  "termination": {
+    "kind": "HARD_CONTROL_STOP",
+    "reason": "Required bootstrap control file is absent on current main, so current evaluation role configuration and Phase-1 desired state cannot be established safely.",
+    "phase1_status": "UNKNOWN_NOT_ASSERTED",
+    "scheduler_action": "DISABLE_CURRENT_AUTOMATION_AS_FULLY_BLOCKED"
+  },
+  "exact_continuation": [
+    "On any explicit future restart, fetch note/automation_control/DESIRED_STATE.json as the first repository read.",
+    "If it is still absent, perform no semantic work and persist a control-missing receipt only.",
+    "If present, execute only the current evaluation role config under clean_exploration and never edit DESIRED_STATE.json."
+  ]
+}
