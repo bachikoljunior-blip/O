@@ -1,4 +1,4 @@
-name: gen29 validate recovered Root freeze v3
+name: gen29 validate recovered Root freeze v4
 
 on:
   push:
@@ -9,12 +9,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: gen29-root-freeze-recovery-v3
+  group: gen29-root-freeze-recovery-v4
   cancel-in-progress: false
 
 jobs:
   recovery-validate:
-    if: ${{ contains(github.event.head_commit.message, '[native-root-recovery-v3]') }}
+    if: ${{ contains(github.event.head_commit.message, '[native-root-recovery-v4]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -50,7 +50,7 @@ jobs:
           request_ref = f'.continual/work-model/invocations/{work_id}/request.json'
           receipt_ref = f'.continual/runs/{run_id}/recovery-receipts/gen29-native-root-freeze-recovered-from-job-99140671439-v1.json'
           expected_paths = {
-              workflow_ref: 'M',
+              workflow_ref: 'A',
               events_ref: 'M',
               native_ref: 'A',
               request_ref: 'A',
