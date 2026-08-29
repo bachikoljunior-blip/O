@@ -1,4 +1,4 @@
-name: gen29 recover exact Root response and Candidate preflight v3
+name: gen29 recover exact Root response and Candidate preflight v4
 
 on:
   push:
@@ -39,6 +39,7 @@ jobs:
       RECOVERED_NEXT_WORK_ID: invoke-6fefa64dcaa56548bf1c3de0
       RECOVERED_NEXT_REQUEST_DIGEST: c1d053f03536c0f2dd0fa08159663ccc60e5848625eb2b2794069e4ce293e2dc
       RECOVERED_NEXT_CREATED_AT: '2026-08-29T20:19:45.287848Z'
+      RECOVERED_SNAPSHOT_UPDATED_AT: '2026-08-29T20:19:45.285809Z'
       RECOVERED_ROOT_RESPONSE_DIGEST: 556918d45a894b94a9bd28b658157be6352a1b855c3609d08390f6ccc6aa6883
       RECOVERY_LOG_JOB_ID: '99155163645'
     steps:
@@ -299,6 +300,7 @@ jobs:
           from continual.store import Store
           from continual.work_session import (
               WorkModelClient,
+              WorkSessionError,
               pending_work_invocations,
               verified_work_invocation,
               verified_work_request,
@@ -583,15 +585,30 @@ jobs:
               raise SystemExit('written Root response failed exact verification')
           if verified_next.get('request_digest') != os.environ['RECOVERED_NEXT_REQUEST_DIGEST']:
               raise SystemExit('written Candidate Evaluate request failed exact verification')
+          class ExactRecoveredWorkModelClient(WorkModelClient):
+              def call(self, component, payload, *, prompt_path):
+                  invocation_id, request_body = self._request_for(component, payload, prompt_path)
+                  if component == 'candidate_evaluate':
+                      if invocation_id != os.environ['RECOVERED_NEXT_WORK_ID']:
+                          raise WorkSessionError(
+                              'recovery replay would create an alternate Candidate Evaluate request'
+                          )
+                      if request_body.get('request_digest') != os.environ['RECOVERED_NEXT_REQUEST_DIGEST']:
+                          raise WorkSessionError(
+                              'recovery replay Candidate Evaluate request digest mismatch'
+                          )
+                  return super().call(component, payload, prompt_path=prompt_path)
+
           engine = Engine(
               root,
-              model=WorkModelClient(
+              model=ExactRecoveredWorkModelClient(
                   root,
                   run_id=run_id,
                   executor_binding=os.environ['EXECUTOR_BINDING'],
                   model_identity=os.environ['MODEL_IDENTITY'],
               ),
           )
+          engine.store.utc_now = lambda: os.environ['RECOVERED_SNAPSHOT_UPDATED_AT']
           snapshot = engine.resume(run_id, max_steps=2)
           resume_result = {
               'run_id': run_id,
@@ -657,6 +674,7 @@ jobs:
           expected_snapshot = {
               'revision': 95, 'phase': 'unit_pending', 'status': 'continue',
               'current_unit': result_unit_id, 'current_component': 'task_evaluate',
+              'updated_at': os.environ['RECOVERED_SNAPSHOT_UPDATED_AT'],
           }
           for key, value in expected_snapshot.items():
               if snapshot.get(key) != value:
