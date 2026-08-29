@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_bc7_exact_response_pr_ci_pending",
+  "active_component": "generation29_bc7_pr339_ci_slot_0512_overlap",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T04:41:21.411Z",
+    "checkpointed_at": "2026-08-29T05:13:25.676Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -200,22 +200,23 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Wait for exact-head workflow runs 33234390107 and 33234390099; inspect any failure before repair, then revalidate main, authority, inbox, head, blob, diff, and mergeability.",
-    "last_verified_effect": "PR 339 was opened with changed_files=1 and exact target blob dabc940e; both required exact-head workflows were accepted.",
-    "completed_effect_receipt": "No head move, duplicate response publication, or merge attempt occurred.",
-    "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:recover-bc7-response:pr339:head-2d08a055:ci-v1",
-    "exact_frontier": "PR 339 open at exact one-file head 2d08a055; directive-source-preflight and test workflow runs accepted and queued.",
-    "current_main_sha": "b1a767f4db98fe0076ce3f15f746bd0249d65afc",
+    "next_action": "Recheck test workflow 33234390099 to terminal status; on success revalidate authority, inbox, main, exact PR head/blob/diff and mergeability, then expected-head merge.",
+    "last_verified_effect": "The 05:12 hourly slot is covered by the same generation-29 execution actively tracking PR 339 exact-head CI.",
+    "completed_effect_receipt": "Task remains enabled with the identical hourly RRULE; no duplicate automation, writer, workflow, response, or merge.",
+    "pending_job_ids": [
+      99052682860
+    ],
+    "idempotency_key": "o-work-gen29:slot-20260829T051200Z:pr339:run-33234390099:overlap",
+    "exact_frontier": "Slot 05:12 covered by same fenced execution while PR 339 exact-head CI has directive success, 3/4 pytest shards successful, 1/4 running.",
+    "current_main_sha": "399740d94c85ac942a2d364ce7faae8ea3e17924",
     "goal_revision": 34,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
     "pending_workflow_run_ids": [
-      33234390107,
       33234390099
     ],
-    "next_tool_action": "Fetch exact-head workflow runs and jobs for PR 339."
+    "next_tool_action": "Fetch workflow 33234390099 jobs."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1472,7 +1473,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T04:41:21.411Z",
+  "heartbeat_at": "2026-08-29T05:13:25.676Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2301,7 +2302,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T04:41:21.411Z",
+  "last_progress_at": "2026-08-29T05:13:25.676Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -5414,8 +5415,8 @@
       "blob_sha": "0a2e9b12f791f3d52b986de4fc321c2e085dcba7"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision34:typed-directive-refresh:v1",
-    "next_action": "Wait for exact-head workflow runs 33234390107 and 33234390099; inspect any failure before repair, then revalidate main, authority, inbox, head, blob, diff, and mergeability.",
-    "updated_at": "2026-08-29T04:41:21.411Z",
+    "next_action": "Recheck test workflow 33234390099 to terminal status; on success revalidate authority, inbox, main, exact PR head/blob/diff and mergeability, then expected-head merge.",
+    "updated_at": "2026-08-29T05:13:25.676Z",
     "repair": {
       "pull_request": 338,
       "branch": "work/recovery-gen29-directive-revision33-binding-v1",
@@ -5513,7 +5514,7 @@
       "external_effect_repeated": false,
       "request_recreated": false,
       "response_repeated": false,
-      "status": "exact_response_pr339_ci_pending",
+      "status": "exact_response_pr339_ci_slot_0512_overlap",
       "rule": "Do not submit or regenerate this accepted-pending invocation. After the frozen generation29 Candidate lifecycle is main-durable, publish only the already-existing exact repair response with its prior proof, exact-readback it, and verify pending=0 before native revision92 resume.",
       "semantic_output_digest_recomputed_matches": true,
       "semantic_response_digest_recomputed_matches": true,
@@ -5522,7 +5523,7 @@
       "exact_target_blob_sha": "dabc940ed79023c3ac971d44a0a8fd1110b4ebce",
       "remote_target_blob_present": false,
       "no_new_response_generation": true,
-      "next_safe_action": "Wait for exact-head workflow runs 33234390107 and 33234390099; inspect any failure before repair, then revalidate main, authority, inbox, head, blob, diff, and mergeability.",
+      "next_safe_action": "Recheck test workflow 33234390099 to terminal status; on success revalidate authority, inbox, main, exact PR head/blob/diff and mergeability, then expected-head merge.",
       "diagnostic": {
         "branch": "work/recovery-gen29-bc7-response-byte-diagnostic-v1",
         "first_head_sha": "dc4014f8ecef44570b5079662b538f5dacf2d8f6",
@@ -7140,6 +7141,51 @@
         ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
         ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/response.json": "2e885226a19c11c98c98fad7172354edae2901d1"
       }
+    }
+  },
+  "scheduled_slot_integrity": {
+    "audited_at": "2026-08-29T05:13:25.676Z",
+    "intended_slot": "2026-08-29T05:12:00Z",
+    "actual_start": "2026-08-28T23:14:52Z",
+    "start_delay_seconds": 0,
+    "overlap_started_before_slot_seconds": 21428,
+    "previous_slot_coverage": {
+      "intended_slot": "2026-08-29T04:12:00Z",
+      "actual_start": "2026-08-28T23:14:52Z",
+      "start_delay_seconds": 0,
+      "gap_classification": "covered_by_same_authoritative_invocation_overlap",
+      "receipt": "automation_control/receipts/o_work_monitor_recovery/20260829T041745232Z-gen29-slot-0412-overlap-and-generation22-to25-complete.json",
+      "state_commit": "ba0aa31020f070cbe17eef6323d8c89cd757d3d0"
+    },
+    "gap_classification": "covered_by_same_authoritative_invocation_overlap",
+    "repair_action": "none_no_duplicate_launch_or_writer_preserve_same_automation_id",
+    "exact_task_readback": {
+      "task_id": "6a902927853481919931a1a1a1a7072d",
+      "enabled": true,
+      "timezone": "Asia/Tokyo",
+      "schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
+      "last_run_time": "2026-08-29T04:03:22.653398+00:00",
+      "next_run_time": null,
+      "updated_at": "2026-08-29T04:03:45.748542+00:00",
+      "conversation_id": "6a901eda-f360-83e8-99b0-7ada04dc36c7"
+    },
+    "overlap_evidence": {
+      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+      "generation": 29,
+      "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+      "pre_slot_state_commit": "399740d94c85ac942a2d364ce7faae8ea3e17924",
+      "pre_slot_heartbeat_at": "2026-08-29T05:13:25.676Z",
+      "post_slot_checkpoint_at": "2026-08-29T05:13:25.676Z",
+      "pull_request": 339,
+      "exact_head": "2d08a0550262748c30eeaaa9c375caa2b3cbe095",
+      "directive_workflow_run_id": 33234390107,
+      "directive_status": "completed",
+      "directive_conclusion": "success",
+      "test_workflow_run_id": 33234390099,
+      "test_status": "in_progress",
+      "test_conclusion": null,
+      "completed_success_jobs": 3,
+      "pending_jobs": 1
     }
   }
 }
