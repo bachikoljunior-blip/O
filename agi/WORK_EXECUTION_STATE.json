@@ -176,14 +176,14 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T06:47:51.603Z",
+    "checkpointed_at": "2026-08-29T07:01:46.403Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
     "exact_pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "The trusted Work verifier completed against the exact post-merge journal and proved no pending Work request.",
+    "reason": "Existing exact-head source CI remains actively executing its final pytest shard; authority heartbeat renewed before the 900-second stale threshold.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
@@ -200,17 +200,15 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Track existing main test run 33238893400 to terminal without relaunch; if all five jobs succeed, bind CI source policy to its exact head/run/jobs and launch one fresh-receipt native consume workflow.",
-    "last_verified_effect": "Run 33238964691 job 99064862244 logged valid=true, requests=84, responses=84, pending=0, WORK_PENDING=[], native_completed=77, native_fragments=77.",
-    "completed_effect_receipt": "Exact verifier branch/head/run/job/log markers were read back; no request, response, or native invocation was replayed.",
+    "next_action": "Continue bounded observation of run 33238893400 without relaunch; on terminal success bind its exact policy and launch one fresh-receipt native consume.",
+    "last_verified_effect": "Direct job readback shows three successful shards and job 99064676827 actively running on exact head 614ead18.",
+    "completed_effect_receipt": "Heartbeat renewal only; generation, fence, Work request/response, native journal, workflow IDs, and frozen continuation are unchanged.",
     "pending_job_ids": [
-      99064676796,
-      99064676827,
-      99064676900
+      99064676827
     ],
-    "idempotency_key": "o-work-gen29:postmerge:work-verify-84-of-84-pending0:v1",
-    "exact_frontier": "Work journal valid with 84/84 and pending0; exact native binding plus revision35 preflight repaired; source CI 33238893400 still running before fresh-receipt consume.",
-    "current_main_sha": "023f58a496e493df2b98a3d440a7da3a7ae7fff9",
+    "idempotency_key": "o-work-gen29:source-ci-33238893400:shard2-active-20260829T0701Z:v1",
+    "exact_frontier": "Work verify 84/84 pending0; exact continuation/preflight repaired; source CI 3 shards successful and final shard active.",
+    "current_main_sha": "4ad5ddbd7adce67c29a49779c7540a1dd7d5c1b1",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -218,7 +216,7 @@
     "pending_workflow_run_ids": [
       33238893400
     ],
-    "next_tool_action": "Fetch run 33238893400 and its jobs after bounded wait; on failure inspect logs, on success CAS-bind source CI policy."
+    "next_tool_action": "Fetch run 33238893400 and job 99064676827 after bounded wait; do not relaunch."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1486,7 +1484,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T06:47:51.603Z",
+  "heartbeat_at": "2026-08-29T07:01:46.403Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -4001,7 +3999,7 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "023f58a496e493df2b98a3d440a7da3a7ae7fff9",
+  "source_main_sha": "4ad5ddbd7adce67c29a49779c7540a1dd7d5c1b1",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
@@ -7295,7 +7293,7 @@
     },
     "idempotency_key": "o-work-gen29:revision35:typed-ledger-refresh-and-pr339-revalidate-v1",
     "next_action": "Track existing main test run 33238893400 to terminal without relaunch; if all five jobs succeed, bind CI source policy to its exact head/run/jobs and launch one fresh-receipt native consume workflow.",
-    "updated_at": "2026-08-29T06:47:51.603Z",
+    "updated_at": "2026-08-29T07:01:46.403Z",
     "pr339_revalidation": {
       "status": "merged_main_exact_response_readback_verified",
       "pull_request": 339,
@@ -7440,8 +7438,8 @@
         {
           "id": 99064676796,
           "name": "pytest shard 0 of 4",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         },
         {
           "id": 99064676827,
@@ -7452,11 +7450,11 @@
         {
           "id": 99064676900,
           "name": "pytest shard 3 of 4",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         }
       ],
-      "observed_at": "2026-08-29T06:47:51.603Z"
+      "observed_at": "2026-08-29T07:01:46.403Z"
     }
   }
 }
