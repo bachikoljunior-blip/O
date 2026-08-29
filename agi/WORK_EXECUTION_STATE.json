@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision34_directive_binding_main_durable_payload_pr337_rebuild_next",
+  "active_component": "generation29_revision34_payload_pr337_exact_head_ci_queued",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T00:26:14.883Z",
+    "checkpointed_at": "2026-08-29T00:28:07.157Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -201,18 +201,21 @@
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
     "next_action": "Continue bounded exact-head rechecks without duplicate launch. Wait for shard 2 and the dependent aggregate, then fresh authority/inbox/head/latest-main/intersection/mergeability checks and expected-head merge.",
-    "last_verified_effect": "Typed directive source now matches USER_INPUT_INBOX revision34 on main.",
-    "completed_effect_receipt": "PR338 merged at exact expected head bf30435d618a50fc06fc1c5bcc98b578da2ac9f3 as main d2e22d45a53859f3335cb0a7cfdbc60aea5da9c4; revision34 ledger blob f589a57a16aa577ccc9853509062a5faa3907281 exact-readback verified.",
+    "last_verified_effect": "Directive stale-source cause eliminated; exact frozen lifecycle payload branch now includes revision34 main without recreating request or repeating response.",
+    "completed_effect_receipt": "Existing PR337 fast-forwarded to exact head 2b2bda15307d6643db587b6894aa41f4357ecb00 with latest main as second parent and the same exact four frozen blobs; branch/file readback verified 4/4.",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:revision34-directive-ledger:merged:d2e22d45",
-    "exact_frontier": "Directive stale-source stop cause eliminated and validated on main. PR337 still carries the exact four frozen lifecycle blobs on old base and must be rebuilt from latest main.",
-    "current_main_sha": "d2e22d45a53859f3335cb0a7cfdbc60aea5da9c4",
+    "idempotency_key": "o-work-gen29:payload-pr337:head-2b2bda15:exact-four-blobs",
+    "exact_frontier": "PR337 changed_files=4, mergeable=true, exact-head test and directive-source-preflight workflows queued.",
+    "current_main_sha": "c5698fa7ec41049b33cf3213951851fd45a50e21",
     "goal_revision": 34,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
-    "pending_workflow_run_ids": [],
-    "next_tool_action": "Create latest-main-based tree with exact blobs 7c666d29, ab70f003, fe1ca1ec, 2e885226; create fast-forward merge commit with PR337 old head as parent and latest main as additional parent; update existing PR337 branch force=false."
+    "pending_workflow_run_ids": [
+      33223569875,
+      33223569969
+    ],
+    "next_tool_action": "Fetch exact-head workflow runs 33223569875 and 33223569969; do not rerun while accepted-pending."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1469,7 +1472,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T00:26:14.883Z",
+  "heartbeat_at": "2026-08-29T00:28:07.157Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2298,7 +2301,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T00:26:14.883Z",
+  "last_progress_at": "2026-08-29T00:28:07.157Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -5124,9 +5127,9 @@
   },
   "generation29_refire": {
     "schema_version": 1,
-    "status": "revision34_directive_pr338_exact_head_ci_pending",
+    "status": "revision34_payload_pr337_exact_head_ci_queued",
     "created_at": "2026-08-28T12:27:59.401Z",
-    "updated_at": "2026-08-28T23:27:35.789Z",
+    "updated_at": "2026-08-29T00:28:07.157Z",
     "target_generation": 29,
     "target_fence_token": "work-recovery-fence-v29-9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781",
     "idempotency_key": "o-work-refire:g29:9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781:2b46edd1:revision92-source-refresh-execute-ablation-v1",
@@ -5382,8 +5385,8 @@
   },
   "generation29_revision34_refresh": {
     "schema_version": 1,
-    "status": "revision34_directive_ledger_main_durable_payload_pr337_rebuild_next",
-    "observed_at": "2026-08-29T00:26:14.883Z",
+    "status": "revision34_payload_pr337_exact_head_ci_queued",
+    "observed_at": "2026-08-29T00:28:07.157Z",
     "user_input": {
       "revision": 34,
       "id": "user-reaffirmation-run-to-achievement-slot-integrity-20260828-v34",
@@ -5411,7 +5414,7 @@
       "blob_sha": "0a2e9b12f791f3d52b986de4fc321c2e085dcba7"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision34:typed-directive-refresh:v1",
-    "next_action": "Rebuild PR337 head from latest main d2e22d45a53859f3335cb0a7cfdbc60aea5da9c4 while preserving the exact four frozen blob SHAs, update its existing branch by fast-forward merge commit, exact-readback all four files, then wait for exact-head workflows before expected-head merge.",
+    "next_action": "Bounded recheck exact-head workflows 33223569875 and 33223569969 without duplicate launch; after both succeed, perform fresh authority/main/inbox/head/blob/mergeability checks and expected-head merge PR337.",
     "updated_at": "2026-08-29T00:09:26.215Z",
     "repair": {
       "pull_request": 338,
@@ -5651,6 +5654,43 @@
       "main_tree": "ab4e9f9d433958c4ba28aa3c77973695f4789c86",
       "main_ledger_blob_sha": "f589a57a16aa577ccc9853509062a5faa3907281",
       "main_exact_readback_verified": true
+    },
+    "payload_publication": {
+      "pull_request": 337,
+      "branch": "work/recovery-gen29-candidate-preflight-durability-v1",
+      "prior_head_sha": "c96cf815a0914ea8839bd540b2879f3793b88819",
+      "exact_head_sha": "2b2bda15307d6643db587b6894aa41f4357ecb00",
+      "exact_tree_sha": "a423c9f33f31fc2956c5391bd3138146023f668f",
+      "parent_shas": [
+        "c96cf815a0914ea8839bd540b2879f3793b88819",
+        "c5698fa7ec41049b33cf3213951851fd45a50e21"
+      ],
+      "changed_files": 4,
+      "exact_blobs": {
+        ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl": "7c666d29d0bbe4f6f4801a636cd3ef56f9ccbafb",
+        ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-453dfc3b5b74ddb7d9e4fdee.json": "ab70f0037683a5ad3c45802f515b0b80cb59a7dd",
+        ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
+        ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/response.json": "2e885226a19c11c98c98fad7172354edae2901d1"
+      },
+      "exact_readback_verified": true,
+      "workflows": [
+        {
+          "id": 33223569875,
+          "name": "test",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 33223569969,
+          "name": "directive-source-preflight",
+          "status": "queued",
+          "conclusion": null
+        }
+      ],
+      "ci_checked_at": "2026-08-29T00:28:07.157Z",
+      "duplicate_payload": false,
+      "request_recreated": false,
+      "response_repeated": false
     }
   }
 }
