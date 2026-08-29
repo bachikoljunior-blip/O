@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "role": "bridge",
+  "observed_at": "2026-08-30T00:55:58+09:00",
+  "bootstrap": {
+    "required_first_artifact": "note/automation_control/DESIRED_STATE.json",
+    "read_result": "404_not_found",
+    "active_main_before_receipt": "7ad8674008f583c41e244f779dc5a4cf9e99a485"
+  },
+  "termination": {
+    "status": "BLOCKED_CONTROL_MISSING",
+    "kind": "HARD_CONTROL_BLOCK",
+    "missing_required_artifact": "note/automation_control/DESIRED_STATE.json",
+    "semantic_bridge_work_started": false,
+    "clean_feed_read_or_mutated": false,
+    "o_state_read_or_mutated": false,
+    "work_created_for_polling": false,
+    "individual_item_spam_emitted": false,
+    "desired_state_edited": false
+  },
+  "safety": {
+    "reason": "The authoritative desired-state artifact is absent on active main, so current bridge role configuration cannot be determined safely.",
+    "continuation": "Restore note/automation_control/DESIRED_STATE.json on active main and explicitly re-enable the bridge automation. On the next run, read DESIRED_STATE.json before semantic bridge work."
+  }
+}
