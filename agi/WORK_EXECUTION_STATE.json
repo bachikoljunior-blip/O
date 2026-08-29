@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_native_consume_result_exact_head_ci_wait",
+  "active_component": "generation29_slot_0812_native_consume_result_ci_in_progress",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T07:59:30.744Z",
+    "checkpointed_at": "2026-08-29T08:13:11.277Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -188,7 +188,7 @@
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_consume_result_exact_head_ci_in_progress",
+    "status": "slot_0812_overlap_native_consume_result_ci_in_progress",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,18 +200,18 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Continue bounded owner-bound observation of run 33241718961; on any failure repair the concrete cause, otherwise PR/merge only unchanged passing d9e4e8d4.",
-    "last_verified_effect": "Exact-head directive run 33241718966/job 99072090539 completed successfully; test run 33241718961 has shard 2 job 99072090469 executing pytest and three accepted queued shards.",
-    "completed_effect_receipt": "No branch head move, failure, duplicate launch, lifecycle mutation, authority change, inbox change, or new response occurred during bounded CI observation.",
+    "next_action": "Persist immutable slot receipt, exact-readback it, then continue bounded CI observation through all four shards and aggregate without relaunch.",
+    "last_verified_effect": "08:12 slot is covered by the same generation29/fence invocation; task enabled/schedule readback is exact, directive CI is successful, and all four exact-head pytest shards are executing.",
+    "completed_effect_receipt": "No scheduler gap, duplicate writer, duplicate launch, head move, CI failure, authority change, inbox change, or lifecycle response duplication was observed.",
     "pending_job_ids": [
       99072090469,
       99072090528,
       99072090532,
       99072090566
     ],
-    "idempotency_key": "o-work-gen29:native-consume-result-d9e4e8d4:ci-recheck-directive-success:v1",
-    "exact_frontier": "Clean lifecycle result head d9e4e8d4 has successful directive integrity and an accepted full test topology with one active shard; wait and verify all four shards plus aggregate.",
-    "current_main_sha": "65340224fe4ced3fefe5b545e415f9f8f1426204",
+    "idempotency_key": "o-work-gen29:slot-20260829T0812Z:d9e4e8d4-ci-overlap:v1",
+    "exact_frontier": "The isolated native-consume result head remains exact; all four required pytest shards are in progress and aggregate is not yet eligible.",
+    "current_main_sha": "4b1f66b85d050a6b798b35faa7725b5c0296b16d",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -219,7 +219,7 @@
     "pending_workflow_run_ids": [
       33241718961
     ],
-    "next_tool_action": "Fetch exact workflow jobs for 33241718961 without relaunch."
+    "next_tool_action": "Create and exact-readback the 08:12 note receipt, then fetch jobs for run 33241718961."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1508,7 +1508,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T07:59:30.744Z",
+  "heartbeat_at": "2026-08-29T08:13:11.277Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2337,12 +2337,12 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T07:59:30.744Z",
+  "last_progress_at": "2026-08-29T08:13:11.277Z",
   "lease_generation": 29,
   "lease_renewal": {
-    "expected_blob_sha": "8204414a29d9d7694deb67c026982a2d36843b53",
-    "reason": "bounded recheck checkpoint while accepted exact-head test run has one active pytest shard",
-    "requested_at": "2026-08-29T07:59:30.744Z",
+    "expected_blob_sha": "f85f36aad3ca6195f142daa3cb038ae2d8f3e390",
+    "reason": "08:12 scheduled-slot overlap checkpoint with exact enabled schedule and active exact-head CI",
+    "requested_at": "2026-08-29T08:13:11.277Z",
     "verified_remote_readback": false
   },
   "local_combined_regression": {
@@ -7166,18 +7166,18 @@
     }
   },
   "scheduled_slot_integrity": {
-    "audited_at": "2026-08-29T07:15:14.761Z",
-    "intended_slot": "2026-08-29T07:12:00Z",
+    "audited_at": "2026-08-29T08:13:11.277Z",
+    "intended_slot": "2026-08-29T08:12:00Z",
     "actual_start": "2026-08-28T23:14:52Z",
     "start_delay_seconds": 0,
-    "overlap_started_before_slot_seconds": 28628,
+    "overlap_started_before_slot_seconds": 32228,
     "previous_slot_coverage": {
-      "intended_slot": "2026-08-29T06:12:00Z",
+      "intended_slot": "2026-08-29T07:12:00Z",
       "actual_start": "2026-08-28T23:14:52Z",
       "start_delay_seconds": 0,
       "gap_classification": "covered_by_same_authoritative_invocation_overlap",
-      "receipt": "automation_control/receipts/o_work_monitor_recovery/20260829T061332813Z-gen29-slot-0612-overlap-and-pr339-shard1-progress.json",
-      "state_commit": "39af499c6266a608a3b47c134863566d5e490dd8"
+      "receipt": "automation_control/receipts/o_work_monitor_recovery/20260829T071514761Z-gen29-slot-0712-overlap-and-source-ci-progress.json",
+      "state_commit": "c3a26791b39a145d725ade91528144dccf3faa03"
     },
     "gap_classification": "covered_by_same_authoritative_invocation_overlap",
     "repair_action": "none_no_duplicate_launch_or_writer_preserve_same_automation_id",
@@ -7186,56 +7186,55 @@
       "enabled": true,
       "timezone": "Asia/Tokyo",
       "schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
-      "last_run_time": "2026-08-29T05:48:39.440784+00:00",
+      "last_run_time": "2026-08-29T07:49:00.935077+00:00",
       "next_run_time": null,
-      "updated_at": "2026-08-29T05:49:02.427662+00:00",
+      "updated_at": "2026-08-29T07:49:23.159357+00:00",
       "conversation_id": "6a901eda-f360-83e8-99b0-7ada04dc36c7"
     },
     "overlap_evidence": {
       "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
       "generation": 29,
       "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
-      "pre_slot_state_commit": "8a25c9fa4af31482e85516187fdcc30dcec0f38d",
-      "pre_slot_state_blob": "bc4f9b382936199e5038a75abaae17bed84febbd",
-      "pre_slot_heartbeat_at": "2026-08-29T07:01:46.403Z",
-      "post_slot_checkpoint_at": "2026-08-29T07:15:14.761Z",
-      "source_ci_workflow_run_id": 33238893400,
-      "source_ci_workflow_id": 335420036,
-      "exact_head": "614ead18e8adbeea313473b885a925a705e12afc",
-      "source_ci_status": "completed",
-      "source_ci_conclusion": "success",
+      "pre_slot_state_commit": "1529a5c52ef9e66a007f8223e4c3d7e827460168",
+      "pre_slot_state_blob": "f85f36aad3ca6195f142daa3cb038ae2d8f3e390",
+      "pre_slot_heartbeat_at": "2026-08-29T08:13:11.277Z",
+      "observed_main_head": "4b1f66b85d050a6b798b35faa7725b5c0296b16d",
+      "result_branch": "agent/recovery-gen29-receipts-native-consume-v3",
+      "exact_result_head": "d9e4e8d4d2c247efca094197bddd549e547e4070",
+      "native_consume_workflow_run_id": 33241612743,
+      "native_consume_conclusion": "success",
+      "directive_run_id": 33241718966,
+      "directive_conclusion": "success",
+      "test_run_id": 33241718961,
+      "test_status": "in_progress",
+      "test_conclusion": null,
       "jobs": [
         {
-          "conclusion": "success",
-          "id": 99064676707,
-          "name": "pytest shard 1 of 4",
-          "status": "completed"
-        },
-        {
-          "conclusion": "success",
-          "id": 99064676796,
-          "name": "pytest shard 0 of 4",
-          "status": "completed"
-        },
-        {
-          "conclusion": "success",
-          "id": 99064676827,
+          "id": 99072090469,
           "name": "pytest shard 2 of 4",
-          "status": "completed"
+          "status": "in_progress",
+          "conclusion": null
         },
         {
-          "conclusion": "success",
-          "id": 99064676900,
+          "id": 99072090528,
+          "name": "pytest shard 0 of 4",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 99072090532,
           "name": "pytest shard 3 of 4",
-          "status": "completed"
+          "status": "in_progress",
+          "conclusion": null
         },
         {
-          "conclusion": "success",
-          "id": 99068622254,
-          "name": "test",
-          "status": "completed"
+          "id": 99072090566,
+          "name": "pytest shard 1 of 4",
+          "status": "in_progress",
+          "conclusion": null
         }
-      ]
+      ],
+      "post_slot_checkpoint_at": "2026-08-29T08:13:11.277Z"
     }
   },
   "generation29_revision35_refresh": {
@@ -7609,7 +7608,7 @@
         "directive_conclusion": "success",
         "directive_job_id": 99072090539,
         "test_run_id": 33241718961,
-        "test_status": "queued",
+        "test_status": "in_progress",
         "test_conclusion": null,
         "jobs": [
           {
@@ -7621,23 +7620,23 @@
           {
             "id": 99072090528,
             "name": "pytest shard 0 of 4",
-            "status": "queued",
+            "status": "in_progress",
             "conclusion": null
           },
           {
             "id": 99072090532,
             "name": "pytest shard 3 of 4",
-            "status": "queued",
+            "status": "in_progress",
             "conclusion": null
           },
           {
             "id": 99072090566,
             "name": "pytest shard 1 of 4",
-            "status": "queued",
+            "status": "in_progress",
             "conclusion": null
           }
         ],
-        "observed_at": "2026-08-29T07:59:30.744Z"
+        "observed_at": "2026-08-29T08:13:11.277Z"
       },
       "authoritative_main_effect": false,
       "request_recreated": false,
