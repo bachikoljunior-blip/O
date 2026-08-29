@@ -343,7 +343,7 @@ jobs:
                 git add -f -- "${generated_path}"
                 ;;
             esac
-          done < <(git ls-files --others --ignored --exclude-standard)
+          done < <( { git ls-files --others --exclude-standard; git ls-files --others --ignored --exclude-standard; } | sort -u )
           python - <<'PY'
           import json
           import subprocess
