@@ -1,0 +1,201 @@
+name: gen29 exact execute response
+
+on:
+  push:
+    branches:
+      - agent/recovery-gen29-execute-response-v1
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-exact-execute-response-v1
+  cancel-in-progress: false
+
+jobs:
+  respond:
+    if: ${{ !contains(github.event.head_commit.message, '[work-response-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      EXPECTED_MAIN: 3bd89140650754fd0fbf7431c01f1df6a8829373
+      EXPECTED_STATE_BLOB: ba89f8bd3e53cb1eade4be66486191255f9c421c
+      EXPECTED_REQUEST_BLOB: 85f97e7ec6942d9853d38e8b3e19f67206845ec4
+      INVOCATION_ID: invoke-e750825c4d5987ec613de791
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+      REPORT_BLOB: e0c4ca3e478d06f493c5099ecc2aa9434aa3b8fd
+      FIXTURE_BLOB: 9d0a7a92d3467a955658a4e09bfaf42cc4c39c90
+      IMPLEMENTATION_BLOB: e9c3939fc918190623e5f5053b8f2d04eaeeec83
+      TEST_BLOB: a99374fd889f904e8a1c1b1487a9ba2044fcde2a
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e '.[test]'
+      - name: Assert exact authoritative request and evidence
+        shell: bash --noprofile --norc -e -o pipefail {0}
+        run: |
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "${EXPECTED_MAIN}"
+          test "$(git merge-base "${EXPECTED_MAIN}" HEAD)" = "${EXPECTED_MAIN}"
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "${EXPECTED_STATE_BLOB}"
+          test "$(git hash-object .continual/work-model/invocations/${INVOCATION_ID}/request.json)" = "${EXPECTED_REQUEST_BLOB}"
+          test ! -e ".continual/work-model/invocations/${INVOCATION_ID}/response.json"
+          test "$(git hash-object agi/RECURSIVE_CONTEXT_RETRIEVAL_ABLATION.json)" = "${REPORT_BLOB}"
+          test "$(git hash-object agi/RECURSIVE_CONTEXT_RETRIEVAL_FIXTURES.json)" = "${FIXTURE_BLOB}"
+          test "$(git hash-object src/agi/recursive_context_retrieval_ablation.py)" = "${IMPLEMENTATION_BLOB}"
+          test "$(git hash-object tests/test_recursive_context_retrieval_ablation.py)" = "${TEST_BLOB}"
+          mapfile -t launch_delta < <(git diff --name-only "${EXPECTED_MAIN}" HEAD)
+          test "${#launch_delta[@]}" -eq 1
+          test "${launch_delta[0]}" = ".github/workflows/gen29-execute-response.yml"
+      - name: Recompute bounded ablation and focused tests
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from agi.recursive_context_retrieval_ablation import validate_recursive_context_retrieval_report
+
+          root = Path('.').resolve()
+          report = json.loads((root / 'agi' / 'RECURSIVE_CONTEXT_RETRIEVAL_ABLATION.json').read_text(encoding='utf-8'))
+          verified = validate_recursive_context_retrieval_report(report, root=root)
+          assert verified['decision']['verdict'] == 'PASS'
+          assert verified['summary'] == {
+              'fixture_count': 3,
+              'baseline_mean_required_source_recall': 1 / 3,
+              'recursive_mean_required_source_recall': 1.0,
+              'mean_recall_delta': 2 / 3,
+              'recursive_unsafe_admission_count': 0,
+              'stale_source_rejection_count': 1,
+              'authority_conflict_rejection_count': 1,
+              'deterministic_replay_count': 6,
+          }
+          assert verified['report_digest'] == '8314097b8e31f40d22bb702c4e81bbd751fcdc15fcfed5f26b6168271f0b8c8f'
+          assert verified['claim_boundary']['production_routing_activated'] is False
+          assert verified['claim_boundary']['candidate_activated'] is False
+          print('ABLATION_VERIFY=' + json.dumps(verified['summary'], sort_keys=True))
+          PY
+          pytest -q tests/test_recursive_context_retrieval_ablation.py
+      - name: Submit exactly one schema-valid Work response
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from continual.work_session import submit_work_response, verified_work_invocation
+
+          root = Path('.').resolve()
+          output = {
+              'result': {
+                  'status': 'PASS',
+                  'unit_id': 'unit-generation25-recursive-context-retrieval-ablation-v1',
+                  'scope': 'generation25/recursive-context-retrieval-ablation-v1; three frozen repository fixtures; local non-production experiment only',
+                  'artifacts': [
+                      'src/agi/recursive_context_retrieval_ablation.py',
+                      'agi/RECURSIVE_CONTEXT_RETRIEVAL_FIXTURES.json',
+                      'agi/RECURSIVE_CONTEXT_RETRIEVAL_ABLATION.json',
+                      'tests/test_recursive_context_retrieval_ablation.py',
+                  ],
+                  'observations': [
+                      'The exact flat baseline recovered one of three required sources in each fixture; the deterministic two-hop variant recovered all three required sources in every fixture.',
+                      'Mean required-source recall increased from one third to 1.0, a mean delta of two thirds, with zero non-required source admissions.',
+                      'The stale CI competitor remained rejected with reason stale_at_decision_time.',
+                      'The legacy control-plane competitor remained rejected with reason authority_conflict:work-state->o-work-mode-monitor.',
+                      'Six deterministic replays were byte-stable and all three fixture verdicts were PASS.',
+                      'The merged protected validation recorded 166 passed and zero failed tests, and this response revalidated the checked-in report plus its focused test file.',
+                  ],
+                  'validation': {
+                      'fixture_count': 3,
+                      'fixture_verdicts': {
+                          'missing-transitive-dependency': 'PASS',
+                          'stale-competing-source': 'PASS',
+                          'authority-conflicting-source': 'PASS',
+                      },
+                      'baseline_mean_required_source_recall': 1 / 3,
+                      'recursive_mean_required_source_recall': 1.0,
+                      'mean_recall_delta': 2 / 3,
+                      'recursive_unsafe_admission_count': 0,
+                      'stale_source_rejection_count': 1,
+                      'authority_conflict_rejection_count': 1,
+                      'deterministic_replay_count': 6,
+                      'report_digest': '8314097b8e31f40d22bb702c4e81bbd751fcdc15fcfed5f26b6168271f0b8c8f',
+                      'fixture_manifest_digest': '72b9ddd96248c640ac202a0c613becefcbb497514b3eb5236981029d6064f7dc',
+                      'merged_protected_tests': {'passed': 166, 'failed': 0},
+                  },
+                  'claim_boundary': 'PASS is limited to the deterministic two-hop implementation and three frozen repository fixtures at base commit 523f171. No production routing or Candidate activation occurred; this is not independent external evidence, AGI evidence, or user-level completion.',
+              },
+              'local_learn': {
+                  'decision': 'ADD',
+                  'candidates': [
+                      {
+                          'candidate_id': 'candidate-bounded-recursive-context-retrieval-v1',
+                          'scope': 'non-production deterministic two-hop context retrieval on three frozen fixtures',
+                          'proposal': 'Retain the bounded two-hop variant as a Candidate for broader independent validation while preserving fail-closed provenance, freshness, invalidation, and authority checks before any activation.',
+                          'evidence_refs': [
+                              'agi/RECURSIVE_CONTEXT_RETRIEVAL_ABLATION.json',
+                              'agi/RECURSIVE_CONTEXT_RETRIEVAL_FIXTURES.json',
+                              'tests/test_recursive_context_retrieval_ablation.py',
+                          ],
+                          'claim_boundary': 'Evidence is limited to the exact three fixtures and does not authorize production activation.',
+                      }
+                  ],
+              },
+              'fragment': {
+                  'component': 'execute',
+                  'continuation': 'Task Evaluate the bounded three-fixture PASS, then Consolidate and Learn. Keep the recursive variant non-activated, publish only through unchanged exact-head CI, and return to Root for a materially different unit.',
+                  'observations': [
+                      'Produced and deterministically recomputed the machine-readable ablation report.',
+                      'Recovered each declared transitive dependency without admitting stale or authority-conflicting sources.',
+                      'Preserved the flat Context Kernel and production routing unchanged.',
+                  ],
+              },
+          }
+          response = submit_work_response(
+              root,
+              'invoke-e750825c4d5987ec613de791',
+              output,
+              executor_binding='current_chatgpt_work_session',
+              model_identity='chatgpt-work-model-unverified',
+              model_verified=False,
+          )
+          verified = verified_work_invocation(root, 'invoke-e750825c4d5987ec613de791')
+          assert verified['output'] == output
+          assert verified['response']['response_digest'] == response['response_digest']
+          print('RESPONSE_RESULT=' + json.dumps({
+              'invocation_id': response['invocation_id'],
+              'request_digest': response['request_digest'],
+              'output_digest': response['output_digest'],
+              'response_digest': response['response_digest'],
+              'status': output['result']['status'],
+          }, sort_keys=True))
+          PY
+      - name: Validate exact single-file result and push once
+        shell: bash --noprofile --norc -e -o pipefail {0}
+        run: |
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "${EXPECTED_MAIN}"
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "${EXPECTED_STATE_BLOB}"
+          test "$(git hash-object .continual/work-model/invocations/${INVOCATION_ID}/request.json)" = "${EXPECTED_REQUEST_BLOB}"
+          test -f ".continual/work-model/invocations/${INVOCATION_ID}/response.json"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f -- ".continual/work-model/invocations/${INVOCATION_ID}/response.json"
+          mapfile -t staged < <(git diff --cached --name-only)
+          test "${#staged[@]}" -eq 1
+          test "${staged[0]}" = ".continual/work-model/invocations/${INVOCATION_ID}/response.json"
+          python - <<'PY'
+          from pathlib import Path
+          from continual.work_session import verified_work_invocation
+
+          verified = verified_work_invocation(Path('.'), 'invoke-e750825c4d5987ec613de791')
+          assert verified['request']['request_digest'] == '953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802'
+          assert verified['output']['result']['status'] == 'PASS'
+          assert verified['output']['result']['claim_boundary'].endswith('user-level completion.')
+          print('FINAL_RESPONSE_DIGEST=' + verified['response']['response_digest'])
+          PY
+          git commit -m '[work-response-result] gen29 answer exact Execute request'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
