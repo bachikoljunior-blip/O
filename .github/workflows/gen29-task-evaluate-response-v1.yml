@@ -149,7 +149,7 @@ jobs:
           if request.get('component') != 'task_evaluate' or request.get('request_digest') != os.environ['TASK_REQUEST_DIGEST']:
               raise SystemExit('Task Evaluate request mismatch')
           payload = request.get('payload', {})
-          if payload.get('execution_unit', {}).get('execution_unit', {}).get('unit_id') != os.environ['RESULT_UNIT_ID']:
+          if payload.get('execution_unit', {}).get('unit_id') != os.environ['RESULT_UNIT_ID']:
               raise SystemExit('Task Evaluate execution-unit binding mismatch')
           if payload.get('preflight_selection', {}).get('decision') != 'TRIAL_CANDIDATE':
               raise SystemExit('Task Evaluate trial selection mismatch')
