@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T19:29:11.147Z",
+    "checkpointed_at": "2026-08-29T19:33:34.399Z",
     "exact_pending_request_blob_sha": null,
     "exact_pending_request_digest": null,
     "exact_pending_request_ref": null,
     "exact_pending_work_invocation_id": null,
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "Exact-head lifecycle and focused tests passed; PR344 opened at unchanged head 8cd9f9a5. Push and PR standard test runs are queued; no merge until required exact-head success.",
+    "reason": "Push exact-head standard test has three pytest shards in progress and one queued; PR directive preflight passed. Head unchanged; no merge yet.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_request_recovery_pr344_exact_head_tests_queued_skip_ci",
+    "status": "root_request_recovery_pr344_exact_head_test_in_progress_skip_ci",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,23 +200,27 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": null,
     "resume_required": true,
-    "next_action": "Observe exact-head standard test and PR mergeability; merge expected head only after success.",
+    "next_action": "Observe all shard and aggregate jobs; merge expected head only after success.",
     "last_verified_effect": "Opened PR344 with exact recovered Root lifecycle head after v5 recovery validation and directive preflight success.",
     "completed_effect_receipt": "github:pull/344@8cd9f9a5c29a953937635440961b0e3e525e83e9",
-    "pending_job_ids": [],
+    "pending_job_ids": [
+      99148771010,
+      99148771029,
+      99148771033,
+      99148771049
+    ],
     "idempotency_key": "o-work-gen29:root-revision94:recover-exact-invoke-91f2cb57cf0f69a5d9abfce6:v1:validation-v5",
-    "exact_frontier": "PR344 open on exact recovered lifecycle head; standard test contexts pending.",
-    "current_main_sha": "20fc129ea5f8162d641ae32dfe16b42a01618378",
+    "exact_frontier": "PR344 open; exact-head standard pytest is actively running on three shards.",
+    "current_main_sha": "94e270c4b35df0cc758136d9d4f87d192ac678f0",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
     "pending_workflow_run_ids": [
       33270788885,
-      33270968142,
-      33270968159
+      33270968142
     ],
-    "next_tool_action": "Fetch runs 33270788885/33270968142 and PR344; do not relaunch or merge early.",
+    "next_tool_action": "Fetch test run 33270788885 jobs and PR344 mergeability.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -238,11 +242,25 @@
     },
     "completed_workflow_run_ids": [
       33270788879,
-      33270788877
+      33270788877,
+      33270968159
     ],
     "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c",
     "pull_request_number": 344,
-    "pull_request_head_sha": "8cd9f9a5c29a953937635440961b0e3e525e83e9"
+    "pull_request_head_sha": "8cd9f9a5c29a953937635440961b0e3e525e83e9",
+    "test_progress": {
+      "observed_at": "2026-08-29T19:33:34.399Z",
+      "run_id": 33270788885,
+      "in_progress_shards": [
+        0,
+        1,
+        3
+      ],
+      "queued_shards": [
+        2
+      ],
+      "failed_shards": []
+    }
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1533,7 +1551,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T19:29:11.147Z",
+  "heartbeat_at": "2026-08-29T19:33:34.399Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -8433,10 +8451,10 @@
     ],
     "duplicate_launch_forbidden": true,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T19:29:11.147Z",
+    "last_observed_at": "2026-08-29T19:33:34.399Z",
     "job_id": 99140671439,
     "job_status": "completed",
-    "heartbeat_refresh_count": 23,
+    "heartbeat_refresh_count": 24,
     "accepted_pending_elapsed_seconds": 2045,
     "job_conclusion": "failure",
     "failed_run_id": 33260870910,
@@ -8504,7 +8522,7 @@
     "exact_head_test_workflow_run_id": 33270788885,
     "directive_preflight_workflow_run_id": 33270788877,
     "recovery_validation_status": "completed",
-    "exact_head_test_status": "queued",
+    "exact_head_test_status": "in_progress",
     "directive_preflight_status": "completed",
     "queue_observation": {
       "observed_at": "2026-08-29T19:07:09.708Z",
@@ -8564,7 +8582,9 @@
     "pull_request_mergeable": false,
     "pull_request_created_at": "2026-08-29T19:28:48Z",
     "pull_request_test_workflow_run_id": 33270968142,
-    "pull_request_directive_preflight_run_id": 33270968159
+    "pull_request_directive_preflight_run_id": 33270968159,
+    "pull_request_directive_preflight_status": "completed",
+    "pull_request_directive_preflight_conclusion": "success"
   },
   "generation29_ci_queue_amplification_repair": {
     "identified_at": "2026-08-29T15:28:32.834Z",
