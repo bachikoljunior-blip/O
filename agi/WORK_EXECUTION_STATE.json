@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T19:24:49.241Z",
+    "checkpointed_at": "2026-08-29T19:28:19.613Z",
     "exact_pending_request_blob_sha": null,
     "exact_pending_request_digest": null,
     "exact_pending_request_ref": null,
     "exact_pending_work_invocation_id": null,
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "v4 proved every recovery invariant through native journal and snapshot, then exposed only compact-versus-Store JSON spacing on the appended event. The event was canonicalized without changing request or journal, and v5 exact-head runs are accepted.",
+    "reason": "v5 exact-head recovery validation and directive preflight passed. The standard full test workflow for the same unchanged head remains queued.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_request_recovered_branch_validation_v5_queued_skip_ci",
+    "status": "root_request_recovered_exact_head_validation_pass_full_test_queued_skip_ci",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,23 +200,26 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": null,
     "resume_required": true,
-    "next_action": "Boundedly observe v5 runs, repairing only a new exact failure or integrating the exact head after required success.",
-    "last_verified_effect": "Canonicalized only the recovered pending event to native Store JSON form, exact-readback all lifecycle blobs, and accepted v5 workflows without Root reinvocation.",
-    "completed_effect_receipt": "note:automation_control/receipts/o_work_monitor_recovery/20260829T191317Z-gen29-slot-1912-overlap-root-freeze-recovery-v4-queued.json@d7780914b85ff22e205490636030cc70aca172a5",
-    "pending_job_ids": [],
+    "next_action": "Boundedly observe standard test 33270788885 without duplicate launch; on success open/merge expected-head PR and update authority state to the merged pending request.",
+    "last_verified_effect": "Exact-head v5 proved immutable Root request digest/blob, native identity/journal, snapshot94/root_pending, one canonical event append, lifecycle counts, 26 focused tests, and no Root reinvocation.",
+    "completed_effect_receipt": "github-actions:run/33270788879/job/99148771128@head-8cd9f9a5c29a953937635440961b0e3e525e83e9",
+    "pending_job_ids": [
+      99148771010,
+      99148771029,
+      99148771033,
+      99148771049
+    ],
     "idempotency_key": "o-work-gen29:root-revision94:recover-exact-invoke-91f2cb57cf0f69a5d9abfce6:v1:validation-v5",
-    "exact_frontier": "Exact request and journal unchanged; recovered event now matches O Store serialization; v5 workflows queued.",
-    "current_main_sha": "457992ec8c3cccae779df89c01d4b25d1cc1123e",
+    "exact_frontier": "Recovered Root request is unique pending on branch and exact-head recovery validation passed; standard full test has not started.",
+    "current_main_sha": "11f178a33d84fb6ce8f7df16f36d89397e3f623f",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
     "pending_workflow_run_ids": [
-      33270788879,
-      33270788885,
-      33270788877
+      33270788885
     ],
-    "next_tool_action": "Fetch v5 recovery validation run 33270788879 and exact-head test/directive runs.",
+    "next_tool_action": "Fetch test run 33270788885 jobs and terminal conclusion.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -237,7 +240,8 @@
       "target_runs_status": "queued"
     },
     "completed_workflow_run_ids": [
-      33270276219
+      33270788879,
+      33270788877
     ],
     "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c"
   },
@@ -1530,7 +1534,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T19:24:49.241Z",
+  "heartbeat_at": "2026-08-29T19:28:19.613Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2359,7 +2363,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T19:24:49.241Z",
+  "last_progress_at": "2026-08-29T19:28:19.613Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -8430,7 +8434,7 @@
     ],
     "duplicate_launch_forbidden": true,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T19:24:49.241Z",
+    "last_observed_at": "2026-08-29T19:28:19.613Z",
     "job_id": 99140671439,
     "job_status": "completed",
     "heartbeat_refresh_count": 23,
@@ -8474,7 +8478,7 @@
     "third_stop_cause": "The persistence allowlist omitted the continuity-preflight report generated by the already-successful Root invocation, so step12 rejected that one expected add-only path before staging or committing any lifecycle file.",
     "third_stop_cause_evidence": "run 33264840298 attempt2 / job 99140671439: steps5-11 succeeded; step12 reported unexpected Root-freeze mutation .continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-b397a396f087f0b727627523.json.",
     "third_repair_action": "Recover and durably publish the exact already-frozen Root request from immutable job logs, reconstruct its bound awaiting native journal without invoking Root again, patch the one-shot workflow atomically into recovery/validation mode, and validate before continuing.",
-    "third_repair_validation": "PASS exact branch readback for workflow/events/native journal/request/recovery receipt; exact-head recovery, full test, and directive-source workflows queued.",
+    "third_repair_validation": "PASS: exact recovered Root lifecycle validated at head 8cd9f9a5 with 26 focused tests; full standard test remains queued.",
     "recovered_frozen_native_invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
     "recovered_frozen_work_invocation_id": "invoke-91f2cb57cf0f69a5d9abfce6",
     "recovered_frozen_request_ref": ".continual/work-model/invocations/invoke-91f2cb57cf0f69a5d9abfce6/request.json",
@@ -8486,7 +8490,7 @@
     "recovered_request_canonical_bytes": 146195,
     "recovered_request_on_authoritative_remote": false,
     "request_recreated": false,
-    "next_action": "Observe v5 exact-head validation; do not invoke Root or alter the frozen request.",
+    "next_action": "Wait boundedly for exact-head standard test run 33270788885; then integrate expected head and bind main state to the unique pending request.",
     "recovery_branch_head_sha": "8cd9f9a5c29a953937635440961b0e3e525e83e9",
     "recovery_workflow_blob_sha": "bff48538d80c8a71d1f65b126eb6398f0ebd4008",
     "recovered_frozen_request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
@@ -8500,9 +8504,9 @@
     "recovery_validation_workflow_run_id": 33270788879,
     "exact_head_test_workflow_run_id": 33270788885,
     "directive_preflight_workflow_run_id": 33270788877,
-    "recovery_validation_status": "queued",
+    "recovery_validation_status": "completed",
     "exact_head_test_status": "queued",
-    "directive_preflight_status": "queued",
+    "directive_preflight_status": "completed",
     "queue_observation": {
       "observed_at": "2026-08-29T19:07:09.708Z",
       "repository_queued_runs": 62,
@@ -8529,7 +8533,30 @@
     "recovery_validation_v4_stop_cause": "The reconstructed work_model_pending event used compact JSON from JavaScript, while O Store.append_jsonl canonical output uses Python json.dumps default spaces; semantic fields matched but exact append formatting did not.",
     "recovery_validation_v4_evidence": "run 33270276231/job 99147411759 passed path, request digest, manifest, native identity, payload digest, journal, and snapshot checks before failing only events ledger exact append.",
     "recovery_validation_v4_repair": "Replace only the final recovered event line with the exact Store.append_jsonl-compatible spaced JSON serialization and advance the validation marker to v5.",
-    "recovery_validation_v4_repair_validation": "PASS exact readback at head 8cd9f9a5: request 7638c2d4, native journal a1cdec99, recovery receipt c2b57dd8 unchanged; events canonicalized to blob 95699dec."
+    "recovery_validation_v4_repair_validation": "PASS exact readback at head 8cd9f9a5: request 7638c2d4, native journal a1cdec99, recovery receipt c2b57dd8 unchanged; events canonicalized to blob 95699dec.",
+    "recovery_validation_conclusion": "success",
+    "recovery_validation_job_id": 99148771128,
+    "recovery_validation_completed_at": "2026-08-29T19:27:03Z",
+    "recovery_validation_summary": {
+      "valid": true,
+      "requests": 86,
+      "responses": 85,
+      "pending": 1,
+      "native_completed": 79,
+      "native_fragments": 79,
+      "native_local_learn": 73,
+      "native_invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
+      "work_invocation_id": "invoke-91f2cb57cf0f69a5d9abfce6",
+      "request_digest": "3d51e513c72a35bf00ce0b5353c6174e6dcac843133bd9df7b4d2526953d56fe",
+      "request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
+      "root_reinvoked": false,
+      "focused_recovery_tests": {
+        "passed": 26,
+        "failed": 0,
+        "duration_seconds": 1.63
+      }
+    },
+    "recovery_validated_at": "2026-08-29T19:28:19.613Z"
   },
   "generation29_ci_queue_amplification_repair": {
     "identified_at": "2026-08-29T15:28:32.834Z",
