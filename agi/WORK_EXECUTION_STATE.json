@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision35_pr339_exact_head_ci",
+  "active_component": "generation29_revision35_postmerge_work_verify",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T06:32:31.726Z",
+    "checkpointed_at": "2026-08-29T06:36:55.516Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
     "exact_pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "no_partial_result_claimed": true,
-    "no_response_on_authoritative_remote": true,
-    "reason": "Fresh revision35 exact-head PR339 CI reached terminal success across directive preflight, four pytest shards, and aggregate.",
+    "no_response_on_authoritative_remote": false,
+    "reason": "PR339 expected-head merge completed after fresh revision35 CI and exact response blob was read back from main.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "revision35_pr339_exact_head_ci_success_premerge_validation_pending",
+    "status": "revision35_pr339_merged_main_work_verify_pending",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,19 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Perform fresh full expected-head merge preflight from latest main; on exact success merge PR339 with expected head 2d08a0550262748c30eeaaa9c375caa2b3cbe095.",
-    "last_verified_effect": "Fresh revision35 workflow runs 33237506374 and 33237506288 completed successfully on exact response head; all six required jobs succeeded.",
-    "completed_effect_receipt": "No failed/cancelled job, head/blob change, duplicate response, duplicate launch, writer, task, or frozen request occurred.",
+    "next_action": "Run or dispatch the trusted exact-main Work journal verifier and require valid=true, requests=responses, pending=0 before refreshing revision35 continuity preflight.",
+    "last_verified_effect": "PR339 merged at exact head into main 6b7a7bbb9e52e5365e0ccbfc1af089a72dda90f0 and main response path read back exact blob dabc940ed79023c3ac971d44a0a8fd1110b4ebce.",
+    "completed_effect_receipt": "Merge API returned merged=true with expected head; PR/main/response exact readback passed and state/inbox/ledger authority remained unchanged.",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:revision35:pr339-fresh-ci-all-success:v1",
-    "exact_frontier": "PR339 exact response unchanged; revision35 preflight, 4 shards, and aggregate all successful; full merge preflight pending; 06:12 slot durably covered.",
-    "current_main_sha": "1bf49f16ea2977700c3d5d89fe322f3c287cf988",
+    "idempotency_key": "o-work-gen29:revision35:pr339-merge-6b7a7bbb:main-blob-dabc940e:v1",
+    "exact_frontier": "Exact accepted Work response is now durable on main; trusted exact-main journal verification pending; AGI not claimed and frozen native continuation not yet resumed.",
+    "current_main_sha": "6b7a7bbb9e52e5365e0ccbfc1af089a72dda90f0",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
     "pending_workflow_run_ids": [],
-    "next_tool_action": "Refetch operations/state/inbox/ledger/PR/files/branch response/main and exact runs; merge only after every CAS predicate passes."
+    "next_tool_action": "Identify and execute the trusted Work journal verifier on exact main 6b7a7bbb; require pending=0, then refresh revision35 continuity preflight."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1469,7 +1469,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T06:32:31.726Z",
+  "heartbeat_at": "2026-08-29T06:36:55.516Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2298,7 +2298,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T06:32:31.726Z",
+  "last_progress_at": "2026-08-29T06:36:55.516Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -3984,7 +3984,7 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "1bf49f16ea2977700c3d5d89fe322f3c287cf988",
+  "source_main_sha": "6b7a7bbb9e52e5365e0ccbfc1af089a72dda90f0",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
@@ -7187,7 +7187,7 @@
   },
   "generation29_revision35_refresh": {
     "schema_version": 1,
-    "status": "pr339_revision35_exact_head_ci_success_premerge_validation_pending",
+    "status": "pr339_exact_response_merged_main_readback_verified_work_verify_pending",
     "observed_at": "2026-08-29T05:17:28.646Z",
     "user_input": {
       "revision": 35,
@@ -7290,10 +7290,10 @@
       ]
     },
     "idempotency_key": "o-work-gen29:revision35:typed-ledger-refresh-and-pr339-revalidate-v1",
-    "next_action": "Perform fresh full expected-head merge preflight from latest main; on exact success merge PR339 with expected head 2d08a0550262748c30eeaaa9c375caa2b3cbe095.",
-    "updated_at": "2026-08-29T06:32:31.726Z",
+    "next_action": "Run or dispatch the trusted exact-main Work journal verifier and require valid=true, requests=responses, pending=0 before refreshing revision35 continuity preflight.",
+    "updated_at": "2026-08-29T06:36:55.516Z",
     "pr339_revalidation": {
-      "status": "fresh_revision35_workflows_completed_success",
+      "status": "merged_main_exact_response_readback_verified",
       "pull_request": 339,
       "exact_head_sha": "2d08a0550262748c30eeaaa9c375caa2b3cbe095",
       "exact_response_blob_sha": "dabc940ed79023c3ac971d44a0a8fd1110b4ebce",
@@ -7320,7 +7320,7 @@
         }
       ],
       "idempotency_key": "o-work-gen29:revision35:pr339-head-2d08a055:reopen-runs-33237506374-33237506288:v1",
-      "observed_at": "2026-08-29T06:32:31.726Z",
+      "observed_at": "2026-08-29T06:36:55.516Z",
       "required_jobs": [
         {
           "id": 99060953238,
@@ -7352,7 +7352,11 @@
           "name": "test",
           "conclusion": "success"
         }
-      ]
+      ],
+      "merge_sha": "6b7a7bbb9e52e5365e0ccbfc1af089a72dda90f0",
+      "merged_at": "2026-08-29T06:36:08Z",
+      "main_response_blob_sha": "dabc940ed79023c3ac971d44a0a8fd1110b4ebce",
+      "main_exact_readback_verified": true
     }
   }
 }
