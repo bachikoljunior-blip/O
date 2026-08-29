@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision35_pr339_revalidation_trigger",
+  "active_component": "generation29_revision35_pr339_exact_head_ci",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T06:01:30.755Z",
+    "checkpointed_at": "2026-08-29T06:02:36.773Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -200,19 +200,28 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Close then reopen PR339 once with head 2d08a055 unchanged; exact-readback it, discover only newly created revision35 workflow runs, and track them to terminal state.",
-    "last_verified_effect": "PR340 merged exact head 0bf852af after directive preflight, four pytest shards, and aggregate succeeded; main ledger blob and revision35 digest match.",
-    "completed_effect_receipt": "No PR339 content/head change, duplicate response, automation, writer, or native launch occurred.",
-    "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:revision35:pr339-head-2d08a055:close-reopen-revalidate-v1",
-    "exact_frontier": "Revision35 typed ledger merged and exact-readback on main; PR339 exact response head/blob preserved, fresh revision35 CI not yet triggered.",
-    "current_main_sha": "82aaa5d7b4bd8e93f5f36cdcf89f12a21288ff6c",
+    "next_action": "Track only new PR339 revision35 workflow runs 33237506374 and 33237506288 to terminal status; inspect any failure, then revalidate authority, inbox35, main ledger, exact head/blob/one-file diff and mergeability before expected-head merge.",
+    "last_verified_effect": "PR339 was closed and reopened exactly once; its response tree stayed unchanged and two new revision35 workflow runs were durably accepted.",
+    "completed_effect_receipt": "No response content/branch head change, duplicate response, writer, automation, or native launch occurred.",
+    "pending_job_ids": [
+      99060952953,
+      99060953021,
+      99060953022,
+      99060953038,
+      99060953238
+    ],
+    "idempotency_key": "o-work-gen29:revision35:pr339-head-2d08a055:reopen-runs-33237506374-33237506288:v1",
+    "exact_frontier": "PR339 reopened with unchanged head/blob; fresh revision35 directive and test runs accepted; 0 jobs successful, 5 pending.",
+    "current_main_sha": "3aa481e143f25f1f700631d2e32600db2079c233",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
-    "pending_workflow_run_ids": [],
-    "next_tool_action": "Update PR339 state to closed then open, validating the exact head before and after."
+    "pending_workflow_run_ids": [
+      33237506374,
+      33237506288
+    ],
+    "next_tool_action": "Fetch jobs for workflow runs 33237506374 and 33237506288."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1469,7 +1478,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T06:01:30.755Z",
+  "heartbeat_at": "2026-08-29T06:02:36.773Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2298,7 +2307,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T06:01:30.755Z",
+  "last_progress_at": "2026-08-29T06:02:36.773Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -7187,7 +7196,7 @@
   },
   "generation29_revision35_refresh": {
     "schema_version": 1,
-    "status": "typed_directive_pr340_merged_main_readback_verified",
+    "status": "pr339_revision35_exact_head_ci_pending",
     "observed_at": "2026-08-29T05:17:28.646Z",
     "user_input": {
       "revision": 35,
@@ -7290,16 +7299,36 @@
       ]
     },
     "idempotency_key": "o-work-gen29:revision35:typed-ledger-refresh-and-pr339-revalidate-v1",
-    "next_action": "Close then reopen PR339 once with head 2d08a055 unchanged; exact-readback it, discover only newly created revision35 workflow runs, and track them to terminal state.",
-    "updated_at": "2026-08-29T06:01:30.755Z",
+    "next_action": "Track only new PR339 revision35 workflow runs 33237506374 and 33237506288 to terminal status; inspect any failure, then revalidate authority, inbox35, main ledger, exact head/blob/one-file diff and mergeability before expected-head merge.",
+    "updated_at": "2026-08-29T06:02:36.773Z",
     "pr339_revalidation": {
-      "status": "pending_reopen_trigger",
+      "status": "fresh_revision35_workflows_accepted_pending",
       "pull_request": 339,
       "exact_head_sha": "2d08a0550262748c30eeaaa9c375caa2b3cbe095",
       "exact_response_blob_sha": "dabc940ed79023c3ac971d44a0a8fd1110b4ebce",
-      "reason": "Revision35 arrived after the prior PR339 workflows. Close and reopen the unchanged PR once to trigger fresh pull_request workflows against the revision35 ledger base without changing the exact response tree.",
-      "close_reopen_performed": false,
-      "duplicate_response": false
+      "close_reopen_performed": true,
+      "closed_at": "2026-08-29T06:01:52Z",
+      "reopened_at": "2026-08-29T06:01:54Z",
+      "head_unchanged": true,
+      "response_blob_unchanged": true,
+      "duplicate_response": false,
+      "exact_head_workflows": [
+        {
+          "id": 33237506374,
+          "name": "directive-source-preflight",
+          "created_at": "2026-08-29T06:01:57Z",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 33237506288,
+          "name": "test",
+          "created_at": "2026-08-29T06:01:57Z",
+          "status": "queued",
+          "conclusion": null
+        }
+      ],
+      "idempotency_key": "o-work-gen29:revision35:pr339-head-2d08a055:reopen-runs-33237506374-33237506288:v1"
     }
   }
 }
