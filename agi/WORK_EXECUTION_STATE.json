@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T21:57:42.195Z",
+    "checkpointed_at": "2026-08-29T22:02:21.850Z",
     "exact_pending_request_blob_sha": "f349684e68f5efdf15167b7b1236c34855da7cb9",
     "exact_pending_request_digest": "c1d053f03536c0f2dd0fa08159663ccc60e5848625eb2b2794069e4ce293e2dc",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-6fefa64dcaa56548bf1c3de0/request.json",
     "exact_pending_work_invocation_id": "invoke-6fefa64dcaa56548bf1c3de0",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "PR346 exact head acdb5ccc remains healthy: directive preflight and shards 0, 1, and 3 succeeded; original shard 2 job 99163259128 remains in progress without relaunch.",
+    "reason": "PR346 exact head acdb5ccc passed directive integrity, all four pytest shards, and dependent aggregate. Latest-main changes since source base are state/receipt-only with zero path overlap.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "pr346_three_shards_passed_shard2_running",
+    "status": "pr346_exact_head_checks_passed_merge_authorized",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,23 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-61abdb4ae9df255613479431",
     "resume_required": true,
-    "next_action": "Bounded-wait and recheck shard 2, then require dependent aggregate success before unchanged-head merge.",
+    "next_action": "Exact-readback this authorization, recheck all bindings, then merge PR346 only at expected head acdb5ccc and exact-readback lifecycle blobs.",
     "last_verified_effect": "Exact-readback Candidate response, completed native, unchanged revision95 snapshot, recovery receipt, unique Task Evaluate request and bound native journal.",
-    "completed_effect_receipt": "github:actions/job/99163259257:success",
-    "pending_job_ids": [
-      99163259128
-    ],
-    "idempotency_key": "o-work-gen29:pr346:acdb5ccc:shard2-running-heartbeat-2157:v1",
+    "completed_effect_receipt": "github:actions/run/33276198203:all-required-jobs-success",
+    "pending_job_ids": [],
+    "idempotency_key": "o-work-gen29:pr346:acdb5ccc:expected-head-merge:v1",
     "exact_frontier": "PR346 is open at immutable expected head acdb5ccc; authoritative main still contains the unanswered Candidate request.",
-    "current_main_sha": "a0113556740c387fcab200d00f416876712753d0",
+    "current_main_sha": "b3c9dbac04f0c51ab7d7dfdd8829fdedba3e9527",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [
-      33276198203
-    ],
-    "next_tool_action": "Bounded-wait and recheck shard 2, then require dependent aggregate success before unchanged-head merge.",
+    "pending_workflow_run_ids": [],
+    "next_tool_action": "Exact-readback this authorization, recheck all bindings, then merge PR346 only at expected head acdb5ccc and exact-readback lifecycle blobs.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -1595,7 +1591,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T21:57:42.195Z",
+  "heartbeat_at": "2026-08-29T22:02:21.850Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2424,7 +2420,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T21:46:58.265Z",
+  "last_progress_at": "2026-08-29T22:02:21.850Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -8701,7 +8697,7 @@
     "validation_head_workflow_run_count": 0,
     "repair_validated": true
   },
-  "last_activity_at": "2026-08-29T21:57:42.195Z",
+  "last_activity_at": "2026-08-29T22:02:21.850Z",
   "generation29_root_recovery_merge": {
     "schema_version": 1,
     "merged_at": "2026-08-29T20:14:30Z",
@@ -8931,7 +8927,7 @@
   },
   "generation29_candidate_preflight_consume_v1": {
     "schema_version": 1,
-    "status": "pr_open_exact_head_tests_in_progress",
+    "status": "pr346_exact_head_checks_passed_merge_authorized",
     "observed_at": "2026-08-29T21:28:07.531Z",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
@@ -8982,7 +8978,7 @@
     "pull_request_head_sha": "acdb5ccc0b32d37dfee38e8c14a0907f22d3a098",
     "pull_request_base_sha": "355e7558a160b60bfc0c4285f08c54cea4401ec2",
     "pr_created_at": "2026-08-29T21:29:27Z",
-    "last_observed_at": "2026-08-29T21:43:23.410Z",
+    "last_observed_at": "2026-08-29T22:02:21.850Z",
     "directive_preflight": {
       "run_id": 33276198212,
       "job_id": 99163259115,
@@ -8992,15 +8988,15 @@
     },
     "test_progress": {
       "run_id": 33276198203,
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "head_sha": "acdb5ccc0b32d37dfee38e8c14a0907f22d3a098",
       "jobs": [
         {
           "id": 99163259128,
           "name": "pytest shard 2 of 4",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         },
         {
           "id": 99163259257,
@@ -9018,10 +9014,69 @@
           "id": 99163259342,
           "name": "pytest shard 1 of 4",
           "status": "completed",
-          "conclusion": "success",
-          "completed_at": "2026-08-29T21:39:11Z"
+          "conclusion": "success"
+        },
+        {
+          "id": 99166702338,
+          "name": "test",
+          "status": "completed",
+          "conclusion": "success"
         }
       ]
+    },
+    "merge_authorization": {
+      "authorized_at": "2026-08-29T22:02:21.850Z",
+      "expected_head_sha": "acdb5ccc0b32d37dfee38e8c14a0907f22d3a098",
+      "observed_main_sha": "b3c9dbac04f0c51ab7d7dfdd8829fdedba3e9527",
+      "source_merge_base_sha": "1b3b5914bdf03bf9875d80b744675215be30ad8d",
+      "main_changed_paths_since_base": [
+        "agi/WORK_EXECUTION_STATE.json",
+        "note/automation_control/receipts/bridge/receipt_2026-08-30T0657_JST_control_missing.json",
+        "note/automation_control/receipts/evaluation/receipt_2026-08-30T0632_JST_control_missing.json",
+        "note/automation_control/receipts/evidence_comparator/receipt_2026-08-30T065353_JST_hard_control_stop.json",
+        "note/automation_control/receipts/integrator/receipt_2026-08-30T0654_JST_control_missing.json",
+        "note/research_workers_clean_g1/evaluation/checkpoint_2026-08-30T0632_JST_control_missing.json"
+      ],
+      "candidate_changed_path_count": 14,
+      "changed_path_intersection": [],
+      "required_workflow_runs": [
+        33276198212,
+        33276198203
+      ],
+      "required_jobs": [
+        {
+          "id": 99163259128,
+          "name": "pytest shard 2 of 4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 99163259257,
+          "name": "pytest shard 0 of 4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 99163259326,
+          "name": "pytest shard 3 of 4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 99163259342,
+          "name": "pytest shard 1 of 4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 99166702338,
+          "name": "test",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "idempotency_key": "o-work-gen29:pr346:acdb5ccc:expected-head-merge:v1",
+      "rule": "After exact readback, re-read generation/fence/inbox, exact PR head, workflow conclusions, and latest-main path overlap; merge only expected head acdb5ccc with no force."
     }
   }
 }
