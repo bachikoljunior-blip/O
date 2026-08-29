@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "role": "bridge",
+  "observed_at": "2026-08-29T22:55:27+09:00",
+  "bootstrap": {
+    "required_first_artifact": "note/automation_control/DESIRED_STATE.json",
+    "default_branch_fetch_status": 404,
+    "automation_control_directory_entries": ["receipts"],
+    "semantic_bridge_work_started": false
+  },
+  "execution": {
+    "clean_feed_read": false,
+    "o_cursor_read": false,
+    "feed_mutation": false,
+    "work_created_for_polling": false,
+    "individual_item_spam": false,
+    "synthetic_ack": false,
+    "desired_state_edited": false
+  },
+  "termination": {
+    "status": "BLOCKED_CONTROL_MISSING",
+    "kind": "HARD_CONTROL_BLOCK",
+    "missing_required_artifact": "note/automation_control/DESIRED_STATE.json",
+    "reason": "Authoritative role configuration cannot be frozen or executed while the required control artifact is absent from active main."
+  },
+  "continuation": "Restore authoritative note/automation_control/DESIRED_STATE.json on active main and explicitly re-enable the bridge automation before semantic bridge execution resumes. The first semantic action on the resumed run remains reading DESIRED_STATE.json."
+}
