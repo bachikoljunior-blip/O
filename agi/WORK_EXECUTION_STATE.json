@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T07:15:14.761Z",
+    "checkpointed_at": "2026-08-29T07:16:43.191Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
     "exact_pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "The same authoritative generation-29 invocation covers the 07:12 scheduled slot while the existing exact-head full source CI continues its final pytest shard; no duplicate launch is permitted.",
+    "reason": "Fresh full source CI on exact head 614ead18 completed successfully across four shards and aggregate; bind this exact run/job set before one-time native consumption.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "work_verify_success_source_ci_pending",
+    "status": "source_ci_success_policy_bound_pending_native_consume",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,23 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
-    "next_action": "Continue bounded observation of run 33238893400 without relaunch; on terminal success bind its exact policy and launch one fresh-receipt native consume.",
-    "last_verified_effect": "Exact task readback proves the hourly automation is enabled on the same task chat; source CI run 33238893400 remains accepted and job 99064676827 is active.",
-    "completed_effect_receipt": "07:12 scheduled slot classified as covered by this same authoritative invocation; no scheduler gap, duplicate automation, or duplicate writer was created.",
-    "pending_job_ids": [
-      99064676827
-    ],
-    "idempotency_key": "o-work-gen29:slot-20260829T0712Z:source-ci-33238893400-pending:v1",
-    "exact_frontier": "Work verify 84/84 pending0; exact continuation and revision35 preflight repaired; source CI has three successful shards and final shard 99064676827 active.",
-    "current_main_sha": "8a25c9fa4af31482e85516187fdcc30dcec0f38d",
+    "next_action": "Create an isolated workflow from this exact policy main, generate fresh GitHub-main and CI receipts, assert revision35 continuity, then resume max one native step without submitting or recreating Work.",
+    "last_verified_effect": "Run 33238893400 and all five required jobs exact-read back completed/success on workflow 335420036 and head 614ead18e8adbeea313473b885a925a705e12afc.",
+    "completed_effect_receipt": "Fresh full exact-head source CI passed; ci_source_observation_policy now binds the immutable run and sorted job IDs.",
+    "pending_job_ids": [],
+    "idempotency_key": "o-work-gen29:bind-source-ci-33238893400:614ead18:v1",
+    "exact_frontier": "Fresh source CI policy bound; existing Work response remains durable and unique; native invoke-453 awaits one consumption with fresh source receipts.",
+    "current_main_sha": "c3a26791b39a145d725ade91528144dccf3faa03",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
-    "pending_workflow_run_ids": [
-      33238893400
-    ],
-    "next_tool_action": "Fetch run 33238893400 and job 99064676827 after bounded wait; do not relaunch."
+    "pending_workflow_run_ids": [],
+    "next_tool_action": "Exact-read back this state commit/blob, then create the single native-consume workflow branch from that commit."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -650,35 +646,35 @@
     "status": "pending_fresh_pr320_exact_head_receipt"
   },
   "ci_source_observation_policy": {
-    "exact_head_sha": "bc2c285c8cdf9ff6f7187332da477fa692f03bcb",
-    "executor_binding": "current_chatgpt_work_session",
-    "max_age_seconds": 900,
-    "repository_full_name": "bachikoljunior-blip/O",
     "required": true,
+    "repository_full_name": "bachikoljunior-blip/O",
+    "exact_head_sha": "614ead18e8adbeea313473b885a925a705e12afc",
+    "workflow_run_id": 33238893400,
+    "workflow_id": 335420036,
     "required_jobs": [
       {
-        "id": 98377586754,
-        "name": "pytest shard 0 of 4"
-      },
-      {
-        "id": 98377586956,
+        "id": 99064676707,
         "name": "pytest shard 1 of 4"
       },
       {
-        "id": 98377586965,
+        "id": 99064676796,
+        "name": "pytest shard 0 of 4"
+      },
+      {
+        "id": 99064676827,
         "name": "pytest shard 2 of 4"
       },
       {
-        "id": 98377586995,
+        "id": 99064676900,
         "name": "pytest shard 3 of 4"
       },
       {
-        "id": 98382352439,
+        "id": 99068622254,
         "name": "test"
       }
     ],
-    "workflow_id": 335420036,
-    "workflow_run_id": 33029217668
+    "max_age_seconds": 900,
+    "executor_binding": "current_chatgpt_work_session"
   },
   "clean_g1_research_feed_cursor": {
     "blob_sha": "b3780c12f1aeb02a1e36a5da976ee99dc2ba72b9",
@@ -1120,25 +1116,46 @@
     "pending_response_blob_sha": "2e885226a19c11c98c98fad7172354edae2901d1"
   },
   "exact_head_ci_observation": {
-    "exact_head_sha": "f8f89648ee163ec05104c21e8029beb290bca4c5",
-    "observed_at": "2026-08-28T06:33:31.736Z",
-    "pull_request": 332,
-    "status": "all_required_jobs_succeeded_and_expected_head_merged",
-    "merge_sha": "f8eaaeade88ec11296457f60baf9dcac8c694375",
-    "workflow_runs": [
+    "observed_at": "2026-08-29T07:16:43.191Z",
+    "repository_full_name": "bachikoljunior-blip/O",
+    "workflow_run_id": 33238893400,
+    "workflow_id": 335420036,
+    "head_sha": "614ead18e8adbeea313473b885a925a705e12afc",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
       {
-        "id": 33145873664,
-        "name": "directive-source-preflight",
-        "status": "completed",
-        "conclusion": "success"
+        "conclusion": "success",
+        "id": 99064676707,
+        "name": "pytest shard 1 of 4",
+        "status": "completed"
       },
       {
-        "id": 33145873655,
+        "conclusion": "success",
+        "id": 99064676796,
+        "name": "pytest shard 0 of 4",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "id": 99064676827,
+        "name": "pytest shard 2 of 4",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "id": 99064676900,
+        "name": "pytest shard 3 of 4",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "id": 99068622254,
         "name": "test",
-        "status": "completed",
-        "conclusion": "success"
+        "status": "completed"
       }
-    ]
+    ],
+    "exact_readback": true
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
   "expected_blob_sha": "499cad127d71529cfe6d35e3ede5bc9b2f995f1d",
@@ -1484,7 +1501,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T07:15:14.761Z",
+  "heartbeat_at": "2026-08-29T07:16:43.191Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -7178,32 +7195,38 @@
       "source_ci_workflow_run_id": 33238893400,
       "source_ci_workflow_id": 335420036,
       "exact_head": "614ead18e8adbeea313473b885a925a705e12afc",
-      "source_ci_status": "in_progress",
-      "source_ci_conclusion": null,
+      "source_ci_status": "completed",
+      "source_ci_conclusion": "success",
       "jobs": [
         {
+          "conclusion": "success",
           "id": 99064676707,
           "name": "pytest shard 1 of 4",
-          "status": "completed",
-          "conclusion": "success"
+          "status": "completed"
         },
         {
+          "conclusion": "success",
           "id": 99064676796,
           "name": "pytest shard 0 of 4",
-          "status": "completed",
-          "conclusion": "success"
+          "status": "completed"
         },
         {
+          "conclusion": "success",
           "id": 99064676827,
           "name": "pytest shard 2 of 4",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed"
         },
         {
+          "conclusion": "success",
           "id": 99064676900,
           "name": "pytest shard 3 of 4",
-          "status": "completed",
-          "conclusion": "success"
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 99068622254,
+          "name": "test",
+          "status": "completed"
         }
       ]
     }
