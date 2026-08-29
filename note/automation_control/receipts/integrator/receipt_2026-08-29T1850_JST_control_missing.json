@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "role": "integrator",
+  "observed_at": "2026-08-29T18:50:55+09:00",
+  "bootstrap": {
+    "required_first_read": "note/automation_control/DESIRED_STATE.json",
+    "active_main_head_observed": "e2b625ff016c4f3316ffa878de1646536d79c2f6",
+    "required_control_fetch_result": "404_NOT_FOUND",
+    "current_role_config_resolved": false,
+    "enabled_desired_resolved": false,
+    "bootstrap_valid": false,
+    "note": "A non-semantic repository locator search preceded the authoritative path fetch; no candidate/downstream semantic state was read or used for integration before the required control fetch failed."
+  },
+  "execution_evidence": {
+    "semantic_work_started": false,
+    "downstream_integration_started": false,
+    "candidate_reads_used_for_semantics": 0,
+    "index_mutations": 0,
+    "active_wave_mutations": 0,
+    "o_feed_mutations": 0,
+    "exploration_feedback_mutations": 0,
+    "desired_state_edited": false,
+    "clean_candidate_boundaries_preserved": true,
+    "downstream_semantic_direction_leaked_to_exploration": false
+  },
+  "revision_evidence": {
+    "control_revision": "UNAVAILABLE",
+    "integrator_config_revision": "UNAVAILABLE"
+  },
+  "prior_consistent_hard_stop_evidence": {
+    "receipt": "note/automation_control/receipts/integrator/receipt_2026-08-29T1748_JST_control_missing.json",
+    "termination": "note/automation_control/receipts/integrator/termination_2026-08-29T1748_JST_control_missing_automation_disabled.json"
+  },
+  "termination": {
+    "status": "BLOCKED_CONTROL_MISSING",
+    "kind": "HARD_CONTROL_BLOCK",
+    "reason": "The authoritative bootstrap file is absent on the active main head, so enabled_desired and the current integrator role configuration cannot be established safely. Semantic/downstream integration remains fail-closed."
+  },
+  "automation_action": {
+    "automation_id": "6a8d2b85b4c881919ee438cddab06eb2",
+    "action_planned": "disable_due_to_hard_control_block"
+  },
+  "exact_continuation": "Only resume by explicitly re-enabling after note/automation_control/DESIRED_STATE.json exists on the active head. On the first resumed run, fetch that file before any repository semantic reads and resolve the current integrator config. Do not reconstruct authority from historical controls, O semantics, other-worker/downstream state, legacy semantics, or prior-run summaries."
+}
