@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_native_consume_result_expected_head_merge",
+  "active_component": "generation29_execute_work_response_precommit",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T08:32:56.867Z",
-    "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
-    "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
-    "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
-    "exact_pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
+    "checkpointed_at": "2026-08-29T08:35:28.112Z",
+    "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
+    "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
+    "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
+    "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
-    "no_response_on_authoritative_remote": false,
+    "no_response_on_authoritative_remote": true,
     "reason": "The corrected v3 run durably pushed one validated lifecycle transition to an isolated branch; the clean result head is awaiting exact-head directive and full test workflows before PR publication.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "native_consume_result_pr341_expected_head_merge_authorization_precommit",
+    "status": "pending_execute_work_response_remote_main_readback_verified",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -198,11 +198,11 @@
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
-    "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
+    "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Exact-readback this merge authorization, reread latest main/state/inbox/PR/head/mergeability, and merge PR 341 only with expected head d9e4e8d4.",
-    "last_verified_effect": "PR 341 exact readback proves head d9e4e8d4, base main, mergeable=true, and exactly 12 reviewed lifecycle paths; push exact-head directive and full test runs are complete success.",
-    "completed_effect_receipt": "PR-triggered revalidation runs 33243367299 and 33243367318 were automatically accepted on the identical head after PR creation; they are tracked without relaunch and do not invalidate the already successful exact-head push CI.",
+    "next_action": "Create an isolated response branch from this exact state checkpoint, write one response bound to request digest 953e1139, exact-readback, validate, run exact-head CI, and merge; then resume native once.",
+    "last_verified_effect": "PR 341 merged with expected head d9e4e8d4 to main 42df5002; all 12 lifecycle blobs exact-read back, old native is complete, new native/Work binding is awaiting, snapshot blob/revision is unchanged, and the new response path is absent.",
+    "completed_effect_receipt": "The exactly-once consume is now authoritative main: 85 requests / 84 responses / 1 pending and native 78 completed / 78 fragments / 72 local-learn. This is unfinished Work, not completion.",
     "pending_job_ids": [
       99076411302,
       99076411314,
@@ -210,18 +210,20 @@
       99076411339,
       99076411290
     ],
-    "idempotency_key": "o-work-gen29:pr341:d9e4e8d4:expected-head-merge:v1",
-    "exact_frontier": "PR 341 is ready for expected-head merge after this state CAS and one final authority/head/mergeability readback; the next Work request is still branch-only.",
-    "current_main_sha": "0cbaf84bd5311a124f59b77d365a7bf0d76d308a",
+    "idempotency_key": "o-work-gen29:invoke-e750825c4d5987ec613de791:response-once:v1",
+    "exact_frontier": "The exact Execute request invoke-e750825 is authoritative on main with no response; construct one schema-valid output from merged artifacts and publish once without recreating the request.",
+    "current_main_sha": "42df5002daf7cda4199742cd4060bff3c1190237",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
-    "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
+    "exact_frozen_response_digest": null,
     "pending_workflow_run_ids": [
       33243367299,
-      33243367318
+      33243367318,
+      33243448037,
+      33243448060
     ],
-    "next_tool_action": "Fetch main, state, inbox, PR 341, branch, and required CI; then call expected-head merge if unchanged."
+    "next_tool_action": "Exact-readback this state CAS and the request/response absence, then create the response branch."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1086,43 +1088,43 @@
     "native_phase": "unit_pending"
   },
   "exact_continuation": {
-    "completed_native_invocation_blob_sha": "f171f71e58a4bf4931316b41b6ea1a633052e3a9",
-    "completed_native_invocation_id": "invoke-1dbf071f57e8c7d48d2262ce",
-    "completed_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-1dbf071f57e8c7d48d2262ce.json",
-    "completed_request_blob_sha": "38f7698868fac92cf7317d93c0d01956f71465dd",
-    "completed_request_digest": "d0a8327fcfef6f0cfcb8c4b4fb9debd987bd932256ce18ff2448b81fd4d98cd5",
-    "completed_request_ref": ".continual/work-model/invocations/invoke-a5c82a8fdb7916d0a16b72cf/request.json",
-    "completed_response_blob_sha": "bb7a511c7c94e243859045227cbf8885f21cca18",
-    "completed_response_digest": "242b174473ef00a9da93576a40073639b1a9b8cdfa0c20249f1e282d05976242",
-    "completed_response_ref": ".continual/work-model/invocations/invoke-a5c82a8fdb7916d0a16b72cf/response.json",
-    "completed_work_invocation_id": "invoke-a5c82a8fdb7916d0a16b72cf",
-    "durability_status": "pending_work_response_remote_main_readback_verified_native_consume_required",
-    "inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
-    "inbox_revision": 35,
-    "native_phase": "unit_pending",
-    "next_action": "Refresh revision35 continuity and source receipts, then resume the unique awaiting native invocation once so it consumes the already-durable Work response without re-answering.",
-    "pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
-    "pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
-    "pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
-    "pending_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
-    "prior_requests_recreated": false,
-    "reconciled_at": "2026-08-28T11:28:00.000Z",
-    "request_recreated": false,
-    "response_exists_on_authoritative_remote": true,
+    "completed_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
+    "completed_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-453dfc3b5b74ddb7d9e4fdee.json",
+    "completed_native_invocation_blob_sha": "b7e5f16eb06b8dc68d521917fbebfaec13355045",
+    "completed_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
+    "completed_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
+    "completed_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
+    "completed_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
+    "completed_response_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/response.json",
+    "completed_response_blob_sha": "2e885226a19c11c98c98fad7172354edae2901d1",
+    "completed_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642f",
+    "pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
+    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-46f38354bc1b6c8a4d6b6564.json",
+    "pending_native_invocation_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
+    "pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
+    "pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
+    "pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
+    "pending_response_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/response.json",
+    "pending_response_blob_sha": null,
+    "pending_response_digest": null,
+    "response_exists_on_authoritative_remote": false,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_blob_sha": "48e919441f25db4a7e89d88c04888dff4d590e4f",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "eaef5dee8cf2123e1727042adba70e0f8c7afc1b",
+    "snapshot_head_sha": "42df5002daf7cda4199742cd4060bff3c1190237",
     "snapshot_revision": 92,
+    "native_phase": "unit_pending",
     "selected_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
     "selected_unit_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/execution-units/unit-generation25-recursive-context-retrieval-ablation-v1.json",
     "selected_unit_blob_sha": "4f40e9b757f4b4aba74e72672085d1df5793e382",
-    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-453dfc3b5b74ddb7d9e4fdee.json",
-    "pending_native_invocation_blob_sha": "ab70f0037683a5ad3c45802f515b0b80cb59a7dd",
-    "pending_response_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/response.json",
-    "pending_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642f",
-    "pending_response_blob_sha": "2e885226a19c11c98c98fad7172354edae2901d1"
+    "durability_status": "pending_work_request_remote_main_readback_verified_response_required",
+    "inbox_revision": 35,
+    "inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
+    "reconciled_at": "2026-08-29T08:35:28.112Z",
+    "request_recreated": false,
+    "prior_requests_recreated": false,
+    "next_action": "Publish exactly one response for Work invoke-e750825c4d5987ec613de791 from the already merged and validated bounded ablation artifacts, exact-readback it, then resume native invoke-46f38354bc1b6c8a4d6b6564 once."
   },
   "exact_head_ci_observation": {
     "observed_at": "2026-08-29T07:16:43.191Z",
@@ -1510,7 +1512,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T08:32:56.867Z",
+  "heartbeat_at": "2026-08-29T08:35:28.112Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2339,12 +2341,12 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T08:32:56.867Z",
+  "last_progress_at": "2026-08-29T08:35:28.112Z",
   "lease_generation": 29,
   "lease_renewal": {
-    "expected_blob_sha": "18c2d89f22a45e0cd63e1db503e74fa4d5ca7dd7",
-    "reason": "premerge expected-head authorization after exact PR readback and successful push exact-head CI",
-    "requested_at": "2026-08-29T08:32:56.867Z",
+    "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
+    "reason": "bind exact postmerge pending Execute Work request before exactly-once response publication",
+    "requested_at": "2026-08-29T08:35:28.112Z",
     "verified_remote_readback": false
   },
   "local_combined_regression": {
@@ -4025,7 +4027,7 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "4ad5ddbd7adce67c29a49779c7540a1dd7d5c1b1",
+  "source_main_sha": "42df5002daf7cda4199742cd4060bff3c1190237",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
@@ -7646,7 +7648,7 @@
         ],
         "verified_at": "2026-08-29T08:31:20.246Z"
       },
-      "authoritative_main_effect": false,
+      "authoritative_main_effect": true,
       "request_recreated": false,
       "response_repeated": false,
       "pre_pr_authorization": {
@@ -7666,7 +7668,7 @@
       "pull_request": 341,
       "pr_url": "https://github.com/bachikoljunior-blip/O/pull/341",
       "merge_authorization": {
-        "status": "precommit_expected_head_merge_after_exact_pr_readback",
+        "status": "completed_merged_expected_head_and_main_exact_readback_verified",
         "prepared_at": "2026-08-29T08:32:56.867Z",
         "expected_state_blob_sha": "18c2d89f22a45e0cd63e1db503e74fa4d5ca7dd7",
         "observed_main_sha": "0cbaf84bd5311a124f59b77d365a7bf0d76d308a",
@@ -7734,8 +7736,56 @@
           "33243367318": "directive-source-preflight pull_request same head: queued"
         },
         "idempotency_key": "bachikoljunior-blip/O:pr341:d9e4e8d4d2c247efca094197bddd549e547e4070:merge:v1",
-        "rule": "After exact readback of this CAS, reread latest authority, inbox, PR exact head, all 12 filenames, successful required push workflows, and mergeability; merge only unchanged head with expected-head protection."
-      }
+        "rule": "After exact readback of this CAS, reread latest authority, inbox, PR exact head, all 12 filenames, successful required push workflows, and mergeability; merge only unchanged head with expected-head protection.",
+        "result_merge_sha": "42df5002daf7cda4199742cd4060bff3c1190237",
+        "merged_at": "2026-08-29T08:33:41Z",
+        "main_exact_readback_verified": true
+      },
+      "merge_sha": "42df5002daf7cda4199742cd4060bff3c1190237",
+      "merged_at": "2026-08-29T08:33:41Z",
+      "main_exact_readback_verified": true
     }
+  },
+  "generation29_execute_response": {
+    "schema_version": 1,
+    "status": "precommit_exact_request_bound_response_absent",
+    "observed_at": "2026-08-29T08:35:28.112Z",
+    "request": {
+      "invocation_id": "invoke-e750825c4d5987ec613de791",
+      "component": "execute",
+      "digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
+      "blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
+      "response_exists": false
+    },
+    "native": {
+      "invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
+      "blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
+      "status": "awaiting_work_model"
+    },
+    "evidence": {
+      "pull_request": 336,
+      "merge_sha": "4d7eeea9d8106782bc7b6603e30145fac3f3cf18",
+      "artifacts": {
+        "agi/RECURSIVE_CONTEXT_RETRIEVAL_ABLATION.json": "e0c4ca3e478d06f493c5099ecc2aa9434aa3b8fd",
+        "agi/RECURSIVE_CONTEXT_RETRIEVAL_FIXTURES.json": "9d0a7a92d3467a955658a4e09bfaf42cc4c39c90",
+        "src/agi/recursive_context_retrieval_ablation.py": "e9c3939fc918190623e5f5053b8f2d04eaeeec83",
+        "tests/test_recursive_context_retrieval_ablation.py": "a99374fd889f904e8a1c1b1487a9ba2044fcde2a"
+      },
+      "report_digest": "8314097b8e31f40d22bb702c4e81bbd751fcdc15fcfed5f26b6168271f0b8c8f",
+      "fixture_manifest_digest": "72b9ddd96248c640ac202a0c613becefcbb497514b3eb5236981029d6064f7dc",
+      "validation": {
+        "passed": 166,
+        "failed": 0,
+        "fixture_count": 3,
+        "baseline_mean_required_source_recall": 0.3333333333333333,
+        "recursive_mean_required_source_recall": 1,
+        "unsafe_admission_count": 0,
+        "deterministic_replay_count": 6,
+        "stale_rejections": 1,
+        "authority_conflict_rejections": 1
+      }
+    },
+    "idempotency_key": "o-work-gen29:invoke-e750825c4d5987ec613de791:response-once:v1",
+    "next_action": "Publish exactly one response on an isolated branch; no production routing or Candidate activation."
   }
 }
