@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T15:36:04.436Z",
+    "checkpointed_at": "2026-08-29T15:40:33.277Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "PR343 merged by expected head b5ac47d3 at cd106226; remote main exact-readback proves all 11 lifecycle blobs, snapshot revision94 root_pending, native Execute completion, and frozen Work request/response invariants.",
+    "reason": "Exact-base one-shot Root freeze workflow was created on branch head 0373091f and GitHub accepted run 33260870910. The run is queued; never relaunch while accepted-pending.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_boundary_pr343_merged_remote_main_exact_readback",
+    "status": "root_boundary_next_root_freeze_run_accepted_queued",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,19 +200,21 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Launch one exact-authority one-shot native work-resume max_steps=1 from root_pending revision94 without duplicating any prior invocation.",
-    "last_verified_effect": "Expected-head merge PR343 succeeded and exact remote main readback verified 11/11 expected path blobs plus root_pending snapshot revision94.",
-    "completed_effect_receipt": "PR343 merge result cd10622680e2c649c3a9a993b37719bdea3b1e14 and latest-main file/blob readbacks at 2026-08-29T15:35:44.763Z.",
+    "next_action": "Bounded-recheck run 33260870910 and its freeze job. While queued, heartbeat state-only updates are allowed; once source-observation steps begin, avoid state mutation until result or failure.",
+    "last_verified_effect": "Created branch agent/recovery-gen29-root-freeze-v1 from exact main e7ab41c, added only workflow blob afe4bf1e, and observed accepted native Root-freeze run 33260870910 on exact head 0373091f.",
+    "completed_effect_receipt": "Branch/file/compare and Actions head-sha readback at 2026-08-29T15:40:16.528Z.",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v8-install-artifact-filter",
-    "exact_frontier": "Durable native Execute result is now on main at root_pending revision94. The upper objective is unmet; next effect must invoke Root once and freeze its next Work-exclusive request.",
-    "current_main_sha": "cd10622680e2c649c3a9a993b37719bdea3b1e14",
+    "idempotency_key": "o-work-gen29:root-revision94:freeze-next-work-request-once:v1",
+    "exact_frontier": "Root-freeze workflow run 33260870910 accepted and queued on exact launch head 0373091f. No duplicate dispatch.",
+    "current_main_sha": "e7ab41cd94627d8f647a39aa6eac1acc4ed32802",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [],
-    "next_tool_action": "Create exact-base one-shot workflow branch for continual work-resume --max-steps 1, dispatch once, and track result."
+    "pending_workflow_run_ids": [
+      33260870910
+    ],
+    "next_tool_action": "Fetch workflow run 33260870910 and job steps without relaunch."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1501,7 +1503,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T15:36:04.436Z",
+  "heartbeat_at": "2026-08-29T15:40:33.277Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2330,7 +2332,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T15:36:04.436Z",
+  "last_progress_at": "2026-08-29T15:40:33.277Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -8396,5 +8398,27 @@
     "frozen_work_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
     "resume_required": true,
     "agi_claim_supported": false
+  },
+  "generation29_root_freeze_v1": {
+    "launch_recorded_at": "2026-08-29T15:40:33.277Z",
+    "branch": "agent/recovery-gen29-root-freeze-v1",
+    "base_main_sha": "e7ab41cd94627d8f647a39aa6eac1acc4ed32802",
+    "launch_head_sha": "0373091fac39cd5f310e5bd23da09b0075d45697",
+    "workflow_path": ".github/workflows/gen29-root-freeze-v1.yml",
+    "workflow_blob_sha": "afe4bf1e4b62f3e0e28ca5eeecbe5cf6e93d7851",
+    "workflow_run_id": 33260870910,
+    "workflow_status": "queued",
+    "workflow_conclusion": null,
+    "idempotency_key": "o-work-gen29:root-revision94:freeze-next-work-request-once:v1",
+    "expected_snapshot_blob_sha": "f56208024a21be4d9061440998f3970253fe6c34",
+    "expected_snapshot_revision": 94,
+    "expected_snapshot_phase": "root_pending",
+    "expected_inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
+    "expected_inbox_revision": 35,
+    "exact_launch_delta": [
+      ".github/workflows/gen29-root-freeze-v1.yml"
+    ],
+    "duplicate_launch_forbidden": true,
+    "resume_required": true
   }
 }
