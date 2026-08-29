@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T20:18:31.793Z",
+    "checkpointed_at": "2026-08-29T20:19:14.204Z",
     "exact_pending_request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
     "exact_pending_request_digest": "3d51e513c72a35bf00ce0b5353c6174e6dcac843133bd9df7b4d2526953d56fe",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-91f2cb57cf0f69a5d9abfce6/request.json",
     "exact_pending_work_invocation_id": "invoke-91f2cb57cf0f69a5d9abfce6",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "Run 33273043868 passed exact authority/request/checkpoint validation, then failed before semantic mutation because the workflow queried run 33270788885 while ci-source-observation-prepare correctly precommitted policy run 33238893400. Root response remains absent and native journal remains exact awaiting blob a1cdec99.",
+    "reason": "The concrete CI observation selector cause was eliminated and exact-readback at repair head 813f68cc. Automatic run 33273154271 is accepted/queued on the same branch and frozen continuation; no duplicate semantic effect exists.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_response_workflow_failed_presemantic_ci_policy_mismatch_repair_validated_skip_ci",
+    "status": "root_response_exact_once_repair_v2_queued_skip_ci",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,19 +200,21 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
     "resume_required": true,
-    "next_action": "Patch only the existing workflow source-CI env to the state policy run/head 33238893400@614ead18; exact-readback the workflow repair and let the same unique branch refire once.",
-    "last_verified_effect": "Identified exact presemantic stop cause and validated policy run 33238893400: workflow_id/head/all five required job identities and success exactly match state policy.",
-    "completed_effect_receipt": "github:actions/job/99154871969:failure-before-semantic-mutation",
+    "next_action": "Observe run 33273154271 without relaunch. Once it begins, avoid state mutation until its pre-mutation CAS and result persistence complete.",
+    "last_verified_effect": "Patched only the source CI run/head selectors to exact state policy values and observed the repaired workflow launch.",
+    "completed_effect_receipt": "github:actions/run/33273154271@813f68cc277eca082dd66f79aaf393e41395b59b:queued",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:consume-root-invoke-91f2cb57cf0f69a5d9abfce6:repair-ci-policy-selector:v2",
-    "exact_frontier": "Root request remains unanswered and bound; the sole blocker is a two-field workflow CI source selector mismatch, with exact repair inputs verified.",
+    "idempotency_key": "o-work-gen29:consume-root-invoke-91f2cb57cf0f69a5d9abfce6:repair-ci-policy-selector:v2:launch",
+    "exact_frontier": "Repaired Root-consume run accepted; response remains absent and native remains awaiting on authoritative main.",
     "current_main_sha": "e5715235dc1a5be5843d20eea9d7089580742102",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [],
-    "next_tool_action": "Update .github/workflows/gen29-root-response-task-evaluate-v1.yml on the existing branch; do not create another branch.",
+    "pending_workflow_run_ids": [
+      33273154271
+    ],
+    "next_tool_action": "Fetch workflow run 33273154271 jobs.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -225,7 +227,7 @@
     "recovered_frozen_request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
     "recovered_native_journal_blob_sha": "a1cdec9928329d80f02bfb69c4a0eec840e6450c",
     "branch": "work/gen29-root-response-task-evaluate-v1",
-    "branch_head_sha": "496f6acd1f60a9c79ff37f2e40e5b35f87e7af9a",
+    "branch_head_sha": "813f68cc277eca082dd66f79aaf393e41395b59b",
     "queue_observation": {
       "observed_at": "2026-08-29T19:07:09.708Z",
       "repository_queued_runs": 62,
@@ -1588,7 +1590,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T20:18:31.793Z",
+  "heartbeat_at": "2026-08-29T20:19:14.204Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -8682,7 +8684,7 @@
     "validation_head_workflow_run_count": 0,
     "repair_validated": true
   },
-  "last_activity_at": "2026-08-29T20:18:31.793Z",
+  "last_activity_at": "2026-08-29T20:19:14.204Z",
   "generation29_root_recovery_merge": {
     "schema_version": 1,
     "merged_at": "2026-08-29T20:14:30Z",
@@ -8713,7 +8715,7 @@
   },
   "generation29_root_response_consume_v1": {
     "schema_version": 1,
-    "status": "failed_before_semantic_mutation_repair_validated",
+    "status": "repair_v2_launch_accepted_queued",
     "launched_at": "2026-08-29T20:16:21Z",
     "branch": "work/gen29-root-response-task-evaluate-v1",
     "base_main_sha": "da307fe7f7541310d868f613d6be71a826f92e6c",
@@ -8732,10 +8734,10 @@
     "request_recreated": false,
     "root_reinvoked": false,
     "response_exists_on_main": false,
-    "refire_pending": false,
+    "refire_pending": true,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T20:18:31.793Z",
-    "next_action": "Patch same workflow and observe the automatically refired run; never relaunch the completed failed head.",
+    "last_observed_at": "2026-08-29T20:19:14.204Z",
+    "next_action": "Observe repaired accepted run; do not relaunch while queued/in progress.",
     "failed_run_id": 33273043868,
     "failed_job_id": 99154871969,
     "failed_step": "Record fresh exact main and successful exact-head CI observations",
@@ -8785,6 +8787,10 @@
           "conclusion": "success"
         }
       ]
-    }
+    },
+    "repair_head_sha": "813f68cc277eca082dd66f79aaf393e41395b59b",
+    "repair_workflow_blob_sha": "3ede4cb2ac7f82079bd1653e44102811b00ab9f5",
+    "repair_run_id": 33273154271,
+    "repair_launched_at": "2026-08-29T20:18:50Z"
   }
 }
