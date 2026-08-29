@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "role": "integrator",
+  "observed_at": "2026-08-29T22:57:56+09:00",
+  "bootstrap_valid": false,
+  "prior_receipt": "note/automation_control/receipts/integrator/receipt_2026-08-29T2256_JST_control_missing.json",
+  "blocking_condition": "note/automation_control/DESIRED_STATE.json remained 404_NOT_FOUND on two direct fetch attempts; automation_control directory contained only receipts/ at the observed main head.",
+  "semantic_work_started": false,
+  "downstream_integration_started": false,
+  "desired_state_edited": false,
+  "exploration_feedback_written": false,
+  "repository_mutations": [
+    "diagnostic receipts only"
+  ],
+  "scheduler_action": {
+    "automation_title": "Research Index Integrator",
+    "is_enabled_after_action": false,
+    "reason": "Fully blocked on missing required bootstrap control; disabled under automation-runtime hard-block handling rather than continuing repeated invalid bootstrap attempts."
+  },
+  "termination": "BLOCKED_CONTROL_MISSING_AUTOMATION_DISABLED",
+  "exact_continuation": "Restore note/automation_control/DESIRED_STATE.json on active main, then explicitly re-enable the Research Index Integrator automation. On the first resumed run, fetch DESIRED_STATE.json before any semantic artifact read, validate the current integrator role config and referenced control tuple, and only then resume downstream integration."
+}
