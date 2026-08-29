@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T20:50:32.055Z",
+    "checkpointed_at": "2026-08-29T21:02:05.780Z",
     "exact_pending_request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
     "exact_pending_request_digest": "3d51e513c72a35bf00ce0b5353c6174e6dcac843133bd9df7b4d2526953d56fe",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-91f2cb57cf0f69a5d9abfce6/request.json",
     "exact_pending_work_invocation_id": "invoke-91f2cb57cf0f69a5d9abfce6",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "Exact-head shards3 and1 succeeded; shards2 and0 remain in progress and aggregate is pending.",
+    "reason": "Bounded rechecks confirm shards2 and0 remain actively running, not stopped; shards3 and1 remain successful. No merge or relaunch.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "pr345_two_shards_passed_two_active_skip_ci",
+    "status": "pr345_two_shards_passed_long_running_two_active_skip_ci",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -202,14 +202,14 @@
     "resume_required": true,
     "next_action": "Observe run 33273154271 without relaunch. Once it begins, avoid state mutation until its pre-mutation CAS and result persistence complete.",
     "last_verified_effect": "PR345 shard1 success after shard3 success.",
-    "completed_effect_receipt": "github:actions/job/99157154002@7a8f597c:success",
+    "completed_effect_receipt": "github:actions/run/33273902467:two-success-two-in-progress:no-head-change",
     "pending_job_ids": [
       99157154080,
       99157154085
     ],
     "idempotency_key": "o-work-gen29:pr345:exact-head-7a8f597c:ci-observe",
-    "exact_frontier": "Two of four shards passed; merge remains forbidden.",
-    "current_main_sha": "5f1eef3147a199bc133d883e77b526727beb4f73",
+    "exact_frontier": "Exact-head CI still running; this heartbeat is liveness observation only and not a completion claim.",
+    "current_main_sha": "fb6cd76d0cb478e96772aedd80e97ea58e2d089e",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -217,7 +217,7 @@
     "pending_workflow_run_ids": [
       33273902467
     ],
-    "next_tool_action": "Recheck shards2/0 and aggregate.",
+    "next_tool_action": "Continue bounded recheck of jobs99157154080/99157154085.",
     "exact_completed_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "exact_completed_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "exact_completed_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
@@ -1593,7 +1593,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T20:50:32.055Z",
+  "heartbeat_at": "2026-08-29T21:02:05.780Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -8687,7 +8687,7 @@
     "validation_head_workflow_run_count": 0,
     "repair_validated": true
   },
-  "last_activity_at": "2026-08-29T20:50:32.055Z",
+  "last_activity_at": "2026-08-29T21:02:05.780Z",
   "generation29_root_recovery_merge": {
     "schema_version": 1,
     "merged_at": "2026-08-29T20:14:30Z",
@@ -8718,7 +8718,7 @@
   },
   "generation29_root_response_consume_v1": {
     "schema_version": 1,
-    "status": "pr345_shards3_and1_passed_two_active",
+    "status": "pr345_two_shards_passed_shards2_and0_still_running",
     "launched_at": "2026-08-29T20:16:21Z",
     "branch": "work/gen29-root-response-task-evaluate-v1",
     "base_main_sha": "da307fe7f7541310d868f613d6be71a826f92e6c",
@@ -8739,7 +8739,7 @@
     "response_exists_on_main": false,
     "refire_pending": true,
     "resume_required": true,
-    "last_observed_at": "2026-08-29T20:50:32.055Z",
+    "last_observed_at": "2026-08-29T21:02:05.780Z",
     "next_action": "Continue exact-head observation; shards3/1 passed, shards2/0 and dependent aggregate remain.",
     "failed_run_id": 33273043868,
     "failed_job_id": 99154871969,
@@ -8856,7 +8856,7 @@
     "test_workflow_run_id": 33273902467,
     "directive_preflight_workflow_run_id": 33273902481,
     "pr345_test_progress": {
-      "observed_at": "2026-08-29T20:50:32.055Z",
+      "observed_at": "2026-08-29T21:02:05.780Z",
       "pull_request": 345,
       "head_sha": "7a8f597cfe10b377a4ca0f3691e27eb3fa514b0b",
       "directive_source_preflight": {
@@ -8886,13 +8886,15 @@
             "id": 99157154080,
             "name": "pytest shard 2 of 4",
             "status": "in_progress",
-            "conclusion": null
+            "conclusion": null,
+            "started_at": "2026-08-29T20:40:21Z"
           },
           {
             "id": 99157154085,
             "name": "pytest shard 0 of 4",
             "status": "in_progress",
-            "conclusion": null
+            "conclusion": null,
+            "started_at": "2026-08-29T20:43:03Z"
           }
         ]
       }
