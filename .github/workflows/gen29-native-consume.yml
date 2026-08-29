@@ -207,10 +207,15 @@ jobs:
           old_native_id = 'invoke-453dfc3b5b74ddb7d9e4fdee'
           old_work_id = 'invoke-f1cb0996ce0ff71a28d0dd58'
           journal = json.loads((run_dir / 'invocations' / f'{old_native_id}.json').read_text())
-          if journal.get('status') != 'complete' or journal.get('work_invocation_id') != old_work_id:
+          response = json.loads((root / '.continual' / 'work-model' / 'invocations' / old_work_id / 'response.json').read_text())
+          if journal.get('status') != 'complete':
               raise SystemExit('old frozen native invocation was not completed exactly')
           if journal.get('component') != 'candidate_evaluate':
               raise SystemExit('old native component changed')
+          if journal.get('output') != response.get('output'):
+              raise SystemExit('completed native output differs from the exact frozen Work response')
+          if 'work_invocation_id' in journal or 'work_request_ref' in journal:
+              raise SystemExit('complete journal retained stale awaiting-work fields')
           if not (run_dir / 'fragments' / f'{old_native_id}-candidate_evaluate.json').is_file():
               raise SystemExit('candidate fragment missing')
           if not (run_dir / 'local-learn' / f'{old_native_id}-candidate_evaluate.json').is_file():
