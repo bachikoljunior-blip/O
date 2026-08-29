@@ -327,7 +327,7 @@ jobs:
           test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "${EXPECTED_STATE_BLOB}"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- \
+          git add -f -- \
             ".continual/runs/${RUN_ID}/events.jsonl" \
             ".continual/runs/${RUN_ID}/invocations/${OLD_NATIVE_ID}.json"
           while IFS= read -r generated_path; do
