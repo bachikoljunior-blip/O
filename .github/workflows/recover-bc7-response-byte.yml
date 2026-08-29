@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   scan:
-    name: scan first-record chunk ${{ matrix.chunk }}
+    name: scan original-gen29 chunk ${{ matrix.chunk }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -48,10 +48,10 @@ jobs:
           }
 
           chunk = int(os.environ["CHUNK"])
-          total_seconds = 322
+          total_seconds = 870
           first_offset = chunk * total_seconds // 12
           last_offset = (chunk + 1) * total_seconds // 12
-          origin = datetime(2026, 8, 28, 23, 42, 54, tzinfo=timezone.utc)
+          origin = datetime(2026, 8, 28, 12, 27, 24, tzinfo=timezone.utc)
           sentinel = "XXXXXX"
 
           for offset in range(first_offset, last_offset):
@@ -63,8 +63,8 @@ jobs:
               marker = raw.index(sentinel.encode("ascii"))
               base = hashlib.sha1(raw[:marker], usedforsecurity=False)
               suffix = raw[marker + 6 :]
-              micro_start = 295_000 if offset == 0 else 0
-              micro_end = 987_001 if offset == 321 else 1_000_000
+              micro_start = 304_000 if offset == 0 else 0
+              micro_end = 473_246 if offset == 869 else 1_000_000
               for micros in range(micro_start, micro_end):
                   digest = base.copy()
                   digest.update(f"{micros:06d}".encode("ascii"))
