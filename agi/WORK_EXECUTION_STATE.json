@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision34_payload_pr337_exact_head_ci_queued",
+  "active_component": "generation29_revision34_payload_pr337_exact_head_ci_started",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T00:28:07.157Z",
+    "checkpointed_at": "2026-08-29T00:28:45.934Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -203,10 +203,16 @@
     "next_action": "Continue bounded exact-head rechecks without duplicate launch. Wait for shard 2 and the dependent aggregate, then fresh authority/inbox/head/latest-main/intersection/mergeability checks and expected-head merge.",
     "last_verified_effect": "Directive stale-source cause eliminated; exact frozen lifecycle payload branch now includes revision34 main without recreating request or repeating response.",
     "completed_effect_receipt": "Existing PR337 fast-forwarded to exact head 2b2bda15307d6643db587b6894aa41f4357ecb00 with latest main as second parent and the same exact four frozen blobs; branch/file readback verified 4/4.",
-    "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:payload-pr337:head-2b2bda15:exact-four-blobs",
-    "exact_frontier": "PR337 changed_files=4, mergeable=true, exact-head test and directive-source-preflight workflows queued.",
-    "current_main_sha": "c5698fa7ec41049b33cf3213951851fd45a50e21",
+    "pending_job_ids": [
+      99022575849,
+      99022575859,
+      99022575902,
+      99022575903,
+      99022576308
+    ],
+    "idempotency_key": "o-work-gen29:payload-pr337:head-2b2bda15:ci-accepted",
+    "exact_frontier": "Exact-head test workflow and directive-source-preflight are accepted; one shard is running and remaining jobs are queued.",
+    "current_main_sha": "f6444ef06ba41b871057d89f7d8d702adb2a068f",
     "goal_revision": 34,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -215,7 +221,7 @@
       33223569875,
       33223569969
     ],
-    "next_tool_action": "Fetch exact-head workflow runs 33223569875 and 33223569969; do not rerun while accepted-pending."
+    "next_tool_action": "Recheck accepted runs/jobs with bounded wait; do not rerun."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1472,7 +1478,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T00:28:07.157Z",
+  "heartbeat_at": "2026-08-29T00:28:45.934Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -5385,8 +5391,8 @@
   },
   "generation29_revision34_refresh": {
     "schema_version": 1,
-    "status": "revision34_payload_pr337_exact_head_ci_queued",
-    "observed_at": "2026-08-29T00:28:07.157Z",
+    "status": "revision34_payload_pr337_exact_head_ci_started",
+    "observed_at": "2026-08-29T00:28:45.934Z",
     "user_input": {
       "revision": 34,
       "id": "user-reaffirmation-run-to-achievement-slot-integrity-20260828-v34",
@@ -5414,7 +5420,7 @@
       "blob_sha": "0a2e9b12f791f3d52b986de4fc321c2e085dcba7"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision34:typed-directive-refresh:v1",
-    "next_action": "Bounded recheck exact-head workflows 33223569875 and 33223569969 without duplicate launch; after both succeed, perform fresh authority/main/inbox/head/blob/mergeability checks and expected-head merge PR337.",
+    "next_action": "Bounded recheck accepted exact-head CI runs 33223569875 and 33223569969 and job ids 99022575849, 99022575859, 99022575902, 99022575903, 99022576308; never duplicate launch.",
     "updated_at": "2026-08-29T00:09:26.215Z",
     "repair": {
       "pull_request": 338,
@@ -5687,10 +5693,37 @@
           "conclusion": null
         }
       ],
-      "ci_checked_at": "2026-08-29T00:28:07.157Z",
+      "ci_checked_at": "2026-08-29T00:28:45.934Z",
       "duplicate_payload": false,
       "request_recreated": false,
-      "response_repeated": false
+      "response_repeated": false,
+      "jobs": [
+        {
+          "id": 99022575849,
+          "name": "pytest shard 3 of 4",
+          "status": "in_progress"
+        },
+        {
+          "id": 99022575859,
+          "name": "pytest shard 1 of 4",
+          "status": "queued"
+        },
+        {
+          "id": 99022575902,
+          "name": "pytest shard 0 of 4",
+          "status": "queued"
+        },
+        {
+          "id": 99022575903,
+          "name": "pytest shard 2 of 4",
+          "status": "queued"
+        },
+        {
+          "id": 99022576308,
+          "name": "directive-source-integrity",
+          "status": "queued"
+        }
+      ]
     }
   }
 }
