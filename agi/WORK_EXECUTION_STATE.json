@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T09:40:10.461Z",
+    "checkpointed_at": "2026-08-29T09:43:39.076Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
-    "no_response_on_authoritative_remote": true,
-    "reason": "The unchanged response-only head abcadcc0 passed directive integrity and the complete exact-head full test workflow (four pytest shards plus aggregate). It is ready for one-file PR publication and expected-head merge.",
+    "no_response_on_authoritative_remote": false,
+    "reason": "PR 342 merged the unchanged exact-head CI-passing Execute response with expected head abcadcc0, and authoritative main 2204c91d exact-readback proves the response/request/native binding. The native Execute journal remains awaiting and must be consumed exactly once.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "response_exact_head_ci_success_pending_pr",
+    "status": "response_main_durable_pending_native_resume",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,19 +200,22 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Create a PR for exact head abcadcc0 against the latest main, verify exactly one response filename and mergeability, then merge only with expected_head_sha=abcadcc0; exact-readback response on authoritative main before native resume.",
-    "last_verified_effect": "Exact-head directive run 33243891665 job 99077860627 and full test run 33243891671 jobs 99077860436, 99077860532, 99077860554, 99077860607, and aggregate 99083326964 all completed success on abcadcc0.",
-    "completed_effect_receipt": "Response-only head abcadcc0 with response blob 4b65ea2b, request digest 953e1139, output digest 77901cf6, and response digest 9ad64d8f is unchanged and fully CI-passing; it remains absent from authoritative main until merge.",
+    "next_action": "From this exact state checkpoint, launch a one-shot Work-capable workflow that renews the exact Work and fixed-policy CI observations, calls work-resume --max-steps 1 once for native invoke-46f383, validates one completed native plus one unique next pending Work request, and pushes only allowed lifecycle records.",
+    "last_verified_effect": "PR 342 merged at 2204c91d; main response blob 4b65ea2b binds request blob 85f97e7e and native journal blob 1d5b358b with status awaiting_work_model. Snapshot remains revision 92/blob 48e91944.",
+    "completed_effect_receipt": "The Execute response is authoritative main durable with response digest 9ad64d8f and output digest 77901cf6. This completes response publication only; native consumption and the upper objective remain unfinished.",
     "pending_job_ids": [],
-    "idempotency_key": "o-work-gen29:invoke-e750825c4d5987ec613de791:response-once:v1",
-    "exact_frontier": "Publish the exact CI-passing one-file response head; do not change or regenerate it. Merge only if PR head remains abcadcc0 and changed filenames remain the single response path.",
-    "current_main_sha": "fa26e1023750f559c0daf06fc97790dc11bf9aba",
+    "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v1",
+    "exact_frontier": "Native invoke-46f383 is still awaiting Work response invoke-e750825 despite the exact response now existing on main. Renew required source observations, consume it once, and verify the next semantic boundary without recreating either invocation.",
+    "current_main_sha": "2204c91d64a4b0c3c89ddb83f334b0b493418fc5",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [],
-    "next_tool_action": "Create PR from agent/recovery-gen29-execute-response-v1 to main, then fetch PR and exact changed filenames before expected-head merge."
+    "pending_workflow_run_ids": [
+      33246102282,
+      33246102289
+    ],
+    "next_tool_action": "Create an isolated branch from this exact state commit, add one-shot gen29 resume workflow bound to its state blob/main, and let it invoke work-resume once."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1501,7 +1504,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T09:40:10.461Z",
+  "heartbeat_at": "2026-08-29T09:43:39.076Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2330,7 +2333,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T09:40:10.461Z",
+  "last_progress_at": "2026-08-29T09:43:39.076Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -4016,7 +4019,7 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "schema_version": 1,
-  "source_main_sha": "fa26e1023750f559c0daf06fc97790dc11bf9aba",
+  "source_main_sha": "2204c91d64a4b0c3c89ddb83f334b0b493418fc5",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
@@ -7746,8 +7749,8 @@
   },
   "generation29_execute_response": {
     "schema_version": 1,
-    "status": "response_exact_head_ci_success_pending_pr",
-    "observed_at": "2026-08-29T09:40:10.461Z",
+    "status": "response_main_durable_pending_native_resume",
+    "observed_at": "2026-08-29T09:43:39.076Z",
     "request": {
       "invocation_id": "invoke-e750825c4d5987ec613de791",
       "component": "execute",
@@ -7784,7 +7787,7 @@
       }
     },
     "idempotency_key": "o-work-gen29:invoke-e750825c4d5987ec613de791:response-once:v1",
-    "next_action": "Publish unchanged head abcadcc0 as one-file response PR, expected-head merge, exact main readback, then consume native continuation exactly once.",
+    "next_action": "Consume native invoke-46f38354bc1b6c8a4d6b6564 exactly once under fresh source receipts and verify one next pending Work boundary.",
     "response": {
       "invocation_id": "invoke-e750825c4d5987ec613de791",
       "branch": "agent/recovery-gen29-execute-response-v1",
@@ -7849,6 +7852,32 @@
         ]
       },
       "status": "success"
+    },
+    "publication": {
+      "pull_request": 342,
+      "clean_head_sha": "abcadcc0e01dd7918d205d48ee6ff3be5aa60993",
+      "merge_sha": "2204c91d64a4b0c3c89ddb83f334b0b493418fc5",
+      "response_blob_sha": "4b65ea2b1b75afa62ebbfe4be1f1f14b599643d6",
+      "request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
+      "native_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
+      "exact_main_readback": true
     }
+  },
+  "generation29_native_after_execute": {
+    "schema_version": 1,
+    "status": "precommit_exact_response_main_bound_native_awaiting",
+    "observed_at": "2026-08-29T09:43:39.076Z",
+    "native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
+    "native_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
+    "native_status": "awaiting_work_model",
+    "work_invocation_id": "invoke-e750825c4d5987ec613de791",
+    "request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
+    "request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
+    "response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
+    "response_blob_sha": "4b65ea2b1b75afa62ebbfe4be1f1f14b599643d6",
+    "snapshot_revision": 92,
+    "snapshot_blob_sha": "48e919441f25db4a7e89d88c04888dff4d590e4f",
+    "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v1",
+    "next_action": "Renew exact source observations and call work-resume --max-steps 1 exactly once."
   }
 }
