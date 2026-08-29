@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_revision34_payload_pr337_ci_three_of_four_shards_passed_bounded_wait",
+  "active_component": "generation29_revision34_payload_pr337_exact_head_ci_passed_merge_pending",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation25-recursive-context-retrieval-ablation-v1",
   "authoritative_source_observation": {
@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T00:56:37.200Z",
+    "checkpointed_at": "2026-08-29T01:05:08.407Z",
     "exact_pending_request_blob_sha": "fe1ca1ec1074d577a709b3fbf4881faa7a171280",
     "exact_pending_request_digest": "4e88ab3474e081a2adfb2d420d98feb971a2d93d05fddecfa061385f2319a500",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-f1cb0996ce0ff71a28d0dd58/request.json",
@@ -201,22 +201,18 @@
     "exact_pending_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "resume_required": true,
     "next_action": "Continue bounded exact-head rechecks without duplicate launch. Wait for shard 2 and the dependent aggregate, then fresh authority/inbox/head/latest-main/intersection/mergeability checks and expected-head merge.",
-    "last_verified_effect": "PR337 exact head unchanged with directive preflight and shards0/1/3 successful; shard2 remains accepted in progress within the prior observed 34m31s runtime envelope.",
-    "completed_effect_receipt": "PR337 exact head directive-source-preflight and pytest shards 0,1,3 succeeded; shard2 remains in progress on the same accepted workflow.",
-    "pending_job_ids": [
-      99022575903
-    ],
-    "idempotency_key": "o-work-gen29:payload-pr337:head-2b2bda15:ci-shard2-bounded-wait",
-    "exact_frontier": "No failure, head move, task disable, or duplicate launch; only shard2 remains.",
-    "current_main_sha": "623ddb8f882e42564d30a8ec0ed61a85c16e826d",
+    "last_verified_effect": "The exact four frozen lifecycle files are CI-valid on unchanged revision34 head; no request recreation, response repeat, or duplicate CI launch occurred.",
+    "completed_effect_receipt": "PR337 exact head 2b2bda15307d6643db587b6894aa41f4357ecb00 passed directive-source-preflight, all four pytest shards, and dependent aggregate; all four frozen blobs exact-readback match.",
+    "pending_job_ids": [],
+    "idempotency_key": "o-work-gen29:payload-pr337:merge:head-2b2bda15",
+    "exact_frontier": "Fresh CI/blob/head/inbox/ledger/authority checks passed. GitHub mergeability must be recomputed against latest state-only main before expected-head merge.",
+    "current_main_sha": "84f7744f7bdf6647b97571f2c21eadbf26ded145",
     "goal_revision": 34,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "d5e517239157993e08751fff9fd929d71b498fc89813dd049cf9bf5736c8642",
-    "pending_workflow_run_ids": [
-      33223569875
-    ],
-    "next_tool_action": "Continue bounded rechecks of accepted job 99022575903; on terminal success verify dependent aggregate and exact-head workflow, then fresh merge preflight."
+    "pending_workflow_run_ids": [],
+    "next_tool_action": "Fetch PR337 until mergeable=true without changing head, then expected-head merge 2b2bda15307d6643db587b6894aa41f4357ecb00 and exact-readback all four blobs on main."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1473,7 +1469,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T00:56:37.200Z",
+  "heartbeat_at": "2026-08-29T01:05:08.407Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2302,7 +2298,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-29T00:43:59.549Z",
+  "last_progress_at": "2026-08-29T01:05:08.407Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "9f564ff71703ca4baec905f9e2857594921ac39f",
@@ -5386,8 +5382,8 @@
   },
   "generation29_revision34_refresh": {
     "schema_version": 1,
-    "status": "revision34_payload_pr337_ci_three_of_four_shards_passed_bounded_wait",
-    "observed_at": "2026-08-29T00:56:37.200Z",
+    "status": "revision34_payload_pr337_exact_head_ci_passed_merge_pending",
+    "observed_at": "2026-08-29T01:05:08.407Z",
     "user_input": {
       "revision": 34,
       "id": "user-reaffirmation-run-to-achievement-slot-integrity-20260828-v34",
@@ -5415,7 +5411,7 @@
       "blob_sha": "0a2e9b12f791f3d52b986de4fc321c2e085dcba7"
     },
     "idempotency_key": "bachikoljunior-blip/O:g29:revision34:typed-directive-refresh:v1",
-    "next_action": "Recheck accepted workflow 33223569875 and pending shard2 job 99022575903 without rerun; after shard2 and dependent aggregate succeed, fresh-read authority/main/inbox/head/blob/mergeability and expected-head merge PR337.",
+    "next_action": "After exact readback of this CAS, re-read latest main/state/inbox/ledger/PR337/head/four blobs and wait for GitHub mergeability recomputation; merge only with expected_head_sha 2b2bda15307d6643db587b6894aa41f4357ecb00.",
     "updated_at": "2026-08-29T00:09:26.215Z",
     "repair": {
       "pull_request": 338,
@@ -5684,11 +5680,11 @@
         {
           "id": 33223569875,
           "name": "test",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         }
       ],
-      "ci_checked_at": "2026-08-29T00:56:37.200Z",
+      "ci_checked_at": "2026-08-29T01:05:08.407Z",
       "duplicate_payload": false,
       "request_recreated": false,
       "response_repeated": false,
@@ -5714,8 +5710,14 @@
         {
           "id": 99022575903,
           "name": "pytest shard 2 of 4",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 99027815196,
+          "name": "test",
+          "status": "completed",
+          "conclusion": "success"
         }
       ],
       "automation_task_readback": {
@@ -5724,7 +5726,9 @@
         "schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
         "last_run_time": "2026-08-28T23:18:15.356415+00:00",
         "updated_at": "2026-08-29T00:40:56.765132+00:00"
-      }
+      },
+      "exact_head_ci_status": "success_four_shards_and_dependent_aggregate_plus_directive_preflight",
+      "merge_pending": true
     }
   }
 }
