@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-29T12:21:54.853Z",
+    "checkpointed_at": "2026-08-29T12:33:13.154Z",
     "exact_pending_request_blob_sha": "85f97e7ec6942d9853d38e8b3e19f67206845ec4",
     "exact_pending_request_digest": "953e1139e714b04cf1e9f4d4b92e1738c3b8d092392d009b1ba41d1356be2802",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-e750825c4d5987ec613de791/request.json",
     "exact_pending_work_invocation_id": "invoke-e750825c4d5987ec613de791",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
-    "reason": "One-shot v8 workflow removed at commit b5ac47d3. Exact compare to state checkpoint base proves clean head has only the eleven reviewed Root-boundary lifecycle/result/observation paths. Exact-head test and directive workflows are accepted pending.",
+    "reason": "Exact-head CI remains accepted on frozen b5ac47d3; same authority heartbeat refreshed during runner queue without branch mutation.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "root_boundary_clean_head_exact_ci_pending",
+    "status": "root_boundary_clean_head_exact_ci_pending_heartbeat_refreshed",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,13 +200,13 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "resume_required": true,
-    "next_action": "Bounded-wait for both exact-head workflows. Require directive success plus four test shards and aggregate success on b5ac47d3 before PR.",
+    "next_action": "Continue observing both exact-head runs; require all success before PR.",
     "last_verified_effect": "Clean head b5ac47d30736aced079bc58e81be27d8ed7db3a0 exact-readback: workflow absent, compare status ahead 3/behind0 from 2b69e2ee, exactly 11 paths with expected blobs.",
     "completed_effect_receipt": "github compare 2b69e2ee...b5ac47d3 plus exact file readbacks; v8 recovery receipt a33ffd2a.",
     "pending_job_ids": [],
     "idempotency_key": "o-work-gen29:invoke-46f38354bc1b6c8a4d6b6564:consume-execute-response-once:v8-install-artifact-filter",
     "exact_frontier": "Root-boundary branch is clean and immutable for validation. Wait for exact-head test 33252294603 and directive 33252294698; never replace head while either is pending.",
-    "current_main_sha": "add43045b12181d07f1d6fdb0f1df41277904a9b",
+    "current_main_sha": "aa2ace4fdae265cdf6db12ff289b3ae7a18fcfb0",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -215,7 +215,7 @@
       33252294603,
       33252294698
     ],
-    "next_tool_action": "Fetch runs 33252294603/33252294698 and jobs; no branch writes."
+    "next_tool_action": "Fetch runs and jobs."
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1504,7 +1504,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-29T12:21:54.853Z",
+  "heartbeat_at": "2026-08-29T12:33:13.154Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -7865,8 +7865,8 @@
   },
   "generation29_native_after_execute": {
     "schema_version": 1,
-    "status": "v8_clean_head_exact_ci_pending",
-    "observed_at": "2026-08-29T12:21:54.853Z",
+    "status": "v8_clean_head_exact_ci_pending_heartbeat_refreshed",
+    "observed_at": "2026-08-29T12:33:13.154Z",
     "native_invocation_id": "invoke-46f38354bc1b6c8a4d6b6564",
     "native_blob_sha": "1d5b358bd9a563218611ead73cb57d56256625b5",
     "native_status": "awaiting_work_model",
@@ -8164,7 +8164,12 @@
         "head_sha": "b5ac47d30736aced079bc58e81be27d8ed7db3a0",
         "test_run_id": 33252294603,
         "directive_run_id": 33252294698,
-        "status": "queued"
+        "status": "queued",
+        "heartbeat_refreshed_at": "2026-08-29T12:33:13.154Z",
+        "run_statuses": {
+          "33252294603": "queued",
+          "33252294698": "queued"
+        }
       }
     }
   }
