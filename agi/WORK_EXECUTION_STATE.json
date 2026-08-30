@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_execute_native_lifecycle_remote_main_readback_verified_root_resume_required",
+  "active_component": "generation29_root_freeze_heartbeat_freshness_repaired_retry_required",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation29-external-observation-behavioral-effect-v1",
   "agi_claim_supported": false,
@@ -177,11 +177,11 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "branch": "work/gen29-execute-behavioral-trial-native-consume-v1",
-    "branch_head_sha": "c19663712f81dc4235af359f07aa01405fd1f802",
+    "branch": "work/gen29-root-freeze-after-behavioral-trial-v1",
+    "branch_head_sha": "aa9aa84cc1ac02a0f70bff240e00f1cf946277d2",
     "branch_result_receipt_blob_sha": "ca8b61fda88c5deac6f10a923262202e3bffb314",
-    "checkpointed_at": "2026-08-30T05:43:39Z",
-    "completed_effect_receipt": "github:actions/run/33293217016:result/041f00b9:pr/355:expected-head/c1966371:merge/a832a4fc:eleven-blobs-exact",
+    "checkpointed_at": "2026-08-30T06:09:02.348Z",
+    "completed_effect_receipt": "github://bachikoljunior-blip/note@280acc7b0841f35c52783a18bed94bf5fc9c7924/automation_control/receipts/o_work_monitor_recovery/20260830T060629Z-gen29-root-freeze-retry-stale-heartbeat-stop-cause.json",
     "completed_job_ids": [
       99188931218,
       99188930894,
@@ -210,7 +210,9 @@
       99209833633,
       99209833636,
       99209833660,
-      99213377820
+      99213377820,
+      99214757570,
+      99215544807
     ],
     "completed_workflow_run_ids": [
       33270788879,
@@ -239,13 +241,15 @@
       33291522638,
       33293217016,
       33293773025,
-      33293773010
+      33293773010,
+      33295660322,
+      33295959413
     ],
-    "current_main_sha": "a832a4fc07a5719b2fe828dad9980708f8af80a5",
+    "current_main_sha": "e3b0a6276a187b612da55a503c8191d886498a49",
     "exact_completed_native_invocation_id": "invoke-ea55cc8d30783a55c0d51e07",
     "exact_completed_response_digest": "fd832614cc51e061b944056e62cd03798535a75863c9fa4092e49ad9598c3977",
     "exact_completed_work_invocation_id": "invoke-1fcc456eaec7f8f134759b06",
-    "exact_frontier": "The unique Execute response is durably consumed on main. No Work request or awaiting native remains. Snapshot revision101 is root_pending; Root must now resume exactly once to select the next unit.",
+    "exact_frontier": "The first Root-freeze run failed closed on one omitted generated preflight path; the repaired retry then failed closed before request creation because the same-owner heartbeat crossed 900 seconds. No durable Root request exists. Refresh the same generation29 heartbeat and retry on exact refreshed state.",
     "exact_frozen_response_digest": "ea78717fdc8e23b8220881b64ed356914ec78a35e0326dd547eaaf600b1408c2",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -253,8 +257,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "goal_revision": 35,
-    "idempotency_key": "o-work-gen29:pr355:merge-a832a4fc:root-revision101-resume-required:v1",
-    "last_verified_effect": "Execute response consumed exactly once by workflow 33293217016; lifecycle result 041f00b9 merged through exact-head PR355 as a832a4fc; eleven blobs and Root revision101 exact on main.",
+    "idempotency_key": "o-work-gen29:root-revision101:freeze-next-root-request:v1:heartbeat-freshness-repair",
+    "last_verified_effect": "Runs 33295660322 and 33295959413 failed closed without branch mutation or a durable Work request; exact stop causes and recurrence repairs were read back in note.",
     "lease_generation": 29,
     "merge_authorization": {
       "authorized_at": "2026-08-30T05:39:47Z",
@@ -283,8 +287,8 @@
       "lifecycle_receipt_blob_sha": "ca8b61fda88c5deac6f10a923262202e3bffb314",
       "snapshot_blob_sha": "3ff00149178019b8c0305880d2bd6dcce0636c79"
     },
-    "next_action": "Resume Root exactly once from main revision101, freeze one unique Work-exclusive request, exact-readback it, then answer and consume it without ending the same authoritative loop.",
-    "next_tool_action": "After exact readback of this state-only commit, create an isolated one-shot Root-resume workflow bound to the resulting main/state and snapshot a832a4fc/3ff00149.",
+    "next_action": "Merge exact refreshed state into the existing workflow branch, bind workflow expected main/state, freeze one unique Root request, and continue same loop.",
+    "next_tool_action": "Create a two-parent branch merge commit with the refreshed-main state and updated workflow bindings, then observe exactly one push run.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": false,
     "pending_consolidate_native_invocation_id": "invoke-c60ebf5dbee7ab567f3cee7c",
@@ -1412,7 +1416,7 @@
     "workflow_run_id": 33238893400
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "499cad127d71529cfe6d35e3ede5bc9b2f995f1d",
+  "expected_blob_sha": "f034b42bff7f6c36963766afb078463a17f1f0f3",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
@@ -7292,7 +7296,7 @@
     "workflow_blob_sha": "8a46d88e2e46bab34dccbd1c0e172d2403c7ff7a",
     "workflow_conclusion": "success"
   },
-  "heartbeat_at": "2026-08-30T05:43:39Z",
+  "heartbeat_at": "2026-08-30T06:09:02.348Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -8121,7 +8125,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-08-30T05:43:39Z",
+  "last_activity_at": "2026-08-30T06:09:02.348Z",
   "last_progress_at": "2026-08-30T05:43:39Z",
   "lease_generation": 29,
   "lease_renewal": {
@@ -9918,7 +9922,7 @@
   "schema_version": 1,
   "snapshot_blob_sha": "3d6387236299dabff188a9b9401b6707c74f9ae3",
   "snapshot_revision": 99,
-  "source_main_sha": "80b5dc24cf6b398ae763dfa934aa71cfe7fa7a5b",
+  "source_main_sha": "e3b0a6276a187b612da55a503c8191d886498a49",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -10571,5 +10575,34 @@
     "idempotency_key": "o-work-gen29:invoke-ea55cc8d30783a55c0d51e07:consume-execute-behavioral-trial-response-once:v1",
     "resume_required": true,
     "next_action": "Resume Root exactly once to freeze the next Work-exclusive request, then consume it in the same authoritative loop."
+  },
+  "generation29_root_freeze_after_behavioral_trial_v1": {
+    "status": "heartbeat_freshness_stop_cause_repaired_retry_required",
+    "source_main_sha": "e3b0a6276a187b612da55a503c8191d886498a49",
+    "source_state_blob_sha": "f034b42bff7f6c36963766afb078463a17f1f0f3",
+    "source_heartbeat_at": "2026-08-30T05:43:39Z",
+    "refreshed_heartbeat_at": "2026-08-30T06:09:02.348Z",
+    "last_progress_at_preserved": "2026-08-30T05:43:39Z",
+    "stale_after_seconds": 900,
+    "first_failed_run_id": 33295660322,
+    "first_failed_job_id": 99214757570,
+    "first_stop_cause": "exact_staging_allowlist_omission",
+    "second_failed_run_id": 33295959413,
+    "second_failed_job_id": 99215544807,
+    "second_stop_cause": "authoritative_work_heartbeat_expired_before_semantic_request",
+    "durable_request_created": false,
+    "branch_mutated_by_failed_runs": false,
+    "pending_work_invocation_id": null,
+    "pending_native_invocation_id": null,
+    "snapshot_revision": 101,
+    "snapshot_phase": "root_pending",
+    "branch": "work/gen29-root-freeze-after-behavioral-trial-v1",
+    "branch_head_sha": "aa9aa84cc1ac02a0f70bff240e00f1cf946277d2",
+    "workflow_blob_sha": "b9bd06f04ad0890c2b13faf4d2b23c93e6575a10",
+    "exact_stop_cause_receipt": "github://bachikoljunior-blip/note@280acc7b0841f35c52783a18bed94bf5fc9c7924/automation_control/receipts/o_work_monitor_recovery/20260830T060629Z-gen29-root-freeze-retry-stale-heartbeat-stop-cause.json",
+    "repair": "same-owner heartbeat renewed under expected main/state/fence CAS; last_progress_at preserved; bind existing branch to this exact state before one retry",
+    "idempotency_key": "o-work-gen29:root-revision101:freeze-next-root-request:v1:heartbeat-freshness-repair",
+    "resume_required": true,
+    "next_action": "Merge this exact refreshed-main state into the existing Root-freeze branch, update exact workflow main/state bindings, and allow one push-triggered retry."
   }
 }

@@ -19,8 +19,8 @@ jobs:
     timeout-minutes: 20
     env:
       GH_TOKEN: ${{ github.token }}
-      EXPECTED_MAIN: e3b0a6276a187b612da55a503c8191d886498a49
-      EXPECTED_STATE_BLOB: f034b42bff7f6c36963766afb078463a17f1f0f3
+      EXPECTED_MAIN: 401dd351ffdd623d2f0f8cda161868c8c74fb1be
+      EXPECTED_STATE_BLOB: 5746e08f6fafc672a929360ba882a8c38ab00b7b
       EXPECTED_SNAPSHOT_BLOB: 3ff00149178019b8c0305880d2bd6dcce0636c79
       EXPECTED_INBOX_BLOB: 93889b482c5b54dd90944f19ce425e845f455b35
       RUN_ID: run-work-recovery-gen9-durability-repair
@@ -173,7 +173,7 @@ jobs:
           root = Path('.').resolve()
           state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
           now = Store(root).utc_now()
-          work = verify_work_source_observation(root, run_id='run-work-recovery-gen9-durability-repair', state=state, state_blob_sha='f034b42bff7f6c36963766afb078463a17f1f0f3', now=now)
+          work = verify_work_source_observation(root, run_id='run-work-recovery-gen9-durability-repair', state=state, state_blob_sha='5746e08f6fafc672a929360ba882a8c38ab00b7b', now=now)
           ci = verify_ci_source_observation(root, run_id='run-work-recovery-gen9-durability-repair', state=state, now=now)
           continuity = assert_work_resume_continuity_preflight(root, run_id='run-work-recovery-gen9-durability-repair', executor_binding='current_chatgpt_work_session', model_identity='chatgpt-work-model-unverified')
           if continuity.get('resume_authorized') is not True:
@@ -239,7 +239,7 @@ jobs:
               raise SystemExit('Root request inbox clock mismatch')
           if clocks.get('native_run_snapshot', {}).get('version') != 'revision:101' or clocks.get('native_run_snapshot', {}).get('git_blob_sha') != '3ff00149178019b8c0305880d2bd6dcce0636c79':
               raise SystemExit('Root request snapshot clock mismatch')
-          if clocks.get('work_execution_state', {}).get('git_blob_sha') != 'f034b42bff7f6c36963766afb078463a17f1f0f3':
+          if clocks.get('work_execution_state', {}).get('git_blob_sha') != '5746e08f6fafc672a929360ba882a8c38ab00b7b':
               raise SystemExit('Root request state clock mismatch')
 
           preflight_candidates = []
@@ -278,7 +278,7 @@ jobs:
               raise SystemExit('awaiting Root native binding mismatch')
 
           events_ref = f'.continual/runs/{run_id}/events.jsonl'
-          base_events = subprocess.check_output(['git', 'show', f'e3b0a6276a187b612da55a503c8191d886498a49:{events_ref}'], text=True)
+          base_events = subprocess.check_output(['git', 'show', f'401dd351ffdd623d2f0f8cda161868c8c74fb1be:{events_ref}'], text=True)
           current_events = (root / events_ref).read_text()
           if not current_events.startswith(base_events):
               raise SystemExit('events ledger did not preserve exact prefix')
