@@ -192,7 +192,7 @@
     "branch": "work/gen29-post-task-candidate-after-behavioral-trial-v1",
     "branch_head_sha": "d2131a010a0d430b173095b77d2ef6abe82a153b",
     "branch_result_receipt_blob_sha": "f499ff53270ab7f96e93766fad32f62834fef2f1",
-    "checkpointed_at": "2026-08-30T10:32:10.504Z",
+    "checkpointed_at": "2026-08-30T10:38:17.568Z",
     "completed_effect_receipt": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-post-task-candidate-consume-consolidate-after-behavioral-trial-v1.json",
     "completed_job_ids": [
       99188931218,
@@ -303,12 +303,12 @@
       33304833792,
       33304833832
     ],
-    "current_main_sha": "94edab25a157101dd9b44ded6e391c05a914e6ee",
+    "current_main_sha": "d2019d024c85af633b4a0ac12284c19e339d316a",
     "exact_completed_native_invocation_id": "invoke-916e4d517996d9694e5de837",
     "exact_completed_request_digest": "aed56a36a4964652242a6017c58e3b6a00ce28f9d73e6482a0a08ed95697c94f",
     "exact_completed_response_digest": "57fbc0dafbb84cb57fa7c8065855af5b3729a0a905bbea20033bd9d87ba7b7e0",
     "exact_completed_work_invocation_id": "invoke-06fcaa9d8102f784ef3b3437",
-    "exact_frontier": "Exact frozen Consolidate request invoke-62de30038bba50241716f8e3 is the unique unanswered Work item on authoritative main 94edab25a157101dd9b44ded6e391c05a914e6ee.",
+    "exact_frontier": "Exact frozen Consolidate remains unanswered; state policy now targets exact successful PR360 test run 33304833832 and its five required jobs.",
     "exact_frozen_request_blob_sha": "be86a1ddb424467310495dbd66277f09e33015a8",
     "exact_frozen_request_digest": "b22aa0834eb71ed799fd9fabf96e88cd0928bf9d892b25326b655fc77c5da784",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-62de30038bba50241716f8e3/request.json",
@@ -326,8 +326,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-62de30038bba50241716f8e3",
     "goal_revision": 35,
-    "idempotency_key": "o-work-gen29:bind-consolidate-invoke-62de30038bba50241716f8e3:v1",
-    "last_verified_effect": "PR360 expected-head merge 94edab25 plus exact 16-path main readback and Consolidate no-response proof.",
+    "idempotency_key": "o-work-gen29:repair-consolidate-ci-policy-run-33304833832:state-f7ec2d48:v1",
+    "last_verified_effect": "Failed run 33306817722 was proven mutation-free; stale state-bound CI policy was identified as the concrete stop cause and rebound to exact successful PR360 run 33304833832.",
     "lease_generation": 29,
     "merge_authorization": {
       "schema_version": 1,
@@ -375,8 +375,8 @@
       "inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
       "idempotency_key": "o-work-gen29:pr360:d2131a01:expected-head-merge:v1"
     },
-    "next_action": "Submit the exact frozen Consolidate Episode response once to invoke-62de30038bba50241716f8e3, resume native invoke-fdefbe8959ff36de75dc88b1, verify the Episode, and freeze the unique Learn continuation without duplicate invocation.",
-    "next_tool_action": "Finalize the isolated exact-base Consolidate workflow against this state CAS head/blob, create its guarded branch once, observe the accepted run, verify the Episode and unique Learn freeze, then continue.",
+    "next_action": "Exact-read repaired state and source run, then re-fire the same exact Consolidate continuation by fast-forwarding the same launch branch.",
+    "next_tool_action": "Create state policy CAS from expected blob f7ec2d48, exact-read it and GitHub run/jobs, then build the repaired workflow against the new main/state and fast-forward the existing failed branch without duplicate invocation.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_consolidate_native_invocation_id": "invoke-fdefbe8959ff36de75dc88b1",
@@ -395,7 +395,7 @@
       "repository_queued_runs": 62,
       "target_runs_status": "queued"
     },
-    "reason": "PR360 merged the exact post-result Candidate lifecycle; all 16 changed blobs, merge parents/tree, workflow absence, and the unique unanswered Consolidate request/native journal were read back from main.",
+    "reason": "The first Consolidate launch stopped before response submission because state ci_source_observation_policy still named PR359 run 33303007208 while the workflow projected PR360 run 33304833832.",
     "recovered_decision_context_manifest_digest": "38a59e23bce361626a6929c96652b81668f2086dc7ba62136deb8c43261a7347",
     "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c",
     "recovered_frozen_native_invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
@@ -472,64 +472,22 @@
       "intended_slot": "2026-08-30T10:12:00Z",
       "exact_readback": true
     },
-    "status": "generation29_consolidate_pending_native_consume",
+    "status": "generation29_consolidate_ci_policy_repaired_pending_refire",
     "stop_cause": {
-      "cause": "trial_spec_bound_live_mutable_state_candidate_index_and_strategy_blobs_would_break_future_protected_suite",
-      "recurrence_validation": {
-        "all_success": true,
-        "directive_conclusion": "success",
-        "directive_run_id": 33289555400,
-        "exact_head_sha": "51afee0d06e516b99f3db95718f91dda55043ffe",
-        "required_jobs": [
-          {
-            "conclusion": "success",
-            "id": 99198657847,
-            "name": "pytest shard 0 of 4",
-            "status": "completed",
-            "summary": "201 passed, 603 deselected"
-          },
-          {
-            "conclusion": "success",
-            "id": 99198657816,
-            "name": "pytest shard 1 of 4",
-            "status": "completed",
-            "summary": "201 passed, 603 deselected"
-          },
-          {
-            "conclusion": "success",
-            "id": 99198657774,
-            "name": "pytest shard 2 of 4",
-            "status": "completed",
-            "summary": "201 passed, 603 deselected"
-          },
-          {
-            "conclusion": "success",
-            "id": 99198657834,
-            "name": "pytest shard 3 of 4",
-            "status": "completed",
-            "summary": "201 passed, 603 deselected"
-          },
-          {
-            "conclusion": "success",
-            "id": 99202492923,
-            "name": "test",
-            "status": "completed"
-          }
-        ],
-        "test_conclusion": "success",
-        "test_run_id": 33289555328
-      },
-      "repair": "Removed three mutable paths, retained five immutable lifecycle blobs, precommitted repaired spec/tests at 3547d158, regenerated only result at 51afee0d.",
-      "repair_exact_readback": true,
-      "repair_precommit_sha": "3547d158dfc87e42b13ee540fdcdd0d48020b025",
-      "repair_result_sha": "51afee0d06e516b99f3db95718f91dda55043ffe",
-      "semantic_result_invalidated": true
+      "cause": "stale_ci_source_observation_policy_workflow_run_id",
+      "failed_run_id": 33306817722,
+      "failed_job_id": 99244716962,
+      "state_policy_workflow_run_id": 33303007208,
+      "workflow_supplied_run_id": 33304833832,
+      "response_submitted": false,
+      "remote_lifecycle_mutation": false,
+      "repair": "Rebind the state policy to exact successful PR360 run 33304833832/head d2131a01/workflow 335420036 and its five required jobs."
     },
     "stop_cause_repair_receipt": {
-      "blob_sha": "3368bb90fc79d4b45fbe8029b36f0967007e8e1c",
-      "commit_sha": "0d203c8c3c02b3cc1bf03ce035d95443ddea6479",
-      "exact_readback": true,
-      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T013040Z-gen29-root-stop-causes-eliminated-result-verified.json"
+      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T103724Z-gen29-consolidate-stop-cause-ci-policy-mismatch.json",
+      "blob_sha": "2e87d1fbcf11dab4be725d48c911be3f834f77c5",
+      "commit_sha": "c3782b65cc55115a05732aba6b0a112bb7745903",
+      "exact_readback": true
     },
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
@@ -1008,43 +966,43 @@
     "validation": "44 focused tests passed; work-verify valid with all known requests and responses plus five recognized pending requests; compileall and git diff check passed."
   },
   "ci_source_observation": {
-    "claim_boundary": "Internal exact-head provenance for consuming one frozen post-result Candidate response and freezing Consolidate only; not activation, production, generalized capability, AGI, or user-objective evidence.",
-    "observed_at": "2026-08-30T09:38:23Z",
+    "status": "exact_head_success_policy_rebound_after_mismatch_pending_fresh_workflow_receipt",
+    "source_head": "d2131a010a0d430b173095b77d2ef6abe82a153b",
+    "source_run": 33304833832,
+    "observed_at": "2026-08-30T10:38:17.568Z",
     "required_before_next_semantic_freeze": true,
-    "source_head": "3c37f3d37aed08ca9481c9aa53e1a40c60e0716f",
-    "source_run": 33303007208,
-    "status": "exact_head_success_policy_bound_pending_fresh_workflow_receipt"
+    "claim_boundary": "Internal exact-head provenance for consuming the one frozen Consolidate response and freezing Learn only; not activation, production, generalized capability, AGI, or user-objective evidence."
   },
   "ci_source_observation_policy": {
-    "exact_head_sha": "3c37f3d37aed08ca9481c9aa53e1a40c60e0716f",
-    "executor_binding": "current_chatgpt_work_session",
-    "max_age_seconds": 900,
-    "repository_full_name": "bachikoljunior-blip/O",
     "required": true,
+    "repository_full_name": "bachikoljunior-blip/O",
+    "exact_head_sha": "d2131a010a0d430b173095b77d2ef6abe82a153b",
+    "workflow_run_id": 33304833832,
+    "workflow_id": 335420036,
     "required_jobs": [
       {
-        "id": 99234491731,
+        "id": 99239408043,
         "name": "pytest shard 0 of 4"
       },
       {
-        "id": 99234491745,
-        "name": "pytest shard 1 of 4"
-      },
-      {
-        "id": 99234491624,
+        "id": 99239408121,
         "name": "pytest shard 2 of 4"
       },
       {
-        "id": 99234491768,
+        "id": 99239408146,
         "name": "pytest shard 3 of 4"
       },
       {
-        "id": 99238080731,
+        "id": 99239408220,
+        "name": "pytest shard 1 of 4"
+      },
+      {
+        "id": 99243507178,
         "name": "test"
       }
     ],
-    "workflow_id": 335420036,
-    "workflow_run_id": 33303007208
+    "max_age_seconds": 900,
+    "executor_binding": "current_chatgpt_work_session"
   },
   "clean_g1_research_feed_cursor": {
     "blob_sha": "b3780c12f1aeb02a1e36a5da976ee99dc2ba72b9",
@@ -1566,7 +1524,7 @@
     "workflow_run_id": 33303007208
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "f7317527e4d84fcd04df7d982e73c70409454ce6",
+  "expected_blob_sha": "f7ec2d48e0a392a27b42398492ac6803e500e307",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
@@ -8176,7 +8134,7 @@
     "workflow_blob_sha": "8a46d88e2e46bab34dccbd1c0e172d2403c7ff7a",
     "workflow_conclusion": "success"
   },
-  "heartbeat_at": "2026-08-30T10:32:10.504Z",
+  "heartbeat_at": "2026-08-30T10:38:17.568Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -9005,8 +8963,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-08-30T10:32:10.504Z",
-  "last_progress_at": "2026-08-30T10:32:10.504Z",
+  "last_activity_at": "2026-08-30T10:38:17.568Z",
+  "last_progress_at": "2026-08-30T10:38:17.568Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -10786,7 +10744,7 @@
   "snapshot_blob_sha": "f38571100c2720ff717b75fc3bcab81140c3cda5",
   "snapshot_phase": "consolidate_pending",
   "snapshot_revision": 103,
-  "source_main_sha": "94edab25a157101dd9b44ded6e391c05a914e6ee",
+  "source_main_sha": "d2019d024c85af633b4a0ac12284c19e339d316a",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -11021,5 +10979,71 @@
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_remote_readback": true,
   "working_branch": "work/gen29-task-evaluate-after-behavioral-trial-v1",
-  "upper_objective_achieved": false
+  "upper_objective_achieved": false,
+  "generation29_consolidate_ci_policy_repair_v1": {
+    "schema_version": 1,
+    "status": "stop_cause_eliminated_exact_source_policy_bound_pending_recurrence_validation",
+    "observed_at": "2026-08-30T10:38:17.568Z",
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "source_main_sha": "d2019d024c85af633b4a0ac12284c19e339d316a",
+    "source_state_blob_sha": "f7ec2d48e0a392a27b42398492ac6803e500e307",
+    "failed_launch": {
+      "run_id": 33306817722,
+      "job_id": 99244716962,
+      "head_sha": "2070d9f988f5bc575087bedd1405e4a72b7f1aa2",
+      "failed_step": "Record fresh exact main and exact-head CI observations",
+      "error": "workflow run id mismatch",
+      "response_submitted": false,
+      "remote_lifecycle_mutation": false
+    },
+    "stop_cause": {
+      "state_policy_workflow_run_id": 33303007208,
+      "workflow_supplied_run_id": 33304833832,
+      "mechanism": "prepare copied stale state policy; record rejected exact supplied projection before response submission"
+    },
+    "repair": {
+      "exact_head_sha": "d2131a010a0d430b173095b77d2ef6abe82a153b",
+      "workflow_run_id": 33304833832,
+      "workflow_id": 335420036,
+      "required_jobs": [
+        {
+          "id": 99239408043,
+          "name": "pytest shard 0 of 4"
+        },
+        {
+          "id": 99239408121,
+          "name": "pytest shard 2 of 4"
+        },
+        {
+          "id": 99239408146,
+          "name": "pytest shard 3 of 4"
+        },
+        {
+          "id": 99239408220,
+          "name": "pytest shard 1 of 4"
+        },
+        {
+          "id": 99243507178,
+          "name": "test"
+        }
+      ],
+      "source_run_status": "completed",
+      "source_run_conclusion": "success"
+    },
+    "recurrence_validation": {
+      "state_policy_matches_exact_source_run": true,
+      "exact_source_run_completed_success": true,
+      "all_five_required_jobs_completed_success": true,
+      "response_still_absent": true,
+      "branch_has_no_lifecycle_mutation": true,
+      "pending_work_invocation_id": "invoke-62de30038bba50241716f8e3"
+    },
+    "request_recreated": false,
+    "consolidate_reinvoked": false,
+    "resume_required": true,
+    "idempotency_key": "o-work-gen29:repair-consolidate-ci-policy-run-33304833832:state-f7ec2d48:v1",
+    "next_action": "Exact-read the repaired policy, validate it against GitHub run 33304833832/jobs, then fast-forward the same launch branch and consume the exact frozen Consolidate once."
+  }
 }
