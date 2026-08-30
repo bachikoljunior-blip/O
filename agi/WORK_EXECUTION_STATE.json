@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-30T00:14:35.997Z",
+    "checkpointed_at": "2026-08-30T00:24:05.226Z",
     "exact_pending_request_blob_sha": "1402785a8e834c2fe5b4310434a9e79bd72f193b",
     "exact_pending_request_digest": "cd132392381be50cbb744afb010f50e563921121f7a35b26eaa2b5c2ced163ff",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-c4be414873dff6ba0d4437c6/request.json",
     "exact_pending_work_invocation_id": "invoke-c4be414873dff6ba0d4437c6",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "00:12 scheduled slot integrity receipt was persisted and exact-read back with no gap or scheduler repair; PR349 shards 0, 1, and 3 remain successful while shard 2 continues.",
+    "reason": "PR349 exact-head directive, all four pytest shards, and dependent aggregate succeeded at unchanged head 0ce6295f.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "pr349_three_shards_success_shard2_running_slot0012_recorded",
+    "status": "pr349_exact_head_ci_success",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -200,23 +200,19 @@
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "exact_pending_native_invocation_id": "invoke-c60ebf5dbee7ab567f3cee7c",
     "resume_required": true,
-    "next_action": "Bounded-wait and recheck PR349 test run 33281853516; require shard 2 and dependent aggregate success.",
-    "last_verified_effect": "PR349 exact-head pytest shard 3 job 99178226061 and shard 0 job 99178226115 succeeded after the prior shard 1 success.",
-    "completed_effect_receipt": "github:actions/jobs/99178226061,99178226115:success",
-    "pending_job_ids": [
-      99178226096
-    ],
-    "idempotency_key": "o-work-gen29:pr349:0ce6295f:slot0012-covered-shard2-running:v1",
-    "exact_frontier": "Directive gate and shards 0, 1, 3 are green; shard 2 and dependent aggregate remain. The 00:12 slot is durably covered by the same invocation.",
-    "current_main_sha": "a786ea9ea77c23d377e16668a2226067a1e99acd",
+    "next_action": "Fresh-read authority, inbox, PR349 unchanged head/state, all five required jobs, and latest-main path delta; persist fenced merge authorization, then expected-head merge only.",
+    "last_verified_effect": "PR349 test run 33281853516 completed with all four pytest shards and dependent aggregate successful.",
+    "completed_effect_receipt": "github:actions/run/33281853516:all-required-jobs-success",
+    "pending_job_ids": [],
+    "idempotency_key": "o-work-gen29:pr349:0ce6295f:exact-head-ci-success:v1",
+    "exact_frontier": "PR349 exact-head CI is fully green; fresh fenced merge authorization and expected-head merge remain.",
+    "current_main_sha": "4e01fe25725b4a616f4bfcb421cd8bf5ecc94e5d",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
-    "pending_workflow_run_ids": [
-      33281853516
-    ],
-    "next_tool_action": "Bounded-wait and recheck PR349 test run 33281853516; require shard 2 and dependent aggregate success.",
+    "pending_workflow_run_ids": [],
+    "next_tool_action": "Fresh-read authority, inbox, PR349 unchanged head/state, all five required jobs, and latest-main path delta; persist fenced merge authorization, then expected-head merge only.",
     "exact_completed_work_invocation_id": "invoke-dba060cc99f2626af6da030c",
     "exact_completed_native_invocation_id": "invoke-828d8826df294be9fb5c1e3d",
     "exact_completed_response_digest": "930c3c39f187ab64a176674fef7fec1cb1cb531d958016e33a448994e2002c82",
@@ -242,7 +238,8 @@
       33270968159,
       33270788885,
       33279865836,
-      33279865821
+      33279865821,
+      33281853516
     ],
     "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c",
     "pull_request_number": 349,
@@ -1604,7 +1601,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-30T00:14:35.997Z",
+  "heartbeat_at": "2026-08-30T00:24:05.226Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -2433,7 +2430,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_progress_at": "2026-08-30T00:02:34.430Z",
+  "last_progress_at": "2026-08-30T00:24:05.226Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -8732,7 +8729,7 @@
     "validation_head_workflow_run_count": 0,
     "repair_validated": true
   },
-  "last_activity_at": "2026-08-30T00:14:35.997Z",
+  "last_activity_at": "2026-08-30T00:24:05.226Z",
   "generation29_root_recovery_merge": {
     "schema_version": 1,
     "merged_at": "2026-08-29T20:14:30Z",
@@ -9549,8 +9546,8 @@
   },
   "generation29_consolidate_consume_v1": {
     "schema_version": 1,
-    "status": "pr349_three_shards_success_shard2_running_slot0012_recorded",
-    "observed_at": "2026-08-30T00:14:35.997Z",
+    "status": "pr349_exact_head_ci_success",
+    "observed_at": "2026-08-30T00:24:05.226Z",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -9605,9 +9602,9 @@
       "valid": true
     },
     "resume_required": true,
-    "idempotency_key": "o-work-gen29:publish-consolidate-result-head-0ce6295f:slot0012-covered:v1",
-    "next_action": "Bounded-wait and recheck PR349 test run 33281853516; require shard 2 and dependent aggregate success.",
-    "last_observed_at": "2026-08-30T00:14:35.997Z",
+    "idempotency_key": "o-work-gen29:publish-consolidate-result-head-0ce6295f:ci-success:v1",
+    "next_action": "Fresh-read authority, inbox, PR349 unchanged head/state, all five required jobs, and latest-main path delta; persist fenced merge authorization, then expected-head merge only.",
+    "last_observed_at": "2026-08-30T00:24:05.226Z",
     "pull_request_number": 349,
     "pull_request_url": "https://github.com/bachikoljunior-blip/O/pull/349",
     "pull_request_head_sha": "0ce6295f1c8c4ef4331f55562a4a5dfee40fb8c7",
@@ -9629,36 +9626,102 @@
     },
     "test_progress": {
       "run_id": 33281853516,
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "head_sha": "0ce6295f1c8c4ef4331f55562a4a5dfee40fb8c7",
       "jobs": [
         {
+          "completed_at": "2026-08-30T00:01:57Z",
           "conclusion": "success",
           "id": 99178226061,
           "name": "pytest shard 3 of 4",
+          "started_at": "2026-08-29T23:48:56Z",
           "status": "completed"
         },
         {
-          "conclusion": null,
+          "completed_at": "2026-08-30T00:23:35Z",
+          "conclusion": "success",
           "id": 99178226096,
           "name": "pytest shard 2 of 4",
-          "status": "in_progress"
+          "started_at": "2026-08-29T23:48:56Z",
+          "status": "completed"
         },
         {
+          "completed_at": "2026-08-30T00:02:21Z",
           "conclusion": "success",
           "id": 99178226115,
           "name": "pytest shard 0 of 4",
+          "started_at": "2026-08-29T23:48:57Z",
           "status": "completed"
         },
         {
+          "completed_at": "2026-08-29T23:59:45Z",
           "conclusion": "success",
           "id": 99178226131,
           "name": "pytest shard 1 of 4",
+          "started_at": "2026-08-29T23:48:56Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-08-30T00:24:02Z",
+          "conclusion": "success",
+          "id": 99181771565,
+          "name": "test",
+          "started_at": "2026-08-30T00:23:38Z",
           "status": "completed"
         }
       ],
-      "observed_at": "2026-08-30T00:14:35.997Z"
+      "observed_at": "2026-08-30T00:24:05.226Z"
+    },
+    "exact_head_ci": {
+      "directive_run_id": 33281853526,
+      "directive_job_id": 99178226074,
+      "directive_conclusion": "success",
+      "test_run_id": 33281853516,
+      "required_jobs": [
+        {
+          "completed_at": "2026-08-30T00:01:57Z",
+          "conclusion": "success",
+          "id": 99178226061,
+          "name": "pytest shard 3 of 4",
+          "started_at": "2026-08-29T23:48:56Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-08-30T00:23:35Z",
+          "conclusion": "success",
+          "id": 99178226096,
+          "name": "pytest shard 2 of 4",
+          "started_at": "2026-08-29T23:48:56Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-08-30T00:02:21Z",
+          "conclusion": "success",
+          "id": 99178226115,
+          "name": "pytest shard 0 of 4",
+          "started_at": "2026-08-29T23:48:57Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-08-29T23:59:45Z",
+          "conclusion": "success",
+          "id": 99178226131,
+          "name": "pytest shard 1 of 4",
+          "started_at": "2026-08-29T23:48:56Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-08-30T00:24:02Z",
+          "conclusion": "success",
+          "id": 99181771565,
+          "name": "test",
+          "started_at": "2026-08-30T00:23:38Z",
+          "status": "completed"
+        }
+      ],
+      "conclusion": "success",
+      "verified_at": "2026-08-30T00:24:05.226Z"
     }
   }
 }
