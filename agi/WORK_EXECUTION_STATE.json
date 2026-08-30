@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_learn_pr350_ci_success_merge_pending",
+  "active_component": "generation29_learn_pr350_merge_authorized",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation29-evaluate-recursive-context-retrieval-ablation-v1",
   "agi_claim_supported": false,
@@ -180,8 +180,8 @@
     "branch": "work/gen29-learn-response-v1",
     "branch_head_sha": "33aa9139e1b231fd3ea00774685bdbb3d0b6d842",
     "branch_result_receipt_blob_sha": "54107e0627177ddf7784a6bbc8d1c28457263af3",
-    "checkpointed_at": "2026-08-30T01:13:49.445Z",
-    "completed_effect_receipt": "github:pull/350:head/33aa9139e1b231fd3ea00774685bdbb3d0b6d842:test/33283795312:success:directive/33283795343:success",
+    "checkpointed_at": "2026-08-30T01:15:22.806Z",
+    "completed_effect_receipt": "github:pull/350:fresh-gate:head/33aa9139e1b231fd3ea00774685bdbb3d0b6d842:main/8e1b135de0a42c1713b22dfa7a0daa16af666a1d:clean",
     "completed_job_ids": [
       99183339079,
       99183338955,
@@ -202,11 +202,11 @@
       33283795312,
       33283795343
     ],
-    "current_main_sha": "820cf77a5b777a6397029e0283ee59f2b69b98e3",
+    "current_main_sha": "8e1b135de0a42c1713b22dfa7a0daa16af666a1d",
     "exact_completed_native_invocation_id": "invoke-c60ebf5dbee7ab567f3cee7c",
     "exact_completed_response_digest": "d9931fd1f3c2c4e769aa6b8f353962a8dd19ebb2921faf84e2ecb8681cec6dde",
     "exact_completed_work_invocation_id": "invoke-c4be414873dff6ba0d4437c6",
-    "exact_frontier": "PR350 exact-head CI and directive are fully successful; result is not main-authoritative until a fresh expected-head merge and exact readback.",
+    "exact_frontier": "PR350 is fully validated and merge-authorized; no merge request has yet been sent.",
     "exact_frozen_response_digest": "9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155",
     "exact_pending_native_invocation_id": "invoke-c0eb5312d7caf14bc2e8fd14",
     "exact_pending_request_blob_sha": "2019c8a80550b592a3390a2077f7754bc2f040d3",
@@ -219,11 +219,11 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
     "goal_revision": 35,
-    "idempotency_key": "o-work-gen29:pr350:33aa9139:full-ci-success:merge-gate:v1",
-    "last_verified_effect": "PR350 head 33aa9139 test run 33283795312 completed success with shards0/1/2/3 and aggregate test; directive run 33283795343 succeeded.",
+    "idempotency_key": "o-work-gen29:pr350:33aa9139:expected-head-merge-authorized:v1",
+    "last_verified_effect": "Final PR350 merge gate passed using direct PR readback: open, unmerged, head 33aa9139, mergeable true, mergeable_state clean, rebaseable true.",
     "lease_generation": 29,
-    "next_action": "Re-read authority, inbox revision/blob, main delta since source, PR head/files/state, and CI at exact head; persist merge authorization and exact-readback it, then merge PR350 by expected head.",
-    "next_tool_action": "Run final fresh PR350 merge gate against exact head 33aa9139 and current main, then expected-head merge.",
+    "next_action": "Exact-readback this authorization, then one final fresh authority/inbox/main/head/PR-clean check and merge PR350 with expected_head_sha 33aa9139.",
+    "next_tool_action": "Call github_merge_pull_request for PR350 with expected_head_sha 33aa9139e1b231fd3ea00774685bdbb3d0b6d842 and merge method merge only after final readback.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_consolidate_native_invocation_id": "invoke-c60ebf5dbee7ab567f3cee7c",
@@ -242,7 +242,7 @@
       "repository_queued_runs": 62,
       "target_runs_status": "queued"
     },
-    "reason": "PR350 directive and every required exact-head test job completed successfully; 01:12 slot overlap is exact-readback durable. Final fresh merge gates remain.",
+    "reason": "Fresh authority, fence, inbox, exact main/state, state-only main delta, branch head, exact 19-file set, directive/test runs and all jobs passed. Direct GitHub PR readback reports mergeable=true and mergeable_state=clean; a cached wrapper false was rejected as stale.",
     "recovered_decision_context_manifest_digest": "38a59e23bce361626a6929c96652b81668f2086dc7ba62136deb8c43261a7347",
     "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c",
     "recovered_frozen_native_invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
@@ -259,24 +259,23 @@
     "result_branch_not_authoritative_until_merge": true,
     "resume_required": true,
     "scheduled_slot_integrity_receipt": {
-      "intended_slot": "2026-08-30T01:12:00Z",
-      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T011319Z-gen29-slot-0112-overlap-pr350-ci-success-pre-merge.json",
       "blob_sha": "fe404e19a62bce2dca4c45c52f8330a582f9464b",
       "commit_sha": "32b2647934185a57cfef21d954971197b9380530",
-      "exact_readback": true
+      "exact_readback": true,
+      "intended_slot": "2026-08-30T01:12:00Z",
+      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T011319Z-gen29-slot-0112-overlap-pr350-ci-success-pre-merge.json"
     },
-    "status": "pr350_exact_head_full_ci_success_merge_pending",
+    "status": "pr350_expected_head_merge_authorized",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
     "successor_snapshot_revision": 67,
     "superseded_at": "2026-08-28T23:27:35.789Z",
     "test_progress": {
-      "observed_at": "2026-08-30T01:13:49.445Z",
-      "run_id": 33283795312,
-      "head_sha": "33aa9139e1b231fd3ea00774685bdbb3d0b6d842",
-      "status": "completed",
       "conclusion": "success",
+      "failed_jobs": [],
+      "head_sha": "33aa9139e1b231fd3ea00774685bdbb3d0b6d842",
+      "observed_at": "2026-08-30T01:13:49.445Z",
       "required_jobs": [
         {
           "completed_at": "2026-08-30T01:11:17Z",
@@ -314,10 +313,32 @@
           "status": "completed"
         }
       ],
-      "failed_jobs": []
+      "run_id": 33283795312,
+      "status": "completed"
     },
     "upper_objective_achieved": false,
-    "user_level_objective_met": false
+    "user_level_objective_met": false,
+    "merge_authorization": {
+      "authorized_at": "2026-08-30T01:15:22.806Z",
+      "pr_number": 350,
+      "expected_head_sha": "33aa9139e1b231fd3ea00774685bdbb3d0b6d842",
+      "observed_main_sha": "8e1b135de0a42c1713b22dfa7a0daa16af666a1d",
+      "observed_state_blob_sha": "681f0cb3faf34970abad750cc228599a9c3d9712",
+      "inbox_revision": 35,
+      "inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
+      "exact_changed_file_count": 19,
+      "exact_changed_files_verified": true,
+      "main_delta_only_work_execution_state": true,
+      "directive_run_id": 33283795343,
+      "directive_conclusion": "success",
+      "test_run_id": 33283795312,
+      "test_conclusion": "success",
+      "required_jobs_all_success": true,
+      "direct_pr_mergeable": true,
+      "direct_pr_mergeable_state": "clean",
+      "direct_pr_rebaseable": true,
+      "wrapper_false_classification": "stale_cached_projection_not_used_for_authorization"
+    }
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -2827,6 +2848,7 @@
     "ci_observed_at": "2026-08-30T01:13:49.445Z",
     "directive_job_id": 99183339079,
     "directive_workflow_run_id": 33283795343,
+    "directive_workflow_status": "success",
     "exact_blob_readback": true,
     "expected_changed_file_count": 18,
     "expected_changed_files": [
@@ -2872,10 +2894,17 @@
     "result_commit_sha": "33aa9139e1b231fd3ea00774685bdbb3d0b6d842",
     "result_parent_sha": "719f020b0eb0db138b0cbadd9dd1c4fe210329d6",
     "resume_required": true,
+    "scheduled_slot_integrity_receipt": {
+      "blob_sha": "fe404e19a62bce2dca4c45c52f8330a582f9464b",
+      "commit_sha": "32b2647934185a57cfef21d954971197b9380530",
+      "exact_readback": true,
+      "intended_slot": "2026-08-30T01:12:00Z",
+      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T011319Z-gen29-slot-0112-overlap-pr350-ci-success-pre-merge.json"
+    },
     "schema_version": 1,
     "source_main_sha": "62a08a935cbdec8b750c68e115e439bc4db21015",
     "source_state_blob_sha": "4443a5504aa677b17580a0f1efeee8bc05c7c87f",
-    "status": "pr350_exact_head_full_ci_success_merge_pending",
+    "status": "pr350_expected_head_merge_authorized",
     "successful_job_ids": [
       99183339079,
       99183338870,
@@ -2904,6 +2933,7 @@
       99183338955
     ],
     "test_workflow_run_id": 33283795312,
+    "test_workflow_status": "success",
     "verification": {
       "native_completed": 85,
       "native_fragments": 85,
@@ -2919,14 +2949,26 @@
     "workflow_job_id": 99182698117,
     "workflow_path": ".github/workflows/gen29-learn-response-v1.yml",
     "workflow_run_id": 33283557926,
-    "directive_workflow_status": "success",
-    "test_workflow_status": "success",
-    "scheduled_slot_integrity_receipt": {
-      "intended_slot": "2026-08-30T01:12:00Z",
-      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T011319Z-gen29-slot-0112-overlap-pr350-ci-success-pre-merge.json",
-      "blob_sha": "fe404e19a62bce2dca4c45c52f8330a582f9464b",
-      "commit_sha": "32b2647934185a57cfef21d954971197b9380530",
-      "exact_readback": true
+    "merge_authorization": {
+      "authorized_at": "2026-08-30T01:15:22.806Z",
+      "pr_number": 350,
+      "expected_head_sha": "33aa9139e1b231fd3ea00774685bdbb3d0b6d842",
+      "observed_main_sha": "8e1b135de0a42c1713b22dfa7a0daa16af666a1d",
+      "observed_state_blob_sha": "681f0cb3faf34970abad750cc228599a9c3d9712",
+      "inbox_revision": 35,
+      "inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
+      "exact_changed_file_count": 19,
+      "exact_changed_files_verified": true,
+      "main_delta_only_work_execution_state": true,
+      "directive_run_id": 33283795343,
+      "directive_conclusion": "success",
+      "test_run_id": 33283795312,
+      "test_conclusion": "success",
+      "required_jobs_all_success": true,
+      "direct_pr_mergeable": true,
+      "direct_pr_mergeable_state": "clean",
+      "direct_pr_rebaseable": true,
+      "wrapper_false_classification": "stale_cached_projection_not_used_for_authorization"
     }
   },
   "generation29_native_after_execute": {
@@ -7124,7 +7166,7 @@
     "workflow_blob_sha": "8a46d88e2e46bab34dccbd1c0e172d2403c7ff7a",
     "workflow_conclusion": "success"
   },
-  "heartbeat_at": "2026-08-30T01:13:49.445Z",
+  "heartbeat_at": "2026-08-30T01:15:22.806Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -7953,8 +7995,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-08-30T01:13:49.445Z",
-  "last_progress_at": "2026-08-30T01:13:49.445Z",
+  "last_activity_at": "2026-08-30T01:15:22.806Z",
+  "last_progress_at": "2026-08-30T01:15:22.806Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
