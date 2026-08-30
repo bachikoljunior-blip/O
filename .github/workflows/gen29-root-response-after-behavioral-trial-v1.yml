@@ -19,8 +19,8 @@ jobs:
     timeout-minutes: 25
     env:
       GH_TOKEN: ${{ github.token }}
-      EXPECTED_MAIN: ae2bf61453229e356f0923684e4e675e09aea23d
-      EXPECTED_STATE_BLOB: 40f64d97449464694e0435c713bc65ee742b78cd
+      EXPECTED_MAIN: b9e1038eb2148e4e2e953f2302492487f228a1ed
+      EXPECTED_STATE_BLOB: 9ba571e67a010d44f062e2eb3a4737813e357e80
       EXPECTED_SNAPSHOT_BLOB: 3ff00149178019b8c0305880d2bd6dcce0636c79
       EXPECTED_INBOX_BLOB: 93889b482c5b54dd90944f19ce425e845f455b35
       EXPECTED_INBOX_REVISION: '35'
@@ -131,7 +131,7 @@ jobs:
           if bind.get('status') != 'merged_to_main_verified_root_bound_pending_native_consume':
               raise SystemExit('Root state binding status mismatch')
           durability = state.get('continuation_durability', {})
-          if durability.get('status') != 'root_request_merged_to_main_verified_pending_native_consume' or durability.get('verified_remote_readback') is not True:
+          if durability.get('status') != 'remote_main_readback_verified' or durability.get('verified_remote_readback') is not True:
               raise SystemExit('continuation durability is not verified')
           if durability.get('pending_work_invocation_id') != work_id or durability.get('pending_native_invocation_id') != native_id:
               raise SystemExit('continuation durability identity mismatch')
