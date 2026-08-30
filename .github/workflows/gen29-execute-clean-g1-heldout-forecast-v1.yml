@@ -20,7 +20,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       EXPECTED_MAIN: 92bccc8061e334facba2b1a4916f1ec00d217bc1
-      EXPECTED_PREWORK_HEAD: 52d7de78aa7abb799524aabee453d48e62290a1c
+      EXPECTED_PREWORK_HEAD: 8d0c1a0121d88ef48282cd10c3b395810e8ea49f
       EXPECTED_STATE_BLOB: 39bd0408927e803104ccf68e0557cb2c045a9a00
       EXPECTED_SNAPSHOT_BLOB: eca73024e39a5079925d49c633991915367e5402
       EXPECTED_INBOX_BLOB: 93889b482c5b54dd90944f19ce425e845f455b35
@@ -287,7 +287,7 @@ jobs:
           python -m agi.scientific_forecast classify /tmp/primary.py > /tmp/ast-replay-2.json
           cmp /tmp/ast-replay-1.json /tmp/ast-replay-2.json
           jq -e '.label == "DURABLE_EXPORT_ABSENT" and .match_count == 0 and (.matches | length) == 0' /tmp/ast-replay-1.json
-          python -m pytest tests/test_scientific_forecast.py tests/test_heldout.py -q | tee /tmp/focused-tests.txt
+          python -m pytest -p no:cacheprovider tests/test_scientific_forecast.py tests/test_heldout.py -q | tee /tmp/focused-tests.txt
 
           python - <<'PY'
           import json
@@ -359,7 +359,7 @@ jobs:
               'forecast_score': forecast,
               'baseline_score': baseline,
               'focused_tests': {
-                  'command': 'python -m pytest tests/test_scientific_forecast.py tests/test_heldout.py -q',
+                  'command': 'python -m pytest -p no:cacheprovider tests/test_scientific_forecast.py tests/test_heldout.py -q',
                   'passed': True,
                   'output_tail': Path('/tmp/focused-tests.txt').read_text()[-1000:],
               },
