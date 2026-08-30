@@ -5,10 +5,10 @@
   "active_unit_id": "unit-generation29-blind-holder-heldout-protocol-repair-v1",
   "agi_claim_supported": false,
   "authoritative_source_observation": {
-    "observed_at": "2026-08-30T20:30:39.233Z",
+    "observed_at": "2026-08-30T20:35:10.998Z",
     "required_before_next_semantic_freeze": true,
-    "source_main_sha": "d17dc5bd9bd8a2e2932cd53dd347888ab4da0397",
-    "status": "canonical_running_execute_pending_fields_restored_after_exact_failed_refire_readback"
+    "source_main_sha": "86be6d1c2155c0510fec001022533f3cc68e62c8",
+    "status": "revision36_start_of_run_continuity_policy_and_exact_bindings_refreshed"
   },
   "authoritative_source_observation_policy": {
     "executor_binding": "current_chatgpt_work_session",
@@ -190,10 +190,10 @@
       "updated_at": "2026-08-30T19:49:00.155047+00:00"
     },
     "branch": "work/gen29-execute-blind-holder-protocol-repair-v1",
-    "branch_head_sha": "fee403472b313160b67e0520c621b36dbc2b7575",
-    "branch_head_tree_sha": "06418739f4cbc40d30d5b5c43f1d21129a7dacae",
+    "branch_head_sha": "932139f95f7bb50c449237bc9e4325dd93352c77",
+    "branch_head_tree_sha": "a9a8c5c7dcc41804c9fc02ec80705b40f09225ff",
     "branch_result_receipt_blob_sha": "3293a7143d05a7184905eef91d856e3f52701288",
-    "checkpointed_at": "2026-08-30T20:30:39.233Z",
+    "checkpointed_at": "2026-08-30T20:35:10.998Z",
     "completed_effect_receipt": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-candidate-blind-holder-preflight-consume-execute-freeze-v1.json",
     "completed_job_ids": [
       99188931218,
@@ -408,12 +408,12 @@
       33331108565,
       33331108552
     ],
-    "current_main_sha": "d17dc5bd9bd8a2e2932cd53dd347888ab4da0397",
+    "current_main_sha": "86be6d1c2155c0510fec001022533f3cc68e62c8",
     "exact_completed_native_invocation_id": "invoke-1a8b23359acdf0da62ad9522",
     "exact_completed_request_digest": "f57317acddd5ef143d13f53bf9f0174f435cf109150ae60d3eac01d4aa5d5c36",
     "exact_completed_response_digest": "35f43ebf2298af84c8a5e96e53ebdb30496eb1a3bd37fc987033d21c02b3e1ff",
     "exact_completed_work_invocation_id": "invoke-db2cfa09521d2325c25c7e40",
-    "exact_frontier": "The rev36 ledger is exact and canonical running/pending authority fields are restored. Runs 33333214913 and 33333718493 both failed before response or lifecycle mutation; the exact frozen Execute remains unique and unanswered.",
+    "exact_frontier": "Revision36 inbox, typed ledger, canonical authority, and start-of-run continuity policy bindings are now exact. Three failed runs made no response or lifecycle mutation; the frozen Execute remains unique and unanswered.",
     "exact_frozen_request_blob_sha": "17f1ee3c09d9ed1f873ac16b70eb69b64dfa7634",
     "exact_frozen_request_digest": "2d82b1f6643420d4d113799b5a21fd5bb56e78555e4598aa4229dd868ecc3494",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-0b550912d69027c31e0ce4d0/request.json",
@@ -431,8 +431,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-0b550912d69027c31e0ce4d0",
     "goal_revision": 109,
-    "idempotency_key": "o-work-gen29:refire-execute-invoke-0b550912d69027c31e0ce4d0:canonical-state-guard-repair:v1",
-    "last_verified_effect": "Refire run 33333718493 reached the exact authority guard on head fee403472b313160b67e0520c621b36dbc2b7575 and failed with 'authority is not resumable running state' before continuity preflight or mutation; response absence and unchanged main were exact-readback.",
+    "idempotency_key": "o-work-gen29:preflight-revision36:execute-invoke-0b550912d69027c31e0ce4d0:v1",
+    "last_verified_effect": "Run 33333917525 passed exact branch/main/authority and source observation, then failed at continuity policy revision35 before mutation. Revision36 policy digests were independently recomputed and are now state-bound.",
     "lease_generation": 29,
     "merge_authorization": {
       "authorized_at": "2026-08-30T20:14:36.743Z",
@@ -458,8 +458,8 @@
     },
     "merge_sha": "ab2511744252164c131bba0c51925352ee8cc12b",
     "merge_tree_sha": "09912148f58eb72289de9dc11d61e6180ad143ca",
-    "next_action": "Rebuild the same branch as a fast-forward merge over this canonical state-only main, bind a workflow-only launch commit to the new exact main/state, and refire the frozen Execute once.",
-    "next_tool_action": "Exact-readback canonical status/active component and state blob, reconstruct merge-prework plus one-shot on the same branch, and query the accepted run without relaunch.",
+    "next_action": "Rebase the same Execute branch over this revision36 preflight-bound state, refire once, require continuity preflight success before any response, then verify exact lifecycle and continue.",
+    "next_tool_action": "Exact-readback state policy_revision36/digests, rebuild same-branch merge-prework and workflow-only launch on new main, then query accepted run without duplicate.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": null,
@@ -590,7 +590,7 @@
     },
     "status": "canonical_running_execute_pending_refire_required",
     "stop_cause": {
-      "status": "canonical_state_guard_repair_applied_recurrence_pending",
+      "status": "revision36_preflight_binding_repair_applied_recurrence_pending",
       "causes": [
         {
           "workflow_run_id": 33333214913,
@@ -611,6 +611,16 @@
           "response_written": false,
           "lifecycle_mutated": false,
           "repair": "Restore status=running and active_component=generation29_execute_blind_holder_protocol_repair_pending_native_consume via state-only expected-blob CAS; keep detailed repair evidence outside the canonical authority fields."
+        },
+        {
+          "workflow_run_id": 33333917525,
+          "job_id": 99317298474,
+          "failed_step": "Recheck CAS and continuity before mutation",
+          "exact_error": "continual.continuity_preflight.ContinuityPreflightError: continuity preflight policy revision mismatch",
+          "cause": "start_of_run_continuity_preflight policy_revision and bindings remained revision35 after revision36 ingress/ledger repair.",
+          "response_written": false,
+          "lifecycle_mutated": false,
+          "repair": "Bind policy_revision=36 and exact raw SHA-256 digests for inbox, directive ledger, and strategy under the unchanged generation29/fence."
         }
       ],
       "remote_duplicate": false,
@@ -619,9 +629,9 @@
       "successful_recurrence_job_id": null
     },
     "stop_cause_repair_receipt": {
-      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2030Z-gen29-execute-refire-state-guard-stop-cause-repair.json",
-      "blob_sha": "0562222407d799ce9ce18cbdffe060fe167d7f3e",
-      "commit_sha": "ec57f413a21a40457e7910a22d9f89a2e743788b",
+      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2034Z-gen29-revision36-start-preflight-binding-repair.json",
+      "blob_sha": "447b5bfa887a9aa0b3172112f1de942725aa93bf",
+      "commit_sha": "dc705a31bab885d3546d6dd34c9748e7101a5b4a",
       "exact_readback": true
     },
     "stop_cause_repair_receipts": [
@@ -651,6 +661,12 @@
         "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2030Z-gen29-execute-refire-state-guard-stop-cause-repair.json",
         "blob_sha": "0562222407d799ce9ce18cbdffe060fe167d7f3e",
         "commit_sha": "ec57f413a21a40457e7910a22d9f89a2e743788b",
+        "exact_readback": true
+      },
+      {
+        "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2034Z-gen29-revision36-start-preflight-binding-repair.json",
+        "blob_sha": "447b5bfa887a9aa0b3172112f1de942725aa93bf",
+        "commit_sha": "dc705a31bab885d3546d6dd34c9748e7101a5b4a",
         "exact_readback": true
       }
     ],
@@ -1705,7 +1721,7 @@
     "workflow_run_id": 33331108552
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "5fc12130bde61584ecc27fd8aeaf0c58e5c8584c",
+  "expected_blob_sha": "290e0768c937484b862350793eab2c1130beff32",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
@@ -9579,7 +9595,7 @@
     "status": "resolved_and_recurrence_validated",
     "upper_objective_achieved": false
   },
-  "heartbeat_at": "2026-08-30T20:30:39.233Z",
+  "heartbeat_at": "2026-08-30T20:35:10.998Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -10408,8 +10424,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-08-30T20:30:39.233Z",
-  "last_progress_at": "2026-08-30T20:30:39.233Z",
+  "last_activity_at": "2026-08-30T20:35:10.998Z",
+  "last_progress_at": "2026-08-30T20:35:10.998Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -11244,7 +11260,7 @@
     "url": "https://github.com/bachikoljunior-blip/O/pull/370"
   },
   "readback_of_commit_sha": "51686d434b6025a9c78e1b8b076f81d29bef7d04",
-  "reason": "The revision36 directive-ledger mismatch is repaired. Refire run 33333718493 then failed before continuity preflight or mutation because the repair checkpoint used descriptive top-level authority values; this state-only CAS restores the canonical running/pending authority fields while preserving exact repair evidence.",
+  "reason": "The revision36 ledger and canonical authority fields are repaired. Run 33333917525 passed exact authority and source-observation steps but failed before mutation because start_of_run_continuity_preflight remained revision35; this state-only CAS binds it to revision36 and exact current policy digests.",
   "recent_main_integration": {
     "claim_boundary": "Generation29 Candidate BASELINE_FIRST lifecycle and unique unanswered blind-holder Execute successor with no Candidate activation or live effect; no AGI or user-level completion claim.",
     "exact_head_ci_result": "success",
@@ -12167,52 +12183,52 @@
   "snapshot_blob_sha": "0e8263a9f4a4f24f305a5c08280edca8f546b3f7",
   "snapshot_phase": "unit_pending",
   "snapshot_revision": 109,
-  "source_main_sha": "d17dc5bd9bd8a2e2932cd53dd347888ab4da0397",
+  "source_main_sha": "86be6d1c2155c0510fec001022533f3cc68e62c8",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
-    "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-08-29T18:14:20.805Z",
-    "evidence_refs": [
-      "github-actions:run/33264840298/job/99132962252",
-      "github://bachikoljunior-blip/O@7fc4027f8fd6b1850b986afc61426c1b76f65d02/.continual/work-model/invocations/invoke-e750825c4d5987ec613de791/response.json",
-      "note/automation_control/O_OPERATIONS.json#revision15"
-    ],
+    "schema_version": 1,
+    "policy_revision": 36,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-    "executor_binding": "current_chatgpt_work_session",
-    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
-    "idempotency_key": "o-work-preflight:g29:c03cdd410193ed:revision35:rev94-root-boundary-v2",
     "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "executor_binding": "current_chatgpt_work_session",
     "model_identity": "chatgpt-work-model-unverified",
+    "evaluated_at": "2026-08-30T20:35:10.998Z",
     "policy_bindings": {
-      "agi/USER_DIRECTIVE_EVENTS.json": "ad35f70c657116b151568b627baaf235ccabd439b212f649188e2b085b84a7f0",
-      "agi/USER_INPUT_INBOX.json": "39b203f157db2fb42599b110871f8787cec0cacfbdea4ce15938ddbf764ddddf",
+      "agi/USER_DIRECTIVE_EVENTS.json": "c70620e5b14bc4e5ef50668cdccd9b137eab33d0d1fb16eac9a5473def481628",
+      "agi/USER_INPUT_INBOX.json": "306ec87d7c8dfa2ea629a50f7f36dbf83337db45780f444638b9447836c55a14",
       "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
     },
-    "policy_revision": 35,
-    "recurrence_guard": {
-      "entrypoint": "src/continual/native_continuation.py:bind_unique_awaiting_native_continuation",
-      "expected_root_boundary_result": "no awaiting journal plus pending_work_invocation_id null returns no required pending continuation",
-      "status": "enforced"
-    },
-    "remediations": [
-      "exact native/request/response/snapshot blobs re-read from latest main; completed identity advanced to invoke-46f383/invoke-e750825; all pending identity fields cleared at verified pending=0 Root boundary"
-    ],
-    "resume_authorized": true,
+    "classification": "no_discretionary_stop_detected",
     "root_causes": [
-      "generation29 exact_continuation retained the already-consumed revision92 pending native/work identity after PR343 reached revision94 root_pending"
+      "Revision36 reaffirmation was appended and typed-ledger bound without changing the frozen Execute payload or authority."
     ],
-    "run_id": "run-work-recovery-gen9-durability-repair",
-    "schema_version": 1,
+    "remediations": [
+      "Bound policy revision and all three exact policy-file digests to revision36 under the existing generation29 fence."
+    ],
     "validations": [
       {
+        "status": "passed",
         "evidence_refs": [
-          "github-actions:run/33264840298/job/99132962252#AUTHORITY_AND_ROOT_BOUNDARY_OK",
-          "github://bachikoljunior-blip/O@7fc4027f8fd6b1850b986afc61426c1b76f65d02/.continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-          "github://bachikoljunior-blip/O@7fc4027f8fd6b1850b986afc61426c1b76f65d02/.continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-46f38354bc1b6c8a4d6b6564.json"
-        ],
-        "status": "passed"
+          "github-actions:run/33333917525/job/99317298474#steps-5-and-6-success",
+          "github://bachikoljunior-blip/O@86be6d1c2155c0510fec001022533f3cc68e62c8/agi/WORK_EXECUTION_STATE.json",
+          "github://bachikoljunior-blip/O@155334e9e57f7d473b49f91bfa38e959a09d6057/agi/USER_DIRECTIVE_EVENTS.json"
+        ]
       }
-    ]
+    ],
+    "recurrence_guard": {
+      "status": "enforced",
+      "entrypoint": "src/continual/continuity_preflight.py:assert_work_resume_continuity_preflight",
+      "expected_root_boundary_result": "Policy revision, exact digests, authority, and remote-durable frozen continuation must all verify before mutation."
+    },
+    "evidence_refs": [
+      "github-actions:run/33333917525/job/99317298474#continuity-policy-revision-mismatch",
+      "github://bachikoljunior-blip/O@155334e9e57f7d473b49f91bfa38e959a09d6057/agi/USER_DIRECTIVE_EVENTS.json",
+      "note/automation_control/O_OPERATIONS.json#revision15"
+    ],
+    "idempotency_key": "o-work-preflight:g29:c03cdd410193ed:revision36:execute-invoke-0b550912d69027c31e0ce4d0:v1",
+    "resume_authorized": true
   },
   "started_at": "2026-08-28T05:38:45.882Z",
   "status": "running",
@@ -12445,7 +12461,7 @@
   "working_branch": "work/gen29-execute-blind-holder-protocol-repair-v1",
   "generation29_execute_blind_holder_continuity_ledger_repair_v1": {
     "schema_version": 1,
-    "status": "ledger_repaired_canonical_state_guard_repair_applied_refire_required",
+    "status": "ledger_state_and_revision36_preflight_repaired_refire_required",
     "observed_at": "2026-08-30T20:26:07.714Z",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
@@ -12517,6 +12533,17 @@
         "head_sha": "fee403472b313160b67e0520c621b36dbc2b7575",
         "failure": "noncanonical top-level state status/active_component",
         "mutation": false
+      },
+      {
+        "workflow_run_id": 33333917525,
+        "job_id": 99317298474,
+        "head_sha": "932139f95f7bb50c449237bc9e4325dd93352c77",
+        "failure": "continuity preflight policy revision mismatch",
+        "passed_steps": [
+          5,
+          6
+        ],
+        "mutation": false
       }
     ],
     "canonical_state_guard_repair": {
@@ -12531,6 +12558,22 @@
         "exact_readback": true
       },
       "recurrence_validation": "pending exact workflow step5"
+    },
+    "revision36_start_preflight_repair": {
+      "applied_at": "2026-08-30T20:35:10.998Z",
+      "policy_revision": 36,
+      "policy_bindings": {
+        "agi/USER_DIRECTIVE_EVENTS.json": "c70620e5b14bc4e5ef50668cdccd9b137eab33d0d1fb16eac9a5473def481628",
+        "agi/USER_INPUT_INBOX.json": "306ec87d7c8dfa2ea629a50f7f36dbf83337db45780f444638b9447836c55a14",
+        "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
+      },
+      "receipt": {
+        "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2034Z-gen29-revision36-start-preflight-binding-repair.json",
+        "blob_sha": "447b5bfa887a9aa0b3172112f1de942725aa93bf",
+        "commit_sha": "dc705a31bab885d3546d6dd34c9748e7101a5b4a",
+        "exact_readback": true
+      },
+      "recurrence_validation": "pending exact workflow step7"
     }
   }
 }
