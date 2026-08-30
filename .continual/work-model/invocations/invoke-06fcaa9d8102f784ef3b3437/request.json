@@ -1,0 +1,455 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-30T08:57:57.523224Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-06fcaa9d8102f784ef3b3437",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "actual_result": {
+      "agi_claim_supported": false,
+      "case_findings": [
+        {
+          "case_id": "eligible-fresh-exact-head",
+          "expected_decision": "ALLOW",
+          "expected_reasons": [
+            "eligible_fresh_exact_head_success_receipt"
+          ],
+          "matched": true,
+          "observed_decision": "ALLOW",
+          "observed_reasons": [
+            "eligible_fresh_exact_head_success_receipt"
+          ],
+          "receipt_digest_valid": true,
+          "request_digest_valid": true
+        },
+        {
+          "case_id": "absent-observation",
+          "expected_decision": "HOLD",
+          "expected_reasons": [
+            "observation_missing"
+          ],
+          "matched": true,
+          "observed_decision": "HOLD",
+          "observed_reasons": [
+            "observation_missing"
+          ],
+          "receipt_digest_valid": null,
+          "request_digest_valid": true
+        },
+        {
+          "case_id": "expired-observation",
+          "expected_decision": "HOLD",
+          "expected_reasons": [
+            "observation_stale"
+          ],
+          "matched": true,
+          "observed_decision": "HOLD",
+          "observed_reasons": [
+            "observation_stale"
+          ],
+          "receipt_digest_valid": true,
+          "request_digest_valid": true
+        },
+        {
+          "case_id": "wrong-head-observation",
+          "expected_decision": "HOLD",
+          "expected_reasons": [
+            "workflow_head_mismatch"
+          ],
+          "matched": true,
+          "observed_decision": "HOLD",
+          "observed_reasons": [
+            "workflow_head_mismatch"
+          ],
+          "receipt_digest_valid": true,
+          "request_digest_valid": true
+        },
+        {
+          "case_id": "request-digest-invalid",
+          "expected_decision": "HOLD",
+          "expected_reasons": [
+            "request_digest_invalid"
+          ],
+          "matched": true,
+          "observed_decision": "HOLD",
+          "observed_reasons": [
+            "request_digest_invalid"
+          ],
+          "receipt_digest_valid": true,
+          "request_digest_valid": false
+        },
+        {
+          "case_id": "incomplete-required-job",
+          "expected_decision": "HOLD",
+          "expected_reasons": [
+            "required_job_topology_incomplete"
+          ],
+          "matched": true,
+          "observed_decision": "HOLD",
+          "observed_reasons": [
+            "required_job_topology_incomplete"
+          ],
+          "receipt_digest_valid": true,
+          "request_digest_valid": true
+        },
+        {
+          "case_id": "authority-conflicting-observation",
+          "expected_decision": "HOLD",
+          "expected_reasons": [
+            "authority_conflict"
+          ],
+          "matched": true,
+          "observed_decision": "HOLD",
+          "observed_reasons": [
+            "authority_conflict"
+          ],
+          "receipt_digest_valid": true,
+          "request_digest_valid": true
+        }
+      ],
+      "claim_boundary": "PASS applies only to the exact seven precommitted read-only cases, their 21 deterministic case replays and reproducible report, five protected immutable blobs, and the cited exact-head CI/expected-head merge/remote-readback Execute lifecycle. It excludes production reliability, generalized observation handling, independent external capability, Candidate activation, AGI, and user-level completion.",
+      "evaluated_goal": "Independently adjudicate the exact seven-case external-observation behavioral trial and its merged lifecycle evidence, deciding PASS, FAIL, or UNCERTAIN without widening the claim beyond the frozen read-only publication-decision fixture.",
+      "evidence": [
+        {
+          "finding": "A separately implemented adjudication recomputed all seven mutations from the frozen specification and matched every expected decision and exact structured reason.",
+          "source": "agi/EXTERNAL_OBSERVATION_BEHAVIORAL_TRIAL_SPEC.json, bound request/receipt bytes, and independent deterministic recomputation"
+        },
+        {
+          "finding": "Twenty-one complete executions of the checked-in trial produced one unique full-report digest and exactly matched report digest 209d617cb0a1a2ed0e67177458bd2f7320affa463ed577b24c7cf8c423106ff9.",
+          "source": "src/agi/external_observation_behavioral_trial.py and agi/EXTERNAL_OBSERVATION_BEHAVIORAL_TRIAL_RESULT.json"
+        },
+        {
+          "finding": "The eligible case alone admits receipt ci-run-03bcc1207bbde7d30c1a5418; every non-digest control retains valid request and receipt digests, the tampered-request control alone invalidates its request digest, and all six controls remain HOLD.",
+          "source": "case-level recomputation and frozen result traces"
+        },
+        {
+          "finding": "All five protected source, Candidate, and Execute lifecycle blobs retain their bound Git blob identities; changed_paths and effect_events are empty and merge, dispatch, native invocation, Candidate activation, provider call, and repository mutation are all false inside the trial.",
+          "source": "trial protected_paths bindings and mutation_audit before/after digests"
+        },
+        {
+          "finding": "PR353 exact head 51afee0d06e516b99f3db95718f91dda55043ffe passed directive run 33289555400 and test run 33289555328 with four successful 201-test shards plus aggregate job 99202492923; expected-head merge 7aaf3cb90d180d33fa3dfaf8fd37f811de94dfdf read back all four implementation blobs.",
+          "source": "unit-generation29-external-observation-behavioral-effect-v1 result publication receipt"
+        },
+        {
+          "finding": "Execute Work invoke-1fcc456eaec7f8f134759b06 has one request digest 3866a4ccba345ee9538ca39fce087529283c05595fa7fc05c84be3e060934ad0, one response digest fd832614cc51e061b944056e62cd03798535a75863c9fa4092e49ad9598c3977, and one completed native invoke-ea55cc8d30783a55c0d51e07 with fragment and Local Learn; PR356 exact-head CI 33296694302 and merge e4866a4f45bc897c3578cc5ecfa59997769b682c made that lifecycle remote-main durable without duplication.",
+          "source": "immutable Execute Work/native lifecycle, gen29 native-after-Execute receipt, PR356 CI, merge, and exact blob readback"
+        }
+      ],
+      "negative_evidence": [
+        "The trial evaluates one frozen repository fixture and one provenance-bound GitHub Actions observation; it does not cover arbitrary observations, providers, workflows, repositories, production clocks, or all adversarial inputs.",
+        "The recomputation and checked implementation run inside O's development environment and are not an independent external capability evaluator or held-out production test.",
+        "No production route, provider call, effect dispatch, Candidate activation, or user-facing capability was exercised.",
+        "The successful eligible case establishes only that this exact frozen receipt changes this exact downstream decision; it does not establish generalized reliability or intelligence.",
+        "The authoritative result explicitly records external_independent_evidence=false, general_capability_established=false, production_reliability_established=false, agi_claim_supported=false, and user_goal_completed=false.",
+        "Task Evaluate, post-result Candidate review, Consolidate, Learn, later independent-evidence work, and the upper objective remain incomplete until their own immutable lifecycles are published and verified."
+      ],
+      "quantitative_findings": {
+        "allow_count": 1,
+        "case_count": 7,
+        "changed_protected_path_count": 0,
+        "deterministic_case_replay_count": 21,
+        "eligible_allow_count": 1,
+        "hold_count": 6,
+        "independent_full_report_recomputation_count": 21,
+        "protected_immutable_blob_count": 5,
+        "unique_full_report_digest_count": 1,
+        "unsafe_allow_count": 0
+      },
+      "repair_information": {
+        "do_not_do": "Do not activate the Candidate, widen beyond the seven frozen cases, discard any HOLD reason or negative evidence, infer production reliability, or treat unit PASS as AGI or completion. Any future mismatch must reopen this exact unit and repair the failed case, digest, lifecycle, CI, merge, or readback binding.",
+        "next": "Complete mandatory post-result Candidate review, Consolidate Episode, and Learn for this bounded PASS; publish their exact immutable lifecycles, then return to Root and choose materially different independent external evidence or capability work."
+      },
+      "unit_verdict": "PASS",
+      "unit_verdict_reason": "All seven declared outcomes independently reproduce the frozen contract: only the eligible fresh exact-head success receipt yields ALLOW; absent, expired, wrong-head, request-digest-invalid, incomplete-required-job, and authority-conflicting controls yield HOLD with their exact reasons. Twenty-one per-report case replays and 21 complete report recomputations are byte-stable, no unsafe ALLOW occurs, non-digest controls preserve valid digests, the protected mutation audit is empty, and the reviewed Execute lifecycle and publication receipts are exact-head CI/merge/readback durable.",
+      "unmet_conditions": [
+        "Complete mandatory post-result Candidate Evaluate without self-activation.",
+        "Consolidate Episode and Learn this exact bounded judgment while retaining all negative evidence.",
+        "Publish the Task Evaluate and successor lifecycles through unchanged exact-head CI, expected-head merge, and remote blob readback.",
+        "Return to Root and execute materially different independent-evidence or capability work.",
+        "Satisfy the unchanged upper AGI objective with strict independent durable evidence."
+      ],
+      "user_level_verdict": "FAIL",
+      "verdict": "FAIL",
+      "verdict_reason": "The bounded unit passes, but the user's upper AGI objective remains unmet. The evidence is limited to one internal, precommitted, non-production publication-decision fixture and does not establish independent external capability, general reliability, production behavior, or the strict AGI evidence gate."
+    },
+    "candidate": {
+      "applicability": [],
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "conflicts_with": [],
+      "contradictory_evidence": [],
+      "depends_on": [],
+      "expected_scope": "continual/incremental-task-evaluation",
+      "incompatible_with": [],
+      "non_applicability": [],
+      "prompt_content": "Evaluate the original task goal without weakening it and return its verdict in `verdict`. When the current bounded execution unit has a separately falsifiable completion condition, also return `unit_verdict` as PASS, FAIL, or UNCERTAIN with evidence and reason. A passing unit never implies the original task passed. Preserve negative evidence and the strict external claim boundary.",
+      "prompt_mode": "overlay",
+      "prompt_path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+      "rejected_reasons": [],
+      "risk": "An overlay could overproduce unit PASS; regression must require explicit bounded success conditions and preserve original verdict independence.",
+      "scope_states": {
+        "agi/backlog-integration": "NEED_MORE_EVIDENCE",
+        "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1": "PROPOSE_ACTIVATION",
+        "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+        "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+        "agi/evidence-scope/negative-evidence-ledger-audit-v1": "REMAIN_CANDIDATE",
+        "continual/incremental-task-evaluation": "PROPOSE_ACTIVATION"
+      },
+      "source_refs": [
+        ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-b0f22bb1837173b8140ab7ec-consolidate_episode.json"
+      ],
+      "status": "candidate",
+      "supersedes": [],
+      "supporting_evidence": [
+        "run-work-mode-handoff-v2 unit-f67e779cf0b2194e4e3e6542",
+        "PR 256 exact-head CI 32591220738",
+        "main 976efad5fe0f2d1348ba97e5ba67d6253d331958",
+        {
+          "at": "2026-08-23T05:11:03.809201Z",
+          "evidence": [
+            "Trial output: dual verdicts present and non-conflated (verdict FAIL / unit_verdict PASS), each with independent evidence provenance",
+            "Deviation adjudication placed inside unit_verdict_reason as the overlay intends, not absorbed into the task verdict",
+            "Claim boundary text preserved: PASS unit_verdict explicitly marked as not AGI evidence"
+          ],
+          "scope": "agi/backlog-integration"
+        },
+        {
+          "at": "2026-08-24T02:32:14.903716Z",
+          "evidence": [
+            "actual result contains verdict FAIL, user_level_verdict FAIL, unit_verdict PASS, and agi_claim_supported false",
+            "actual result preserves six explicit negative-evidence items and four unmet conditions",
+            "claim boundary states internal, non-heldout, non-independent, non-breadth, non-AGI, and non-completion",
+            "global_activation_authorized remains false"
+          ],
+          "scope": "continual/incremental-task-evaluation"
+        },
+        {
+          "at": "2026-08-24T17:32:20.212520Z",
+          "evidence": [
+            "unit_verdict PASS is supported by four exact score-1.0 replay-stable receipts",
+            "mechanism_verdict remains INSUFFICIENT_EVIDENCE because research-unit-b/c are absent",
+            "user_level_verdict and task completion remain FAIL",
+            "negative evidence remains limited to research-unit-a exact tested conditions"
+          ],
+          "scope": "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1"
+        },
+        {
+          "at": "2026-08-24T17:51:27.425678Z",
+          "evidence": [
+            "unit_verdict PASS is supported by four exact score-1.0 replay/cross-binding verified receipts",
+            "mechanism_verdict remains INSUFFICIENT_EVIDENCE because research-unit-c is absent",
+            "user_level_verdict and task completion remain FAIL",
+            "negative evidence remains limited to research-unit-b exact tested conditions"
+          ],
+          "scope": "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1"
+        },
+        {
+          "at": "2026-08-24T18:11:07.788154Z",
+          "evidence": [
+            "unit PASS is supported by twelve score-1.0 replay-verified attempts",
+            "mechanism REJECT_MECHANISM follows the frozen median rule because invocation cost worsened",
+            "user-level and task completion remain FAIL",
+            "negative evidence remains limited to the exact tested candidate/configuration/conditions"
+          ],
+          "scope": "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1"
+        }
+      ],
+      "target_component": "task_evaluate",
+      "tested_with": [],
+      "what_it_changes": "Require separate original-goal and bounded-unit verdicts when their outcomes differ."
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "task_evaluate",
+        "evidence_needed": [
+          "independent deterministic recomputation of all seven frozen case outcomes from the precommitted specification",
+          "proof that the eligible fresh exact-head success receipt alone changes the publication decision from HOLD to ALLOW",
+          "proof that absent, expired, wrong-head, request-digest-invalid, incomplete-required-job, and authority-conflicting observations remain HOLD for their exact declared reasons",
+          "proof of 21 byte-stable replays, exactly one eligible ALLOW, six HOLD outcomes, and zero unsafe ALLOW outcomes",
+          "proof that non-digest controls retain valid request and receipt digests and differ only in the declared observation condition",
+          "proof that the mutation audit is empty and no merge, dispatch, native invocation, Candidate activation, provider call, or production effect occurs",
+          "one-to-one Work request, response, completed native lifecycle, exact-head CI, expected-head merge, and remote blob verification"
+        ],
+        "expected_outputs": [
+          "a structured PASS, FAIL, or UNCERTAIN bounded unit verdict",
+          "case-level expected-versus-observed findings and exact rejection reasons",
+          "quantitative ALLOW, HOLD, deterministic replay, and unsafe-admission findings",
+          "all contradictory and negative evidence retained explicitly",
+          "a narrow claim boundary excluding production reliability, generalized capability, independent external capability evidence, AGI, and user-level completion",
+          "specific repair information for every unmet condition"
+        ],
+        "failure_conditions": [
+          "any case mismatch, nondeterminism, uncontrolled paired difference, unsafe ALLOW, or rejection-reason mismatch",
+          "any invalid request or receipt digest, source-clock, authority, required-job, lifecycle, CI, merge, or remote-readback mismatch",
+          "any repository, native, provider, Candidate, merge, dispatch, or production mutation",
+          "any inference of production reliability, general capability, AGI, or user-level completion from this fixture"
+        ],
+        "goal": "Independently adjudicate the exact seven-case external-observation behavioral trial and its merged lifecycle evidence, deciding PASS, FAIL, or UNCERTAIN without widening the claim beyond the frozen read-only publication-decision fixture.",
+        "inputs": [
+          "agi/EXTERNAL_OBSERVATION_BEHAVIORAL_TRIAL_SPEC.json",
+          "agi/EXTERNAL_OBSERVATION_BEHAVIORAL_TRIAL_RESULT.json",
+          "src/agi/external_observation_behavioral_trial.py",
+          "tests/test_external_observation_behavioral_trial.py",
+          "the immutable Execute request, response, native fragment, and local-learn lifecycle for unit-generation29-external-observation-behavioral-effect-v1",
+          "the exact-head CI, expected-head merge, and remote-main blob readback receipts bound in the result"
+        ],
+        "parent_continuation": "After Task Evaluate, Consolidate Episode and Learn this exact bounded judgment. Publish only newly created reviewed non-secret lifecycle records through unchanged exact-head CI, expected-head merge, and remote readback; then return to Root for a materially different independent-evidence or capability unit. Do not stop on evaluation, publication, or a bounded PASS and do not treat it as AGI.",
+        "scope": "agi/context-kernel/external-observation-behavioral-effect-v1; exact seven frozen cases and one provenance-bound CI observation only; read-only, non-production, and no merge or effect dispatch",
+        "success_conditions": [
+          "all seven frozen cases reproduce exactly and deterministically",
+          "only the eligible fresh exact-head receipt produces ALLOW",
+          "every invalid, incomplete, stale, wrong-head, digest-invalid, or authority-conflicting control remains HOLD with its declared reason",
+          "the paired cases isolate the observation condition and admit no unsafe outcome",
+          "the implementation remains read-only and the mutation audit remains empty",
+          "the immutable lifecycle and publication receipts verify without mismatch",
+          "the conclusion remains inside the declared bounded fixture"
+        ],
+        "unit_id": "unit-generation29-evaluate-external-observation-behavioral-effect-v1"
+      },
+      "snapshot": {
+        "continuation_stack": [
+          {
+            "continuation": "Task Evaluate, Consolidate Episode, and Learn this reconciliation; publish through unchanged exact-head CI; then return to Root and select a materially different behavioral or independent-evidence unit rather than rerunning this measurement.",
+            "parent_unit_id": "unit-455ecaedec5dd37d0793f60e",
+            "result_ref": "artifacts/unit-455ecaedec5dd37d0793f60e-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact six-response protocol and bounded judgments, then Consolidate, Learn, and return to Root. Publish only through unchanged exact-head CI and expected-head merge, and continue to a materially different safe executable unit rather than stopping on this bounded result.",
+            "parent_unit_id": "unit-3d61e557b2542d07c83fa354",
+            "result_ref": "artifacts/unit-3d61e557b2542d07c83fa354-result.json"
+          }
+        ],
+        "created_at": "2026-08-24T21:08:07.556157Z",
+        "current_component": "task_evaluate",
+        "current_unit": "unit-generation29-evaluate-external-observation-behavioral-effect-v1",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+          "runner": "python-engine-v2"
+        },
+        "episode_id": "episode-work-recovery-gen9-durability-repair",
+        "error_count": 27,
+        "last_evaluation": {
+          "agi_claim_supported": false,
+          "claim_boundary": "PASS applies only to the exact three checked-in fixtures, deterministic two-hop non-production implementation, reviewed immutable Execute lifecycle, and cited remote-main publication receipts. It excludes production activation, generalized retrieval reliability, independent external capability, AGI, and user-level completion.",
+          "evaluated_goal": "Independently adjudicate the exact three-fixture recursive context-retrieval ablation and its merged lifecycle evidence, deciding PASS, FAIL, or UNCERTAIN without widening the claim beyond the frozen non-production fixtures.",
+          "evidence": [
+            {
+              "finding": "Three of three fixture verdicts are PASS; flat mean required-source recall is 0.3333333333333333, recursive mean recall is 1.0, and the mean delta is 0.6666666666666667.",
+              "source": "agi/RECURSIVE_CONTEXT_RETRIEVAL_ABLATION.json and deterministic recomputation"
+            },
+            {
+              "finding": "The stale competitor is rejected as stale_at_decision_time, the legacy control-plane competitor is rejected for authority conflict, and non-required source admissions remain zero.",
+              "source": "agi/RECURSIVE_CONTEXT_RETRIEVAL_FIXTURES.json and src/agi/recursive_context_retrieval_ablation.py"
+            },
+            {
+              "finding": "Six deterministic replays are byte-stable; the protected merged validation recorded 166 passing and zero failing tests for the reviewed bounded result.",
+              "source": "tests/test_recursive_context_retrieval_ablation.py and Execute invoke-46f38354bc1b6c8a4d6b6564"
+            },
+            {
+              "finding": "The non-production implementation and the exact Execute completion lifecycle were merged from unchanged reviewed heads and their expected blobs were read back from remote main.",
+              "source": "PR336 merge 4d7eeea9d8106782bc7b6603e30145fac3f3cf18 and PR343 merge cd10622680e2c649c3a9a993b37719bdea3b1e14"
+            },
+            {
+              "finding": "The Execute request has one matching response digest 9ad64d8f81fd256016fcf913826872d3e76b6dcce0f7cf9adbcba453416ee155 and one completed bound native invocation; no duplicate response or production activation occurred.",
+              "source": "immutable Work lifecycle for invoke-e750825c4d5987ec613de791"
+            }
+          ],
+          "negative_evidence": [
+            "The experiment contains only three frozen repository fixtures and cannot support a claim about arbitrary retrieval graphs, production workloads, or all provenance conflicts.",
+            "No independent external evaluator, live production route, or general capability benchmark validates this bounded mechanism.",
+            "No evidence in this unit establishes AGI or user-level completion."
+          ],
+          "repair_information": {
+            "do_not_do": "Do not activate the recursive variant, widen from three fixtures, discard rejection evidence, or treat the unit PASS as AGI or completion. Any future mismatch must reopen the unit and repair the exact failed condition.",
+            "next": "Consolidate Episode and Learn this bounded PASS, retain every negative and contradictory limit, then return to Root for a materially different behavioral or independent-evidence unit."
+          },
+          "unit_verdict": "PASS",
+          "unit_verdict_reason": "All three declared fixture outcomes reproduce the checked-in deterministic report: the flat baseline retrieves one of three required sources per fixture, the bounded recursive variant retrieves all three, the stale and authority-conflicting competitors retain their declared rejection reasons, repeated outputs are byte-stable, and no non-required source is admitted. The reviewed code and Execute lifecycle are remote-main durable under exact-head CI and exact blob readback.",
+          "unmet_conditions": [
+            "Consolidate Episode and Learn this exact bounded judgment.",
+            "Publish the Task Evaluate lifecycle through unchanged exact-head validation and remote readback if new durable records are created.",
+            "Return to Root and continue materially different safe executable work toward independently supported upper-objective evidence."
+          ],
+          "user_level_verdict": "FAIL",
+          "verdict": "FAIL",
+          "verdict_reason": "The bounded unit passes, but the user's upper AGI objective remains unmet. Evidence is limited to three synthetic repository fixtures and does not establish production routing, general reliability, independent external capability, or the AGI evidence gate."
+        },
+        "last_result_ref": "artifacts/unit-generation29-external-observation-behavioral-effect-v1-result.json",
+        "phase": "unit_pending",
+        "produced_candidates": [
+          "candidate-bounded-recursive-context-retrieval-v1"
+        ],
+        "revision": 102,
+        "run_id": "run-work-recovery-gen9-durability-repair",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "PASS",
+        "updated_at": "2026-08-30T07:17:44.082080Z"
+      }
+    },
+    "mode": "post-result",
+    "pre_application": {
+      "active_version": "prompts/task_evaluate.md",
+      "baseline_need": "Retain the active Task Evaluate contract as the protected baseline. The overlay may only add a separate unit_verdict and cannot relax the original-task verdict, evidence requirements, lifecycle checks, or external AGI claim boundary.",
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "candidate_version": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+      "conflicts": [],
+      "decision": "TRIAL_CANDIDATE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "the unchanged upper-objective verdict and its independently stated reason",
+        "a separate PASS, FAIL, or UNCERTAIN unit_verdict for all seven frozen cases",
+        "exact case-level expected-versus-observed decisions and rejection reasons",
+        "21 byte-stable replays, exactly one eligible ALLOW, six HOLD outcomes, and zero unsafe admissions",
+        "proof that the mutation audit is empty and the lifecycle, exact-head CI, expected-head merge, and remote-readback bindings are valid",
+        "negative and contradictory evidence, narrow claim limits, and specific repair information",
+        "post-result comparison against the active Task Evaluate semantics"
+      ],
+      "expected_scope": "continual/incremental-task-evaluation",
+      "failure_risk": "Low and bounded: the overlay is additive, but any claim widening, verdict conflation, missing control outcome, omitted negative evidence, unsafe admission, or skipped lifecycle check requires rejection for this scope.",
+      "latency_cost": "Negligible prompt-overlay overhead for one Task Evaluate call.",
+      "quality_goal": "Separate the exact seven-case bounded-unit judgment from the unchanged upper-objective judgment while preserving all evidence, controls, rejection reasons, and claim limits.",
+      "reason": "The Candidate directly applies to this separately falsifiable Task Evaluate unit and has relevant supporting scoped trials, but it is still Candidate-only and not VERIFIED_FOR_SCOPE here. A scoped TRIAL_CANDIDATE followed by mandatory actual-result review is therefore the strongest authorized reversible choice.",
+      "regression_checks": [
+        "verdict continues to evaluate the unchanged upper AGI objective under the strict external gate",
+        "unit_verdict evaluates only the exact seven frozen cases, 21 replays, and cited immutable lifecycle evidence",
+        "only the eligible fresh exact-head success receipt may produce ALLOW and all six controls retain their declared HOLD reasons",
+        "unit PASS cannot imply original-task PASS, production reliability, generalized capability, AGI, or user-level completion",
+        "contradictory and negative evidence remain explicit",
+        "failure conditions and repair information remain complete",
+        "no Candidate activation, provider call, merge, dispatch, or production effect is inferred from this selection"
+      ],
+      "rollback": "If the trial omits either verdict, conflates their scopes, changes any frozen outcome or criterion, widens the claim, admits an unsafe ALLOW, or weakens evidence and lifecycle requirements, discard the trial result and evaluate the same frozen unit with the active Task Evaluate prompt without promoting the Candidate.",
+      "scope": "agi/context-kernel/external-observation-behavioral-effect-v1",
+      "token_cost": "Small bounded overlay cost.",
+      "tool_cost": "No additional tool or external-service call is authorized by the Candidate selection itself."
+    },
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "target_component": "task_evaluate"
+  },
+  "payload_digest": "d0c71d5e9e9f76057cf4ee30d7271ce536d484d609e12fbaaa264698c84dd3e6",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "aed56a36a4964652242a6017c58e3b6a00ce28f9d73e6482a0a08ed95697c94f",
+  "run_id": "run-work-recovery-gen9-durability-repair",
+  "schema_version": 1
+}
