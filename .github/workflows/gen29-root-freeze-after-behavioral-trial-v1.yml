@@ -242,6 +242,27 @@ jobs:
           if clocks.get('work_execution_state', {}).get('git_blob_sha') != 'f034b42bff7f6c36963766afb078463a17f1f0f3':
               raise SystemExit('Root request state clock mismatch')
 
+          preflight_candidates = []
+          for path in sorted((run_dir / 'preflight').glob('preflight-root-*.json')):
+              ref = path.relative_to(root).as_posix()
+              existed_at_launch = subprocess.run(
+                  ['git', 'cat-file', '-e', f'HEAD:{ref}'],
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL,
+              ).returncode == 0
+              if not existed_at_launch:
+                  preflight_candidates.append(path)
+          if len(preflight_candidates) != 1:
+              raise SystemExit(f'expected exactly one newly generated Root preflight, got {len(preflight_candidates)}')
+          preflight_path = preflight_candidates[0]
+          preflight_ref = preflight_path.relative_to(root).as_posix()
+          preflight = json.loads(preflight_path.read_text())
+          if request.get('payload', {}).get('preflight_selection') != preflight.get('result'):
+              raise SystemExit('Root request preflight selection does not exactly match generated preflight result')
+          if preflight.get('result', {}).get('scope') != 'root':
+              raise SystemExit('generated preflight is not Root scoped')
+          preflight_blob = subprocess.check_output(['git', 'hash-object', preflight_ref], text=True).strip()
+
           awaiting = []
           for path in sorted((run_dir / 'invocations').glob('*.json')):
               value = json.loads(path.read_text())
@@ -281,6 +302,8 @@ jobs:
               'pending_request_ref': request_ref,
               'pending_request_digest': request['request_digest'],
               'pending_request_blob_sha': request_blob,
+              'pending_preflight_ref': preflight_ref,
+              'pending_preflight_blob_sha': preflight_blob,
               'pending_native_invocation_id': native_id,
               'pending_native_invocation_ref': native_ref,
               'pending_native_invocation_blob_sha': native_blob,
@@ -327,6 +350,7 @@ jobs:
               f'.continual/runs/{run_id}/events.jsonl',
               summary['pending_native_invocation_ref'],
               summary['pending_request_ref'],
+              summary['pending_preflight_ref'],
               f".continual/runs/{run_id}/work-source-observations/{summary['work_source_observation_id']}/request.json",
               f".continual/runs/{run_id}/work-source-observations/{summary['work_source_observation_id']}/receipt.json",
               f".continual/runs/{run_id}/ci-source-observations/{summary['ci_source_observation_id']}/request.json",
