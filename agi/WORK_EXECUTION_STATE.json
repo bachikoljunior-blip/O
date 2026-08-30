@@ -176,19 +176,19 @@
   },
   "checkpoint": {
     "agi_claim_supported": false,
-    "checkpointed_at": "2026-08-30T00:02:34.430Z",
+    "checkpointed_at": "2026-08-30T00:14:35.997Z",
     "exact_pending_request_blob_sha": "1402785a8e834c2fe5b4310434a9e79bd72f193b",
     "exact_pending_request_digest": "cd132392381be50cbb744afb010f50e563921121f7a35b26eaa2b5c2ced163ff",
     "exact_pending_request_ref": ".continual/work-model/invocations/invoke-c4be414873dff6ba0d4437c6/request.json",
     "exact_pending_work_invocation_id": "invoke-c4be414873dff6ba0d4437c6",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
-    "reason": "PR349 exact-head pytest shards 0, 1, and 3 succeeded; shard 2 remains actively running and no failure is present.",
+    "reason": "00:12 scheduled slot integrity receipt was persisted and exact-read back with no gap or scheduler repair; PR349 shards 0, 1, and 3 remain successful while shard 2 continues.",
     "recovery_acquisition_commit": "0b43f2d251308b6db0871e16f3cfb61b3441ef81",
     "recovery_finalization_blob_sha": "814e1f1ddea3564b4b32cb16fb5bf558c21c7b34",
     "recovery_finalization_commit": "4e9b3fd8161b3d5e195803d16c808fac4c035987",
     "remote_authority_commit": "0d1e96eef79c1aed8f6a7ed050db123c73aeead0",
-    "status": "pr349_three_shards_success_shard2_running",
+    "status": "pr349_three_shards_success_shard2_running_slot0012_recorded",
     "successor_generation": 21,
     "successor_merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
     "successor_recovery_required": true,
@@ -206,9 +206,9 @@
     "pending_job_ids": [
       99178226096
     ],
-    "idempotency_key": "o-work-gen29:pr349:0ce6295f:three-shards-success-shard2-running:v1",
-    "exact_frontier": "Directive gate and shards 0, 1, 3 are green; shard 2 and dependent aggregate remain.",
-    "current_main_sha": "ef6ac8eed31a13294c639ff054b7b6127249f40a",
+    "idempotency_key": "o-work-gen29:pr349:0ce6295f:slot0012-covered-shard2-running:v1",
+    "exact_frontier": "Directive gate and shards 0, 1, 3 are green; shard 2 and dependent aggregate remain. The 00:12 slot is durably covered by the same invocation.",
+    "current_main_sha": "a786ea9ea77c23d377e16668a2226067a1e99acd",
     "goal_revision": 35,
     "frozen_native_invocation_id": "invoke-453dfc3b5b74ddb7d9e4fdee",
     "frozen_work_invocation_id": "invoke-f1cb0996ce0ff71a28d0dd58",
@@ -294,7 +294,14 @@
     "pending_consolidate_native_invocation_id": "invoke-c60ebf5dbee7ab567f3cee7c",
     "pending_consolidate_request_digest": "cd132392381be50cbb744afb010f50e563921121f7a35b26eaa2b5c2ced163ff",
     "pending_consolidate_request_blob_sha": "1402785a8e834c2fe5b4310434a9e79bd72f193b",
-    "branch_result_receipt_blob_sha": "54107e0627177ddf7784a6bbc8d1c28457263af3"
+    "branch_result_receipt_blob_sha": "54107e0627177ddf7784a6bbc8d1c28457263af3",
+    "scheduled_slot_integrity_receipt": {
+      "intended_slot": "2026-08-30T00:12:00Z",
+      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T001333Z-gen29-slot-0012-overlap-pr349-shard2-in-progress.json",
+      "blob_sha": "87d8921aca2078279d985b2b1ca5a0c87b809d37",
+      "commit_sha": "e549f8610029cab3c645e4dd3a7ccfb56f628894",
+      "exact_readback": true
+    }
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1597,7 +1604,7 @@
       ]
     }
   },
-  "heartbeat_at": "2026-08-30T00:02:34.430Z",
+  "heartbeat_at": "2026-08-30T00:14:35.997Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -7255,71 +7262,92 @@
     }
   },
   "scheduled_slot_integrity": {
-    "audited_at": "2026-08-29T19:13:54.945Z",
-    "intended_slot": "2026-08-29T19:12:00Z",
+    "audited_at": "2026-08-30T00:13:33.649Z",
+    "intended_slot": "2026-08-30T00:12:00Z",
     "actual_start": "2026-08-28T23:14:52Z",
     "start_delay_seconds": 0,
-    "overlap_started_before_slot_seconds": 71828,
+    "overlap_started_before_slot_seconds": 89828,
     "previous_slot_coverage": {
-      "intended_slot": "2026-08-29T18:12:00Z",
+      "intended_slot": "2026-08-29T23:12:00Z",
       "actual_start": "2026-08-28T23:14:52Z",
       "start_delay_seconds": 0,
       "gap_classification": "covered_by_same_authoritative_invocation_overlap",
-      "receipt": "automation_control/receipts/o_work_monitor_recovery/20260829T181439Z-gen29-slot-1812-overlap-root-freeze-attempt2-queued.json",
-      "receipt_blob_sha": "a43e23f870051ebb492aab6f4b98876c860f631d"
+      "receipt": "automation_control/receipts/o_work_monitor_recovery/20260829T231247Z-gen29-slot-2312-overlap-pr348-tests-in-progress.json",
+      "receipt_blob_sha": "6a54ce3328169dc293dbb80a1503ca6fd3c321b5"
     },
     "gap_classification": "covered_by_same_authoritative_invocation_overlap",
-    "repair_action": "scheduler_intact_no_reregistration; exact Root request recovered, v3 validation-only base-relative status defect repaired, and v4 workflows accepted without reinvocation",
+    "repair_action": "scheduler_intact_no_reregistration; preserve same generation29 writer and continue PR349 shard2 plus dependent aggregate",
     "exact_task_readback": {
       "task_id": "6a902927853481919931a1a1a1a7072d",
       "enabled": true,
       "timezone": "Asia/Tokyo",
       "schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
       "timing_mode": "exact_schedule",
-      "last_run_time": "2026-08-29T19:40:18.244579+00:00",
+      "last_run_time": "2026-08-29T23:22:54.387592+00:00",
       "next_run_time": null,
-      "updated_at": "2026-08-29T19:40:40.647302+00:00",
+      "updated_at": "2026-08-29T23:23:17.060826+00:00",
       "conversation_id": "6a901eda-f360-83e8-99b0-7ada04dc36c7",
-      "readback_at": "2026-08-29T19:57:22.000Z"
+      "readback_at": "2026-08-30T00:13:33.649Z"
     },
     "overlap_evidence": {
       "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
       "generation": 29,
       "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
-      "observed_main_head": "a4df2b206270ba271c777a09d8e6a8c1107d39c4",
-      "state_blob_sha": "b0f9076253a12fd92846ce0e96c6c685774ef7b6",
-      "heartbeat_at": "2026-08-29T19:13:54.945Z",
-      "recovery_branch_head": "468961cf99ba4ac440feed060267b7585b52169d",
-      "frozen_work_invocation_id": "invoke-91f2cb57cf0f69a5d9abfce6",
-      "frozen_request_blob_sha": "7638c2d42621c956622c5f90d2abfde3d48eef19",
+      "observed_o_main_head": "a786ea9ea77c23d377e16668a2226067a1e99acd",
+      "work_state_blob_sha": "26c078dff3e2590d197aa63adef0e8c4940c8e06",
+      "heartbeat_at": "2026-08-30T00:14:35.997Z",
+      "last_progress_at": "2026-08-30T00:02:34.430Z",
+      "pull_request": 349,
+      "exact_head_sha": "0ce6295f1c8c4ef4331f55562a4a5dfee40fb8c7",
+      "exact_head_test_run_id": 33281853516,
+      "required_jobs": [
+        {
+          "conclusion": "success",
+          "id": 99178226061,
+          "name": "pytest shard 3 of 4",
+          "status": "completed"
+        },
+        {
+          "conclusion": null,
+          "id": 99178226096,
+          "name": "pytest shard 2 of 4",
+          "status": "in_progress"
+        },
+        {
+          "conclusion": "success",
+          "id": 99178226115,
+          "name": "pytest shard 0 of 4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 99178226131,
+          "name": "pytest shard 1 of 4",
+          "status": "completed"
+        }
+      ],
       "request_recreated": false,
-      "root_reinvoked": false,
-      "recovery_validation_v3_run_id": 33269782473,
-      "recovery_validation_v3_conclusion": "failure",
-      "directive_preflight_v3_run_id": 33269782474,
-      "directive_preflight_v3_conclusion": "success",
-      "repair_commit": "468961cf99ba4ac440feed060267b7585b52169d",
-      "recovery_validation_v4_run_id": 33270276231,
-      "exact_head_test_v4_run_id": 33270276221,
-      "directive_preflight_v4_run_id": 33270276219
+      "duplicate_writer": false,
+      "resume_required": true,
+      "agi_claim_supported": false
     },
-    "latest_intended_slot": "2026-08-29T20:12:00Z",
+    "latest_intended_slot": "2026-08-30T00:12:00Z",
     "latest_actual_start": "2026-08-28T23:14:52Z",
     "latest_start_delay_seconds": 0,
     "latest_gap_classification": "covered_by_same_authoritative_invocation_overlap",
-    "latest_repair_action": "scheduler intact; preserve same writer and continue exact-head merge",
+    "latest_repair_action": "scheduler_intact_no_reregistration",
     "latest_receipt_repository": "bachikoljunior-blip/note",
-    "latest_receipt_path": "automation_control/receipts/o_work_monitor_recovery/20260829T201234Z-gen29-slot-2012-overlap-pr344-aggregate-in-progress.json",
-    "latest_receipt_commit": "ac1a9d1ac07591372291c72b5ed608a1790fe39f",
-    "latest_receipt_blob": "4c04557dc2a5ca028b30c6fad5bc1ced8a64a202",
-    "latest_receipt": "automation_control/receipts/o_work_monitor_recovery/20260829T201234Z-gen29-slot-2012-overlap-pr344-aggregate-in-progress.json",
-    "latest_receipt_blob_sha": "4c04557dc2a5ca028b30c6fad5bc1ced8a64a202",
+    "latest_receipt_path": "automation_control/receipts/o_work_monitor_recovery/20260830T001333Z-gen29-slot-0012-overlap-pr349-shard2-in-progress.json",
+    "latest_receipt_commit": "e549f8610029cab3c645e4dd3a7ccfb56f628894",
+    "latest_receipt_blob": "87d8921aca2078279d985b2b1ca5a0c87b809d37",
+    "latest_receipt": "automation_control/receipts/o_work_monitor_recovery/20260830T001333Z-gen29-slot-0012-overlap-pr349-shard2-in-progress.json",
+    "latest_receipt_blob_sha": "87d8921aca2078279d985b2b1ca5a0c87b809d37",
     "automation_id": "6a902927853481919931a1a1a1a7072d",
     "enabled_readback": true,
     "exact_schedule_readback": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
-    "receipt_recorded_at": "2026-08-29T20:12:34.998Z",
-    "latest_platform_start_readback": "2026-08-29T19:40:18.244579+00:00",
-    "latest_platform_start_classification": "same_task_chat_trigger_observed_while_authoritative_generation29_continues; no_duplicate_writer",
+    "receipt_recorded_at": "2026-08-30T00:13:33.649Z",
+    "latest_platform_start_readback": "2026-08-29T23:22:54.387592+00:00",
+    "latest_platform_start_classification": "same_task_chat authoritative generation29 invocation overlaps slot; no duplicate writer",
     "last_intended_slot": "2026-08-29T21:12:00Z",
     "last_actual_start": "2026-08-28T23:14:52Z",
     "last_start_delay_seconds": 0,
@@ -7331,7 +7359,7 @@
     "last_receipt_path": "automation_control/receipts/o_work_monitor_recovery/20260829T211251Z-gen29-slot-2112-overlap-pr345-shard2-in-progress.json",
     "last_receipt_blob_sha": "96c8f279d95d9a58d526b76e44391a6c32c12536",
     "last_receipt_commit_sha": "11abdbd58eb1ee285f476820546e108a05c70e24",
-    "next_intended_slot": "2026-08-29T22:12:00Z"
+    "next_intended_slot": "2026-08-30T01:12:00Z"
   },
   "generation29_revision35_refresh": {
     "schema_version": 1,
@@ -8704,7 +8732,7 @@
     "validation_head_workflow_run_count": 0,
     "repair_validated": true
   },
-  "last_activity_at": "2026-08-30T00:02:34.430Z",
+  "last_activity_at": "2026-08-30T00:14:35.997Z",
   "generation29_root_recovery_merge": {
     "schema_version": 1,
     "merged_at": "2026-08-29T20:14:30Z",
@@ -9521,8 +9549,8 @@
   },
   "generation29_consolidate_consume_v1": {
     "schema_version": 1,
-    "status": "pr349_three_shards_success_shard2_running",
-    "observed_at": "2026-08-30T00:02:34.430Z",
+    "status": "pr349_three_shards_success_shard2_running_slot0012_recorded",
+    "observed_at": "2026-08-30T00:14:35.997Z",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -9577,9 +9605,9 @@
       "valid": true
     },
     "resume_required": true,
-    "idempotency_key": "o-work-gen29:publish-consolidate-result-head-0ce6295f:ci-three-shards-success:v1",
+    "idempotency_key": "o-work-gen29:publish-consolidate-result-head-0ce6295f:slot0012-covered:v1",
     "next_action": "Bounded-wait and recheck PR349 test run 33281853516; require shard 2 and dependent aggregate success.",
-    "last_observed_at": "2026-08-30T00:02:34.430Z",
+    "last_observed_at": "2026-08-30T00:14:35.997Z",
     "pull_request_number": 349,
     "pull_request_url": "https://github.com/bachikoljunior-blip/O/pull/349",
     "pull_request_head_sha": "0ce6295f1c8c4ef4331f55562a4a5dfee40fb8c7",
@@ -9630,7 +9658,7 @@
           "status": "completed"
         }
       ],
-      "observed_at": "2026-08-30T00:02:34.430Z"
+      "observed_at": "2026-08-30T00:14:35.997Z"
     }
   }
 }
