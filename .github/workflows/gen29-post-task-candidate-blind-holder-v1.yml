@@ -1,0 +1,596 @@
+name: gen29 consume post-Task Candidate after blind-holder Task bounded PASS v1
+
+on:
+  push:
+    branches:
+      - work/gen29-post-task-candidate-blind-holder-v1
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-post-task-candidate-blind-holder-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-post-task-candidate-blind-holder-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_MAIN: 4f165503a6f2fc5c7eab324b3f26ec2565edd156
+      EXPECTED_STATE_BLOB: 7e2fe3f77de810d116ac683de851072ee3a4d923
+      EXPECTED_SNAPSHOT_BLOB: 44daa9251db822ca0fb2f23c98f316db92f4d358
+      EXPECTED_INBOX_BLOB: 7994e66f6e45199093e57d7811ae0805fb354256
+      EXPECTED_INBOX_REVISION: '36'
+      CANDIDATE_NATIVE_ID: invoke-96c7568053ec5ca132e60d90
+      CANDIDATE_NATIVE_BLOB: c09a54ea55ae5cb3ecc9ac2f443105455ee5618b
+      CANDIDATE_WORK_ID: invoke-c3fdf7b0b9e70d29c0f21d86
+      CANDIDATE_REQUEST_BLOB: 5dbe3bad7e086b6f63bebcb48f15643cb43d0162
+      CANDIDATE_REQUEST_DIGEST: cbe58d9721535aba5a09deab2ee21d20538afec4df34071d22fd9d1d7c3f6cdd
+      SOURCE_CI_RUN_ID: '33339988312'
+      SOURCE_CI_HEAD: 7e5c64dfa7c9b3917395b56b239ce39b27c4b4f6
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      RESULT_UNIT_ID: unit-generation29-evaluate-blind-holder-protocol-repair-v1
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e .
+
+      - name: Assert exact branch, runtime main, authority, and Candidate binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          RUNTIME_MAIN="$(git rev-parse origin/main)"
+          test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
+          python - <<'PY'
+          import subprocess
+          expected = ['.github/workflows/gen29-post-task-candidate-blind-holder-v1.yml']
+          observed = subprocess.check_output(
+              ['git', 'diff', '--name-only', __import__('os').environ['EXPECTED_MAIN'], 'HEAD'],
+              text=True,
+          ).splitlines()
+          if observed != expected:
+              raise SystemExit(f'launch delta mismatch: {observed!r}')
+          PY
+          python - "$EXPECTED_MAIN" "$RUNTIME_MAIN" <<'PY'
+          import subprocess
+          import sys
+          base, latest = sys.argv[1:]
+          if subprocess.check_output(['git', 'merge-base', base, latest], text=True).strip() != base:
+              raise SystemExit('runtime main lost expected ancestry')
+          for line in subprocess.check_output(['git', 'diff', '--name-status', base, latest], text=True).splitlines():
+              status, path = line.split('\t', 1)
+              allowed = (
+                  (status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json')
+                  or (status == 'A' and path.startswith('note/automation_control/receipts/') and path.endswith('.json'))
+                  or (status == 'A' and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_') and path.endswith('_control_missing.json'))
+              )
+              if not allowed:
+                  raise SystemExit(f'unsafe runtime-main delta: {status} {path}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/runtime-state-document.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/USER_INPUT_INBOX.json?ref=$RUNTIME_MAIN" > /tmp/runtime-inbox-document.json
+          RUNTIME_STATE_BLOB="$(jq -r '.sha' /tmp/runtime-state-document.json)"
+          test "$RUNTIME_STATE_BLOB" = "$EXPECTED_STATE_BLOB"
+          test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
+          jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
+          jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object /tmp/runtime-inbox.json)" = "$EXPECTED_INBOX_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$CANDIDATE_WORK_ID/request.json)" = "$CANDIDATE_REQUEST_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$CANDIDATE_NATIVE_ID.json)" = "$CANDIDATE_NATIVE_BLOB"
+          echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
+          echo "RUNTIME_STATE_BLOB=$RUNTIME_STATE_BLOB" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_invocation, verified_work_request, verify_work_invocations
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          native_id = os.environ['CANDIDATE_NATIVE_ID']
+          work_id = os.environ['CANDIDATE_WORK_ID']
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          inbox = json.loads(Path('/tmp/runtime-inbox.json').read_text())
+          snapshot = json.loads((root / '.continual' / 'runs' / run_id / 'snapshot.json').read_text())
+          request = verified_work_request(root, work_id)
+          native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
+          native = json.loads(native_path.read_text())
+          if state.get('execution_id') != 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3':
+              raise SystemExit('execution mismatch')
+          if state.get('lease_generation') != 29 or hashlib.sha256(state['fence_token'].encode()).hexdigest() != 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
+              raise SystemExit('generation/fence mismatch')
+          if state.get('status') != 'running' or state.get('resume_required') is not True:
+              raise SystemExit('authority is not resumable running state')
+          if state.get('active_component') != 'generation29_post_task_candidate_blind_holder_pending_native_consume':
+              raise SystemExit('active component mismatch')
+          exact = state.get('exact_continuation', {})
+          expected = {
+              'completed_native_invocation_id': 'invoke-d5cb1c32252a2e4ab92d0569',
+              'completed_work_invocation_id': 'invoke-dd1a8dfd09422efbc0d4f014',
+              'completed_response_digest': 'fba111f81f5e10d9e6602b48f89c4df6d0123d718dfb3e3bc0151f2258e2c64a',
+              'pending_native_invocation_id': native_id,
+              'pending_native_invocation_ref': f'.continual/runs/{run_id}/invocations/{native_id}.json',
+              'pending_native_invocation_blob_sha': os.environ['CANDIDATE_NATIVE_BLOB'],
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': f'.continual/work-model/invocations/{work_id}/request.json',
+              'pending_request_blob_sha': os.environ['CANDIDATE_REQUEST_BLOB'],
+              'pending_request_digest': os.environ['CANDIDATE_REQUEST_DIGEST'],
+              'pending_response_ref': None,
+              'pending_response_blob_sha': None,
+              'pending_response_digest': None,
+              'response_exists_on_authoritative_remote': False,
+              'snapshot_revision': 110,
+              'native_phase': 'unit_pending',
+              'pending_component': 'candidate_evaluate',
+              'target_component': 'task_evaluate',
+              'durability_status': 'pending_native_consume',
+          }
+          for key, value in expected.items():
+              if exact.get(key) != value:
+                  raise SystemExit(f'exact continuation mismatch {key}: {exact.get(key)!r} != {value!r}')
+          bind = state.get('generation29_post_task_candidate_blind_holder_consume_v1', {})
+          if bind.get('status') != 'pending_native_consume' or bind.get('candidate_work_invocation_id') != work_id or bind.get('candidate_native_invocation_id') != native_id:
+              raise SystemExit('post-Task Candidate state binding mismatch')
+          durability = state.get('continuation_durability', {})
+          if durability.get('status') != 'remote_main_readback_verified' or durability.get('verified_remote_readback') is not True:
+              raise SystemExit('continuation durability is not exact-readback verified')
+          if durability.get('pending_work_invocation_id') != work_id or durability.get('pending_native_invocation_id') != native_id:
+              raise SystemExit('continuation durability binding mismatch')
+          if inbox.get('revision') != 36:
+              raise SystemExit('inbox revision mismatch')
+          if snapshot.get('revision') != 110 or snapshot.get('phase') != 'unit_pending' or snapshot.get('current_component') != 'task_evaluate':
+              raise SystemExit('snapshot is not revision110 Task Evaluate unit_pending')
+          if request.get('component') != 'candidate_evaluate' or request.get('request_digest') != os.environ['CANDIDATE_REQUEST_DIGEST']:
+              raise SystemExit('Candidate Evaluate request mismatch')
+          payload = request.get('payload', {})
+          if payload.get('mode') != 'post-result' or payload.get('target_component') != 'task_evaluate':
+              raise SystemExit('post-result Candidate mode/target mismatch')
+          if payload.get('candidate', {}).get('candidate_id') != 'candidate-task-evaluate-unit-verdict-v1':
+              raise SystemExit('post-result Candidate identity mismatch')
+          task = verified_work_invocation(root, 'invoke-dd1a8dfd09422efbc0d4f014')
+          if payload.get('actual_result') != task.get('output', {}).get('result'):
+              raise SystemExit('post-result Candidate actual result is not the exact completed Task result')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Candidate request identity mismatch')
+          if (root / '.continual' / 'work-model' / 'invocations' / work_id / 'response.json').exists():
+              raise SystemExit('Candidate request already answered')
+          if native.get('status') != 'awaiting_work_model' or native.get('component') != 'candidate_evaluate':
+              raise SystemExit('Candidate native journal is not awaiting')
+          if native.get('work_invocation_id') != work_id or native.get('work_request_digest') != request.get('request_digest'):
+              raise SystemExit('Candidate native-to-Work binding mismatch')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1 or pending[0].get('invocation_id') != work_id:
+              raise SystemExit('Candidate request is not the unique pending Work item')
+          verified = verify_work_invocations(root, run_id=run_id)
+          expected_counts = {
+              'valid': True, 'requests': 112, 'responses': 111, 'pending': 1,
+              'native_completed': 105, 'native_fragments': 105, 'native_local_learn': 97,
+          }
+          for key, value in expected_counts.items():
+              if verified.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
+          print('POST_TASK_CANDIDATE_BINDING_OK=' + json.dumps(expected_counts, sort_keys=True))
+          PY
+          continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-verify-before.json
+          cat /tmp/work-checkpoint-verify-before.json
+          continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-verify-before.json
+          cat /tmp/work-checkpoint-verify-before.json
+
+      - name: Record fresh exact main and successful exact-head CI observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$RUNTIME_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
+          python - <<'PY'
+          import base64
+          import json
+          from pathlib import Path
+          from continual.store import Store
+          document = json.loads(Path('/tmp/runtime-state-document.json').read_text())
+          state = json.loads(base64.b64decode(''.join(document['content'].splitlines())).decode())
+          projection = {
+              'status': state['status'],
+              'owner_kind': state['owner_kind'],
+              'execution_id': state['execution_id'],
+              'lease_generation': state['lease_generation'],
+              'fence_token_digest': Store(Path('.')).stable_digest(state['fence_token'], length=64),
+              'heartbeat_at': state['heartbeat_at'],
+          }
+          Path('/tmp/work-source-projection.json').write_text(json.dumps(projection, sort_keys=True) + '\n')
+          PY
+          WORK_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/work-source-prepare.json)"
+          WORK_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/work-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$RUNTIME_MAIN" --blob-sha "$RUNTIME_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = "completed"
+          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = "success"
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
+          jq '{id, workflow_id, name, status, conclusion, head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
+          jq '[.jobs[] | {id, name, status, conclusion}] | sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
+          CI_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/ci-source-prepare.json)"
+          CI_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/ci-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$CI_OBSERVATION_ID" --request-digest "$CI_REQUEST_DIGEST" --workflow-run /tmp/workflow-run-projection.json --jobs /tmp/workflow-jobs-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+
+      - name: Recheck CAS, verify observations, and assert exact continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          LATEST_MAIN="$(git rev-parse origin/main)"
+          python - "$EXPECTED_MAIN" "$LATEST_MAIN" <<'PY'
+          import subprocess
+          import sys
+          base, latest = sys.argv[1:]
+          if subprocess.check_output(['git', 'merge-base', base, latest], text=True).strip() != base:
+              raise SystemExit('latest main lost expected ancestry')
+          for line in subprocess.check_output(['git', 'diff', '--name-status', base, latest], text=True).splitlines():
+              status, path = line.split('\t', 1)
+              allowed = (
+                  (status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json')
+                  or (status == 'A' and path.startswith('note/automation_control/receipts/') and path.endswith('.json'))
+                  or (status == 'A' and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_') and path.endswith('_control_missing.json'))
+              )
+              if not allowed:
+                  raise SystemExit(f'unsafe latest-main delta: {status} {path}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$LATEST_MAIN" > /tmp/pre-mutation-state-document.json
+          test "$(jq -r '.sha' /tmp/pre-mutation-state-document.json)" = "$RUNTIME_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from continual.ci_source_observation import verify_ci_source_observation
+          from continual.continuity_preflight import assert_work_resume_continuity_preflight
+          from continual.store import Store
+          from continual.work_source_observation import verify_work_source_observation
+
+          root = Path('.').resolve()
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          now = Store(root).utc_now()
+          work = verify_work_source_observation(
+              root, run_id=os.environ['RUN_ID'], state=state,
+              state_blob_sha=os.environ['RUNTIME_STATE_BLOB'], now=now,
+          )
+          ci = verify_ci_source_observation(root, run_id=os.environ['RUN_ID'], state=state, now=now)
+          continuity = assert_work_resume_continuity_preflight(
+              root, run_id=os.environ['RUN_ID'],
+              executor_binding=os.environ['EXECUTOR_BINDING'],
+              model_identity=os.environ['MODEL_IDENTITY'],
+          )
+          if continuity.get('resume_authorized') is not True:
+              raise SystemExit('continuity preflight did not authorize exact resume')
+          print('WORK_SOURCE_VERIFY=' + json.dumps(work, sort_keys=True))
+          print('CI_SOURCE_VERIFY=' + json.dumps(ci, sort_keys=True))
+          print('CONTINUITY_PREFLIGHT=' + json.dumps(continuity, sort_keys=True))
+          PY
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-before.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-before.json
+
+      - name: Submit exact post-result Candidate response and freeze Consolidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+          value = base64.b64decode("""
+          ewogICJmcmFnbWVudCI6IHsKICAgICJjb21wb25lbnQiOiAiY2FuZGlkYXRlX2V2YWx1YXRlIiwKICAgICJvYnNlcnZhdGlvbnMi
+          OiBbCiAgICAgICJUaGUgYWN0dWFsIHJlc3VsdCBrZXB0IHRoZSB1bmNoYW5nZWQgdXBwZXItb2JqZWN0aXZlIHZlcmRpY3QgRkFJ
+          TCBhbmQgdGhlIGJvdW5kZWQgcmVwb3NpdG9yeS1sb2NhbCB1bml0IHZlcmRpY3QgUEFTUyBzZXBhcmF0ZWx5IHJlYXNvbmVkOyB0
+          aGUgdW5pdCBQQVNTIHdhcyBub3QgY29udmVydGVkIGludG8gdGFzaywgdXNlci1sZXZlbCwgb3IgQUdJIHN1Y2Nlc3MuIiwKICAg
+          ICAgIlRoZSBleGFjdCBzeW50aGV0aWMgcG9zaXRpdmUgcmVwbGF5LCBhbGwgMTQgdW5pcXVlIGZhaWwtY2xvc2VkIG5lZ2F0aXZl
+          IGNvbnRyb2xzLCBwcmlvciBjb250YW1pbmF0ZWQtdHJpYWwgRkFJTCwgc2l4IG5lZ2F0aXZlLWV2aWRlbmNlIGl0ZW1zLCBmaXZl
+          IHVubWV0IGNvbmRpdGlvbnMsIGFuZCBzdHJpY3QgZXh0ZXJuYWwgY2xhaW0gYm91bmRhcnkgd2VyZSBwcmVzZXJ2ZWQuIiwKICAg
+          ICAgIlRoZSBDYW5kaWRhdGUgbWF5IGJlIHByb3Bvc2VkIG9ubHkgZm9yIGl0cyBzY29wZWQgYWRkaXRpdmUgZHVhbC12ZXJkaWN0
+          IGRpc2NpcGxpbmU7IGFjdGl2YXRpb24gcmVtYWlucyBwcm9oaWJpdGVkIHdpdGhvdXQgYSBzZXBhcmF0ZSBkZXRlcm1pbmlzdGlj
+          IHByb3RlY3RlZC1iYXNlbGluZSBWRVJJRklFRF9GT1JfU0NPUEUgZ2F0ZS4iCiAgICBdCiAgfSwKICAibG9jYWxfbGVhcm4iOiB7
+          CiAgICAiY2FuZGlkYXRlcyI6IFtdLAogICAgImRlY2lzaW9uIjogIk5PX0NIQU5HRSIKICB9LAogICJyZXN1bHQiOiB7CiAgICAi
+          YWN0aXZhdGlvbl9jb25zdHJhaW50IjogIlRoaXMgaXMgb25seSBhIHNjb3BlZCBwcm9wb3NhbCBmb3IgY29udGludWFsL2luY3Jl
+          bWVudGFsLXRhc2stZXZhbHVhdGlvbi4gQWN0aXZhdGlvbiBzdGlsbCByZXF1aXJlcyBhIHNlcGFyYXRlIGRldGVybWluaXN0aWMg
+          cHJvdGVjdGVkLWJhc2VsaW5lIHJlZ3Jlc3Npb24gZ2F0ZSB3aXRoIHBlcnNpc3RlZCBWRVJJRklFRF9GT1JfU0NPUEUgZXZpZGVu
+          Y2U7IHRoaXMgcmVzdWx0IGRvZXMgbm90IGF1dGhvcml6ZSBzZWxmLWFjdGl2YXRpb24sIHByb2R1Y3Rpb24gcm91dGluZywgZ2xv
+          YmFsIGFjdGl2YXRpb24sIGNsYWltIHdpZGVuaW5nLCBmb3JlY2FzdCBjYXBhYmlsaXR5LCBBR0ksIG9yIHVzZXItbGV2ZWwgY29t
+          cGxldGlvbi4iLAogICAgImFjdHVhbF9ldmlkZW5jZSI6IFsKICAgICAgInVuaXRfdmVyZGljdD1QQVNTIGlzIGV4cGxpY2l0bHkg
+          bGltaXRlZCB0byByZXBvc2l0b3J5LWxvY2FsIHN5bnRoZXRpYyBlbmZvcmNlbWVudCBvZiB0aGUgYmxpbmQtaG9sZGVyIG9yZGVy
+          aW5nLCBkaWdlc3QsIHJldmVhbCwgZGV0ZXJtaW5pc3RpYy1yZXBsYXksIGJhc2VsaW5lLCBhbmQgZmFpbC1jbG9zZWQgY29udHJv
+          bCBjb250cmFjdCIsCiAgICAgICJ2ZXJkaWN0PUZBSUwgYW5kIHVzZXJfbGV2ZWxfdmVyZGljdD1GQUlMIHJlbWFpbiBpbmRlcGVu
+          ZGVudGx5IGJvdW5kIHRvIHRoZSB1bmNoYW5nZWQgdXBwZXIgQUdJIG9iamVjdGl2ZSwgd2hpbGUgYWdpX2NsYWltX3N1cHBvcnRl
+          ZCByZW1haW5zIGZhbHNlIiwKICAgICAgInRoZSBwb3NpdGl2ZSBmaXh0dXJlIGNvbnRhaW5zIGVpZ2h0IG9yZGVyZWQgZXZlbnRz
+          IGFuZCB0d28gYnl0ZS1pZGVudGljYWwgcmVwbGF5cywgYW5kIGFsbCAxNCBmcm96ZW4gbmVnYXRpdmUgY29udHJvbHMgZmFpbCB3
+          aXRoIHRoZWlyIDE0IHVuaXF1ZSBleHBlY3RlZCByZWFzb25zIiwKICAgICAgInNpeCBleHBsaWNpdCBuZWdhdGl2ZS1ldmlkZW5j
+          ZSBpdGVtcyBhbmQgZml2ZSB1bm1ldCBjb25kaXRpb25zIHJlbWFpbiB2aXNpYmxlLCBpbmNsdWRpbmcgemVybyBleHRlcm5hbC1o
+          b2xkZXIsIGxpdmUtZm9yZWNhc3QsIGxpdmUtcHJvdmlkZXIsIG9yIGluZGVwZW5kZW50bHkgdmVyaWZpZWQgQUdJIGV4ZWN1dGlv
+          bnMiLAogICAgICAidGhlIHByaW9yIGNvbnRhbWluYXRlZCBjbGVhbi1nMSB0cmlhbCByZW1haW5zIEZBSUwsIENhbmRpZGF0ZSBh
+          Y3RpdmF0aW9uIHJlbWFpbnMgZmFsc2UsIGFuZCB0aGUgY2xhaW0gYm91bmRhcnkgZXhjbHVkZXMgZXh0ZXJuYWwgcHJlZGljdG9y
+          IGlzb2xhdGlvbiwgZ2VuZXJhbGl6ZWQgY2FwYWJpbGl0eSwgcHJvZHVjdGlvbiByZWFkaW5lc3MsIEFHSSwgYW5kIHVzZXItbGV2
+          ZWwgY29tcGxldGlvbiIsCiAgICAgICJ0aGUgc3VjY2Vzc2Z1bCBuYXRpdmUgbGlmZWN5Y2xlIGNvbnN1bWVkIGludm9rZS1kZDFh
+          OGRmZDA5NDIyZWZiYzBkNGYwMTQgb25jZSwgcmVjb3JkZWQgcmVzcG9uc2UgZGlnZXN0IGZiYTExMWY4MWY1ZTEwZDllNjYwMmI0
+          OGY4OWM0ZGY2ZDAxMjNkNzE4ZGZiM2UzYmMwMTUxZjIyNThlMmM2NGEsIGFuZCBmcm96ZSB0aGlzIGV4YWN0IHBvc3QtcmVzdWx0
+          IENhbmRpZGF0ZSByZXF1ZXN0IHdpdGhvdXQgZHVwbGljYXRpb24iCiAgICBdLAogICAgImNhbmRpZGF0ZV9pZCI6ICJjYW5kaWRh
+          dGUtdGFzay1ldmFsdWF0ZS11bml0LXZlcmRpY3QtdjEiLAogICAgImNvbnRyYWRpY3RvcnlfZXZpZGVuY2UiOiBbCiAgICAgICJF
+          dmVyeSBwb3NpdGl2ZSByZXN1bHQgaXMgcmVwb3NpdG9yeS1sb2NhbCBhbmQgc3ludGhldGljOyBubyBsaXZlIHByb3ZpZGVyLCBs
+          aXZlIGZvcmVjYXN0LCBleHRlcm5hbGx5IG9wZXJhdGVkIGhvbGRlciwgb3IgZ2VudWluZWx5IGluZGVwZW5kZW50IHByZWRpY3Rv
+          ciB3YXMgZXhlcmNpc2VkLiIsCiAgICAgICJUaGUgZGVjbGFyZWQgc3ludGhldGljIGlzb2xhdGlvbiByZWNlaXB0IGlzIHN0cnVj
+          dHVyYWxseSBjaGVja2VkIGJ1dCBpcyBub3QgYW4gaW5kZXBlbmRlbnQgZXh0ZXJuYWwgYXR0ZXN0YXRpb24gb2YgbW9kZWwsIHBy
+          b2Nlc3MsIGNvbnRleHQsIG9yIG1lbW9yeSBpc29sYXRpb24uIiwKICAgICAgIk9uZSBib3VuZGVkIGRpZmZlcmluZy12ZXJkaWN0
+          IHRyaWFsIGFuZCBpdHMgZW51bWVyYXRlZCBjb250cm9scyBhcmUgbm90IGEgcHJvdGVjdGVkLWJhc2VsaW5lIHJlZ3Jlc3Npb24g
+          c3VpdGUsIHByb2R1Y3Rpb24gcm91dGUsIGluZGVwZW5kZW50IGV4dGVybmFsIGV2YWx1YXRvciwgb3IgYnJvYWQgdGFzayBkaXN0
+          cmlidXRpb24uIiwKICAgICAgIlRoZSBDYW5kaWRhdGUgc2NvcGUgc3RhdGUgaXMgUFJPUE9TRV9BQ1RJVkFUSU9OLCBub3QgVkVS
+          SUZJRURfRk9SX1NDT1BFLCBhbmQgbm8gc2VwYXJhdGUgZGV0ZXJtaW5pc3RpYyBhY3RpdmF0aW9uIGdhdGUgd2FzIGV4ZWN1dGVk
+          IGluIHRoaXMgaW52b2NhdGlvbi4iCiAgICBdLAogICAgImRlY2lzaW9uIjogIlBST1BPU0VfQUNUSVZBVElPTiIsCiAgICAiZ2xv
+          YmFsX2FjdGl2YXRpb25fYXV0aG9yaXplZCI6IGZhbHNlLAogICAgInJlYXNvbiI6ICJUaGUgYWN0dWFsIFRhc2sgRXZhbHVhdGUg
+          cmVzdWx0IHVzZWQgdGhlIENhbmRpZGF0ZSBleGFjdGx5IGFzIGFuIGFkZGl0aXZlIGR1YWwtdmVyZGljdCBvdmVybGF5OiBpdCBy
+          ZXR1cm5lZCB1bml0X3ZlcmRpY3QgUEFTUyBvbmx5IGZvciB0aGUgcmVwb3NpdG9yeS1sb2NhbCBzeW50aGV0aWMgYmxpbmQtaG9s
+          ZGVyIGdhdGUgd2hpbGUgcmV0YWluaW5nIHZlcmRpY3QgRkFJTCBhbmQgdXNlcl9sZXZlbF92ZXJkaWN0IEZBSUwgZm9yIHRoZSB1
+          bmNoYW5nZWQgdXBwZXIgb2JqZWN0aXZlLCBwcmVzZXJ2ZWQgYWxsIG5lZ2F0aXZlIGFuZCBjb250cmFkaWN0b3J5IGV2aWRlbmNl
+          LCByZXRhaW5lZCB0aGUgcHJpb3IgY29udGFtaW5hdGVkIHRyaWFsIGFzIEZBSUwsIGFuZCBleHBsaWNpdGx5IGRlbmllZCBDYW5k
+          aWRhdGUgYWN0aXZhdGlvbiBhbmQgQUdJIGNvbXBsZXRpb24uIFRoaXMgc3VwcG9ydHMgYSBzY29wZWQgcHJvcG9zYWwsIGJ1dCBz
+          eW50aGV0aWMtb25seSBldmlkZW5jZSBhbmQgdGhlIGFic2VuY2Ugb2YgYSBzZXBhcmF0ZSBkZXRlcm1pbmlzdGljIHByb3RlY3Rl
+          ZC1iYXNlbGluZSBWRVJJRklFRF9GT1JfU0NPUEUgZ2F0ZSBwcm9oaWJpdCBhY3RpdmF0aW9uLiIsCiAgICAicmVqZWN0ZWRfcmVh
+          c29ucyI6IFtdLAogICAgInNjb3BlIjogImNvbnRpbnVhbC9pbmNyZW1lbnRhbC10YXNrLWV2YWx1YXRpb24iCiAgfQp9Cg==
+          """)
+          Path('/tmp/candidate-output.json').write_bytes(value)
+          PY
+          continual --root . work-submit "$CANDIDATE_WORK_ID" --response /tmp/candidate-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/candidate-submit.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
+          cat /tmp/candidate-submit.json
+          cat /tmp/native-resume.json
+          cat /tmp/work-verify-after.json
+          cat /tmp/work-pending-after.json
+
+      - name: Validate post-result Candidate consume and exact Consolidate freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from datetime import UTC, datetime
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_invocation, verify_work_invocations
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          candidate_native_id = os.environ['CANDIDATE_NATIVE_ID']
+          candidate_work_id = os.environ['CANDIDATE_WORK_ID']
+          expected_output = json.loads(Path('/tmp/candidate-output.json').read_text())
+          original_request = json.loads((root / '.continual' / 'work-model' / 'invocations' / candidate_work_id / 'request.json').read_text())
+          before = json.loads(Path('/tmp/work-verify-before.json').read_text())
+          expected_before = {
+              'valid': True, 'requests': 112, 'responses': 111, 'pending': 1,
+              'native_completed': 105, 'native_fragments': 105, 'native_local_learn': 97,
+          }
+          for key, value in expected_before.items():
+              if before.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {before.get(key)!r}')
+          after = verify_work_invocations(root, run_id=run_id)
+          expected_after = {
+              'valid': True, 'requests': 113, 'responses': 112, 'pending': 1,
+              'native_completed': 106, 'native_fragments': 106, 'native_local_learn': 98,
+          }
+          for key, value in expected_after.items():
+              if after.get(key) != value:
+                  raise SystemExit(f'after verification mismatch {key}: {after.get(key)!r} != {value!r}')
+          verified_candidate = verified_work_invocation(root, candidate_work_id)
+          if verified_candidate.get('output') != expected_output:
+              raise SystemExit('persisted Candidate output differs from exact submitted output')
+          candidate_native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{candidate_native_id}.json'
+          candidate_native = json.loads(candidate_native_path.read_text())
+          if candidate_native.get('status') != 'complete' or candidate_native.get('component') != 'candidate_evaluate':
+              raise SystemExit('Candidate native journal is not complete')
+          if candidate_native.get('output') != expected_output:
+              raise SystemExit('Candidate native output mismatch')
+          candidate_trial_rel = f'.continual/runs/{run_id}/candidate-trials/{candidate_native_id}.json'
+          if json.loads((root / candidate_trial_rel).read_text()) != expected_output:
+              raise SystemExit('Candidate trial artifact mismatch')
+          snapshot_rel = f'.continual/runs/{run_id}/snapshot.json'
+          snapshot = json.loads((root / snapshot_rel).read_text())
+          task_result = original_request.get('payload', {}).get('actual_result')
+          artifact_rel = f'.continual/runs/{run_id}/artifacts/{os.environ["RESULT_UNIT_ID"]}-result.json'
+          if json.loads((root / artifact_rel).read_text()) != task_result:
+              raise SystemExit('Task result artifact differs from exact evaluated result')
+          if snapshot.get('revision') != 111 or snapshot.get('phase') != 'consolidate_pending':
+              raise SystemExit(f'snapshot did not advance exactly to revision111 consolidate_pending: {snapshot.get("revision")!r} {snapshot.get("phase")!r}')
+          if snapshot.get('last_result_ref') != f'artifacts/{os.environ["RESULT_UNIT_ID"]}-result.json':
+              raise SystemExit('snapshot last result ref mismatch')
+          if snapshot.get('last_evaluation') != task_result:
+              raise SystemExit('snapshot last evaluation mismatch')
+          if snapshot.get('unit_completion_verdict') != 'PASS' or snapshot.get('task_completion_verdict') != 'FAIL':
+              raise SystemExit('snapshot dual verdict mismatch')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1:
+              raise SystemExit(f'expected one Consolidate request, got {len(pending)}')
+          request = pending[0]
+          if request.get('component') != 'consolidate_episode':
+              raise SystemExit('next pending request is not Consolidate Episode')
+          work_id = request['invocation_id']
+          request_rel = f'.continual/work-model/invocations/{work_id}/request.json'
+          if (root / request_rel).with_name('response.json').exists():
+              raise SystemExit('Consolidate request already has a response')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Consolidate request identity mismatch')
+          if request.get('prompt_path') != 'prompts/consolidate_episode.md':
+              raise SystemExit('Consolidate prompt mismatch')
+          selection = request.get('payload', {}).get('preflight_selection', {})
+          if selection.get('decision') != 'USE_ACTIVE':
+              raise SystemExit('Consolidate preflight was not mechanical USE_ACTIVE')
+          awaiting = []
+          for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
+              value = json.loads(path.read_text())
+              if value.get('status') == 'awaiting_work_model':
+                  awaiting.append((path, value))
+          if len(awaiting) != 1:
+              raise SystemExit(f'expected one awaiting Consolidate native journal, got {len(awaiting)}')
+          native_path, native = awaiting[0]
+          if native.get('component') != 'consolidate_episode' or native.get('work_invocation_id') != work_id:
+              raise SystemExit('Consolidate native-to-Work identity mismatch')
+          if native.get('work_request_digest') != request.get('request_digest') or native.get('work_request_ref') != request_rel:
+              raise SystemExit('Consolidate native-to-Work digest/ref mismatch')
+          response_rel = f'.continual/work-model/invocations/{candidate_work_id}/response.json'
+          fragment_rel = candidate_native['fragment_ref']
+          local_learn_rel = f'.continual/runs/{run_id}/local-learn/{candidate_native_id}-candidate_evaluate.json'
+          summary = {
+              'candidate_native_invocation_id': candidate_native_id,
+              'candidate_work_invocation_id': candidate_work_id,
+              'candidate_response_ref': response_rel,
+              'candidate_response_digest': verified_candidate['response']['response_digest'],
+              'candidate_response_blob_sha': subprocess.check_output(['git', 'hash-object', response_rel], text=True).strip(),
+              'candidate_native_blob_sha': subprocess.check_output(['git', 'hash-object', str(candidate_native_path)], text=True).strip(),
+              'candidate_fragment_ref': fragment_rel,
+              'candidate_fragment_blob_sha': subprocess.check_output(['git', 'hash-object', fragment_rel], text=True).strip(),
+              'candidate_local_learn_ref': local_learn_rel,
+              'candidate_local_learn_blob_sha': subprocess.check_output(['git', 'hash-object', local_learn_rel], text=True).strip(),
+              'candidate_trial_ref': candidate_trial_rel,
+              'candidate_trial_blob_sha': subprocess.check_output(['git', 'hash-object', candidate_trial_rel], text=True).strip(),
+              'task_result_artifact_ref': artifact_rel,
+              'task_result_artifact_blob_sha': subprocess.check_output(['git', 'hash-object', artifact_rel], text=True).strip(),
+              'snapshot_ref': snapshot_rel,
+              'snapshot_blob_sha': subprocess.check_output(['git', 'hash-object', snapshot_rel], text=True).strip(),
+              'snapshot_revision': 111,
+              'snapshot_phase': 'consolidate_pending',
+              'pending_native_invocation_id': native['invocation_id'],
+              'pending_native_invocation_ref': native_path.relative_to(root).as_posix(),
+              'pending_native_invocation_blob_sha': subprocess.check_output(['git', 'hash-object', str(native_path)], text=True).strip(),
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': request_rel,
+              'pending_request_digest': request['request_digest'],
+              'pending_request_blob_sha': subprocess.check_output(['git', 'hash-object', request_rel], text=True).strip(),
+              'pending_component': 'consolidate_episode',
+              'verification': expected_after,
+          }
+          Path('/tmp/post-task-candidate-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-post-task-candidate-consume-consolidate-after-blind-holder-v1.json'
+          receipt = {
+              'schema_version': 1,
+              'record_type': 'generation29_post_task_candidate_consume_receipt',
+              'recorded_at': datetime.now(UTC).isoformat().replace('+00:00', 'Z'),
+              'authority': {
+                  'execution_id': 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3',
+                  'lease_generation': 29,
+                  'fence_token_digest': 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d',
+              },
+              'source_main_sha': os.environ['RUNTIME_MAIN'],
+              'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
+              'source_ci_workflow_run_id': int(os.environ['SOURCE_CI_RUN_ID']),
+              'idempotency_key': 'o-work-gen29:consume-post-task-candidate-invoke-c3fdf7b0b9e70d29c0f21d86:freeze-consolidate:v1',
+              'completed_effect': summary,
+              'request_recreated': False,
+              'candidate_reinvoked': False,
+              'resume_required': True,
+              'next_action': 'Exact-head validate and merge this post-result Candidate lifecycle plus revision111 Consolidate freeze, bind state, then answer the exact Consolidate request once.',
+          }
+          receipt_path = root / receipt_rel
+          receipt_path.parent.mkdir(parents=True, exist_ok=True)
+          receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          print('POST_TASK_CANDIDATE_CONSUME=' + json.dumps(summary, sort_keys=True))
+          PY
+
+      - name: Stage only exact post-result Candidate lifecycle delta and push once
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          run_id = os.environ['RUN_ID']
+          candidate_native_id = os.environ['CANDIDATE_NATIVE_ID']
+          candidate_work_id = os.environ['CANDIDATE_WORK_ID']
+          summary = json.loads(Path('/tmp/post-task-candidate-summary.json').read_text())
+          work_obs = json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']
+          ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-post-task-candidate-consume-consolidate-after-blind-holder-v1.json'
+          expected_status = {
+              f'.continual/runs/{run_id}/events.jsonl': 'M',
+              f'.continual/runs/{run_id}/snapshot.json': 'M',
+              f'.continual/runs/{run_id}/invocations/{candidate_native_id}.json': 'M',
+              f'.continual/work-model/invocations/{candidate_work_id}/response.json': 'A',
+              summary['candidate_fragment_ref']: 'A',
+              summary['candidate_local_learn_ref']: 'A',
+              summary['candidate_trial_ref']: 'A',
+              summary['task_result_artifact_ref']: 'A',
+              summary['pending_native_invocation_ref']: 'A',
+              summary['pending_request_ref']: 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/receipt.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/receipt.json': 'A',
+              receipt_rel: 'A',
+          }
+          status = {}
+          for line in subprocess.check_output(['git', 'diff', '--name-status'], text=True).splitlines():
+              code, path = line.split('\t', 1)
+              status[path] = code
+          normal = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], text=True).splitlines()
+          ignored = subprocess.check_output(['git', 'ls-files', '--others', '--ignored', '--exclude-standard'], text=True).splitlines()
+          for path in normal + ignored:
+              status.setdefault(path, 'A')
+          install_artifacts = {
+              path for path in status
+              if path.startswith('src/agi/__pycache__/')
+              or path.startswith('src/continual/__pycache__/')
+              or path.startswith('src/continual_chatgpt.egg-info/')
+          }
+          for path in install_artifacts:
+              status.pop(path, None)
+          preflight_prefix = f'.continual/runs/{run_id}/preflight/preflight-consolidate_episode-'
+          new_preflights = sorted(path for path, code in status.items() if path.startswith(preflight_prefix) and path.endswith('.json') and code == 'A')
+          if len(new_preflights) != 1:
+              raise SystemExit('expected exactly one new mechanical Consolidate preflight: ' + json.dumps(new_preflights))
+          expected_status[new_preflights[0]] = 'A'
+          if status != expected_status:
+              raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({
+                  'expected': expected_status,
+                  'observed': status,
+                  'missing': sorted(set(expected_status) - set(status)),
+                  'unexpected': sorted(set(status) - set(expected_status)),
+              }, sort_keys=True))
+          required = sorted(expected_status)
+          for path in required:
+              if not Path(path).is_file():
+                  raise SystemExit('required lifecycle path missing: ' + path)
+          subprocess.run(['git', 'add', '-f', '--', *required], check=True)
+          staged = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines())
+          if staged != set(required):
+              raise SystemExit('staged lifecycle set mismatch')
+          immutable = sorted(path for path in staged if path.startswith('.continual/work-model/invocations/'))
+          expected_immutable = sorted([
+              f'.continual/work-model/invocations/{candidate_work_id}/response.json',
+              summary['pending_request_ref'],
+          ])
+          if immutable != expected_immutable:
+              raise SystemExit('immutable Work mutation set mismatch: ' + json.dumps(immutable))
+          print('STAGED_PATHS=' + '\n'.join(required))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '[native-post-task-candidate-blind-holder-result] gen29 consume post-result Candidate and freeze Consolidate'
+          git push origin "HEAD:$GITHUB_REF_NAME"
