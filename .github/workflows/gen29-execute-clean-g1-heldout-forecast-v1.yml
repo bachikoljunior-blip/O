@@ -20,7 +20,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       EXPECTED_MAIN: 92bccc8061e334facba2b1a4916f1ec00d217bc1
-      EXPECTED_PREWORK_HEAD: 9ea5ab6be1f407576bf5e997f89fa8613badd3be
+      EXPECTED_PREWORK_HEAD: 52d7de78aa7abb799524aabee453d48e62290a1c
       EXPECTED_STATE_BLOB: 39bd0408927e803104ccf68e0557cb2c045a9a00
       EXPECTED_SNAPSHOT_BLOB: eca73024e39a5079925d49c633991915367e5402
       EXPECTED_INBOX_BLOB: 93889b482c5b54dd90944f19ce425e845f455b35
@@ -51,7 +51,7 @@ jobs:
           python-version: '3.11'
           cache: pip
       - name: Install exact repository runtime
-        run: python -m pip install -e .
+        run: python -m pip install -e '.[test]'
 
       - name: Assert exact branch, main, authority, and Execute binding
         shell: bash
