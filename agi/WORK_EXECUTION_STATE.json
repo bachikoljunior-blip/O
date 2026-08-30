@@ -1,14 +1,14 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_execute_blind_holder_protocol_repair_stop_cause_eliminated_refire_required",
+  "active_component": "generation29_execute_blind_holder_protocol_repair_pending_native_consume",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation29-blind-holder-heldout-protocol-repair-v1",
   "agi_claim_supported": false,
   "authoritative_source_observation": {
-    "observed_at": "2026-08-30T20:26:07.714Z",
+    "observed_at": "2026-08-30T20:30:39.233Z",
     "required_before_next_semantic_freeze": true,
-    "source_main_sha": "155334e9e57f7d473b49f91bfa38e959a09d6057",
-    "status": "revision36_typed_directive_ledger_stop_cause_eliminated_exact_readback_execute_refire_required"
+    "source_main_sha": "d17dc5bd9bd8a2e2932cd53dd347888ab4da0397",
+    "status": "canonical_running_execute_pending_fields_restored_after_exact_failed_refire_readback"
   },
   "authoritative_source_observation_policy": {
     "executor_binding": "current_chatgpt_work_session",
@@ -190,10 +190,10 @@
       "updated_at": "2026-08-30T19:49:00.155047+00:00"
     },
     "branch": "work/gen29-execute-blind-holder-protocol-repair-v1",
-    "branch_head_sha": "9d0f80630677ea51e1c69c233f33bba21b366b6e",
-    "branch_head_tree_sha": "d242edd665ad7bc150befa8bd21f11a4521c6147",
+    "branch_head_sha": "fee403472b313160b67e0520c621b36dbc2b7575",
+    "branch_head_tree_sha": "06418739f4cbc40d30d5b5c43f1d21129a7dacae",
     "branch_result_receipt_blob_sha": "3293a7143d05a7184905eef91d856e3f52701288",
-    "checkpointed_at": "2026-08-30T20:26:07.714Z",
+    "checkpointed_at": "2026-08-30T20:30:39.233Z",
     "completed_effect_receipt": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-candidate-blind-holder-preflight-consume-execute-freeze-v1.json",
     "completed_job_ids": [
       99188931218,
@@ -408,12 +408,12 @@
       33331108565,
       33331108552
     ],
-    "current_main_sha": "155334e9e57f7d473b49f91bfa38e959a09d6057",
+    "current_main_sha": "d17dc5bd9bd8a2e2932cd53dd347888ab4da0397",
     "exact_completed_native_invocation_id": "invoke-1a8b23359acdf0da62ad9522",
     "exact_completed_request_digest": "f57317acddd5ef143d13f53bf9f0174f435cf109150ae60d3eac01d4aa5d5c36",
     "exact_completed_response_digest": "35f43ebf2298af84c8a5e96e53ebdb30496eb1a3bd37fc987033d21c02b3e1ff",
     "exact_completed_work_invocation_id": "invoke-db2cfa09521d2325c25c7e40",
-    "exact_frontier": "The rev36 typed directive ledger mismatch is eliminated and exact-readback; failed run 33333214913 wrote no Execute response or lifecycle mutation, so the exact frozen Execute remains the unique unfinished Work item.",
+    "exact_frontier": "The rev36 ledger is exact and canonical running/pending authority fields are restored. Runs 33333214913 and 33333718493 both failed before response or lifecycle mutation; the exact frozen Execute remains unique and unanswered.",
     "exact_frozen_request_blob_sha": "17f1ee3c09d9ed1f873ac16b70eb69b64dfa7634",
     "exact_frozen_request_digest": "2d82b1f6643420d4d113799b5a21fd5bb56e78555e4598aa4229dd868ecc3494",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-0b550912d69027c31e0ce4d0/request.json",
@@ -431,8 +431,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-0b550912d69027c31e0ce4d0",
     "goal_revision": 109,
-    "idempotency_key": "o-work-gen29:refire-execute-invoke-0b550912d69027c31e0ce4d0:ledger-rev36-repair:v1",
-    "last_verified_effect": "Expected-blob CAS updated agi/USER_DIRECTIVE_EVENTS.json from f1437b12dc6e319716c5a5262cfdf96e1cfcdb40 to 05c469055717453a16e6d65ba8f9d5b179695a16 at main 155334e9e57f7d473b49f91bfa38e959a09d6057, binding canonical inbox revision36 digest 2ec061262025c27f5f312a3d6884181328279182a7c9ba5fb4c34b11ca6b8324 and eight exact source atoms.",
+    "idempotency_key": "o-work-gen29:refire-execute-invoke-0b550912d69027c31e0ce4d0:canonical-state-guard-repair:v1",
+    "last_verified_effect": "Refire run 33333718493 reached the exact authority guard on head fee403472b313160b67e0520c621b36dbc2b7575 and failed with 'authority is not resumable running state' before continuity preflight or mutation; response absence and unchanged main were exact-readback.",
     "lease_generation": 29,
     "merge_authorization": {
       "authorized_at": "2026-08-30T20:14:36.743Z",
@@ -458,8 +458,8 @@
     },
     "merge_sha": "ab2511744252164c131bba0c51925352ee8cc12b",
     "merge_tree_sha": "09912148f58eb72289de9dc11d61e6180ad143ca",
-    "next_action": "Reconstruct the same Execute branch as a fast-forward merge over repaired latest main, remove the failed one-shot from the prework tree, add the identical reviewed implementation/tests, bind a repaired one-shot to the new main/state, and refire the exact frozen Execute once.",
-    "next_tool_action": "Create an exact merge-prework tree from repaired main plus the reviewed source/tests, then a single workflow-only launch commit on the same branch; query the failed run and response before launch and observe the new run without duplicate.",
+    "next_action": "Rebuild the same branch as a fast-forward merge over this canonical state-only main, bind a workflow-only launch commit to the new exact main/state, and refire the frozen Execute once.",
+    "next_tool_action": "Exact-readback canonical status/active component and state blob, reconstruct merge-prework plus one-shot on the same branch, and query the accepted run without relaunch.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": null,
@@ -588,9 +588,9 @@
       "intended_slot": "2026-08-30T17:12:00Z",
       "path": "automation_control/receipts/o_work_monitor_recovery/20260830T171227Z-gen29-scheduled-slot-overlap-1712.json"
     },
-    "status": "stop_cause_eliminated_refire_required",
+    "status": "canonical_running_execute_pending_refire_required",
     "stop_cause": {
-      "status": "eliminated_exact_readback_refire_pending",
+      "status": "canonical_state_guard_repair_applied_recurrence_pending",
       "causes": [
         {
           "workflow_run_id": 33333214913,
@@ -601,6 +601,16 @@
           "response_written": false,
           "lifecycle_mutated": false,
           "repair": "Expected-blob CAS bind the typed ledger to canonical revision36 content and source entry digests, append the eight faithful reaffirmation atoms, and exact-readback the resulting content."
+        },
+        {
+          "workflow_run_id": 33333718493,
+          "job_id": 99316770679,
+          "failed_step": "Assert exact branch, main, authority, and Execute binding",
+          "exact_error": "authority is not resumable running state",
+          "cause": "Repair checkpoint changed canonical top-level status/active_component to descriptive values.",
+          "response_written": false,
+          "lifecycle_mutated": false,
+          "repair": "Restore status=running and active_component=generation29_execute_blind_holder_protocol_repair_pending_native_consume via state-only expected-blob CAS; keep detailed repair evidence outside the canonical authority fields."
         }
       ],
       "remote_duplicate": false,
@@ -609,9 +619,9 @@
       "successful_recurrence_job_id": null
     },
     "stop_cause_repair_receipt": {
-      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2025Z-gen29-execute-continuity-ledger-stop-cause-repair.json",
-      "blob_sha": "8f9f05507054e474cb4ce60bbb1910baf86d8fdb",
-      "commit_sha": "5cfe64666985dc69b63ad0c2256d866ec0aaa4bf",
+      "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2030Z-gen29-execute-refire-state-guard-stop-cause-repair.json",
+      "blob_sha": "0562222407d799ce9ce18cbdffe060fe167d7f3e",
+      "commit_sha": "ec57f413a21a40457e7910a22d9f89a2e743788b",
       "exact_readback": true
     },
     "stop_cause_repair_receipts": [
@@ -635,6 +645,12 @@
         "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2025Z-gen29-execute-continuity-ledger-stop-cause-repair.json",
         "blob_sha": "8f9f05507054e474cb4ce60bbb1910baf86d8fdb",
         "commit_sha": "5cfe64666985dc69b63ad0c2256d866ec0aaa4bf",
+        "exact_readback": true
+      },
+      {
+        "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2030Z-gen29-execute-refire-state-guard-stop-cause-repair.json",
+        "blob_sha": "0562222407d799ce9ce18cbdffe060fe167d7f3e",
+        "commit_sha": "ec57f413a21a40457e7910a22d9f89a2e743788b",
         "exact_readback": true
       }
     ],
@@ -1689,7 +1705,7 @@
     "workflow_run_id": 33331108552
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "befd0376076cdee6fd6e4206599a94de49466ee4",
+  "expected_blob_sha": "5fc12130bde61584ecc27fd8aeaf0c58e5c8584c",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
@@ -9563,7 +9579,7 @@
     "status": "resolved_and_recurrence_validated",
     "upper_objective_achieved": false
   },
-  "heartbeat_at": "2026-08-30T20:26:07.714Z",
+  "heartbeat_at": "2026-08-30T20:30:39.233Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -10392,8 +10408,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-08-30T20:26:07.714Z",
-  "last_progress_at": "2026-08-30T20:26:07.714Z",
+  "last_activity_at": "2026-08-30T20:30:39.233Z",
+  "last_progress_at": "2026-08-30T20:30:39.233Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
@@ -11228,7 +11244,7 @@
     "url": "https://github.com/bachikoljunior-blip/O/pull/370"
   },
   "readback_of_commit_sha": "51686d434b6025a9c78e1b8b076f81d29bef7d04",
-  "reason": "The first frozen Execute launch failed before mutation because the typed directive ledger was still bound to inbox revision35. The ledger is now bound to revision36 by expected-blob CAS and exact content readback; the Execute response remains absent and the exact frozen continuation must be refired once.",
+  "reason": "The revision36 directive-ledger mismatch is repaired. Refire run 33333718493 then failed before continuity preflight or mutation because the repair checkpoint used descriptive top-level authority values; this state-only CAS restores the canonical running/pending authority fields while preserving exact repair evidence.",
   "recent_main_integration": {
     "claim_boundary": "Generation29 Candidate BASELINE_FIRST lifecycle and unique unanswered blind-holder Execute successor with no Candidate activation or live effect; no AGI or user-level completion claim.",
     "exact_head_ci_result": "success",
@@ -12151,7 +12167,7 @@
   "snapshot_blob_sha": "0e8263a9f4a4f24f305a5c08280edca8f546b3f7",
   "snapshot_phase": "unit_pending",
   "snapshot_revision": 109,
-  "source_main_sha": "155334e9e57f7d473b49f91bfa38e959a09d6057",
+  "source_main_sha": "d17dc5bd9bd8a2e2932cd53dd347888ab4da0397",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -12199,7 +12215,7 @@
     ]
   },
   "started_at": "2026-08-28T05:38:45.882Z",
-  "status": "running_stop_cause_eliminated_refire_required",
+  "status": "running",
   "strategy_path": "agi/WORK_STRATEGY.json",
   "superseded_execute_closure": {
     "branch": "work/recovery-gen11-superseded-execute-records-v1",
@@ -12429,7 +12445,7 @@
   "working_branch": "work/gen29-execute-blind-holder-protocol-repair-v1",
   "generation29_execute_blind_holder_continuity_ledger_repair_v1": {
     "schema_version": 1,
-    "status": "stop_cause_eliminated_exact_readback_refire_required",
+    "status": "ledger_repaired_canonical_state_guard_repair_applied_refire_required",
     "observed_at": "2026-08-30T20:26:07.714Z",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
@@ -12486,6 +12502,35 @@
     "idempotency_key": "o-work-gen29:refire-execute-invoke-0b550912d69027c31e0ce4d0:ledger-rev36-repair:v1",
     "resume_required": true,
     "upper_objective_achieved": false,
-    "agi_claim_supported": false
+    "agi_claim_supported": false,
+    "failed_refires": [
+      {
+        "workflow_run_id": 33333214913,
+        "job_id": 99315422145,
+        "head_sha": "9d0f80630677ea51e1c69c233f33bba21b366b6e",
+        "failure": "directive ledger revision mismatch",
+        "mutation": false
+      },
+      {
+        "workflow_run_id": 33333718493,
+        "job_id": 99316770679,
+        "head_sha": "fee403472b313160b67e0520c621b36dbc2b7575",
+        "failure": "noncanonical top-level state status/active_component",
+        "mutation": false
+      }
+    ],
+    "canonical_state_guard_repair": {
+      "applied_at": "2026-08-30T20:30:39.233Z",
+      "expected_blob_sha": "5fc12130bde61584ecc27fd8aeaf0c58e5c8584c",
+      "restored_status": "running",
+      "restored_active_component": "generation29_execute_blind_holder_protocol_repair_pending_native_consume",
+      "receipt": {
+        "path": "automation_control/receipts/o_work_monitor_recovery/20260830T2030Z-gen29-execute-refire-state-guard-stop-cause-repair.json",
+        "blob_sha": "0562222407d799ce9ce18cbdffe060fe167d7f3e",
+        "commit_sha": "ec57f413a21a40457e7910a22d9f89a2e743788b",
+        "exact_readback": true
+      },
+      "recurrence_validation": "pending exact workflow step5"
+    }
   }
 }
