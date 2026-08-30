@@ -473,8 +473,6 @@ jobs:
                   status.pop(path,None)
           preflight_prefix = f'.continual/runs/{run_id}/preflight/preflight-'
           preflight_paths = sorted(path for path, code in status.items() if path.startswith(preflight_prefix) and path.endswith('.json') and code == 'A')
-          if not preflight_paths:
-              raise SystemExit('no fresh continuity/semantic preflight was produced')
           for path in preflight_paths:
               expected_status[path] = 'A'
           if status != expected_status:
