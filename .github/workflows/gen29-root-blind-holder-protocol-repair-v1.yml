@@ -1,0 +1,499 @@
+# launch-bootstrap: exact Root response and blind-holder protocol repair preflight
+name: gen29 consume Root blind-holder repair response v1
+
+on:
+  push:
+    branches:
+      - work/gen29-root-blind-holder-protocol-repair-v1
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-root-blind-holder-protocol-repair-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-root-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_MAIN: 23cc6df12724c769be1ce593533b0ae86b0f8862
+      EXPECTED_STATE_BLOB: a65946112d63df046f18bab63f5da167d02ccaf1
+      EXPECTED_SNAPSHOT_BLOB: c2ae9b1a22ed5d659910b2df52aafefbea5d2ec7
+      EXPECTED_INBOX_BLOB: 93889b482c5b54dd90944f19ce425e845f455b35
+      EXPECTED_INBOX_REVISION: '35'
+      ROOT_NATIVE_ID: invoke-848a5fdb4c9dc70b2178d66e
+      ROOT_NATIVE_BLOB: 0b8b5e40b4d0563397240ed2eff22b9d00d5d5a1
+      ROOT_WORK_ID: invoke-d3d4f8cba352d40dcb0c403b
+      ROOT_REQUEST_BLOB: a8f47bd292cab71d4b2b179d4538c20dc63d2067
+      ROOT_REQUEST_DIGEST: 14440da930cd2e217a58ef2fb9f0b2d96ba1e3bbdf31b922e2482f04eb927877
+      SOURCE_CI_RUN_ID: '33325873588'
+      SOURCE_CI_HEAD: 964eacac4b2b61202240153980ac619669145748
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      RESULT_UNIT_ID: unit-generation29-blind-holder-heldout-protocol-repair-v1
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e .
+
+      - name: Assert exact branch, runtime main, authority, and Root binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          RUNTIME_MAIN="$(git rev-parse origin/main)"
+          test "$RUNTIME_MAIN" = "$EXPECTED_MAIN"
+          test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
+          python - <<'PY'
+          import os
+          import subprocess
+          expected = ['.github/workflows/gen29-root-blind-holder-protocol-repair-v1.yml']
+          observed = subprocess.check_output(
+              ['git', 'diff', '--name-only', os.environ['EXPECTED_MAIN'], 'HEAD'],
+              text=True,
+          ).splitlines()
+          if observed != expected:
+              raise SystemExit(f'launch delta mismatch: {observed!r}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/runtime-state-document.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/USER_INPUT_INBOX.json?ref=$RUNTIME_MAIN" > /tmp/runtime-inbox-document.json
+          RUNTIME_STATE_BLOB="$(jq -r '.sha' /tmp/runtime-state-document.json)"
+          test "$RUNTIME_STATE_BLOB" = "$EXPECTED_STATE_BLOB"
+          test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
+          jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
+          jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object /tmp/runtime-inbox.json)" = "$EXPECTED_INBOX_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$ROOT_WORK_ID/request.json)" = "$ROOT_REQUEST_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$ROOT_NATIVE_ID.json)" = "$ROOT_NATIVE_BLOB"
+          echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
+          echo "RUNTIME_STATE_BLOB=$RUNTIME_STATE_BLOB" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_request, verify_work_invocations
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          native_id = os.environ['ROOT_NATIVE_ID']
+          work_id = os.environ['ROOT_WORK_ID']
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          inbox = json.loads(Path('/tmp/runtime-inbox.json').read_text())
+          snapshot = json.loads((root / '.continual' / 'runs' / run_id / 'snapshot.json').read_text())
+          request = verified_work_request(root, work_id)
+          native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
+          native = json.loads(native_path.read_text())
+          if state.get('execution_id') != 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3':
+              raise SystemExit('execution mismatch')
+          if state.get('lease_generation') != 29 or hashlib.sha256(state['fence_token'].encode()).hexdigest() != 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
+              raise SystemExit('generation/fence mismatch')
+          if state.get('status') != 'running' or state.get('resume_required') is not True:
+              raise SystemExit('authority is not resumable running state')
+          if state.get('active_component') != 'generation29_root_after_post_task_candidate_clean_g1_pending_native_consume':
+              raise SystemExit('active component mismatch')
+          exact = state.get('exact_continuation', {})
+          expected = {
+              'completed_native_invocation_id': 'invoke-65a7544b0903383186c9590b',
+              'completed_work_invocation_id': 'invoke-298983fa57d83e76dfbee3d1',
+              'completed_response_digest': '4b128bd62c5a05daa7bbc1c0c8d19c5f9cdf2a45bc804f4ecc97130da86e4c24',
+              'pending_native_invocation_id': native_id,
+              'pending_native_invocation_ref': f'.continual/runs/{run_id}/invocations/{native_id}.json',
+              'pending_native_invocation_blob_sha': os.environ['ROOT_NATIVE_BLOB'],
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': f'.continual/work-model/invocations/{work_id}/request.json',
+              'pending_request_blob_sha': os.environ['ROOT_REQUEST_BLOB'],
+              'pending_request_digest': os.environ['ROOT_REQUEST_DIGEST'],
+              'pending_response_ref': None,
+              'pending_response_blob_sha': None,
+              'pending_response_digest': None,
+              'response_exists_on_authoritative_remote': False,
+              'snapshot_revision': 108,
+              'native_phase': 'root_pending',
+              'pending_component': 'root',
+              'durability_status': 'pending_native_consume',
+          }
+          for key, value in expected.items():
+              if exact.get(key) != value:
+                  raise SystemExit(f'exact continuation mismatch {key}: {exact.get(key)!r} != {value!r}')
+          bind = state.get('generation29_root_after_post_task_candidate_clean_g1_v1', {})
+          if bind.get('status') != 'pending_native_consume':
+              raise SystemExit('Root state binding status mismatch')
+          durability = state.get('continuation_durability', {})
+          if durability.get('status') != 'remote_main_readback_verified' or durability.get('verified_remote_readback') is not True:
+              raise SystemExit('continuation durability is not verified')
+          if durability.get('pending_work_invocation_id') != work_id or durability.get('pending_native_invocation_id') != native_id:
+              raise SystemExit('continuation durability identity mismatch')
+          if inbox.get('revision') != 35:
+              raise SystemExit('inbox revision mismatch')
+          if snapshot.get('revision') != 108 or snapshot.get('phase') != 'root_pending' or snapshot.get('status') != 'continue':
+              raise SystemExit('snapshot is not revision108 root_pending')
+          if request.get('component') != 'root' or request.get('request_digest') != os.environ['ROOT_REQUEST_DIGEST']:
+              raise SystemExit('Root request mismatch')
+          if request.get('prompt_path') != 'prompts/root.md':
+              raise SystemExit('Root prompt mismatch')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Root identity mismatch')
+          if (root / '.continual' / 'work-model' / 'invocations' / work_id / 'response.json').exists():
+              raise SystemExit('Root already answered')
+          if native.get('status') != 'awaiting_work_model' or native.get('component') != 'root':
+              raise SystemExit('Root native is not awaiting')
+          if native.get('work_invocation_id') != work_id or native.get('work_request_digest') != request.get('request_digest'):
+              raise SystemExit('native/Work binding mismatch')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1 or pending[0].get('invocation_id') != work_id:
+              raise SystemExit('Root is not the unique pending Work item')
+          verified = verify_work_invocations(root, run_id=run_id)
+          expected_counts = {'valid': True, 'requests': 107, 'responses': 106, 'pending': 1, 'native_completed': 100, 'native_fragments': 100, 'native_local_learn': 92}
+          for key, value in expected_counts.items():
+              if verified.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
+          Path('/tmp/expected-before.json').write_text(json.dumps(expected_counts, sort_keys=True) + '\n')
+          PY
+          continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-before.json
+
+      - name: Record fresh exact main and exact-head CI observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$RUNTIME_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
+          python - <<'PY'
+          import base64
+          import json
+          from pathlib import Path
+          from continual.store import Store
+          document = json.loads(Path('/tmp/runtime-state-document.json').read_text())
+          state = json.loads(base64.b64decode(''.join(document['content'].splitlines())).decode())
+          projection = {
+              'status': state['status'], 'owner_kind': state['owner_kind'],
+              'execution_id': state['execution_id'], 'lease_generation': state['lease_generation'],
+              'fence_token_digest': Store(Path('.')).stable_digest(state['fence_token'], length=64),
+              'heartbeat_at': state['heartbeat_at'],
+          }
+          Path('/tmp/work-source-projection.json').write_text(json.dumps(projection, sort_keys=True) + '\n')
+          PY
+          WORK_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/work-source-prepare.json)"
+          WORK_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/work-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$RUNTIME_MAIN" --blob-sha "$RUNTIME_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = "completed"
+          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = "success"
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
+          jq '{id, workflow_id, name, status, conclusion, head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
+          jq '[.jobs[] | {id, name, status, conclusion}] | sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
+          CI_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/ci-source-prepare.json)"
+          CI_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/ci-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$CI_OBSERVATION_ID" --request-digest "$CI_REQUEST_DIGEST" --workflow-run /tmp/workflow-run-projection.json --jobs /tmp/workflow-jobs-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+
+      - name: Recheck CAS and continuity before mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          LATEST_MAIN="$(git rev-parse origin/main)"
+          test "$LATEST_MAIN" = "$EXPECTED_MAIN"
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$LATEST_MAIN" > /tmp/pre-mutation-state-document.json
+          test "$(jq -r '.sha' /tmp/pre-mutation-state-document.json)" = "$RUNTIME_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from continual.ci_source_observation import verify_ci_source_observation
+          from continual.continuity_preflight import assert_work_resume_continuity_preflight
+          from continual.store import Store
+          from continual.work_source_observation import verify_work_source_observation
+          root = Path('.').resolve()
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          now = Store(root).utc_now()
+          work = verify_work_source_observation(root, run_id=os.environ['RUN_ID'], state=state, state_blob_sha=os.environ['RUNTIME_STATE_BLOB'], now=now)
+          ci = verify_ci_source_observation(root, run_id=os.environ['RUN_ID'], state=state, now=now)
+          continuity = assert_work_resume_continuity_preflight(root, run_id=os.environ['RUN_ID'], executor_binding=os.environ['EXECUTOR_BINDING'], model_identity=os.environ['MODEL_IDENTITY'])
+          if continuity.get('resume_authorized') is not True:
+              raise SystemExit('continuity preflight denied')
+          print(json.dumps({'work': work, 'ci': ci, 'continuity': continuity}, sort_keys=True))
+          PY
+
+      - name: Submit exact Root response and freeze successor preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/root-output.json <<'JSON'
+          {
+            "result": {
+              "component": "execute",
+              "goal": "Build and falsifiably validate a fail-closed blind-holder gate for future held-out scientific forecasts so task/source selection, label and scoring rules, and predictor isolation are durably committed before any outcome-bearing primary-content retrieval; exercise the gate only with synthetic canaries and negative-ordering fixtures in this unit, without claiming external capability.",
+              "scope": "agi/heldout-protocol/blind-holder-gate-v1; repository-local protocol repair and deterministic validation only; no live scientific score, provider or production routing, Candidate activation, broad capability claim, AGI claim, or user-level completion",
+              "inputs": [
+                "the exact contamination FAIL for unit-generation29-evaluate-clean-g1-heldout-scientific-forecast-v1, including pre_prediction_primary_content_retrieval, same_session_isolation_unproven, and task_rule_frozen_after_source_access",
+                "the revision108 Root decision context and frozen source clocks, with the failed source and outcome-bearing clean_g1 record excluded from any replacement capability claim",
+                "the existing Work invocation, DecisionContextManifest, source-observation, immutable Git provenance, deterministic scoring, mutation-audit, and exact-head publication machinery",
+                "synthetic canary sources and deliberately invalid timestamp/order/isolation fixtures that contain no external scientific claim"
+              ],
+              "evidence_needed": [
+                "a machine-readable protocol state machine whose ordering requires selection rule, task schema, label rule, scoring rule, and predictor-context commitment before first primary-content or outcome-bearing feed retrieval",
+                "a holder receipt schema that binds an immutable source identity and hidden-outcome digest while exposing no outcome-bearing bytes to the predictor manifest",
+                "a predictor isolation receipt binding a fresh invocation, executor/model/context identity, allowed-input digests, denied source locators, and proof that no prior response or same-session carryover is accepted as isolation",
+                "a reveal authorization that is impossible before exact prediction response readback and that binds the revealed bytes to both the prior holder commitment and immutable source",
+                "deterministic negative tests for retrieval-before-commit, task-rule-after-read, same-session or missing-isolation receipt, reveal-before-response, digest mismatch, replay drift, and fabricated baseline",
+                "focused tests, the protected four-shard repository suite and aggregate, exact unchanged-head CI, expected-head merge, and remote blob readback"
+              ],
+              "expected_outputs": [
+                "versioned blind-holder protocol and receipt schemas with explicit states, transition guards, idempotency keys, and no secret storage",
+                "a deterministic validator that returns fail-closed invalid status for every forbidden ordering, missing isolation proof, digest mismatch, or replay difference",
+                "synthetic positive-control artifacts proving only that the protocol machinery can complete when all causal ordering and binding predicates hold",
+                "negative-control fixtures for each of the three observed contamination causes plus early reveal, holder mismatch, duplicate prediction, and baseline substitution",
+                "a migration or reconciliation note explaining how the contaminated prior trial remains FAIL and cannot be upgraded by the new harness",
+                "a bounded result that evaluates protocol enforcement only and explicitly defers any live fresh-source forecast to a later Root-selected unit"
+              ],
+              "success_conditions": [
+                "the validator mechanically proves all commitment timestamps and immutable digests precede the first outcome-bearing retrieval in the synthetic positive control",
+                "the predictor context is bound to a fresh isolated invocation receipt and any current-session, reused-response, missing-boundary, or unverified model context fails closed",
+                "reveal cannot occur until an exact prediction response exists and matches the frozen request, and the revealed source must match both holder commitment and immutable provenance",
+                "every negative-control fixture is rejected for the intended unique reason and deterministic replay yields identical decisions and digests",
+                "no live external task is scored, no contaminated evidence is relabeled, no Candidate is activated, and all claims remain limited to protocol enforcement",
+                "focused and protected tests pass and publication uses one unchanged exact head with expected-head merge and exact remote readback"
+              ],
+              "failure_conditions": [
+                "any primary-content or outcome-bearing feed read can occur before source/task/rule commitment without a deterministic rejection",
+                "self-attestation, manifest exclusion alone, or the current ChatGPT Work session is accepted as proof of predictor isolation",
+                "a reveal can precede exact prediction readback, a holder/source digest mismatch is tolerated, or duplicate prediction/reveal effects are possible",
+                "the positive control depends on hidden manual state, wall-clock coincidence, nondeterministic replay, a fabricated baseline, or an unavailable secret",
+                "the prior contaminated trial is upgraded, generalized scientific capability is claimed, or the unit performs provider, production, Candidate activation, or unrelated repository effects",
+                "the mutation allowlist, focused tests, protected CI, exact-head, expected-head merge, or remote readback checks fail"
+              ],
+              "unit_id": "unit-generation29-blind-holder-heldout-protocol-repair-v1",
+              "parent_continuation": "After Execute, independently Task Evaluate only whether the blind-holder gate enforces the specified causal ordering, isolation, reveal, replay, and claim-boundary predicates. Then Consolidate Episode and Learn, return to Root, and only then select a separate live trial using a genuinely post-commit fresh clean_g1 source; keep the prior forecast FAIL and the upper AGI objective open."
+            },
+            "local_learn": {
+              "decision": "NO_CHANGE",
+              "candidates": [],
+              "observation": "The failed forecast does not justify activation or a capability conclusion. The reusable lesson is procedural: before another live trial, make causal pre-retrieval commitment, fresh-context isolation, and post-response reveal mechanically enforceable and test their failures with synthetic controls."
+            },
+            "fragment": {
+              "component": "root",
+              "observations": [
+                "The exact prior trial remains FAIL because source retrieval preceded commitment, the task rule was frozen after source access, and same-session isolation was unproven; its correct arithmetic is only a contaminated diagnostic.",
+                "The post-result Candidate response is a scoped PROPOSE_ACTIVATION with global activation false, and the revision108 Root request preserves upper-objective, AGI, and user-level completion as false.",
+                "This Root selects one bounded protocol-repair unit with synthetic controls before any new live forecast, so the next live evidence cannot repeat the same contamination mechanism or widen the claim."
+              ]
+            }
+          }
+          JSON
+          python -m json.tool /tmp/root-output.json > /dev/null
+          test "$(git hash-object /tmp/root-output.json)" = "7e0b2d975b6702ed470492073bf8376e1ac7e29d"
+          continual --root . work-submit "$ROOT_WORK_ID" --response /tmp/root-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/root-submit.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
+
+      - name: Validate exact Root completion and Candidate Evaluate freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from datetime import UTC, datetime
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_invocation, verify_work_invocations
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          root_native_id = os.environ['ROOT_NATIVE_ID']
+          root_work_id = os.environ['ROOT_WORK_ID']
+          unit_id = os.environ['RESULT_UNIT_ID']
+          expected_output = json.loads(Path('/tmp/root-output.json').read_text())
+          after = verify_work_invocations(root, run_id=run_id)
+          expected_after = {'valid': True, 'requests': 108, 'responses': 107, 'pending': 1, 'native_completed': 101, 'native_fragments': 101, 'native_local_learn': 93}
+          for key, value in expected_after.items():
+              if after.get(key) != value:
+                  raise SystemExit(f'after mismatch {key}: {after.get(key)!r} != {value!r}')
+          verified_root = verified_work_invocation(root, root_work_id)
+          if verified_root.get('output') != expected_output:
+              raise SystemExit('persisted Root output mismatch')
+          root_native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{root_native_id}.json'
+          root_native = json.loads(root_native_path.read_text())
+          if root_native.get('status') != 'complete' or root_native.get('component') != 'root' or root_native.get('output') != expected_output:
+              raise SystemExit('Root native completion mismatch')
+          response_rel = f'.continual/work-model/invocations/{root_work_id}/response.json'
+          fragment_rel = root_native.get('fragment_ref')
+          local_learn_rel = f'.continual/runs/{run_id}/local-learn/{root_native_id}-root.json'
+          for rel in (response_rel, fragment_rel, local_learn_rel):
+              if not rel or not (root / rel).is_file():
+                  raise SystemExit(f'Root lifecycle path missing: {rel}')
+          unit_path = root / '.continual' / 'runs' / run_id / 'execution-units' / f'{unit_id}.json'
+          if json.loads(unit_path.read_text()) != expected_output['result']:
+              raise SystemExit('persisted execution unit mismatch')
+          snapshot_path = root / '.continual' / 'runs' / run_id / 'snapshot.json'
+          snapshot = json.loads(snapshot_path.read_text())
+          expected_snapshot = {'revision': 109, 'phase': 'unit_pending', 'status': 'continue', 'current_component': 'execute', 'current_unit': unit_id}
+          for key, value in expected_snapshot.items():
+              if snapshot.get(key) != value:
+                  raise SystemExit(f'snapshot mismatch {key}: {snapshot.get(key)!r} != {value!r}')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1:
+              raise SystemExit(f'expected one successor pending request, got {len(pending)}')
+          request = pending[0]
+          if request.get('component') != 'candidate_evaluate':
+              raise SystemExit(f'expected Candidate Evaluate successor, got {request.get("component")!r}')
+          payload = request.get('payload', {})
+          if payload.get('mode') != 'pre-application' or payload.get('target_component') != 'execute':
+              raise SystemExit('Candidate Evaluate request is not the scoped Execute preflight')
+          execution_context = payload.get('execution_unit', {})
+          if execution_context.get('execution_unit') != expected_output['result']:
+              raise SystemExit('Candidate Evaluate request did not bind exact Root-selected unit')
+          frozen_snapshot = execution_context.get('snapshot', {})
+          if frozen_snapshot.get('revision') != 109 or frozen_snapshot.get('phase') != 'unit_pending' or frozen_snapshot.get('current_component') != 'execute' or frozen_snapshot.get('current_unit') != unit_id:
+              raise SystemExit('Candidate Evaluate request snapshot binding mismatch')
+          candidates = payload.get('candidate_index', {}).get('candidates', [])
+          if not isinstance(candidates, list):
+              raise SystemExit('Candidate Evaluate candidate index is not frozen as a list')
+          work_id = request['invocation_id']
+          request_rel = f'.continual/work-model/invocations/{work_id}/request.json'
+          if (root / request_rel).with_name('response.json').exists():
+              raise SystemExit('Candidate Evaluate request already has a response')
+          awaiting = []
+          for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
+              value = json.loads(path.read_text())
+              if value.get('status') == 'awaiting_work_model':
+                  awaiting.append((path, value))
+          if len(awaiting) != 1:
+              raise SystemExit(f'expected one awaiting native journal, got {len(awaiting)}')
+          native_path, native = awaiting[0]
+          if native.get('component') != 'candidate_evaluate' or native.get('work_invocation_id') != work_id:
+              raise SystemExit('successor native-to-Work identity mismatch')
+          if native.get('work_request_digest') != request.get('request_digest') or native.get('work_request_ref') != request_rel:
+              raise SystemExit('successor native-to-Work digest/ref mismatch')
+          summary = {
+              'root_native_invocation_id': root_native_id,
+              'root_work_invocation_id': root_work_id,
+              'root_response_ref': response_rel,
+              'root_response_digest': verified_root['response']['response_digest'],
+              'root_response_blob_sha': subprocess.check_output(['git','hash-object',response_rel], text=True).strip(),
+              'root_native_blob_sha': subprocess.check_output(['git','hash-object',str(root_native_path)], text=True).strip(),
+              'root_fragment_ref': fragment_rel,
+              'root_fragment_blob_sha': subprocess.check_output(['git','hash-object',fragment_rel], text=True).strip(),
+              'root_local_learn_ref': local_learn_rel,
+              'root_local_learn_blob_sha': subprocess.check_output(['git','hash-object',local_learn_rel], text=True).strip(),
+              'execution_unit_ref': unit_path.relative_to(root).as_posix(),
+              'execution_unit_blob_sha': subprocess.check_output(['git','hash-object',str(unit_path)], text=True).strip(),
+              'pending_native_invocation_id': native['invocation_id'],
+              'pending_native_invocation_ref': native_path.relative_to(root).as_posix(),
+              'pending_native_invocation_blob_sha': subprocess.check_output(['git','hash-object',str(native_path)], text=True).strip(),
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': request_rel,
+              'pending_request_digest': request['request_digest'],
+              'pending_request_blob_sha': subprocess.check_output(['git','hash-object',request_rel], text=True).strip(),
+              'snapshot_revision': 109,
+              'snapshot_phase': 'unit_pending',
+              'snapshot_blob_sha': subprocess.check_output(['git','hash-object',str(snapshot_path)], text=True).strip(),
+              'verification': expected_after,
+              'selected_semantic_component': 'execute',
+              'pending_preflight_component': 'candidate_evaluate',
+          }
+          Path('/tmp/root-consume-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-root-consume-blind-holder-protocol-repair-freeze-v1.json'
+          receipt = {
+              'schema_version': 1,
+              'record_type': 'generation29_root_response_and_candidate_preflight_receipt',
+              'recorded_at': datetime.now(UTC).isoformat().replace('+00:00','Z'),
+              'authority': {'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},
+              'source_main_sha': os.environ['RUNTIME_MAIN'],
+              'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
+              'source_ci_workflow_run_id': int(os.environ['SOURCE_CI_RUN_ID']),
+              'idempotency_key': 'o-work-gen29:consume-root-invoke-d3d4f8cba352d40dcb0c403b:freeze-blind-holder-protocol-repair-preflight:v1',
+              'completed_effect': summary,
+              'request_recreated': False,
+              'root_reinvoked': False,
+              'resume_required': True,
+              'next_action': 'Exact-head validate and merge this Root response and Candidate Evaluate preflight freeze, bind state, answer the Candidate Evaluate request exactly once, then execute the bounded blind-holder protocol repair unit.',
+          }
+          receipt_path = root / receipt_rel
+          receipt_path.parent.mkdir(parents=True, exist_ok=True)
+          receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Stage only exact lifecycle delta and push once
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$ROOT_WORK_ID/request.json)" = "$ROOT_REQUEST_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+          run_id = os.environ['RUN_ID']
+          root_native_id = os.environ['ROOT_NATIVE_ID']
+          root_work_id = os.environ['ROOT_WORK_ID']
+          summary = json.loads(Path('/tmp/root-consume-summary.json').read_text())
+          work_obs = json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']
+          ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-root-consume-blind-holder-protocol-repair-freeze-v1.json'
+          expected_status = {
+              f'.continual/runs/{run_id}/events.jsonl': 'M',
+              f'.continual/runs/{run_id}/snapshot.json': 'M',
+              f'.continual/runs/{run_id}/invocations/{root_native_id}.json': 'M',
+              f'.continual/work-model/invocations/{root_work_id}/response.json': 'A',
+              summary['root_fragment_ref']: 'A',
+              summary['root_local_learn_ref']: 'A',
+              summary['execution_unit_ref']: 'A',
+              summary['pending_native_invocation_ref']: 'A',
+              summary['pending_request_ref']: 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/receipt.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/receipt.json': 'A',
+              receipt_rel: 'A',
+          }
+          status = {}
+          for line in subprocess.check_output(['git','diff','--name-status'], text=True).splitlines():
+              code, path = line.split('\t',1)
+              status[path] = code
+          for path in subprocess.check_output(['git','ls-files','--others','--exclude-standard'], text=True).splitlines() + subprocess.check_output(['git','ls-files','--others','--ignored','--exclude-standard'], text=True).splitlines():
+              status.setdefault(path,'A')
+          for path in list(status):
+              if path.startswith('src/agi/__pycache__/') or path.startswith('src/continual/__pycache__/') or path.startswith('src/continual_chatgpt.egg-info/'):
+                  status.pop(path,None)
+          preflight_prefix = f'.continual/runs/{run_id}/preflight/preflight-'
+          preflight_paths = sorted(path for path, code in status.items() if path.startswith(preflight_prefix) and path.endswith('.json') and code == 'A')
+          for path in preflight_paths:
+              expected_status[path] = 'A'
+          if status != expected_status:
+              raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({'expected':expected_status,'observed':status,'missing':sorted(set(expected_status)-set(status)),'unexpected':sorted(set(status)-set(expected_status))}, sort_keys=True))
+          required = sorted(expected_status)
+          for path in required:
+              if not Path(path).is_file():
+                  raise SystemExit('required lifecycle path missing: ' + path)
+          subprocess.run(['git','add','-f','--',*required], check=True)
+          staged = set(subprocess.check_output(['git','diff','--cached','--name-only'], text=True).splitlines())
+          if staged != set(required):
+              raise SystemExit('staged lifecycle set mismatch')
+          immutable = sorted(path for path in staged if path.startswith('.continual/work-model/invocations/'))
+          expected_immutable = sorted([f'.continual/work-model/invocations/{root_work_id}/response.json', summary['pending_request_ref']])
+          if immutable != expected_immutable:
+              raise SystemExit('immutable Work mutation set mismatch: ' + json.dumps(immutable))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '[native-root-result] gen29 consume Root and freeze blind-holder repair preflight'
+          git push origin "HEAD:$GITHUB_REF_NAME"
