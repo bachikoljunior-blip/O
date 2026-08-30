@@ -287,7 +287,7 @@ jobs:
           continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-before.json
           continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-before.json
 
-      - name: Submit exact post-result Candidate response and freeze Consolidate
+      - name: Submit exact post-result Candidate response and freeze Root
         shell: bash
         run: |
           set -euo pipefail
@@ -352,7 +352,7 @@ jobs:
           cat /tmp/work-verify-after.json
           cat /tmp/work-pending-after.json
 
-      - name: Validate post-result Candidate consume and exact Consolidate freeze
+      - name: Validate post-result Candidate consume and exact Root freeze
         shell: bash
         run: |
           set -euo pipefail
@@ -404,8 +404,8 @@ jobs:
           artifact_rel = f'.continual/runs/{run_id}/artifacts/{os.environ["RESULT_UNIT_ID"]}-result.json'
           if json.loads((root / artifact_rel).read_text()) != task_result:
               raise SystemExit('Task result artifact differs from exact evaluated result')
-          if snapshot.get('revision') != 108 or snapshot.get('phase') != 'consolidate_pending':
-              raise SystemExit(f'snapshot did not advance exactly to revision108 consolidate_pending: {snapshot.get("revision")!r} {snapshot.get("phase")!r}')
+          if snapshot.get('revision') != 108 or snapshot.get('phase') != 'root_pending':
+              raise SystemExit(f'snapshot did not advance exactly to revision108 root_pending: {snapshot.get("revision")!r} {snapshot.get("phase")!r}')
           if snapshot.get('last_result_ref') != f'artifacts/{os.environ["RESULT_UNIT_ID"]}-result.json':
               raise SystemExit('snapshot last result ref mismatch')
           if snapshot.get('last_evaluation') != task_result:
@@ -414,33 +414,33 @@ jobs:
               raise SystemExit('snapshot dual verdict mismatch')
           pending = pending_work_invocations(root, run_id=run_id)
           if len(pending) != 1:
-              raise SystemExit(f'expected one Consolidate request, got {len(pending)}')
+              raise SystemExit(f'expected one Root request, got {len(pending)}')
           request = pending[0]
-          if request.get('component') != 'consolidate_episode':
-              raise SystemExit('next pending request is not Consolidate Episode')
+          if request.get('component') != 'root':
+              raise SystemExit('next pending request is not Root Episode')
           work_id = request['invocation_id']
           request_rel = f'.continual/work-model/invocations/{work_id}/request.json'
           if (root / request_rel).with_name('response.json').exists():
-              raise SystemExit('Consolidate request already has a response')
+              raise SystemExit('Root request already has a response')
           if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
-              raise SystemExit('Consolidate request identity mismatch')
-          if request.get('prompt_path') != 'prompts/consolidate_episode.md':
-              raise SystemExit('Consolidate prompt mismatch')
+              raise SystemExit('Root request identity mismatch')
+          if request.get('prompt_path') != 'prompts/root.md':
+              raise SystemExit('Root prompt mismatch')
           selection = request.get('payload', {}).get('preflight_selection', {})
           if selection.get('decision') != 'USE_ACTIVE':
-              raise SystemExit('Consolidate preflight was not mechanical USE_ACTIVE')
+              raise SystemExit('Root preflight was not mechanical USE_ACTIVE')
           awaiting = []
           for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
               value = json.loads(path.read_text())
               if value.get('status') == 'awaiting_work_model':
                   awaiting.append((path, value))
           if len(awaiting) != 1:
-              raise SystemExit(f'expected one awaiting Consolidate native journal, got {len(awaiting)}')
+              raise SystemExit(f'expected one awaiting Root native journal, got {len(awaiting)}')
           native_path, native = awaiting[0]
-          if native.get('component') != 'consolidate_episode' or native.get('work_invocation_id') != work_id:
-              raise SystemExit('Consolidate native-to-Work identity mismatch')
+          if native.get('component') != 'root' or native.get('work_invocation_id') != work_id:
+              raise SystemExit('Root native-to-Work identity mismatch')
           if native.get('work_request_digest') != request.get('request_digest') or native.get('work_request_ref') != request_rel:
-              raise SystemExit('Consolidate native-to-Work digest/ref mismatch')
+              raise SystemExit('Root native-to-Work digest/ref mismatch')
           response_rel = f'.continual/work-model/invocations/{candidate_work_id}/response.json'
           fragment_rel = candidate_native['fragment_ref']
           local_learn_rel = f'.continual/runs/{run_id}/local-learn/{candidate_native_id}-candidate_evaluate.json'
@@ -462,7 +462,7 @@ jobs:
               'snapshot_ref': snapshot_rel,
               'snapshot_blob_sha': subprocess.check_output(['git', 'hash-object', snapshot_rel], text=True).strip(),
               'snapshot_revision': 108,
-              'snapshot_phase': 'consolidate_pending',
+              'snapshot_phase': 'root_pending',
               'pending_native_invocation_id': native['invocation_id'],
               'pending_native_invocation_ref': native_path.relative_to(root).as_posix(),
               'pending_native_invocation_blob_sha': subprocess.check_output(['git', 'hash-object', str(native_path)], text=True).strip(),
@@ -470,11 +470,11 @@ jobs:
               'pending_request_ref': request_rel,
               'pending_request_digest': request['request_digest'],
               'pending_request_blob_sha': subprocess.check_output(['git', 'hash-object', request_rel], text=True).strip(),
-              'pending_component': 'consolidate_episode',
+              'pending_component': 'root',
               'verification': expected_after,
           }
           Path('/tmp/post-task-candidate-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
-          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-post-task-candidate-consume-consolidate-after-clean-g1-fail-v1.json'
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-post-task-candidate-consume-root-after-clean-g1-fail-v1.json'
           receipt = {
               'schema_version': 1,
               'record_type': 'generation29_post_task_candidate_consume_receipt',
@@ -487,12 +487,12 @@ jobs:
               'source_main_sha': os.environ['RUNTIME_MAIN'],
               'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
               'source_ci_workflow_run_id': int(os.environ['SOURCE_CI_RUN_ID']),
-              'idempotency_key': 'o-work-gen29:consume-post-task-candidate-invoke-298983fa57d83e76dfbee3d1:freeze-consolidate-after-clean-g1-fail:v1',
+              'idempotency_key': 'o-work-gen29:consume-post-task-candidate-invoke-298983fa57d83e76dfbee3d1:freeze-root-after-clean-g1-fail:v1',
               'completed_effect': summary,
               'request_recreated': False,
               'candidate_reinvoked': False,
               'resume_required': True,
-              'next_action': 'Exact-head validate and merge this post-result Candidate lifecycle plus revision108 Consolidate freeze, bind state, then answer the exact Consolidate request once.',
+              'next_action': 'Exact-head validate and merge this post-result Candidate lifecycle plus revision108 Root freeze, bind state, then answer the exact Root request once.',
           }
           receipt_path = root / receipt_rel
           receipt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -518,7 +518,7 @@ jobs:
           summary = json.loads(Path('/tmp/post-task-candidate-summary.json').read_text())
           work_obs = json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']
           ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
-          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-post-task-candidate-consume-consolidate-after-clean-g1-fail-v1.json'
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-post-task-candidate-consume-root-after-clean-g1-fail-v1.json'
           expected_status = {
               f'.continual/runs/{run_id}/events.jsonl': 'M',
               f'.continual/runs/{run_id}/snapshot.json': 'M',
@@ -552,10 +552,10 @@ jobs:
           }
           for path in install_artifacts:
               status.pop(path, None)
-          preflight_prefix = f'.continual/runs/{run_id}/preflight/preflight-consolidate_episode-'
+          preflight_prefix = f'.continual/runs/{run_id}/preflight/preflight-root-'
           new_preflights = sorted(path for path, code in status.items() if path.startswith(preflight_prefix) and path.endswith('.json') and code == 'A')
           if len(new_preflights) != 1:
-              raise SystemExit('expected exactly one new mechanical Consolidate preflight: ' + json.dumps(new_preflights))
+              raise SystemExit('expected exactly one new mechanical Root preflight: ' + json.dumps(new_preflights))
           expected_status[new_preflights[0]] = 'A'
           if status != expected_status:
               raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({
@@ -583,5 +583,5 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m '[native-post-task-candidate-clean-g1-result] gen29 consume post-result Candidate and freeze Consolidate'
+          git commit -m '[native-post-task-candidate-clean-g1-result] gen29 consume post-result Candidate and freeze Root'
           git push origin "HEAD:$GITHUB_REF_NAME"
