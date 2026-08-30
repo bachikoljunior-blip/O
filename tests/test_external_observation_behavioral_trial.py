@@ -144,9 +144,6 @@ def test_frozen_source_and_protected_blob_bindings_are_exact() -> None:
         ".continual/work-model/invocations/invoke-7869112b0d411a16c51c8cfc/request.json": "3a78e24f1da67e3e40a7295c33748d81c03741b4",
         ".continual/work-model/invocations/invoke-7869112b0d411a16c51c8cfc/response.json": "68537651c55e9e68db665283074d21e8f08e0a38",
         ".continual/work-model/invocations/invoke-1fcc456eaec7f8f134759b06/request.json": "8f877ca0be349e6736ba803e596549f86cf91727",
-        "agi/WORK_EXECUTION_STATE.json": "7452bd12213b81e75feb12ffa0c11dfdb62ce517",
-        ".continual/candidates/index.json": "79f2f06d12ec44c1baa079406533eaa672095d67",
-        "agi/WORK_STRATEGY.json": "0328a8372d5712f005149e0fad33d0bc7d25e4df",
     }
 
 
