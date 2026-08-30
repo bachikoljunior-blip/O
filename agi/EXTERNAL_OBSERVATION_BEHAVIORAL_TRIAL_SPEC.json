@@ -1,0 +1,188 @@
+{
+  "cases": [
+    {
+      "case_id": "eligible-fresh-exact-head",
+      "expected_decision": "ALLOW",
+      "expected_reasons": [
+        "eligible_fresh_exact_head_success_receipt"
+      ],
+      "mutation": {
+        "kind": "none"
+      }
+    },
+    {
+      "case_id": "absent-observation",
+      "expected_decision": "HOLD",
+      "expected_reasons": [
+        "observation_missing"
+      ],
+      "mutation": {
+        "kind": "remove_receipt"
+      }
+    },
+    {
+      "case_id": "expired-observation",
+      "expected_decision": "HOLD",
+      "expected_reasons": [
+        "observation_stale"
+      ],
+      "mutation": {
+        "kind": "advance_decision_time",
+        "value": "2026-08-30T01:43:10Z"
+      }
+    },
+    {
+      "case_id": "wrong-head-observation",
+      "expected_decision": "HOLD",
+      "expected_reasons": [
+        "workflow_head_mismatch"
+      ],
+      "mutation": {
+        "kind": "set_workflow_head",
+        "value": "0000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "case_id": "request-digest-invalid",
+      "expected_decision": "HOLD",
+      "expected_reasons": [
+        "request_digest_invalid"
+      ],
+      "mutation": {
+        "kind": "tamper_request_requested_at",
+        "value": "2026-08-30T01:28:08.424081Z"
+      }
+    },
+    {
+      "case_id": "incomplete-required-job",
+      "expected_decision": "HOLD",
+      "expected_reasons": [
+        "required_job_topology_incomplete"
+      ],
+      "mutation": {
+        "job_id": 99068622254,
+        "kind": "remove_required_job"
+      }
+    },
+    {
+      "case_id": "authority-conflicting-observation",
+      "expected_decision": "HOLD",
+      "expected_reasons": [
+        "authority_conflict"
+      ],
+      "mutation": {
+        "kind": "set_receipt_execution_id",
+        "value": "conflicting-authoritative-execution"
+      }
+    }
+  ],
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "behavioral_integration_evidence": true,
+    "external_independent_evidence": false,
+    "general_capability_established": false,
+    "production_effect_performed": false,
+    "production_reliability_established": false,
+    "scope": "One frozen request-bound exact-head CI receipt originating at O main c4a126675f2d415e0935f9ad03f0664e37caaea2, evaluated by seven precommitted read-only cases at state-bound main b8c08a34e247318df636f1fef8175d630d932665; eight lifecycle, authority, Candidate-index, and strategy blobs are protected at the trial head.",
+    "user_goal_completed": false
+  },
+  "decision_time": "2026-08-30T01:28:10Z",
+  "expected_binding": {
+    "authority": {
+      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+      "fence_token_digest": "bb7799bed3515d7100b3504ca4b190539aa8e89409b2b443cf1f6cd95c7f8274",
+      "lease_generation": 29,
+      "owner_kind": "work_recovery_automation"
+    },
+    "executor_binding": "current_chatgpt_work_session",
+    "max_age_seconds": 900,
+    "model_identity": "chatgpt-work-model-unverified",
+    "observation_id": "ci-run-03bcc1207bbde7d30c1a5418",
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "source": {
+      "exact_head_sha": "614ead18e8adbeea313473b885a925a705e12afc",
+      "kind": "github_actions",
+      "repository_full_name": "bachikoljunior-blip/O",
+      "required_jobs": [
+        {
+          "id": 99064676707,
+          "name": "pytest shard 1 of 4"
+        },
+        {
+          "id": 99064676796,
+          "name": "pytest shard 0 of 4"
+        },
+        {
+          "id": 99064676827,
+          "name": "pytest shard 2 of 4"
+        },
+        {
+          "id": 99064676900,
+          "name": "pytest shard 3 of 4"
+        },
+        {
+          "id": 99068622254,
+          "name": "test"
+        }
+      ],
+      "workflow_id": 335420036,
+      "workflow_run_id": 33238893400
+    }
+  },
+  "forbidden_effects": [
+    "merge",
+    "dispatch",
+    "native_invocation",
+    "candidate_activation",
+    "repository_mutation",
+    "provider_call"
+  ],
+  "protected_paths": [
+    {
+      "git_blob_sha": "bd7d4852e7415bd852ba846cdfdd3a4a1b96074f",
+      "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-03bcc1207bbde7d30c1a5418/request.json"
+    },
+    {
+      "git_blob_sha": "740a06ea2246de608318c8950ff44358860d72db",
+      "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-03bcc1207bbde7d30c1a5418/receipt.json"
+    },
+    {
+      "git_blob_sha": "3a78e24f1da67e3e40a7295c33748d81c03741b4",
+      "path": ".continual/work-model/invocations/invoke-7869112b0d411a16c51c8cfc/request.json"
+    },
+    {
+      "git_blob_sha": "68537651c55e9e68db665283074d21e8f08e0a38",
+      "path": ".continual/work-model/invocations/invoke-7869112b0d411a16c51c8cfc/response.json"
+    },
+    {
+      "git_blob_sha": "8f877ca0be349e6736ba803e596549f86cf91727",
+      "path": ".continual/work-model/invocations/invoke-1fcc456eaec7f8f134759b06/request.json"
+    },
+    {
+      "path": "agi/WORK_EXECUTION_STATE.json",
+      "git_blob_sha": "7452bd12213b81e75feb12ffa0c11dfdb62ce517"
+    },
+    {
+      "path": ".continual/candidates/index.json",
+      "git_blob_sha": "79f2f06d12ec44c1baa079406533eaa672095d67"
+    },
+    {
+      "path": "agi/WORK_STRATEGY.json",
+      "git_blob_sha": "0328a8372d5712f005149e0fad33d0bc7d25e4df"
+    }
+  ],
+  "replay_count": 3,
+  "schema_version": 1,
+  "source_commit": "c4a126675f2d415e0935f9ad03f0664e37caaea2",
+  "source_receipt": {
+    "git_blob_sha": "740a06ea2246de608318c8950ff44358860d72db",
+    "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-03bcc1207bbde7d30c1a5418/receipt.json",
+    "receipt_digest": "829bc3771644140c646651ccb19a36fe8e2f337535c226f29a9eab0cab532588"
+  },
+  "source_request": {
+    "git_blob_sha": "bd7d4852e7415bd852ba846cdfdd3a4a1b96074f",
+    "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-03bcc1207bbde7d30c1a5418/request.json",
+    "request_digest": "c773a121e99e01d0e520330c537bef23dbf62b726ca1db4708554096d60e6c28"
+  },
+  "trial_id": "external-observation-behavioral-effect-v1"
+}
