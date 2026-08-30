@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "record_type": "heldout_scientific_forecast_trial_spec",
+  "trial_id": "gen29-clean-g1-crucible-provenance-export-v1",
+  "unit_id": "unit-generation29-clean-g1-heldout-scientific-forecast-v1",
+  "frozen_at": "2026-08-30T14:28:10.244Z",
+  "frozen_source_clocks": {
+    "o_main_sha": "92bccc8061e334facba2b1a4916f1ec00d217bc1",
+    "work_state_blob_sha": "39bd0408927e803104ccf68e0557cb2c045a9a00",
+    "user_input_inbox_revision": 35,
+    "user_input_inbox_blob_sha": "93889b482c5b54dd90944f19ce425e845f455b35",
+    "native_snapshot_revision": 106,
+    "native_snapshot_blob_sha": "eca73024e39a5079925d49c633991915367e5402",
+    "note_main_sha": "653950941584de88ce1dbcd2e6e0de0b016ab2f5",
+    "clean_g1_record_observed_at": "2026-08-30T22:38:10+09:00",
+    "revision105_root_snapshot_updated_at": "2026-08-30T12:25:58.775680Z"
+  },
+  "source_identity": {
+    "clean_g1_record_path": "research_workers_clean_g1/scientist_agents/source_evidence/2026-08-30T2238JST_crucible_provenance_capture_export_audit.json",
+    "clean_g1_record_blob_sha": "84aba3588e5574580cb107c4e7e4bb6a727ab476",
+    "generation": "clean_g1",
+    "worker": "scientist_agents",
+    "primary_repository": "arghavan-b/crucible-harness",
+    "primary_commit_sha": "437835ded412544fd294c2b910942208216e85b2",
+    "primary_path": "crucible/benchmarks/provenance_capture.py",
+    "primary_blob_sha": "30660760620ceb61c2cabb0d53c424482f50f40b",
+    "primary_byte_count": 5692
+  },
+  "outcome_hidden_task": {
+    "research_question": "At the immutable primary commit, does the provenance-capture benchmark module contain at least one statically detectable durable export sink under the frozen AST rule?",
+    "setup": "Read-only static Python-AST classification of one exact public primary-source module; no provider call, benchmark execution, repository mutation, production route, or result substitution.",
+    "conditions": [
+      {
+        "label": "DURABLE_EXPORT_PRESENT",
+        "definition": "At least one frozen durable-sink AST pattern is present."
+      },
+      {
+        "label": "DURABLE_EXPORT_ABSENT",
+        "definition": "No frozen durable-sink AST pattern is present."
+      }
+    ],
+    "outcome_fields_excluded": [
+      "primary source file contents",
+      "clean_g1 record observations, finding, inference, assessment, uncertainty, termination, and exact_next_action",
+      "primary repository tests and any generated result",
+      "the revealed label, matching sink locations, and score"
+    ],
+    "exposed_fields_only": [
+      "clean_g1 provenance identity and chronology",
+      "primary repository, immutable commit, path, blob identity, and byte count",
+      "research question, setup, label definitions, extraction rule, scoring rule, and baseline rule"
+    ]
+  },
+  "commitment": {
+    "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-clean-g1-heldout-scientific-forecast-v1/withheld-outcome-commitment.json",
+    "commit_sha": "aa8e71c221a2b498abc7550e9a77724782d4152b",
+    "blob_sha": "5e3f25940ce7ba367fcca6cebbc07c3fdb0abe1c",
+    "primary_content_sha256": "92b9790c386b3e445c44677636355942961a493bb66acad84303128fbb6dc818"
+  },
+  "connector_receipt": {
+    "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-clean-g1-heldout-scientific-forecast-v1/source-connector-receipt.json",
+    "commit_sha": "1e026fadbab0d67549d338ed781170af265b2714",
+    "blob_sha": "10e0d7db95f19dde30c9dc3828498d16545139c1"
+  },
+  "extraction_rule": {
+    "parser": "Python ast",
+    "durable_sink_patterns": [
+      {
+        "kind": "attribute_call",
+        "names": [
+          "write_text",
+          "write_bytes"
+        ]
+      },
+      {
+        "kind": "builtin_open_call",
+        "literal_modes_containing_any": [
+          "w",
+          "a",
+          "x"
+        ]
+      },
+      {
+        "kind": "module_dump_call",
+        "qualified_names": [
+          "json.dump",
+          "yaml.dump",
+          "pickle.dump"
+        ]
+      }
+    ],
+    "label_rule": "DURABLE_EXPORT_PRESENT iff count(durable_sink_patterns) > 0; else DURABLE_EXPORT_ABSENT",
+    "replay_rule": "Parse the exact UTF-8 bytes twice and require identical sorted match tuples and label."
+  },
+  "prediction_schema": {
+    "forecast_label": [
+      "DURABLE_EXPORT_PRESENT",
+      "DURABLE_EXPORT_ABSENT"
+    ],
+    "confidence_probability_of_present": "number in [0,1]",
+    "next_experiment_choice": [
+      "round_trip_replay_integrity_probe",
+      "seeded_end_to_end_durable_export_probe"
+    ],
+    "required_ordering": "prediction artifact commit must descend from commitment commit and precede reveal commit"
+  },
+  "baseline": {
+    "id": "filename_lexical_same_input_v1",
+    "same_exposed_input": true,
+    "no_extra_context": true,
+    "rule": "Because the exposed filename is provenance_capture.py, predict DURABLE_EXPORT_PRESENT with p_present=0.60 and choose round_trip_replay_integrity_probe.",
+    "forecast_label": "DURABLE_EXPORT_PRESENT",
+    "confidence_probability_of_present": 0.6,
+    "next_experiment_choice": "round_trip_replay_integrity_probe"
+  },
+  "scoring_rule": {
+    "label_correct": "1 if forecast_label equals reveal_label else 0",
+    "confidence_brier": "(confidence_probability_of_present - I[reveal_label == DURABLE_EXPORT_PRESENT])^2; lower is better",
+    "next_experiment_correct": "1 if choice equals mapping(PRESENT=>round_trip_replay_integrity_probe, ABSENT=>seeded_end_to_end_durable_export_probe), else 0",
+    "composite_score": "0.7 * label_correct + 0.3 * next_experiment_correct",
+    "baseline_scored_identically": true
+  },
+  "contamination_policy": {
+    "prediction_manifest_must_not_contain_outcome_signal": true,
+    "forbidden_pre_prediction_reads": [
+      "primary file content projection",
+      "clean_g1 outcome text",
+      "primary tests",
+      "revealed matches"
+    ],
+    "fail_closed_on_violation": true
+  },
+  "mutation_policy": {
+    "allowed": [
+      "read-only connector retrieval",
+      "O trial artifact publication on the fenced branch",
+      "focused and protected CI"
+    ],
+    "forbidden": [
+      "provider execution",
+      "production route",
+      "dispatch",
+      "Candidate activation",
+      "unrelated repository effect"
+    ]
+  },
+  "claim_boundary": "One externally provenance-bound binary forecast about one scientific-agent benchmark module. Not generalized scientific capability, production reliability, AGI, or user-level completion.",
+  "agi_claim_supported": false,
+  "user_level_objective_met": false,
+  "resume_required": true
+}
