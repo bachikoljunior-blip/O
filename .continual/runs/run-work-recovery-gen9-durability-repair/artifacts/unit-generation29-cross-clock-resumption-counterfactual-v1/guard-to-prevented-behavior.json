@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+  "mapping": {
+    "moved_authoritative_binding": {
+      "guard": "main_state_blob_and_fence_binding",
+      "prevented_behavior": "stale_commit_and_divergent_successor"
+    },
+    "newer_inbox_at_dispatch": {
+      "guard": "inbox_revision_safe_boundary",
+      "prevented_behavior": "dispatch_before_newer_inbox_ingestion"
+    },
+    "stale_work_heartbeat": {
+      "guard": "work_heartbeat_freshness",
+      "prevented_behavior": "dispatch_with_stale_heartbeat"
+    }
+  },
+  "schema_version": 1
+}
