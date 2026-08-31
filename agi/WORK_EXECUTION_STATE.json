@@ -12088,7 +12088,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-08-31T20:35:29.295Z",
+  "heartbeat_at": "2026-08-31T20:53:47.529Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -12918,7 +12918,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_activity_at": "2026-08-31T19:37:28.153Z",
-  "last_progress_at": "2026-08-31T20:35:29.295Z",
+  "last_progress_at": "2026-08-31T20:53:47.529Z",
   "last_verified_effect": "PR392 exact-head protected CI passed; exact Root response merged once and one Candidate Evaluate successor is frozen at revision124.",
   "lease_generation": 29,
   "lease_renewal": {
@@ -14913,5 +14913,35 @@
   "user_level_objective_met": false,
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_remote_readback": true,
-  "working_branch": null
+  "working_branch": null,
+  "generation29_candidate_external_upstream_regression_repair_heartbeat_repair_v1": {
+    "concrete_stop_cause": "Candidate response was accepted only inside the ephemeral runner, but Context Kernel rejected the exact Execute successor freeze because the authoritative Work heartbeat exceeded the 300-second freshness bound.",
+    "durable_effects_before_failure": "none; Candidate response and Execute successor are absent on authoritative main",
+    "failed_workflow_run_id": 33438379542,
+    "failed_job_id": 99640275071,
+    "prior_validation_failures": [
+      {
+        "workflow_run_id": 33438048685,
+        "job_id": 99639194362,
+        "cause": "workflow template retained snapshot revision119 instead of frozen revision124; fail-closed before response submission"
+      },
+      {
+        "workflow_run_id": 33438164768,
+        "job_id": 99639572965,
+        "cause": "CI observation used PR392 test run instead of state-precommitted CI source; fail-closed on workflow run id mismatch"
+      }
+    ],
+    "frozen_candidate": {
+      "native_invocation_id": "invoke-fe66c169beb447d2cc786342",
+      "work_invocation_id": "invoke-30731537ba2d27101b1e7ccf",
+      "request_blob_sha": "60bd69c4e9fc1fbb02ff83776d17943c6884490f",
+      "request_digest": "aa60b8f8a0d1b8d3dd9c8741822eb3a8aecddee7c6e99fb4370ddaa7d2f6ce7e",
+      "response_exists_on_authoritative_remote": false
+    },
+    "repair": "Refresh only heartbeat/source-observation time under the existing generation29 fence; preserve execution id, generation, fence, request bytes, snapshot revision124/blob, inbox revision38/blob, and exact continuation.",
+    "idempotency_key": "o-work-gen29:repair-candidate-external-upstream-heartbeat-run-33438379542:v1",
+    "recorded_at": "2026-08-31T20:53:47.529Z",
+    "status": "phase1_heartbeat_repair_committed_pending_exact_readback",
+    "resume_required": true
+  }
 }
