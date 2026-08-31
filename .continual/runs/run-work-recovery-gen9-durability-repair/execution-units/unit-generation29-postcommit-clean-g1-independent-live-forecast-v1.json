@@ -1,0 +1,49 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "a pre-retrieval causal receipt binding selection rule, immutable source identity, task and label schema, deterministic scoring rule, holder identity, predictor identity/context boundary, timestamps, control-plane revision, and idempotency key",
+    "an independent holder commitment that binds hidden outcome bytes and immutable provenance while exposing no outcome-bearing content to the predictor",
+    "an independent predictor receipt for a fresh invocation with no outcome access, no prior response reuse, no same-session carryover, exact allowed-input digests, and explicit denied source/outcome locators",
+    "an exact frozen prediction request and exact response blob/digest read back durably before any reveal authorization",
+    "a reveal receipt from the independent holder that cryptographically matches the prior commitment, immutable source identity, and exact prediction response",
+    "deterministic score computation and replay with a full causal/digest/idempotency/control matrix",
+    "focused validation, protected four-shard repository CI plus aggregate, expected-head merge, and exact remote readback for any repository mutation"
+  ],
+  "expected_outputs": [
+    "one immutable live-trial manifest and pre-retrieval commitment receipt for a new post-commit clean_g1 source/task",
+    "one independent-holder commitment receipt or a fail-closed NOT_EVALUABLE record produced before outcome-bearing retrieval",
+    "one independent-predictor invocation/request/response receipt with exact digests, or a fail-closed NOT_EVALUABLE record produced before outcome-bearing retrieval",
+    "when both independent surfaces are valid, one post-response reveal receipt and deterministic score/replay artifact bound to the frozen prediction",
+    "a complete causal-order, provenance, digest, idempotency, and control matrix showing every transition and rejection reason",
+    "a bounded task result that keeps the prior contaminated trial FAIL and states precisely whether this new trial is PASS, FAIL, or NOT_EVALUABLE",
+    "a post-result Candidate Evaluate preflight followed by Consolidate Episode, Learn, exact-head publication, state binding, and return to Root"
+  ],
+  "failure_conditions": [
+    "either independent holder or independent predictor surface is unavailable or cannot provide externally checkable receipts before outcome-bearing retrieval; in that case stop the live trial as NOT_EVALUABLE and do not retrieve, fabricate, or substitute",
+    "any outcome-bearing content is read before the full commitment boundary, or task/label/score rules change after source access",
+    "same-session memory, self-attestation, manifest exclusion alone, a reused response, or an unverified context is accepted as predictor isolation",
+    "reveal precedes exact response readback, holder/source/response digests mismatch, duplicate prediction or reveal occurs, or replay differs",
+    "a synthetic fixture, historical result, fabricated baseline, or the contaminated prior forecast is presented as this live trial",
+    "the unit mutates provider or production routing, activates a Candidate, broadens the claim, or bypasses focused/protected CI and exact-head publication controls"
+  ],
+  "goal": "Run exactly one new post-revision-113 clean_g1 live held-out forecast through the already validated blind-holder gate: durably commit source identity, task schema, label rule, deterministic score, holder commitment, predictor-context boundary, and idempotency keys before any outcome-bearing retrieval; obtain one exact predictor response from an independent no-outcome-access surface; only then authorize an independent holder reveal and deterministically score the frozen response.",
+  "inputs": [
+    "the revision113 root_pending snapshot and exact frozen Root request",
+    "the validated blind-holder protocol, transition validator, synthetic positive control, and negative-ordering fixtures merged at the exact protected head",
+    "the prior contaminated forecast retained as FAIL and excluded from scoring or capability aggregation",
+    "one newly selected public clean_g1 source whose immutable identity and pre-outcome locator can be committed without exposing outcome-bearing bytes",
+    "an independent holder surface able to commit the source/outcome digest before prediction and reveal only after exact response readback",
+    "an independent predictor surface whose fresh invocation, model/executor identity, allowed-input digests, denied locators, and absence of outcome access are externally checkable"
+  ],
+  "parent_continuation": "After Execute, run Task Evaluate on only this exact unit and its causal/provenance matrix. Then run post-result Candidate Evaluate, Consolidate Episode, and Learn; publish through focused and protected exact-head CI with expected-head merge and remote readback, bind the next frozen continuation, return to Root, and keep the upper objective, AGI, and user-level completion false unless later authoritative goal evidence independently proves them.",
+  "scope": "One previously unused clean_g1 public source and one new task only. Read-only source access; no rerun or relabel of the contaminated prior forecast; no same-session self-attestation as isolation; no synthetic fixture or fabricated baseline as a substitute for live evidence; no provider or production routing, Candidate activation, broad capability, AGI, or completion claim.",
+  "success_conditions": [
+    "all source/task/rule/holder/predictor commitments are durably exact-read back before the first outcome-bearing retrieval",
+    "the predictor is demonstrably independent, fresh, and denied outcome access; same-task-chat or same-session self-attestation alone is rejected",
+    "the holder is independent and cannot reveal before exact prediction response readback; revealed bytes match the precommitted digest and immutable source",
+    "exactly one prediction and one reveal effect occur under stable idempotency keys, and deterministic replay produces identical decision, score, and digests",
+    "the result is limited to this one live trial; no contaminated evidence is upgraded and no Candidate, production, provider, AGI, or user-completion claim is made",
+    "any repository changes pass focused checks and the protected four-shard suite/aggregate, then merge through unchanged expected head with exact remote readback"
+  ],
+  "unit_id": "unit-generation29-postcommit-clean-g1-independent-live-forecast-v1"
+}
