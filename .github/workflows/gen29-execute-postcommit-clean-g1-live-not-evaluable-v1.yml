@@ -1,0 +1,793 @@
+name: gen29 consume post-commit clean_g1 live Execute fail-closed v1
+
+on:
+  push:
+    branches:
+      - work/gen29-execute-postcommit-clean-g1-live-not-evaluable-v1
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-execute-postcommit-clean-g1-live-not-evaluable-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-execute-postcommit-clean-g1-live-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_MAIN: ba8ebc54de94cca2a0386884073a1c9ad0bfeba7
+      EXPECTED_STATE_BLOB: 1d9ce2bf29b3decdb5768f68213c1f82d94bde96
+      EXPECTED_SNAPSHOT_BLOB: 96586c74f8c022769af1dca5720af7e45e8d4e80
+      EXPECTED_INBOX_BLOB: 208906fb4669eca5c8f448a0a8db6e4dcb7dfee2
+      EXPECTED_INBOX_REVISION: '37'
+      EXECUTE_NATIVE_ID: invoke-c9e6b55132155338b8113132
+      EXECUTE_NATIVE_BLOB: 02651e93c186c32f60ebf2348ef040cc331a3545
+      EXECUTE_WORK_ID: invoke-156890b09d225d1dadb9595b
+      EXECUTE_REQUEST_BLOB: 6295cd6a0ecd1019ea39832527c838005c185f24
+      EXECUTE_REQUEST_DIGEST: 083c762d384e1974247319e0351ac0439b9a9dfd95de3f6e0875d3017d2335c4
+      EXECUTE_OUTPUT_BLOB: 09ad586dbc3ed03e4d01336572b58ebe760fb93e
+      SOURCE_CI_RUN_ID: '33353747027'
+      SOURCE_CI_HEAD: 6bb80797ae851bd4322c1067ad64abdc609d469e
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      RESULT_UNIT_ID: unit-generation29-postcommit-clean-g1-independent-live-forecast-v1
+      TASK_UNIT_ID: unit-generation29-evaluate-postcommit-clean-g1-independent-live-forecast-v1
+      TRIAL_ID: gen29-postcommit-clean-g1-independent-live-forecast-v1
+      TRIAL_DIR: .continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e .
+
+      - name: Assert exact branch, main, authority, and Execute binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          RUNTIME_MAIN="$(git rev-parse origin/main)"
+          test "$RUNTIME_MAIN" = "$EXPECTED_MAIN"
+          test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
+          python - <<'PY'
+          import os
+          import subprocess
+          expected = ['.github/workflows/gen29-execute-postcommit-clean-g1-live-not-evaluable-v1.yml']
+          observed = subprocess.check_output(['git','diff','--name-only',os.environ['EXPECTED_MAIN'],'HEAD'], text=True).splitlines()
+          if observed != expected:
+              raise SystemExit(f'launch delta mismatch: {observed!r}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/runtime-state-document.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/USER_INPUT_INBOX.json?ref=$RUNTIME_MAIN" > /tmp/runtime-inbox-document.json
+          RUNTIME_STATE_BLOB="$(jq -r '.sha' /tmp/runtime-state-document.json)"
+          test "$RUNTIME_STATE_BLOB" = "$EXPECTED_STATE_BLOB"
+          test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
+          jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
+          jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object /tmp/runtime-inbox.json)" = "$EXPECTED_INBOX_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$EXECUTE_WORK_ID/request.json)" = "$EXECUTE_REQUEST_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$EXECUTE_NATIVE_ID.json)" = "$EXECUTE_NATIVE_BLOB"
+          echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
+          echo "RUNTIME_STATE_BLOB=$RUNTIME_STATE_BLOB" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_request, verify_work_invocations
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          native_id = os.environ['EXECUTE_NATIVE_ID']
+          work_id = os.environ['EXECUTE_WORK_ID']
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          inbox = json.loads(Path('/tmp/runtime-inbox.json').read_text())
+          snapshot = json.loads((root / '.continual' / 'runs' / run_id / 'snapshot.json').read_text())
+          request = verified_work_request(root, work_id)
+          native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
+          native = json.loads(native_path.read_text())
+          if state.get('execution_id') != 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3':
+              raise SystemExit('execution mismatch')
+          if state.get('lease_generation') != 29 or hashlib.sha256(state['fence_token'].encode()).hexdigest() != 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
+              raise SystemExit('generation/fence mismatch')
+          if state.get('status') != 'running' or state.get('resume_required') is not True:
+              raise SystemExit('authority is not resumable running state')
+          if state.get('active_component') != 'generation29_execute_postcommit_clean_g1_live_forecast_pending_native_consume':
+              raise SystemExit('active component mismatch')
+          bind = state.get('generation29_execute_postcommit_clean_g1_live_forecast_v1', {})
+          if bind.get('status') != 'pending_native_consume':
+              raise SystemExit('Execute state binding status mismatch')
+          if bind.get('pending_execute_work_invocation_id') != work_id or bind.get('pending_execute_native_invocation_id') != native_id:
+              raise SystemExit('Execute state binding identity mismatch')
+          exact = state.get('exact_continuation', {})
+          expected = {
+              'pending_native_invocation_id': native_id,
+              'pending_native_invocation_ref': f'.continual/runs/{run_id}/invocations/{native_id}.json',
+              'pending_native_invocation_blob_sha': os.environ['EXECUTE_NATIVE_BLOB'],
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': f'.continual/work-model/invocations/{work_id}/request.json',
+              'pending_request_blob_sha': os.environ['EXECUTE_REQUEST_BLOB'],
+              'pending_request_digest': os.environ['EXECUTE_REQUEST_DIGEST'],
+              'pending_response_ref': None,
+              'pending_response_blob_sha': None,
+              'pending_response_digest': None,
+              'response_exists_on_authoritative_remote': False,
+              'snapshot_revision': 114,
+              'native_phase': 'unit_pending',
+              'pending_component': 'execute',
+              'target_component': 'task_evaluate',
+              'durability_status': 'pending_native_consume',
+          }
+          for key, value in expected.items():
+              if exact.get(key) != value:
+                  raise SystemExit(f'exact continuation mismatch {key}: {exact.get(key)!r} != {value!r}')
+          durability = state.get('continuation_durability', {})
+          if durability.get('status') != 'remote_main_readback_verified' or durability.get('verified_remote_readback') is not True:
+              raise SystemExit('continuation durability is not exact-readback verified')
+          if durability.get('pending_work_invocation_id') != work_id or durability.get('pending_native_invocation_id') != native_id:
+              raise SystemExit('continuation durability identity mismatch')
+          if inbox.get('revision') != int(os.environ['EXPECTED_INBOX_REVISION']):
+              raise SystemExit('inbox revision mismatch')
+          if state.get('user_input_inbox', {}).get('highest_acknowledged_revision') != int(os.environ['EXPECTED_INBOX_REVISION']):
+              raise SystemExit('state inbox acknowledgement mismatch')
+          if snapshot.get('revision') != 114 or snapshot.get('phase') != 'unit_pending' or snapshot.get('current_component') != 'execute' or snapshot.get('current_unit') != os.environ['RESULT_UNIT_ID']:
+              raise SystemExit('snapshot is not revision114 Execute unit_pending')
+          if request.get('component') != 'execute' or request.get('request_digest') != os.environ['EXECUTE_REQUEST_DIGEST']:
+              raise SystemExit('Execute request mismatch')
+          payload = request.get('payload', {})
+          if payload.get('execution_unit', {}).get('unit_id') != os.environ['RESULT_UNIT_ID']:
+              raise SystemExit('Execute request unit mismatch')
+          if payload.get('preflight_selection', {}).get('decision') != 'BASELINE_FIRST':
+              raise SystemExit('Execute Candidate selection mismatch')
+          if 'candidate' in payload and payload.get('candidate') not in (None, {}):
+              raise SystemExit('unexpected Candidate overlay')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Execute identity mismatch')
+          if (root / '.continual' / 'work-model' / 'invocations' / work_id / 'response.json').exists():
+              raise SystemExit('Execute already answered')
+          if native.get('status') != 'awaiting_work_model' or native.get('component') != 'execute':
+              raise SystemExit('Execute native is not awaiting')
+          if native.get('work_invocation_id') != work_id or native.get('work_request_digest') != request.get('request_digest'):
+              raise SystemExit('native/Work binding mismatch')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1 or pending[0].get('invocation_id') != work_id:
+              raise SystemExit('Execute is not the unique pending Work item')
+          verified = verify_work_invocations(root, run_id=run_id)
+          expected_counts = {'valid': True, 'requests': 117, 'responses': 116, 'pending': 1, 'native_completed': 110, 'native_fragments': 110, 'native_local_learn': 101}
+          for key, value in expected_counts.items():
+              if verified.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
+          PY
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-before.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-before.json
+
+      - name: Record fresh main and exact-head CI observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$RUNTIME_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
+          python - <<'PY'
+          import base64
+          import json
+          from pathlib import Path
+          from continual.store import Store
+          document = json.loads(Path('/tmp/runtime-state-document.json').read_text())
+          state = json.loads(base64.b64decode(''.join(document['content'].splitlines())).decode())
+          projection = {
+              'status': state['status'],
+              'owner_kind': state['owner_kind'],
+              'execution_id': state['execution_id'],
+              'lease_generation': state['lease_generation'],
+              'fence_token_digest': Store(Path('.')).stable_digest(state['fence_token'], length=64),
+              'heartbeat_at': state['heartbeat_at'],
+          }
+          Path('/tmp/work-source-projection.json').write_text(json.dumps(projection, sort_keys=True) + '\n')
+          PY
+          WORK_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/work-source-prepare.json)"
+          WORK_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/work-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$RUNTIME_MAIN" --blob-sha "$RUNTIME_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = "completed"
+          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = "success"
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
+          jq '{id, workflow_id, name, status, conclusion, head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
+          jq '[.jobs[] | {id, name, status, conclusion}] | sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
+          CI_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/ci-source-prepare.json)"
+          CI_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/ci-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$CI_OBSERVATION_ID" --request-digest "$CI_REQUEST_DIGEST" --workflow-run /tmp/workflow-run-projection.json --jobs /tmp/workflow-jobs-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+
+      - name: Recheck CAS and continuity before mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          LATEST_MAIN="$(git rev-parse origin/main)"
+          test "$LATEST_MAIN" = "$EXPECTED_MAIN"
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$LATEST_MAIN" > /tmp/pre-mutation-state-document.json
+          test "$(jq -r '.sha' /tmp/pre-mutation-state-document.json)" = "$RUNTIME_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from continual.ci_source_observation import verify_ci_source_observation
+          from continual.continuity_preflight import assert_work_resume_continuity_preflight
+          from continual.store import Store
+          from continual.work_source_observation import verify_work_source_observation
+
+          root = Path('.').resolve()
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          now = Store(root).utc_now()
+          work = verify_work_source_observation(root, run_id=os.environ['RUN_ID'], state=state, state_blob_sha=os.environ['RUNTIME_STATE_BLOB'], now=now)
+          ci = verify_ci_source_observation(root, run_id=os.environ['RUN_ID'], state=state, now=now)
+          continuity = assert_work_resume_continuity_preflight(root, run_id=os.environ['RUN_ID'], executor_binding=os.environ['EXECUTOR_BINDING'], model_identity=os.environ['MODEL_IDENTITY'])
+          if continuity.get('resume_authorized') is not True:
+              raise SystemExit('continuity preflight denied')
+          print(json.dumps({'work': work, 'ci': ci, 'continuity': continuity}, sort_keys=True))
+          PY
+
+      - name: Produce exact fail-closed artifacts, submit Execute, and freeze Task Evaluate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$TRIAL_DIR"
+          cat > /tmp/execute-output.json <<'JSON'
+          {
+            "result": {
+              "unit_id": "unit-generation29-postcommit-clean-g1-independent-live-forecast-v1",
+              "trial_id": "gen29-postcommit-clean-g1-independent-live-forecast-v1",
+              "status": "NOT_EVALUABLE_PRE_RETRIEVAL",
+              "verdict": "UNIT_RESULT_REQUIRES_INDEPENDENT_TASK_EVALUATE",
+              "reason": "The available execution surface could not provide either an externally verifiable independent holder commitment or a fresh independent no-outcome-access predictor receipt. The current Work session is not an eligible predictor because it shares the task context and has prior access to O control and outcome-bearing research summaries. The trial therefore failed closed before selecting or retrieving a source.",
+              "surface_availability": {
+                "independent_holder_available": false,
+                "independent_holder_receipt_provided": false,
+                "independent_predictor_available": false,
+                "independent_predictor_receipt_provided": false,
+                "current_work_session_eligible_as_predictor": false,
+                "github_actions_eligible_as_holder_or_predictor": false
+              },
+              "effects": {
+                "source_selected": 0,
+                "source_identity_committed": 0,
+                "outcome_bearing_retrieval": 0,
+                "prediction_requests": 0,
+                "prediction_responses": 0,
+                "reveal_requests": 0,
+                "reveals": 0,
+                "scores": 0,
+                "synthetic_substitutions": 0,
+                "historical_substitutions": 0,
+                "fabricated_baselines": 0
+              },
+              "ordering": {
+                "surface_audit_before_retrieval": true,
+                "fail_closed_before_retrieval": true,
+                "response_readback_before_reveal": "NOT_APPLICABLE_NO_PREDICTION",
+                "deterministic_score_replay": "NOT_APPLICABLE_NO_SCORE"
+              },
+              "prior_contaminated_forecast_status": "FAIL_RETAINED_UNCHANGED",
+              "candidate_activation": false,
+              "provider_route_changed": false,
+              "production_route_changed": false,
+              "artifacts": {
+                "surface_availability_audit": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/surface-availability-audit.json",
+                "pre_retrieval_manifest": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/pre-retrieval-manifest.json",
+                "causal_digest_control_matrix": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/causal-digest-control-matrix.json",
+                "contamination_mutation_audit": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/contamination-mutation-audit.json",
+                "focused_validation": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/focused-validation.json",
+                "bounded_result": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/bounded-result.json"
+              },
+              "negative_evidence": [
+                "No public clean_g1 source was selected or committed for this trial.",
+                "No outcome-bearing bytes were retrieved for this trial.",
+                "No independent holder commitment or reveal receipt exists.",
+                "No independent predictor request or response exists.",
+                "No prediction, reveal, deterministic score, baseline, fixture, or historical substitute was produced.",
+                "The prior contaminated forecast remains FAIL and is excluded from scoring and capability aggregation.",
+                "Protected exact-head CI and merge are pending at Execute-response time.",
+                "No generalized scientific capability, transfer, robustness, autonomy, continual-learning, AGI, or user-level completion claim is supported."
+              ],
+              "claim_boundary": "This result proves only that one exact post-revision-113 live forecast correctly failed closed before retrieval because independent holder and predictor surfaces were unavailable. It is not a forecast score, capability result, production validation, AGI evidence, or user-level completion.",
+              "agi_claim_supported": false,
+              "user_level_objective_met": false,
+              "upper_objective_achieved": false,
+              "next_execution_unit": {
+                "unit_id": "unit-generation29-evaluate-postcommit-clean-g1-independent-live-forecast-v1",
+                "component": "task_evaluate",
+                "goal": "Independently verify the exact pre-retrieval NOT_EVALUABLE decision for the post-revision-113 clean_g1 live forecast: confirm that no eligible independent holder or predictor receipt existed, no source or outcome-bearing retrieval was performed for this trial, no prediction/reveal/score or synthetic substitution occurred, the prior contaminated trial remains FAIL, and all claims remain bounded.",
+                "scope": "agi/clean-g1/postcommit-independent-live-forecast-v1/task-evaluate; exact fail-closed trial gen29-postcommit-clean-g1-independent-live-forecast-v1 only",
+                "inputs": [
+                  ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/surface-availability-audit.json",
+                  ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/pre-retrieval-manifest.json",
+                  ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/causal-digest-control-matrix.json",
+                  ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/contamination-mutation-audit.json",
+                  ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/focused-validation.json",
+                  ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1/bounded-result.json"
+                ],
+                "evidence_needed": [
+                  "exact Execute request, Candidate BASELINE_FIRST preflight, authority state, snapshot revision 114, and inbox revision 37 bindings",
+                  "externally checkable evidence that both independent-holder and independent-predictor surfaces were unavailable before trial retrieval",
+                  "zero source-selection, outcome-bearing retrieval, prediction, reveal, score, and substitution effect counts for this trial",
+                  "causal matrix proving the fail-closed decision preceded all forbidden effects",
+                  "explicit retention of the prior contaminated forecast as FAIL",
+                  "focused validation plus protected exact-head CI, expected-head merge, and exact remote blob readback"
+                ],
+                "expected_outputs": [
+                  "separate original-task and bounded-unit verdicts",
+                  "an independent verdict on NOT_EVALUABLE_PRE_RETRIEVAL and every zero-effect invariant",
+                  "explicit negative evidence and unmet conditions",
+                  "a claim boundary limited to this one fail-closed trial"
+                ],
+                "success_conditions": [
+                  "the independent surface audit is complete and rejects same-session self-attestation",
+                  "no source or outcome-bearing content was selected or retrieved for this trial",
+                  "prediction, reveal, score, and synthetic-substitution counts are all zero",
+                  "the prior contaminated forecast remains FAIL and no Candidate/provider/production route changed",
+                  "focused and protected tests pass on one unchanged head and conclusions keep agi_claim_supported=false"
+                ],
+                "failure_conditions": [
+                  "any source or outcome-bearing retrieval occurred for this trial before valid independent receipts",
+                  "same-session identity or self-attestation was accepted as isolation",
+                  "any prediction, reveal, score, synthetic fixture, historical result, or fabricated baseline was substituted",
+                  "the prior contaminated trial was upgraded or any claim broadened",
+                  "publication evidence is not exact-head, protected, and read back"
+                ],
+                "parent_continuation": "After independent Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, Learn, publish through protected exact-head CI and expected-head merge with remote readback, return to Root, and continue toward the unchanged upper objective while AGI and user-level completion remain false."
+              },
+              "continuation": "After independent Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, Learn, publish through protected exact-head CI and expected-head merge with remote readback, return to Root, and continue toward the unchanged upper objective while AGI and user-level completion remain false."
+            },
+            "local_learn": {
+              "decision": "NO_CHANGE",
+              "candidates": [],
+              "observations": [
+                "A live held-out forecast is not evaluable when holder or predictor independence cannot be established by external receipts before retrieval.",
+                "Same-task-chat memory and current-session self-attestation cannot prove predictor isolation, even when a manifest excludes outcome locators.",
+                "Failing closed with zero retrieval, prediction, reveal, score, and substitution effects preserves the causal boundary and the prior contaminated FAIL."
+              ]
+            },
+            "fragment": {
+              "component": "execute",
+              "unit_id": "unit-generation29-postcommit-clean-g1-independent-live-forecast-v1",
+              "trial_id": "gen29-postcommit-clean-g1-independent-live-forecast-v1",
+              "status": "NOT_EVALUABLE_PRE_RETRIEVAL",
+              "surface_audit_passed": true,
+              "fail_closed_before_retrieval": true,
+              "outcome_bearing_retrieval_performed": false,
+              "prediction_count": 0,
+              "reveal_count": 0,
+              "score_count": 0,
+              "synthetic_substitution_count": 0,
+              "prior_contaminated_forecast_status": "FAIL_RETAINED_UNCHANGED",
+              "candidate_activation": false,
+              "agi_claim_supported": false,
+              "user_level_objective_met": false,
+              "claim_boundary": "This result proves only that one exact post-revision-113 live forecast correctly failed closed before retrieval because independent holder and predictor surfaces were unavailable. It is not a forecast score, capability result, production validation, AGI evidence, or user-level completion."
+            }
+          }
+          JSON
+          python -m json.tool /tmp/execute-output.json > /dev/null
+          test "$(git hash-object /tmp/execute-output.json)" = "$EXECUTE_OUTPUT_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          from datetime import UTC, datetime
+          from pathlib import Path
+
+          root = Path('.').resolve()
+          trial_dir = root / os.environ['TRIAL_DIR']
+          trial_dir.mkdir(parents=True, exist_ok=True)
+          output = json.loads(Path('/tmp/execute-output.json').read_text())
+          now = datetime.now(UTC).isoformat().replace('+00:00','Z')
+          authority = {
+              'execution_id': 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3',
+              'lease_generation': 29,
+              'fence_token_digest': 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d',
+          }
+          binding = {
+              'source_main_sha': os.environ['RUNTIME_MAIN'],
+              'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
+              'snapshot_revision': 114,
+              'snapshot_blob_sha': os.environ['EXPECTED_SNAPSHOT_BLOB'],
+              'inbox_revision': int(os.environ['EXPECTED_INBOX_REVISION']),
+              'inbox_blob_sha': os.environ['EXPECTED_INBOX_BLOB'],
+              'execute_native_invocation_id': os.environ['EXECUTE_NATIVE_ID'],
+              'execute_native_blob_sha': os.environ['EXECUTE_NATIVE_BLOB'],
+              'execute_work_invocation_id': os.environ['EXECUTE_WORK_ID'],
+              'execute_request_blob_sha': os.environ['EXECUTE_REQUEST_BLOB'],
+              'execute_request_digest': os.environ['EXECUTE_REQUEST_DIGEST'],
+              'candidate_preflight_decision': 'BASELINE_FIRST',
+          }
+          zero_effects = dict(output['result']['effects'])
+          surface = {
+              'schema_version': 1,
+              'record_type': 'independent_surface_availability_audit',
+              'trial_id': os.environ['TRIAL_ID'],
+              'evaluated_at': now,
+              'authority': authority,
+              'binding': binding,
+              'requirements_evaluated_before_source_selection': True,
+              'holder': {
+                  'required': True,
+                  'available': False,
+                  'independent': False,
+                  'externally_checkable_receipt_available': False,
+                  'reason': 'No available surface can independently commit hidden outcome bytes and enforce reveal only after exact predictor-response readback.',
+              },
+              'predictor': {
+                  'required': True,
+                  'available': False,
+                  'independent': False,
+                  'fresh_no_outcome_access_receipt_available': False,
+                  'current_work_session_rejected': True,
+                  'current_work_session_rejection_reason': 'The current session shares the task chat and has prior access to O control and outcome-bearing research summaries; self-attestation is not isolation.',
+                  'reason': 'No separate Work-capable predictor surface can provide an externally checkable fresh context and denied-outcome receipt.',
+              },
+              'github_actions': {
+                  'usable_for_validation_and_publication': True,
+                  'eligible_as_independent_holder': False,
+                  'eligible_as_independent_predictor': False,
+              },
+              'decision': 'NOT_EVALUABLE_PRE_RETRIEVAL',
+              'outcome_bearing_retrieval_performed': False,
+          }
+          manifest = {
+              'schema_version': 1,
+              'record_type': 'pre_retrieval_fail_closed_manifest',
+              'trial_id': os.environ['TRIAL_ID'],
+              'recorded_at': now,
+              'authority': authority,
+              'binding': binding,
+              'idempotency_key': 'o-work-gen29:consume-execute-invoke-156890b09d225d1dadb9595b:freeze-live-not-evaluable-task-evaluate:v1',
+              'phase': 'stopped_before_source_selection',
+              'source_selected': False,
+              'source_identity': None,
+              'source_locator': None,
+              'holder_identity': None,
+              'predictor_identity': None,
+              'task_schema_instantiated': False,
+              'label_rule_instantiated': False,
+              'score_rule_instantiated': False,
+              'outcome_bearing_retrieval_performed': False,
+              'effect_counts': zero_effects,
+              'terminal_trial_status': 'NOT_EVALUABLE_PRE_RETRIEVAL',
+          }
+          matrix = {
+              'schema_version': 1,
+              'record_type': 'causal_digest_idempotency_control_matrix',
+              'trial_id': os.environ['TRIAL_ID'],
+              'recorded_at': now,
+              'authority': authority,
+              'binding': binding,
+              'transitions': [
+                  {'sequence': 1, 'transition': 'verify_frozen_execute_request', 'status': 'PASS', 'durable_effect': False},
+                  {'sequence': 2, 'transition': 'audit_independent_holder', 'status': 'UNAVAILABLE_UNVERIFIABLE', 'durable_effect': False},
+                  {'sequence': 3, 'transition': 'audit_independent_predictor', 'status': 'UNAVAILABLE_UNVERIFIABLE', 'durable_effect': False},
+                  {'sequence': 4, 'transition': 'fail_closed_before_source_selection', 'status': 'NOT_EVALUABLE_PRE_RETRIEVAL', 'durable_effect': True},
+              ],
+              'forbidden_transitions': [
+                  {'transition': 'select_or_retrieve_live_source', 'executed': False},
+                  {'transition': 'invoke_predictor', 'executed': False},
+                  {'transition': 'authorize_or_perform_reveal', 'executed': False},
+                  {'transition': 'score_or_replay', 'executed': False},
+                  {'transition': 'substitute_fixture_history_or_baseline', 'executed': False},
+              ],
+              'effect_counts': zero_effects,
+              'digest_boundary': {
+                  'execute_request_digest': os.environ['EXECUTE_REQUEST_DIGEST'],
+                  'execute_output_blob_sha': os.environ['EXECUTE_OUTPUT_BLOB'],
+                  'response_digest': 'PERSISTED_BY_WORK_SUBMIT_AND_EXACTLY_READ_BACK_AFTERWARD',
+              },
+              'replay_expectation': 'All zero-effect and fail-closed predicates must remain identical on independent evaluation.',
+          }
+          audit = {
+              'schema_version': 1,
+              'record_type': 'contamination_and_mutation_audit',
+              'trial_id': os.environ['TRIAL_ID'],
+              'recorded_at': now,
+              'current_session_disqualified_as_predictor': True,
+              'current_session_prior_outcome_summary_exposure': True,
+              'trial_source_selected': False,
+              'trial_outcome_bearing_retrieval_performed': False,
+              'contamination_findings': [],
+              'mutation_findings': [],
+              'forbidden_effect_findings': [],
+              'prior_contaminated_forecast': {
+                  'status': 'FAIL',
+                  'retained_unchanged': True,
+                  'used_as_trial_input': False,
+                  'used_for_scoring_or_capability_aggregation': False,
+              },
+              'provider_route_changed': False,
+              'production_route_changed': False,
+              'candidate_activation': False,
+          }
+          checks = {
+              'frozen_request_exact': True,
+              'candidate_baseline_first_exact': True,
+              'independent_holder_receipt_absent': True,
+              'independent_predictor_receipt_absent': True,
+              'current_session_rejected_as_predictor': True,
+              'source_selected_count_zero': zero_effects['source_selected'] == 0,
+              'outcome_bearing_retrieval_count_zero': zero_effects['outcome_bearing_retrieval'] == 0,
+              'prediction_request_count_zero': zero_effects['prediction_requests'] == 0,
+              'prediction_response_count_zero': zero_effects['prediction_responses'] == 0,
+              'reveal_count_zero': zero_effects['reveals'] == 0,
+              'score_count_zero': zero_effects['scores'] == 0,
+              'synthetic_substitution_count_zero': zero_effects['synthetic_substitutions'] == 0,
+              'historical_substitution_count_zero': zero_effects['historical_substitutions'] == 0,
+              'fabricated_baseline_count_zero': zero_effects['fabricated_baselines'] == 0,
+              'prior_contaminated_fail_retained': True,
+              'agi_claim_false': output['result']['agi_claim_supported'] is False,
+              'user_objective_false': output['result']['user_level_objective_met'] is False,
+          }
+          if not all(checks.values()):
+              raise SystemExit('focused fail-closed invariant failed')
+          focused = {
+              'schema_version': 1,
+              'record_type': 'postcommit_clean_g1_live_fail_closed_focused_validation',
+              'trial_id': os.environ['TRIAL_ID'],
+              'validated_at': now,
+              'authority': authority,
+              'binding': binding,
+              'checks': checks,
+              'passed': True,
+              'status': 'NOT_EVALUABLE_PRE_RETRIEVAL',
+              'protected_ci_pending': True,
+              'resume_required': True,
+              'claim_boundary': output['result']['claim_boundary'],
+          }
+          documents = {
+              'surface-availability-audit.json': surface,
+              'pre-retrieval-manifest.json': manifest,
+              'causal-digest-control-matrix.json': matrix,
+              'contamination-mutation-audit.json': audit,
+              'focused-validation.json': focused,
+              'bounded-result.json': output['result'],
+          }
+          for name, value in documents.items():
+              (trial_dir / name).write_text(json.dumps(value, indent=2, sort_keys=True) + '\n')
+          Path('/tmp/artifact-files.json').write_text(json.dumps(sorted(documents), sort_keys=True) + '\n')
+          PY
+          continual --root . work-submit "$EXECUTE_WORK_ID" --response /tmp/execute-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/execute-submit.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
+
+      - name: Validate Execute completion and exact Task Evaluate freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from datetime import UTC, datetime
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_invocation, verify_work_invocations
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          execute_native_id = os.environ['EXECUTE_NATIVE_ID']
+          execute_work_id = os.environ['EXECUTE_WORK_ID']
+          expected_output = json.loads(Path('/tmp/execute-output.json').read_text())
+          after = verify_work_invocations(root, run_id=run_id)
+          expected_after = {'valid': True, 'requests': 118, 'responses': 117, 'pending': 1, 'native_completed': 111, 'native_fragments': 111, 'native_local_learn': 102}
+          for key, value in expected_after.items():
+              if after.get(key) != value:
+                  raise SystemExit(f'after mismatch {key}: {after.get(key)!r} != {value!r}')
+          verified_execute = verified_work_invocation(root, execute_work_id)
+          if verified_execute.get('output') != expected_output:
+              raise SystemExit('persisted Execute output mismatch')
+          execute_native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{execute_native_id}.json'
+          execute_native = json.loads(execute_native_path.read_text())
+          if execute_native.get('status') != 'complete' or execute_native.get('component') != 'execute' or execute_native.get('output') != expected_output:
+              raise SystemExit('Execute native completion mismatch')
+          snapshot_path = root / '.continual' / 'runs' / run_id / 'snapshot.json'
+          snapshot = json.loads(snapshot_path.read_text())
+          if snapshot.get('revision') != 115 or snapshot.get('phase') != 'unit_pending':
+              raise SystemExit(f'unexpected successor snapshot: {snapshot.get("revision")}/{snapshot.get("phase")}')
+          if snapshot.get('current_component') != 'task_evaluate' or snapshot.get('current_unit') != os.environ['TASK_UNIT_ID']:
+              raise SystemExit('Task Evaluate unit not scheduled')
+          task_unit_path = root / '.continual' / 'runs' / run_id / 'execution-units' / f"{os.environ['TASK_UNIT_ID']}.json"
+          task_unit = json.loads(task_unit_path.read_text())
+          if task_unit != expected_output['result']['next_execution_unit']:
+              raise SystemExit('Task Evaluate unit mismatch')
+          canonical_result_path = root / '.continual' / 'runs' / run_id / 'artifacts' / f"{os.environ['RESULT_UNIT_ID']}-result.json"
+          if json.loads(canonical_result_path.read_text()) != expected_output['result']:
+              raise SystemExit('canonical Execute result mismatch')
+          trial_dir = root / os.environ['TRIAL_DIR']
+          artifact_names = json.loads(Path('/tmp/artifact-files.json').read_text())
+          artifacts = {name: json.loads((trial_dir / name).read_text()) for name in artifact_names}
+          if artifacts['surface-availability-audit.json']['decision'] != 'NOT_EVALUABLE_PRE_RETRIEVAL':
+              raise SystemExit('surface audit decision mismatch')
+          effects = artifacts['pre-retrieval-manifest.json']['effect_counts']
+          if any(value != 0 for value in effects.values()):
+              raise SystemExit('pre-retrieval effect count is nonzero')
+          if artifacts['pre-retrieval-manifest.json']['source_selected'] is not False or artifacts['pre-retrieval-manifest.json']['outcome_bearing_retrieval_performed'] is not False:
+              raise SystemExit('retrieval boundary mismatch')
+          if artifacts['contamination-mutation-audit.json']['prior_contaminated_forecast']['status'] != 'FAIL':
+              raise SystemExit('prior contaminated FAIL not retained')
+          if artifacts['focused-validation.json']['passed'] is not True or not all(artifacts['focused-validation.json']['checks'].values()):
+              raise SystemExit('focused validation failed')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1:
+              raise SystemExit(f'expected one successor request, got {len(pending)}')
+          request = pending[0]
+          if request.get('component') != 'candidate_evaluate':
+              raise SystemExit('successor is not Task Evaluate Candidate preflight')
+          payload = request.get('payload', {})
+          if payload.get('mode') != 'pre-application' or payload.get('target_component') != 'task_evaluate':
+              raise SystemExit('successor Candidate mode/target mismatch')
+          wrapped = payload.get('execution_unit', {})
+          if wrapped.get('execution_unit', {}).get('unit_id') != os.environ['TASK_UNIT_ID'] or wrapped.get('snapshot', {}).get('revision') != 115:
+              raise SystemExit('successor Candidate unit/snapshot mismatch')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('successor Candidate identity mismatch')
+          work_id = request['invocation_id']
+          request_rel = f'.continual/work-model/invocations/{work_id}/request.json'
+          if (root / request_rel).with_name('response.json').exists():
+              raise SystemExit('successor Candidate already answered')
+          awaiting = []
+          for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
+              value = json.loads(path.read_text())
+              if value.get('status') == 'awaiting_work_model':
+                  awaiting.append((path, value))
+          if len(awaiting) != 1:
+              raise SystemExit(f'expected one awaiting Candidate native journal, got {len(awaiting)}')
+          native_path, native = awaiting[0]
+          if native.get('component') != 'candidate_evaluate' or native.get('work_invocation_id') != work_id:
+              raise SystemExit('successor native/Work mismatch')
+          if native.get('work_request_digest') != request.get('request_digest') or native.get('work_request_ref') != request_rel:
+              raise SystemExit('successor native digest/ref mismatch')
+          response_rel = f'.continual/work-model/invocations/{execute_work_id}/response.json'
+          fragment_rel = execute_native['fragment_ref']
+          local_learn_rel = f'.continual/runs/{run_id}/local-learn/{execute_native_id}-execute.json'
+          artifact_blobs = {}
+          for name in artifact_names:
+              rel = f"{os.environ['TRIAL_DIR']}/{name}"
+              artifact_blobs[rel] = subprocess.check_output(['git','hash-object',rel], text=True).strip()
+          summary = {
+              'execute_native_invocation_id': execute_native_id,
+              'execute_work_invocation_id': execute_work_id,
+              'execute_response_ref': response_rel,
+              'execute_response_digest': verified_execute['response']['response_digest'],
+              'execute_response_blob_sha': subprocess.check_output(['git','hash-object',response_rel], text=True).strip(),
+              'execute_output_blob_sha': os.environ['EXECUTE_OUTPUT_BLOB'],
+              'execute_native_blob_sha': subprocess.check_output(['git','hash-object',str(execute_native_path)], text=True).strip(),
+              'execute_fragment_ref': fragment_rel,
+              'execute_fragment_blob_sha': subprocess.check_output(['git','hash-object',fragment_rel], text=True).strip(),
+              'execute_local_learn_ref': local_learn_rel,
+              'execute_local_learn_blob_sha': subprocess.check_output(['git','hash-object',local_learn_rel], text=True).strip(),
+              'canonical_result_ref': canonical_result_path.relative_to(root).as_posix(),
+              'canonical_result_blob_sha': subprocess.check_output(['git','hash-object',str(canonical_result_path)], text=True).strip(),
+              'artifact_blobs': artifact_blobs,
+              'task_unit_ref': task_unit_path.relative_to(root).as_posix(),
+              'task_unit_blob_sha': subprocess.check_output(['git','hash-object',str(task_unit_path)], text=True).strip(),
+              'snapshot_revision': 115,
+              'snapshot_phase': 'unit_pending',
+              'snapshot_blob_sha': subprocess.check_output(['git','hash-object',str(snapshot_path)], text=True).strip(),
+              'pending_native_invocation_id': native['invocation_id'],
+              'pending_native_invocation_ref': native_path.relative_to(root).as_posix(),
+              'pending_native_invocation_blob_sha': subprocess.check_output(['git','hash-object',str(native_path)], text=True).strip(),
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': request_rel,
+              'pending_request_digest': request['request_digest'],
+              'pending_request_blob_sha': subprocess.check_output(['git','hash-object',request_rel], text=True).strip(),
+              'pending_component': 'candidate_evaluate',
+              'target_component': 'task_evaluate',
+              'verification': expected_after,
+          }
+          Path('/tmp/execute-consume-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-execute-postcommit-clean-g1-live-not-evaluable-freeze-task-evaluate-v1.json'
+          receipt = {
+              'schema_version': 1,
+              'record_type': 'generation29_execute_postcommit_clean_g1_live_fail_closed_consume_receipt',
+              'recorded_at': datetime.now(UTC).isoformat().replace('+00:00','Z'),
+              'authority': {'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},
+              'source_main_sha': os.environ['RUNTIME_MAIN'],
+              'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
+              'source_ci_workflow_run_id': int(os.environ['SOURCE_CI_RUN_ID']),
+              'idempotency_key': 'o-work-gen29:consume-execute-invoke-156890b09d225d1dadb9595b:freeze-live-not-evaluable-task-evaluate:v1',
+              'completed_effect': summary,
+              'trial_status': 'NOT_EVALUABLE_PRE_RETRIEVAL',
+              'outcome_bearing_retrieval_performed': False,
+              'prediction_count': 0,
+              'reveal_count': 0,
+              'score_count': 0,
+              'synthetic_substitution_count': 0,
+              'prior_contaminated_forecast_status': 'FAIL_RETAINED_UNCHANGED',
+              'request_recreated': False,
+              'execute_reinvoked': False,
+              'resume_required': True,
+              'next_action': 'Remove this one-shot workflow, exact-head validate and merge the Execute fail-closed lifecycle, bind state to the unique Task Evaluate Candidate preflight, consume it exactly once, and continue.',
+          }
+          receipt_path = root / receipt_rel
+          receipt_path.parent.mkdir(parents=True, exist_ok=True)
+          receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Stage only exact Execute lifecycle delta and push once
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          run_id = os.environ['RUN_ID']
+          execute_native_id = os.environ['EXECUTE_NATIVE_ID']
+          execute_work_id = os.environ['EXECUTE_WORK_ID']
+          summary = json.loads(Path('/tmp/execute-consume-summary.json').read_text())
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-execute-postcommit-clean-g1-live-not-evaluable-freeze-task-evaluate-v1.json'
+          expected_status = {
+              f'.continual/runs/{run_id}/events.jsonl': 'M',
+              f'.continual/runs/{run_id}/invocations/{execute_native_id}.json': 'M',
+              f'.continual/work-model/invocations/{execute_work_id}/response.json': 'A',
+              summary['execute_fragment_ref']: 'A',
+              summary['execute_local_learn_ref']: 'A',
+              summary['canonical_result_ref']: 'A',
+              summary['task_unit_ref']: 'A',
+              f'.continual/runs/{run_id}/snapshot.json': 'M',
+              summary['pending_native_invocation_ref']: 'A',
+              summary['pending_request_ref']: 'A',
+              receipt_rel: 'A',
+          }
+          for path in summary['artifact_blobs']:
+              expected_status[path] = 'A'
+          status = {}
+          for line in subprocess.check_output(['git','diff','--name-status'], text=True).splitlines():
+              code, path = line.split('\t',1)
+              status[path] = code
+          untracked = subprocess.check_output(['git','ls-files','--others','--exclude-standard'], text=True).splitlines() + subprocess.check_output(['git','ls-files','--others','--ignored','--exclude-standard'], text=True).splitlines()
+          for path in untracked:
+              status.setdefault(path,'A')
+          for path in list(status):
+              if path.startswith('src/agi/__pycache__/') or path.startswith('src/continual/__pycache__/') or path.startswith('src/continual_chatgpt.egg-info/') or path.startswith('tests/__pycache__/'):
+                  status.pop(path,None)
+          allowed_new_prefixes = (
+              f'.continual/runs/{run_id}/work-source-observations/',
+              f'.continual/runs/{run_id}/ci-source-observations/',
+          )
+          for path, code in status.items():
+              if code == 'A' and path.startswith(allowed_new_prefixes):
+                  expected_status[path] = 'A'
+          if status != expected_status:
+              raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({'expected':expected_status,'observed':status,'missing':sorted(set(expected_status)-set(status)),'unexpected':sorted(set(status)-set(expected_status))}, sort_keys=True))
+          required = sorted(expected_status)
+          for path in required:
+              if not Path(path).is_file():
+                  raise SystemExit('required lifecycle path missing: ' + path)
+          subprocess.run(['git','add','-f','--',*required], check=True)
+          staged = set(subprocess.check_output(['git','diff','--cached','--name-only'], text=True).splitlines())
+          if staged != set(required):
+              raise SystemExit('staged lifecycle set mismatch')
+          immutable = sorted(path for path in staged if path.startswith('.continual/work-model/invocations/'))
+          expected_immutable = sorted([f'.continual/work-model/invocations/{execute_work_id}/response.json',summary['pending_request_ref']])
+          if immutable != expected_immutable:
+              raise SystemExit('immutable Work mutation set mismatch: ' + json.dumps(immutable))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '[native-execute-postcommit-clean-g1-live-result] gen29 fail closed before retrieval and freeze Task Evaluate'
+          git push origin "HEAD:$GITHUB_REF_NAME"
