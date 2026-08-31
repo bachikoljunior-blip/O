@@ -275,7 +275,7 @@ jobs:
           continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-before.json
           continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-before.json
 
-      - name: Submit exact Task Evaluate response and freeze post-result Candidate
+      - name: Submit exact Task Evaluate response and freeze Consolidate
         shell: bash
         run: |
           set -euo pipefail
@@ -499,7 +499,7 @@ jobs:
           Path('/tmp/task-output.json').write_bytes(value)
           PY
           continual --root . work-submit "$TASK_WORK_ID" --response /tmp/task-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/task-submit.json
-          continual --root . work-resume "$RUN_ID" --max-steps 1 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
           continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
           continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
           cat /tmp/task-submit.json
@@ -507,7 +507,7 @@ jobs:
           cat /tmp/work-verify-after.json
           cat /tmp/work-pending-after.json
 
-      - name: Validate Task Evaluate consume and exact post-result Candidate freeze
+      - name: Validate Task Evaluate consume and exact Consolidate freeze
         shell: bash
         run: |
           set -euo pipefail
@@ -517,14 +517,13 @@ jobs:
           import subprocess
           from datetime import UTC, datetime
           from pathlib import Path
-          from continual.work_session import pending_work_invocations, verified_work_invocation, verified_work_request, verify_work_invocations
+          from continual.work_session import pending_work_invocations, verified_work_invocation, verify_work_invocations
 
           root = Path('.').resolve()
           run_id = os.environ['RUN_ID']
           task_native_id = os.environ['TASK_NATIVE_ID']
           task_work_id = os.environ['TASK_WORK_ID']
           expected_output = json.loads(Path('/tmp/task-output.json').read_text())
-          original_request = verified_work_request(root, task_work_id)
           before = json.loads(Path('/tmp/work-verify-before.json').read_text())
           expected_before = {
             'valid': True, 'requests': 119, 'responses': 118, 'pending': 1,
@@ -550,52 +549,51 @@ jobs:
             raise SystemExit('Task Evaluate native journal is not complete')
           if task_native.get('output') != expected_output:
             raise SystemExit('Task Evaluate native output mismatch')
-          snapshot_path = root / '.continual' / 'runs' / run_id / 'snapshot.json'
-          if subprocess.check_output(['git', 'hash-object', str(snapshot_path)], text=True).strip() != os.environ['EXPECTED_SNAPSHOT_BLOB']:
-            raise SystemExit('revision115 snapshot changed before post-result Candidate was consumed')
+          task_result = expected_output.get('result')
+          artifact_rel = f'.continual/runs/{run_id}/artifacts/{os.environ["RESULT_UNIT_ID"]}-result.json'
+          if json.loads((root / artifact_rel).read_text()) != task_result:
+            raise SystemExit('Task result artifact differs from exact evaluated result')
+          snapshot_rel = f'.continual/runs/{run_id}/snapshot.json'
+          snapshot = json.loads((root / snapshot_rel).read_text())
+          if snapshot.get('revision') != 117 or snapshot.get('phase') != 'consolidate_pending':
+            raise SystemExit(f'snapshot did not advance exactly to revision117 consolidate_pending: {snapshot.get("revision")!r} {snapshot.get("phase")!r}')
+          if snapshot.get('last_result_ref') != f'artifacts/{os.environ["RESULT_UNIT_ID"]}-result.json':
+            raise SystemExit('snapshot last result ref mismatch')
+          if snapshot.get('last_evaluation') != task_result:
+            raise SystemExit('snapshot last evaluation mismatch')
+          if snapshot.get('unit_completion_verdict') != 'PASS' or snapshot.get('task_completion_verdict') != 'FAIL':
+            raise SystemExit('snapshot dual verdict mismatch')
+          if snapshot.get('produced_candidates') != []:
+            raise SystemExit('BASELINE_FIRST Task Evaluate unexpectedly produced a post-result Candidate')
           pending = pending_work_invocations(root, run_id=run_id)
           if len(pending) != 1:
-            raise SystemExit(f'expected one post-result Candidate request, got {len(pending)}')
+            raise SystemExit(f'expected one Consolidate request, got {len(pending)}')
           request = pending[0]
-          if request.get('component') != 'candidate_evaluate':
-            raise SystemExit('next pending request is not Candidate Evaluate')
-          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
-            raise SystemExit('post-result Candidate request identity mismatch')
-          payload = request.get('payload', {})
-          if payload.get('mode') != 'post-result' or payload.get('target_component') != 'task_evaluate':
-            raise SystemExit('post-result Candidate mode/target mismatch')
-          if payload.get('actual_result') != expected_output.get('result'):
-            raise SystemExit('post-result Candidate actual_result mismatch')
-          original_payload = original_request.get('payload', {})
-          expected_post_unit = {
-            'snapshot': original_payload.get('snapshot'),
-            'execution_unit': original_payload.get('execution_unit'),
-          }
-          if payload.get('execution_unit') != expected_post_unit:
-            raise SystemExit('post-result Candidate execution-unit mismatch')
-          if payload.get('pre_application') != original_payload.get('preflight_selection'):
-            raise SystemExit('post-result Candidate pre-application mismatch')
-          candidate = payload.get('candidate', {})
-          if candidate.get('candidate_id') != 'candidate-task-evaluate-unit-verdict-v1' or candidate.get('target_component') != 'task_evaluate':
-            raise SystemExit('post-result Candidate binding mismatch')
+          if request.get('component') != 'consolidate_episode':
+            raise SystemExit('next pending request is not Consolidate Episode')
           work_id = request['invocation_id']
           request_rel = f'.continual/work-model/invocations/{work_id}/request.json'
           if (root / request_rel).with_name('response.json').exists():
-            raise SystemExit('post-result Candidate request already has a response')
-          if request.get('prompt_path') != 'prompts/candidate_evaluate.md':
-            raise SystemExit('post-result Candidate prompt binding mismatch')
+            raise SystemExit('Consolidate request already has a response')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+            raise SystemExit('Consolidate request identity mismatch')
+          if request.get('prompt_path') != 'prompts/consolidate_episode.md':
+            raise SystemExit('Consolidate prompt mismatch')
+          selection = request.get('payload', {}).get('preflight_selection', {})
+          if selection.get('decision') != 'USE_ACTIVE':
+            raise SystemExit('Consolidate preflight was not mechanical USE_ACTIVE')
           awaiting = []
           for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
             value = json.loads(path.read_text())
             if value.get('status') == 'awaiting_work_model':
               awaiting.append((path, value))
           if len(awaiting) != 1:
-            raise SystemExit(f'expected one awaiting post-result Candidate native journal, got {len(awaiting)}')
+            raise SystemExit(f'expected one awaiting Consolidate native journal, got {len(awaiting)}')
           native_path, native = awaiting[0]
-          if native.get('component') != 'candidate_evaluate' or native.get('work_invocation_id') != work_id:
-            raise SystemExit('post-result Candidate native-to-Work identity mismatch')
+          if native.get('component') != 'consolidate_episode' or native.get('work_invocation_id') != work_id:
+            raise SystemExit('Consolidate native-to-Work identity mismatch')
           if native.get('work_request_digest') != request.get('request_digest') or native.get('work_request_ref') != request_rel:
-            raise SystemExit('post-result Candidate native-to-Work digest/ref mismatch')
+            raise SystemExit('Consolidate native-to-Work digest/ref mismatch')
           response_rel = f'.continual/work-model/invocations/{task_work_id}/response.json'
           fragment_rel = task_native['fragment_ref']
           local_learn_rel = f'.continual/runs/{run_id}/local-learn/{task_native_id}-task_evaluate.json'
@@ -610,6 +608,12 @@ jobs:
             'task_fragment_blob_sha': subprocess.check_output(['git', 'hash-object', fragment_rel], text=True).strip(),
             'task_local_learn_ref': local_learn_rel,
             'task_local_learn_blob_sha': subprocess.check_output(['git', 'hash-object', local_learn_rel], text=True).strip(),
+            'task_result_artifact_ref': artifact_rel,
+            'task_result_artifact_blob_sha': subprocess.check_output(['git', 'hash-object', artifact_rel], text=True).strip(),
+            'snapshot_ref': snapshot_rel,
+            'snapshot_blob_sha': subprocess.check_output(['git', 'hash-object', snapshot_rel], text=True).strip(),
+            'snapshot_revision': 117,
+            'snapshot_phase': 'consolidate_pending',
             'pending_native_invocation_id': native['invocation_id'],
             'pending_native_invocation_ref': native_path.relative_to(root).as_posix(),
             'pending_native_invocation_blob_sha': subprocess.check_output(['git', 'hash-object', str(native_path)], text=True).strip(),
@@ -617,19 +621,14 @@ jobs:
             'pending_request_ref': request_rel,
             'pending_request_digest': request['request_digest'],
             'pending_request_blob_sha': subprocess.check_output(['git', 'hash-object', request_rel], text=True).strip(),
-            'pending_component': 'candidate_evaluate',
-            'candidate_mode': 'post-result',
-            'selected_candidate_id': 'candidate-task-evaluate-unit-verdict-v1',
-            'snapshot_revision': 115,
-            'snapshot_phase': 'unit_pending',
-            'snapshot_blob_sha': os.environ['EXPECTED_SNAPSHOT_BLOB'],
+            'pending_component': 'consolidate_episode',
             'verification': expected_after,
           }
           Path('/tmp/task-consume-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
-          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-task-evaluate-postcommit-clean-g1-not-evaluable-consume-post-result-candidate-freeze-v1.json'
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-task-evaluate-postcommit-clean-g1-not-evaluable-consume-consolidate-freeze-v1.json'
           receipt = {
             'schema_version': 1,
-            'record_type': 'generation29_task_evaluate_postcommit_clean_g1_not_evaluable_consume_receipt',
+            'record_type': 'generation29_task_evaluate_postcommit_clean_g1_not_evaluable_consume_consolidate_receipt',
             'recorded_at': datetime.now(UTC).isoformat().replace('+00:00', 'Z'),
             'authority': {
               'execution_id': 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3',
@@ -639,12 +638,12 @@ jobs:
             'source_main_sha': os.environ['RUNTIME_MAIN'],
             'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
             'source_ci_workflow_run_id': int(os.environ['SOURCE_CI_RUN_ID']),
-            'idempotency_key': 'o-work-gen29:consume-task-evaluate-invoke-115ab8989cbae76d07e0c5a5:freeze-post-result-candidate:revision38:v1',
+            'idempotency_key': 'o-work-gen29:consume-task-evaluate-invoke-115ab8989cbae76d07e0c5a5:freeze-consolidate:revision38:v1',
             'completed_effect': summary,
             'request_recreated': False,
             'task_reinvoked': False,
             'resume_required': True,
-            'next_action': 'Exact-head validate and merge this fail-closed Task Evaluate response plus post-result Candidate freeze, bind state, then answer the exact post-result Candidate request once.',
+            'next_action': 'Exact-head validate and merge this fail-closed Task Evaluate lifecycle plus revision117 Consolidate freeze, bind state, then answer the exact Consolidate request once.',
           }
           receipt_path = root / receipt_rel
           receipt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -658,7 +657,6 @@ jobs:
           set -euo pipefail
           git checkout -- agi/WORK_EXECUTION_STATE.json
           test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
-          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
           python - <<'PY'
           import json
           import os
@@ -671,13 +669,15 @@ jobs:
           summary = json.loads(Path('/tmp/task-consume-summary.json').read_text())
           work_obs = json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']
           ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
-          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-task-evaluate-postcommit-clean-g1-not-evaluable-consume-post-result-candidate-freeze-v1.json'
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-task-evaluate-postcommit-clean-g1-not-evaluable-consume-consolidate-freeze-v1.json'
           expected_status = {
             f'.continual/runs/{run_id}/events.jsonl': 'M',
+            f'.continual/runs/{run_id}/snapshot.json': 'M',
             f'.continual/runs/{run_id}/invocations/{task_native_id}.json': 'M',
             f'.continual/work-model/invocations/{task_work_id}/response.json': 'A',
             summary['task_fragment_ref']: 'A',
             summary['task_local_learn_ref']: 'A',
+            summary['task_result_artifact_ref']: 'A',
             summary['pending_native_invocation_ref']: 'A',
             summary['pending_request_ref']: 'A',
             f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json': 'A',
@@ -702,6 +702,11 @@ jobs:
           }
           for path in install_artifacts:
             status.pop(path, None)
+          preflight_prefix = f'.continual/runs/{run_id}/preflight/preflight-consolidate_episode-'
+          new_preflights = sorted(path for path, code in status.items() if path.startswith(preflight_prefix) and path.endswith('.json') and code == 'A')
+          if len(new_preflights) != 1:
+            raise SystemExit('expected exactly one new mechanical Consolidate preflight: ' + json.dumps(new_preflights))
+          expected_status[new_preflights[0]] = 'A'
           if status != expected_status:
             raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({
               'expected': expected_status,
@@ -728,5 +733,5 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m '[native-task-evaluate-postcommit-clean-g1-not-evaluable-result] gen29 consume fail-closed Task Evaluate and freeze post-result Candidate'
+          git commit -m '[native-task-evaluate-postcommit-clean-g1-not-evaluable-result] gen29 consume fail-closed Task Evaluate and freeze Consolidate'
           git push origin "HEAD:$GITHUB_REF_NAME"
