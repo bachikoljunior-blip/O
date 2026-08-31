@@ -1,0 +1,631 @@
+name: gen29 consume Task Evaluate Candidate preflight after live fail-closed v1
+
+on:
+  push:
+    branches:
+      - work/gen29-candidate-evaluate-postcommit-clean-g1-not-evaluable-preflight-v1
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-candidate-evaluate-postcommit-clean-g1-not-evaluable-preflight-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-candidate-task-evaluate-postcommit-live-not-evaluable-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_MAIN: 421fe710d77cfd25857aeae84d17df6c90f47fa9
+      EXPECTED_STATE_BLOB: 1de43a525eca0cea138f5ab05d539aebfbbd091e
+      EXPECTED_SNAPSHOT_BLOB: 65327c71d034ad3e1c092cf3467d2b0d70d962ac
+      EXPECTED_INBOX_BLOB: 34423c2dd71d95c55769f501fe1701ea0088fb32
+      EXPECTED_INBOX_REVISION: '38'
+      EXPECTED_LEDGER_BLOB: ec64b6acfbf5339c46eec95262f1e8fcd345e7b9
+      PREPARED_OUTPUT_BLOB: dc60fbd860aa813286c7e25ae8f70bb5d3fcfea2
+      CANDIDATE_NATIVE_ID: invoke-5e9168698d944bc2758168c8
+      CANDIDATE_NATIVE_BLOB: 8a55ec75b99aefb5e9f154470cd624bd3fc30eac
+      CANDIDATE_WORK_ID: invoke-2172f756fdc5a8c04aefbc16
+      CANDIDATE_REQUEST_BLOB: 1e4b73dbf1b79c6ee0c600f812807906af150a05
+      CANDIDATE_REQUEST_DIGEST: 3305c462a963a4f15c12320d6b26a8df63950be3d0f40dd283f478946a5ca496
+      SOURCE_CI_RUN_ID: '33356174143'
+      SOURCE_CI_HEAD: f43e998ce7df0b82c1c254e62f6fdce4d12ec320
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      RESULT_UNIT_ID: unit-generation29-evaluate-postcommit-clean-g1-independent-live-forecast-v1
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e .
+
+      - name: Assert exact branch, runtime main, authority, and Candidate binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          RUNTIME_MAIN="$(git rev-parse origin/main)"
+          test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
+          python - <<'PY'
+          import subprocess
+          expected = ['.github/workflows/gen29-candidate-evaluate-postcommit-clean-g1-not-evaluable-preflight-v1.yml']
+          observed = subprocess.check_output(
+              ['git', 'diff', '--name-only', __import__('os').environ['EXPECTED_MAIN'], 'HEAD'],
+              text=True,
+          ).splitlines()
+          if observed != expected:
+              raise SystemExit(f'launch delta mismatch: {observed!r}')
+          PY
+          python - "$EXPECTED_MAIN" "$RUNTIME_MAIN" <<'PY'
+          import subprocess
+          import sys
+          base, latest = sys.argv[1:]
+          if subprocess.check_output(['git', 'merge-base', base, latest], text=True).strip() != base:
+              raise SystemExit('runtime main lost expected ancestry')
+          for line in subprocess.check_output(['git', 'diff', '--name-status', base, latest], text=True).splitlines():
+              status, path = line.split('\t', 1)
+              allowed = (
+                  (status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json')
+                  or (status == 'A' and path.startswith('note/automation_control/receipts/') and path.endswith('.json'))
+                  or (status == 'A' and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_') and path.endswith('_control_missing.json'))
+              )
+              if not allowed:
+                  raise SystemExit(f'unsafe runtime-main delta: {status} {path}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/runtime-state-document.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/USER_INPUT_INBOX.json?ref=$RUNTIME_MAIN" > /tmp/runtime-inbox-document.json
+          RUNTIME_STATE_BLOB="$(jq -r '.sha' /tmp/runtime-state-document.json)"
+          test "$RUNTIME_STATE_BLOB" = "$EXPECTED_STATE_BLOB"
+          test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
+          jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
+          jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object /tmp/runtime-inbox.json)" = "$EXPECTED_INBOX_BLOB"
+          test "$(git hash-object agi/USER_DIRECTIVE_EVENTS.json)" = "$EXPECTED_LEDGER_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$CANDIDATE_WORK_ID/request.json)" = "$CANDIDATE_REQUEST_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$CANDIDATE_NATIVE_ID.json)" = "$CANDIDATE_NATIVE_BLOB"
+          echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
+          echo "RUNTIME_STATE_BLOB=$RUNTIME_STATE_BLOB" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_request, verify_work_invocations
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          native_id = os.environ['CANDIDATE_NATIVE_ID']
+          work_id = os.environ['CANDIDATE_WORK_ID']
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          inbox = json.loads(Path('/tmp/runtime-inbox.json').read_text())
+          snapshot = json.loads((root / '.continual' / 'runs' / run_id / 'snapshot.json').read_text())
+          request = verified_work_request(root, work_id)
+          native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
+          native = json.loads(native_path.read_text())
+          if state.get('execution_id') != 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3':
+              raise SystemExit('execution mismatch')
+          if state.get('lease_generation') != 29 or hashlib.sha256(state['fence_token'].encode()).hexdigest() != 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
+              raise SystemExit('generation/fence mismatch')
+          if state.get('status') != 'running' or state.get('resume_required') is not True:
+              raise SystemExit('authority is not resumable running state')
+          exact = state.get('exact_continuation', {})
+          expected = {
+              'pending_native_invocation_id': native_id,
+              'pending_native_invocation_ref': f'.continual/runs/{run_id}/invocations/{native_id}.json',
+              'pending_native_invocation_blob_sha': os.environ['CANDIDATE_NATIVE_BLOB'],
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': f'.continual/work-model/invocations/{work_id}/request.json',
+              'pending_request_blob_sha': os.environ['CANDIDATE_REQUEST_BLOB'],
+              'pending_request_digest': os.environ['CANDIDATE_REQUEST_DIGEST'],
+              'pending_response_ref': None,
+              'pending_response_blob_sha': None,
+              'pending_response_digest': None,
+              'response_exists_on_authoritative_remote': False,
+              'snapshot_revision': 115,
+              'native_phase': 'unit_pending',
+              'pending_component': 'candidate_evaluate',
+              'durability_status': 'pending_native_consume',
+          }
+          for key, value in expected.items():
+              if exact.get(key) != value:
+                  raise SystemExit(f'exact continuation mismatch {key}: {exact.get(key)!r} != {value!r}')
+          durability = state.get('continuation_durability', {})
+          if durability.get('status') != 'remote_main_readback_verified' or durability.get('verified_remote_readback') is not True:
+              raise SystemExit('continuation durability is not exact-readback verified')
+          if durability.get('pending_work_invocation_id') != work_id or durability.get('pending_native_invocation_id') != native_id:
+              raise SystemExit('continuation durability binding mismatch')
+          if inbox.get('revision') != int(os.environ['EXPECTED_INBOX_REVISION']):
+              raise SystemExit('inbox revision mismatch')
+          if snapshot.get('revision') != 115 or snapshot.get('phase') != 'unit_pending' or snapshot.get('current_component') != 'task_evaluate':
+              raise SystemExit('snapshot is not revision115 Task Evaluate unit_pending')
+          if request.get('component') != 'candidate_evaluate' or request.get('request_digest') != os.environ['CANDIDATE_REQUEST_DIGEST']:
+              raise SystemExit('Candidate Evaluate request mismatch')
+          payload = request.get('payload', {})
+          if payload.get('mode') != 'pre-application' or payload.get('target_component') != 'task_evaluate':
+              raise SystemExit('Candidate request mode/target mismatch')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Candidate request identity mismatch')
+          if (root / '.continual' / 'work-model' / 'invocations' / work_id / 'response.json').exists():
+              raise SystemExit('Candidate request already answered')
+          if native.get('status') != 'awaiting_work_model' or native.get('component') != 'candidate_evaluate':
+              raise SystemExit('Candidate native journal is not awaiting')
+          if native.get('work_invocation_id') != work_id or native.get('work_request_digest') != request.get('request_digest'):
+              raise SystemExit('Candidate native-to-Work binding mismatch')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1 or pending[0].get('invocation_id') != work_id:
+              raise SystemExit('Candidate request is not the unique pending Work item')
+          verified = verify_work_invocations(root, run_id=run_id)
+          expected_counts = {
+              'valid': True, 'requests': 118, 'responses': 117, 'pending': 1,
+              'native_completed': 111, 'native_fragments': 111, 'native_local_learn': 102,
+          }
+          for key, value in expected_counts.items():
+              if verified.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
+          print('CANDIDATE_BINDING_OK=' + json.dumps(expected_counts, sort_keys=True))
+          PY
+          continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-verify-before.json
+          cat /tmp/work-checkpoint-verify-before.json
+
+      - name: Record fresh exact main and successful exact-head CI observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$RUNTIME_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
+          python - <<'PY'
+          import base64
+          import json
+          from pathlib import Path
+          from continual.store import Store
+          document = json.loads(Path('/tmp/runtime-state-document.json').read_text())
+          state = json.loads(base64.b64decode(''.join(document['content'].splitlines())).decode())
+          projection = {
+              'status': state['status'],
+              'owner_kind': state['owner_kind'],
+              'execution_id': state['execution_id'],
+              'lease_generation': state['lease_generation'],
+              'fence_token_digest': Store(Path('.')).stable_digest(state['fence_token'], length=64),
+              'heartbeat_at': state['heartbeat_at'],
+          }
+          Path('/tmp/work-source-projection.json').write_text(json.dumps(projection, sort_keys=True) + '\n')
+          PY
+          WORK_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/work-source-prepare.json)"
+          WORK_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/work-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$RUNTIME_MAIN" --blob-sha "$RUNTIME_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = "completed"
+          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = "success"
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
+          jq '{id, workflow_id, name, status, conclusion, head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
+          jq '[.jobs[] | {id, name, status, conclusion}] | sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
+          CI_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/ci-source-prepare.json)"
+          CI_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/ci-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$CI_OBSERVATION_ID" --request-digest "$CI_REQUEST_DIGEST" --workflow-run /tmp/workflow-run-projection.json --jobs /tmp/workflow-jobs-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+
+      - name: Recheck CAS, verify observations, and assert exact continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          LATEST_MAIN="$(git rev-parse origin/main)"
+          python - "$EXPECTED_MAIN" "$LATEST_MAIN" <<'PY'
+          import subprocess
+          import sys
+          base, latest = sys.argv[1:]
+          if subprocess.check_output(['git', 'merge-base', base, latest], text=True).strip() != base:
+              raise SystemExit('latest main lost expected ancestry')
+          for line in subprocess.check_output(['git', 'diff', '--name-status', base, latest], text=True).splitlines():
+              status, path = line.split('\t', 1)
+              allowed = (
+                  (status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json')
+                  or (status == 'A' and path.startswith('note/automation_control/receipts/') and path.endswith('.json'))
+                  or (status == 'A' and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_') and path.endswith('_control_missing.json'))
+              )
+              if not allowed:
+                  raise SystemExit(f'unsafe latest-main delta: {status} {path}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$LATEST_MAIN" > /tmp/pre-mutation-state-document.json
+          test "$(jq -r '.sha' /tmp/pre-mutation-state-document.json)" = "$RUNTIME_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from continual.ci_source_observation import verify_ci_source_observation
+          from continual.continuity_preflight import assert_work_resume_continuity_preflight
+          from continual.store import Store
+          from continual.work_source_observation import verify_work_source_observation
+
+          root = Path('.').resolve()
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          now = Store(root).utc_now()
+          work = verify_work_source_observation(
+              root, run_id=os.environ['RUN_ID'], state=state,
+              state_blob_sha=os.environ['RUNTIME_STATE_BLOB'], now=now,
+          )
+          ci = verify_ci_source_observation(root, run_id=os.environ['RUN_ID'], state=state, now=now)
+          continuity = assert_work_resume_continuity_preflight(
+              root, run_id=os.environ['RUN_ID'],
+              executor_binding=os.environ['EXECUTOR_BINDING'],
+              model_identity=os.environ['MODEL_IDENTITY'],
+          )
+          if continuity.get('resume_authorized') is not True:
+              raise SystemExit('continuity preflight did not authorize exact resume')
+          print('WORK_SOURCE_VERIFY=' + json.dumps(work, sort_keys=True))
+          print('CI_SOURCE_VERIFY=' + json.dumps(ci, sort_keys=True))
+          print('CONTINUITY_PREFLIGHT=' + json.dumps(continuity, sort_keys=True))
+          PY
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-before.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-before.json
+
+      - name: Submit exact Candidate preflight response and freeze Task Evaluate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+          value = base64.b64decode("""
+          ewogICJmcmFnbWVudCI6IHsKICAgICJjb21wb25lbnQiOiAiY2FuZGlkYXRlX2V2YWx1YXRlIiwKICAgICJtb2RlIjogInBy
+          ZS1hcHBsaWNhdGlvbiIsCiAgICAidW5pdF9pZCI6ICJ1bml0LWdlbmVyYXRpb24yOS1ldmFsdWF0ZS1wb3N0Y29tbWl0LWNs
+          ZWFuLWcxLWluZGVwZW5kZW50LWxpdmUtZm9yZWNhc3QtdjEiLAogICAgInNlbGVjdGVkX3N0cmF0ZWd5IjogImFjdGl2ZSBU
+          YXNrIEV2YWx1YXRlIHByb21wdCB3aXRoIGV4YWN0IGZhaWwtY2xvc2VkIGFydGlmYWN0IHJlcGxheSBhbmQgbm8gQ2FuZGlk
+          YXRlIG92ZXJsYXkiLAogICAgImNhbmRpZGF0ZV9hY3RpdmF0aW9uIjogZmFsc2UsCiAgICAiY2xhaW1fYm91bmRhcnkiOiAi
+          VGhpcyBwcmUtYXBwbGljYXRpb24gZGVjaXNpb24gYXV0aG9yaXplcyBvbmx5IGluZGVwZW5kZW50IGV2YWx1YXRpb24gb2Yg
+          dGhlIGV4YWN0IE5PVF9FVkFMVUFCTEVfUFJFX1JFVFJJRVZBTCB0cmlhbCBhbmQgaXRzIHplcm8tZWZmZWN0IGFydGlmYWN0
+          cy4gSXQgZG9lcyBub3QgYXV0aG9yaXplIHNvdXJjZSByZXRyaWV2YWwsIHByZWRpY3Rpb24sIHJldmVhbCwgc2NvcmluZywg
+          Q2FuZGlkYXRlIGFjdGl2YXRpb24sIHByb3ZpZGVyIG9yIHByb2R1Y3Rpb24gcm91dGluZywgZ2VuZXJhbGl6ZWQgY2FwYWJp
+          bGl0eSwgQUdJIGV2aWRlbmNlLCBvciB1c2VyLWxldmVsIGNvbXBsZXRpb24uIgogIH0sCiAgImxvY2FsX2xlYXJuIjogewog
+          ICAgImRlY2lzaW9uIjogIk5PX0NIQU5HRSIsCiAgICAiY2FuZGlkYXRlcyI6IFtdLAogICAgIm9ic2VydmF0aW9ucyI6IFsK
+          ICAgICAgIlRoZSBUYXNrIEV2YWx1YXRlIGJhc2VsaW5lIG11c3Qgc2VwYXJhdGUgdGhlIG9yaWdpbmFsIHVzZXIgb2JqZWN0
+          aXZlIChGQUlMIHdoaWxlIEFHSSBpcyB1bnByb3ZlZCksIHRoZSBsaXZlIGZvcmVjYXN0IHRyaWFsIChOT1RfRVZBTFVBQkxF
+          IHdpdGhvdXQgaW5kZXBlbmRlbnQgc3VyZmFjZXMpLCBhbmQgdGhlIGJvdW5kZWQgZmFpbC1jbG9zZWQgYmVoYXZpb3IgKGVs
+          aWdpYmxlIGZvciBQQVNTKS4iLAogICAgICAiTm8gaW5kZXhlZCBDYW5kaWRhdGUgY2FuIHJlcGxhY2UgZXh0ZXJuYWxseSBj
+          aGVja2FibGUgaG9sZGVyL3ByZWRpY3RvciByZWNlaXB0cyBvciBjb252ZXJ0IGEgemVyby1lZmZlY3QgTk9UX0VWQUxVQUJM
+          RSB0cmlhbCBpbnRvIGZvcmVjYXN0IGV2aWRlbmNlLiIKICAgIF0KICB9LAogICJyZXN1bHQiOiB7CiAgICAiZGVjaXNpb24i
+          OiAiQkFTRUxJTkVfRklSU1QiLAogICAgInJlYXNvbiI6ICJObyBpbmRleGVkIENhbmRpZGF0ZSBpcyB2ZXJpZmllZCBmb3Ig
+          aW5kZXBlbmRlbnRseSBldmFsdWF0aW5nIHRoaXMgZXhhY3QgcHJlLXJldHJpZXZhbCBmYWlsLWNsb3NlZCBjbGVhbl9nMSB0
+          cmlhbC4gVGhlIGFjdGl2ZSBUYXNrIEV2YWx1YXRlIHByb21wdCBjYW4gZGlyZWN0bHkgcmVwbGF5IHRoZSBpbW11dGFibGUg
+          YXJ0aWZhY3RzLCB6ZXJvLWVmZmVjdCBjb3VudHMsIGNhdXNhbCBvcmRlcmluZywgcHJpb3IgY29udGFtaW5hdGVkIEZBSUwg
+          cmV0ZW50aW9uLCBhbmQgcHJvdGVjdGVkIHB1YmxpY2F0aW9uIGV2aWRlbmNlIHdpdGhvdXQgYWRkaW5nIGFuIG92ZXJsYXkg
+          dGhhdCB3b3VsZCB3aWRlbiB0aGUgY2xhaW0uIiwKICAgICJiYXNlbGluZSI6ICJVc2UgdGhlIHVuY2hhbmdlZCBhY3RpdmUg
+          VGFzayBFdmFsdWF0ZSBwcm9tcHQuIEV4YWN0LXJlYWQgdGhlIEV4ZWN1dGUgcmVzcG9uc2UsIHNpeCB0cmlhbCBhcnRpZmFj
+          dHMsIGNhbm9uaWNhbCBib3VuZGVkIHJlc3VsdCwgc25hcHNob3QxMTUgVGFzayBFdmFsdWF0ZSB1bml0LCBDYW5kaWRhdGUg
+          cHJlZmxpZ2h0LCBhdXRob3JpdHkgYmluZGluZ3MsIGFuZCBzdWNjZXNzZnVsIGV4YWN0LWhlYWQgUFIzNzkgcHVibGljYXRp
+          b24gZXZpZGVuY2UuIFZlcmlmeSBldmVyeSB6ZXJvLWVmZmVjdCBmaWVsZCBhbmQgY2F1c2FsIHRyYW5zaXRpb24gaW5kZXBl
+          bmRlbnRseS4gUmV0dXJuIG9yaWdpbmFsX3VzZXJfdGFza192ZXJkaWN0PUZBSUwgYmVjYXVzZSBhdXRob3JpdGF0aXZlIEFH
+          SSBhbmQgdGhlIHVwcGVyIG9iamVjdGl2ZSByZW1haW4gZmFsc2U7IHJldHVybiBsaXZlX2ZvcmVjYXN0X3RyaWFsX3ZlcmRp
+          Y3Q9Tk9UX0VWQUxVQUJMRSBiZWNhdXNlIG5vIGluZGVwZW5kZW50IGhvbGRlci9wcmVkaWN0b3Igc3VyZmFjZXMgZXhpc3Rl
+          ZDsgYW5kIHJldHVybiBib3VuZGVkX2ZhaWxfY2xvc2VkX3VuaXRfdmVyZGljdD1QQVNTIG9ubHkgaWYgdGhlIHRyaWFsIHN0
+          b3BwZWQgYmVmb3JlIHNvdXJjZSBzZWxlY3Rpb24vcmV0cmlldmFsLCBubyBwcmVkaWN0aW9uL3JldmVhbC9zY29yZS9zdWJz
+          dGl0dXRpb24gb2NjdXJyZWQsIHRoZSBjdXJyZW50IHNlc3Npb24gd2FzIHJlamVjdGVkIGFzIHByZWRpY3RvciwgdGhlIHBy
+          aW9yIGNvbnRhbWluYXRlZCBmb3JlY2FzdCByZW1haW5zIEZBSUwsIGFuZCBhbGwgY2xhaW1zIHJlbWFpbiBmYWxzZSBhbmQg
+          Ym91bmRlZC4iLAogICAgImFwcGxpY2FiaWxpdHkiOiBbCiAgICAgIHsKICAgICAgICAiY2FuZGlkYXRlX2lkIjogImNhbmRp
+          ZGF0ZS1hZ2ktYmVuY2htYXJrLXN1aXRlLXYxIiwKICAgICAgICAiZGVjaXNpb24iOiAiREVGRVIiLAogICAgICAgICJyZWFz
+          b24iOiAiVGhlIGJlbmNobWFyayBzdWl0ZSBtYXkgbGF0ZXIgY29uc3VtZSBpbmRlcGVuZGVudGx5IHZhbGlkIGV2aWRlbmNl
+          LCBidXQgdGhpcyB1bml0IGNvbnRhaW5zIG5vIGZvcmVjYXN0IHNjb3JlIGFuZCBtdXN0IG9ubHkgdmFsaWRhdGUgdGhlIGZh
+          aWwtY2xvc2VkIGJvdW5kYXJ5LiIKICAgICAgfSwKICAgICAgewogICAgICAgICJjYW5kaWRhdGVfaWQiOiAiY2FuZGlkYXRl
+          LXNlbGYtYXBwbGljYXRpb24tY29udGV4dC1oeWdpZW5lLXYxIiwKICAgICAgICAiZGVjaXNpb24iOiAiREVGRVIiLAogICAg
+          ICAgICJyZWFzb24iOiAiQ29udGV4dCBoeWdpZW5lIGlzIHJlbGV2YW50IGJhY2tncm91bmQsIGJ1dCBhcHBseWluZyBpdCBu
+          b3cgd291bGQgbm90IGluZGVwZW5kZW50bHkgcHJvdmUgaG9sZGVyL3ByZWRpY3RvciBhdmFpbGFiaWxpdHkgb3IgY2hhbmdl
+          IHRoZSBhbHJlYWR5IGNvbXBsZXRlZCB6ZXJvLWVmZmVjdCB0cmlhbC4iCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiY2Fu
+          ZGlkYXRlX2lkIjogImNhbmRpZGF0ZS1saXZlLWNhbXBhaWduLXN0YWdlLWlzb2xhdGlvbi12MSIsCiAgICAgICAgImRlY2lz
+          aW9uIjogIk5PVF9BUFBMSUNBQkxFIiwKICAgICAgICAicmVhc29uIjogIlRoZSB1bml0IGlzIGEgb25lLXRyaWFsIGFydGlm
+          YWN0IHJlcGxheSwgbm90IGEgbGl2ZSBjYW1wYWlnbiBvciBwcm92aWRlciByb3V0ZS4iCiAgICAgIH0sCiAgICAgIHsKICAg
+          ICAgICAiY2FuZGlkYXRlX2lkIjogImNhbmRpZGF0ZS1saXZlLXJlcXVlc3Qtc3RhdHVzLXJlbmRlenZvdXMtdjEiLAogICAg
+          ICAgICJkZWNpc2lvbiI6ICJOT1RfQVBQTElDQUJMRSIsCiAgICAgICAgInJlYXNvbiI6ICJSZXF1ZXN0IG9ic2VydmFiaWxp
+          dHkgY2Fubm90IGVzdGFibGlzaCB0aGUgaG9sZGVyL3ByZWRpY3RvciBib3VuZGFyeSBvciBhbHRlciB0aGUgY29tcGxldGVk
+          IGZhaWwtY2xvc2VkIGNhdXNhbCByZWNvcmQuIgogICAgICB9LAogICAgICB7CiAgICAgICAgImNhbmRpZGF0ZV9pZCI6ICJj
+          YW5kaWRhdGUtYm91bmRlZC1yZWN1cnNpdmUtY29udGV4dC1yZXRyaWV2YWwtdjEiLAogICAgICAgICJkZWNpc2lvbiI6ICJO
+          T1RfQVBQTElDQUJMRSIsCiAgICAgICAgInJlYXNvbiI6ICJSZWN1cnNpdmUgcmV0cmlldmFsIGlzIG91dHNpZGUgdGhlIGV4
+          YWN0IHplcm8tcmV0cmlldmFsIFRhc2sgRXZhbHVhdGUgc2NvcGUuIgogICAgICB9LAogICAgICB7CiAgICAgICAgImNhbmRp
+          ZGF0ZV9pZCI6ICJjYW5kaWRhdGUtd29ya3NwYWNlLWNhbXBhaWduLXYxIiwKICAgICAgICAiZGVjaXNpb24iOiAiREVGRVIi
+          LAogICAgICAgICJyZWFzb24iOiAiQSBicm9hZGVyIHdvcmtzcGFjZSBjYW1wYWlnbiB3b3VsZCB3aWRlbiB0aGlzIGJvdW5k
+          ZWQgaW5kZXBlbmRlbnQgZXZhbHVhdGlvbi4iCiAgICAgIH0KICAgIF0sCiAgICAiZXZpZGVuY2VfdG9fY29sbGVjdCI6IFsK
+          ICAgICAgImV4YWN0IEV4ZWN1dGUgcmVxdWVzdC9yZXNwb25zZS9ibG9iL2RpZ2VzdCBhbmQgQ2FuZGlkYXRlIEJBU0VMSU5F
+          X0ZJUlNUIHByZWZsaWdodCBiaW5kaW5nIiwKICAgICAgInN1cmZhY2UtYXZhaWxhYmlsaXR5IGF1ZGl0IHNob3dpbmcgYm90
+          aCBpbmRlcGVuZGVudCByZWNlaXB0cyBhYnNlbnQgYW5kIGN1cnJlbnQtc2Vzc2lvbiBzZWxmLWF0dGVzdGF0aW9uIHJlamVj
+          dGVkIiwKICAgICAgInByZS1yZXRyaWV2YWwgbWFuaWZlc3Qgd2l0aCBubyBzZWxlY3RlZCBzb3VyY2UgYW5kIGV2ZXJ5IGVm
+          ZmVjdCBjb3VudCB6ZXJvIiwKICAgICAgImNhdXNhbC9kaWdlc3QvY29udHJvbCBtYXRyaXggcHJvdmluZyBmYWlsLWNsb3Nl
+          ZCBvcmRlcmluZyBiZWZvcmUgZXZlcnkgZm9yYmlkZGVuIHRyYW5zaXRpb24iLAogICAgICAiY29udGFtaW5hdGlvbi9tdXRh
+          dGlvbiBhdWRpdCByZXRhaW5pbmcgdGhlIHByaW9yIGNvbnRhbWluYXRlZCBmb3JlY2FzdCBhcyBGQUlMIiwKICAgICAgImZv
+          Y3VzZWQgdmFsaWRhdGlvbiBhbmQgY2Fub25pY2FsIGJvdW5kZWQtcmVzdWx0IGVxdWFsaXR5IiwKICAgICAgIlBSMzc5IGRp
+          cmVjdGl2ZSwgZm91ciBwcm90ZWN0ZWQgcHl0ZXN0IHNoYXJkcywgYWdncmVnYXRlLCBleHBlY3RlZC1oZWFkIG1lcmdlLCBh
+          bmQgZXhhY3QgcmVtb3RlIGJsb2IgcmVhZGJhY2siCiAgICBdLAogICAgInJlZ3Jlc3Npb25fY2hlY2tzIjogWwogICAgICAi
+          b3JpZ2luYWxfdXNlcl90YXNrX3ZlcmRpY3QgaXMgRkFJTCBiZWNhdXNlIGF1dGhvcml0YXRpdmUgQUdJLCB1cHBlci1vYmpl
+          Y3RpdmUsIGFuZCB1c2VyLWxldmVsIGNvbXBsZXRpb24gcmVtYWluIGZhbHNlIiwKICAgICAgImxpdmVfZm9yZWNhc3RfdHJp
+          YWxfdmVyZGljdCBpcyBOT1RfRVZBTFVBQkxFLCBuZXZlciBQQVNTIG9yIGZvcmVjYXN0IGV2aWRlbmNlIiwKICAgICAgImJv
+          dW5kZWRfZmFpbF9jbG9zZWRfdW5pdF92ZXJkaWN0IGlzIFBBU1Mgb25seSBmb3IgY29ycmVjdCBmYWlsLWNsb3NlZCBiZWhh
+          dmlvciIsCiAgICAgICJzb3VyY2Ugc2VsZWN0aW9uLCBvdXRjb21lLWJlYXJpbmcgcmV0cmlldmFsLCBwcmVkaWN0aW9uIHJl
+          cXVlc3QvcmVzcG9uc2UsIHJldmVhbCwgc2NvcmUsIHN5bnRoZXRpYyBzdWJzdGl0dXRpb24sIGhpc3RvcmljYWwgc3Vic3Rp
+          dHV0aW9uLCBhbmQgZmFicmljYXRlZCBiYXNlbGluZSBjb3VudHMgYWxsIGVxdWFsIHplcm8iLAogICAgICAidGhlIGN1cnJl
+          bnQgV29yayBzZXNzaW9uIHJlbWFpbnMgaW5lbGlnaWJsZSBhcyBhbiBpbmRlcGVuZGVudCBwcmVkaWN0b3IiLAogICAgICAi
+          dGhlIHByaW9yIGNvbnRhbWluYXRlZCBmb3JlY2FzdCByZW1haW5zIEZBSUwgYW5kIGV4Y2x1ZGVkIGZyb20gc2NvcmluZy9j
+          YXBhYmlsaXR5IGFnZ3JlZ2F0aW9uIiwKICAgICAgIkNhbmRpZGF0ZSBhY3RpdmF0aW9uLCBwcm92aWRlci9wcm9kdWN0aW9u
+          IHJvdXRlIGNoYW5nZSwgQUdJIGNsYWltLCB1cHBlciBvYmplY3RpdmUsIGFuZCB1c2VyLWxldmVsIGNvbXBsZXRpb24gYWxs
+          IHJlbWFpbiBmYWxzZSIsCiAgICAgICJhbGwgcmV2aWV3ZWQgYXJ0aWZhY3RzIGFyZSBvbiBvbmUgcHJvdGVjdGVkIGV4cGVj
+          dGVkIGhlYWQgYW5kIGV4YWN0LXJlYWQgYWZ0ZXIgbWVyZ2UiCiAgICBdLAogICAgImNvc3RfZGltZW5zaW9ucyI6IHsKICAg
+          ICAgInF1YWxpdHkiOiAiUmVxdWlyZSBleGFjdCBKU09OIGVxdWFsaXR5LCBkaWdlc3QvYmxvYiBiaW5kaW5ncywgZGV0ZXJt
+          aW5pc3RpYyB6ZXJvLWVmZmVjdCByZXBsYXksIHNlcGFyYXRlIHZlcmRpY3RzLCBhbmQgYSBuYXJyb3cgY2xhaW0gYm91bmRh
+          cnkuIiwKICAgICAgImZhaWx1cmVfcmlzayI6ICJSZWplY3QgYW55IG5vbnplcm8gZWZmZWN0LCBtaXNzaW5nIGluZGVwZW5k
+          ZW50LXN1cmZhY2UgZXZpZGVuY2UsIHNvdXJjZSBzZWxlY3Rpb24vcmV0cmlldmFsLCBzdWJzdGl0dXRpb24sIHByaW9yLUZB
+          SUwgdXBncmFkZSwgb3IgcHVibGljYXRpb24gbWlzbWF0Y2guIiwKICAgICAgImV4dGVybmFsIjogIlJlYWQtb25seSBHaXRI
+          dWIgZXZpZGVuY2Ugb25seTsgbm8gc291cmNlL291dGNvbWUgcmV0cmlldmFsLCBwcmVkaWN0b3IgaW52b2NhdGlvbiwgcmV2
+          ZWFsLCBwcm92aWRlciByb3V0ZSwgb3IgcHJvZHVjdGlvbiBtdXRhdGlvbi4iLAogICAgICAibGF0ZW5jeSI6ICJCb3VuZGVk
+          IHRvIGV4YWN0IGFydGlmYWN0IHJlcGxheSBhbmQgcHJvdGVjdGVkIHB1YmxpY2F0aW9uIGNoZWNrcyBmb3IgdGhpcyBvbmUg
+          dW5pdC4iLAogICAgICAidG9vbCI6ICJSZXBvc2l0b3J5IGFuZCBHaXRIdWIgZXhhY3QtcmVhZGJhY2sgc3VyZmFjZXMgb25s
+          eS4iLAogICAgICAidG9rZW4iOiAiUmVjb3JkIG5vIGluZmVycmVkIG1vZGVsIHVzYWdlIG9yIGlzb2xhdGlvbiBjbGFpbS4i
+          CiAgICB9LAogICAgInJvbGxiYWNrIjogIklmIGFueSBhcnRpZmFjdCBpcyBtaXNzaW5nLCBkaWZmZXJzLCByZXBvcnRzIGEg
+          bm9uemVybyBmb3JiaWRkZW4gZWZmZWN0LCBhY2NlcHRzIHNhbWUtc2Vzc2lvbiBpc29sYXRpb24sIHVwZ3JhZGVzIHRoZSBw
+          cmlvciBjb250YW1pbmF0ZWQgRkFJTCwgb3IgbGFja3MgZXhhY3QtaGVhZCBwcm90ZWN0ZWQgcHVibGljYXRpb24gZXZpZGVu
+          Y2UsIHJldHVybiBib3VuZGVkX3VuaXRfdmVyZGljdD1GQUlMIG9yIE5PVF9FVkFMVUFCTEUgYXMgYXBwcm9wcmlhdGUsIHBy
+          ZXNlcnZlIHRoZSByZWNvcmQsIG1ha2Ugbm8gQ2FuZGlkYXRlL3JvdXRlIGNoYW5nZSwgYW5kIGRvIG5vdCB3aWRlbiB0aGUg
+          Y2xhaW0uIgogIH0KfQo=
+          """)
+          Path('/tmp/candidate-output.json').write_bytes(value)
+          PY
+          test "$(git hash-object /tmp/candidate-output.json)" = "$PREPARED_OUTPUT_BLOB"
+          continual --root . work-submit "$CANDIDATE_WORK_ID" --response /tmp/candidate-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/candidate-submit.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
+          cat /tmp/candidate-submit.json
+          cat /tmp/native-resume.json
+          cat /tmp/work-verify-after.json
+          cat /tmp/work-pending-after.json
+
+      - name: Validate Candidate consume and exact Task Evaluate freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from datetime import UTC, datetime
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_invocation, verify_work_invocations
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          candidate_native_id = os.environ['CANDIDATE_NATIVE_ID']
+          candidate_work_id = os.environ['CANDIDATE_WORK_ID']
+          expected_output = json.loads(Path('/tmp/candidate-output.json').read_text())
+          before = json.loads(Path('/tmp/work-verify-before.json').read_text())
+          expected_before = {
+              'valid': True, 'requests': 87, 'responses': 86, 'pending': 1,
+              'native_completed': 80, 'native_fragments': 80, 'native_local_learn': 74,
+          }
+          for key, value in expected_before.items():
+              if before.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {before.get(key)!r}')
+          after = verify_work_invocations(root, run_id=run_id)
+          expected_after = {
+              'valid': True, 'requests': 119, 'responses': 118, 'pending': 1,
+              'native_completed': 112, 'native_fragments': 112, 'native_local_learn': 103,
+          }
+          for key, value in expected_after.items():
+              if after.get(key) != value:
+                  raise SystemExit(f'after verification mismatch {key}: {after.get(key)!r} != {value!r}')
+          verified_candidate = verified_work_invocation(root, candidate_work_id)
+          if verified_candidate.get('output') != expected_output:
+              raise SystemExit('persisted Candidate output differs from exact submitted output')
+          candidate_native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{candidate_native_id}.json'
+          candidate_native = json.loads(candidate_native_path.read_text())
+          if candidate_native.get('status') != 'complete' or candidate_native.get('component') != 'candidate_evaluate':
+              raise SystemExit('Candidate native journal is not complete')
+          if candidate_native.get('output') != expected_output:
+              raise SystemExit('Candidate native output mismatch')
+          snapshot_path = root / '.continual' / 'runs' / run_id / 'snapshot.json'
+          if subprocess.check_output(['git', 'hash-object', str(snapshot_path)], text=True).strip() != os.environ['EXPECTED_SNAPSHOT_BLOB']:
+              raise SystemExit('revision115 snapshot changed while only preflight was consumed')
+          unit_path = root / '.continual' / 'runs' / run_id / 'execution-units' / f"{os.environ['RESULT_UNIT_ID']}.json"
+          unit = json.loads(unit_path.read_text())
+          matches = []
+          for path in sorted((root / '.continual' / 'runs' / run_id / 'preflight').glob('preflight-task_evaluate-*.json')):
+              if json.loads(path.read_text()) == expected_output:
+                  matches.append(path)
+          if len(matches) != 1:
+              raise SystemExit(f'expected one exact Task Evaluate preflight output, got {len(matches)}')
+          preflight_path = matches[0]
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1:
+              raise SystemExit(f'expected one Task Evaluate request, got {len(pending)}')
+          request = pending[0]
+          if request.get('component') != 'task_evaluate':
+              raise SystemExit('next pending request is not Task Evaluate')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Task Evaluate request identity mismatch')
+          payload = request.get('payload', {})
+          if payload.get('execution_unit') != unit:
+              raise SystemExit('Task Evaluate request did not bind exact selected unit')
+          if payload.get('preflight_selection', {}).get('decision') != 'BASELINE_FIRST':
+              raise SystemExit('Task Evaluate request did not retain BASELINE_FIRST')
+          if payload.get('candidate') not in (None, {}):
+              raise SystemExit('BASELINE_FIRST request unexpectedly retained a Candidate overlay')
+          clocks = payload.get('decision_context', {}).get('source_clock', {})
+          if clocks.get('user_input_inbox', {}).get('version') != 'revision:38':
+              raise SystemExit('Task Evaluate request inbox clock mismatch')
+          if clocks.get('native_run_snapshot', {}).get('version') != 'revision:115':
+              raise SystemExit('Task Evaluate request snapshot clock mismatch')
+          work_id = request['invocation_id']
+          request_rel = f'.continual/work-model/invocations/{work_id}/request.json'
+          if (root / request_rel).with_name('response.json').exists():
+              raise SystemExit('Task Evaluate request already has a response')
+          prompt_ref = request.get('prompt_path')
+          if prompt_ref != 'prompts/task_evaluate.md':
+              raise SystemExit('BASELINE_FIRST Task Evaluate prompt mismatch')
+          awaiting = []
+          for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
+              value = json.loads(path.read_text())
+              if value.get('status') == 'awaiting_work_model':
+                  awaiting.append((path, value))
+          if len(awaiting) != 1:
+              raise SystemExit(f'expected one awaiting Task Evaluate native journal, got {len(awaiting)}')
+          native_path, native = awaiting[0]
+          if native.get('component') != 'task_evaluate' or native.get('work_invocation_id') != work_id:
+              raise SystemExit('Task Evaluate native-to-Work identity mismatch')
+          if native.get('work_request_digest') != request.get('request_digest') or native.get('work_request_ref') != request_rel:
+              raise SystemExit('Task Evaluate native-to-Work digest/ref mismatch')
+          response_rel = f'.continual/work-model/invocations/{candidate_work_id}/response.json'
+          fragment_rel = candidate_native['fragment_ref']
+          local_learn_rel = f'.continual/runs/{run_id}/local-learn/{candidate_native_id}-candidate_evaluate.json'
+          summary = {
+              'candidate_native_invocation_id': candidate_native_id,
+              'candidate_work_invocation_id': candidate_work_id,
+              'candidate_response_ref': response_rel,
+              'candidate_response_digest': verified_candidate['response']['response_digest'],
+              'candidate_response_blob_sha': subprocess.check_output(['git', 'hash-object', response_rel], text=True).strip(),
+              'candidate_native_blob_sha': subprocess.check_output(['git', 'hash-object', str(candidate_native_path)], text=True).strip(),
+              'candidate_fragment_ref': fragment_rel,
+              'candidate_fragment_blob_sha': subprocess.check_output(['git', 'hash-object', fragment_rel], text=True).strip(),
+              'candidate_local_learn_ref': local_learn_rel,
+              'candidate_local_learn_blob_sha': subprocess.check_output(['git', 'hash-object', local_learn_rel], text=True).strip(),
+              'semantic_preflight_ref': preflight_path.relative_to(root).as_posix(),
+              'semantic_preflight_blob_sha': subprocess.check_output(['git', 'hash-object', str(preflight_path)], text=True).strip(),
+              'pending_native_invocation_id': native['invocation_id'],
+              'pending_native_invocation_ref': native_path.relative_to(root).as_posix(),
+              'pending_native_invocation_blob_sha': subprocess.check_output(['git', 'hash-object', str(native_path)], text=True).strip(),
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': request_rel,
+              'pending_request_digest': request['request_digest'],
+              'pending_request_blob_sha': subprocess.check_output(['git', 'hash-object', request_rel], text=True).strip(),
+              'pending_component': 'task_evaluate',
+              'preflight_decision': 'BASELINE_FIRST',
+              'selected_candidate_id': None,
+              'snapshot_revision': 95,
+              'snapshot_phase': 'unit_pending',
+              'snapshot_blob_sha': os.environ['EXPECTED_SNAPSHOT_BLOB'],
+              'verification': expected_after,
+          }
+          Path('/tmp/candidate-consume-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-candidate-postcommit-clean-g1-live-not-evaluable-preflight-consume-task-evaluate-freeze-v1.json'
+          receipt = {
+              'schema_version': 1,
+              'record_type': 'generation29_candidate_postcommit_clean_g1_live_not_evaluable_preflight_consume_receipt',
+              'recorded_at': datetime.now(UTC).isoformat().replace('+00:00', 'Z'),
+              'authority': {
+                  'execution_id': 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3',
+                  'lease_generation': 29,
+                  'fence_token_digest': 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d',
+              },
+              'source_main_sha': os.environ['RUNTIME_MAIN'],
+              'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
+              'source_ci_workflow_run_id': int(os.environ['SOURCE_CI_RUN_ID']),
+              'idempotency_key': 'o-work-gen29:consume-candidate-invoke-2172f756fdc5a8c04aefbc16:freeze-task-evaluate:revision38:v1',
+              'completed_effect': summary,
+              'request_recreated': False,
+              'candidate_reinvoked': False,
+              'resume_required': True,
+              'next_action': 'Exact-head validate and merge this fail-closed-trial Candidate response plus the unique Task Evaluate freeze, bind state, then answer the exact Task Evaluate request once.',
+          }
+          receipt_path = root / receipt_rel
+          receipt_path.parent.mkdir(parents=True, exist_ok=True)
+          receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          print('CANDIDATE_CONSUME=' + json.dumps(summary, sort_keys=True))
+          PY
+
+      - name: Stage only exact Candidate lifecycle delta and push once
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          run_id = os.environ['RUN_ID']
+          candidate_native_id = os.environ['CANDIDATE_NATIVE_ID']
+          candidate_work_id = os.environ['CANDIDATE_WORK_ID']
+          summary = json.loads(Path('/tmp/candidate-consume-summary.json').read_text())
+          work_obs = json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']
+          ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-candidate-preflight-consume-task-evaluate-freeze-v1.json'
+          expected_status = {
+              f'.continual/runs/{run_id}/events.jsonl': 'M',
+              f'.continual/runs/{run_id}/invocations/{candidate_native_id}.json': 'M',
+              f'.continual/work-model/invocations/{candidate_work_id}/response.json': 'A',
+              summary['candidate_fragment_ref']: 'A',
+              summary['candidate_local_learn_ref']: 'A',
+              summary['semantic_preflight_ref']: 'A',
+              summary['pending_native_invocation_ref']: 'A',
+              summary['pending_request_ref']: 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/receipt.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/receipt.json': 'A',
+              receipt_rel: 'A',
+          }
+          status = {}
+          for line in subprocess.check_output(['git', 'diff', '--name-status'], text=True).splitlines():
+              code, path = line.split('\t', 1)
+              status[path] = code
+          normal = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], text=True).splitlines()
+          ignored = subprocess.check_output(['git', 'ls-files', '--others', '--ignored', '--exclude-standard'], text=True).splitlines()
+          for path in normal + ignored:
+              status.setdefault(path, 'A')
+          install_artifacts = {
+              path for path in status
+              if path.startswith('src/agi/__pycache__/')
+              or path.startswith('src/continual/__pycache__/')
+              or path.startswith('src/continual_chatgpt.egg-info/')
+          }
+          for path in install_artifacts:
+              status.pop(path, None)
+          preflight_prefix = f'.continual/runs/{run_id}/preflight/preflight-'
+          preflight_paths = sorted(
+              path for path, code in status.items()
+              if path.startswith(preflight_prefix) and path.endswith('.json') and code == 'A'
+          )
+          if summary['semantic_preflight_ref'] not in preflight_paths:
+              raise SystemExit('semantic Task Evaluate preflight is not a new exact artifact')
+          for path in preflight_paths:
+              expected_status[path] = 'A'
+          if status != expected_status:
+              raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({
+                  'expected': expected_status,
+                  'observed': status,
+                  'missing': sorted(set(expected_status) - set(status)),
+                  'unexpected': sorted(set(status) - set(expected_status)),
+              }, sort_keys=True))
+          required = sorted(expected_status)
+          for path in required:
+              if not Path(path).is_file():
+                  raise SystemExit('required lifecycle path missing: ' + path)
+          subprocess.run(['git', 'add', '-f', '--', *required], check=True)
+          staged = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines())
+          if staged != set(required):
+              raise SystemExit('staged lifecycle set mismatch')
+          immutable = sorted(path for path in staged if path.startswith('.continual/work-model/invocations/'))
+          expected_immutable = sorted([
+              f'.continual/work-model/invocations/{candidate_work_id}/response.json',
+              summary['pending_request_ref'],
+          ])
+          if immutable != expected_immutable:
+              raise SystemExit('immutable Work mutation set mismatch: ' + json.dumps(immutable))
+          print('STAGED_PATHS=' + '\n'.join(required))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '[native-candidate-preflight-result] gen29 consume Candidate preflight and freeze Task Evaluate'
+          git push origin "HEAD:$GITHUB_REF_NAME"
