@@ -88,7 +88,7 @@ def test_benchmark_replays_byte_stably_and_preserves_claim_boundary() -> None:
 def test_artifact_writer_is_deterministic_and_complete(tmp_path: Path) -> None:
     first = write_cross_clock_artifacts(PROTOCOL, tmp_path / "a")
     second = write_cross_clock_artifacts(PROTOCOL, tmp_path / "b")
-    assert first["artifact_count"] == 9
+    assert first["artifact_count"] == 10
     assert first["files"] == second["files"]
     for name in first["files"]:
         assert (tmp_path / "a" / name).read_bytes() == (tmp_path / "b" / name).read_bytes()
