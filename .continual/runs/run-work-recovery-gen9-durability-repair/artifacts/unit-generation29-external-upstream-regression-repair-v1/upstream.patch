@@ -1,0 +1,31 @@
+diff --git a/src/novelai/_utils/converter.py b/src/novelai/_utils/converter.py
+index dddfb55..c315499 100644
+--- a/src/novelai/_utils/converter.py
++++ b/src/novelai/_utils/converter.py
+@@ -95,7 +95,7 @@ def _create_v4_prompts(
+                 characters, is_negative=False
+             ),
+         ),
+-        use_coords=False,
++        use_coords=any(char.enabled for char in characters or []),
+         use_order=True,
+     )
+ 
+@@ -301,7 +301,7 @@ def convert_user_params_to_api_params(
+         dynamic_thresholding=False,
+         legacy_uc=False,
+         inpaintImg2ImgStrength=source_strength,
+-        use_coords=False,
++        use_coords=any(char.enabled for char in params.characters or []),
+         normalize_reference_strength_multiple=False,
+         # Basic parameters
+         width=width,
+@@ -425,7 +425,7 @@ async def async_convert_user_params_to_api_params(
+         dynamic_thresholding=False,
+         legacy_uc=False,
+         inpaintImg2ImgStrength=source_strength,
+-        use_coords=False,
++        use_coords=any(char.enabled for char in params.characters or []),
+         normalize_reference_strength_multiple=False,
+         width=width,
+         height=height,
