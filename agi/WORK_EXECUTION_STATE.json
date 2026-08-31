@@ -1705,7 +1705,7 @@
     "native_phase": "unit_pending",
     "pending_component": "candidate_evaluate",
     "target_component": "task_evaluate",
-    "source_main_sha": "5aa98ed983f063b111b304e0a1a7266754885965",
+    "source_main_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "durability_status": "pending_native_consume",
     "status": "remote_main_readback_verified",
     "request_recreated": false,
@@ -1779,7 +1779,7 @@
     "native_phase": "unit_pending",
     "pending_component": "candidate_evaluate",
     "target_component": "task_evaluate",
-    "source_main_sha": "5aa98ed983f063b111b304e0a1a7266754885965",
+    "source_main_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "durability_status": "pending_native_consume",
     "status": "remote_main_readback_verified",
     "request_recreated": false,
@@ -12151,7 +12151,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-08-31T23:22:19.530Z",
+  "heartbeat_at": "2026-08-31T23:27:22.911Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -15274,7 +15274,7 @@
     "verified_at": "2026-08-31T23:15:17.403Z"
   },
   "generation29_task_evaluate_ci_policy_schema_repair_v1": {
-    "phase": "repair_exact_readback_verified",
+    "phase": "repair_complete_with_continuity_binding_fix_pending_readback",
     "recorded_at": "2026-08-31T23:21:51.789Z",
     "expected_prior_main_sha": "82d10719bc5b899a45bfa5c514df6f12dffb7b59",
     "expected_prior_state_blob_sha": "dea76fee9b122ea6652cf38a5c097e6ef46e04d4",
@@ -15293,7 +15293,7 @@
     ],
     "intended_exact_head_sha": "5a6ef249fc001ff29704aaca323cdbfb1038e53f",
     "intended_max_age_seconds": 7200,
-    "recurrence_validation": "rerun exact one-shot Candidate consume only after final state blob exact-readback; prepare_ci_source_observation must pass before any response submission",
+    "recurrence_validation": "assert_work_resume_continuity_preflight must now pass after CI source observation verification and before work-submit",
     "preserved_pending_native_invocation_id": "invoke-1487948ebb1ccf851231d1b1",
     "preserved_pending_work_invocation_id": "invoke-089a664f465dbc66e143b9ed",
     "preserved_pending_request_digest": "7d59bc824db5c941c7a88a06aec81a864278b3192265b68f2bb0b741e189767c",
@@ -15307,6 +15307,11 @@
     "applied_state_blob_sha": "423187b9a3f5b6e21b8a909e93c57f2a14dd2bdc",
     "exact_schema_readback": true,
     "pending_request_preserved": true,
-    "next_action": "rerun exact one-shot Candidate consume from original frozen request without creating a duplicate"
+    "next_action": "rerun exact one-shot Candidate consume from original frozen request without creating a duplicate",
+    "second_failed_workflow_run_id": 33450414698,
+    "second_failed_job_id": 99678823761,
+    "secondary_concrete_stop_cause": "continuation_durability.source_main_sha was bound to phase1 state commit 5aa98ed while snapshot_head_sha and immutable pending request source were on merge commit 3ceca061; runtime requires exact equality",
+    "secondary_repair": "set source_main_sha to existing exact snapshot_head_sha 3ceca061 in both exact_continuation and continuation_durability without changing the frozen request, snapshot, generation, fence, or inbox",
+    "secondary_applied_at": "2026-08-31T23:27:22.911Z"
   }
 }
