@@ -395,8 +395,12 @@ jobs:
               'replay-verification.json',
               'upstream.patch',
           ])
+          expected_directory = sorted(expected + [
+              str(trial / 'issue-89-source.json'),
+              str(trial / 'precommitted-selector-manifest.json'),
+          ])
           observed = sorted(str(path) for path in trial.iterdir() if path.is_file())
-          if observed != expected:
+          if observed != expected_directory:
               raise SystemExit(f'unexpected evidence set: {observed!r}')
           subprocess.run(['git', 'add', '-f', '--', *expected], check=True)
           staged = sorted(subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines())
