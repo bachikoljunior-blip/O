@@ -5,10 +5,10 @@
   "active_unit_id": "unit-generation29-cross-clock-resumption-counterfactual-v1",
   "agi_claim_supported": false,
   "authoritative_source_observation": {
-    "observed_at": "2026-08-31T12:44:31.529Z",
+    "observed_at": "2026-08-31T13:16:54.961Z",
     "required_before_next_semantic_freeze": true,
-    "source_main_sha": "d98f085fc7c8621886a7732ac5dff6efe6d40ce9",
-    "status": "exact_main_readback_verified_after_pr385_root_completed_candidate_evaluate_unique_pending"
+    "source_main_sha": "faa26797b6f842c9a902a893e538e8ffc5dd9a56",
+    "status": "exact_main_readback_verified_after_candidate_execute_freeze_heartbeat_stop_cause_repair"
   },
   "authoritative_source_observation_policy": {
     "executor_binding": "current_chatgpt_work_session",
@@ -542,7 +542,7 @@
     "exact_completed_request_digest": "eefcf711a7eb32f389d5e91dea9a7c39d5bb6824887a41842e166851002ab3a8",
     "exact_completed_response_digest": "d5f80f3072bdfe41c5ec18c5297a1569cb83e67c38a6cebfcf4199314a6813be",
     "exact_completed_work_invocation_id": "invoke-cb5b97a104622aea5f019d38",
-    "exact_frontier": "revision119 Candidate Evaluate is uniquely frozen and pending exact-once response consumption",
+    "exact_frontier": "revision119 Candidate Evaluate remains uniquely frozen and unanswered on authoritative main",
     "exact_frozen_request_blob_sha": "43c9152ceeebe2259663534a04c438241a490f6e",
     "exact_frozen_request_digest": "05bf12a57e4e6d517507bdbb59d15a2d39f3c2d0a40f2c3e0a51b73026543728",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-c5c119aff74ae340fd143b9b/request.json",
@@ -584,8 +584,8 @@
     },
     "merge_sha": "d98f085fc7c8621886a7732ac5dff6efe6d40ce9",
     "merge_tree_sha": "31db89c31fe5b3732aa1008f2928c8736bb005ad",
-    "next_action": "Consume Candidate Evaluate invoke-27fae06ba7ae79b8e355d3b3 exactly once, verify one Execute successor for unit-generation29-cross-clock-resumption-counterfactual-v1, then implement the bounded synthetic protected-versus-fail-open benchmark.",
-    "next_tool_action": "consume exact frozen Candidate Evaluate request once through a branch workflow bound to this expected state blob",
+    "next_action": "Exact-read this heartbeat CAS, rebuild the existing failed workflow branch from this refreshed main, consume invoke-27fae06ba7ae79b8e355d3b3 exactly once, and freeze the unique Execute successor.",
+    "next_tool_action": "retry the existing Candidate consume workflow only after exact state/main/response readback",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
@@ -664,7 +664,7 @@
       "repository_queued_runs": 62,
       "target_runs_status": "queued"
     },
-    "reason": "Concrete Learn-to-Root resume stop cause is the expired authoritative heartbeat; the unchanged generation29/fence and exact frozen Learn continuation remain authoritative, and no response is durable remotely.",
+    "reason": "Candidate consume run 33395856265 submitted only to the ephemeral runner, then fail-closed before Execute freeze because the decision-context Work heartbeat exceeded the 300-second freshness limit. No Candidate response or successor is durable remotely.",
     "recovered_decision_context_manifest_digest": "38a59e23bce361626a6929c96652b81668f2086dc7ba62136deb8c43261a7347",
     "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c",
     "recovered_frozen_native_invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
@@ -722,29 +722,13 @@
       "intended_slot": "2026-08-31T02:12:00Z",
       "path": "automation_control/receipts/o_work_monitor_recovery/20260831T021345Z-gen29-scheduled-slot-overlap-0212.json"
     },
-    "status": "candidate_evaluate_pending_native_consume_main_readback_verified",
+    "status": "candidate_evaluate_pending_native_consume_heartbeat_repaired",
     "stop_cause": {
-      "status": "heartbeat_refresh_exact_readback_verified_branch_rebind_pending",
-      "observed_at": "2026-08-31T10:42:28.884Z",
-      "failed_workflow_run_id": 33382998357,
-      "failed_job_id": 99459314760,
-      "failed_step": "Submit exact Learn response and freeze Root",
-      "exact_error": "continual.work_session.WorkSessionError: Context Kernel failed closed: decision context Work heartbeat is stale",
-      "concrete_stop_cause": "The authoritative Work heartbeat at 2026-08-31T10:19:21.994Z crossed stale_after_seconds=900 before work-resume built the Root decision context.",
-      "remote_learn_response_exists": false,
-      "remote_lifecycle_mutated": false,
-      "local_ephemeral_work_submit_succeeded": true,
-      "local_ephemeral_resume_failed_before_push": true,
-      "duplicate_retry_forbidden": true,
-      "repair": "Refresh the unchanged generation29/fence heartbeat by expected-main/expected-state-blob CAS and exact readback; merge that exact state into the existing Learn branch, rebind the workflow to the refreshed main/state blob, then retry once. Preserve the same frozen Learn request and verify the response remains absent remotely before retry.",
-      "recurrence_validation_pending": true,
-      "recurrence_workflow_run_id": null,
-      "recurrence_job_id": null,
-      "prior_last_progress_at": "2026-08-31T10:19:21.994Z",
-      "last_progress_at_preserved": true,
-      "repair_verified_at": "2026-08-31T10:43:30.234Z",
-      "repair_commit_sha": "b728746abbe066448efe2f0745244361a4111a15",
-      "repair_state_blob_sha": "0874dd0673e2311cd4ae11bd18177d4ea004c600"
+      "failed_run_id": 33395856265,
+      "failed_step": "Submit exact Candidate baseline response and freeze Execute",
+      "mechanism": "decision context Work heartbeat is stale",
+      "evidence": "GitHub Actions job 99500084280 failed in Context Kernel before Execute preflight/successor freeze; authoritative Candidate response remains absent on main.",
+      "repair": "Refresh only heartbeat/source-observation metadata under unchanged generation29/fence and exact pending Candidate request, exact-read it, then rebuild the same workflow branch from the refreshed main and retry once."
     },
     "stop_cause_repair_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-task-evaluate-postcommit-clean-g1-not-evaluable-consume-consolidate-freeze-v1.json",
@@ -851,7 +835,8 @@
     "next_tool": "Build and launch one isolated exact-main Learn response workflow after rechecking generation/fence/state blob and exact frozen request digest; monitor post-merge exact-head CI concurrently.",
     "snapshot_revision": 119,
     "snapshot_phase": "unit_pending",
-    "snapshot_blob_sha": "d5415e5dcd1e8e165b3e1ce1f0772f6891a4dc2e"
+    "snapshot_blob_sha": "d5415e5dcd1e8e165b3e1ce1f0772f6891a4dc2e",
+    "recorded_at": "2026-08-31T13:16:54.961Z"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -10357,7 +10342,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-08-31T12:44:31.529Z",
+  "heartbeat_at": "2026-08-31T13:16:54.961Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -11187,7 +11172,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_activity_at": "2026-08-31T10:19:21.994Z",
-  "last_progress_at": "2026-08-31T12:44:31.529Z",
+  "last_progress_at": "2026-08-31T13:16:54.961Z",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "4cfcffe49290f53879863d2ac9029944782c3535",
@@ -14418,5 +14403,24 @@
     "resume_required": true,
     "upper_objective_achieved": false,
     "agi_achieved": false
+  },
+  "generation29_candidate_cross_clock_resumption_heartbeat_repair_v1": {
+    "recorded_at": "2026-08-31T13:16:54.961Z",
+    "status": "repair_committing",
+    "failed_workflow_run_id": 33395856265,
+    "failed_job_id": 99500084280,
+    "concrete_stop_cause": "The Candidate response was accepted only inside the ephemeral runner, but Context Kernel rejected successor freeze because the source Work heartbeat was older than 300 seconds.",
+    "durable_effects_before_failure": "none; Candidate response absent and Execute successor absent on authoritative main",
+    "frozen_candidate": {
+      "work_invocation_id": "invoke-27fae06ba7ae79b8e355d3b3",
+      "native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
+      "request_blob_sha": "4f5fda7c51b6751957a9fb9bf44b5b6f2787c719",
+      "request_digest": "9feb086122e9a0c70331a40bb6b0a89d06f25c6f927aa665ab38f6f78983e082",
+      "response_exists_on_authoritative_remote": false
+    },
+    "repair": "Heartbeat and source observation refreshed only; generation, fence, execution id, frozen request, inbox revision38/blob, snapshot revision119/blob, and idempotency key remain unchanged.",
+    "recurrence_validation": "Re-run the same exact-main fail-closed preflight and require Execute successor freeze plus lifecycle exact-readback.",
+    "idempotency_key": "o-work-gen29:repair-candidate-cross-clock-heartbeat-run-33395856265:v1",
+    "resume_required": true
   }
 }
