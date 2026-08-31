@@ -59,15 +59,15 @@ jobs:
           from pathlib import Path
 
           trial = Path(os.environ['TRIAL_DIR'])
-          expected = [
+          expected = sorted([
               '.github/workflows/gen29-external-upstream-regression-repair-trial-v1.yml',
               f'{trial}/issue-89-source.json',
               f'{trial}/precommitted-selector-manifest.json',
-          ]
-          observed = subprocess.check_output(
+          ])
+          observed = sorted(subprocess.check_output(
               ['git', 'diff', '--name-only', os.environ['BRANCH_BASE'], 'HEAD'],
               text=True,
-          ).splitlines()
+          ).splitlines())
           if observed != expected:
               raise SystemExit(f'pre-trial branch delta mismatch: {observed!r}')
 
