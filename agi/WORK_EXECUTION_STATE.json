@@ -5,10 +5,10 @@
   "active_unit_id": "unit-generation29-evaluate-postcommit-clean-g1-independent-live-forecast-v1",
   "agi_claim_supported": false,
   "authoritative_source_observation": {
-    "observed_at": "2026-08-31T10:19:21.994Z",
+    "observed_at": "2026-08-31T10:42:28.884Z",
     "required_before_next_semantic_freeze": true,
-    "source_main_sha": "538ac91dd1492fc89816713cc7d732707d050bc4",
-    "status": "exact_main_readback_verified_after_pr382_consolidate_completed_learn_unique_pending"
+    "source_main_sha": "a4988f11c6389e2acd16491d2987b1a78ecfca65",
+    "status": "exact_main_state_and_pending_learn_readback_verified_before_stale_heartbeat_repair_cas"
   },
   "authoritative_source_observation_policy": {
     "executor_binding": "current_chatgpt_work_session",
@@ -196,7 +196,7 @@
     "branch_head_sha": "538ac91dd1492fc89816713cc7d732707d050bc4",
     "branch_head_tree_sha": "01129c7e1451e152a03e0d0e192f1a80628d81e4",
     "branch_result_receipt_blob_sha": "ea9860bfd349f9f83236d7bbfa3f091c838217a3",
-    "checkpointed_at": "2026-08-31T10:19:21.994Z",
+    "checkpointed_at": "2026-08-31T10:42:28.884Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-consolidate-postcommit-clean-g1-not-evaluable-consume-learn-freeze-v1.json",
       "blob_sha": "a6686bbee85b8ef96dbcef1fd66038182f9d4a36",
@@ -560,15 +560,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
-    "idempotency_key": "o-work-gen29:pr382:538ac91d:learn-bound:v1",
-    "last_verified_effect": {
-      "kind": "consolidate_response_consumed_learn_frozen_main_durable",
-      "pull_request": 382,
-      "merge_sha": "538ac91dd1492fc89816713cc7d732707d050bc4",
-      "receipt_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-consolidate-postcommit-clean-g1-not-evaluable-consume-learn-freeze-v1.json",
-      "receipt_blob_sha": "a6686bbee85b8ef96dbcef1fd66038182f9d4a36",
-      "verified_at": "2026-08-31T10:19:21.994Z"
-    },
+    "idempotency_key": "o-work-gen29:learn-postcommit-clean-g1:stale-heartbeat-repair:33382998357:v1",
+    "last_verified_effect": "PR382 lifecycle is durable on main with unique frozen Learn pending; failed recurrence run 33382998357 produced no remote lifecycle commit.",
     "lease_generation": 29,
     "merge_authorization": {
       "status": "completed_merged_and_readback_verified",
@@ -591,8 +584,8 @@
     },
     "merge_sha": "fa5c1c06d64fcaba6982c076d65acb7f6b6842ee",
     "merge_tree_sha": "094151244f66cad99e5bff3d8ada549ea08d13f7",
-    "next_action": "Consume the exact frozen Learn response once for Work invoke-c5c119aff74ae340fd143b9b, resume native invoke-2bc2261e87d1bd5f27aa083c, verify revision-118 and the unique Root successor freeze, then continue immediately to a materially different safe Root-selected unit without recreating or duplicating the Learn request.",
-    "next_tool_action": "Update the one-shot branch expected-main/state constants and allow exactly one push-triggered recurrence check.",
+    "next_action": "Exact-readback this heartbeat repair, merge the refreshed main state into the existing Learn branch, rebind EXPECTED_MAIN/EXPECTED_STATE_BLOB, verify the Learn response is still absent remotely, and retry the exact frozen Learn request once through Root freeze.",
+    "next_tool_action": "fetch refreshed main commit/blob, update existing Learn workflow branch by expected blob, then observe the new exact-head recurrence workflow",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": null,
@@ -610,7 +603,8 @@
     "pending_job_ids": [
       99453696265,
       99453696351,
-      99453696414
+      99453696414,
+      99459314760
     ],
     "pending_learn_native_invocation_id": null,
     "pending_learn_request_blob_sha": null,
@@ -626,7 +620,8 @@
     "pending_task_evaluate_request_ref": ".continual/work-model/invocations/invoke-115ab8989cbae76d07e0c5a5/request.json",
     "pending_task_evaluate_work_invocation_id": "invoke-115ab8989cbae76d07e0c5a5",
     "pending_workflow_run_ids": [
-      33381191299
+      33381191299,
+      33382998357
     ],
     "postmerge_checkpoint": {
       "blob_sha": "5840402802415c3c0e7f7f0d4de47bb320ce877e",
@@ -670,7 +665,7 @@
       "repository_queued_runs": 62,
       "target_runs_status": "queued"
     },
-    "reason": "PR380 merged and exact-readback the fail-closed Candidate BASELINE_FIRST preflight, all 13 lifecycle blobs, workflow absence, preserved inbox/snapshot invariants, and the unique unanswered Task Evaluate successor. No source/retrieval/prediction/reveal/score effect, Candidate activation, AGI claim, or user-level completion is asserted.",
+    "reason": "Concrete Learn-to-Root resume stop cause is the expired authoritative heartbeat; the unchanged generation29/fence and exact frozen Learn continuation remain authoritative, and no response is durable remotely.",
     "recovered_decision_context_manifest_digest": "38a59e23bce361626a6929c96652b81668f2086dc7ba62136deb8c43261a7347",
     "recovered_events_blob_sha": "95699dec79f3e0a3642d3ed198460c19d6bbd86c",
     "recovered_frozen_native_invocation_id": "invoke-863ecdb0bbb9da518791d7b7",
@@ -728,8 +723,27 @@
       "intended_slot": "2026-08-31T02:12:00Z",
       "path": "automation_control/receipts/o_work_monitor_recovery/20260831T021345Z-gen29-scheduled-slot-overlap-0212.json"
     },
-    "status": "consolidate_snapshot_binding_repaired_pending_preflight",
-    "stop_cause": "Durable continuation omitted snapshot_branch/main and full snapshot_head_sha.",
+    "status": "stale_heartbeat_cause_identified_repair_cas_pending_readback",
+    "stop_cause": {
+      "status": "heartbeat_refresh_cas_written_exact_readback_pending",
+      "observed_at": "2026-08-31T10:42:28.884Z",
+      "failed_workflow_run_id": 33382998357,
+      "failed_job_id": 99459314760,
+      "failed_step": "Submit exact Learn response and freeze Root",
+      "exact_error": "continual.work_session.WorkSessionError: Context Kernel failed closed: decision context Work heartbeat is stale",
+      "concrete_stop_cause": "The authoritative Work heartbeat at 2026-08-31T10:19:21.994Z crossed stale_after_seconds=900 before work-resume built the Root decision context.",
+      "remote_learn_response_exists": false,
+      "remote_lifecycle_mutated": false,
+      "local_ephemeral_work_submit_succeeded": true,
+      "local_ephemeral_resume_failed_before_push": true,
+      "duplicate_retry_forbidden": true,
+      "repair": "Refresh the unchanged generation29/fence heartbeat by expected-main/expected-state-blob CAS and exact readback; merge that exact state into the existing Learn branch, rebind the workflow to the refreshed main/state blob, then retry once. Preserve the same frozen Learn request and verify the response remains absent remotely before retry.",
+      "recurrence_validation_pending": true,
+      "recurrence_workflow_run_id": null,
+      "recurrence_job_id": null,
+      "prior_last_progress_at": "2026-08-31T10:19:21.994Z",
+      "last_progress_at_preserved": true
+    },
     "stop_cause_repair_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-task-evaluate-postcommit-clean-g1-not-evaluable-consume-consolidate-freeze-v1.json",
       "blob_sha": "9fb9d8b226e7e883ca4f68d9efae959ef234eca1",
@@ -10345,7 +10359,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-08-31T10:19:21.994Z",
+  "heartbeat_at": "2026-08-31T10:42:28.884Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -11178,9 +11192,9 @@
   "last_progress_at": "2026-08-31T10:19:21.994Z",
   "lease_generation": 29,
   "lease_renewal": {
-    "expected_blob_sha": "cbc360688a0e8ac567b4bd6377274a70653bc94d",
-    "reason": "bind exact postmerge pending Execute Work request before exactly-once response publication",
-    "requested_at": "2026-08-29T08:35:28.112Z",
+    "expected_blob_sha": "4cfcffe49290f53879863d2ac9029944782c3535",
+    "requested_at": "2026-08-31T10:42:28.884Z",
+    "reason": "repair the exact Learn-to-Root Context Kernel stale-heartbeat stop cause without changing generation, fence, frozen Learn request, or last_progress_at",
     "verified_remote_readback": false
   },
   "local_combined_regression": {
@@ -13002,20 +13016,24 @@
   "started_at": "2026-08-28T05:38:45.882Z",
   "status": "running",
   "stop_cause": {
-    "status": "context_kernel_heartbeat_stale_repair_prepared_refire_pending",
-    "remote_duplicate": false,
-    "failed_workflow_run_id": 33366864656,
-    "failed_job_id": 99409208473,
-    "failed_step": "Submit exact Task Evaluate response and freeze Consolidate",
+    "status": "heartbeat_refresh_cas_written_exact_readback_pending",
+    "observed_at": "2026-08-31T10:42:28.884Z",
+    "failed_workflow_run_id": 33382998357,
+    "failed_job_id": 99459314760,
+    "failed_step": "Submit exact Learn response and freeze Root",
     "exact_error": "continual.work_session.WorkSessionError: Context Kernel failed closed: decision context Work heartbeat is stale",
-    "mechanism": "The first repaired resume correctly consumed Task Evaluate locally and reached the second step that mechanically freezes Consolidate, but the authoritative Work heartbeat from 2026-08-31T06:30:37.867Z exceeded stale_after_seconds=900 before the new Consolidate decision-context manifest was built.",
-    "repair": "Refresh the unchanged generation29/fence authority heartbeat through expected-main/expected-state-blob CAS and exact readback, merge the refreshed state into the same launch branch, bind workflow EXPECTED_MAIN/EXPECTED_STATE_BLOB to that exact state, then refire once without recreating or duplicating the frozen Task Evaluate request.",
-    "response_written": false,
-    "lifecycle_mutated": false,
-    "task_submit_local_only_not_pushed": true,
+    "concrete_stop_cause": "The authoritative Work heartbeat at 2026-08-31T10:19:21.994Z crossed stale_after_seconds=900 before work-resume built the Root decision context.",
+    "remote_learn_response_exists": false,
+    "remote_lifecycle_mutated": false,
+    "local_ephemeral_work_submit_succeeded": true,
+    "local_ephemeral_resume_failed_before_push": true,
+    "duplicate_retry_forbidden": true,
+    "repair": "Refresh the unchanged generation29/fence heartbeat by expected-main/expected-state-blob CAS and exact readback; merge that exact state into the existing Learn branch, rebind the workflow to the refreshed main/state blob, then retry once. Preserve the same frozen Learn request and verify the response remains absent remotely before retry.",
     "recurrence_validation_pending": true,
-    "successful_recurrence_run_id": null,
-    "successful_recurrence_job_id": null
+    "recurrence_workflow_run_id": null,
+    "recurrence_job_id": null,
+    "prior_last_progress_at": "2026-08-31T10:19:21.994Z",
+    "last_progress_at_preserved": true
   },
   "strategy_path": "agi/WORK_STRATEGY.json",
   "superseded_execute_closure": {
@@ -14261,5 +14279,25 @@
       "timing_mode": "exact_schedule",
       "updated_at": "2026-08-31T09:48:50.439026+00:00"
     }
+  },
+  "generation29_learn_postcommit_clean_g1_not_evaluable_stop_cause_repair_v1": {
+    "status": "heartbeat_refresh_cas_written_exact_readback_pending",
+    "observed_at": "2026-08-31T10:42:28.884Z",
+    "failed_workflow_run_id": 33382998357,
+    "failed_job_id": 99459314760,
+    "failed_step": "Submit exact Learn response and freeze Root",
+    "exact_error": "continual.work_session.WorkSessionError: Context Kernel failed closed: decision context Work heartbeat is stale",
+    "concrete_stop_cause": "The authoritative Work heartbeat at 2026-08-31T10:19:21.994Z crossed stale_after_seconds=900 before work-resume built the Root decision context.",
+    "remote_learn_response_exists": false,
+    "remote_lifecycle_mutated": false,
+    "local_ephemeral_work_submit_succeeded": true,
+    "local_ephemeral_resume_failed_before_push": true,
+    "duplicate_retry_forbidden": true,
+    "repair": "Refresh the unchanged generation29/fence heartbeat by expected-main/expected-state-blob CAS and exact readback; merge that exact state into the existing Learn branch, rebind the workflow to the refreshed main/state blob, then retry once. Preserve the same frozen Learn request and verify the response remains absent remotely before retry.",
+    "recurrence_validation_pending": true,
+    "recurrence_workflow_run_id": null,
+    "recurrence_job_id": null,
+    "prior_last_progress_at": "2026-08-31T10:19:21.994Z",
+    "last_progress_at_preserved": true
   }
 }
