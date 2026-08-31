@@ -555,8 +555,8 @@ jobs:
             raise SystemExit('Task result artifact differs from exact evaluated result')
           snapshot_rel = f'.continual/runs/{run_id}/snapshot.json'
           snapshot = json.loads((root / snapshot_rel).read_text())
-          if snapshot.get('revision') != 117 or snapshot.get('phase') != 'consolidate_pending':
-            raise SystemExit(f'snapshot did not advance exactly to revision117 consolidate_pending: {snapshot.get("revision")!r} {snapshot.get("phase")!r}')
+          if snapshot.get('revision') != 116 or snapshot.get('phase') != 'consolidate_pending':
+            raise SystemExit(f'snapshot did not advance exactly to revision116 consolidate_pending: {snapshot.get("revision")!r} {snapshot.get("phase")!r}')
           if snapshot.get('last_result_ref') != f'artifacts/{os.environ["RESULT_UNIT_ID"]}-result.json':
             raise SystemExit('snapshot last result ref mismatch')
           if snapshot.get('last_evaluation') != task_result:
@@ -612,7 +612,7 @@ jobs:
             'task_result_artifact_blob_sha': subprocess.check_output(['git', 'hash-object', artifact_rel], text=True).strip(),
             'snapshot_ref': snapshot_rel,
             'snapshot_blob_sha': subprocess.check_output(['git', 'hash-object', snapshot_rel], text=True).strip(),
-            'snapshot_revision': 117,
+            'snapshot_revision': 116,
             'snapshot_phase': 'consolidate_pending',
             'pending_native_invocation_id': native['invocation_id'],
             'pending_native_invocation_ref': native_path.relative_to(root).as_posix(),
@@ -643,7 +643,7 @@ jobs:
             'request_recreated': False,
             'task_reinvoked': False,
             'resume_required': True,
-            'next_action': 'Exact-head validate and merge this fail-closed Task Evaluate lifecycle plus revision117 Consolidate freeze, bind state, then answer the exact Consolidate request once.',
+            'next_action': 'Exact-head validate and merge this fail-closed Task Evaluate lifecycle plus revision116 Consolidate freeze, bind state, then answer the exact Consolidate request once.',
           }
           receipt_path = root / receipt_rel
           receipt_path.parent.mkdir(parents=True, exist_ok=True)
