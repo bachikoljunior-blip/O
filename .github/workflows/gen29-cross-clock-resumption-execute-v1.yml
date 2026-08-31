@@ -20,8 +20,8 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       BRANCH_BASE: 066e2cef0d9beb7112d15137c090f3678fd4b516
-      EXPECTED_MAIN: 2c57472c9c9a2fdd005914f3d14b097ef1924438
-      EXPECTED_STATE_BLOB: ef64cf5a6e3e43a04a262c68514514728c8ec060
+      EXPECTED_MAIN: 0d3466556bd376cf8702da27c2f9d73e817811b4
+      EXPECTED_STATE_BLOB: 58aed36bc25c6ac970cd48c17b21c6970c15e96e
       EXPECTED_SNAPSHOT_BLOB: d5415e5dcd1e8e165b3e1ce1f0772f6891a4dc2e
       EXPECTED_INBOX_BLOB: 34423c2dd71d95c55769f501fe1701ea0088fb32
       EXPECTED_INBOX_REVISION: '38'
@@ -47,7 +47,7 @@ jobs:
           python-version: '3.11'
           cache: pip
       - name: Install exact repository runtime
-        run: python -m pip install -e .
+        run: python -m pip install -e '.[test]'
 
       - name: Assert exact branch, main, authority, and Execute binding
         shell: bash
@@ -587,4 +587,3 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m '[native-execute-cross-clock-result] gen29 complete benchmark and freeze Task Evaluate preflight'
           git push origin "HEAD:$GITHUB_REF_NAME"
-
