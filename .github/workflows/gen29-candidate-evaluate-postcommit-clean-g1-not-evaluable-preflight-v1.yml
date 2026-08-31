@@ -409,8 +409,8 @@ jobs:
           expected_output = json.loads(Path('/tmp/candidate-output.json').read_text())
           before = json.loads(Path('/tmp/work-verify-before.json').read_text())
           expected_before = {
-              'valid': True, 'requests': 87, 'responses': 86, 'pending': 1,
-              'native_completed': 80, 'native_fragments': 80, 'native_local_learn': 74,
+              'valid': True, 'requests': 118, 'responses': 117, 'pending': 1,
+              'native_completed': 111, 'native_fragments': 111, 'native_local_learn': 102,
           }
           for key, value in expected_before.items():
               if before.get(key) != value:
@@ -509,7 +509,7 @@ jobs:
               'pending_component': 'task_evaluate',
               'preflight_decision': 'BASELINE_FIRST',
               'selected_candidate_id': None,
-              'snapshot_revision': 95,
+              'snapshot_revision': 115,
               'snapshot_phase': 'unit_pending',
               'snapshot_blob_sha': os.environ['EXPECTED_SNAPSHOT_BLOB'],
               'verification': expected_after,
@@ -560,7 +560,7 @@ jobs:
           summary = json.loads(Path('/tmp/candidate-consume-summary.json').read_text())
           work_obs = json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']
           ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
-          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-candidate-preflight-consume-task-evaluate-freeze-v1.json'
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-candidate-postcommit-clean-g1-live-not-evaluable-preflight-consume-task-evaluate-freeze-v1.json'
           expected_status = {
               f'.continual/runs/{run_id}/events.jsonl': 'M',
               f'.continual/runs/{run_id}/invocations/{candidate_native_id}.json': 'M',
@@ -627,5 +627,5 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m '[native-candidate-preflight-result] gen29 consume Candidate preflight and freeze Task Evaluate'
+          git commit -m '[native-candidate-task-evaluate-postcommit-live-not-evaluable-result] gen29 consume Candidate preflight and freeze Task Evaluate'
           git push origin "HEAD:$GITHUB_REF_NAME"
