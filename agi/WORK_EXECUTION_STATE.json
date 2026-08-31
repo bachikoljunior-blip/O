@@ -192,11 +192,11 @@
       "timing_mode": "exact_schedule",
       "updated_at": "2026-08-31T01:48:29.480447+00:00"
     },
-    "branch": "work/gen29-candidate-evaluate-postcommit-clean-g1-not-evaluable-preflight-v1",
-    "branch_head_sha": "db2536ba5b5c608bb37011eb7cd1f812d982808b",
-    "branch_head_tree_sha": "094151244f66cad99e5bff3d8ada549ea08d13f7",
+    "branch": "work/gen29-task-evaluate-postcommit-clean-g1-not-evaluable-response-v1",
+    "branch_head_sha": "d2bcf09fd3be74bf5088bc92c7cc71740cb21cd8",
+    "branch_head_tree_sha": "0157d2b92e66ab3f6d46141e497cb5f35dd8217a",
     "branch_result_receipt_blob_sha": "ea9860bfd349f9f83236d7bbfa3f091c838217a3",
-    "checkpointed_at": "2026-08-31T06:30:37.867Z",
+    "checkpointed_at": "2026-08-31T07:08:50.649Z",
     "completed_effect_receipt": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-learn-consume-root-freeze-after-blind-holder-v1.json",
     "completed_job_ids": [
       99188931218,
@@ -398,7 +398,9 @@
       99393682130,
       99393682078,
       99393682103,
-      99400394517
+      99400394517,
+      99402802237,
+      99409208473
     ],
     "completed_workflow_run_ids": [
       33270788879,
@@ -506,14 +508,16 @@
       33356174123,
       33356174143,
       33361529193,
-      33361529199
+      33361529199,
+      33364687209,
+      33366864656
     ],
-    "current_main_sha": "4ed01aab1b3dc5a4495b1d59f27d0c74cdef09e0",
+    "current_main_sha": "36514bd77e0a010521a7f5466a4c772de54be15f",
     "exact_completed_native_invocation_id": "invoke-5e9168698d944bc2758168c8",
     "exact_completed_request_digest": "3305c462a963a4f15c12320d6b26a8df63950be3d0f40dd283f478946a5ca496",
     "exact_completed_response_digest": "457216a48f9d0e16485eb90337696fee8f28f991ce3d8cc7c7745ccf478b112b",
     "exact_completed_work_invocation_id": "invoke-2172f756fdc5a8c04aefbc16",
-    "exact_frontier": "The exact frozen Task Evaluate request invoke-115ab8989cbae76d07e0c5a5 is the unique unanswered Work item on authoritative main 4ed01aab1b3dc5a4495b1d59f27d0c74cdef09e0; its response is absent and native invoke-ce159f20a14fef52aa5e369b remains awaiting_work_model.",
+    "exact_frontier": "The exact frozen Task Evaluate request invoke-115ab8989cbae76d07e0c5a5 remains the unique unanswered authoritative Work item. Two local-only workflow attempts wrote no lifecycle to the branch: the Candidate-successor assumption was repaired to Consolidate, and the remaining concrete stop cause is the expired 900-second heartbeat required to create the new Consolidate request.",
     "exact_frozen_request_blob_sha": "138fa8bb1ad005d4b297dd881d6fd0cc1b889d81",
     "exact_frozen_request_digest": "b03098574dfb759db525a8f2302eb7ba62a18411408d22c46ae66dfad1eb4dca",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-115ab8989cbae76d07e0c5a5/request.json",
@@ -531,7 +535,7 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-115ab8989cbae76d07e0c5a5",
     "goal_revision": 114,
-    "idempotency_key": "o-work-gen29:bind-task-evaluate-invoke-115ab8989cbae76d07e0c5a5:revision38:v1",
+    "idempotency_key": "o-work-gen29:repair-task-evaluate-baseline-first-successor-and-context-freshness:revision38:v1",
     "last_verified_effect": "PR380 expected-head merge 4ed01aab1b3dc5a4495b1d59f27d0c74cdef09e0 plus exact 13-path main readback, completed Candidate BASELINE_FIRST preflight, workflow absence, preserved state/inbox/snapshot, and unique unanswered Task Evaluate successor.",
     "lease_generation": 29,
     "merge_authorization": {
@@ -556,7 +560,7 @@
     "merge_sha": "4ed01aab1b3dc5a4495b1d59f27d0c74cdef09e0",
     "merge_tree_sha": "094151244f66cad99e5bff3d8ada549ea08d13f7",
     "next_action": "Consume the exact frozen Task Evaluate response once for invoke-115ab8989cbae76d07e0c5a5, resume native invoke-ce159f20a14fef52aa5e369b, preserve bounded unit PASS, live trial NOT_EVALUABLE, and upper-objective FAIL as separate verdicts, freeze the unique post-result Candidate successor, and continue immediately without duplicate invocation.",
-    "next_tool_action": "Create one guarded Task Evaluate one-shot from the exact post-CAS state blob confirmed by readback on 4ed01aab1b3dc5a4495b1d59f27d0c74cdef09e0; verify response absence, main/state/inbox/generation/fence and PR380 CI policy before submitting the prepared blob 0471d51adcdacbebb346519ce8187a3d705c83b1 exactly once.",
+    "next_tool_action": "Expected-main/expected-state-blob CAS this refreshed heartbeat, exact-readback it, merge refreshed main into the same one-shot branch while updating workflow bindings, and refire once.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": null,
@@ -827,7 +831,8 @@
         "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
       },
       "exact_readback": true
-    }
+    },
+    "current_state_blob_sha": "3189da3b676e535913bc8e8b9f1fc44bdfc628f9"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -10330,7 +10335,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-08-31T06:30:37.867Z",
+  "heartbeat_at": "2026-08-31T07:08:50.649Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -11159,7 +11164,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-08-31T06:30:37.867Z",
+  "last_activity_at": "2026-08-31T07:08:50.649Z",
   "last_progress_at": "2026-08-31T06:30:37.867Z",
   "lease_generation": 29,
   "lease_renewal": {
@@ -11361,7 +11366,7 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Consume the exact frozen Task Evaluate response once for invoke-115ab8989cbae76d07e0c5a5, resume native invoke-ce159f20a14fef52aa5e369b, preserve bounded unit PASS, live trial NOT_EVALUABLE, and upper-objective FAIL as separate verdicts, freeze the unique post-result Candidate successor, and continue immediately without duplicate invocation.",
+  "next_action": "Exact-readback the refreshed authority heartbeat, merge that state into the same Task Evaluate launch branch, bind the workflow to the refreshed main/state, refire the exact frozen Task Evaluate continuation once, and verify the unique Consolidate freeze without recreating or duplicating the request.",
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
     "base_main_sha": "aadfa7c049961e79ab7e15cd634c25b292293ff8",
@@ -12007,7 +12012,7 @@
     "changed_files": 13
   },
   "readback_of_commit_sha": "51686d434b6025a9c78e1b8b076f81d29bef7d04",
-  "reason": "PR380 merged and exact-readback the fail-closed Candidate BASELINE_FIRST preflight, all 13 lifecycle blobs, workflow absence, preserved inbox/snapshot invariants, and the unique unanswered Task Evaluate successor. No source/retrieval/prediction/reveal/score effect, Candidate activation, AGI claim, or user-level completion is asserted.",
+  "reason": "The repaired Task Evaluate lifecycle reached the correct Consolidate preflight but failed closed because the authoritative Work heartbeat aged beyond 900 seconds. The unchanged generation29/fence authority is being refreshed by exact CAS; the remote Task Evaluate response remains absent and no lifecycle effect was pushed.",
   "recent_main_integration": {
     "claim_boundary": "Generation29 post-result Candidate lifecycle after the repository-local blind-holder bounded unit PASS / upper-objective FAIL, with Candidate activation still unauthorized and one unique frozen Consolidate continuation only; no generalized capability, AGI claim, or user-level completion.",
     "exact_head_ci_result": "success",
@@ -12985,15 +12990,17 @@
   "started_at": "2026-08-28T05:38:45.882Z",
   "status": "running",
   "stop_cause": {
-    "status": "ci_policy_mismatch_eliminated_refire_pending",
+    "status": "context_kernel_heartbeat_stale_repair_prepared_refire_pending",
     "remote_duplicate": false,
-    "failed_workflow_run_id": 33360539237,
-    "failed_job_id": 99390883374,
-    "exact_error": "continual.ci_source_observation.CiSourceObservationError: workflow run id mismatch",
-    "mechanism": "The workflow projected verified run 33356174143 while ci-source-observation-prepare copied stale state policy run 33353747027.",
-    "repair": "Bind state policy to exact successful run 33356174143/head f43e998ce7df0b82c1c254e62f6fdce4d12ec320 and its five exact successful jobs before fast-forwarding the same launch branch.",
+    "failed_workflow_run_id": 33366864656,
+    "failed_job_id": 99409208473,
+    "failed_step": "Submit exact Task Evaluate response and freeze Consolidate",
+    "exact_error": "continual.work_session.WorkSessionError: Context Kernel failed closed: decision context Work heartbeat is stale",
+    "mechanism": "The first repaired resume correctly consumed Task Evaluate locally and reached the second step that mechanically freezes Consolidate, but the authoritative Work heartbeat from 2026-08-31T06:30:37.867Z exceeded stale_after_seconds=900 before the new Consolidate decision-context manifest was built.",
+    "repair": "Refresh the unchanged generation29/fence authority heartbeat through expected-main/expected-state-blob CAS and exact readback, merge the refreshed state into the same launch branch, bind workflow EXPECTED_MAIN/EXPECTED_STATE_BLOB to that exact state, then refire once without recreating or duplicating the frozen Task Evaluate request.",
     "response_written": false,
     "lifecycle_mutated": false,
+    "task_submit_local_only_not_pushed": true,
     "recurrence_validation_pending": true,
     "successful_recurrence_run_id": null,
     "successful_recurrence_job_id": null
@@ -13983,5 +13990,81 @@
     "idempotency_key": "o-work-gen29:bind-task-evaluate-invoke-115ab8989cbae76d07e0c5a5:revision38:v1",
     "resume_required": true,
     "next_action": "Consume the exact frozen Task Evaluate response once for invoke-115ab8989cbae76d07e0c5a5, resume native invoke-ce159f20a14fef52aa5e369b, preserve bounded unit PASS, live trial NOT_EVALUABLE, and upper-objective FAIL as separate verdicts, freeze the unique post-result Candidate successor, and continue immediately without duplicate invocation."
+  },
+  "generation29_task_evaluate_baseline_first_successor_repair_v1": {
+    "schema_version": 1,
+    "status": "context_freshness_repair_state_cas_prepared",
+    "recorded_at": "2026-08-31T07:08:50.649Z",
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "source_main_sha": "36514bd77e0a010521a7f5466a4c772de54be15f",
+    "source_state_blob_sha": "3189da3b676e535913bc8e8b9f1fc44bdfc628f9",
+    "frozen_task_evaluate": {
+      "work_invocation_id": "invoke-115ab8989cbae76d07e0c5a5",
+      "native_invocation_id": "invoke-ce159f20a14fef52aa5e369b",
+      "request_blob_sha": "138fa8bb1ad005d4b297dd881d6fd0cc1b889d81",
+      "request_digest": "b03098574dfb759db525a8f2302eb7ba62a18411408d22c46ae66dfad1eb4dca",
+      "prepared_output_blob_sha": "0471d51adcdacbebb346519ce8187a3d705c83b1",
+      "response_exists_on_authoritative_remote": false,
+      "request_recreated": false,
+      "response_repeated": false
+    },
+    "failed_attempts": [
+      {
+        "workflow_run_id": 33364687209,
+        "job_id": 99402802237,
+        "head_sha": "9b53a2d3074f34d336abefdaf21d41028a1006bb",
+        "failed_step": "Validate Task Evaluate consume and exact post-result Candidate freeze",
+        "error": "after verification mismatch requests: 119 != 120",
+        "concrete_cause": "BASELINE_FIRST Task Evaluate with no Candidate overlay transitions directly to consolidate_pending; the one-step workflow and old Candidate-successor validator were incorrect.",
+        "response_written_to_remote": false,
+        "lifecycle_mutated": false
+      },
+      {
+        "workflow_run_id": 33366864656,
+        "job_id": 99409208473,
+        "head_sha": "d2bcf09fd3be74bf5088bc92c7cc71740cb21cd8",
+        "failed_step": "Submit exact Task Evaluate response and freeze Consolidate",
+        "error": "Context Kernel failed closed: decision context Work heartbeat is stale",
+        "concrete_cause": "The repaired second resume step reached Consolidate preflight after the 900-second authority freshness window elapsed.",
+        "response_written_to_remote": false,
+        "lifecycle_mutated": false
+      }
+    ],
+    "repair": {
+      "branch": "work/gen29-task-evaluate-postcommit-clean-g1-not-evaluable-response-v1",
+      "repair_commit_sha": "d2bcf09fd3be74bf5088bc92c7cc71740cb21cd8",
+      "repair_tree_sha": "0157d2b92e66ab3f6d46141e497cb5f35dd8217a",
+      "workflow_blob_sha": "9a0c40a2c9c3d1883df4e1c9af79f5af4b87262f",
+      "resume_max_steps": 2,
+      "expected_successor": "consolidate_episode",
+      "expected_snapshot_revision": 117,
+      "expected_verification": {
+        "valid": true,
+        "requests": 120,
+        "responses": 119,
+        "pending": 1,
+        "native_completed": 113,
+        "native_fragments": 113,
+        "native_local_learn": 104
+      },
+      "heartbeat_refreshed_at": "2026-08-31T07:08:50.649Z"
+    },
+    "recurrence_validation": {
+      "branch_exact_readback": true,
+      "launch_delta_only_one_workflow": true,
+      "first_seven_steps_success_on_repaired_head": true,
+      "authoritative_task_response_absent": true,
+      "authoritative_state_unchanged_before_this_cas": true,
+      "request_recreated": false,
+      "duplicate_launch": false
+    },
+    "idempotency_key": "o-work-gen29:repair-task-evaluate-baseline-first-successor-and-context-freshness:revision38:v1",
+    "resume_required": true,
+    "upper_objective_achieved": false,
+    "agi_claim_supported": false,
+    "user_level_objective_met": false,
+    "next_action": "Exact-readback this refreshed state, merge it into the same launch branch with the repaired workflow and updated expected-main/state bindings, refire exactly once, verify the Task Evaluate lifecycle plus unique Consolidate freeze, then continue."
   }
 }
