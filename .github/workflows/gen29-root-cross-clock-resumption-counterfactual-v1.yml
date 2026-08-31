@@ -352,7 +352,7 @@ jobs:
           if execution_context.get('execution_unit') != expected_output['result']:
               raise SystemExit('Candidate Evaluate request did not bind exact Root-selected unit')
           frozen_snapshot = execution_context.get('snapshot', {})
-          if frozen_snapshot.get('revision') != 109 or frozen_snapshot.get('phase') != 'unit_pending' or frozen_snapshot.get('current_component') != 'execute' or frozen_snapshot.get('current_unit') != unit_id:
+          if frozen_snapshot.get('revision') != 118 or frozen_snapshot.get('phase') != 'unit_pending' or frozen_snapshot.get('current_component') != 'execute' or frozen_snapshot.get('current_unit') != unit_id:
               raise SystemExit('Candidate Evaluate request snapshot binding mismatch')
           candidates = payload.get('candidate_index', {}).get('candidates', [])
           if not isinstance(candidates, list):
@@ -415,7 +415,7 @@ jobs:
               'request_recreated': False,
               'root_reinvoked': False,
               'resume_required': True,
-              'next_action': 'Exact-head validate and merge this Root response and Candidate Evaluate preflight freeze, bind state, answer the Candidate Evaluate request exactly once, then execute the bounded blind-holder protocol repair unit.',
+              'next_action': 'Exact-head validate and merge this Root response and Candidate Evaluate preflight freeze, bind state, answer the Candidate Evaluate request exactly once, then execute the bounded cross-clock resumption counterfactual unit.',
           }
           receipt_path = root / receipt_rel
           receipt_path.parent.mkdir(parents=True, exist_ok=True)
