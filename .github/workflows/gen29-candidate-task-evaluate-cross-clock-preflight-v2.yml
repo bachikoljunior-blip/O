@@ -1,0 +1,480 @@
+name: gen29 consume Candidate Task Evaluate cross-clock preflight v1
+
+on:
+  push:
+    branches:
+      - work/gen29-candidate-task-evaluate-cross-clock-preflight-v2
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-candidate-task-evaluate-cross-clock-preflight-v2
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-candidate-preflight-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_MAIN: 2cd54e86e942e62b779ae4efe7cce07ff64b6697
+      EXPECTED_STATE_BLOB: 68c4eaac689cb8263066f877793da2eff38e1c5b
+      EXPECTED_SNAPSHOT_BLOB: 248a14ccf2518429d6d811b75db9a83ee56852c3
+      EXPECTED_INBOX_BLOB: 34423c2dd71d95c55769f501fe1701ea0088fb32
+      EXPECTED_INBOX_REVISION: '38'
+      CANDIDATE_NATIVE_ID: invoke-f1383581e489f964bb9b2b49
+      CANDIDATE_NATIVE_BLOB: 102a82ec500f634cb0a37eab20d3adfccc00e5f8
+      CANDIDATE_WORK_ID: invoke-dd2b8896187190d3992f1e4e
+      CANDIDATE_REQUEST_BLOB: 53528240cf9a8e0b733441bf62207f63ea7b10de
+      CANDIDATE_REQUEST_DIGEST: 8fe8f6bab124f34cf3b9a87139bb939ff9d9ec3c06c5d3acdb1f5b23d8d5f01c
+      SOURCE_CI_RUN_ID: '33377667811'
+      SOURCE_CI_HEAD: 257e421a232ba600d00cb2cdbc028c73f31bfc3a
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      RESULT_UNIT_ID: unit-generation29-evaluate-cross-clock-resumption-counterfactual-v1
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e .
+
+      - name: Assert exact branch, runtime main, authority, and Candidate binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          RUNTIME_MAIN="$(git rev-parse origin/main)"
+          test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
+          python - <<'PY'
+          import subprocess
+          expected = ['.github/workflows/gen29-candidate-task-evaluate-cross-clock-preflight-response.json', '.github/workflows/gen29-candidate-task-evaluate-cross-clock-preflight-v2.yml']
+          observed = subprocess.check_output(
+              ['git', 'diff', '--name-only', __import__('os').environ['EXPECTED_MAIN'], 'HEAD'],
+              text=True,
+          ).splitlines()
+          if observed != expected:
+              raise SystemExit(f'launch delta mismatch: {observed!r}')
+          PY
+          python - "$EXPECTED_MAIN" "$RUNTIME_MAIN" <<'PY'
+          import subprocess
+          import sys
+          base, latest = sys.argv[1:]
+          if subprocess.check_output(['git', 'merge-base', base, latest], text=True).strip() != base:
+              raise SystemExit('runtime main lost expected ancestry')
+          for line in subprocess.check_output(['git', 'diff', '--name-status', base, latest], text=True).splitlines():
+              status, path = line.split('\t', 1)
+              allowed = (
+                  (status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json')
+                  or (status == 'A' and path.startswith('note/automation_control/receipts/') and path.endswith('.json'))
+                  or (status == 'A' and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_') and path.endswith('_control_missing.json'))
+              )
+              if not allowed:
+                  raise SystemExit(f'unsafe runtime-main delta: {status} {path}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/runtime-state-document.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/USER_INPUT_INBOX.json?ref=$RUNTIME_MAIN" > /tmp/runtime-inbox-document.json
+          RUNTIME_STATE_BLOB="$(jq -r '.sha' /tmp/runtime-state-document.json)"
+          test "$RUNTIME_STATE_BLOB" = "$EXPECTED_STATE_BLOB"
+          test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
+          jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
+          jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object /tmp/runtime-inbox.json)" = "$EXPECTED_INBOX_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$CANDIDATE_WORK_ID/request.json)" = "$CANDIDATE_REQUEST_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$CANDIDATE_NATIVE_ID.json)" = "$CANDIDATE_NATIVE_BLOB"
+          echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
+          echo "RUNTIME_STATE_BLOB=$RUNTIME_STATE_BLOB" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_request, verify_work_invocations
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          native_id = os.environ['CANDIDATE_NATIVE_ID']
+          work_id = os.environ['CANDIDATE_WORK_ID']
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          inbox = json.loads(Path('/tmp/runtime-inbox.json').read_text())
+          snapshot = json.loads((root / '.continual' / 'runs' / run_id / 'snapshot.json').read_text())
+          request = verified_work_request(root, work_id)
+          native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
+          native = json.loads(native_path.read_text())
+          if state.get('execution_id') != 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3':
+              raise SystemExit('execution mismatch')
+          if state.get('lease_generation') != 29 or hashlib.sha256(state['fence_token'].encode()).hexdigest() != 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
+              raise SystemExit('generation/fence mismatch')
+          if state.get('status') != 'running' or state.get('resume_required') is not True:
+              raise SystemExit('authority is not resumable continuation state')
+          if state.get('active_component') != 'generation29_candidate_evaluate_cross_clock_resumption_task_evaluate_preflight_pending_native_consume':
+              raise SystemExit('active component mismatch')
+          exact = state.get('exact_continuation', {})
+          expected = {
+              'pending_native_invocation_id': native_id,
+              'pending_native_invocation_ref': f'.continual/runs/{run_id}/invocations/{native_id}.json',
+              'pending_native_invocation_blob_sha': os.environ['CANDIDATE_NATIVE_BLOB'],
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': f'.continual/work-model/invocations/{work_id}/request.json',
+              'pending_request_blob_sha': os.environ['CANDIDATE_REQUEST_BLOB'],
+              'pending_request_digest': os.environ['CANDIDATE_REQUEST_DIGEST'],
+              'pending_response_ref': None,
+              'pending_response_blob_sha': None,
+              'pending_response_digest': None,
+              'response_exists_on_authoritative_remote': False,
+              'snapshot_revision': 120,
+              'native_phase': 'unit_pending',
+              'pending_component': 'candidate_evaluate',
+              'durability_status': 'pending_native_consume',
+          }
+          for key, value in expected.items():
+              if exact.get(key) != value:
+                  raise SystemExit(f'exact continuation mismatch {key}: {exact.get(key)!r} != {value!r}')
+          durability = state.get('continuation_durability', {})
+          if durability.get('status') != 'remote_main_readback_verified' or durability.get('verified_remote_readback') is not True:
+              raise SystemExit('continuation durability is not exact-readback verified')
+          if durability.get('pending_work_invocation_id') != work_id or durability.get('pending_native_invocation_id') != native_id:
+              raise SystemExit('continuation durability binding mismatch')
+          if inbox.get('revision') != 38:
+              raise SystemExit('inbox revision mismatch')
+          if snapshot.get('revision') != 120 or snapshot.get('phase') != 'unit_pending' or snapshot.get('current_component') != 'task_evaluate':
+              raise SystemExit('snapshot is not revision120 Task Evaluate unit_pending')
+          if request.get('component') != 'candidate_evaluate' or request.get('request_digest') != os.environ['CANDIDATE_REQUEST_DIGEST']:
+              raise SystemExit('Candidate Evaluate request mismatch')
+          payload = request.get('payload', {})
+          if payload.get('mode') != 'pre-application' or payload.get('target_component') != 'task_evaluate':
+              raise SystemExit('Candidate request mode/target mismatch')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Candidate request identity mismatch')
+          if (root / '.continual' / 'work-model' / 'invocations' / work_id / 'response.json').exists():
+              raise SystemExit('Candidate request already answered')
+          if native.get('status') != 'awaiting_work_model' or native.get('component') != 'candidate_evaluate':
+              raise SystemExit('Candidate native journal is not awaiting')
+          if native.get('work_invocation_id') != work_id or native.get('work_request_digest') != request.get('request_digest'):
+              raise SystemExit('Candidate native-to-Work binding mismatch')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1 or pending[0].get('invocation_id') != work_id:
+              raise SystemExit('Candidate request is not the unique pending Work item')
+          verified = verify_work_invocations(root, run_id=run_id)
+          expected_counts = {
+              'valid': True, 'requests': 125, 'responses': 124, 'pending': 1,
+              'native_completed': 118, 'native_fragments': 118, 'native_local_learn': 108,
+          }
+          for key, value in expected_counts.items():
+              if verified.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
+          print('CANDIDATE_BINDING_OK=' + json.dumps(expected_counts, sort_keys=True))
+          PY
+          continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-verify-before.json
+          cat /tmp/work-checkpoint-verify-before.json
+
+      - name: Record fresh exact main and successful exact-head CI observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$RUNTIME_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
+          python - <<'PY'
+          import base64
+          import json
+          from pathlib import Path
+          from continual.store import Store
+          document = json.loads(Path('/tmp/runtime-state-document.json').read_text())
+          state = json.loads(base64.b64decode(''.join(document['content'].splitlines())).decode())
+          projection = {
+              'status': state['status'],
+              'owner_kind': state['owner_kind'],
+              'execution_id': state['execution_id'],
+              'lease_generation': state['lease_generation'],
+              'fence_token_digest': Store(Path('.')).stable_digest(state['fence_token'], length=64),
+              'heartbeat_at': state['heartbeat_at'],
+          }
+          Path('/tmp/work-source-projection.json').write_text(json.dumps(projection, sort_keys=True) + '\n')
+          PY
+          WORK_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/work-source-prepare.json)"
+          WORK_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/work-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$RUNTIME_MAIN" --blob-sha "$RUNTIME_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = "completed"
+          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = "success"
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
+          jq '{id, workflow_id, name, status, conclusion, head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
+          jq '[.jobs[] | {id, name, status, conclusion}] | sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
+          CI_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/ci-source-prepare.json)"
+          CI_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/ci-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$CI_OBSERVATION_ID" --request-digest "$CI_REQUEST_DIGEST" --workflow-run /tmp/workflow-run-projection.json --jobs /tmp/workflow-jobs-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+
+      - name: Recheck CAS, verify observations, and assert exact continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          LATEST_MAIN="$(git rev-parse origin/main)"
+          python - "$EXPECTED_MAIN" "$LATEST_MAIN" <<'PY'
+          import subprocess
+          import sys
+          base, latest = sys.argv[1:]
+          if subprocess.check_output(['git', 'merge-base', base, latest], text=True).strip() != base:
+              raise SystemExit('latest main lost expected ancestry')
+          for line in subprocess.check_output(['git', 'diff', '--name-status', base, latest], text=True).splitlines():
+              status, path = line.split('\t', 1)
+              allowed = (
+                  (status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json')
+                  or (status == 'A' and path.startswith('note/automation_control/receipts/') and path.endswith('.json'))
+                  or (status == 'A' and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_') and path.endswith('_control_missing.json'))
+              )
+              if not allowed:
+                  raise SystemExit(f'unsafe latest-main delta: {status} {path}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$LATEST_MAIN" > /tmp/pre-mutation-state-document.json
+          test "$(jq -r '.sha' /tmp/pre-mutation-state-document.json)" = "$RUNTIME_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from continual.ci_source_observation import verify_ci_source_observation
+          from continual.continuity_preflight import assert_work_resume_continuity_preflight
+          from continual.store import Store
+          from continual.work_source_observation import verify_work_source_observation
+
+          root = Path('.').resolve()
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          now = Store(root).utc_now()
+          work = verify_work_source_observation(
+              root, run_id=os.environ['RUN_ID'], state=state,
+              state_blob_sha=os.environ['RUNTIME_STATE_BLOB'], now=now,
+          )
+          ci = verify_ci_source_observation(root, run_id=os.environ['RUN_ID'], state=state, now=now)
+          continuity = assert_work_resume_continuity_preflight(
+              root, run_id=os.environ['RUN_ID'],
+              executor_binding=os.environ['EXECUTOR_BINDING'],
+              model_identity=os.environ['MODEL_IDENTITY'],
+          )
+          if continuity.get('resume_authorized') is not True:
+              raise SystemExit('continuity preflight did not authorize exact resume')
+          print('WORK_SOURCE_VERIFY=' + json.dumps(work, sort_keys=True))
+          print('CI_SOURCE_VERIFY=' + json.dumps(ci, sort_keys=True))
+          print('CONTINUITY_PREFLIGHT=' + json.dumps(continuity, sort_keys=True))
+          PY
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-before.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-before.json
+
+      - name: Submit exact Candidate baseline response and freeze Task Evaluate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/workflows/gen29-candidate-task-evaluate-cross-clock-preflight-response.json /tmp/candidate-output.json
+          continual --root . work-submit "$CANDIDATE_WORK_ID" --response /tmp/candidate-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/candidate-submit.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
+          cat /tmp/candidate-submit.json
+          cat /tmp/native-resume.json
+          cat /tmp/work-verify-after.json
+          cat /tmp/work-pending-after.json
+
+      - name: Validate Candidate consume and exact Task Evaluate freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from datetime import UTC, datetime
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_invocation, verify_work_invocations
+
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          candidate_native_id = os.environ['CANDIDATE_NATIVE_ID']
+          candidate_work_id = os.environ['CANDIDATE_WORK_ID']
+          expected_output = json.loads(Path('/tmp/candidate-output.json').read_text())
+          before = json.loads(Path('/tmp/work-verify-before.json').read_text())
+          expected_before = {'valid': True, 'requests': 125, 'responses': 124, 'pending': 1, 'native_completed': 118, 'native_fragments': 118, 'native_local_learn': 108}
+          for key, value in expected_before.items():
+              if before.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {before.get(key)!r}')
+          after = verify_work_invocations(root, run_id=run_id)
+          expected_after = {'valid': True, 'requests': 126, 'responses': 125, 'pending': 1, 'native_completed': 119, 'native_fragments': 119, 'native_local_learn': 109}
+          for key, value in expected_after.items():
+              if after.get(key) != value:
+                  raise SystemExit(f'after verification mismatch {key}: {after.get(key)!r} != {value!r}')
+          verified_candidate = verified_work_invocation(root, candidate_work_id)
+          if verified_candidate.get('output') != expected_output:
+              raise SystemExit('persisted Candidate output differs from submitted output')
+          candidate_native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{candidate_native_id}.json'
+          candidate_native = json.loads(candidate_native_path.read_text())
+          if candidate_native.get('status') != 'complete' or candidate_native.get('component') != 'candidate_evaluate' or candidate_native.get('output') != expected_output:
+              raise SystemExit('Candidate native completion mismatch')
+          snapshot_path = root / '.continual' / 'runs' / run_id / 'snapshot.json'
+          if subprocess.check_output(['git', 'hash-object', str(snapshot_path)], text=True).strip() != os.environ['EXPECTED_SNAPSHOT_BLOB']:
+              raise SystemExit('revision120 snapshot changed during preflight consume')
+          unit_path = root / '.continual' / 'runs' / run_id / 'execution-units' / f"{os.environ['RESULT_UNIT_ID']}.json"
+          unit = json.loads(unit_path.read_text())
+          matches = [p for p in sorted((root / '.continual' / 'runs' / run_id / 'preflight').glob('preflight-task_evaluate-*.json')) if json.loads(p.read_text()) == expected_output]
+          if len(matches) != 1:
+              raise SystemExit(f'expected one exact Execute preflight output, got {len(matches)}')
+          preflight_path = matches[0]
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1 or pending[0].get('component') != 'task_evaluate':
+              raise SystemExit(f'expected one Task Evaluate request, got {pending!r}')
+          request = pending[0]
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Task Evaluate identity mismatch')
+          payload = request.get('payload', {})
+          if payload.get('execution_unit') != unit:
+              raise SystemExit('Task Evaluate request did not bind exact unit')
+          if payload.get('preflight_selection', {}).get('decision') != 'BASELINE_FIRST':
+              raise SystemExit('Task Evaluate request lost BASELINE_FIRST')
+          if payload.get('candidate') not in (None, {}):
+              raise SystemExit('baseline Task Evaluate retained a Candidate overlay')
+          clocks = payload.get('decision_context', {}).get('source_clock', {})
+          if clocks.get('user_input_inbox', {}).get('version') != 'revision:38' or clocks.get('native_run_snapshot', {}).get('version') != 'revision:120':
+              raise SystemExit('Execute source clocks mismatch')
+          work_id = request['invocation_id']
+          request_rel = f'.continual/work-model/invocations/{work_id}/request.json'
+          if (root / request_rel).with_name('response.json').exists() or request.get('prompt_path') != 'prompts/task_evaluate.md':
+              raise SystemExit('Execute baseline prompt/response invariant failed')
+          awaiting = []
+          for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
+              value = json.loads(path.read_text())
+              if value.get('status') == 'awaiting_work_model':
+                  awaiting.append((path, value))
+          if len(awaiting) != 1:
+              raise SystemExit(f'expected one awaiting Task Evaluate native journal, got {len(awaiting)}')
+          native_path, native = awaiting[0]
+          if native.get('component') != 'task_evaluate' or native.get('work_invocation_id') != work_id or native.get('work_request_digest') != request.get('request_digest') or native.get('work_request_ref') != request_rel:
+              raise SystemExit('Task Evaluate native-to-Work binding mismatch')
+          response_rel = f'.continual/work-model/invocations/{candidate_work_id}/response.json'
+          fragment_rel = candidate_native['fragment_ref']
+          local_learn_rel = f'.continual/runs/{run_id}/local-learn/{candidate_native_id}-candidate_evaluate.json'
+          h=lambda p: subprocess.check_output(['git','hash-object',str(p)],text=True).strip()
+          summary = {
+              'candidate_native_invocation_id': candidate_native_id,
+              'candidate_work_invocation_id': candidate_work_id,
+              'candidate_response_ref': response_rel,
+              'candidate_response_digest': verified_candidate['response']['response_digest'],
+              'candidate_response_blob_sha': h(response_rel),
+              'candidate_native_blob_sha': h(candidate_native_path),
+              'candidate_fragment_ref': fragment_rel,
+              'candidate_fragment_blob_sha': h(fragment_rel),
+              'candidate_local_learn_ref': local_learn_rel,
+              'candidate_local_learn_blob_sha': h(local_learn_rel),
+              'semantic_preflight_ref': preflight_path.relative_to(root).as_posix(),
+              'semantic_preflight_blob_sha': h(preflight_path),
+              'pending_native_invocation_id': native['invocation_id'],
+              'pending_native_invocation_ref': native_path.relative_to(root).as_posix(),
+              'pending_native_invocation_blob_sha': h(native_path),
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': request_rel,
+              'pending_request_digest': request['request_digest'],
+              'pending_request_blob_sha': h(request_rel),
+              'pending_component': 'task_evaluate',
+              'selected_candidate_id': None,
+              'selected_decision': 'BASELINE_FIRST',
+              'snapshot_revision': 120,
+          }
+          Path('/tmp/candidate-consume-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
+          receipt = {
+              'schema_version': 1,
+              'record_type': 'generation29_candidate_task_evaluate_cross_clock_preflight_consume_task_evaluate_freeze',
+              'recorded_at': datetime.now(UTC).isoformat().replace('+00:00', 'Z'),
+              'execution_id': 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3',
+              'lease_generation': 29,
+              'fence_token_digest': 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d',
+              'source_main_sha': os.environ['RUNTIME_MAIN'],
+              'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
+              'snapshot_blob_sha': os.environ['EXPECTED_SNAPSHOT_BLOB'],
+              'inbox_revision': int(os.environ['EXPECTED_INBOX_REVISION']),
+              'inbox_blob_sha': os.environ['EXPECTED_INBOX_BLOB'],
+              'completed_effect': summary,
+              'idempotency_key': 'o-work-gen29:consume-candidate-invoke-dd2b8896187190d3992f1e4e:freeze-cross-clock-task-evaluate:v1',
+              'exact_frontier': 'revision120 Candidate BASELINE_FIRST consumed once; one exact Task Evaluate successor frozen pending native consume',
+              'next_action': 'Remove this one-shot workflow, exact-head validate and merge this lifecycle, bind state to the unique Task Evaluate request, consume it exactly once, and continue post-result Candidate, Consolidate, and Learn.',
+              'claim_boundary': expected_output['fragment']['claim_boundary'],
+              'resume_required': True,
+          }
+          receipt_path = root / '.continual' / 'runs' / run_id / 'recovery-receipts' / 'gen29-candidate-task-evaluate-cross-clock-preflight-consume-task-evaluate-freeze-v1.json'
+          receipt_path.parent.mkdir(parents=True, exist_ok=True)
+          receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Stage only exact Candidate lifecycle delta and push once
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+          run_id = os.environ['RUN_ID']
+          candidate_native_id = os.environ['CANDIDATE_NATIVE_ID']
+          candidate_work_id = os.environ['CANDIDATE_WORK_ID']
+          summary = json.loads(Path('/tmp/candidate-consume-summary.json').read_text())
+          work_obs = json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']
+          ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-candidate-task-evaluate-cross-clock-preflight-consume-task-evaluate-freeze-v1.json'
+          expected = {
+              f'.continual/runs/{run_id}/events.jsonl': 'M',
+              f'.continual/runs/{run_id}/invocations/{candidate_native_id}.json': 'M',
+              f'.continual/work-model/invocations/{candidate_work_id}/response.json': 'A',
+              summary['candidate_fragment_ref']: 'A',
+              summary['candidate_local_learn_ref']: 'A',
+              summary['semantic_preflight_ref']: 'A',
+              summary['pending_native_invocation_ref']: 'A',
+              summary['pending_request_ref']: 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/receipt.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/receipt.json': 'A',
+              receipt_rel: 'A',
+          }
+          status = {}
+          for line in subprocess.check_output(['git','diff','--name-status'],text=True).splitlines():
+              code,path=line.split('\t',1); status[path]=code
+          for path in subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--ignored','--exclude-standard'],text=True).splitlines():
+              status.setdefault(path,'A')
+          for path in list(status):
+              if path.startswith('src/agi/__pycache__/') or path.startswith('src/continual/__pycache__/') or path.startswith('src/continual_chatgpt.egg-info/'):
+                  status.pop(path)
+          prefix=f'.continual/runs/{run_id}/preflight/preflight-'
+          preflights=sorted(p for p,c in status.items() if p.startswith(prefix) and p.endswith('.json') and c=='A')
+          if summary['semantic_preflight_ref'] not in preflights:
+              raise SystemExit('semantic Task Evaluate preflight missing')
+          for path in preflights: expected[path]='A'
+          if status != expected:
+              raise SystemExit('lifecycle mutation mismatch: '+json.dumps({'expected':expected,'observed':status,'missing':sorted(set(expected)-set(status)),'unexpected':sorted(set(status)-set(expected))},sort_keys=True))
+          required=sorted(expected)
+          for path in required:
+              if not Path(path).is_file(): raise SystemExit('required path missing: '+path)
+          subprocess.run(['git','add','-f','--',*required],check=True)
+          staged=set(subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines())
+          if staged != set(required): raise SystemExit('staged lifecycle set mismatch')
+          immutable=sorted(p for p in staged if p.startswith('.continual/work-model/invocations/'))
+          if immutable != sorted([f'.continual/work-model/invocations/{candidate_work_id}/response.json',summary['pending_request_ref']]):
+              raise SystemExit('immutable Work mutation set mismatch: '+json.dumps(immutable))
+          print('STAGED_PATHS='+'\n'.join(required))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '[native-candidate-preflight-result] gen29 consume Candidate baseline and freeze Task Evaluate'
+          git push origin "HEAD:$GITHUB_REF_NAME"
