@@ -1,0 +1,77 @@
+{
+  "configuration_id": "fail_open",
+  "observation": {
+    "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+    "claim_boundary": {
+      "agi_claim_supported": false,
+      "bounded_continuity_control_only": true,
+      "candidate_activation": false,
+      "provider_or_production_route_change": false,
+      "upper_objective_achieved": false,
+      "user_level_objective_met": false
+    },
+    "configuration_id": "fail_open",
+    "counters": {
+      "completions": 1,
+      "dispatch_attempts": 1,
+      "divergent_successors": 1,
+      "duplicate_responses": 0,
+      "duplicate_successors": 0,
+      "fence_changes": 0,
+      "inbox_bypasses": 0,
+      "live_authority_mutations": 0,
+      "rejections": 0,
+      "repairs": 0,
+      "request_preservation_checks": 0,
+      "stale_commits": 1,
+      "stale_context_actions": 0,
+      "submissions": 1,
+      "successors": 1
+    },
+    "disabled_guards": [
+      "main_state_blob_and_fence_binding"
+    ],
+    "guard": "main_state_blob_and_fence_binding",
+    "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+    "replay_digest": "f6b32702cf62436f4072d4ff07b8ed7b24b5d4956f9a1fff6024ed8300acc09b",
+    "request_digest_after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+    "request_digest_before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+    "request_identity_preserved": true,
+    "scenario_id": "moved_authoritative_binding",
+    "schema_version": 1,
+    "trace": [
+      {
+        "event": "fixture_bound",
+        "live_authority": false,
+        "request_digest": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "sequence": 1
+      },
+      {
+        "configuration": "fail_open",
+        "event": "dispatch_attempt",
+        "guard": "main_state_blob_and_fence_binding",
+        "sequence": 2
+      },
+      {
+        "disabled_guard": "main_state_blob_and_fence_binding",
+        "event": "scenario_guard_disabled",
+        "sequence": 3
+      },
+      {
+        "effect": "stale_commit_and_divergent_successor",
+        "event": "counterfactual_effect_observed",
+        "live_authority": false,
+        "sequence": 4,
+        "simulated": true
+      },
+      {
+        "event": "simulated_response_and_successor",
+        "external_effect_applied": false,
+        "sequence": 5
+      }
+    ],
+    "verdict": "CONTROL_EFFECT_OBSERVED"
+  },
+  "replay_verified": true,
+  "scenario_id": "moved_authoritative_binding"
+}
