@@ -1,4 +1,4 @@
-name: gen29 consume Candidate cross-clock resumption preflight v1
+name: gen29 consume Candidate external upstream regression repair preflight v1
 
 on:
   push:
@@ -145,7 +145,7 @@ jobs:
               raise SystemExit('continuation durability binding mismatch')
           if inbox.get('revision') != 38:
               raise SystemExit('inbox revision mismatch')
-          if snapshot.get('revision') != 119 or snapshot.get('phase') != 'unit_pending' or snapshot.get('current_component') != 'execute':
+          if snapshot.get('revision') != 124 or snapshot.get('phase') != 'unit_pending' or snapshot.get('current_component') != 'execute':
               raise SystemExit('snapshot is not revision124 Execute unit_pending')
           if request.get('component') != 'candidate_evaluate' or request.get('request_digest') != os.environ['CANDIDATE_REQUEST_DIGEST']:
               raise SystemExit('Candidate Evaluate request mismatch')
