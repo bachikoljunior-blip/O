@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "unit_id": "unit-generation29-external-upstream-regression-repair-v1",
+  "selection_status": "precommitted_before_source_level_repair",
+  "selection_rule": "From the fresh open-bug search result set, choose the lexicographically first repository#issue that has an OSI-permissive license, contains no solution PR/gold-patch/later-commit reference, admits a no-network no-secret focused reproducer from the issue claim, and has a bounded official regression command. The unique eligible result was caru-ini/novelai-sdk#89.",
+  "selected_task": {
+    "repository": "caru-ini/novelai-sdk",
+    "issue_number": 89,
+    "issue_url": "https://github.com/caru-ini/novelai-sdk/issues/89",
+    "issue_source_ref": "issue-89-source.json",
+    "upstream_commit": "4ec0e19aad139b23592342b6a29592f5732e34bd",
+    "upstream_commit_title": "0.14.0",
+    "license": "MIT",
+    "license_path": "LICENSE",
+    "license_blob_sha": "23a314f89c9291f0e9974fc9d69431dd5aaa7ad7",
+    "source_blob_sha": "dddfb55066f4b654878f5f0dbf18c8252d051be2"
+  },
+  "allowed_patch_paths": [
+    "src/novelai/_utils/converter.py"
+  ],
+  "focused_reproducer": {
+    "kind": "issue-derived no-network serializer assertion",
+    "command": "python /tmp/reproduce_issue_89.py",
+    "baseline_expected": "exit 1 because enabled character coordinates serialize while both v4_prompt.use_coords and top-level use_coords are false",
+    "patched_expected": "exit 0 with both coordinate-control flags true and swapped centers preserved",
+    "secrets_required": false,
+    "network_required": false
+  },
+  "official_regressions": [
+    "python -m pytest -q"
+  ],
+  "resource_budget": {
+    "runner": "ubuntu-latest isolated GitHub Actions workspace",
+    "timeout_minutes": 20,
+    "max_selected_tasks": 1,
+    "max_patch_files": 1
+  },
+  "contamination_exclusions": [
+    "issue comments",
+    "solution pull requests",
+    "gold patches",
+    "commits after 4ec0e19aad139b23592342b6a29592f5732e34bd",
+    "prior O Run solution artifacts",
+    "web search for an implementation answer"
+  ],
+  "verdict_rule": {
+    "SOLVED": "baseline focused reproducer fails for the precommitted defect, minimal one-file patch makes it pass, and all official regressions pass",
+    "FAILED": "defect reproduces but the bounded patch fails the focused or official regression checks",
+    "NOT_EVALUABLE": "selection/provenance/license is invalid, baseline does not reproduce, dependencies cannot install safely, or evidence cannot replay before patch scoring"
+  },
+  "side_effect_policy": {
+    "upstream_writes": false,
+    "provider_or_production_route_change": false,
+    "candidate_activation": false
+  },
+  "claim_boundary": "One bounded exact-commit software-repair trial only; no generalized capability, AGI, upper-objective, or user-completion claim."
+}
