@@ -198,7 +198,7 @@
     "branch_head_sha": "2d009c2fcec6f63b10cb130c191af0da12c00344",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T10:35:17.958Z",
+    "checkpointed_at": "2026-09-01T10:36:08.555Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-candidate-cross-source-reconciliation-preflight-consume-execute-freeze-v1.json",
       "blob_sha": "d29fb0df1427c86a274c7e6d2d81bbc5dd97aaac",
@@ -341,13 +341,13 @@
       33451087993,
       33451088030
     ],
-    "current_main_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
-    "current_state_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
+    "current_main_sha": "e7fc9022958169d08967428b23ef58f04245d4e5",
+    "current_state_blob_sha": "e8303f854b23c744d6e39b9a6566a574947e3c77",
     "exact_completed_native_invocation_id": "invoke-4207db89def9709f3545b270",
     "exact_completed_request_digest": "ebe32784af1b5c6561369c24df2a19ebbd0259db6ac24e4e2476f6010f11ddc2",
     "exact_completed_response_digest": "36e6b3239413c046038ed6b0ee4bd8380afc565205e13628b264b48dad20a9be",
     "exact_completed_work_invocation_id": "invoke-047ed5d16b7ff5cfbdbc716b",
-    "exact_frontier": "Candidate response and PR406 merge are durable; unique Execute request is CAS-bound, exact-readback verified, and unanswered pending immutable selector precommit.",
+    "exact_frontier": "Execute is bound and unanswered; selector/protocol precommit CAS is written before selected record values.",
     "exact_frozen_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
     "exact_frozen_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-dbef4e8815ff89b7cb56aa50/request.json",
@@ -365,8 +365,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
-    "idempotency_key": "o-work-gen29:bind-execute-cross-source-final:v1",
-    "last_verified_effect": "Two-phase expected-blob CAS and exact readback bound the unique Execute request under unchanged execution, generation, fence, inbox, snapshot, and zero-response proof.",
+    "idempotency_key": "o-work-gen29:cross-source-reconciliation:selector-protocol:datasets-6a595f1a:country-json-41d4084b:v1",
+    "last_verified_effect": "Frozen Execute request remains unanswered; exact two-source selector/protocol has been written by expected-blob CAS before selected record values are read.",
     "lease_generation": 29,
     "merge_authorization": {
       "base_sha": "dbb2b3ecf1168c576de904aff74f6aef5412c232",
@@ -389,9 +389,9 @@
     },
     "merge_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "merge_tree_sha": "4697405584d3c30a86cc839bd7d1555fb363ad09",
-    "next_action": "Consume Execute invoke-5c28ad87d810c530cf9f8371 exactly once after durably freezing the exact two-source selector and protocol before reading selected target record values; produce bounded reconciliation evidence, freeze Task Evaluate, and continue.",
-    "next_tool": "Publish immutable selector/protocol precommit without reading selected target values.",
-    "next_tool_action": "Publish and exact-read an immutable two-source selector/protocol manifest before reading selected source record values; then execute the bounded reconciliation and answer invoke-5c28ad87d810c530cf9f8371 exactly once.",
+    "next_action": "Exact-read the selector/protocol precommit, then acquire only the exact selected source blobs read-only, run deterministic reconciliation and corruption controls, replay, persist artifacts, and answer Execute exactly once.",
+    "next_tool": "Exact-read selector/protocol CAS before selected source data acquisition.",
+    "next_tool_action": "Exact-read selector CAS fields and state blob; only then fetch selected data blob contents at exact commits.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
@@ -11951,7 +11951,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T10:35:17.958Z",
+  "heartbeat_at": "2026-09-01T10:36:08.555Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -12780,9 +12780,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-09-01T10:35:17.958Z",
-  "last_progress_at": "2026-09-01T10:35:17.958Z",
-  "last_verified_effect": "Two-phase expected-blob CAS and exact readback bound the unique Execute request under unchanged execution, generation, fence, inbox, snapshot, and zero-response proof.",
+  "last_activity_at": "2026-09-01T10:36:08.555Z",
+  "last_progress_at": "2026-09-01T10:36:08.555Z",
+  "last_verified_effect": "Frozen Execute request remains unanswered; exact two-source selector/protocol has been written by expected-blob CAS before selected record values are read.",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "4cfcffe49290f53879863d2ac9029944782c3535",
@@ -12987,8 +12987,8 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Consume Execute invoke-5c28ad87d810c530cf9f8371 exactly once after durably freezing the exact two-source selector and protocol before reading selected target record values; produce bounded reconciliation evidence, freeze Task Evaluate, and continue.",
-  "next_tool_action": "Publish and exact-read an immutable two-source selector/protocol manifest before reading selected source record values; then execute the bounded reconciliation and answer invoke-5c28ad87d810c530cf9f8371 exactly once.",
+  "next_action": "Exact-read the selector/protocol precommit, then acquire only the exact selected source blobs read-only, run deterministic reconciliation and corruption controls, replay, persist artifacts, and answer Execute exactly once.",
+  "next_tool_action": "Exact-read selector CAS fields and state blob; only then fetch selected data blob contents at exact commits.",
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
     "base_main_sha": "aadfa7c049961e79ab7e15cd634c25b292293ff8",
@@ -16142,5 +16142,181 @@
     "phase2_commit_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
     "phase2_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
     "verified_at": "2026-09-01T10:35:17.958Z"
+  },
+  "generation29_cross_source_reconciliation_selector_precommit_v1": {
+    "schema_version": 1,
+    "record_type": "generation29_cross_source_data_reconciliation_selector_protocol_precommit",
+    "precommitted_at": "2026-09-01T10:36:08.555Z",
+    "authority": {
+      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+      "lease_generation": 29,
+      "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+      "inbox_revision": 38,
+      "inbox_blob_sha": "34423c2dd71d95c55769f501fe1701ea0088fb32"
+    },
+    "unit_id": "unit-generation29-cross-source-data-reconciliation-v1",
+    "execute_native_invocation_id": "invoke-bc78eb5f075bb06ef6a4f92d",
+    "execute_work_invocation_id": "invoke-5c28ad87d810c530cf9f8371",
+    "execute_request_blob_sha": "badc15b3967b928839359735ea04823cb5a9972c",
+    "execute_request_digest": "a866c9a5c3cf1d2ce70f17f9fa3d347e1faec55e805aeea5c4cacfe69b8b3000",
+    "selection_rule": "Exactly the two declared sources below. No substitution after this CAS. Source data record values were not read before this precommit; only repository metadata, exact trees/blobs, license text, and schema descriptors were inspected.",
+    "sources": [
+      {
+        "source_id": "datasets_country_codes",
+        "repository_full_name": "datasets/country-codes",
+        "exact_commit_sha": "6a595f1a6f10b3d00175fe67375da88f64f7f76b",
+        "license": {
+          "kind": "ODC-PDDL-1.0",
+          "ref": "datapackage.yml",
+          "blob_sha": "d129ac94a13dc44e913ccce3c0aea8e2e4b1a59d"
+        },
+        "data": {
+          "path": "data/country-codes.csv",
+          "blob_sha": "f1cad381b15224af8ea56f93aec61073d3ca4ab6",
+          "format": "csv",
+          "max_bytes": 200000
+        },
+        "schema": {
+          "container": "csv_rows",
+          "alpha2_field": "ISO3166-1-Alpha-2",
+          "name_field": "CLDR display name"
+        }
+      },
+      {
+        "source_id": "samayo_country_json",
+        "repository_full_name": "samayo/country-json",
+        "exact_commit_sha": "41d4084bc1ccf9614dab45255a41ba3a5473be74",
+        "license": {
+          "kind": "MIT",
+          "ref": "LICENSE",
+          "blob_sha": "cf44b9dc8df344e36029c9861366935f9dad3ab4"
+        },
+        "data": {
+          "path": "src/country-by-abbreviation.json",
+          "blob_sha": "d51b248d847a1cbb27c622fc6ac6e864f32b53b2",
+          "format": "json",
+          "max_bytes": 50000
+        },
+        "schema": {
+          "container": "json_array",
+          "alpha2_field": "abbreviation",
+          "name_field": "country"
+        }
+      }
+    ],
+    "contamination_exclusions": [
+      {
+        "repository_full_name": "umpirsky/country-list",
+        "reason": "Target record values were inadvertently exposed to this execution before final selector precommit; excluded from the trial."
+      },
+      {
+        "repository_full_name": "lukes/ISO-3166-Countries-with-Regional-Codes",
+        "reason": "Target record values were inadvertently exposed to this execution before final selector precommit; excluded from the trial."
+      }
+    ],
+    "normalization": {
+      "alpha2": [
+        "require string",
+        "strip ASCII surrounding whitespace",
+        "uppercase",
+        "require regex ^[A-Z]{2}$",
+        "reject duplicate code if raw names differ",
+        "sort by alpha2"
+      ],
+      "name": [
+        "require nonempty string",
+        "Unicode NFKC",
+        "collapse Unicode whitespace to one ASCII space",
+        "strip surrounding whitespace",
+        "retain normalized case-preserving name and a casefold comparison value"
+      ],
+      "encoding": "UTF-8",
+      "forbid_post_read_rule_changes": true
+    },
+    "thresholds": {
+      "minimum_records_per_source": 200,
+      "maximum_records_per_source": 300,
+      "overlap_over_smaller_set_minimum": 0.95,
+      "jaccard_minimum": 0.9,
+      "all_queries_must_exist_in_both": true,
+      "corruption_controls_detected_required": 2,
+      "replay_digest_match_required": true
+    },
+    "divergence_categories": [
+      "exact_name",
+      "nfkc_casefold_equal",
+      "punctuation_spacing_variant",
+      "distinct_nonempty_name",
+      "left_only_alpha2",
+      "right_only_alpha2"
+    ],
+    "divergence_rule": "Every non-exact overlap and every symmetric-difference key must be emitted with exactly one category; distinct nonempty names are bounded divergences, not silently coerced.",
+    "queries": [
+      "AU",
+      "BR",
+      "CA",
+      "CN",
+      "DE",
+      "FR",
+      "IN",
+      "JP",
+      "US",
+      "ZA"
+    ],
+    "corruption_controls": [
+      {
+        "id": "invalid_alpha2",
+        "mutation": "replace one copied alpha2 with A1",
+        "expected": "validator rejects invalid alpha2"
+      },
+      {
+        "id": "conflicting_duplicate",
+        "mutation": "append a copied existing alpha2 with a different nonempty name",
+        "expected": "validator rejects conflicting duplicate"
+      }
+    ],
+    "budgets": {
+      "network": "Only GitHub read-only exact-commit acquisition of the four declared license/schema/data files; no network after acquisition.",
+      "wall_seconds": 180,
+      "max_total_source_bytes": 250000,
+      "max_records_per_source": 300,
+      "upstream_writes": 0,
+      "issue_comments": 0,
+      "provider_calls": 0,
+      "credentials_used": 0
+    },
+    "replay": {
+      "required": true,
+      "canonical_json": "UTF-8, sorted keys, separators comma/colon, ensure_ascii=false",
+      "digest": "sha256",
+      "repeat_count": 2
+    },
+    "output_contract": {
+      "artifact_prefix": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/",
+      "required": [
+        "precommitted-selector-manifest.json",
+        "source-readiness.json",
+        "normalized-sources.json",
+        "reconciliation-report.json",
+        "corruption-controls.json",
+        "replay-verification.json",
+        "bounded-result.json",
+        "mutation-audit.json"
+      ],
+      "verdicts": [
+        "PASS",
+        "FAIL",
+        "NOT_EVALUABLE"
+      ],
+      "claim_boundary": "Bounded exact-source reconciliation only; Candidate activation, generalized reliability, production behavior, AGI, upper-objective achievement, and user-level completion remain false."
+    },
+    "idempotency_key": "o-work-gen29:cross-source-reconciliation:selector-protocol:datasets-6a595f1a:country-json-41d4084b:v1",
+    "source_values_read_before_precommit": false,
+    "request_recreated": false,
+    "response_repeated": false,
+    "resume_required": true,
+    "upper_objective_achieved": false,
+    "agi_achieved": false,
+    "status": "precommit_cas_written_pending_exact_readback"
   }
 }
