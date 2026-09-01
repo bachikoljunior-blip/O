@@ -239,6 +239,10 @@ jobs:
               status.setdefault(path,'A')
           for path in list(status):
               if path.startswith('src/agi/__pycache__/') or path.startswith('src/continual/__pycache__/') or path.startswith('src/continual_chatgpt.egg-info/'): status.pop(path)
+          prefix=f'.continual/runs/{run}/preflight/preflight-consolidate_episode-'
+          preflights=sorted(p for p in status if p.startswith(prefix) and p.endswith('.json'))
+          if len(preflights)!=1: raise SystemExit(f'expected one new Consolidate Episode preflight, got {preflights!r}')
+          required.add(preflights[0])
           if set(status)!=required: raise SystemExit('lifecycle mutation mismatch: '+json.dumps({'missing':sorted(required-set(status)),'unexpected':sorted(set(status)-required),'status':status},sort_keys=True))
           if 'agi/WORK_EXECUTION_STATE.json' in status: raise SystemExit('state mutation must not be staged')
           for p in sorted(required):
