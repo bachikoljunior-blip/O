@@ -1,5 +1,5 @@
 {
-  "acquisition_phase": "phase2_expected_blob_cas_written",
+  "acquisition_phase": "verified_two_phase_remote_readback",
   "active_component": "generation29_candidate_cross_source_reconciliation_pending_native_consume",
   "active_prompt": "prompts/candidate_evaluate.md",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
@@ -198,7 +198,7 @@
     "branch_head_sha": "755cb4d4fc0c18d2b23fb7f638c15a2c123819ac",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T12:25:10.272Z",
+    "checkpointed_at": "2026-09-01T12:25:36.151Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-cross-source-execute-consume-successor-freeze-v1.json",
       "blob_sha": "e1cc8cede214cb03ea7872e7f5b3c903c47be572",
@@ -358,13 +358,13 @@
       33503617576,
       33503617551
     ],
-    "current_main_sha": "ac9ffbde8700b3c3b5c7e2373caf5fa0e1f27e95",
-    "current_state_blob_sha": "30b8e34a03f070f8661de15d0b048663f95c5ab1",
+    "current_main_sha": "dd7dd902471e19929927b55faba1bf547f1d6495",
+    "current_state_blob_sha": "738cf608867d84a9b68352ac25ceb97c155f2f28",
     "exact_completed_native_invocation_id": "invoke-bc78eb5f075bb06ef6a4f92d",
     "exact_completed_request_digest": "a866c9a5c3cf1d2ce70f17f9fa3d347e1faec55e805aeea5c4cacfe69b8b3000",
     "exact_completed_response_digest": "d36ed0034af13942462ca7adfa11b0c3df0c563da16de2909732937d93089d7c",
     "exact_completed_work_invocation_id": "invoke-5c28ad87d810c530cf9f8371",
-    "exact_frontier": "Execute is durably complete once; the unique Candidate Evaluate request is frozen and unanswered on authoritative main.",
+    "exact_frontier": "Execute is durably complete once; Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 is the unique frozen unanswered Work request after verified two-phase CAS.",
     "exact_frozen_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
     "exact_frozen_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-dbef4e8815ff89b7cb56aa50/request.json",
@@ -383,7 +383,7 @@
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
     "idempotency_key": "o-work-gen29:cross-source-reconciliation:selector-protocol:datasets-6a595f1a:country-json-41d4084b:v1",
-    "last_verified_effect": "Phase1 Candidate Evaluate binding commit ac9ffbde8700b3c3b5c7e2373caf5fa0e1f27e95 and state blob 30b8e34a03f070f8661de15d0b048663f95c5ab1 exact-read back with unchanged generation29 fence and pending request digest cfe343f2df1f6f6af6f497595cea4a585fbd044cb9027e58f8782f03e0098315.",
+    "last_verified_effect": "Two-phase Candidate Evaluate binding CAS is exact-read verified at phase2 commit dd7dd902471e19929927b55faba1bf547f1d6495 and blob 738cf608867d84a9b68352ac25ceb97c155f2f28; Execute is complete once and Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 remains the unique unanswered frozen request.",
     "lease_generation": 29,
     "merge_authorization": {
       "base_sha": "dbb2b3ecf1168c576de904aff74f6aef5412c232",
@@ -406,9 +406,9 @@
     },
     "merge_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "merge_tree_sha": "4697405584d3c30a86cc839bd7d1555fb363ad09",
-    "next_action": "Consume Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 exactly once, independently preserve the bounded reconciliation claim boundary, freeze its unique Task Evaluate successor, and continue toward the unmet upper objective.",
-    "next_tool": "Exact-read phase2 CAS and finalize verified continuation.",
-    "next_tool_action": "Exact-read phase2 CAS and finalize verified continuation.",
+    "next_action": "Consume Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 exactly once, preserve the independent bounded claim boundary, freeze its unique Task Evaluate successor, then continue through Task Evaluate and later lifecycle phases while the upper objective remains unmet.",
+    "next_tool": "Create and run exact-state Candidate Evaluate consume workflow.",
+    "next_tool_action": "Create and run exact-state Candidate Evaluate consume workflow.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
@@ -1497,7 +1497,7 @@
     "target_component": "task_evaluate",
     "source_main_sha": "755cb4d4fc0c18d2b23fb7f638c15a2c123819ac",
     "durability_status": "pending_native_consume",
-    "status": "phase2_remote_cas_written",
+    "status": "remote_main_readback_verified",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1505,13 +1505,18 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "next_action": "Consume Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 exactly once, independently preserve the bounded reconciliation claim boundary, freeze its unique Task Evaluate successor, and continue toward the unmet upper objective.",
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "phase1_expected_prior_state_blob_sha": "6c21bd4ae53224884464f1e4a056bd08476b41af",
     "phase1_recorded_at": "2026-09-01T12:24:48.274Z",
     "phase1_commit_sha": "ac9ffbde8700b3c3b5c7e2373caf5fa0e1f27e95",
     "phase1_state_blob_sha": "30b8e34a03f070f8661de15d0b048663f95c5ab1",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T12:25:10.272Z"
+    "phase1_verified_at": "2026-09-01T12:25:10.272Z",
+    "phase2_commit_sha": "dd7dd902471e19929927b55faba1bf547f1d6495",
+    "phase2_state_blob_sha": "738cf608867d84a9b68352ac25ceb97c155f2f28",
+    "verified_state_commit_sha": "dd7dd902471e19929927b55faba1bf547f1d6495",
+    "verified_state_blob_sha": "738cf608867d84a9b68352ac25ceb97c155f2f28",
+    "verified_at": "2026-09-01T12:25:36.151Z"
   },
   "continuation_source": "repository_latest_main_only",
   "continuous_execution_authorization": {
@@ -1572,7 +1577,7 @@
     "target_component": "task_evaluate",
     "source_main_sha": "755cb4d4fc0c18d2b23fb7f638c15a2c123819ac",
     "durability_status": "pending_native_consume",
-    "status": "phase2_remote_cas_written",
+    "status": "remote_main_readback_verified",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1580,13 +1585,18 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "next_action": "Consume Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 exactly once, independently preserve the bounded reconciliation claim boundary, freeze its unique Task Evaluate successor, and continue toward the unmet upper objective.",
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "phase1_expected_prior_state_blob_sha": "6c21bd4ae53224884464f1e4a056bd08476b41af",
     "phase1_recorded_at": "2026-09-01T12:24:48.274Z",
     "phase1_commit_sha": "ac9ffbde8700b3c3b5c7e2373caf5fa0e1f27e95",
     "phase1_state_blob_sha": "30b8e34a03f070f8661de15d0b048663f95c5ab1",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T12:25:10.272Z"
+    "phase1_verified_at": "2026-09-01T12:25:10.272Z",
+    "phase2_commit_sha": "dd7dd902471e19929927b55faba1bf547f1d6495",
+    "phase2_state_blob_sha": "738cf608867d84a9b68352ac25ceb97c155f2f28",
+    "verified_state_commit_sha": "dd7dd902471e19929927b55faba1bf547f1d6495",
+    "verified_state_blob_sha": "738cf608867d84a9b68352ac25ceb97c155f2f28",
+    "verified_at": "2026-09-01T12:25:36.151Z"
   },
   "exact_head_ci_observation": {
     "repository_full_name": "bachikoljunior-blip/O",
@@ -1605,7 +1615,7 @@
     "observed_at": "2026-09-01T07:25:00.000Z"
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "30b8e34a03f070f8661de15d0b048663f95c5ab1",
+  "expected_blob_sha": "738cf608867d84a9b68352ac25ceb97c155f2f28",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
@@ -11945,7 +11955,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T12:25:10.272Z",
+  "heartbeat_at": "2026-09-01T12:25:36.151Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -12774,9 +12784,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-09-01T12:25:10.272Z",
-  "last_progress_at": "2026-09-01T12:25:10.272Z",
-  "last_verified_effect": "Phase1 Candidate Evaluate binding commit ac9ffbde8700b3c3b5c7e2373caf5fa0e1f27e95 and state blob 30b8e34a03f070f8661de15d0b048663f95c5ab1 exact-read back with unchanged generation29 fence and pending request digest cfe343f2df1f6f6af6f497595cea4a585fbd044cb9027e58f8782f03e0098315.",
+  "last_activity_at": "2026-09-01T12:25:36.151Z",
+  "last_progress_at": "2026-09-01T12:25:36.151Z",
+  "last_verified_effect": "Two-phase Candidate Evaluate binding CAS is exact-read verified at phase2 commit dd7dd902471e19929927b55faba1bf547f1d6495 and blob 738cf608867d84a9b68352ac25ceb97c155f2f28; Execute is complete once and Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 remains the unique unanswered frozen request.",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "4cfcffe49290f53879863d2ac9029944782c3535",
@@ -12981,8 +12991,8 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Consume Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 exactly once, independently preserve the bounded reconciliation claim boundary, freeze its unique Task Evaluate successor, and continue toward the unmet upper objective.",
-  "next_tool_action": "Exact-read phase2 state commit and blob, then finalize verified remote continuation without consuming the pending Candidate Evaluate request.",
+  "next_action": "Consume Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 exactly once, preserve the independent bounded claim boundary, freeze its unique Task Evaluate successor, then continue through Task Evaluate and later lifecycle phases while the upper objective remains unmet.",
+  "next_tool_action": "Create and run an exact-state one-shot Candidate Evaluate consume workflow, freeze its unique Task Evaluate successor, protect/merge/read back, then bind state before consuming Task Evaluate.",
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
     "base_main_sha": "aadfa7c049961e79ab7e15cd634c25b292293ff8",
@@ -14543,8 +14553,8 @@
   "snapshot_phase": "unit_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
   "snapshot_revision": 133,
-  "source_main_sha": "755cb4d4fc0c18d2b23fb7f638c15a2c123819ac",
-  "source_state_blob_sha": "30b8e34a03f070f8661de15d0b048663f95c5ab1",
+  "source_main_sha": "dd7dd902471e19929927b55faba1bf547f1d6495",
+  "source_state_blob_sha": "738cf608867d84a9b68352ac25ceb97c155f2f28",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -16397,7 +16407,7 @@
   },
   "generation29_execute_cross_source_reconciliation_consume_candidate_evaluate_bind_v1": {
     "schema_version": 1,
-    "status": "phase2_remote_cas_written",
+    "status": "state_cas_exact_readback_verified_candidate_evaluate_pending_native_consume",
     "recorded_at": "2026-09-01T12:24:48.274Z",
     "source_main_sha": "755cb4d4fc0c18d2b23fb7f638c15a2c123819ac",
     "source_state_blob_sha": "6c21bd4ae53224884464f1e4a056bd08476b41af",
@@ -16457,10 +16467,13 @@
     "agi_achieved": false,
     "claim_boundary": "Bounded two-source reconciliation Execute passed; independent Candidate/Task evaluation, generalized capability, upper-objective completion, and AGI remain unproven.",
     "next_action": "Consume Candidate Evaluate invoke-df53c9c1834b4830176b1ea0 exactly once, independently preserve the bounded reconciliation claim boundary, freeze its unique Task Evaluate successor, and continue toward the unmet upper objective.",
-    "exact_readback_verified": false,
+    "exact_readback_verified": true,
     "phase1_commit_sha": "ac9ffbde8700b3c3b5c7e2373caf5fa0e1f27e95",
     "phase1_blob_sha": "30b8e34a03f070f8661de15d0b048663f95c5ab1",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T12:25:10.272Z"
+    "phase1_verified_at": "2026-09-01T12:25:10.272Z",
+    "phase2_commit_sha": "dd7dd902471e19929927b55faba1bf547f1d6495",
+    "phase2_blob_sha": "738cf608867d84a9b68352ac25ceb97c155f2f28",
+    "verified_at": "2026-09-01T12:25:36.151Z"
   }
 }
