@@ -148,6 +148,7 @@ jobs:
           verified=verified_work_invocation(root,wid); assert verified['output']==out
           npath=root/'.continual/runs'/run/'invocations'/f'{nid}.json'; native=json.loads(npath.read_text()); assert native['status']=='complete' and native['output']==out
           snap_path=root/'.continual/runs'/run/'snapshot.json'; snap=json.loads(snap_path.read_text())
+          print('SNAPSHOT_DIAGNOSTIC='+json.dumps({k:snap.get(k) for k in ['revision','phase','current_component','current_unit']},sort_keys=True))
           assert snap['revision']==132 and snap['phase']=='unit_pending' and snap['current_component']=='candidate_evaluate' and snap['current_unit']==os.environ['UNIT_ID']
           pending=pending_work_invocations(root,run_id=run); assert len(pending)==1 and pending[0]['component']=='candidate_evaluate'
           req=pending[0]; nwid=req['invocation_id']; nreq=f'.continual/work-model/invocations/{nwid}/request.json'; assert req['prompt_path']=='prompts/candidate_evaluate.md' and not (root/nreq).with_name('response.json').exists()
