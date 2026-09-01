@@ -179,7 +179,7 @@ jobs:
               raise SystemExit('exact Execute output shape mismatch')
           PY
           continual --root . work-submit "$EXEC_WORK_ID" --response /tmp/execute-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/execute-submit.json
-          continual --root . work-resume "$RUN_ID" --max-steps 1 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
           continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
           continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
           cat /tmp/execute-submit.json
