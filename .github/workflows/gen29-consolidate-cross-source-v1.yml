@@ -97,6 +97,7 @@ jobs:
           test "$(git hash-object .continual/runs/$RUN_ID/invocations/$CONSOLIDATE_NATIVE_ID.json)" = "$CONSOLIDATE_NATIVE_BLOB"
           echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
           echo "RUNTIME_STATE_BLOB=$RUNTIME_STATE_BLOB" >> "$GITHUB_ENV"
+          set +e
           python - <<'PY'
           import hashlib
           import json
@@ -190,6 +191,9 @@ jobs:
                   raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
           Path('/tmp/expected-before.json').write_text(json.dumps(expected_counts, sort_keys=True) + '\n')
           PY
+          PREFLIGHT_PY_RC=$?
+          echo "DIAG_PREFLIGHT_PY_RC=$PREFLIGHT_PY_RC"
+          test "$PREFLIGHT_PY_RC" = 0
           set +e
           continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-before.json
           CHECKPOINT_RC=$?
