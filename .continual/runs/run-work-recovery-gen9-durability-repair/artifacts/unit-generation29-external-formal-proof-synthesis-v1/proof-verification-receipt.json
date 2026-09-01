@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "artifact_type": "generation29_external_formal_proof_verification_v1",
+  "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+  "generation": 29,
+  "fence_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+  "work_invocation_id": "invoke-7f53acc04154a015c5e8dcb1",
+  "work_request_digest": "ec7b2b0a341f2c709c00bd9f4c95852e66e1b9e41391db67a67ae9e3d786e130",
+  "upstream": {
+    "repository": "aimmerwahr/lean-math-exercises",
+    "commit": "ef9d2506ecf03bb3338e59d33edded195d94a9be",
+    "tree": "5b091fba2d23033ae7436467c17364db01265eb2",
+    "license": "Apache-2.0",
+    "license_blob": "e96cb121c4f899640c741149fd80f1293b377eac",
+    "source_path": "Exercises/Analysis/01OrderCompleteness.lean",
+    "source_blob": "b1472e9b72df28045f33d0270f860ce793ffbd5e",
+    "toolchain": "leanprover/lean4:v4.33.0-rc1",
+    "toolchain_blob": "fd85b262bf1c734663aa8292b0101f672168788f",
+    "mathlib_commit": "4851ebd9bfe9aae548388b92ebd13ded9332abba"
+  },
+  "theorem": {
+    "name": "Exercises.Analysis.OrderCompleteness.q1_integer_fractional_decomposition",
+    "statement_sha256": "3751707448eeee45da93a6e33efba2720191d3c7eaa56b07e961bd35a011b8d3"
+  },
+  "candidate": {
+    "artifact_commit": "841371f35de1e8341becf4a0644368677bdcbbe2",
+    "artifact_blob": "2e59f488b9e4382649c61a6cfc9d7e950c81858e",
+    "proof_sha256": "8a3efbe9789ed58172ba0c9cfc58ef508d2b67958e242591ff99c82a578a499f",
+    "patched_source_sha256": "d40e71535254e56da881f701bc6f4658dde38e162dc16c190948c86eb0b4cda4",
+    "lean_exit_code": 0,
+    "elapsed_seconds": 3,
+    "selected_theorem_sorry_warning": false,
+    "verdict": "PASS"
+  },
+  "negative_controls": [
+    {
+      "id": "corrupted-proof-rfl",
+      "mutation": "replace candidate with by rfl",
+      "expected": "reject",
+      "observed": "reject",
+      "lean_exit_code": 1,
+      "diagnostic": "Exercises/Analysis/01OrderCompleteness.lean:55:2: Tactic rfl failed"
+    },
+    {
+      "id": "changed-statement-append-false",
+      "mutation": "append ∧ False to selected theorem proposition",
+      "expected": "reject",
+      "observed": "reject",
+      "lean_exit_code": 1,
+      "diagnostic": "Exercises/Analysis/01OrderCompleteness.lean:56:61: Int.fract_lt_one type mismatch"
+    }
+  ],
+  "replay": {
+    "fresh_sparse_checkout": true,
+    "upstream_commit_exact": true,
+    "source_blob_exact": true,
+    "patched_source_sha256": "d40e71535254e56da881f701bc6f4658dde38e162dc16c190948c86eb0b4cda4",
+    "semantic_digest_match": true,
+    "lean_exit_code": 0,
+    "selected_theorem_sorry_warning": false,
+    "verdict": "PASS"
+  },
+  "verification_run": {
+    "head_sha": "f68a64bfa1755ffa390ee75e321215384018fc5f",
+    "workflow_blob": "3e59f1c7168c9ada9ac3a32bf604877af175f21b",
+    "run_id": 33557583424,
+    "job_id": 100022056563,
+    "started_at": "2026-09-01T20:49:44Z",
+    "completed_at": "2026-09-01T20:52:48Z",
+    "conclusion": "success"
+  },
+  "validator_repairs": [
+    {
+      "failed_run_id": 33555421914,
+      "cause": "theorem-name grep was over-specific",
+      "repair_commit": "263cc87cb30e60a55b10b4d5b214569aee106d4b",
+      "recurrence_run_id": 33556052716,
+      "recurrence_conclusion": "success"
+    },
+    {
+      "failed_run_id": 33556528719,
+      "cause": "candidate log was required to be empty although untouched exercise sorries emit warnings",
+      "repair_commit": "f232bf6ca981d98f4d2d60a9ec16b91c51edfaf3",
+      "recurrence_evidence": "candidate, corruption, and changed-statement steps all passed in run 33556969647"
+    },
+    {
+      "failed_run_id": 33556969647,
+      "cause": "fresh replay retained the same over-broad empty-log assertion",
+      "repair_commit": "f68a64bfa1755ffa390ee75e321215384018fc5f",
+      "recurrence_run_id": 33557583424,
+      "recurrence_conclusion": "success"
+    }
+  ],
+  "relevant_upstream_check": {
+    "command": "lake env lean Exercises/Analysis/01OrderCompleteness.lean",
+    "scope": "exact selected source/import closure",
+    "global_build_omitted_reason": "the upstream global build includes contamination-excluded solution paths; exact-file Lean compilation is the strongest permitted bounded check"
+  },
+  "contamination": {
+    "solution_read": false,
+    "solution_checked_out": false,
+    "meta_checks_read": false,
+    "meta_checks_checked_out": false,
+    "later_upstream_commit_read": false,
+    "discussion_read": false,
+    "external_proof_service_used": false
+  },
+  "mutation_audit": {
+    "upstream_writes": 0,
+    "upstream_comments": 0,
+    "forks_created": 0,
+    "deployments": 0,
+    "credentials_used": 0,
+    "provider_route_changed": false,
+    "production_route_changed": false
+  },
+  "bounded_verdict": "SOLVED",
+  "independent_task_evaluate_required": true,
+  "upper_objective_achieved": false,
+  "user_level_objective_met": false,
+  "agi_claim_supported": false
+}

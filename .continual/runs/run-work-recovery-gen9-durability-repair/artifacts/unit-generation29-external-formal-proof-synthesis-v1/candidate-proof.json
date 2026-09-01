@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "artifact_type": "generation29_external_formal_proof_candidate_v1",
+  "created_at": "2026-09-01T20:38:00Z",
+  "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+  "generation": 29,
+  "fence_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+  "work_invocation_id": "invoke-7f53acc04154a015c5e8dcb1",
+  "work_request_digest": "ec7b2b0a341f2c709c00bd9f4c95852e66e1b9e41391db67a67ae9e3d786e130",
+  "upstream_commit": "ef9d2506ecf03bb3338e59d33edded195d94a9be",
+  "source_path": "Exercises/Analysis/01OrderCompleteness.lean",
+  "source_blob": "b1472e9b72df28045f33d0270f860ce793ffbd5e",
+  "theorem_name": "Exercises.Analysis.OrderCompleteness.q1_integer_fractional_decomposition",
+  "statement_sha256": "3751707448eeee45da93a6e33efba2720191d3c7eaa56b07e961bd35a011b8d3",
+  "baseline_receipt_commit": "46c65246856e81435b97fd9b162f77cc95f084b5",
+  "baseline_receipt_blob": "1036608310b26515fe88683a26f4a5baf39f4ab9",
+  "generation_method": "direct synthesis from the selected statement and imported Mathlib declarations after baseline exact-readback",
+  "contamination": {
+    "solution_read": false,
+    "meta_checks_read": false,
+    "later_upstream_commits_read": false,
+    "discussion_read": false
+  },
+  "forbidden_tokens_absent": [
+    "sorry",
+    "admit",
+    "axiom",
+    "unsafe"
+  ],
+  "proof": "by\n  refine ⟨(⌊x⌋, Int.fract x), ?_, ?_⟩\n  · exact ⟨(Int.floor_add_fract x).symm, Int.fract_nonneg x, Int.fract_lt_one x⟩\n  · rintro ⟨z, u⟩ ⟨hx, hu0, hu1⟩\n    have hfloor : ⌊x⌋ = z := by\n      rw [Int.floor_eq_iff]\n      constructor <;> linarith\n    apply Prod.ext\n    · exact hfloor.symm\n    · dsimp\n      rw [Int.fract, hfloor]\n      linarith"
+}
