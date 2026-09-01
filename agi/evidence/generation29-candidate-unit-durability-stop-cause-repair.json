@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "record_type": "generation29_candidate_unit_durability_stop_cause_repair",
+  "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+  "lease_generation": 29,
+  "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+  "source_main_sha": "620fec45a18a4c40c73f394a9a584edeaadb7c3e",
+  "failed_lifecycle_run": {
+    "workflow_run_id": 33543749043,
+    "job_id": 99976104019,
+    "observed_at": "2026-09-01T18:28:05Z"
+  },
+  "stop_cause": {
+    "classification": "durable_current_unit_missing",
+    "missing_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/execution-units/unit-generation29-external-formal-proof-synthesis-v1.json",
+    "remote_readback": "404_not_found",
+    "effect": "Engine read an empty execution unit during work-resume, changed the Candidate payload digest from 6188deea0571f7a646c331473abed221bcc37648da11b02f420a2ab6f03989cc to 7806d758ac94b82bc153122b6e3fd158ce05a84ee11ad7d734fb7c3fbbb80a0f, and minted invoke-a792524f0c0fa252a0f30cb6 instead of consuming invoke-41fe14117283ba173c0fb998.",
+    "stale_heartbeat_alone_was_not_used": true
+  },
+  "repair": {
+    "method": "Restore the exact execution-unit object already frozen inside the immutable Candidate Work request; do not recreate or alter the frozen request.",
+    "frozen_request_ref": ".continual/work-model/invocations/invoke-41fe14117283ba173c0fb998/request.json",
+    "frozen_request_digest": "0460c645a61533258a54b53a1d487cb01f235c3df81d926fe1e71a1893a27ef3",
+    "restored_unit_blob_sha": "f576390e00df1fc7a8a09ac66cc2b29c0d1deb57",
+    "exact_structural_readback_match": true,
+    "request_recreated": false,
+    "response_submitted": false,
+    "exact_native_replay_verified": true
+  },
+  "recurrence_validation": {
+    "status": "passed",
+    "workflow_run_id": 33544552827,
+    "workflow_job_conclusion": "success",
+    "exact_head_sha": "f93512297c1c4232235d16cfa8815ea9c3eab9b7",
+    "completed_at": "2026-09-01T18:36:12Z",
+    "assertions": [
+      "The restored unit Git blob is f576390e00df1fc7a8a09ac66cc2b29c0d1deb57 and structurally equals the exact object frozen in invoke-41fe14117283ba173c0fb998.",
+      "A response-free work-resume preserved invoke-41fe14117283ba173c0fb998 as the unique pending Work identity.",
+      "Work counts remained requests=149, responses=148, pending=1; native completed/fragments/local-learn remained 142/142/129.",
+      "Snapshot blob f85c5321c44b004c1bd01f9f7441be08b0c2b9eb and native journal blob 654faf52ebad711956387b28d09c742c1e155551 remained unchanged.",
+      "No second Work request or repository diff was produced."
+    ]
+  },
+  "resume_required": true,
+  "upper_objective_achieved": false,
+  "agi_achieved": false,
+  "next_action": "Publish the repaired unit through exact-head CI and expected-head merge, update the continuation source-main binding by CAS/readback, then submit the already-authored frozen Candidate response exactly once."
+}
