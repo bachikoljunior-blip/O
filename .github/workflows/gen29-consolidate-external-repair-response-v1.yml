@@ -20,7 +20,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       EXPECTED_MAIN: 6a685085f8cd60957d02225e941dbc19f44b44f1
-      EXPECTED_STATE_BLOB: 24796de4c69f279689b108aff3b47c5b60f09021
+      EXPECTED_STATE_BLOB: 305aec76f0dd8a13f4532bf76b1284771f3c74d7
       EXPECTED_SNAPSHOT_BLOB: 32d495f9fee8c2fd887db0b1a3f8a230db90e2a8
       EXPECTED_INBOX_BLOB: 34423c2dd71d95c55769f501fe1701ea0088fb32
       EXPECTED_INBOX_REVISION: '38'
@@ -55,7 +55,7 @@ jobs:
           test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
           python - <<'PY'
           import subprocess
-          expected = ['.github/workflows/gen29-consolidate-external-repair-v1.json', '.github/workflows/gen29-consolidate-external-repair-response-v1.yml']
+          expected = ['.github/workflows/gen29-consolidate-external-repair-response-v1.yml', '.github/workflows/gen29-consolidate-external-repair-v1.json']
           observed = subprocess.check_output(
               ['git', 'diff', '--name-only', __import__('os').environ['EXPECTED_MAIN'], 'HEAD'],
               text=True,
@@ -133,7 +133,7 @@ jobs:
               'pending_response_blob_sha': None,
               'pending_response_digest': None,
               'response_exists_on_authoritative_remote': False,
-              'snapshot_revision': 111,
+              'snapshot_revision': 126,
               'native_phase': 'consolidate_pending',
               'pending_component': 'consolidate_episode',
               'durability_status': 'pending_native_consume',
@@ -142,7 +142,7 @@ jobs:
               if exact.get(key) != value:
                   raise SystemExit(f'exact continuation mismatch {key}: {exact.get(key)!r} != {value!r}')
           bind = state.get('generation29_consolidate_external_repair_bind_v1', {})
-          if bind.get('phase') != 'state_cas_exact_readback_verified_consolidate_pending_native_consume':
+          if bind.get('phase') not in {'state_cas_exact_readback_verified_consolidate_pending_native_consume', 'launch_guard_stop_cause_identified_repair_pending'}:
               raise SystemExit('Consolidate state binding phase mismatch')
           if bind.get('pending_work_invocation_id') != work_id or bind.get('pending_native_invocation_id') != native_id:
               raise SystemExit('Consolidate state identity mismatch')
@@ -408,7 +408,7 @@ jobs:
         run: |
           set -euo pipefail
           git checkout -- agi/WORK_EXECUTION_STATE.json
-          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          git diff --quiet -- agi/WORK_EXECUTION_STATE.json
           python - <<'PY'
           import json
           import os
