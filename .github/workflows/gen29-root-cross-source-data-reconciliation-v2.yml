@@ -149,7 +149,7 @@ jobs:
           npath=root/'.continual/runs'/run/'invocations'/f'{nid}.json'; native=json.loads(npath.read_text()); assert native['status']=='complete' and native['output']==out
           snap_path=root/'.continual/runs'/run/'snapshot.json'; snap=json.loads(snap_path.read_text())
           assert snap['revision']==132 and snap['phase']=='unit_pending' and snap['current_component']=='execute' and snap['current_unit']==os.environ['UNIT_ID']
-          pending=pending_work_invocations(root,run_id=run); assert len(pending)==1 and pending[0]['component']=='execute'
+          pending=pending_work_invocations(root,run_id=run); print('PENDING_DIAGNOSTIC='+json.dumps([{k:v.get(k) for k in ['invocation_id','component','prompt_path','request_digest']} for v in pending],sort_keys=True)); assert len(pending)==1 and pending[0]['component']=='execute'
           req=pending[0]; nwid=req['invocation_id']; nreq=f'.continual/work-model/invocations/{nwid}/request.json'; assert req['prompt_path']=='prompts/execute.md' and not (root/nreq).with_name('response.json').exists()
           awaiting=[]
           for p in (root/'.continual/runs'/run/'invocations').glob('*.json'):
