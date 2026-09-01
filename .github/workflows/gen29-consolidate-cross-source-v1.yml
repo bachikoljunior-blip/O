@@ -97,110 +97,45 @@ jobs:
           test "$(git hash-object .continual/runs/$RUN_ID/invocations/$CONSOLIDATE_NATIVE_ID.json)" = "$CONSOLIDATE_NATIVE_BLOB"
           echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
           echo "RUNTIME_STATE_BLOB=$RUNTIME_STATE_BLOB" >> "$GITHUB_ENV"
-          set +e
-          python - <<'PY'
-          import hashlib
-          import json
-          import os
-          from pathlib import Path
-          from continual.work_session import pending_work_invocations, verified_work_request, verify_work_invocations
-          root = Path('.').resolve()
-          run_id = os.environ['RUN_ID']
-          native_id = os.environ['CONSOLIDATE_NATIVE_ID']
-          work_id = os.environ['CONSOLIDATE_WORK_ID']
-          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
-          inbox = json.loads(Path('/tmp/runtime-inbox.json').read_text())
-          snapshot = json.loads((root / '.continual' / 'runs' / run_id / 'snapshot.json').read_text())
-          print('PY_STAGE=before_verified_request', flush=True)
-          request = verified_work_request(root, work_id)
-          print('PY_STAGE=after_verified_request', flush=True)
-          native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
-          native = json.loads(native_path.read_text())
-          print('PY_STATE=' + json.dumps({'execution_id':state.get('execution_id'),'generation':state.get('lease_generation'),'status':state.get('status'),'resume_required':state.get('resume_required'),'active_component':state.get('active_component'),'exact':{k:state.get('exact_continuation',{}).get(k) for k in ['pending_native_invocation_id','pending_native_invocation_ref','pending_native_invocation_blob_sha','pending_work_invocation_id','pending_request_ref','pending_request_blob_sha','pending_request_digest','pending_response_ref','pending_response_blob_sha','pending_response_digest','response_exists_on_authoritative_remote','snapshot_revision','native_phase','pending_component','durability_status']},'completed':state.get('exact_continuation',{}).get('completed_effect'),'bind':state.get('generation29_task_evaluate_cross_source_reconciliation_consolidate_bind_v1'),'durability_status':state.get('continuation_durability',{}).get('status'),'inbox_revision':inbox.get('revision'),'snapshot_revision':snapshot.get('revision'),'snapshot_phase':snapshot.get('phase'),'native_status':native.get('status'),'native_component':native.get('component'),'native_work':native.get('work_invocation_id')}, sort_keys=True), flush=True)
-          if state.get('execution_id') != 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3':
-              raise SystemExit('execution mismatch')
-          if state.get('lease_generation') != 29 or hashlib.sha256(state['fence_token'].encode()).hexdigest() != 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
-              raise SystemExit('generation/fence mismatch')
-          if state.get('status') != 'running' or state.get('resume_required') is not True:
-              raise SystemExit('authority is not resumable running state')
-          if state.get('active_component') != 'generation29_consolidate_cross_source_reconciliation_pending_native_consume':
-              raise SystemExit('active component mismatch')
-          exact = state.get('exact_continuation', {})
-          expected = {
-              'pending_native_invocation_id': native_id,
-              'pending_native_invocation_ref': f'.continual/runs/{run_id}/invocations/{native_id}.json',
-              'pending_native_invocation_blob_sha': os.environ['CONSOLIDATE_NATIVE_BLOB'],
-              'pending_work_invocation_id': work_id,
-              'pending_request_ref': f'.continual/work-model/invocations/{work_id}/request.json',
-              'pending_request_blob_sha': os.environ['CONSOLIDATE_REQUEST_BLOB'],
-              'pending_request_digest': os.environ['CONSOLIDATE_REQUEST_DIGEST'],
-              'pending_response_ref': None,
-              'pending_response_blob_sha': None,
-              'pending_response_digest': None,
-              'response_exists_on_authoritative_remote': False,
-              'snapshot_revision': 134,
-              'native_phase': 'unit_pending',
-              'pending_component': 'consolidate_episode',
-              'durability_status': 'pending_native_consume',
-          }
-          for key, value in expected.items():
-              if exact.get(key) != value:
-                  raise SystemExit(f'exact continuation mismatch {key}: {exact.get(key)!r} != {value!r}')
-          completed = exact.get('completed_effect', {})
-          if completed.get('native_invocation_id') != 'invoke-002e7b508042a134bb24c405' or completed.get('work_invocation_id') != 'invoke-64f6b0cd887538ecd50c0a24':
-              raise SystemExit('completed Task Evaluate identity mismatch')
-          if completed.get('response_digest') != '5472db83780a5567a772870d3d0ba392555213659affdadfabe45e2ae366609d' or completed.get('agi_achieved') is not False:
-              raise SystemExit('completed Task Evaluate result mismatch')
-          bind = state.get('generation29_task_evaluate_cross_source_reconciliation_consolidate_bind_v1', {})
-          if bind.get('status') != 'remote_main_readback_verified' or bind.get('verified_remote_readback') is not True:
-              raise SystemExit('Consolidate state binding status mismatch')
-          bound_pending = bind.get('pending_continuation', {})
-          if bound_pending.get('work_invocation_id') != work_id or bound_pending.get('native_invocation_id') != native_id:
-              raise SystemExit('Consolidate state identity mismatch')
-          durability = state.get('continuation_durability', {})
-          if durability.get('status') != 'remote_main_readback_verified' or durability.get('verified_remote_readback') is not True:
-              raise SystemExit('continuation durability is not verified')
-          if durability.get('pending_work_invocation_id') != work_id or durability.get('pending_native_invocation_id') != native_id:
-              raise SystemExit('continuation durability identity mismatch')
-          if inbox.get('revision') != 38:
-              raise SystemExit('inbox revision mismatch')
-          if snapshot.get('revision') != 134 or snapshot.get('phase') != 'consolidate_pending':
-              raise SystemExit('snapshot is not revision134 consolidate_pending')
-          if request.get('component') != 'consolidate_episode' or request.get('request_digest') != os.environ['CONSOLIDATE_REQUEST_DIGEST']:
-              raise SystemExit('Consolidate request mismatch')
-          if request.get('prompt_path') != 'prompts/consolidate_episode.md':
-              raise SystemExit('Consolidate prompt mismatch')
-          if request.get('payload', {}).get('preflight_selection', {}).get('decision') != 'USE_ACTIVE':
-              raise SystemExit('Consolidate preflight is not USE_ACTIVE')
-          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
-              raise SystemExit('Consolidate identity mismatch')
-          if (root / '.continual' / 'work-model' / 'invocations' / work_id / 'response.json').exists():
-              raise SystemExit('Consolidate already answered')
-          if native.get('status') != 'awaiting_work_model' or native.get('component') != 'consolidate_episode':
-              raise SystemExit('Consolidate native is not awaiting')
-          if native.get('work_invocation_id') != work_id or native.get('work_request_digest') != request.get('request_digest'):
-              raise SystemExit('native/Work binding mismatch')
-          pending = pending_work_invocations(root, run_id=run_id)
-          if len(pending) != 1 or pending[0].get('invocation_id') != work_id:
-              raise SystemExit('Consolidate is not the unique pending Work item')
-          verified = verify_work_invocations(root, run_id=run_id)
-          expected_counts = {'valid': True, 'requests': 146, 'responses': 145, 'pending': 1, 'native_completed': 139, 'native_fragments': 139, 'native_local_learn': 127}
-          print('VERIFIED_COUNTS=' + json.dumps(verified, sort_keys=True), flush=True)
-          for key, value in expected_counts.items():
-              if verified.get(key) != value:
-                  raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
-          Path('/tmp/expected-before.json').write_text(json.dumps(expected_counts, sort_keys=True) + '\n')
-          PY
-          PREFLIGHT_PY_RC=$?
-          echo "DIAG_PREFLIGHT_PY_RC=$PREFLIGHT_PY_RC"
-          set -e
-          test "$PREFLIGHT_PY_RC" = 0
-          set +e
+          test "$(printf '%s' "$(jq -r '.fence_token' agi/WORK_EXECUTION_STATE.json)" | sha256sum | cut -d' ' -f1)" = "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d"
+          jq -e --arg native "$CONSOLIDATE_NATIVE_ID" --arg work "$CONSOLIDATE_WORK_ID" --arg nblob "$CONSOLIDATE_NATIVE_BLOB" --arg rblob "$CONSOLIDATE_REQUEST_BLOB" --arg rdigest "$CONSOLIDATE_REQUEST_DIGEST" '
+            .execution_id == "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3"
+            and .lease_generation == 29 and .status == "running" and .resume_required == true
+            and .active_component == "generation29_consolidate_cross_source_reconciliation_pending_native_consume"
+            and .exact_continuation.status == "remote_main_readback_verified"
+            and .exact_continuation.verified_remote_readback == true
+            and .exact_continuation.pending_native_invocation_id == $native
+            and .exact_continuation.pending_native_invocation_blob_sha == $nblob
+            and .exact_continuation.pending_work_invocation_id == $work
+            and .exact_continuation.pending_request_blob_sha == $rblob
+            and .exact_continuation.pending_request_digest == $rdigest
+            and .exact_continuation.pending_response_ref == null
+            and .exact_continuation.response_exists_on_authoritative_remote == false
+            and .exact_continuation.snapshot_revision == 134
+            and .exact_continuation.native_phase == "unit_pending"
+            and .exact_continuation.pending_component == "consolidate_episode"
+            and .exact_continuation.durability_status == "pending_native_consume"
+            and .exact_continuation.completed_effect.native_invocation_id == "invoke-002e7b508042a134bb24c405"
+            and .exact_continuation.completed_effect.work_invocation_id == "invoke-64f6b0cd887538ecd50c0a24"
+            and .exact_continuation.completed_effect.response_digest == "5472db83780a5567a772870d3d0ba392555213659affdadfabe45e2ae366609d"
+            and .exact_continuation.completed_effect.agi_achieved == false
+            and .generation29_task_evaluate_cross_source_reconciliation_consolidate_bind_v1.status == "remote_main_readback_verified"
+            and .generation29_task_evaluate_cross_source_reconciliation_consolidate_bind_v1.verified_remote_readback == true
+            and .generation29_task_evaluate_cross_source_reconciliation_consolidate_bind_v1.pending_continuation.native_invocation_id == $native
+            and .generation29_task_evaluate_cross_source_reconciliation_consolidate_bind_v1.pending_continuation.work_invocation_id == $work
+          ' agi/WORK_EXECUTION_STATE.json
+          jq -e '.revision == 38' /tmp/runtime-inbox.json
+          jq -e '.revision == 134 and .phase == "consolidate_pending"' ".continual/runs/$RUN_ID/snapshot.json"
+          jq -e --arg d "$CONSOLIDATE_REQUEST_DIGEST" '.component == "consolidate_episode" and .request_digest == $d and .prompt_path == "prompts/consolidate_episode.md" and .payload.preflight_selection.decision == "USE_ACTIVE" and .executor_binding == "current_chatgpt_work_session" and .model_identity == "chatgpt-work-model-unverified"' ".continual/work-model/invocations/$CONSOLIDATE_WORK_ID/request.json"
+          jq -e --arg work "$CONSOLIDATE_WORK_ID" --arg d "$CONSOLIDATE_REQUEST_DIGEST" '.status == "awaiting_work_model" and .component == "consolidate_episode" and .work_invocation_id == $work and .work_request_digest == $d' ".continual/runs/$RUN_ID/invocations/$CONSOLIDATE_NATIVE_ID.json"
+          test ! -e ".continual/work-model/invocations/$CONSOLIDATE_WORK_ID/response.json"
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/preflight-work-verify.json
+          cat /tmp/preflight-work-verify.json
+          jq -e '.valid == true and .requests == 146 and .responses == 145 and .pending == 1 and .native_completed == 139 and .native_fragments == 139 and .native_local_learn == 127' /tmp/preflight-work-verify.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/preflight-work-pending.json
+          jq -e --arg work "$CONSOLIDATE_WORK_ID" '.pending | length == 1 and .[0].invocation_id == $work and .[0].component == "consolidate_episode"' /tmp/preflight-work-pending.json
           continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-before.json
-          CHECKPOINT_RC=$?
-          set -e
           cat /tmp/work-checkpoint-before.json
-          test "$CHECKPOINT_RC" = 0
           jq -e '.valid == true' /tmp/work-checkpoint-before.json
 
       - name: Record fresh exact main and exact-head CI observations
