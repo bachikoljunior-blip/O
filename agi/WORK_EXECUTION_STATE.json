@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_task_evaluate_external_upstream_regression_repair_pending_native_consume",
+  "active_component": "generation29_task_evaluate_external_repair_branch_exact_head_ci_in_progress",
   "active_prompt": "prompts/candidate_evaluate.md",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation29-evaluate-external-upstream-regression-repair-v1",
@@ -193,11 +193,11 @@
       "updated_at": "2026-08-31T23:03:12.932518+00:00",
       "readback_at": "2026-09-01T00:23:46.112Z"
     },
-    "branch": "main",
-    "branch_head_sha": "283bdb92c737ad098fa33930ba3a9b977532fd7f",
+    "branch": "work/gen29-task-evaluate-external-repair-response-v1",
+    "branch_head_sha": "5eaf99dc55b9744ed23b3e17869ebb038a79a30a",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T00:23:46.112Z",
+    "checkpointed_at": "2026-09-01T00:38:03.719Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-candidate-task-evaluate-external-repair-preflight-consume-task-evaluate-freeze-v1.json",
       "blob_sha": "a37ebf8b6b1b9746ef8c700572b0b45b7f1f8a39",
@@ -575,13 +575,13 @@
       33451087993,
       33451088030
     ],
-    "current_main_sha": "d07ddafaa8a7f7bb9502b7e9873773ea0ff6c40f",
-    "current_state_blob_sha": "fc6e750d541cc290a9a2cee1d61ad55ae869bbef",
+    "current_main_sha": "10b56452b2eaab6fe2c135a843ff98956fe94701",
+    "current_state_blob_sha": "c3479ad7e856597d2aacaa174e33d3de85120c84",
     "exact_completed_native_invocation_id": "invoke-1487948ebb1ccf851231d1b1",
     "exact_completed_request_digest": "7d59bc824db5c941c7a88a06aec81a864278b3192265b68f2bb0b741e189767c",
     "exact_completed_response_digest": "e8ea7ed6e8cb4630c54c558d05887c8f71b32f207e4b6cf120b0a4f368f5f7c6",
     "exact_completed_work_invocation_id": "invoke-089a664f465dbc66e143b9ed",
-    "exact_frontier": "PR395 merged; Candidate BASELINE_FIRST consumed exactly once; unique Task Evaluate invoke-dbef4e8815ff89b7cb56aa50 is response-absent and pending native consume.",
+    "exact_frontier": "Task Evaluate invoke-dbef4e8815ff89b7cb56aa50 was consumed exactly once on isolated head 7598f0ad; one Consolidate successor is frozen there; launcher cleanup head 5eaf99dc awaits protected PR396 exact-head CI and merge.",
     "exact_frozen_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
     "exact_frozen_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-dbef4e8815ff89b7cb56aa50/request.json",
@@ -599,8 +599,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
-    "idempotency_key": "o-work-gen29:pr395:c91fa424:bind-external-repair-task-evaluate:v1",
-    "last_verified_effect": "PR395 lifecycle and exact Task Evaluate freeze are read back; slot 00:12 UTC is bound to the same execution; response remains absent.",
+    "idempotency_key": "o-work-gen29:pr396:5eaf99dc:task-evaluate-external-repair-ci-wait:v1",
+    "last_verified_effect": "One-shot lifecycle produced commit 7598f0ad and exact Consolidate freeze; workflow/response launchers were removed at 5eaf99dc; PR396 exact-head workflows are queued/in progress.",
     "lease_generation": 29,
     "merge_authorization": {
       "base_sha": "dbb2b3ecf1168c576de904aff74f6aef5412c232",
@@ -623,9 +623,9 @@
     },
     "merge_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "merge_tree_sha": "4697405584d3c30a86cc839bd7d1555fb363ad09",
-    "next_action": "Consume Task Evaluate invoke-dbef4e8815ff89b7cb56aa50 exactly once, verify the bounded issue-89 repair independently, freeze the post-result Candidate successor, and continue.",
-    "next_tool": "Consume the existing frozen Task Evaluate request; do not recreate it.",
-    "next_tool_action": "Submit one Task Evaluate response, then work-resume to freeze the post-result Candidate request.",
+    "next_action": "Wait boundedly for PR396 directive/test exact-head CI, merge only expected unchanged head 5eaf99dc, exact-readback Task Evaluate response and Consolidate successor, bind state, then consume Consolidate once.",
+    "next_tool": "Poll workflow runs 33455198252 and 33455198283; do not relaunch or duplicate the Task Evaluate response.",
+    "next_tool_action": "On all required jobs success, merge PR396 expected head 5eaf99dc and perform two-phase state binding.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
@@ -640,7 +640,13 @@
     "pending_execute_request_blob_sha": "6295cd6a0ecd1019ea39832527c838005c185f24",
     "pending_execute_request_digest": "083c762d384e1974247319e0351ac0439b9a9dfd95de3f6e0875d3017d2335c4",
     "pending_execute_work_invocation_id": "invoke-156890b09d225d1dadb9595b",
-    "pending_job_ids": [],
+    "pending_job_ids": [
+      99693585190,
+      99693585130,
+      99693585326,
+      99693585328,
+      99693585540
+    ],
     "pending_learn_native_invocation_id": null,
     "pending_learn_request_blob_sha": null,
     "pending_learn_request_digest": null,
@@ -654,7 +660,10 @@
     "pending_task_evaluate_request_digest": "b03098574dfb759db525a8f2302eb7ba62a18411408d22c46ae66dfad1eb4dca",
     "pending_task_evaluate_request_ref": ".continual/work-model/invocations/invoke-115ab8989cbae76d07e0c5a5/request.json",
     "pending_task_evaluate_work_invocation_id": "invoke-115ab8989cbae76d07e0c5a5",
-    "pending_workflow_run_ids": [],
+    "pending_workflow_run_ids": [
+      33455198252,
+      33455198283
+    ],
     "postmerge_checkpoint": {
       "blob_sha": "5840402802415c3c0e7f7f0d4de47bb320ce877e",
       "exact_readback": true,
@@ -694,10 +703,10 @@
       "number": 380,
       "url": "https://github.com/bachikoljunior-blip/O/pull/380"
     },
-    "pull_request_head_sha": "c91fa424251aa06a4c0deee503409abcd4db5483",
+    "pull_request_head_sha": "5eaf99dc55b9744ed23b3e17869ebb038a79a30a",
     "pull_request_merge_sha": "283bdb92c737ad098fa33930ba3a9b977532fd7f",
-    "pull_request_number": 395,
-    "pull_request_state": "merged",
+    "pull_request_number": 396,
+    "pull_request_state": "open",
     "queue_observation": {
       "observed_at": "2026-08-29T19:07:09.708Z",
       "repository_in_progress_runs": 10,
@@ -797,7 +806,7 @@
     "snapshot_blob_sha": "e39abed425d8fbba0baaf04b3da3870ab2d79c0d",
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 125,
-    "status": "task_evaluate_state_cas_exact_readback_verified_pending_native_consume",
+    "status": "task_evaluate_external_repair_branch_exact_head_ci_in_progress",
     "stop_cause": {
       "evidence": "GitHub Actions job 99500084280 failed in Context Kernel before Execute preflight/successor freeze; authoritative Candidate response remains absent on main.",
       "failed_run_id": 33395856265,
@@ -12167,7 +12176,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T00:23:46.112Z",
+  "heartbeat_at": "2026-09-01T00:38:03.719Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -15430,6 +15439,36 @@
     "slot_receipt_ref": "automation_control/receipts/o_work_monitor_recovery/20260901T002137Z-gen29-scheduled-slot-overlap-0012.json",
     "slot_receipt_blob_sha": "06b9b0db45102204d1186f17f78d1aa9e8caffc6"
   },
-  "last_action": "Task Evaluate pending binding exact-readback verified; 00:12 UTC slot overlap durably bound",
-  "continuation": "Consume invoke-dbef4e8815ff89b7cb56aa50 exactly once, freeze the post-result Candidate successor, then continue Consolidate, Learn, Root, and materially different safe work."
+  "last_action": "Task Evaluate exact response consumed once on isolated branch; Consolidate frozen; PR396 protected exact-head CI in progress",
+  "continuation": "Complete PR396 exact-head CI and expected-head merge/readback, bind the unique Consolidate request, consume it exactly once, then continue Learn, Root, and materially different safe work.",
+  "generation29_task_evaluate_external_repair_consume_v1": {
+    "schema_version": 1,
+    "phase": "isolated_branch_exact_head_ci_in_progress",
+    "recorded_at": "2026-09-01T00:38:03.719Z",
+    "source_state_commit_sha": "10b56452b2eaab6fe2c135a843ff98956fe94701",
+    "source_state_blob_sha": "c3479ad7e856597d2aacaa174e33d3de85120c84",
+    "task_native_invocation_id": "invoke-56e01e957b82e50bab4f36eb",
+    "task_work_invocation_id": "invoke-dbef4e8815ff89b7cb56aa50",
+    "task_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
+    "task_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
+    "lifecycle_result_commit_sha": "7598f0ad9360e6c1356bdd1bfbbd705a20237d95",
+    "pull_request_number": 396,
+    "pull_request_head_sha": "5eaf99dc55b9744ed23b3e17869ebb038a79a30a",
+    "directive_run_id": 33455198252,
+    "test_run_id": 33455198283,
+    "required_job_ids": [
+      99693585190,
+      99693585130,
+      99693585326,
+      99693585328,
+      99693585540
+    ],
+    "response_exists_on_authoritative_main": false,
+    "request_recreated": false,
+    "response_repeated": false,
+    "idempotency_key": "o-work-gen29:consume-task-evaluate-invoke-dbef4e8815ff89b7cb56aa50:freeze-external-repair-consolidate:revision38:v1",
+    "next_action": "complete exact-head CI, expected-head merge, exact readback, and state binding before consuming Consolidate",
+    "resume_required": true,
+    "agi_achieved": false
+  }
 }
