@@ -177,13 +177,19 @@ jobs:
               raise SystemExit('Consolidate is not the unique pending Work item')
           verified = verify_work_invocations(root, run_id=run_id)
           expected_counts = {'valid': True, 'requests': 146, 'responses': 145, 'pending': 1, 'native_completed': 139, 'native_fragments': 139, 'native_local_learn': 127}
+          print('VERIFIED_COUNTS=' + json.dumps(verified, sort_keys=True), flush=True)
           for key, value in expected_counts.items():
               if verified.get(key) != value:
                   raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
           Path('/tmp/expected-before.json').write_text(json.dumps(expected_counts, sort_keys=True) + '\n')
           PY
+          set +e
           continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-before.json
+          CHECKPOINT_RC=$?
+          set -e
           cat /tmp/work-checkpoint-before.json
+          test "$CHECKPOINT_RC" = 0
+          jq -e '.valid == true' /tmp/work-checkpoint-before.json
 
       - name: Record fresh exact main and exact-head CI observations
         shell: bash
