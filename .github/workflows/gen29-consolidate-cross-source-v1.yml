@@ -56,7 +56,7 @@ jobs:
           test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
           python - <<'PY'
           import subprocess
-          expected = ['.github/workflows/gen29-consolidate-cross-source-v1.yml']
+          expected = ['.github/workflows/gen29-consolidate-cross-source-v1.yml', 'agi/WORK_EXECUTION_STATE.json']
           observed = subprocess.check_output(
               ['git', 'diff', '--name-only', __import__('os').environ['EXPECTED_MAIN'], 'HEAD'],
               text=True,
