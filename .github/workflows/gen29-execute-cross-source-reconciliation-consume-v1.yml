@@ -129,10 +129,11 @@ jobs:
           set -euo pipefail
           continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$EXPECTED_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
           python - <<'PY'
-          import hashlib,json,os
+          import json,os
           from pathlib import Path
+          from continual.store import Store
           state=json.loads(Path('agi/WORK_EXECUTION_STATE.json').read_text())
-          projection={'status':state['status'],'owner_kind':state['owner_kind'],'execution_id':state['execution_id'],'lease_generation':state['lease_generation'],'fence_token_digest':hashlib.sha256(state['fence_token'].encode()).hexdigest(),'heartbeat_at':state['heartbeat_at']}
+          projection={'status':state['status'],'owner_kind':state['owner_kind'],'execution_id':state['execution_id'],'lease_generation':state['lease_generation'],'fence_token_digest':Store(Path('.')).stable_digest(state['fence_token'],length=64),'heartbeat_at':state['heartbeat_at']}
           Path('/tmp/work-source-projection.json').write_text(json.dumps(projection,sort_keys=True)+'\n')
           PY
           WORK_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/work-source-prepare.json)"
