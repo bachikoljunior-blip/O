@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_consolidate_external_repair_pending_native_consume",
+  "active_component": "generation29_consolidate_external_repair_branch_exact_head_ci_in_progress",
   "active_prompt": "prompts/consolidate_episode.md",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation29-evaluate-external-upstream-regression-repair-v1",
@@ -193,11 +193,11 @@
       "updated_at": "2026-09-01T00:47:48.229062+00:00",
       "readback_at": "2026-09-01T02:00:13.597Z"
     },
-    "branch": "main",
-    "branch_head_sha": "d5c4aa051fa2b7a8c3bac21d81640b10be464886",
+    "branch": "work/gen29-consolidate-external-repair-response-v1",
+    "branch_head_sha": "58e94c45196cab71518b732ddffd98e5c46059d1",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T02:07:11.317Z",
+    "checkpointed_at": "2026-09-01T02:09:39.925Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-task-evaluate-external-repair-consume-consolidate-freeze-v1.json",
       "blob_sha": "5106ae4021e0af50affe65b26e218ddb3d45f186",
@@ -346,7 +346,7 @@
     "exact_completed_request_digest": "7d59bc824db5c941c7a88a06aec81a864278b3192265b68f2bb0b741e189767c",
     "exact_completed_response_digest": "e8ea7ed6e8cb4630c54c558d05887c8f71b32f207e4b6cf120b0a4f368f5f7c6",
     "exact_completed_work_invocation_id": "invoke-089a664f465dbc66e143b9ed",
-    "exact_frontier": "Consolidate remains unanswered; first launch failed before semantic mutation on deterministic launch-delta order.",
+    "exact_frontier": "Consolidate consumed exactly once on isolated branch and Learn frozen; PR398 exact-head CI is queued.",
     "exact_frozen_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
     "exact_frozen_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-dbef4e8815ff89b7cb56aa50/request.json",
@@ -390,7 +390,7 @@
     "merge_tree_sha": "4697405584d3c30a86cc839bd7d1555fb363ad09",
     "next_action": "Wait boundedly for PR397 exact-head test run 33458183962, merge expected head 5eaf99dc only after all jobs succeed, exact-readback response and Consolidate, then bind state.",
     "next_tool": "Poll run 33458183962; do not relaunch Task Evaluate.",
-    "next_tool_action": "Exact-read phase1 state CAS, apply phase2/readback, then submit the frozen Consolidate response exactly once.",
+    "next_tool_action": "Boundedly poll PR398 directive/test runs without duplicate launch; merge only exact head after all required jobs succeed.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
@@ -420,8 +420,8 @@
     "pending_task_evaluate_request_ref": ".continual/work-model/invocations/invoke-115ab8989cbae76d07e0c5a5/request.json",
     "pending_task_evaluate_work_invocation_id": "invoke-115ab8989cbae76d07e0c5a5",
     "pending_workflow_run_ids": [
-      33458184113,
-      33458183962
+      33461456984,
+      33461456954
     ],
     "postmerge_checkpoint": {
       "blob_sha": "5840402802415c3c0e7f7f0d4de47bb320ce877e",
@@ -11941,7 +11941,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T02:07:11.317Z",
+  "heartbeat_at": "2026-09-01T02:09:39.925Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -12770,8 +12770,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-09-01T02:07:11.317Z",
-  "last_progress_at": "2026-09-01T02:00:51.036Z",
+  "last_activity_at": "2026-09-01T02:09:39.925Z",
+  "last_progress_at": "2026-09-01T02:09:39.925Z",
   "last_verified_effect": {
     "kind": "task_evaluate_response_merged_exact_readback",
     "pull_request": 397,
@@ -12986,8 +12986,8 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Consume Consolidate invoke-7951f174fecae923310eb7a9 exactly once, verify its durable response, freeze Learn, and continue.",
-  "next_tool_action": "Patch only the one-shot workflow launch-order and snapshot-revision guards, re-run once, and require post-launch lifecycle progress.",
+  "next_action": "Complete PR398 exact-head CI, merge only expected head, exact-read the Consolidate response and frozen Learn request, then CAS-bind and consume Learn.",
+  "next_tool_action": "Boundedly poll PR398 directive/test runs without duplicate launch; merge only exact head after all required jobs succeed.",
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
     "base_main_sha": "aadfa7c049961e79ab7e15cd634c25b292293ff8",
@@ -15259,12 +15259,12 @@
   },
   "generation29_consolidate_external_repair_bind_v1": {
     "schema_version": 1,
-    "phase": "launch_guard_stop_cause_identified_repair_pending",
+    "phase": "lifecycle_branch_exact_head_ci_in_progress",
     "recorded_at": "2026-09-01T02:00:13.597Z",
     "expected_prior_main_sha": "d5c4aa051fa2b7a8c3bac21d81640b10be464886",
     "expected_prior_state_blob_sha": "fc3163d06e56c9cd3921fbe09124181916362e63",
-    "pull_request_number": 397,
-    "pull_request_head_sha": "5eaf99dc55b9744ed23b3e17869ebb038a79a30a",
+    "pull_request_number": 398,
+    "pull_request_head_sha": "58e94c45196cab71518b732ddffd98e5c46059d1",
     "merge_sha": "d5c4aa051fa2b7a8c3bac21d81640b10be464886",
     "task_response_blob_sha": "f6ffa24a87984fca670c85ffff5745cc44a33518",
     "task_response_digest": "255cd6d8690977bc5a0830daaba3ea24802b8182965f6a24f0750a6589710bd7",
@@ -15275,7 +15275,7 @@
     "pending_request_digest": "5e3b95577c32aa98be692caef794723bbbe1fb54dc3bef55d839ecb92e4de6e7",
     "response_exists_on_authoritative_remote": false,
     "idempotency_key": "o-work-gen29:pr397:5eaf99dc:bind-external-repair-consolidate:v1",
-    "next_action": "Consume Consolidate invoke-7951f174fecae923310eb7a9 exactly once, verify its durable response, freeze Learn, and continue.",
+    "next_action": "Complete PR398 exact-head CI, merge only expected head, exact-read the Consolidate response and frozen Learn request, then CAS-bind and consume Learn.",
     "resume_required": true,
     "agi_achieved": false,
     "phase1_commit_sha": "44dc72fab326d7c1287642b3c08c5371e3bbdf82",
@@ -15303,7 +15303,16 @@
       "repair": "Change the deterministic expected launch-delta order to the observed git diff order and correct the stale snapshot_revision assertion from 111 to 126.",
       "validation_required": "A new exact workflow run must pass the pre-mutation guard and produce the exact Consolidate response plus Learn freeze without recreating the request.",
       "idempotency_key": "o-work-gen29:repair-consolidate-external-repair-launch-delta-order-and-snapshot-v1",
-      "cause_eliminated": false
-    }
+      "cause_eliminated": true,
+      "repair_head_sha": "dd4c1de2617f1428b2b875918ad81cd8d7a822ec",
+      "successful_recurrence_run_id": 33461369787,
+      "successful_recurrence_job_id": 99711990533,
+      "validated": true,
+      "validation": "The repaired one-shot passed all pre-mutation guards, submitted the exact Consolidate response once, advanced to revision127, froze one Learn request, and pushed the exact lifecycle delta."
+    },
+    "lifecycle_result_commit_sha": "e03d9517ad1e293d7c35fde5b6f919b164477045",
+    "cleanup_head_sha": "58e94c45196cab71518b732ddffd98e5c46059d1",
+    "directive_run_id": 33461456984,
+    "test_run_id": 33461456954
   }
 }
