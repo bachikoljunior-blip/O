@@ -1,5 +1,5 @@
 {
-  "acquisition_phase": "phase2_remote_cas_written",
+  "acquisition_phase": "verified_two_phase_remote_readback",
   "active_component": "generation29_candidate_cross_source_data_reconciliation_pending_native_consume",
   "active_prompt": "prompts/candidate_evaluate.md",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
@@ -198,7 +198,7 @@
     "branch_head_sha": "eebddc858d00913ca34736907364f19379e59098",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T09:45:37.697Z",
+    "checkpointed_at": "2026-09-01T09:45:57.609Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-root-consume-cross-source-data-reconciliation-freeze-v1.json",
       "blob_sha": "5df3ffbf1470ab5309d07ac5d65c930a287f50b8",
@@ -341,13 +341,13 @@
       33451087993,
       33451088030
     ],
-    "current_main_sha": "74fe2ff7c73ca97133df56d15d89c30b30535859",
-    "current_state_blob_sha": "f4543f769db62116af4d6fd65fca01b44ad9cb29",
+    "current_main_sha": "94bffa2a1bcf6330e581587c639a6b37d14892a8",
+    "current_state_blob_sha": "6e52708e5844e7d48a626bf0fdcca60482e038d3",
     "exact_completed_native_invocation_id": "invoke-61622cc42438018f9e4d5108",
     "exact_completed_request_digest": "51019cfcf5535798773c995e08b6071fdbb6f47d236bffee11320d44572563cc",
     "exact_completed_response_digest": "9178559a467d9b39738b58375b2f0d1d64fa6e2e5c8543516573e5b600082927",
     "exact_completed_work_invocation_id": "invoke-b26b9b21916d14afae757348",
-    "exact_frontier": "Root response and PR405 merge are durable; unique Candidate Evaluate request is being CAS-bound and remains unanswered.",
+    "exact_frontier": "Root response and PR405 merge are durable; unique Candidate Evaluate request is CAS-bound, exact-readback verified, and unanswered.",
     "exact_frozen_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
     "exact_frozen_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-dbef4e8815ff89b7cb56aa50/request.json",
@@ -365,8 +365,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
-    "idempotency_key": "o-work-gen29:bind-candidate-evaluate-phase2:v1",
-    "last_verified_effect": "Phase1 exact readback verified the unchanged generation/fence plus Root completion, Candidate native/request blobs and digest, snapshot revision 132, and zero Candidate response.",
+    "idempotency_key": "o-work-gen29:bind-candidate-evaluate-final-readback:v1",
+    "last_verified_effect": "Two-phase expected-blob CAS and exact readback bound the unique Candidate Evaluate request under unchanged execution, generation, fence, inbox, snapshot, and zero-response proof.",
     "lease_generation": 29,
     "merge_authorization": {
       "base_sha": "dbb2b3ecf1168c576de904aff74f6aef5412c232",
@@ -390,8 +390,8 @@
     "merge_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "merge_tree_sha": "4697405584d3c30a86cc839bd7d1555fb363ad09",
     "next_action": "Consume Candidate Evaluate invoke-047ed5d16b7ff5cfbdbc716b exactly once, preserve the precommitted reconciliation controls, freeze its unique Execute successor, and continue.",
-    "next_tool": "Exact-read phase2 and finalize binding.",
-    "next_tool_action": "Exact-read phase2 and finalize the Candidate Evaluate binding before any native consume.",
+    "next_tool": "Launch exact Candidate Evaluate native consume.",
+    "next_tool_action": "Launch one protected Candidate Evaluate consume workflow using invoke-047ed5d16b7ff5cfbdbc716b exactly once; validate successor Execute freeze and continue.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
@@ -1493,7 +1493,7 @@
     "target_component": "execute",
     "source_main_sha": "eebddc858d00913ca34736907364f19379e59098",
     "durability_status": "pending_native_consume",
-    "status": "phase2_remote_cas_written",
+    "status": "remote_main_readback_verified",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1501,13 +1501,18 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "next_action": "Consume Candidate Evaluate invoke-047ed5d16b7ff5cfbdbc716b exactly once, preserve the precommitted reconciliation controls, freeze its unique Execute successor, and continue.",
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "phase1_expected_prior_state_blob_sha": "e60371c4120c20129c3620ab8898f0f4e7e0f678",
     "phase1_recorded_at": "2026-09-01T09:45:14.952Z",
     "phase1_commit_sha": "74fe2ff7c73ca97133df56d15d89c30b30535859",
     "phase1_state_blob_sha": "f4543f769db62116af4d6fd65fca01b44ad9cb29",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T09:45:37.697Z"
+    "phase1_verified_at": "2026-09-01T09:45:37.697Z",
+    "phase2_commit_sha": "94bffa2a1bcf6330e581587c639a6b37d14892a8",
+    "phase2_state_blob_sha": "6e52708e5844e7d48a626bf0fdcca60482e038d3",
+    "verified_state_commit_sha": "94bffa2a1bcf6330e581587c639a6b37d14892a8",
+    "verified_state_blob_sha": "6e52708e5844e7d48a626bf0fdcca60482e038d3",
+    "verified_at": "2026-09-01T09:45:57.609Z"
   },
   "continuation_source": "repository_latest_main_only",
   "continuous_execution_authorization": {
@@ -1568,7 +1573,7 @@
     "target_component": "execute",
     "source_main_sha": "eebddc858d00913ca34736907364f19379e59098",
     "durability_status": "pending_native_consume",
-    "status": "phase2_remote_cas_written",
+    "status": "remote_main_readback_verified",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1576,13 +1581,18 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "next_action": "Consume Candidate Evaluate invoke-047ed5d16b7ff5cfbdbc716b exactly once, preserve the precommitted reconciliation controls, freeze its unique Execute successor, and continue.",
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "phase1_expected_prior_state_blob_sha": "e60371c4120c20129c3620ab8898f0f4e7e0f678",
     "phase1_recorded_at": "2026-09-01T09:45:14.952Z",
     "phase1_commit_sha": "74fe2ff7c73ca97133df56d15d89c30b30535859",
     "phase1_state_blob_sha": "f4543f769db62116af4d6fd65fca01b44ad9cb29",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T09:45:37.697Z"
+    "phase1_verified_at": "2026-09-01T09:45:37.697Z",
+    "phase2_commit_sha": "94bffa2a1bcf6330e581587c639a6b37d14892a8",
+    "phase2_state_blob_sha": "6e52708e5844e7d48a626bf0fdcca60482e038d3",
+    "verified_state_commit_sha": "94bffa2a1bcf6330e581587c639a6b37d14892a8",
+    "verified_state_blob_sha": "6e52708e5844e7d48a626bf0fdcca60482e038d3",
+    "verified_at": "2026-09-01T09:45:57.609Z"
   },
   "exact_head_ci_observation": {
     "repository_full_name": "bachikoljunior-blip/O",
@@ -1601,7 +1611,7 @@
     "observed_at": "2026-09-01T07:25:00.000Z"
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "f4543f769db62116af4d6fd65fca01b44ad9cb29",
+  "expected_blob_sha": "6e52708e5844e7d48a626bf0fdcca60482e038d3",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
@@ -11941,7 +11951,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T09:45:37.697Z",
+  "heartbeat_at": "2026-09-01T09:45:57.609Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -12770,9 +12780,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-09-01T09:45:37.697Z",
-  "last_progress_at": "2026-09-01T09:45:37.697Z",
-  "last_verified_effect": "Phase1 exact readback verified the unchanged generation/fence plus Root completion, Candidate native/request blobs and digest, snapshot revision 132, and zero Candidate response.",
+  "last_activity_at": "2026-09-01T09:45:57.609Z",
+  "last_progress_at": "2026-09-01T09:45:57.609Z",
+  "last_verified_effect": "Two-phase expected-blob CAS and exact readback bound the unique Candidate Evaluate request under unchanged execution, generation, fence, inbox, snapshot, and zero-response proof.",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "4cfcffe49290f53879863d2ac9029944782c3535",
@@ -12978,7 +12988,7 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Consume Candidate Evaluate invoke-047ed5d16b7ff5cfbdbc716b exactly once, preserve the precommitted reconciliation controls, freeze its unique Execute successor, and continue.",
-  "next_tool_action": "Exact-read phase2 and finalize the Candidate Evaluate binding before any native consume.",
+  "next_tool_action": "Launch one protected Candidate Evaluate consume workflow using invoke-047ed5d16b7ff5cfbdbc716b exactly once; validate successor Execute freeze and continue.",
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
     "base_main_sha": "aadfa7c049961e79ab7e15cd634c25b292293ff8",
@@ -14539,8 +14549,8 @@
   "snapshot_phase": "unit_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
   "snapshot_revision": 132,
-  "source_main_sha": "eebddc858d00913ca34736907364f19379e59098",
-  "source_state_blob_sha": "f4543f769db62116af4d6fd65fca01b44ad9cb29",
+  "source_main_sha": "94bffa2a1bcf6330e581587c639a6b37d14892a8",
+  "source_state_blob_sha": "6e52708e5844e7d48a626bf0fdcca60482e038d3",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -15988,7 +15998,7 @@
   },
   "generation29_root_cross_source_data_reconciliation_candidate_evaluate_bind_v1": {
     "schema_version": 1,
-    "status": "phase2_remote_cas_written",
+    "status": "state_cas_exact_readback_verified_candidate_evaluate_pending_native_consume",
     "recorded_at": "2026-09-01T09:45:14.952Z",
     "source_main_sha": "eebddc858d00913ca34736907364f19379e59098",
     "source_state_blob_sha": "e60371c4120c20129c3620ab8898f0f4e7e0f678",
@@ -16051,10 +16061,13 @@
     "agi_achieved": false,
     "claim_boundary": "Root selected a bounded cross-source reconciliation unit; Candidate decision, Execute evidence, AGI, and user completion remain unproven.",
     "next_action": "Consume Candidate Evaluate invoke-047ed5d16b7ff5cfbdbc716b exactly once, preserve the precommitted reconciliation controls, freeze its unique Execute successor, and continue.",
-    "exact_readback_verified": false,
+    "exact_readback_verified": true,
     "phase1_commit_sha": "74fe2ff7c73ca97133df56d15d89c30b30535859",
     "phase1_blob_sha": "f4543f769db62116af4d6fd65fca01b44ad9cb29",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T09:45:37.697Z"
+    "phase1_verified_at": "2026-09-01T09:45:37.697Z",
+    "phase2_commit_sha": "94bffa2a1bcf6330e581587c639a6b37d14892a8",
+    "phase2_blob_sha": "6e52708e5844e7d48a626bf0fdcca60482e038d3",
+    "verified_at": "2026-09-01T09:45:57.609Z"
   }
 }
