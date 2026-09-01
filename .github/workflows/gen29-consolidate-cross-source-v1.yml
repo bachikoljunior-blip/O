@@ -193,6 +193,7 @@ jobs:
           PY
           PREFLIGHT_PY_RC=$?
           echo "DIAG_PREFLIGHT_PY_RC=$PREFLIGHT_PY_RC"
+          set -e
           test "$PREFLIGHT_PY_RC" = 0
           set +e
           continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-before.json
