@@ -109,9 +109,12 @@ jobs:
           state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
           inbox = json.loads(Path('/tmp/runtime-inbox.json').read_text())
           snapshot = json.loads((root / '.continual' / 'runs' / run_id / 'snapshot.json').read_text())
+          print('PY_STAGE=before_verified_request', flush=True)
           request = verified_work_request(root, work_id)
+          print('PY_STAGE=after_verified_request', flush=True)
           native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
           native = json.loads(native_path.read_text())
+          print('PY_STATE=' + json.dumps({'execution_id':state.get('execution_id'),'generation':state.get('lease_generation'),'status':state.get('status'),'resume_required':state.get('resume_required'),'active_component':state.get('active_component'),'exact':{k:state.get('exact_continuation',{}).get(k) for k in ['pending_native_invocation_id','pending_native_invocation_ref','pending_native_invocation_blob_sha','pending_work_invocation_id','pending_request_ref','pending_request_blob_sha','pending_request_digest','pending_response_ref','pending_response_blob_sha','pending_response_digest','response_exists_on_authoritative_remote','snapshot_revision','native_phase','pending_component','durability_status']},'completed':state.get('exact_continuation',{}).get('completed_effect'),'bind':state.get('generation29_task_evaluate_cross_source_reconciliation_consolidate_bind_v1'),'durability_status':state.get('continuation_durability',{}).get('status'),'inbox_revision':inbox.get('revision'),'snapshot_revision':snapshot.get('revision'),'snapshot_phase':snapshot.get('phase'),'native_status':native.get('status'),'native_component':native.get('component'),'native_work':native.get('work_invocation_id')}, sort_keys=True), flush=True)
           if state.get('execution_id') != 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3':
               raise SystemExit('execution mismatch')
           if state.get('lease_generation') != 29 or hashlib.sha256(state['fence_token'].encode()).hexdigest() != 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
