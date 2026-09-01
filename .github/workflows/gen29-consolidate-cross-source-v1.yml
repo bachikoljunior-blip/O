@@ -1,0 +1,833 @@
+name: gen29 consume cross-source Consolidate response v1
+
+on:
+  push:
+    branches:
+      - work/gen29-consolidate-cross-source-v1
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-consolidate-cross-source-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-consolidate-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_MAIN: 85662c3455d084e00b670ece111343b6a91f86e5
+      EXPECTED_STATE_BLOB: e1c1c731bdc1720dec55c26e9d3f5ca36b01873b
+      EXPECTED_SNAPSHOT_BLOB: cbc21f3dbd15a8de4c8275605f46c2b46f682556
+      EXPECTED_INBOX_BLOB: 34423c2dd71d95c55769f501fe1701ea0088fb32
+      EXPECTED_INBOX_REVISION: '38'
+      CONSOLIDATE_NATIVE_ID: invoke-cb8d52043d61b9c66990bc2c
+      CONSOLIDATE_NATIVE_BLOB: 93db1d756d12053451ad73b7cfec12e737d3ff95
+      CONSOLIDATE_WORK_ID: invoke-2b68ec6d0e21b7c420fde35b
+      CONSOLIDATE_REQUEST_BLOB: 7cb54ed9d835e619fbf5825d62f1f629789d325a
+      CONSOLIDATE_REQUEST_DIGEST: ce92eefa139f7ddde5696d16f56157a22b2b6f8f373fff4feba7d49da1077b48
+      SOURCE_CI_RUN_ID: '33513797649'
+      SOURCE_CI_HEAD: 78bafb24b4b903d43f7bcbabe37fe8f7b0ec13a0
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      EPISODE_ID: episode-work-recovery-gen9-durability-repair
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e .
+
+      - name: Assert exact branch, runtime main, authority, and Consolidate binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          RUNTIME_MAIN="$(git rev-parse origin/main)"
+          test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
+          python - <<'PY'
+          import subprocess
+          expected = ['.github/workflows/gen29-consolidate-cross-source-v1.yml']
+          observed = subprocess.check_output(
+              ['git', 'diff', '--name-only', __import__('os').environ['EXPECTED_MAIN'], 'HEAD'],
+              text=True,
+          ).splitlines()
+          if observed != expected:
+              raise SystemExit(f'launch delta mismatch: {observed!r}')
+          PY
+          python - "$EXPECTED_MAIN" "$RUNTIME_MAIN" <<'PY'
+          import subprocess
+          import sys
+          base, latest = sys.argv[1:]
+          if subprocess.check_output(['git', 'merge-base', base, latest], text=True).strip() != base:
+              raise SystemExit('runtime main lost expected ancestry')
+          for line in subprocess.check_output(['git', 'diff', '--name-status', base, latest], text=True).splitlines():
+              status, path = line.split('\t', 1)
+              allowed = (
+                  (status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json')
+                  or (status == 'A' and path.startswith('note/automation_control/receipts/') and path.endswith('.json'))
+                  or (status == 'A' and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_') and path.endswith('_control_missing.json'))
+              )
+              if not allowed:
+                  raise SystemExit(f'unsafe runtime-main delta: {status} {path}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/runtime-state-document.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/USER_INPUT_INBOX.json?ref=$RUNTIME_MAIN" > /tmp/runtime-inbox-document.json
+          RUNTIME_STATE_BLOB="$(jq -r '.sha' /tmp/runtime-state-document.json)"
+          test "$RUNTIME_STATE_BLOB" = "$EXPECTED_STATE_BLOB"
+          test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
+          jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
+          jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object /tmp/runtime-inbox.json)" = "$EXPECTED_INBOX_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$CONSOLIDATE_WORK_ID/request.json)" = "$CONSOLIDATE_REQUEST_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$CONSOLIDATE_NATIVE_ID.json)" = "$CONSOLIDATE_NATIVE_BLOB"
+          echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
+          echo "RUNTIME_STATE_BLOB=$RUNTIME_STATE_BLOB" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_request, verify_work_invocations
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          native_id = os.environ['CONSOLIDATE_NATIVE_ID']
+          work_id = os.environ['CONSOLIDATE_WORK_ID']
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          inbox = json.loads(Path('/tmp/runtime-inbox.json').read_text())
+          snapshot = json.loads((root / '.continual' / 'runs' / run_id / 'snapshot.json').read_text())
+          request = verified_work_request(root, work_id)
+          native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
+          native = json.loads(native_path.read_text())
+          if state.get('execution_id') != 'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3':
+              raise SystemExit('execution mismatch')
+          if state.get('lease_generation') != 29 or hashlib.sha256(state['fence_token'].encode()).hexdigest() != 'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
+              raise SystemExit('generation/fence mismatch')
+          if state.get('status') != 'running' or state.get('resume_required') is not True:
+              raise SystemExit('authority is not resumable running state')
+          if state.get('active_component') != 'generation29_consolidate_cross_source_reconciliation_pending_native_consume':
+              raise SystemExit('active component mismatch')
+          exact = state.get('exact_continuation', {})
+          expected = {
+              'pending_native_invocation_id': native_id,
+              'pending_native_invocation_ref': f'.continual/runs/{run_id}/invocations/{native_id}.json',
+              'pending_native_invocation_blob_sha': os.environ['CONSOLIDATE_NATIVE_BLOB'],
+              'pending_work_invocation_id': work_id,
+              'pending_request_ref': f'.continual/work-model/invocations/{work_id}/request.json',
+              'pending_request_blob_sha': os.environ['CONSOLIDATE_REQUEST_BLOB'],
+              'pending_request_digest': os.environ['CONSOLIDATE_REQUEST_DIGEST'],
+              'pending_response_ref': None,
+              'pending_response_blob_sha': None,
+              'pending_response_digest': None,
+              'response_exists_on_authoritative_remote': False,
+              'snapshot_revision': 134,
+              'native_phase': 'unit_pending',
+              'pending_component': 'consolidate_episode',
+              'durability_status': 'pending_native_consume',
+          }
+          for key, value in expected.items():
+              if exact.get(key) != value:
+                  raise SystemExit(f'exact continuation mismatch {key}: {exact.get(key)!r} != {value!r}')
+          completed = exact.get('completed_effect', {})
+          if completed.get('native_invocation_id') != 'invoke-002e7b508042a134bb24c405' or completed.get('work_invocation_id') != 'invoke-64f6b0cd887538ecd50c0a24':
+              raise SystemExit('completed Task Evaluate identity mismatch')
+          if completed.get('response_digest') != '5472db83780a5567a772870d3d0ba392555213659affdadfabe45e2ae366609d' or completed.get('agi_achieved') is not False:
+              raise SystemExit('completed Task Evaluate result mismatch')
+          bind = state.get('generation29_task_evaluate_cross_source_reconciliation_consolidate_bind_v1', {})
+          if bind.get('status') != 'remote_main_readback_verified' or bind.get('verified_remote_readback') is not True:
+              raise SystemExit('Consolidate state binding status mismatch')
+          bound_pending = bind.get('pending_continuation', {})
+          if bound_pending.get('work_invocation_id') != work_id or bound_pending.get('native_invocation_id') != native_id:
+              raise SystemExit('Consolidate state identity mismatch')
+          durability = state.get('continuation_durability', {})
+          if durability.get('status') != 'remote_main_readback_verified' or durability.get('verified_remote_readback') is not True:
+              raise SystemExit('continuation durability is not verified')
+          if durability.get('pending_work_invocation_id') != work_id or durability.get('pending_native_invocation_id') != native_id:
+              raise SystemExit('continuation durability identity mismatch')
+          if inbox.get('revision') != 38:
+              raise SystemExit('inbox revision mismatch')
+          if snapshot.get('revision') != 134 or snapshot.get('phase') != 'consolidate_pending':
+              raise SystemExit('snapshot is not revision134 consolidate_pending')
+          if request.get('component') != 'consolidate_episode' or request.get('request_digest') != os.environ['CONSOLIDATE_REQUEST_DIGEST']:
+              raise SystemExit('Consolidate request mismatch')
+          if request.get('prompt_path') != 'prompts/consolidate_episode.md':
+              raise SystemExit('Consolidate prompt mismatch')
+          if request.get('payload', {}).get('preflight_selection', {}).get('decision') != 'USE_ACTIVE':
+              raise SystemExit('Consolidate preflight is not USE_ACTIVE')
+          if request.get('executor_binding') != os.environ['EXECUTOR_BINDING'] or request.get('model_identity') != os.environ['MODEL_IDENTITY']:
+              raise SystemExit('Consolidate identity mismatch')
+          if (root / '.continual' / 'work-model' / 'invocations' / work_id / 'response.json').exists():
+              raise SystemExit('Consolidate already answered')
+          if native.get('status') != 'awaiting_work_model' or native.get('component') != 'consolidate_episode':
+              raise SystemExit('Consolidate native is not awaiting')
+          if native.get('work_invocation_id') != work_id or native.get('work_request_digest') != request.get('request_digest'):
+              raise SystemExit('native/Work binding mismatch')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1 or pending[0].get('invocation_id') != work_id:
+              raise SystemExit('Consolidate is not the unique pending Work item')
+          verified = verify_work_invocations(root, run_id=run_id)
+          expected_counts = {'valid': True, 'requests': 146, 'responses': 145, 'pending': 1, 'native_completed': 139, 'native_fragments': 139, 'native_local_learn': 127}
+          for key, value in expected_counts.items():
+              if verified.get(key) != value:
+                  raise SystemExit(f'before verification mismatch {key}: {verified.get(key)!r}')
+          Path('/tmp/expected-before.json').write_text(json.dumps(expected_counts, sort_keys=True) + '\n')
+          PY
+          continual --root . work-checkpoint-verify --state agi/WORK_EXECUTION_STATE.json > /tmp/work-checkpoint-before.json
+          cat /tmp/work-checkpoint-before.json
+
+      - name: Record fresh exact main and exact-head CI observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$RUNTIME_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
+          python - <<'PY'
+          import base64
+          import json
+          from pathlib import Path
+          from continual.store import Store
+          document = json.loads(Path('/tmp/runtime-state-document.json').read_text())
+          state = json.loads(base64.b64decode(''.join(document['content'].splitlines())).decode())
+          projection = {
+              'status': state['status'], 'owner_kind': state['owner_kind'],
+              'execution_id': state['execution_id'], 'lease_generation': state['lease_generation'],
+              'fence_token_digest': Store(Path('.')).stable_digest(state['fence_token'], length=64),
+              'heartbeat_at': state['heartbeat_at'],
+          }
+          Path('/tmp/work-source-projection.json').write_text(json.dumps(projection, sort_keys=True) + '\n')
+          PY
+          WORK_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/work-source-prepare.json)"
+          WORK_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/work-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$RUNTIME_MAIN" --blob-sha "$RUNTIME_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = "completed"
+          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = "success"
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
+          jq '{id, workflow_id, name, status, conclusion, head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
+          jq '[.jobs[] | {id, name, status, conclusion}] | sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
+          CI_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/ci-source-prepare.json)"
+          CI_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/ci-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$CI_OBSERVATION_ID" --request-digest "$CI_REQUEST_DIGEST" --workflow-run /tmp/workflow-run-projection.json --jobs /tmp/workflow-jobs-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+
+      - name: Recheck CAS and continuity before mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          LATEST_MAIN="$(git rev-parse origin/main)"
+          python - "$EXPECTED_MAIN" "$LATEST_MAIN" <<'PY'
+          import subprocess
+          import sys
+          base, latest = sys.argv[1:]
+          if subprocess.check_output(['git', 'merge-base', base, latest], text=True).strip() != base:
+              raise SystemExit('latest main lost expected ancestry')
+          for line in subprocess.check_output(['git', 'diff', '--name-status', base, latest], text=True).splitlines():
+              status, path = line.split('\t', 1)
+              allowed = (
+                  (status == 'M' and path == 'agi/WORK_EXECUTION_STATE.json')
+                  or (status == 'A' and path.startswith('note/automation_control/receipts/') and path.endswith('.json'))
+                  or (status == 'A' and path.startswith('note/research_workers_clean_g1/evaluation/checkpoint_') and path.endswith('_control_missing.json'))
+              )
+              if not allowed:
+                  raise SystemExit(f'unsafe latest-main delta: {status} {path}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$LATEST_MAIN" > /tmp/pre-mutation-state-document.json
+          test "$(jq -r '.sha' /tmp/pre-mutation-state-document.json)" = "$RUNTIME_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from continual.ci_source_observation import verify_ci_source_observation
+          from continual.continuity_preflight import assert_work_resume_continuity_preflight
+          from continual.store import Store
+          from continual.work_source_observation import verify_work_source_observation
+          root = Path('.').resolve()
+          state = json.loads((root / 'agi/WORK_EXECUTION_STATE.json').read_text())
+          now = Store(root).utc_now()
+          work = verify_work_source_observation(root, run_id=os.environ['RUN_ID'], state=state, state_blob_sha=os.environ['RUNTIME_STATE_BLOB'], now=now)
+          ci = verify_ci_source_observation(root, run_id=os.environ['RUN_ID'], state=state, now=now)
+          continuity = assert_work_resume_continuity_preflight(root, run_id=os.environ['RUN_ID'], executor_binding=os.environ['EXECUTOR_BINDING'], model_identity=os.environ['MODEL_IDENTITY'])
+          if continuity.get('resume_authorized') is not True:
+              raise SystemExit('continuity preflight denied')
+          print(json.dumps({'work': work, 'ci': ci, 'continuity': continuity}, sort_keys=True))
+          PY
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-before.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-before.json
+
+      - name: Submit exact Consolidate response and freeze Learn
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/consolidate-output.json <<'JSON'
+          {
+            "result": {
+              "episode_id": "episode-work-recovery-gen9-durability-repair",
+              "episode_type": "bounded_cross_source_country_data_reconciliation_and_evaluation",
+              "execute_unit_id": "unit-generation29-cross-source-data-reconciliation-v1",
+              "evaluation_unit_id": "unit-generation29-evaluate-cross-source-data-reconciliation-v1",
+              "status": "continue",
+              "episode_summary": "A source-readiness-first, read-only reconciliation compared two exact public country datasets under frozen selectors, source/blob identities, normalization, thresholds, ten queries, two fail-closed corruption controls, deterministic replay, contamination exclusions, and zero-upstream-write budgets. Independent Task Evaluate reproduced the normalized records, all forty divergence keys and metrics, both control rejections, and the replay digest, returning bounded unit PASS while retaining task/user FAIL and agi_claim_supported=false. Both Candidate boundaries selected the protected active baseline and authorized no activation.",
+              "claim_boundary": "PASS applies only to the exact frozen datasets/country-codes and samayo/country-json commits and four blobs under the precommitted normalization, thresholds, ten queries, two corruption controls, replay rule, contamination exclusions, zero-upstream-write budget, and supplied request-time publication evidence. It excludes generalized data reliability, changing upstreams, production behavior, independent external capability, Candidate activation, AGI, upper-objective achievement, and user-level completion.",
+              "environment": {
+                "model_identity": "chatgpt-work-model-unverified",
+                "executor_binding": "current_chatgpt_work_session",
+                "run_id": "run-work-recovery-gen9-durability-repair",
+                "source_commits": {
+                  "datasets/country-codes": "6a595f1a6f10b3d00175fe67375da88f64f7f76b",
+                  "samayo/country-json": "41d4084bc1ccf9614dab45255a41ba3a5473be74"
+                },
+                "component_repository_commits": {
+                  "selection_root": "f5fb42fc928339c52660d377393cc9062e7e9609",
+                  "pre_execute_candidate": "d4ecb8ec26ce0839385ea5541aa4c02bddd2657b",
+                  "execute": "a9329e7d9be62efd22053d66d235feddef3d6b53",
+                  "post_execute_root": "4928a146dd55487a37f183169254e84c9c0d2212",
+                  "pre_task_evaluate_candidate": "857ba49741215d63b9189aece052db00a39509b0",
+                  "task_evaluate": "5ebb207c5cceab150d6d17cd37917bfb5853220e"
+                }
+              },
+              "sequence": [
+                {
+                  "step": 1,
+                  "component": "root",
+                  "invocation_id": "invoke-61622cc42438018f9e4d5108",
+                  "kind": "unit_selection",
+                  "summary": "Changed domain from the preceding non-evaluable repair-transfer unit to a source-readiness-first cross-source public-data reconciliation."
+                },
+                {
+                  "step": 2,
+                  "component": "candidate_evaluate",
+                  "invocation_id": "invoke-4207db89def9709f3545b270",
+                  "kind": "pre_execute",
+                  "summary": "Selected BASELINE_FIRST with the active Execute prompt and frozen source-readiness controls; no Candidate was activated."
+                },
+                {
+                  "step": 3,
+                  "component": "execute",
+                  "invocation_id": "invoke-bc78eb5f075bb06ef6a4f92d",
+                  "kind": "bounded_reconciliation",
+                  "summary": "Produced exact normalized records, forty declared divergences, passing thresholds and ten queries, two rejected corruption controls, a byte-stable replay digest, and zero upstream writes."
+                },
+                {
+                  "step": 4,
+                  "component": "root",
+                  "invocation_id": "invoke-fefcb593d1e33b69308cb773",
+                  "kind": "routing",
+                  "summary": "Routed the locally complete Execute result to the smallest independent bounded adjudication before consolidation."
+                },
+                {
+                  "step": 5,
+                  "component": "candidate_evaluate",
+                  "invocation_id": "invoke-0be83d0a11994dff9bbc4b2c",
+                  "kind": "pre_task_evaluate",
+                  "summary": "Selected BASELINE_FIRST with unchanged active Task Evaluate and the exact frozen reconciliation evidence; no evaluation overlay or activation."
+                },
+                {
+                  "step": 6,
+                  "component": "task_evaluate",
+                  "invocation_id": "invoke-002e7b508042a134bb24c405",
+                  "kind": "independent_adjudication",
+                  "summary": "Reproduced exact source identities, records, metrics, forty divergences, thresholds, queries, corruption-control rejections, replay, and zero-write audit; returned unit PASS, task/user FAIL, and AGI false."
+                },
+                {
+                  "step": 7,
+                  "component": "side_effect_state",
+                  "kind": "frozen_request_boundary",
+                  "summary": "The eight Execute artifacts and their PR407 publication facts are supplied as request-time evidence. The Task Evaluate lifecycle, this Consolidate response, Learn, and successor Root require their own later publication/readback; no later fact is backfilled."
+                }
+              ],
+              "candidate_decisions": [
+                {
+                  "phase": "pre_execute",
+                  "candidate_id": null,
+                  "decision": "BASELINE_FIRST",
+                  "activation_authorized": false,
+                  "detail": "Used the unchanged active Execute prompt with the frozen source-readiness-first protocol."
+                },
+                {
+                  "phase": "pre_task_evaluate",
+                  "candidate_id": null,
+                  "decision": "BASELINE_FIRST",
+                  "activation_authorized": false,
+                  "detail": "Used unchanged active Task Evaluate to preserve independent bounded adjudication."
+                },
+                {
+                  "phase": "post_task_evaluate",
+                  "candidate_id": null,
+                  "decision": "NO_CANDIDATE_PRODUCED",
+                  "activation_authorized": false,
+                  "global_activation_authorized": false,
+                  "detail": "Task Evaluate produced no candidate and no activation path is implied by the bounded PASS."
+                }
+              ],
+              "evidence_classes": {
+                "observation": [
+                  "Checked-in selector/readiness, normalized-source, reconciliation, corruption-control, replay, bounded-result, mutation-audit, and Task Evaluate artifacts plus exact upstream commit/blob readbacks supplied in the frozen request."
+                ],
+                "external_evidence": [
+                  "The payload cites exact public GitHub source commits/blobs and protected GitHub Actions/merge readbacks. These are source and repository-integrity evidence, not an independent generalized capability or production evaluation."
+                ],
+                "inference": [
+                  "Within the exact frozen protocol, the two source datasets satisfy every declared coverage threshold while retaining forty explicit divergences and two fail-closed corruption controls."
+                ],
+                "model_self_report": [
+                  "Root, Candidate, Execute, Task Evaluate, and Consolidate summaries are model-generated except where bound to the cited immutable artifacts and receipts."
+                ],
+                "later_user_feedback": "No later user-authored feedback is supplied inside this frozen invocation payload."
+              },
+              "objective_evidence": [
+                {
+                  "kind": "precommit_and_readiness",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/precommitted-selector-manifest.json",
+                  "finding": "The selector manifest fixed repositories, commits, blobs, schemas, normalization, metrics, thresholds, ten queries, controls, replay, exclusions, and zero-write budgets before target acquisition; readiness was separately recorded after exact readback."
+                },
+                {
+                  "kind": "exact_source_identity",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/source-readiness.json",
+                  "finding": "datasets/country-codes data blob f1cad381b15224af8ea56f93aec61073d3ca4ab6 and datapackage d129ac94a13dc44e913ccce3c0aea8e2e4b1a59d, plus samayo/country-json data d51b248d847a1cbb27c622fc6ac6e864f32b53b2 and license cf44b9dc8df344e36029c9861366935f9dad3ab4, matched exact commits."
+                },
+                {
+                  "kind": "normalized_source_reproduction",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/normalized-sources.json",
+                  "finding": "Independent parsing reproduced 249 left and 245 right normalized records byte-for-value."
+                },
+                {
+                  "kind": "deterministic_reconciliation",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/reconciliation-report.json",
+                  "finding": "Overlap=242, union=252, overlap/smaller=0.9877551020408163, Jaccard=0.9603174603174603, exact names=212, NFKC/casefold equal=1, distinct nonempty overlapping names=29, left-only=7, right-only=3, and forty ordered divergence keys."
+                },
+                {
+                  "kind": "query_and_threshold_validation",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/reconciliation-report.json",
+                  "finding": "All ten frozen queries AU, BR, CA, CN, DE, FR, IN, JP, US, and ZA occurred in both sources, and all minimum/maximum record, overlap, Jaccard, and coverage thresholds passed."
+                },
+                {
+                  "kind": "fail_closed_controls",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/corruption-controls.json",
+                  "finding": "Invalid alpha2 A1 and conflicting duplicate AF were both rejected."
+                },
+                {
+                  "kind": "deterministic_replay",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/replay-verification.json",
+                  "finding": "Two canonical replays produced identical SHA-256 digest 731301488a1530af9009ab6acf6fd6ebccd2b36f84d4885fc26bc889c389379b."
+                },
+                {
+                  "kind": "zero_write_audit",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/mutation-audit.json",
+                  "finding": "Zero credentials, provider calls, issue comments, source mutations, or upstream writes; both excluded contamination sources remained unused."
+                },
+                {
+                  "kind": "protected_publication",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/bounded-result.json",
+                  "finding": "PR407 exact head 4082122194952c0363830871b0232fd24c575de1 passed directive run 33498703531 and test run 33498703511 with four shards and aggregate, merged as 765064d5b2de4bfc828a99695f42a94690cd0225, with eight artifact blobs exact-readable."
+                },
+                {
+                  "kind": "independent_o_evaluator_output",
+                  "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-evaluate-cross-source-data-reconciliation-v1-result.json",
+                  "finding": "Task Evaluate recorded unit_verdict=PASS, upper/task/user verdicts FAIL, and agi_claim_supported=false after independent exact-source recomputation."
+                }
+              ],
+              "success_condition_mapping": [
+                {
+                  "condition": "Fix selector ordering, source identities, normalization, metrics, queries, controls, replay, exclusions, and budgets before target acquisition.",
+                  "status": "PASS",
+                  "evidence": "Selector manifest and separate readiness receipt are exact-readable and ordered."
+                },
+                {
+                  "condition": "Reproduce both normalized source arrays.",
+                  "status": "PASS",
+                  "evidence": "249 left and 245 right records matched byte-for-value."
+                },
+                {
+                  "condition": "Reproduce every frozen metric and divergence.",
+                  "status": "PASS",
+                  "evidence": "All counts, ratios, name classes, and forty ordered divergence keys matched."
+                },
+                {
+                  "condition": "Meet all thresholds and ten-query coverage without substitution or coercion.",
+                  "status": "PASS",
+                  "evidence": "Every threshold passed and all ten codes were present in both sources."
+                },
+                {
+                  "condition": "Reject both precommitted corruption controls.",
+                  "status": "PASS",
+                  "evidence": "Invalid A1 and conflicting duplicate AF both failed closed."
+                },
+                {
+                  "condition": "Replay deterministically.",
+                  "status": "PASS",
+                  "evidence": "Both canonical replay digests equal 731301488a1530af9009ab6acf6fd6ebccd2b36f84d4885fc26bc889c389379b."
+                },
+                {
+                  "condition": "Perform no upstream or production mutation.",
+                  "status": "PASS",
+                  "evidence": "Mutation audit recorded zero upstream writes and zero effectful external actions."
+                },
+                {
+                  "condition": "Protect and exact-readback the eight Execute artifacts.",
+                  "status": "PASS",
+                  "evidence": "PR407 exact-head CI, expected-head merge, and all eight blob readbacks are supplied."
+                },
+                {
+                  "condition": "Keep bounded unit verdict separate from the unchanged upper objective.",
+                  "status": "PASS",
+                  "evidence": "Unit PASS coexists with task/user FAIL and agi_claim_supported=false."
+                },
+                {
+                  "condition": "Activate no Candidate by implication.",
+                  "status": "PASS",
+                  "evidence": "Both pre-application decisions are BASELINE_FIRST and no post-result Candidate was produced."
+                },
+                {
+                  "condition": "Publish and exact-readback Task Evaluate, Consolidate, Learn, and successor lifecycle.",
+                  "status": "PENDING",
+                  "evidence": "The frozen request cannot establish later publication of its own or successor records."
+                },
+                {
+                  "condition": "Complete Learn and return to a materially different Root unit.",
+                  "status": "PENDING",
+                  "evidence": "This response performs Consolidate only."
+                },
+                {
+                  "condition": "Achieve the user's upper AGI objective.",
+                  "status": "FAIL",
+                  "evidence": "No generalized capability, transfer, autonomy, continual learning, self-improvement, safe production, or independent AGI evidence is supplied."
+                }
+              ],
+              "failures_and_repairs": [
+                {
+                  "failure": "Source selection or target values could be contaminated by looking at desired results before precommit.",
+                  "repair": "Separated the selector manifest from post-readiness selected values and required exact commit/blob identities.",
+                  "status": "prevented_for_exact_unit"
+                },
+                {
+                  "failure": "Silent source substitution or name coercion could hide real disagreement.",
+                  "repair": "Preserved all forty ordered divergence keys and did not coerce distinct nonempty names.",
+                  "status": "verified"
+                },
+                {
+                  "failure": "Malformed or conflicting records could be accepted.",
+                  "repair": "Both invalid-alpha2 and conflicting-duplicate controls fail closed.",
+                  "status": "verified"
+                },
+                {
+                  "failure": "A bounded deterministic PASS could be widened to generalized reliability or AGI.",
+                  "repair": "Task Evaluate retained separate unit/task/user/AGI fields and no Candidate activation.",
+                  "status": "scope_separation_verified"
+                },
+                {
+                  "failure": "Current and successor lifecycle publication is not evidence available at request freeze.",
+                  "repair": "Preserve the frozen response and require unchanged exact-head CI, expected-head merge, and exact remote readback later.",
+                  "status": "pending_at_request_freeze"
+                }
+              ],
+              "negative_evidence": [
+                "Twenty-nine overlapping codes retain distinct nonempty normalized names, seven keys exist only on the left, three only on the right, and forty total divergence keys remain explicit.",
+                "The unit covers two exact frozen public datasets; arbitrary schemas, evolving upstreams, broader domains, production clocks, adversarial inputs, and production load remain untested.",
+                "Repository CI, exact blob readback, and deterministic replay establish bounded integrity, not independent generalized capability.",
+                "No provider call, production route, Candidate activation, external capability test, or user-facing production outcome occurred.",
+                "No supplied evidence establishes AGI, upper-objective completion, or user-level completion."
+              ],
+              "side_effect_states": {
+                "execute_artifacts_publication": "VERIFIED_ON_MAIN_AT_REQUEST_FREEZE",
+                "task_evaluate_lifecycle_publication": "PENDING_AT_REQUEST_FREEZE",
+                "consolidate_lifecycle_publication": "PENDING",
+                "learn_completed": false,
+                "successor_root_selected": false,
+                "production_routing_changed": false,
+                "upstream_writes": 0,
+                "candidate_activated": false,
+                "global_activation_authorized": false,
+                "external_capability_claim_made": false
+              },
+              "searchable_metadata": {
+                "keywords": [
+                  "cross-source-reconciliation",
+                  "country-data",
+                  "source-readiness",
+                  "exact-commit",
+                  "normalization",
+                  "forty-divergences",
+                  "corruption-controls",
+                  "deterministic-replay",
+                  "zero-upstream-write",
+                  "generation-29"
+                ],
+                "left_record_count": 249,
+                "right_record_count": 245,
+                "overlap_count": 242,
+                "union_count": 252,
+                "jaccard": 0.9603174603174603,
+                "overlap_over_smaller_set": 0.9877551020408163,
+                "total_divergence_count": 40,
+                "query_coverage_count": 10,
+                "corruption_controls_detected": 2,
+                "replay_digest": "731301488a1530af9009ab6acf6fd6ebccd2b36f84d4885fc26bc889c389379b",
+                "upstream_writes": 0,
+                "task_evaluate_work_invocation": "invoke-64f6b0cd887538ecd50c0a24",
+                "consolidate_work_invocation": "invoke-2b68ec6d0e21b7c420fde35b",
+                "unit_completion_verdict": "PASS",
+                "task_completion_verdict": "FAIL",
+                "agi_claim_supported": false
+              },
+              "unknowns": [
+                "Generalization beyond the two exact frozen sources is unknown.",
+                "Behavior under changing upstreams, arbitrary schemas, production workloads, and adversarial inputs is unknown.",
+                "No independent external capability or held-out production result is present.",
+                "The frozen request cannot establish later publication/readback of Task Evaluate, this Consolidate response, Learn, or successor Root."
+              ],
+              "unresolved_end_goals": [
+                "Complete Learn without widening this episode's claim.",
+                "Publish and exact-readback the current and successor lifecycle where required.",
+                "Return to Root for materially different safe executable work.",
+                "Continue toward the upper objective; agi_claim_supported remains false."
+              ]
+            },
+            "local_learn": {
+              "decision": "NO_CHANGE",
+              "candidates": [],
+              "observations": [
+                "Preserve selector-before-readiness ordering and exact source/blob identities when consolidating cross-source evidence.",
+                "Retain every declared divergence, both fail-closed corruption controls, the replay digest, and zero-write audit rather than compressing them into a generic PASS.",
+                "Keep bounded unit PASS, task/user FAIL, AGI false, and Candidate non-activation as separate durable facts.",
+                "Do not backfill later CI, merge, or readback facts into this frozen response."
+              ],
+              "reason": "The supplied immutable artifacts and evaluation support one coherent bounded episode; consolidation does not justify a prompt change, a new Candidate, activation, or claim widening."
+            },
+            "fragment": {
+              "component": "consolidate_episode",
+              "purpose": "Consolidate the exact cross-source country-data reconciliation, independent bounded evaluation, and baseline-only Candidate decisions without widening the frozen read-only claim.",
+              "evidence_refs": [
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/precommitted-selector-manifest.json",
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/source-readiness.json",
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/normalized-sources.json",
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/reconciliation-report.json",
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/corruption-controls.json",
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/replay-verification.json",
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/bounded-result.json",
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/mutation-audit.json",
+                ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-evaluate-cross-source-data-reconciliation-v1-result.json"
+              ],
+              "observations": [
+                "Both exact source arrays, every frozen metric and forty divergence keys, all ten queries, both corruption-control rejections, and the canonical replay digest were independently reproduced.",
+                "Task Evaluate returned bounded unit PASS while task/user verdicts remained FAIL and agi_claim_supported remained false.",
+                "Both Candidate boundaries selected BASELINE_FIRST; no scoped, global, automatic, or production activation is authorized.",
+                "The mutation audit records zero upstream writes and no effectful production action."
+              ],
+              "unresolved": [
+                "Task Evaluate and current lifecycle publication/readback at their respective frozen boundaries",
+                "Learn and a materially different successor Root unit",
+                "independent generalized capability, production, and upper-objective evidence"
+              ]
+            }
+          }
+          JSON
+          python -m json.tool /tmp/consolidate-output.json > /dev/null
+          continual --root . work-submit "$CONSOLIDATE_WORK_ID" --response /tmp/consolidate-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/consolidate-submit.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
+          cat /tmp/consolidate-submit.json
+          cat /tmp/native-resume.json
+          cat /tmp/work-verify-after.json
+          cat /tmp/work-pending-after.json
+
+      - name: Validate Episode and exact Learn freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from datetime import UTC, datetime
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_invocation, verify_work_invocations
+          root = Path('.').resolve()
+          run_id = os.environ['RUN_ID']
+          native_id = os.environ['CONSOLIDATE_NATIVE_ID']
+          work_id = os.environ['CONSOLIDATE_WORK_ID']
+          expected_output = json.loads(Path('/tmp/consolidate-output.json').read_text())
+          before = json.loads(Path('/tmp/work-verify-before.json').read_text())
+          expected_before = {'valid': True, 'requests': 146, 'responses': 145, 'pending': 1, 'native_completed': 139, 'native_fragments': 139, 'native_local_learn': 127}
+          for key, value in expected_before.items():
+              if before.get(key) != value:
+                  raise SystemExit(f'before mismatch {key}: {before.get(key)!r}')
+          after = verify_work_invocations(root, run_id=run_id)
+          expected_after = {'valid': True, 'requests': 147, 'responses': 146, 'pending': 1, 'native_completed': 140, 'native_fragments': 140, 'native_local_learn': 128}
+          for key, value in expected_after.items():
+              if after.get(key) != value:
+                  raise SystemExit(f'after mismatch {key}: {after.get(key)!r} != {value!r}')
+          verified = verified_work_invocation(root, work_id)
+          if verified.get('output') != expected_output:
+              raise SystemExit('persisted Consolidate output mismatch')
+          native_path = root / '.continual' / 'runs' / run_id / 'invocations' / f'{native_id}.json'
+          native = json.loads(native_path.read_text())
+          if native.get('status') != 'complete' or native.get('component') != 'consolidate_episode' or native.get('output') != expected_output:
+              raise SystemExit('Consolidate native completion mismatch')
+          response_rel = f'.continual/work-model/invocations/{work_id}/response.json'
+          fragment_rel = native.get('fragment_ref')
+          local_rel = f'.continual/runs/{run_id}/local-learn/{native_id}-consolidate_episode.json'
+          if not fragment_rel or not (root / fragment_rel).is_file() or not (root / local_rel).is_file():
+              raise SystemExit('Consolidate fragment/local learn missing')
+          if json.loads((root / local_rel).read_text()) != expected_output['local_learn']:
+              raise SystemExit('Consolidate Local Learn mismatch')
+          episode_rel = f'.continual/episodes/{os.environ["EPISODE_ID"]}/episode.json'
+          if json.loads((root / episode_rel).read_text()) != expected_output['result']:
+              raise SystemExit('Episode does not equal exact Consolidate result')
+          snapshot_rel = f'.continual/runs/{run_id}/snapshot.json'
+          snapshot = json.loads((root / snapshot_rel).read_text())
+          if snapshot.get('revision') != 135 or snapshot.get('phase') != 'post_task_learn_pending' or snapshot.get('episode_id') != os.environ['EPISODE_ID']:
+              raise SystemExit(f'bad revision135 Learn phase: {snapshot.get("revision")!r} {snapshot.get("phase")!r} {snapshot.get("episode_id")!r}')
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1:
+              raise SystemExit(f'expected one Learn request, got {len(pending)}')
+          learn = pending[0]
+          if learn.get('component') != 'learn':
+              raise SystemExit('next pending component is not Learn')
+          learn_id = learn['invocation_id']
+          learn_rel = f'.continual/work-model/invocations/{learn_id}/request.json'
+          if (root / learn_rel).with_name('response.json').exists():
+              raise SystemExit('Learn already answered')
+          payload = learn.get('payload', {})
+          if payload.get('mode') != 'post-task' or payload.get('episode_id') != os.environ['EPISODE_ID'] or payload.get('current_episode') != expected_output['result']:
+              raise SystemExit('Learn payload is not exact post-task Episode')
+          awaiting = []
+          for path in sorted((root / '.continual' / 'runs' / run_id / 'invocations').glob('*.json')):
+              value = json.loads(path.read_text())
+              if value.get('status') == 'awaiting_work_model':
+                  awaiting.append((path, value))
+          if len(awaiting) != 1:
+              raise SystemExit(f'expected one awaiting Learn native journal, got {len(awaiting)}')
+          learn_native_path, learn_native = awaiting[0]
+          if learn_native.get('component') != 'learn' or learn_native.get('work_invocation_id') != learn_id or learn_native.get('work_request_digest') != learn.get('request_digest'):
+              raise SystemExit('Learn native/Work binding mismatch')
+          summary = {
+              'consolidate_native_invocation_id': native_id,
+              'consolidate_work_invocation_id': work_id,
+              'consolidate_response_ref': response_rel,
+              'consolidate_response_digest': verified['response']['response_digest'],
+              'consolidate_response_blob_sha': subprocess.check_output(['git','hash-object',response_rel], text=True).strip(),
+              'consolidate_native_ref': native_path.relative_to(root).as_posix(),
+              'consolidate_native_blob_sha': subprocess.check_output(['git','hash-object',str(native_path)], text=True).strip(),
+              'consolidate_fragment_ref': fragment_rel,
+              'consolidate_fragment_blob_sha': subprocess.check_output(['git','hash-object',fragment_rel], text=True).strip(),
+              'consolidate_local_learn_ref': local_rel,
+              'consolidate_local_learn_blob_sha': subprocess.check_output(['git','hash-object',local_rel], text=True).strip(),
+              'episode_ref': episode_rel,
+              'episode_blob_sha': subprocess.check_output(['git','hash-object',episode_rel], text=True).strip(),
+              'snapshot_ref': snapshot_rel,
+              'snapshot_blob_sha': subprocess.check_output(['git','hash-object',snapshot_rel], text=True).strip(),
+              'snapshot_revision': 135,
+              'snapshot_phase': 'post_task_learn_pending',
+              'pending_work_invocation_id': learn_id,
+              'pending_request_ref': learn_rel,
+              'pending_request_digest': learn['request_digest'],
+              'pending_request_blob_sha': subprocess.check_output(['git','hash-object',learn_rel], text=True).strip(),
+              'pending_native_invocation_id': learn_native['invocation_id'],
+              'pending_native_invocation_ref': learn_native_path.relative_to(root).as_posix(),
+              'pending_native_invocation_blob_sha': subprocess.check_output(['git','hash-object',str(learn_native_path)], text=True).strip(),
+              'verification': expected_after,
+          }
+          Path('/tmp/consolidate-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-consolidate-cross-source-reconciliation-consume-learn-freeze-v1.json'
+          receipt = {
+              'schema_version': 1, 'record_type': 'generation29_consolidate_consume_receipt',
+              'recorded_at': datetime.now(UTC).isoformat().replace('+00:00','Z'),
+              'authority': {'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},
+              'source_main_sha': os.environ['RUNTIME_MAIN'], 'source_state_blob_sha': os.environ['RUNTIME_STATE_BLOB'],
+              'source_ci_workflow_run_id': int(os.environ['SOURCE_CI_RUN_ID']),
+              'idempotency_key': 'o-work-gen29:consume-consolidate-cross-source-invoke-2b68ec6d0e21b7c420fde35b:freeze-learn:v1',
+              'completed_effect': summary, 'request_recreated': False, 'consolidate_reinvoked': False,
+              'resume_required': True,
+              'next_action': 'Exact-head validate and merge this Consolidate lifecycle plus revision135 Learn freeze, bind state, then answer the exact Learn request once.',
+          }
+          receipt_path = root / receipt_rel
+          receipt_path.parent.mkdir(parents=True, exist_ok=True)
+          receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          print('CONSOLIDATE_SUMMARY=' + json.dumps(summary, sort_keys=True))
+          PY
+
+      - name: Stage only exact Consolidate lifecycle delta and push once
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+          run_id = os.environ['RUN_ID']
+          native_id = os.environ['CONSOLIDATE_NATIVE_ID']
+          work_id = os.environ['CONSOLIDATE_WORK_ID']
+          summary = json.loads(Path('/tmp/consolidate-summary.json').read_text())
+          work_obs = json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']
+          ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
+          receipt_rel = f'.continual/runs/{run_id}/recovery-receipts/gen29-consolidate-cross-source-reconciliation-consume-learn-freeze-v1.json'
+          expected = {
+              f'.continual/runs/{run_id}/events.jsonl': 'M',
+              f'.continual/runs/{run_id}/snapshot.json': 'M',
+              f'.continual/runs/{run_id}/invocations/{native_id}.json': 'M',
+              f'.continual/work-model/invocations/{work_id}/response.json': 'A',
+              summary['consolidate_fragment_ref']: 'A',
+              summary['consolidate_local_learn_ref']: 'A',
+              summary['episode_ref']: 'M',
+              summary['pending_native_invocation_ref']: 'A',
+              summary['pending_request_ref']: 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/receipt.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/receipt.json': 'A',
+              receipt_rel: 'A',
+          }
+          status = {}
+          for line in subprocess.check_output(['git','diff','--name-status'], text=True).splitlines():
+              code, path = line.split('\t',1)
+              status[path] = code
+          for path in subprocess.check_output(['git','ls-files','--others','--exclude-standard'], text=True).splitlines() + subprocess.check_output(['git','ls-files','--others','--ignored','--exclude-standard'], text=True).splitlines():
+              status.setdefault(path,'A')
+          for path in list(status):
+              if path.startswith('src/agi/__pycache__/') or path.startswith('src/continual/__pycache__/') or path.startswith('src/continual_chatgpt.egg-info/'):
+                  status.pop(path,None)
+          prefix = f'.continual/runs/{run_id}/preflight/preflight-learn-'
+          preflights = sorted(path for path,code in status.items() if path.startswith(prefix) and path.endswith('.json') and code == 'A')
+          if len(preflights) != 1:
+              raise SystemExit('expected one new Learn preflight: ' + json.dumps(preflights))
+          expected[preflights[0]] = 'A'
+          relations = f'.continual/episodes/{os.environ["EPISODE_ID"]}/relations.jsonl'
+          if status.get(relations) == 'M':
+              expected[relations] = 'M'
+          if status != expected:
+              raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({'expected':expected,'observed':status,'missing':sorted(set(expected)-set(status)),'unexpected':sorted(set(status)-set(expected))}, sort_keys=True))
+          required = sorted(expected)
+          for path in required:
+              if not Path(path).is_file():
+                  raise SystemExit('required path missing: ' + path)
+          subprocess.run(['git','add','-f','--',*required], check=True)
+          staged = set(subprocess.check_output(['git','diff','--cached','--name-only'], text=True).splitlines())
+          if staged != set(required):
+              raise SystemExit('staged set mismatch')
+          immutable = sorted(path for path in staged if path.startswith('.continual/work-model/invocations/'))
+          if immutable != sorted([f'.continual/work-model/invocations/{work_id}/response.json', summary['pending_request_ref']]):
+              raise SystemExit('immutable mutation set mismatch: ' + json.dumps(immutable))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '[native-consolidate-result] gen29 consume cross-source Consolidate and freeze Learn'
+          git push origin "HEAD:$GITHUB_REF_NAME"
