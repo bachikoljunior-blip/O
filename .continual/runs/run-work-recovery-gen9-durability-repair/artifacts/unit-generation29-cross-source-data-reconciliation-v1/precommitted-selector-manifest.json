@@ -1,0 +1,180 @@
+{
+  "agi_achieved": false,
+  "authority": {
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "inbox_blob_sha": "34423c2dd71d95c55769f501fe1701ea0088fb32",
+    "inbox_revision": 38,
+    "lease_generation": 29
+  },
+  "budgets": {
+    "credentials_used": 0,
+    "issue_comments": 0,
+    "max_records_per_source": 300,
+    "max_total_source_bytes": 250000,
+    "network": "Only GitHub read-only exact-commit acquisition of the four declared license/schema/data files; no network after acquisition.",
+    "provider_calls": 0,
+    "upstream_writes": 0,
+    "wall_seconds": 180
+  },
+  "contamination_exclusions": [
+    {
+      "reason": "Target record values were inadvertently exposed to this execution before final selector precommit; excluded from the trial.",
+      "repository_full_name": "umpirsky/country-list"
+    },
+    {
+      "reason": "Target record values were inadvertently exposed to this execution before final selector precommit; excluded from the trial.",
+      "repository_full_name": "lukes/ISO-3166-Countries-with-Regional-Codes"
+    }
+  ],
+  "corruption_controls": [
+    {
+      "expected": "validator rejects invalid alpha2",
+      "id": "invalid_alpha2",
+      "mutation": "replace one copied alpha2 with A1"
+    },
+    {
+      "expected": "validator rejects conflicting duplicate",
+      "id": "conflicting_duplicate",
+      "mutation": "append a copied existing alpha2 with a different nonempty name"
+    }
+  ],
+  "divergence_categories": [
+    "exact_name",
+    "nfkc_casefold_equal",
+    "punctuation_spacing_variant",
+    "distinct_nonempty_name",
+    "left_only_alpha2",
+    "right_only_alpha2"
+  ],
+  "divergence_rule": "Every non-exact overlap and every symmetric-difference key must be emitted with exactly one category; distinct nonempty names are bounded divergences, not silently coerced.",
+  "exact_readback_verified": true,
+  "exact_readback_verified_at": "2026-09-01T10:38:58.342Z",
+  "execute_native_invocation_id": "invoke-bc78eb5f075bb06ef6a4f92d",
+  "execute_request_blob_sha": "badc15b3967b928839359735ea04823cb5a9972c",
+  "execute_request_digest": "a866c9a5c3cf1d2ce70f17f9fa3d347e1faec55e805aeea5c4cacfe69b8b3000",
+  "execute_work_invocation_id": "invoke-5c28ad87d810c530cf9f8371",
+  "idempotency_key": "o-work-gen29:cross-source-reconciliation:selector-protocol:datasets-6a595f1a:country-json-41d4084b:v1",
+  "normalization": {
+    "alpha2": [
+      "require string",
+      "strip ASCII surrounding whitespace",
+      "uppercase",
+      "require regex ^[A-Z]{2}$",
+      "reject duplicate code if raw names differ",
+      "sort by alpha2"
+    ],
+    "encoding": "UTF-8",
+    "forbid_post_read_rule_changes": true,
+    "name": [
+      "require nonempty string",
+      "Unicode NFKC",
+      "collapse Unicode whitespace to one ASCII space",
+      "strip surrounding whitespace",
+      "retain normalized case-preserving name and a casefold comparison value"
+    ]
+  },
+  "output_contract": {
+    "artifact_prefix": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/",
+    "claim_boundary": "Bounded exact-source reconciliation only; Candidate activation, generalized reliability, production behavior, AGI, upper-objective achievement, and user-level completion remain false.",
+    "required": [
+      "precommitted-selector-manifest.json",
+      "source-readiness.json",
+      "normalized-sources.json",
+      "reconciliation-report.json",
+      "corruption-controls.json",
+      "replay-verification.json",
+      "bounded-result.json",
+      "mutation-audit.json"
+    ],
+    "verdicts": [
+      "PASS",
+      "FAIL",
+      "NOT_EVALUABLE"
+    ]
+  },
+  "precommit_cas_commit_sha": "6db2e0c7d9cb8cbe7bc839415b48e8ee669ee012",
+  "precommit_state_blob_sha": "e6d03155cbdc738643c02779d67ac64e60b62c3f",
+  "precommitted_at": "2026-09-01T10:36:08.555Z",
+  "queries": [
+    "AU",
+    "BR",
+    "CA",
+    "CN",
+    "DE",
+    "FR",
+    "IN",
+    "JP",
+    "US",
+    "ZA"
+  ],
+  "record_type": "generation29_cross_source_data_reconciliation_selector_protocol_precommit",
+  "replay": {
+    "canonical_json": "UTF-8, sorted keys, separators comma/colon, ensure_ascii=false",
+    "digest": "sha256",
+    "repeat_count": 2,
+    "required": true
+  },
+  "request_recreated": false,
+  "response_repeated": false,
+  "resume_required": true,
+  "schema_version": 1,
+  "selection_rule": "Exactly the two declared sources below. No substitution after this CAS. Source data record values were not read before this precommit; only repository metadata, exact trees/blobs, license text, and schema descriptors were inspected.",
+  "source_values_read_before_precommit": false,
+  "sources": [
+    {
+      "data": {
+        "blob_sha": "f1cad381b15224af8ea56f93aec61073d3ca4ab6",
+        "format": "csv",
+        "max_bytes": 200000,
+        "path": "data/country-codes.csv"
+      },
+      "exact_commit_sha": "6a595f1a6f10b3d00175fe67375da88f64f7f76b",
+      "license": {
+        "blob_sha": "d129ac94a13dc44e913ccce3c0aea8e2e4b1a59d",
+        "kind": "ODC-PDDL-1.0",
+        "ref": "datapackage.yml"
+      },
+      "repository_full_name": "datasets/country-codes",
+      "schema": {
+        "alpha2_field": "ISO3166-1-Alpha-2",
+        "container": "csv_rows",
+        "name_field": "CLDR display name"
+      },
+      "source_id": "datasets_country_codes"
+    },
+    {
+      "data": {
+        "blob_sha": "d51b248d847a1cbb27c622fc6ac6e864f32b53b2",
+        "format": "json",
+        "max_bytes": 50000,
+        "path": "src/country-by-abbreviation.json"
+      },
+      "exact_commit_sha": "41d4084bc1ccf9614dab45255a41ba3a5473be74",
+      "license": {
+        "blob_sha": "cf44b9dc8df344e36029c9861366935f9dad3ab4",
+        "kind": "MIT",
+        "ref": "LICENSE"
+      },
+      "repository_full_name": "samayo/country-json",
+      "schema": {
+        "alpha2_field": "abbreviation",
+        "container": "json_array",
+        "name_field": "country"
+      },
+      "source_id": "samayo_country_json"
+    }
+  ],
+  "status": "precommit_exact_readback_verified",
+  "thresholds": {
+    "all_queries_must_exist_in_both": true,
+    "corruption_controls_detected_required": 2,
+    "jaccard_minimum": 0.9,
+    "maximum_records_per_source": 300,
+    "minimum_records_per_source": 200,
+    "overlap_over_smaller_set_minimum": 0.95,
+    "replay_digest_match_required": true
+  },
+  "unit_id": "unit-generation29-cross-source-data-reconciliation-v1",
+  "upper_objective_achieved": false
+}
