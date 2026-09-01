@@ -1,0 +1,38 @@
+{
+  "component": "task_evaluate",
+  "expected_outputs": [
+    "separate bounded-unit, original upper-objective, and user-level verdicts",
+    "explicit findings for every frozen threshold, divergence class, query, corruption control, replay and mutation invariant",
+    "negative evidence and unmet conditions",
+    "repair information for any failed invariant without substituting sources or widening the claim"
+  ],
+  "failure_conditions": [
+    "any selected source, commit, blob, schema, rule, threshold, query, or budget changed after precommit",
+    "a contamination-excluded source affected the result",
+    "any divergence was hidden or coerced, a corruption control was accepted, or replay changed",
+    "any upstream write or broader Candidate/production/AGI claim occurred",
+    "exact-head protected validation or remote readback cannot be reproduced"
+  ],
+  "goal": "Independently adjudicate the exact bounded cross-source reconciliation PASS, including causal precommit-before-value-read ordering, source/license/data blob identities, normalization validity, all divergence accounting, frozen thresholds and queries, both corruption-control rejections, deterministic replay, zero-upstream-write audit, protected exact-head CI, expected-head merge, and exact remote readback.",
+  "inputs": [
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/precommitted-selector-manifest.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/source-readiness.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/normalized-sources.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/reconciliation-report.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/corruption-controls.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/replay-verification.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/bounded-result.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-source-data-reconciliation-v1/mutation-audit.json"
+  ],
+  "parent_continuation": "Independently Task Evaluate the exact frozen selector ordering, source/blob identity, normalization, every divergence, threshold results, deterministic queries, both corruption controls, replay digest, zero-upstream-write audit, protected exact-head CI and merge readback; then continue post-result Candidate Evaluate, Consolidate Episode, Learn, Root, and materially different safe work while the upper objective remains unmet.",
+  "scope": "agi/public-data/cross-source-country-reconciliation-v1/task-evaluate; exact frozen two-source unit only",
+  "success_conditions": [
+    "selector/protocol exact-readback is proven before selected target values were acquired",
+    "both exact source and license/data Git blob identities match the precommit",
+    "record counts, overlap, Jaccard, all ten queries, and all forty nonexact/symmetric-difference records reproduce exactly",
+    "both precommitted corruption controls are rejected and the canonical replay digest matches twice",
+    "upstream mutation audit remains zero and every claim remains inside the bounded unit",
+    "PR407 exact head, protected CI jobs, merge SHA, and eight artifact blob readbacks are unchanged"
+  ],
+  "unit_id": "unit-generation29-evaluate-cross-source-data-reconciliation-v1"
+}
