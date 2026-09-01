@@ -50,7 +50,7 @@ jobs:
           root=Path('.').resolve(); run_id=os.environ['RUN_ID']
           root_native_path=root/'.continual/runs'/run_id/'invocations'/f"{os.environ['ROOT_NATIVE_ID']}.json"
           root_native=json.loads(root_native_path.read_text())
-          if root_native.get('status')!='complete' or root_native.get('work_invocation_id')!=os.environ['ROOT_WORK_ID']:
+          if root_native.get('status')!='complete' or root_native.get('component')!='root' or root_native.get('invocation_id')!=os.environ['ROOT_NATIVE_ID']:
               raise SystemExit('completed Root mismatch')
           successor=verified_work_request(root,os.environ['SUCCESSOR_WORK_ID'])
           if successor.get('component')!='candidate_evaluate' or successor.get('request_digest')!='0460c645a61533258a54b53a1d487cb01f235c3df81d926fe1e71a1893a27ef3':
