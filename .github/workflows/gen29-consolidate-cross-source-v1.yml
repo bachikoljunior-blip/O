@@ -88,6 +88,7 @@ jobs:
           test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
           jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
           jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
+          echo "DIAG_LOCAL_STATE=$(git hash-object agi/WORK_EXECUTION_STATE.json) DIAG_LOCAL_INBOX=$(git hash-object /tmp/runtime-inbox.json)"
           test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
           test "$(git hash-object /tmp/runtime-inbox.json)" = "$EXPECTED_INBOX_BLOB"
           echo "DIAG_SNAPSHOT=$(git hash-object .continual/runs/$RUN_ID/snapshot.json) DIAG_REQUEST=$(git hash-object .continual/work-model/invocations/$CONSOLIDATE_WORK_ID/request.json) DIAG_NATIVE=$(git hash-object .continual/runs/$RUN_ID/invocations/$CONSOLIDATE_NATIVE_ID.json)"
