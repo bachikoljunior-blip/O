@@ -71,7 +71,7 @@ jobs:
           p=json.load(open('/tmp/pending-before.json'))['pending']
           assert len(p)==1 and p[0]['invocation_id']==os.environ['TASK_WORK_ID'],p
           assert p[0]['component']=='consolidate_episode',p
-          assert p[0]['payload']['execution_unit']['unit_id']=='unit-generation29-evaluate-external-formal-proof-synthesis-v1',p
+          assert p[0]['payload']['snapshot']['current_unit']=='unit-generation29-evaluate-external-formal-proof-synthesis-v1',p
           v=json.load(open('/tmp/verify-before.json'))
           assert v['valid'] is True and v['pending']==1,v
           response=Path(f".continual/work-model/invocations/{os.environ['TASK_WORK_ID']}/response.json")
