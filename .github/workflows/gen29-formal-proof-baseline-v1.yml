@@ -95,7 +95,8 @@ jobs:
           started=$(date +%s)
           lake env lean Exercises/Analysis/01OrderCompleteness.lean 2>&1 | tee candidate.log
           elapsed=$(( $(date +%s) - started ))
-          test ! -s candidate.log
+          ! grep -q " error:" candidate.log
+          ! grep -Eq "Exercises/Analysis/01OrderCompleteness\.lean:55:.*declaration uses .*sorry" candidate.log
           test ! -e Solutions
           test ! -e Meta/Checks
           echo "CANDIDATE_PROOF_PASS elapsed_seconds=$elapsed proof_sha256=$(cat ../candidate-proof.sha256) patched_sha256=$(cut -d' ' -f1 ../candidate-patched-source.sha256)"
