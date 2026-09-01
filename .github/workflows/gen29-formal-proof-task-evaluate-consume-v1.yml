@@ -1,0 +1,261 @@
+name: gen29 consume formal-proof Task Evaluate and freeze post-result Candidate
+
+on:
+  push:
+    branches:
+      - work/gen29-formal-proof-post-evaluate-v1
+    paths:
+      - .github/workflows/gen29-formal-proof-task-evaluate-consume-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-formal-proof-task-evaluate-consume-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-formal-proof-post-candidate-frozen]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      EXPECTED_MAIN: 5c910e487738cf02384316c4627c633848b7135c
+      EXPECTED_STATE_BLOB: 1c150468d59f10668d37f77482692ad64dd879a3
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      TASK_NATIVE_ID: invoke-35f65d7ed8050023a39ab49f
+      TASK_WORK_ID: invoke-a944e08fb0e821cea2feb29b
+      TASK_REQUEST_DIGEST: db98fe654667e2a4039ddc5a92fb3ef449f2e3335edb4bc538f5d6ed72d1209e
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e .
+      - name: Verify authority and exact frozen Task Evaluate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$TASK_WORK_ID/request.json)" = "ec6a58e8b6defff461fcfbdca0f78d987645ceda"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$TASK_NATIVE_ID.json)" = "d08b573e30f1381cc3b6438ede207e07b8a7edcd"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "cc17d0a358b4f6e7a605519e2d7f7470fd3e155f"
+          PYTHONPATH=src python -m continual.cli --root . work-pending --run-id "$RUN_ID" > /tmp/pending-before.json
+          PYTHONPATH=src python -m continual.cli --root . work-verify --run-id "$RUN_ID" > /tmp/verify-before.json
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          state=json.loads(Path('agi/WORK_EXECUTION_STATE.json').read_text())
+          assert state['status']=='running'
+          assert state['execution_id']=='work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3'
+          assert state['lease_generation']==29
+          assert hashlib.sha256(state['fence_token'].encode()).hexdigest()=='c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'
+          assert state['pending_work_invocation_id']==os.environ['TASK_WORK_ID']
+          assert state['pending_native_invocation_id']==os.environ['TASK_NATIVE_ID']
+          assert state['pending_request_digest']==os.environ['TASK_REQUEST_DIGEST']
+          assert state['finalization_readback_verified'] is True
+          exact=state['exact_continuation']
+          assert exact['status']=='remote_main_readback_verified'
+          assert exact['pending_work_invocation_id']==os.environ['TASK_WORK_ID']
+          assert exact['pending_native_invocation_id']==os.environ['TASK_NATIVE_ID']
+          assert exact['pending_request_digest']==os.environ['TASK_REQUEST_DIGEST']
+          assert exact['snapshot_revision']==138 and exact['pending_component']=='task_evaluate'
+          p=json.load(open('/tmp/pending-before.json'))['pending']
+          assert len(p)==1 and p[0]['invocation_id']==os.environ['TASK_WORK_ID'],p
+          assert p[0]['component']=='task_evaluate',p
+          assert p[0]['payload']['execution_unit']['unit_id']=='unit-generation29-evaluate-external-formal-proof-synthesis-v1',p
+          v=json.load(open('/tmp/verify-before.json'))
+          assert v['valid'] is True and v['pending']==1,v
+          response=Path(f".continual/work-model/invocations/{os.environ['TASK_WORK_ID']}/response.json")
+          assert not response.exists(),response
+          PY
+      - name: Record fresh authoritative Work source observation
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,json,os,urllib.request
+          from datetime import UTC,datetime
+          from pathlib import Path
+          from continual.store import Store
+          from continual.work_source_observation import prepare_work_source_observation,record_work_source_observation_receipt,verify_work_source_observation
+          root=Path('.').resolve();run_id=os.environ['RUN_ID']
+          state=json.loads((root/'agi/WORK_EXECUTION_STATE.json').read_text())
+          request=prepare_work_source_observation(root,run_id=run_id,state=state,state_blob_sha=os.environ['EXPECTED_STATE_BLOB'],expected_commit_sha=os.environ['EXPECTED_MAIN'],model_identity=os.environ['MODEL_IDENTITY'])
+          headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Authorization':'Bearer '+os.environ['GITHUB_TOKEN']}
+          def get(url):
+            with urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=30) as response:return json.load(response)
+          branch=get('https://api.github.com/repos/bachikoljunior-blip/O/branches/main')
+          remote=get('https://api.github.com/repos/bachikoljunior-blip/O/contents/agi/WORK_EXECUTION_STATE.json?ref=main')
+          assert branch['commit']['sha']==os.environ['EXPECTED_MAIN']
+          assert remote['sha']==os.environ['EXPECTED_STATE_BLOB']
+          remote_state=json.loads(base64.b64decode(remote['content']).decode())
+          store=Store(root)
+          projection={'status':remote_state['status'],'owner_kind':remote_state['owner_kind'],'execution_id':remote_state['execution_id'],'lease_generation':remote_state['lease_generation'],'fence_token_digest':store.stable_digest(remote_state['fence_token'],length=64),'heartbeat_at':remote_state['heartbeat_at']}
+          observed_at=datetime.now(UTC).isoformat().replace('+00:00','Z')
+          receipt=record_work_source_observation_receipt(root,run_id=run_id,observation_id=request['observation_id'],request_digest=request['request_digest'],executor_binding=state['authoritative_source_observation_policy']['executor_binding'],model_identity=os.environ['MODEL_IDENTITY'],commit_sha=branch['commit']['sha'],blob_sha=remote['sha'],projection=projection,observed_at=observed_at)
+          verified=verify_work_source_observation(root,run_id=run_id,state=state,state_blob_sha=os.environ['EXPECTED_STATE_BLOB'],now=observed_at)
+          assert verified['observation_id']==request['observation_id']
+          print(json.dumps({'request':request,'receipt':receipt,'verified':verified},sort_keys=True))
+          PY
+      - name: Record fresh exact CI source observation
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,urllib.request
+          from datetime import UTC,datetime
+          from pathlib import Path
+          from continual.ci_source_observation import prepare_ci_source_observation,record_ci_source_observation_receipt,verify_ci_source_observation
+          root=Path('.').resolve();run_id=os.environ['RUN_ID']
+          state=json.loads((root/'agi/WORK_EXECUTION_STATE.json').read_text())
+          request=prepare_ci_source_observation(root,run_id=run_id,state=state,model_identity=os.environ['MODEL_IDENTITY'])
+          headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Authorization':'Bearer '+os.environ['GITHUB_TOKEN']}
+          def get(url):
+            with urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=30) as response:return json.load(response)
+          policy=state['ci_source_observation_policy'];rid=policy['workflow_run_id']
+          remote_run=get(f'https://api.github.com/repos/bachikoljunior-blip/O/actions/runs/{rid}')
+          remote_jobs=get(f'https://api.github.com/repos/bachikoljunior-blip/O/actions/runs/{rid}/jobs?per_page=100')['jobs']
+          required={v['id'] for v in policy['required_jobs']}
+          jobs=[{'id':v['id'],'name':v['name'],'status':v['status'],'conclusion':v['conclusion']} for v in remote_jobs if v['id'] in required]
+          run_projection={'id':remote_run['id'],'workflow_id':remote_run['workflow_id'],'name':remote_run['name'],'status':remote_run['status'],'conclusion':remote_run['conclusion'],'head_sha':remote_run['head_sha']}
+          observed_at=datetime.now(UTC).isoformat().replace('+00:00','Z')
+          receipt=record_ci_source_observation_receipt(root,run_id=run_id,observation_id=request['observation_id'],request_digest=request['request_digest'],executor_binding=policy['executor_binding'],model_identity=os.environ['MODEL_IDENTITY'],workflow_run=run_projection,jobs=jobs,observed_at=observed_at)
+          verified=verify_ci_source_observation(root,run_id=run_id,state=state,now=observed_at)
+          assert verified['observation_id']==request['observation_id']
+          print(json.dumps({'request':request,'receipt':receipt,'verified':verified},sort_keys=True))
+          PY
+      - name: Submit exact Task Evaluate response and freeze post-result Candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/task-output.json <<'TASKJSON'
+          {
+            "result": {
+              "verdict": "FAIL",
+              "unit_verdict": "PASS",
+              "upper_objective_verdict": "FAIL",
+              "user_level_verdict": "FAIL",
+              "agi_claim_supported": false,
+              "candidate_activation": false,
+              "evaluated_goal": "Evaluate the original AGI/user objective separately from the exact generation-29 external formal-proof synthesis unit.",
+              "unit_scope": "Exactly one immutable Lean theorem: Exercises.Analysis.OrderCompleteness.q1_integer_fractional_decomposition from aimmerwahr/lean-math-exercises commit ef9d2506ecf03bb3338e59d33edded195d94a9be, source blob b1472e9b72df28045f33d0270f860ce793ffbd5e, under leanprover/lean4:v4.33.0-rc1 and mathlib 4851eb.",
+              "claim_boundary": "PASS applies only to the frozen theorem and exact evidence chain. It does not establish generalized theorem proving, robustness across held-out tasks, autonomous self-improvement, production readiness, AGI, user-level completion, upper-objective completion, or monitor completion.",
+              "verdict_reason": "The bounded theorem unit satisfies every declared mechanical and provenance condition, but the original user goal requires authoritative AGI evidence. One narrow theorem and internal lifecycle evidence cannot satisfy that gate.",
+              "unit_verdict_reason": "Precommit ordering, immutable source identities, contamination exclusions, failing sentinel baseline, candidate compilation, corrupted-proof and changed-statement rejection, clean exact replay, zero upstream writes, protected exact-head CI, expected-head merge, and exact artifact readbacks all succeeded.",
+              "evidence": [
+                {"source": "precommit/readiness", "finding": "Manifest commit 6eb8f16 and blob ea2133 preceded source-readiness commit ba784f and blob 79f714; no solution, Meta/Checks, later answer-bearing commit, discussion, or external proof service was used."},
+                {"source": "baseline", "finding": "Baseline receipt blob 103660 recorded rejection of sentinel proof by exact True.intro; recurrence workflow 33556052716 succeeded for expected rejection."},
+                {"source": "candidate", "finding": "Proof SHA-256 8a3efbe9789ed58172ba0c9cfc58ef508d2b67958e242591ff99c82a578a499f and patched-source SHA-256 d40e7153 compiled for the exact frozen theorem."},
+                {"source": "verification", "finding": "Receipt blob b099ba7292e2f0ada6b59492eb23fa1b737a1877 and workflow 33557583424/job 100022056563 record candidate pass, both negative controls rejected, clean immutable replay pass, digest match, and zero upstream writes."},
+                {"source": "merge", "finding": "PR416 exact head 64293497ba449478c3291c0836dcee69323567e2 passed required CI and merged by expected head as b475a4bacad78ce432152a3e9882ab91c4709433 with exact remote readbacks."},
+                {"source": "lifecycle", "finding": "Execute and pre-application Candidate responses were consumed once; Candidate remained BASELINE_FIRST with no activation or provider/production route change."}
+              ],
+              "negative_evidence": [
+                "The evidence covers one frozen theorem, one repository, and one toolchain only.",
+                "There is no held-out breadth, cross-domain generalization, robustness, autonomy, continual-learning, or self-improvement evidence.",
+                "The model identity remains unverified and repository/CI evidence is not strict independent external AGI evidence.",
+                "There are zero independently verified AGI-gate artifacts and no authorized Candidate activation."
+              ],
+              "quantitative": {
+                "proof_generation_attempts": 1,
+                "candidate_compilations_passed": 1,
+                "negative_controls_rejected": "2/2",
+                "clean_replays_passed": 1,
+                "final_required_ci_jobs_passed": 5,
+                "upstream_writes": 0,
+                "independently_verified_agi_evidence": 0
+              },
+              "unmet_conditions": [
+                "Complete the post-result Candidate Evaluate, Consolidate Episode, Learn, and Root lifecycle without widening this unit claim.",
+                "Select and execute a materially different safe unit toward independent generalized capability evidence.",
+                "Satisfy the strict external AGI evidence gate before any AGI or upper-objective PASS."
+              ],
+              "repair_information": {
+                "bounded_unit": "No repair required for the exact theorem unit.",
+                "next": "Freeze and evaluate the post-result Candidate, consolidate and learn the exact PASS/FAIL separation, return to Root, and continue materially different safe work.",
+                "recurrence": "Recheck immutable identities, compilation, both negative controls, clean replay, protected exact-head CI, expected-head merge, and exact remote blob readbacks."
+              }
+            },
+            "local_learn": {
+              "decision": "NO_CHANGE",
+              "candidates": [],
+              "observations": [
+                "A mechanically complete bounded PASS must remain separate from the original-task FAIL.",
+                "Negative controls and immutable-source replay provide strong unit evidence but do not create breadth or independent AGI evidence.",
+                "The existing Task Evaluate prompt already enforces the required original-goal evidence gate; no prompt change is justified by this single unit."
+              ]
+            },
+            "fragment": {
+              "component": "task_evaluate",
+              "unit_id": "unit-generation29-evaluate-external-formal-proof-synthesis-v1",
+              "verdict": "FAIL",
+              "unit_verdict": "PASS",
+              "agi_claim_supported": false,
+              "candidate_activation": false,
+              "claim_boundary": "Exact frozen formal-proof theorem only; no generalized theorem-proving, AGI, user-level, upper-objective, production, or monitor-completion claim.",
+              "continuation": "Freeze and consume the post-result Candidate exactly once, then Consolidate Episode, Learn, Root, and materially different safe work toward independently supported upper-objective evidence."
+            }
+          }
+          TASKJSON
+          PYTHONPATH=src python -m continual.cli --root . work-submit "$TASK_WORK_ID" --response /tmp/task-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/submitted.json
+          PYTHONPATH=src python -m continual.cli --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/resumed.json
+          PYTHONPATH=src python -m continual.cli --root . work-verify --run-id "$RUN_ID" > /tmp/verify-after.json
+          PYTHONPATH=src python -m continual.cli --root . work-pending --run-id "$RUN_ID" > /tmp/pending-after.json
+      - name: Validate and persist exact lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from continual.work_session import verified_work_invocation
+          run_id=os.environ['RUN_ID'];wid=os.environ['TASK_WORK_ID'];nid=os.environ['TASK_NATIVE_ID']
+          expected=json.load(open('/tmp/task-output.json'))
+          verified=verified_work_invocation(Path('.').resolve(),wid)
+          assert verified['output']==expected,verified
+          native=json.loads(Path(f'.continual/runs/{run_id}/invocations/{nid}.json').read_text())
+          assert native['status']=='complete' and native['component']=='task_evaluate',native
+          assert native['output']==expected,native
+          before=json.load(open('/tmp/verify-before.json'));after=json.load(open('/tmp/verify-after.json'))
+          assert after['valid'] is True and after['pending']==1,after
+          for k in ('requests','responses','native_completed','native_fragments','native_local_learn'):
+            assert after[k]==before[k]+1,(k,before,after)
+          p=json.load(open('/tmp/pending-after.json'))['pending']
+          assert len(p)==1 and p[0]['component']=='candidate_evaluate',p
+          successor=p[0]
+          assert successor['payload']['mode']=='post-result',successor
+          assert successor['payload']['target_component']=='task_evaluate',successor
+          assert successor['payload']['actual_result']==expected['result'],successor
+          assert successor['payload']['execution_unit']['execution_unit']['unit_id']=='unit-generation29-evaluate-external-formal-proof-synthesis-v1',successor
+          waiting=[]
+          for path in Path(f'.continual/runs/{run_id}/invocations').glob('*.json'):
+            value=json.loads(path.read_text())
+            if value.get('status')=='awaiting_work_model':waiting.append((path,value))
+          assert len(waiting)==1 and waiting[0][1]['work_invocation_id']==successor['invocation_id'],waiting
+          snapshot=json.loads(Path(f'.continual/runs/{run_id}/snapshot.json').read_text())
+          assert snapshot['revision']==138 and snapshot['phase']=='unit_pending' and snapshot['status']=='continue',snapshot
+          assert snapshot['current_component']=='task_evaluate',snapshot
+          print('TASK_EVALUATE_CONSUMED_POST_CANDIDATE_FROZEN',verified['response']['response_digest'],successor['invocation_id'],successor['request_digest'],waiting[0][1]['invocation_id'])
+          PY
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          rm -f /tmp/pending-before.json /tmp/verify-before.json /tmp/submitted.json /tmp/resumed.json /tmp/verify-after.json /tmp/pending-after.json /tmp/task-output.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f .continual/work-model/invocations .continual/runs/$RUN_ID
+          test -n "$(git status --porcelain)"
+          git commit -m "[native-formal-proof-post-candidate-frozen] consume Task Evaluate and freeze post-result Candidate"
+          git push origin "HEAD:$GITHUB_REF_NAME"
