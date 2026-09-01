@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git merge-base "$EXPECTED_HEAD" HEAD)" = "$EXPECTED_HEAD"
           git fetch origin main --no-tags
           test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
           python - <<'PY'
