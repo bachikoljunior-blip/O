@@ -52,6 +52,7 @@ jobs:
           set -euo pipefail
           git fetch origin main --no-tags
           RUNTIME_MAIN="$(git rev-parse origin/main)"
+          echo "DIAG_HEAD=$(git rev-parse HEAD) DIAG_RUNTIME_MAIN=$RUNTIME_MAIN DIAG_MERGE_BASE=$(git merge-base "$EXPECTED_MAIN" HEAD)"
           test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
           python - <<'PY'
           import subprocess
@@ -82,12 +83,14 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/runtime-state-document.json
           gh api "repos/$GITHUB_REPOSITORY/contents/agi/USER_INPUT_INBOX.json?ref=$RUNTIME_MAIN" > /tmp/runtime-inbox-document.json
           RUNTIME_STATE_BLOB="$(jq -r '.sha' /tmp/runtime-state-document.json)"
+          echo "DIAG_STATE=$RUNTIME_STATE_BLOB DIAG_INBOX=$(jq -r '.sha' /tmp/runtime-inbox-document.json)"
           test "$RUNTIME_STATE_BLOB" = "$EXPECTED_STATE_BLOB"
           test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
           jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
           jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
           test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
           test "$(git hash-object /tmp/runtime-inbox.json)" = "$EXPECTED_INBOX_BLOB"
+          echo "DIAG_SNAPSHOT=$(git hash-object .continual/runs/$RUN_ID/snapshot.json) DIAG_REQUEST=$(git hash-object .continual/work-model/invocations/$CONSOLIDATE_WORK_ID/request.json) DIAG_NATIVE=$(git hash-object .continual/runs/$RUN_ID/invocations/$CONSOLIDATE_NATIVE_ID.json)"
           test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
           test "$(git hash-object .continual/work-model/invocations/$CONSOLIDATE_WORK_ID/request.json)" = "$CONSOLIDATE_REQUEST_BLOB"
           test "$(git hash-object .continual/runs/$RUN_ID/invocations/$CONSOLIDATE_NATIVE_ID.json)" = "$CONSOLIDATE_NATIVE_BLOB"
