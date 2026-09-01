@@ -148,8 +148,9 @@ jobs:
           npath=root/'.continual/runs'/run/'invocations'/f'{nid}.json'; native=json.loads(npath.read_text()); assert native['status']=='complete' and native['output']==out
           snap_path=root/'.continual/runs'/run/'snapshot.json'; snap=json.loads(snap_path.read_text())
           print('SNAPSHOT_DIAGNOSTIC',json.dumps({'revision':snap.get('revision'),'phase':snap.get('phase'),'current_component':snap.get('current_component'),'current_unit':snap.get('current_unit')},sort_keys=True),flush=True)
-          assert snap['revision']==131 and snap['phase']=='consolidate_pending' and snap['current_component']=='consolidate_episode'
-          pending=pending_work_invocations(root,run_id=run); assert len(pending)==1 and pending[0]['component']=='consolidate_episode'
+          pending=pending_work_invocations(root,run_id=run)
+          print('PENDING_DIAGNOSTIC',json.dumps([{'invocation_id':x.get('invocation_id'),'component':x.get('component'),'prompt_path':x.get('prompt_path'),'request_digest':x.get('request_digest')} for x in pending],sort_keys=True),flush=True)
+          raise AssertionError('diagnostic stop before publication')
           req=pending[0]; nwid=req['invocation_id']; nreq=f'.continual/work-model/invocations/{nwid}/request.json'; assert req['prompt_path']=='prompts/consolidate_episode.md' and not (root/nreq).with_name('response.json').exists()
           awaiting=[]
           for p in (root/'.continual/runs'/run/'invocations').glob('*.json'):
