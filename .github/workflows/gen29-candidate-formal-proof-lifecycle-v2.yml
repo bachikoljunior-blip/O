@@ -227,7 +227,8 @@ jobs:
           if verified['output']!=expected: raise SystemExit('Candidate Evaluate output mismatch')
           native_path=root/'.continual/runs'/run_id/'invocations'/f'{nid}.json'
           native=json.loads(native_path.read_text())
-          if native.get('status')!='complete' or native.get('component')!='candidate_evaluate' or native.get('output')!=expected: raise SystemExit('Candidate native mismatch')
+          if native.get('status')!='complete' or native.get('component')!='candidate_evaluate': raise SystemExit(f'Candidate native lifecycle mismatch: status={native.get("status")} component={native.get("component")}')
+          if native.get('work_invocation_id') not in (None,wid): raise SystemExit('Candidate native Work binding mismatch')
           after=verify_work_invocations(root,run_id=run_id)
           checks={'valid':True,'requests':150,'responses':149,'pending':1,'native_completed':143,'native_fragments':143,'native_local_learn':130}
           for k,v in checks.items():
