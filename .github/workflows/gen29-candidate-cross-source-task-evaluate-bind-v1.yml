@@ -97,7 +97,7 @@ jobs:
           if snap.get('revision')!=133 or snap.get('phase')!='unit_pending' or snap.get('current_component')!='task_evaluate' or snap.get('current_unit')!=os.environ['RESULT_UNIT_ID']: raise SystemExit('snapshot mismatch')
           req=verified_work_request(root,os.environ['CANDIDATE_WORK_ID'])
           if req.get('component')!='candidate_evaluate' or req.get('request_digest')!=os.environ['CANDIDATE_REQUEST_DIGEST'] or req.get('payload',{}).get('mode')!='pre-application' or req.get('payload',{}).get('target_component')!='task_evaluate': raise SystemExit('Candidate request mismatch')
-          ids=[x.get('candidate_id') for x in req.get('payload',{}).get('candidates',[])]
+          ids=[x.get('candidate_id') for x in req.get('payload',{}).get('candidate_index',{}).get('candidates',[])]
           if ids!=['candidate-task-evaluate-unit-verdict-v1']: raise SystemExit(f'candidate set mismatch {ids!r}')
           native=json.loads((root/'.continual/runs'/run/'invocations'/f"{os.environ['CANDIDATE_NATIVE_ID']}.json").read_text())
           if native.get('status')!='awaiting_work_model' or native.get('component')!='candidate_evaluate' or native.get('work_invocation_id')!=os.environ['CANDIDATE_WORK_ID']: raise SystemExit('native mismatch')
