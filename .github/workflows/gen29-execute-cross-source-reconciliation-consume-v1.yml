@@ -1,0 +1,289 @@
+name: gen29 consume cross-source Execute v1
+
+on:
+  push:
+    branches:
+      - work/gen29-execute-cross-source-reconciliation-consume-v1
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gen29-execute-cross-source-reconciliation-consume-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-execute-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_MAIN: 1d6b61c8b8f3a1ea51a106dd23579239bba6621a
+      EXPECTED_STATE_BLOB: 6c21bd4ae53224884464f1e4a056bd08476b41af
+      EXPECTED_SNAPSHOT_BLOB: 3cc0477c3a3b8d7cc418d6a726a813f8a6f37fe2
+      EXPECTED_INBOX_BLOB: 34423c2dd71d95c55769f501fe1701ea0088fb32
+      EXEC_NATIVE_ID: invoke-bc78eb5f075bb06ef6a4f92d
+      EXEC_NATIVE_BLOB: 2bb406eed90aea2cdddd5ef39237058549840efc
+      EXEC_WORK_ID: invoke-5c28ad87d810c530cf9f8371
+      EXEC_REQUEST_BLOB: badc15b3967b928839359735ea04823cb5a9972c
+      EXEC_REQUEST_DIGEST: a866c9a5c3cf1d2ce70f17f9fa3d347e1faec55e805aeea5c4cacfe69b8b3000
+      SOURCE_CI_RUN_ID: '33498703511'
+      SOURCE_CI_HEAD: 4082122194952c0363830871b0232fd24c575de1
+      RESULT_MERGE_SHA: 765064d5b2de4bfc828a99695f42a94690cd0225
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e .
+
+      - name: Assert exact branch, authority, pending Execute, artifacts, and source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          RUNTIME_MAIN="$(git rev-parse origin/main)"
+          test "$RUNTIME_MAIN" = "$EXPECTED_MAIN"
+          python - <<'PY'
+          import subprocess
+          expected = ['.github/workflows/gen29-execute-cross-source-reconciliation-consume-v1.yml']
+          observed = subprocess.check_output(['git','diff','--name-only',__import__('os').environ['EXPECTED_MAIN'],'HEAD'], text=True).splitlines()
+          if observed != expected:
+              raise SystemExit(f'launch delta mismatch: {observed!r}')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/runtime-state-document.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/agi/USER_INPUT_INBOX.json?ref=$RUNTIME_MAIN" > /tmp/runtime-inbox-document.json
+          test "$(jq -r '.sha' /tmp/runtime-state-document.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(jq -r '.sha' /tmp/runtime-inbox-document.json)" = "$EXPECTED_INBOX_BLOB"
+          jq -r '.content' /tmp/runtime-state-document.json | tr -d '\n' | base64 --decode > agi/WORK_EXECUTION_STATE.json
+          jq -r '.content' /tmp/runtime-inbox-document.json | tr -d '\n' | base64 --decode > /tmp/runtime-inbox.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$EXEC_WORK_ID/request.json)" = "$EXEC_REQUEST_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$EXEC_NATIVE_ID.json)" = "$EXEC_NATIVE_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/artifacts/unit-generation29-cross-source-data-reconciliation-v1/precommitted-selector-manifest.json)" = b7c08e41c97a486a8d0610d6d8ab4487f2318e04
+          test "$(git hash-object .continual/runs/$RUN_ID/artifacts/unit-generation29-cross-source-data-reconciliation-v1/source-readiness.json)" = 35b5dbd0bf932843cb88740ec608af98492b0267
+          test "$(git hash-object .continual/runs/$RUN_ID/artifacts/unit-generation29-cross-source-data-reconciliation-v1/normalized-sources.json)" = 7f51c4d9ae19d0425c605f60adac28f8043bc241
+          test "$(git hash-object .continual/runs/$RUN_ID/artifacts/unit-generation29-cross-source-data-reconciliation-v1/reconciliation-report.json)" = 6e1b2f3d2068a35588fa36369b6622981080bf13
+          test "$(git hash-object .continual/runs/$RUN_ID/artifacts/unit-generation29-cross-source-data-reconciliation-v1/corruption-controls.json)" = c46a2c8bc935b2987a366fd09893859f08e522ff
+          test "$(git hash-object .continual/runs/$RUN_ID/artifacts/unit-generation29-cross-source-data-reconciliation-v1/replay-verification.json)" = f51d0b63710446e06f759edb68897aea698ac20e
+          test "$(git hash-object .continual/runs/$RUN_ID/artifacts/unit-generation29-cross-source-data-reconciliation-v1/bounded-result.json)" = 8486daa3d8da17e467325a9187758693048bb47f
+          test "$(git hash-object .continual/runs/$RUN_ID/artifacts/unit-generation29-cross-source-data-reconciliation-v1/mutation-audit.json)" = 059cf33a10ebf7e6fb3483d651b217b5aa91e661
+          echo "RUNTIME_MAIN=$RUNTIME_MAIN" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verified_work_request, verify_work_invocations
+          root=Path('.').resolve(); run_id=os.environ['RUN_ID']
+          state=json.loads(Path('agi/WORK_EXECUTION_STATE.json').read_text()); inbox=json.loads(Path('/tmp/runtime-inbox.json').read_text())
+          exact=state['exact_continuation']; durability=state['continuation_durability']
+          if state.get('execution_id')!='work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3' or state.get('lease_generation')!=29:
+              raise SystemExit('authority identity mismatch')
+          if hashlib.sha256(state['fence_token'].encode()).hexdigest()!='c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d':
+              raise SystemExit('fence mismatch')
+          if state.get('status')!='running' or state.get('resume_required') is not True or inbox.get('revision')!=38:
+              raise SystemExit('state/inbox mismatch')
+          if exact != durability or exact.get('status')!='remote_main_readback_verified' or exact.get('verified_remote_readback') is not True:
+              raise SystemExit('continuation durability mismatch')
+          expected={'pending_native_invocation_id':os.environ['EXEC_NATIVE_ID'],'pending_native_invocation_blob_sha':os.environ['EXEC_NATIVE_BLOB'],'pending_work_invocation_id':os.environ['EXEC_WORK_ID'],'pending_request_blob_sha':os.environ['EXEC_REQUEST_BLOB'],'pending_request_digest':os.environ['EXEC_REQUEST_DIGEST'],'pending_response_ref':None,'response_exists_on_authoritative_remote':False,'snapshot_revision':132,'native_phase':'unit_pending','pending_component':'execute','target_component':'task_evaluate'}
+          for k,v in expected.items():
+              if exact.get(k)!=v: raise SystemExit(f'continuation mismatch {k}: {exact.get(k)!r} != {v!r}')
+          request=verified_work_request(root,os.environ['EXEC_WORK_ID'])
+          if request.get('component')!='execute' or request.get('request_digest')!=os.environ['EXEC_REQUEST_DIGEST']:
+              raise SystemExit('Execute request mismatch')
+          if (root/'.continual/work-model/invocations'/os.environ['EXEC_WORK_ID']/'response.json').exists():
+              raise SystemExit('Execute already answered')
+          native=json.loads((root/'.continual/runs'/run_id/'invocations'/f"{os.environ['EXEC_NATIVE_ID']}.json").read_text())
+          if native.get('status')!='awaiting_work_model' or native.get('component')!='execute' or native.get('work_invocation_id')!=os.environ['EXEC_WORK_ID']:
+              raise SystemExit('native Execute mismatch')
+          pending=pending_work_invocations(root,run_id=run_id)
+          if len(pending)!=1 or pending[0].get('invocation_id')!=os.environ['EXEC_WORK_ID']:
+              raise SystemExit('Execute is not unique pending Work item')
+          before=verify_work_invocations(root,run_id=run_id)
+          expected_counts={'valid':True,'requests':143,'responses':142,'pending':1,'native_completed':136,'native_fragments':136,'native_local_learn':124}
+          for k,v in expected_counts.items():
+              if before.get(k)!=v: raise SystemExit(f'before count mismatch {k}: {before.get(k)!r}')
+          bounded=json.loads((root/'.continual/runs'/run_id/'artifacts/unit-generation29-cross-source-data-reconciliation-v1/bounded-result.json').read_text())
+          if bounded.get('verdict')!='PASS' or bounded.get('summary',{}).get('replay_digest')!='731301488a1530af9009ab6acf6fd6ebccd2b36f84d4885fc26bc889c389379b':
+              raise SystemExit('bounded result mismatch')
+          Path('/tmp/work-verify-before.json').write_text(json.dumps(before,sort_keys=True)+'\n')
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = completed
+          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = success
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
+
+      - name: Record and verify fresh exact source observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$EXPECTED_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          state=json.loads(Path('agi/WORK_EXECUTION_STATE.json').read_text())
+          projection={'status':state['status'],'owner_kind':state['owner_kind'],'execution_id':state['execution_id'],'lease_generation':state['lease_generation'],'fence_token_digest':hashlib.sha256(state['fence_token'].encode()).hexdigest(),'heartbeat_at':state['heartbeat_at']}
+          Path('/tmp/work-source-projection.json').write_text(json.dumps(projection,sort_keys=True)+'\n')
+          PY
+          WORK_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/work-source-prepare.json)"
+          WORK_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/work-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC,datetime;print(datetime.now(UTC).isoformat().replace("+00:00","Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$RUNTIME_MAIN" --blob-sha "$EXPECTED_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
+          jq '{id,workflow_id,name,status,conclusion,head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
+          jq '[.jobs[]|{id,name,status,conclusion}]|sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
+          CI_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/ci-source-prepare.json)"
+          CI_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/ci-source-prepare.json)"
+          OBSERVED_AT="$(python -c 'from datetime import UTC,datetime;print(datetime.now(UTC).isoformat().replace("+00:00","Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$CI_OBSERVATION_ID" --request-digest "$CI_REQUEST_DIGEST" --workflow-run /tmp/workflow-run-projection.json --jobs /tmp/workflow-jobs-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from continual.ci_source_observation import verify_ci_source_observation
+          from continual.continuity_preflight import assert_work_resume_continuity_preflight
+          from continual.store import Store
+          from continual.work_source_observation import verify_work_source_observation
+          root=Path('.').resolve(); state=json.loads(Path('agi/WORK_EXECUTION_STATE.json').read_text()); now=Store(root).utc_now()
+          work=verify_work_source_observation(root,run_id=os.environ['RUN_ID'],state=state,state_blob_sha=os.environ['EXPECTED_STATE_BLOB'],now=now)
+          ci=verify_ci_source_observation(root,run_id=os.environ['RUN_ID'],state=state,now=now)
+          continuity=assert_work_resume_continuity_preflight(root,run_id=os.environ['RUN_ID'],executor_binding=os.environ['EXECUTOR_BINDING'],model_identity=os.environ['MODEL_IDENTITY'])
+          if continuity.get('resume_authorized') is not True: raise SystemExit('continuity not authorized')
+          print(json.dumps({'work':work,'ci':ci,'continuity':continuity},sort_keys=True))
+          PY
+
+      - name: Submit exact Execute output and freeze the next native boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' 'ewogICJmcmFnbWVudCI6IHsKICAgICJhZ2lfY2xhaW1fc3VwcG9ydGVkIjogZmFsc2UsCiAgICAiY2FuZGlkYXRlX2FjdGl2YXRpb24iOiBmYWxzZSwKICAgICJjbGFpbV9ib3VuZGFyeSI6ICJQQVNTIGFwcGxpZXMgb25seSB0byBkZXRlcm1pbmlzdGljIHJlY29uY2lsaWF0aW9uIG9mIGRhdGFzZXRzL2NvdW50cnktY29kZXMgY29tbWl0IDZhNTk1ZjFhNmYxMGIzZDAwMTc1ZmU2NzM3NWRhODhmNjRmN2Y3NmIgYW5kIHNhbWF5by9jb3VudHJ5LWpzb24gY29tbWl0IDQxZDQwODRiYzFjY2Y5NjE0ZGFiNDUyNTVhNDFiYTNhNTQ3M2JlNzQgdW5kZXIgdGhlIGZyb3plbiBzZWxlY3Rvciwgbm9ybWFsaXphdGlvbiwgdGhyZXNob2xkcywgcXVlcmllcywgY29ycnVwdGlvbiBjb250cm9scywgYW5kIHplcm8tdXBzdHJlYW0td3JpdGUgYnVkZ2V0LiBJdCBkb2VzIG5vdCBlc3RhYmxpc2ggZ2VuZXJhbGl6ZWQgZGF0YSByZWxpYWJpbGl0eSwgcHJvZHVjdGlvbiBiZWhhdmlvciwgQ2FuZGlkYXRlIGFjdGl2YXRpb24sIEFHSSwgdXBwZXItb2JqZWN0aXZlIGFjaGlldmVtZW50LCBvciB1c2VyLWxldmVsIGNvbXBsZXRpb24uIiwKICAgICJjb21wb25lbnQiOiAiZXhlY3V0ZSIsCiAgICAiY29udGludWF0aW9uIjogIkluZGVwZW5kZW50bHkgVGFzayBFdmFsdWF0ZSB0aGUgZXhhY3QgZnJvemVuIHNlbGVjdG9yIG9yZGVyaW5nLCBzb3VyY2UvYmxvYiBpZGVudGl0eSwgbm9ybWFsaXphdGlvbiwgZXZlcnkgZGl2ZXJnZW5jZSwgdGhyZXNob2xkIHJlc3VsdHMsIGRldGVybWluaXN0aWMgcXVlcmllcywgYm90aCBjb3JydXB0aW9uIGNvbnRyb2xzLCByZXBsYXkgZGlnZXN0LCB6ZXJvLXVwc3RyZWFtLXdyaXRlIGF1ZGl0LCBwcm90ZWN0ZWQgZXhhY3QtaGVhZCBDSSBhbmQgbWVyZ2UgcmVhZGJhY2s7IHRoZW4gY29udGludWUgcG9zdC1yZXN1bHQgQ2FuZGlkYXRlIEV2YWx1YXRlLCBDb25zb2xpZGF0ZSBFcGlzb2RlLCBMZWFybiwgUm9vdCwgYW5kIG1hdGVyaWFsbHkgZGlmZmVyZW50IHNhZmUgd29yayB3aGlsZSB0aGUgdXBwZXIgb2JqZWN0aXZlIHJlbWFpbnMgdW5tZXQuIiwKICAgICJjb3JydXB0aW9uX2NvbnRyb2xzX2RldGVjdGVkIjogMiwKICAgICJkaXZlcmdlbmNlX2NvdW50IjogNDAsCiAgICAiamFjY2FyZCI6IDAuOTYwMzE3NDYwMzE3NDYwMywKICAgICJsZWZ0X3JlY29yZF9jb3VudCI6IDI0OSwKICAgICJvdmVybGFwX2NvdW50IjogMjQyLAogICAgIm92ZXJsYXBfb3Zlcl9zbWFsbGVyX3NldCI6IDAuOTg3NzU1MTAyMDQwODE2MywKICAgICJyZXBsYXlfZGlnZXN0IjogIjczMTMwMTQ4OGExNTMwYWY5MDA5YWI2YWNmNmZkNmViY2NkMmIzNmY4NGQ0ODg1ZmMyNmJjODg5YzM4OTM3OWIiLAogICAgInJpZ2h0X3JlY29yZF9jb3VudCI6IDI0NSwKICAgICJzdGF0dXMiOiAiUEFTUyIsCiAgICAidW5pdF9pZCI6ICJ1bml0LWdlbmVyYXRpb24yOS1jcm9zcy1zb3VyY2UtZGF0YS1yZWNvbmNpbGlhdGlvbi12MSIsCiAgICAidXBzdHJlYW1fd3JpdGVzIjogMCwKICAgICJ1c2VyX2xldmVsX29iamVjdGl2ZV9tZXQiOiBmYWxzZQogIH0sCiAgImxvY2FsX2xlYXJuIjogewogICAgImNhbmRpZGF0ZXMiOiBbXSwKICAgICJkZWNpc2lvbiI6ICJOT19DSEFOR0UiLAogICAgIm9ic2VydmF0aW9ucyI6IFsKICAgICAgIkEgc291cmNlLXJlYWRpbmVzcy1maXJzdCBzZWxlY3RvciBwcmVjb21taXQgcHJldmVudGVkIHBvc3QtcmVhZCBzb3VyY2UsIHNjaGVtYSwgdGhyZXNob2xkLCBxdWVyeSwgYW5kIGJ1ZGdldCBkcmlmdCB3aGlsZSBzdGlsbCBwZXJtaXR0aW5nIGJvdW5kZWQgcHVibGljLWRhdGEgZXZpZGVuY2UuIiwKICAgICAgIkV4YWN0IHNvdXJjZSBpZGVudGl0eSBhbmQgaGlnaCBrZXkgb3ZlcmxhcCBkaWQgbm90IGltcGx5IGV4YWN0IHNlbWFudGljIGVxdWl2YWxlbmNlOiAyOSBvdmVybGFwcGluZyBhbHBoYS0yIGtleXMgcmV0YWluZWQgZGlzdGluY3Qgbm9uZW1wdHkgbm9ybWFsaXplZCBuYW1lcyBhbmQgcmVxdWlyZWQgZXhwbGljaXQgYXR0cmlidXRpb24uIiwKICAgICAgIkludmFsaWQta2V5IGFuZCBjb25mbGljdGluZy1kdXBsaWNhdGUgY29udHJvbHMgcGx1cyBjYW5vbmljYWwgcmVwbGF5IG1hdGVyaWFsbHkgc3RyZW5ndGhlbmVkIHRoZSBib3VuZGVkIHJlY29uY2lsaWF0aW9uIHJlY2VpcHQgd2l0aG91dCBhY3RpdmF0aW5nIGEgQ2FuZGlkYXRlIG9yIG11dGF0aW5nIHVwc3RyZWFtIHN5c3RlbXMuIgogICAgXQogIH0sCiAgInJlc3VsdCI6IHsKICAgICJhZ2lfY2xhaW1fc3VwcG9ydGVkIjogZmFsc2UsCiAgICAiYXJ0aWZhY3RzIjogewogICAgICAiYm91bmRlZF9yZXN1bHQiOiAiLmNvbnRpbnVhbC9ydW5zL3J1bi13b3JrLXJlY292ZXJ5LWdlbjktZHVyYWJpbGl0eS1yZXBhaXIvYXJ0aWZhY3RzL3VuaXQtZ2VuZXJhdGlvbjI5LWNyb3NzLXNvdXJjZS1kYXRhLXJlY29uY2lsaWF0aW9uLXYxL2JvdW5kZWQtcmVzdWx0Lmpzb24iLAogICAgICAiY29ycnVwdGlvbl9jb250cm9scyI6ICIuY29udGludWFsL3J1bnMvcnVuLXdvcmstcmVjb3ZlcnktZ2VuOS1kdXJhYmlsaXR5LXJlcGFpci9hcnRpZmFjdHMvdW5pdC1nZW5lcmF0aW9uMjktY3Jvc3Mtc291cmNlLWRhdGEtcmVjb25jaWxpYXRpb24tdjEvY29ycnVwdGlvbi1jb250cm9scy5qc29uIiwKICAgICAgIm11dGF0aW9uX2F1ZGl0IjogIi5jb250aW51YWwvcnVucy9ydW4td29yay1yZWNvdmVyeS1nZW45LWR1cmFiaWxpdHktcmVwYWlyL2FydGlmYWN0cy91bml0LWdlbmVyYXRpb24yOS1jcm9zcy1zb3VyY2UtZGF0YS1yZWNvbmNpbGlhdGlvbi12MS9tdXRhdGlvbi1hdWRpdC5qc29uIiwKICAgICAgIm5vcm1hbGl6ZWRfc291cmNlcyI6ICIuY29udGludWFsL3J1bnMvcnVuLXdvcmstcmVjb3ZlcnktZ2VuOS1kdXJhYmlsaXR5LXJlcGFpci9hcnRpZmFjdHMvdW5pdC1nZW5lcmF0aW9uMjktY3Jvc3Mtc291cmNlLWRhdGEtcmVjb25jaWxpYXRpb24tdjEvbm9ybWFsaXplZC1zb3VyY2VzLmpzb24iLAogICAgICAicHJlY29tbWl0dGVkX3NlbGVjdG9yX21hbmlmZXN0IjogIi5jb250aW51YWwvcnVucy9ydW4td29yay1yZWNvdmVyeS1nZW45LWR1cmFiaWxpdHktcmVwYWlyL2FydGlmYWN0cy91bml0LWdlbmVyYXRpb24yOS1jcm9zcy1zb3VyY2UtZGF0YS1yZWNvbmNpbGlhdGlvbi12MS9wcmVjb21taXR0ZWQtc2VsZWN0b3ItbWFuaWZlc3QuanNvbiIsCiAgICAgICJyZWNvbmNpbGlhdGlvbl9yZXBvcnQiOiAiLmNvbnRpbnVhbC9ydW5zL3J1bi13b3JrLXJlY292ZXJ5LWdlbjktZHVyYWJpbGl0eS1yZXBhaXIvYXJ0aWZhY3RzL3VuaXQtZ2VuZXJhdGlvbjI5LWNyb3NzLXNvdXJjZS1kYXRhLXJlY29uY2lsaWF0aW9uLXYxL3JlY29uY2lsaWF0aW9uLXJlcG9ydC5qc29uIiwKICAgICAgInJlcGxheV92ZXJpZmljYXRpb24iOiAiLmNvbnRpbnVhbC9ydW5zL3J1bi13b3JrLXJlY292ZXJ5LWdlbjktZHVyYWJpbGl0eS1yZXBhaXIvYXJ0aWZhY3RzL3VuaXQtZ2VuZXJhdGlvbjI5LWNyb3NzLXNvdXJjZS1kYXRhLXJlY29uY2lsaWF0aW9uLXYxL3JlcGxheS12ZXJpZmljYXRpb24uanNvbiIsCiAgICAgICJzb3VyY2VfcmVhZGluZXNzIjogIi5jb250aW51YWwvcnVucy9ydW4td29yay1yZWNvdmVyeS1nZW45LWR1cmFiaWxpdHktcmVwYWlyL2FydGlmYWN0cy91bml0LWdlbmVyYXRpb24yOS1jcm9zcy1zb3VyY2UtZGF0YS1yZWNvbmNpbGlhdGlvbi12MS9zb3VyY2UtcmVhZGluZXNzLmpzb24iCiAgICB9LAogICAgImNhbmRpZGF0ZV9hY3RpdmF0aW9uIjogZmFsc2UsCiAgICAiY2xhaW1fYm91bmRhcnkiOiAiUEFTUyBhcHBsaWVzIG9ubHkgdG8gZGV0ZXJtaW5pc3RpYyByZWNvbmNpbGlhdGlvbiBvZiBkYXRhc2V0cy9jb3VudHJ5LWNvZGVzIGNvbW1pdCA2YTU5NWYxYTZmMTBiM2QwMDE3NWZlNjczNzVkYTg4ZjY0ZjdmNzZiIGFuZCBzYW1heW8vY291bnRyeS1qc29uIGNvbW1pdCA0MWQ0MDg0YmMxY2NmOTYxNGRhYjQ1MjU1YTQxYmEzYTU0NzNiZTc0IHVuZGVyIHRoZSBmcm96ZW4gc2VsZWN0b3IsIG5vcm1hbGl6YXRpb24sIHRocmVzaG9sZHMsIHF1ZXJpZXMsIGNvcnJ1cHRpb24gY29udHJvbHMsIGFuZCB6ZXJvLXVwc3RyZWFtLXdyaXRlIGJ1ZGdldC4gSXQgZG9lcyBub3QgZXN0YWJsaXNoIGdlbmVyYWxpemVkIGRhdGEgcmVsaWFiaWxpdHksIHByb2R1Y3Rpb24gYmVoYXZpb3IsIENhbmRpZGF0ZSBhY3RpdmF0aW9uLCBBR0ksIHVwcGVyLW9iamVjdGl2ZSBhY2hpZXZlbWVudCwgb3IgdXNlci1sZXZlbCBjb21wbGV0aW9uLiIsCiAgICAiY29udGFtaW5hdGlvbl9leGNsdXNpb25zX2VuZm9yY2VkIjogWwogICAgICAidW1waXJza3kvY291bnRyeS1saXN0IiwKICAgICAgImx1a2VzL0lTTy0zMTY2LUNvdW50cmllcy13aXRoLVJlZ2lvbmFsLUNvZGVzIgogICAgXSwKICAgICJjb250aW51YXRpb24iOiAiSW5kZXBlbmRlbnRseSBUYXNrIEV2YWx1YXRlIHRoZSBleGFjdCBmcm96ZW4gc2VsZWN0b3Igb3JkZXJpbmcsIHNvdXJjZS9ibG9iIGlkZW50aXR5LCBub3JtYWxpemF0aW9uLCBldmVyeSBkaXZlcmdlbmNlLCB0aHJlc2hvbGQgcmVzdWx0cywgZGV0ZXJtaW5pc3RpYyBxdWVyaWVzLCBib3RoIGNvcnJ1cHRpb24gY29udHJvbHMsIHJlcGxheSBkaWdlc3QsIHplcm8tdXBzdHJlYW0td3JpdGUgYXVkaXQsIHByb3RlY3RlZCBleGFjdC1oZWFkIENJIGFuZCBtZXJnZSByZWFkYmFjazsgdGhlbiBjb250aW51ZSBwb3N0LXJlc3VsdCBDYW5kaWRhdGUgRXZhbHVhdGUsIENvbnNvbGlkYXRlIEVwaXNvZGUsIExlYXJuLCBSb290LCBhbmQgbWF0ZXJpYWxseSBkaWZmZXJlbnQgc2FmZSB3b3JrIHdoaWxlIHRoZSB1cHBlciBvYmplY3RpdmUgcmVtYWlucyB1bm1ldC4iLAogICAgIm5lZ2F0aXZlX2V2aWRlbmNlIjogWwogICAgICAiRm9ydHkga2V5cyB3ZXJlIG5vbi1leGFjdCBvciBpbiB0aGUgc3ltbWV0cmljIGRpZmZlcmVuY2UsIGluY2x1ZGluZyAyOSBkaXN0aW5jdCBub25lbXB0eSBvdmVybGFwcGluZyBuYW1lczsgbm9uZSB3YXMgc2lsZW50bHkgY29lcmNlZCBvciBkaXNjYXJkZWQuIiwKICAgICAgIlRoaXMgaXMgb25lIGJvdW5kZWQgdHdvLXNvdXJjZSBjb3VudHJ5LW5hbWUgcmVjb25jaWxpYXRpb24sIG5vdCBldmlkZW5jZSBmb3IgYXJiaXRyYXJ5IHNjaGVtYXMsIGRvbWFpbnMsIGNoYW5naW5nIHVwc3RyZWFtcywgb3IgcHJvZHVjdGlvbiB3b3JrbG9hZHMuIiwKICAgICAgIlJlcG9zaXRvcnkgQ0kgYW5kIGV4YWN0IGJsb2IgcmVhZGJhY2sgZXN0YWJsaXNoIGxpZmVjeWNsZSBhbmQgYXJ0aWZhY3QgaW50ZWdyaXR5LCBub3QgaW5kZXBlbmRlbnQgZ2VuZXJhbGl6ZWQgY2FwYWJpbGl0eSBvciBBR0kuIiwKICAgICAgIk5vIENhbmRpZGF0ZSwgcHJvdmlkZXIgcm91dGUsIHByb2R1Y3Rpb24gcm91dGUsIGRlcGxveW1lbnQsIGNyZWRlbnRpYWwsIGlzc3VlIGNvbW1lbnQsIG9yIHVwc3RyZWFtIHJlcG9zaXRvcnkgd2FzIGNoYW5nZWQuIgogICAgXSwKICAgICJuZXh0X2V4ZWN1dGlvbl91bml0IjogewogICAgICAiY29tcG9uZW50IjogInRhc2tfZXZhbHVhdGUiLAogICAgICAiZXhwZWN0ZWRfb3V0cHV0cyI6IFsKICAgICAgICAic2VwYXJhdGUgYm91bmRlZC11bml0LCBvcmlnaW5hbCB1cHBlci1vYmplY3RpdmUsIGFuZCB1c2VyLWxldmVsIHZlcmRpY3RzIiwKICAgICAgICAiZXhwbGljaXQgZmluZGluZ3MgZm9yIGV2ZXJ5IGZyb3plbiB0aHJlc2hvbGQsIGRpdmVyZ2VuY2UgY2xhc3MsIHF1ZXJ5LCBjb3JydXB0aW9uIGNvbnRyb2wsIHJlcGxheSBhbmQgbXV0YXRpb24gaW52YXJpYW50IiwKICAgICAgICAibmVnYXRpdmUgZXZpZGVuY2UgYW5kIHVubWV0IGNvbmRpdGlvbnMiLAogICAgICAgICJyZXBhaXIgaW5mb3JtYXRpb24gZm9yIGFueSBmYWlsZWQgaW52YXJpYW50IHdpdGhvdXQgc3Vic3RpdHV0aW5nIHNvdXJjZXMgb3Igd2lkZW5pbmcgdGhlIGNsYWltIgogICAgICBdLAogICAgICAiZmFpbHVyZV9jb25kaXRpb25zIjogWwogICAgICAgICJhbnkgc2VsZWN0ZWQgc291cmNlLCBjb21taXQsIGJsb2IsIHNjaGVtYSwgcnVsZSwgdGhyZXNob2xkLCBxdWVyeSwgb3IgYnVkZ2V0IGNoYW5nZWQgYWZ0ZXIgcHJlY29tbWl0IiwKICAgICAgICAiYSBjb250YW1pbmF0aW9uLWV4Y2x1ZGVkIHNvdXJjZSBhZmZlY3RlZCB0aGUgcmVzdWx0IiwKICAgICAgICAiYW55IGRpdmVyZ2VuY2Ugd2FzIGhpZGRlbiBvciBjb2VyY2VkLCBhIGNvcnJ1cHRpb24gY29udHJvbCB3YXMgYWNjZXB0ZWQsIG9yIHJlcGxheSBjaGFuZ2VkIiwKICAgICAgICAiYW55IHVwc3RyZWFtIHdyaXRlIG9yIGJyb2FkZXIgQ2FuZGlkYXRlL3Byb2R1Y3Rpb24vQUdJIGNsYWltIG9jY3VycmVkIiwKICAgICAgICAiZXhhY3QtaGVhZCBwcm90ZWN0ZWQgdmFsaWRhdGlvbiBvciByZW1vdGUgcmVhZGJhY2sgY2Fubm90IGJlIHJlcHJvZHVjZWQiCiAgICAgIF0sCiAgICAgICJnb2FsIjogIkluZGVwZW5kZW50bHkgYWRqdWRpY2F0ZSB0aGUgZXhhY3QgYm91bmRlZCBjcm9zcy1zb3VyY2UgcmVjb25jaWxpYXRpb24gUEFTUywgaW5jbHVkaW5nIGNhdXNhbCBwcmVjb21taXQtYmVmb3JlLXZhbHVlLXJlYWQgb3JkZXJpbmcsIHNvdXJjZS9saWNlbnNlL2RhdGEgYmxvYiBpZGVudGl0aWVzLCBub3JtYWxpemF0aW9uIHZhbGlkaXR5LCBhbGwgZGl2ZXJnZW5jZSBhY2NvdW50aW5nLCBmcm96ZW4gdGhyZXNob2xkcyBhbmQgcXVlcmllcywgYm90aCBjb3JydXB0aW9uLWNvbnRyb2wgcmVqZWN0aW9ucywgZGV0ZXJtaW5pc3RpYyByZXBsYXksIHplcm8tdXBzdHJlYW0td3JpdGUgYXVkaXQsIHByb3RlY3RlZCBleGFjdC1oZWFkIENJLCBleHBlY3RlZC1oZWFkIG1lcmdlLCBhbmQgZXhhY3QgcmVtb3RlIHJlYWRiYWNrLiIsCiAgICAgICJpbnB1dHMiOiBbCiAgICAgICAgIi5jb250aW51YWwvcnVucy9ydW4td29yay1yZWNvdmVyeS1nZW45LWR1cmFiaWxpdHktcmVwYWlyL2FydGlmYWN0cy91bml0LWdlbmVyYXRpb24yOS1jcm9zcy1zb3VyY2UtZGF0YS1yZWNvbmNpbGlhdGlvbi12MS9wcmVjb21taXR0ZWQtc2VsZWN0b3ItbWFuaWZlc3QuanNvbiIsCiAgICAgICAgIi5jb250aW51YWwvcnVucy9ydW4td29yay1yZWNvdmVyeS1nZW45LWR1cmFiaWxpdHktcmVwYWlyL2FydGlmYWN0cy91bml0LWdlbmVyYXRpb24yOS1jcm9zcy1zb3VyY2UtZGF0YS1yZWNvbmNpbGlhdGlvbi12MS9zb3VyY2UtcmVhZGluZXNzLmpzb24iLAogICAgICAgICIuY29udGludWFsL3J1bnMvcnVuLXdvcmstcmVjb3ZlcnktZ2VuOS1kdXJhYmlsaXR5LXJlcGFpci9hcnRpZmFjdHMvdW5pdC1nZW5lcmF0aW9uMjktY3Jvc3Mtc291cmNlLWRhdGEtcmVjb25jaWxpYXRpb24tdjEvbm9ybWFsaXplZC1zb3VyY2VzLmpzb24iLAogICAgICAgICIuY29udGludWFsL3J1bnMvcnVuLXdvcmstcmVjb3ZlcnktZ2VuOS1kdXJhYmlsaXR5LXJlcGFpci9hcnRpZmFjdHMvdW5pdC1nZW5lcmF0aW9uMjktY3Jvc3Mtc291cmNlLWRhdGEtcmVjb25jaWxpYXRpb24tdjEvcmVjb25jaWxpYXRpb24tcmVwb3J0Lmpzb24iLAogICAgICAgICIuY29udGludWFsL3J1bnMvcnVuLXdvcmstcmVjb3ZlcnktZ2VuOS1kdXJhYmlsaXR5LXJlcGFpci9hcnRpZmFjdHMvdW5pdC1nZW5lcmF0aW9uMjktY3Jvc3Mtc291cmNlLWRhdGEtcmVjb25jaWxpYXRpb24tdjEvY29ycnVwdGlvbi1jb250cm9scy5qc29uIiwKICAgICAgICAiLmNvbnRpbnVhbC9ydW5zL3J1bi13b3JrLXJlY292ZXJ5LWdlbjktZHVyYWJpbGl0eS1yZXBhaXIvYXJ0aWZhY3RzL3VuaXQtZ2VuZXJhdGlvbjI5LWNyb3NzLXNvdXJjZS1kYXRhLXJlY29uY2lsaWF0aW9uLXYxL3JlcGxheS12ZXJpZmljYXRpb24uanNvbiIsCiAgICAgICAgIi5jb250aW51YWwvcnVucy9ydW4td29yay1yZWNvdmVyeS1nZW45LWR1cmFiaWxpdHktcmVwYWlyL2FydGlmYWN0cy91bml0LWdlbmVyYXRpb24yOS1jcm9zcy1zb3VyY2UtZGF0YS1yZWNvbmNpbGlhdGlvbi12MS9ib3VuZGVkLXJlc3VsdC5qc29uIiwKICAgICAgICAiLmNvbnRpbnVhbC9ydW5zL3J1bi13b3JrLXJlY292ZXJ5LWdlbjktZHVyYWJpbGl0eS1yZXBhaXIvYXJ0aWZhY3RzL3VuaXQtZ2VuZXJhdGlvbjI5LWNyb3NzLXNvdXJjZS1kYXRhLXJlY29uY2lsaWF0aW9uLXYxL211dGF0aW9uLWF1ZGl0Lmpzb24iCiAgICAgIF0sCiAgICAgICJwYXJlbnRfY29udGludWF0aW9uIjogIkluZGVwZW5kZW50bHkgVGFzayBFdmFsdWF0ZSB0aGUgZXhhY3QgZnJvemVuIHNlbGVjdG9yIG9yZGVyaW5nLCBzb3VyY2UvYmxvYiBpZGVudGl0eSwgbm9ybWFsaXphdGlvbiwgZXZlcnkgZGl2ZXJnZW5jZSwgdGhyZXNob2xkIHJlc3VsdHMsIGRldGVybWluaXN0aWMgcXVlcmllcywgYm90aCBjb3JydXB0aW9uIGNvbnRyb2xzLCByZXBsYXkgZGlnZXN0LCB6ZXJvLXVwc3RyZWFtLXdyaXRlIGF1ZGl0LCBwcm90ZWN0ZWQgZXhhY3QtaGVhZCBDSSBhbmQgbWVyZ2UgcmVhZGJhY2s7IHRoZW4gY29udGludWUgcG9zdC1yZXN1bHQgQ2FuZGlkYXRlIEV2YWx1YXRlLCBDb25zb2xpZGF0ZSBFcGlzb2RlLCBMZWFybiwgUm9vdCwgYW5kIG1hdGVyaWFsbHkgZGlmZmVyZW50IHNhZmUgd29yayB3aGlsZSB0aGUgdXBwZXIgb2JqZWN0aXZlIHJlbWFpbnMgdW5tZXQuIiwKICAgICAgInNjb3BlIjogImFnaS9wdWJsaWMtZGF0YS9jcm9zcy1zb3VyY2UtY291bnRyeS1yZWNvbmNpbGlhdGlvbi12MS90YXNrLWV2YWx1YXRlOyBleGFjdCBmcm96ZW4gdHdvLXNvdXJjZSB1bml0IG9ubHkiLAogICAgICAic3VjY2Vzc19jb25kaXRpb25zIjogWwogICAgICAgICJzZWxlY3Rvci9wcm90b2NvbCBleGFjdC1yZWFkYmFjayBpcyBwcm92ZW4gYmVmb3JlIHNlbGVjdGVkIHRhcmdldCB2YWx1ZXMgd2VyZSBhY3F1aXJlZCIsCiAgICAgICAgImJvdGggZXhhY3Qgc291cmNlIGFuZCBsaWNlbnNlL2RhdGEgR2l0IGJsb2IgaWRlbnRpdGllcyBtYXRjaCB0aGUgcHJlY29tbWl0IiwKICAgICAgICAicmVjb3JkIGNvdW50cywgb3ZlcmxhcCwgSmFjY2FyZCwgYWxsIHRlbiBxdWVyaWVzLCBhbmQgYWxsIGZvcnR5IG5vbmV4YWN0L3N5bW1ldHJpYy1kaWZmZXJlbmNlIHJlY29yZHMgcmVwcm9kdWNlIGV4YWN0bHkiLAogICAgICAgICJib3RoIHByZWNvbW1pdHRlZCBjb3JydXB0aW9uIGNvbnRyb2xzIGFyZSByZWplY3RlZCBhbmQgdGhlIGNhbm9uaWNhbCByZXBsYXkgZGlnZXN0IG1hdGNoZXMgdHdpY2UiLAogICAgICAgICJ1cHN0cmVhbSBtdXRhdGlvbiBhdWRpdCByZW1haW5zIHplcm8gYW5kIGV2ZXJ5IGNsYWltIHJlbWFpbnMgaW5zaWRlIHRoZSBib3VuZGVkIHVuaXQiLAogICAgICAgICJQUjQwNyBleGFjdCBoZWFkLCBwcm90ZWN0ZWQgQ0kgam9icywgbWVyZ2UgU0hBLCBhbmQgZWlnaHQgYXJ0aWZhY3QgYmxvYiByZWFkYmFja3MgYXJlIHVuY2hhbmdlZCIKICAgICAgXSwKICAgICAgInVuaXRfaWQiOiAidW5pdC1nZW5lcmF0aW9uMjktZXZhbHVhdGUtY3Jvc3Mtc291cmNlLWRhdGEtcmVjb25jaWxpYXRpb24tdjEiCiAgICB9LAogICAgInByb2R1Y3Rpb25fcm91dGVfY2hhbmdlZCI6IGZhbHNlLAogICAgInByb3ZlbmFuY2UiOiB7CiAgICAgICJhbGxfZWlnaHRfYXJ0aWZhY3RfYmxvYnNfZXhhY3RfcmVhZGJhY2siOiB0cnVlLAogICAgICAiYWxsX3JlcXVpcmVkX2pvYnNfc3VjY2VzcyI6IHRydWUsCiAgICAgICJhcnRpZmFjdF9oZWFkX3NoYSI6ICI0MDgyMTIyMTk0OTUyYzAzNjM4MzA4NzFiMDIzMmZkMjRjNTc1ZGUxIiwKICAgICAgImFydGlmYWN0X21lcmdlX3NoYSI6ICI3NjUwNjRkNWIyZGU0YmZjODI4YTk5Njk1ZjQyYTk0NjkwY2QwMjI1IiwKICAgICAgImFydGlmYWN0X3ByIjogNDA3LAogICAgICAiZGlyZWN0aXZlX3J1bl9pZCI6IDMzNDk4NzAzNTMxLAogICAgICAicHJlY29tbWl0X2NvbW1pdF9zaGEiOiAiNmRiMmUwYzdkOWNiOGNiZTdiYzgzOTQxNWI0OGU4ZWU2NjllZTAxMiIsCiAgICAgICJwcmVjb21taXRfZXhhY3RfcmVhZGJhY2tfY29tbWl0X3NoYSI6ICJjYjUzOGMwOGQxYjcyYTc5YzcyN2RmNGZmNWU3MWRjOGI1Nzg5YTk1IiwKICAgICAgInByZWNvbW1pdF9zdGF0ZV9ibG9iX3NoYSI6ICJlNmQwMzE1NWNiZGM3Mzg2NDNjMDI3NzlkNjdhYzY0ZTYwYjYyYzNmIiwKICAgICAgInRlc3RfcnVuX2lkIjogMzM0OTg3MDM1MTEKICAgIH0sCiAgICAicHJvdmlkZXJfcm91dGVfY2hhbmdlZCI6IGZhbHNlLAogICAgInF1YW50aXRhdGl2ZV9maW5kaW5ncyI6IHsKICAgICAgImNvcnJ1cHRpb25fY29udHJvbHNfZGV0ZWN0ZWQiOiAyLAogICAgICAiY29ycnVwdGlvbl9jb250cm9sc19yZXF1aXJlZCI6IDIsCiAgICAgICJkaXN0aW5jdF9ub25lbXB0eV9uYW1lX2NvdW50IjogMjksCiAgICAgICJleGFjdF9uYW1lX2NvdW50IjogMjEyLAogICAgICAiamFjY2FyZCI6IDAuOTYwMzE3NDYwMzE3NDYwMywKICAgICAgImxlZnRfb25seV9hbHBoYTJfY291bnQiOiA3LAogICAgICAibGVmdF9yZWNvcmRfY291bnQiOiAyNDksCiAgICAgICJuZmtjX2Nhc2Vmb2xkX2VxdWFsX2NvdW50IjogMSwKICAgICAgIm92ZXJsYXBfY291bnQiOiAyNDIsCiAgICAgICJvdmVybGFwX292ZXJfc21hbGxlcl9zZXQiOiAwLjk4Nzc1NTEwMjA0MDgxNjMsCiAgICAgICJwdW5jdHVhdGlvbl9zcGFjaW5nX3ZhcmlhbnRfY291bnQiOiAwLAogICAgICAicXVlcnlfY292ZXJhZ2VfY291bnQiOiAxMCwKICAgICAgInF1ZXJ5X3JlcXVpcmVkX2NvdW50IjogMTAsCiAgICAgICJyZXBsYXlfZGlnZXN0IjogIjczMTMwMTQ4OGExNTMwYWY5MDA5YWI2YWNmNmZkNmViY2NkMmIzNmY4NGQ0ODg1ZmMyNmJjODg5YzM4OTM3OWIiLAogICAgICAicmVwbGF5X2RpZ2VzdF9tYXRjaCI6IHRydWUsCiAgICAgICJyaWdodF9vbmx5X2FscGhhMl9jb3VudCI6IDMsCiAgICAgICJyaWdodF9yZWNvcmRfY291bnQiOiAyNDUsCiAgICAgICJ0b3RhbF9ub25leGFjdF9vcl9zeW1tZXRyaWNfZGlmZmVyZW5jZV9jb3VudCI6IDQwLAogICAgICAidW5pb25fY291bnQiOiAyNTIsCiAgICAgICJ1cHN0cmVhbV93cml0ZXMiOiAwCiAgICB9LAogICAgInJlYXNvbiI6ICJCb3RoIGV4YWN0IHByZWNvbW1pdHRlZCBwdWJsaWMgc291cmNlcyB3ZXJlIGFjcXVpcmVkIG9ubHkgYWZ0ZXIgc2VsZWN0b3IgZXhhY3QtcmVhZGJhY2ssIGFsbCBmb3VyIGRlY2xhcmVkIEdpdCBibG9icyBtYXRjaGVkLCAyNDkgYW5kIDI0NSB2YWxpZCBhbHBoYS0yIHJlY29yZHMgbm9ybWFsaXplZCBkZXRlcm1pbmlzdGljYWxseSwgMjQyIGtleXMgb3ZlcmxhcHBlZCwgZnJvemVuIG92ZXJsYXAgYW5kIEphY2NhcmQgdGhyZXNob2xkcyBwYXNzZWQsIGFsbCB0ZW4gcXVlcmllcyBleGlzdGVkIGluIGJvdGggc291cmNlcywgYm90aCBjb3JydXB0aW9uIGNvbnRyb2xzIGZhaWxlZCBjbG9zZWQsIHJlcGxheSBkaWdlc3RzIG1hdGNoZWQsIGFuZCBubyB1cHN0cmVhbSB3cml0ZSBvY2N1cnJlZC4iLAogICAgInNvdXJjZXMiOiBbCiAgICAgIHsKICAgICAgICAiZGF0YV9ibG9iX3NoYSI6ICJmMWNhZDM4MWIxNTIyNGFmOGVhNTZmOTNhZWM2MTA3M2QzY2E0YWI2IiwKICAgICAgICAiZXhhY3RfY29tbWl0X3NoYSI6ICI2YTU5NWYxYTZmMTBiM2QwMDE3NWZlNjczNzVkYTg4ZjY0ZjdmNzZiIiwKICAgICAgICAibGljZW5zZSI6ICJPREMtUERETC0xLjAiLAogICAgICAgICJsaWNlbnNlX3NjaGVtYV9ibG9iX3NoYSI6ICJkMTI5YWM5NGExM2RjNDRlOTEzY2NjZTNjMGFlYThlMmU0YjFhNTlkIiwKICAgICAgICAicmVwb3NpdG9yeV9mdWxsX25hbWUiOiAiZGF0YXNldHMvY291bnRyeS1jb2RlcyIKICAgICAgfSwKICAgICAgewogICAgICAgICJkYXRhX2Jsb2Jfc2hhIjogImQ1MWIyNDhkODQ3YTFjYmIyN2M2MjJmYzZhYzZlODY0ZjMyYjUzYjIiLAogICAgICAgICJleGFjdF9jb21taXRfc2hhIjogIjQxZDQwODRiYzFjY2Y5NjE0ZGFiNDUyNTVhNDFiYTNhNTQ3M2JlNzQiLAogICAgICAgICJsaWNlbnNlIjogIk1JVCIsCiAgICAgICAgImxpY2Vuc2VfYmxvYl9zaGEiOiAiY2Y0NGI5ZGM4ZGYzNDRlMzYwMjljOTg2MTM2NjkzNWY5ZGFkM2FiNCIsCiAgICAgICAgInJlcG9zaXRvcnlfZnVsbF9uYW1lIjogInNhbWF5by9jb3VudHJ5LWpzb24iCiAgICAgIH0KICAgIF0sCiAgICAic3RhdHVzIjogIlBBU1MiLAogICAgInRyaWFsX2lkIjogImdlbjI5LWNyb3NzLXNvdXJjZS1kYXRhLXJlY29uY2lsaWF0aW9uLXYxIiwKICAgICJ1bml0X2lkIjogInVuaXQtZ2VuZXJhdGlvbjI5LWNyb3NzLXNvdXJjZS1kYXRhLXJlY29uY2lsaWF0aW9uLXYxIiwKICAgICJ1cHBlcl9vYmplY3RpdmVfYWNoaWV2ZWQiOiBmYWxzZSwKICAgICJ1c2VyX2xldmVsX29iamVjdGl2ZV9tZXQiOiBmYWxzZSwKICAgICJ2ZXJkaWN0IjogIlVOSVRfUkVTVUxUX1JFUVVJUkVTX0lOREVQRU5ERU5UX1RBU0tfRVZBTFVBVEUiCiAgfQp9Cg==' | base64 --decode > /tmp/execute-output.json
+          python - <<'PY'
+          import json
+          value=json.load(open('/tmp/execute-output.json'))
+          if list(value)!=['result','local_learn','fragment'] or value['result'].get('status')!='PASS' or value['fragment'].get('component')!='execute':
+              raise SystemExit('exact Execute output shape mismatch')
+          PY
+          continual --root . work-submit "$EXEC_WORK_ID" --response /tmp/execute-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/execute-submit.json
+          continual --root . work-resume "$RUN_ID" --max-steps 1 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/work-verify-after.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/work-pending-after.json
+          cat /tmp/execute-submit.json
+          cat /tmp/native-resume.json
+          cat /tmp/work-verify-after.json
+          cat /tmp/work-pending-after.json
+
+      - name: Validate exactly-once Execute completion and unique successor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,subprocess
+          from datetime import UTC,datetime
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations,verified_work_invocation,verify_work_invocations
+          root=Path('.').resolve();run_id=os.environ['RUN_ID'];nid=os.environ['EXEC_NATIVE_ID'];wid=os.environ['EXEC_WORK_ID']
+          expected_output=json.loads(Path('/tmp/execute-output.json').read_text())
+          after=verify_work_invocations(root,run_id=run_id)
+          expected_after={'valid':True,'requests':144,'responses':143,'pending':1,'native_completed':137,'native_fragments':137,'native_local_learn':125}
+          for k,v in expected_after.items():
+              if after.get(k)!=v: raise SystemExit(f'after count mismatch {k}: {after.get(k)!r} != {v!r}')
+          completed=verified_work_invocation(root,wid)
+          if completed.get('output')!=expected_output: raise SystemExit('persisted Execute output mismatch')
+          native_path=root/'.continual/runs'/run_id/'invocations'/f'{nid}.json';native=json.loads(native_path.read_text())
+          if native.get('status')!='complete' or native.get('component')!='execute' or native.get('output')!=expected_output:
+              raise SystemExit('native Execute completion mismatch')
+          pending=pending_work_invocations(root,run_id=run_id)
+          if len(pending)!=1: raise SystemExit(f'expected one successor, got {len(pending)}')
+          request=pending[0]; next_wid=request['invocation_id']
+          if request.get('component') not in {'candidate_evaluate','task_evaluate'}:
+              raise SystemExit(f"unexpected successor component {request.get('component')!r}")
+          if request.get('executor_binding')!=os.environ['EXECUTOR_BINDING'] or request.get('model_identity')!=os.environ['MODEL_IDENTITY']:
+              raise SystemExit('successor identity mismatch')
+          awaiting=[]
+          for path in sorted((root/'.continual/runs'/run_id/'invocations').glob('*.json')):
+              val=json.loads(path.read_text())
+              if val.get('status')=='awaiting_work_model': awaiting.append((path,val))
+          if len(awaiting)!=1 or awaiting[0][1].get('work_invocation_id')!=next_wid:
+              raise SystemExit('successor native uniqueness mismatch')
+          next_native_path,next_native=awaiting[0]
+          req_rel=f'.continual/work-model/invocations/{next_wid}/request.json'
+          if next_native.get('work_request_digest')!=request.get('request_digest') or next_native.get('work_request_ref')!=req_rel:
+              raise SystemExit('successor native/request binding mismatch')
+          response_rel=f'.continual/work-model/invocations/{wid}/response.json'
+          fragment_rel=native['fragment_ref']
+          local_rel=f'.continual/runs/{run_id}/local-learn/{nid}-execute.json'
+          snapshot_rel=f'.continual/runs/{run_id}/snapshot.json'; snapshot=json.loads((root/snapshot_rel).read_text())
+          summary={
+           'execute_native_invocation_id':nid,'execute_work_invocation_id':wid,'execute_response_ref':response_rel,
+           'execute_response_digest':completed['response']['response_digest'],'execute_response_blob_sha':subprocess.check_output(['git','hash-object',response_rel],text=True).strip(),
+           'execute_native_blob_sha':subprocess.check_output(['git','hash-object',str(native_path)],text=True).strip(),
+           'execute_fragment_ref':fragment_rel,'execute_fragment_blob_sha':subprocess.check_output(['git','hash-object',fragment_rel],text=True).strip(),
+           'execute_local_learn_ref':local_rel,'execute_local_learn_blob_sha':subprocess.check_output(['git','hash-object',local_rel],text=True).strip(),
+           'pending_native_invocation_id':next_native['invocation_id'],'pending_native_invocation_ref':next_native_path.relative_to(root).as_posix(),'pending_native_invocation_blob_sha':subprocess.check_output(['git','hash-object',str(next_native_path)],text=True).strip(),
+           'pending_work_invocation_id':next_wid,'pending_request_ref':req_rel,'pending_request_digest':request['request_digest'],'pending_request_blob_sha':subprocess.check_output(['git','hash-object',req_rel],text=True).strip(),
+           'pending_component':request['component'],'snapshot_revision':snapshot['revision'],'snapshot_phase':snapshot['phase'],'snapshot_component':snapshot['current_component'],'snapshot_blob_sha':subprocess.check_output(['git','hash-object',snapshot_rel],text=True).strip(),
+           'verification':expected_after
+          }
+          Path('/tmp/consume-summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          receipt={'schema_version':1,'record_type':'generation29_cross_source_execute_consume_receipt','recorded_at':datetime.now(UTC).isoformat().replace('+00:00','Z'),'authority':{'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},'source_main_sha':os.environ['RUNTIME_MAIN'],'source_state_blob_sha':os.environ['EXPECTED_STATE_BLOB'],'source_result_merge_sha':os.environ['RESULT_MERGE_SHA'],'source_ci_workflow_run_id':int(os.environ['SOURCE_CI_RUN_ID']),'idempotency_key':'o-work-gen29:consume-execute-invoke-5c28ad87d810c530cf9f8371:freeze-independent-task-evaluate-boundary:v1','completed_effect':summary,'request_recreated':False,'response_repeated':False,'resume_required':True,'upper_objective_achieved':False,'agi_achieved':False,'next_action':'Protect and merge this exact Execute completion and unique successor, bind state by two-phase readback CAS, then consume the successor exactly once.'}
+          rp=root/f'.continual/runs/{run_id}/recovery-receipts/gen29-cross-source-execute-consume-successor-freeze-v1.json';rp.parent.mkdir(parents=True,exist_ok=True);rp.write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(summary,sort_keys=True))
+          PY
+
+      - name: Stage only the exact lifecycle delta and push once
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          python - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          run_id=os.environ['RUN_ID'];summary=json.loads(Path('/tmp/consume-summary.json').read_text())
+          work_obs=json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id'];ci_obs=json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
+          required={
+           f'.continual/runs/{run_id}/events.jsonl',
+           f'.continual/runs/{run_id}/invocations/{os.environ["EXEC_NATIVE_ID"]}.json',
+           summary['execute_response_ref'],summary['execute_fragment_ref'],summary['execute_local_learn_ref'],
+           summary['pending_native_invocation_ref'],summary['pending_request_ref'],
+           f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json',
+           f'.continual/runs/{run_id}/work-source-observations/{work_obs}/receipt.json',
+           f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/request.json',
+           f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/receipt.json',
+           f'.continual/runs/{run_id}/recovery-receipts/gen29-cross-source-execute-consume-successor-freeze-v1.json'
+          }
+          snapshot=f'.continual/runs/{run_id}/snapshot.json'
+          status={}
+          for line in subprocess.check_output(['git','diff','--name-status'],text=True).splitlines():
+              code,path=line.split('\t',1);status[path]=code
+          for path in subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--ignored','--exclude-standard'],text=True).splitlines():
+              status.setdefault(path,'A')
+          for path in list(status):
+              if path.startswith('src/agi/__pycache__/') or path.startswith('src/continual/__pycache__/') or path.startswith('src/continual_chatgpt.egg-info/'): status.pop(path)
+          if snapshot in status: required.add(snapshot)
+          if set(status)!=required:
+              raise SystemExit('lifecycle mutation mismatch: '+json.dumps({'missing':sorted(required-set(status)),'unexpected':sorted(set(status)-required),'status':status},sort_keys=True))
+          if 'agi/WORK_EXECUTION_STATE.json' in status: raise SystemExit('state mutation must not be staged')
+          for path in sorted(required):
+              if not Path(path).is_file(): raise SystemExit('missing lifecycle file '+path)
+          subprocess.run(['git','add','-f','--',*sorted(required)],check=True)
+          staged=set(subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines())
+          if staged!=required: raise SystemExit('staged set mismatch')
+          immutable=sorted(p for p in staged if p.startswith('.continual/work-model/invocations/'))
+          expected=sorted([summary['execute_response_ref'],summary['pending_request_ref']])
+          if immutable!=expected: raise SystemExit('immutable mutation set mismatch')
+          print('\n'.join(sorted(required)))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '[native-execute-result] gen29 consume cross-source Execute and freeze successor'
+          git push origin "HEAD:$GITHUB_REF_NAME"
