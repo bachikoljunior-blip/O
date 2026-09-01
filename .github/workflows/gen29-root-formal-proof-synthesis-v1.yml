@@ -1,0 +1,277 @@
+name: gen29 consume Root and freeze formal-proof successor v1
+
+on:
+  push:
+    branches:
+      - work/gen29-root-formal-proof-synthesis-v1
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: gen29-root-formal-proof-synthesis-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    if: ${{ !contains(github.event.head_commit.message, '[native-root-formal-proof-result]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_MAIN: f945f369ebcf4d6ee0e527c2cd94a0f78dc85336
+      EXPECTED_STATE_BLOB: b333a7ff2a99b675a3500b885e5d34faf446c726
+      EXPECTED_SNAPSHOT_BLOB: 0503a0c509ba42b82e41a83767838ecba1b0db43
+      EXPECTED_INBOX_BLOB: 34423c2dd71d95c55769f501fe1701ea0088fb32
+      ROOT_NATIVE_ID: invoke-951a8a494631b41867dc48aa
+      ROOT_NATIVE_BLOB: b9f66c3dbca890ff67ddf5d22b0aeba449f514eb
+      ROOT_WORK_ID: invoke-f72ab3eeeccf55038abb9407
+      ROOT_REQUEST_BLOB: 825b731e015741c92021c7da914d0aaf3fdc74b4
+      ROOT_REQUEST_DIGEST: fe0caaa7ff344a4b8985846fb420364de729dd7589dbb022152c35a87ef5a5cf
+      SOURCE_CI_RUN_ID: '33532115535'
+      SOURCE_CI_HEAD: 1196d08af36e129e7398cc00e0b3bc8a0280eb25
+      RUN_ID: run-work-recovery-gen9-durability-repair
+      EXECUTOR_BINDING: current_chatgpt_work_session
+      MODEL_IDENTITY: chatgpt-work-model-unverified
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e .
+
+      - name: Verify exact authority and frozen Root
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          test "$(git hash-object agi/USER_INPUT_INBOX.json)" = "$EXPECTED_INBOX_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/snapshot.json)" = "$EXPECTED_SNAPSHOT_BLOB"
+          test "$(git hash-object .continual/work-model/invocations/$ROOT_WORK_ID/request.json)" = "$ROOT_REQUEST_BLOB"
+          test "$(git hash-object .continual/runs/$RUN_ID/invocations/$ROOT_NATIVE_ID.json)" = "$ROOT_NATIVE_BLOB"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations, verify_work_invocations, verified_work_request
+          root=Path('.').resolve(); run_id=os.environ['RUN_ID']
+          state=json.loads((root/'agi/WORK_EXECUTION_STATE.json').read_text())
+          req=verified_work_request(root,os.environ['ROOT_WORK_ID'])
+          native=json.loads((root/'.continual/runs'/run_id/'invocations'/f"{os.environ['ROOT_NATIVE_ID']}.json").read_text())
+          checks=[
+            state['execution_id']=='work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3',
+            state['lease_generation']==29,
+            hashlib.sha256(state['fence_token'].encode()).hexdigest()=='c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d',
+            state['status']=='running', state['resume_required'] is True,
+            state['active_component']=='generation29_root_cross_source_reconciliation_pending_native_consume',
+            state['exact_continuation']['status']=='remote_main_readback_verified',
+            state['exact_continuation']['pending_work_invocation_id']==os.environ['ROOT_WORK_ID'],
+            state['exact_continuation']['pending_request_digest']==os.environ['ROOT_REQUEST_DIGEST'],
+            req['component']=='root', req['request_digest']==os.environ['ROOT_REQUEST_DIGEST'],
+            native['status']=='awaiting_work_model', native['work_invocation_id']==os.environ['ROOT_WORK_ID'],
+          ]
+          if not all(checks): raise SystemExit('authority/frozen Root mismatch')
+          pending=pending_work_invocations(root,run_id=run_id)
+          if len(pending)!=1 or pending[0]['invocation_id']!=os.environ['ROOT_WORK_ID']: raise SystemExit('Root not unique pending')
+          before=verify_work_invocations(root,run_id=run_id)
+          expected={'valid':True,'requests':148,'responses':147,'pending':1,'native_completed':141,'native_fragments':141,'native_local_learn':128}
+          for k,v in expected.items():
+            if before.get(k)!=v: raise SystemExit(f'before mismatch {k}: {before.get(k)} != {v}')
+          Path('/tmp/before.json').write_text(json.dumps(before,sort_keys=True)+'\n')
+          PY
+
+      - name: Record fresh exact source observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$EXPECTED_STATE_BLOB" --expected-commit-sha "$EXPECTED_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-prepare.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from continual.store import Store
+          s=json.loads(Path('agi/WORK_EXECUTION_STATE.json').read_text())
+          p={'status':s['status'],'owner_kind':s['owner_kind'],'execution_id':s['execution_id'],'lease_generation':s['lease_generation'],'fence_token_digest':Store(Path('.')).stable_digest(s['fence_token'],length=64),'heartbeat_at':s['heartbeat_at']}
+          Path('/tmp/work-projection.json').write_text(json.dumps(p,sort_keys=True)+'\n')
+          PY
+          WID="$(jq -r .observation_id /tmp/work-prepare.json)"
+          WREQ="$(jq -r .request_digest /tmp/work-prepare.json)"
+          NOW="$(python -c 'from datetime import UTC,datetime;print(datetime.now(UTC).isoformat().replace("+00:00","Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$WID" --request-digest "$WREQ" --commit-sha "$EXPECTED_MAIN" --blob-sha "$EXPECTED_STATE_BLOB" --projection /tmp/work-projection.json --observed-at "$NOW" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-receipt.json
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-prepare.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/ci-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/ci-jobs.json
+          test "$(jq -r .head_sha /tmp/ci-run.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r .status /tmp/ci-run.json)" = completed
+          test "$(jq -r .conclusion /tmp/ci-run.json)" = success
+          jq -e '[.jobs[]|select(.name=="pytest shard 0 of 4" or .name=="pytest shard 1 of 4" or .name=="pytest shard 2 of 4" or .name=="pytest shard 3 of 4" or .name=="test")|select(.status=="completed" and .conclusion=="success")]|length==5' /tmp/ci-jobs.json
+          jq '{id,workflow_id,name,status,conclusion,head_sha}' /tmp/ci-run.json > /tmp/ci-run-proj.json
+          jq '[.jobs[]|{id,name,status,conclusion}]|sort_by(.id)' /tmp/ci-jobs.json > /tmp/ci-jobs-proj.json
+          CID="$(jq -r .observation_id /tmp/ci-prepare.json)"
+          CREQ="$(jq -r .request_digest /tmp/ci-prepare.json)"
+          NOW="$(python -c 'from datetime import UTC,datetime;print(datetime.now(UTC).isoformat().replace("+00:00","Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$CID" --request-digest "$CREQ" --workflow-run /tmp/ci-run-proj.json --jobs /tmp/ci-jobs-proj.json --observed-at "$NOW" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-receipt.json
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from continual.ci_source_observation import verify_ci_source_observation
+          from continual.continuity_preflight import assert_work_resume_continuity_preflight
+          from continual.store import Store
+          from continual.work_source_observation import verify_work_source_observation
+          root=Path('.').resolve();s=json.loads(Path('agi/WORK_EXECUTION_STATE.json').read_text());now=Store(root).utc_now()
+          verify_work_source_observation(root,run_id=os.environ['RUN_ID'],state=s,state_blob_sha=os.environ['EXPECTED_STATE_BLOB'],now=now)
+          verify_ci_source_observation(root,run_id=os.environ['RUN_ID'],state=s,now=now)
+          out=assert_work_resume_continuity_preflight(root,run_id=os.environ['RUN_ID'],executor_binding=os.environ['EXECUTOR_BINDING'],model_identity=os.environ['MODEL_IDENTITY'])
+          if out.get('resume_authorized') is not True: raise SystemExit('continuity denied')
+          PY
+
+      - name: Submit exact Root response and freeze one successor
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/root-output.json <<'ROOTJSON'
+{
+  "fragment": {
+    "component": "root",
+    "observations": [
+      "The cross-source reconciliation lifecycle is complete with bounded unit PASS, Learn NO_CHANGE, and unchanged upper/user FAIL.",
+      "Prediction, software-repair, cross-repository transfer, clock-resumption, and data-reconciliation units already occupy recent continuation history.",
+      "A mechanically checked formal-proof synthesis trial is materially different and directly probes symbolic reasoning under an external exact toolchain without implying generalized capability or AGI."
+    ],
+    "purpose": "Select one bounded externally anchored formal-proof synthesis unit while preserving the full parent continuation and strict claim separation."
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "observation": "The evidence supports method diversification toward formal verification, but does not justify a prompt Candidate, activation, routing change, generalized capability, or AGI claim."
+  },
+  "result": {
+    "component": "execute",
+    "unit_id": "unit-generation29-external-formal-proof-synthesis-v1",
+    "goal": "Deterministically select one previously unseen, solution-unread Lean 4 theorem exercise from a permissively licensed public repository at an exact commit; freeze the theorem statement, imports, Lean toolchain, selector, and contamination exclusions before proof generation; then synthesize one proof and verify it in an isolated exact-toolchain build with fail-closed negative controls.",
+    "scope": "Read-only public GitHub source at an immutable commit, an isolated temporary Lean build, and O evidence artifacts. No upstream write, issue comment, fork mutation, dependency drift, Candidate activation, provider or production routing change, deployment, credential use, or AGI/completion claim.",
+    "inputs": [
+      "revision136 Root context and completed cross-source reconciliation Episode/Learn lifecycle",
+      "a deterministic selector over permissively licensed Lean 4 exercise repositories containing explicit unfilled theorem exercises or statement-only tasks",
+      "the exact repository, commit, license blob, theorem path/name, statement/import closure, and lean-toolchain file frozen before proof generation",
+      "an isolated GitHub Actions runner able to install the exact declared Lean toolchain without secrets"
+    ],
+    "evidence_needed": [
+      "pre-proof selector manifest and exact Git/blob readbacks proving theorem identity, toolchain identity, eligibility, and absence from prior Run units",
+      "a contamination audit showing no solution file, later commit, answer-bearing discussion, proof search service, or prior Run proof was consumed",
+      "baseline evidence that the frozen exercise is genuinely unfilled or fails when the placeholder is replaced by a sentinel invalid proof",
+      "the candidate proof text, deterministic patch/apply receipt, exact compiler output, and full relevant upstream check",
+      "at least two fail-closed negative controls, including a corrupted proof and a changed theorem statement or import"
+    ],
+    "expected_outputs": [
+      "a precommit manifest fixing selector order, repository and commit, license, theorem identity, statement digest, import closure, toolchain, allowed paths, time/resource budgets, success rules, and contamination exclusions",
+      "source-readiness and no-solution-access receipts obtained only after the precommit manifest is durable",
+      "one minimal proof artifact and an exact patch containing no theorem weakening, axiom addition, sorry/admit, unsafe declaration, or unrelated source change",
+      "baseline, proof-build, regression, corruption-control, replay, timing, resource, and zero-upstream-write receipts",
+      "a bounded SOLVED, FAILED, or NOT_EVALUABLE result whose formal compiler verdict is kept separate from task/user/upper and AGI claims"
+    ],
+    "success_conditions": [
+      "the selector yields exactly one eligible previously unseen theorem and freezes its exact statement/import/toolchain identity before proof generation",
+      "the candidate contains no sorry, admit, axiom, theorem weakening, unsafe escape, or out-of-scope change and compiles under the exact frozen Lean toolchain",
+      "the relevant upstream build or check passes, while both precommitted corrupted controls fail closed",
+      "a clean replay from the exact public commit applies the same proof and reproduces identical semantic receipts within the fixed budget",
+      "all artifacts publish only through protected exact-head CI and expected-head merge, and the result remains one bounded formal-proof observation"
+    ],
+    "failure_conditions": [
+      "no eligible theorem, immutable source, permissive license, exact toolchain, or reproducible build is available within budget",
+      "any solution, later answer-bearing commit, hidden proof, prior Run proof, or external proof service leaks into the generation context",
+      "the proof uses sorry/admit, adds axioms, weakens the statement, changes imports or dependencies outside the frozen allowance, or touches unrelated paths",
+      "the exact compiler or relevant regression check fails, either negative control passes, replay diverges, or provenance cannot be exact-read back",
+      "the workflow writes upstream or broadens the bounded result into Candidate activation, production routing, generalized capability, AGI, or completion"
+    ],
+    "parent_continuation": "After Execute, independently Task Evaluate the exact selection, contamination audit, theorem/statement/toolchain bindings, proof, compiler and regression outputs, negative controls, replay, resource receipts, and bounded verdict. Then run post-result Candidate Evaluate, Consolidate Episode, Learn, protected exact-head publication and expected-head merge with readback, return to Root, and continue materially different safe work while AGI and user completion remain false."
+  }
+}
+ROOTJSON
+          python -m json.tool /tmp/root-output.json >/dev/null
+          continual --root . work-submit "$ROOT_WORK_ID" --response /tmp/root-output.json --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/root-submit.json
+          continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/native-resume.json
+          continual --root . work-verify --run-id "$RUN_ID" > /tmp/after.json
+          continual --root . work-pending --run-id "$RUN_ID" > /tmp/pending.json
+          cat /tmp/root-submit.json
+          cat /tmp/native-resume.json
+          cat /tmp/after.json
+          cat /tmp/pending.json
+
+      - name: Validate and persist exact Root effect
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,subprocess
+          from datetime import UTC,datetime
+          from pathlib import Path
+          from continual.work_session import pending_work_invocations,verified_work_invocation,verify_work_invocations
+          root=Path('.').resolve();run_id=os.environ['RUN_ID'];wid=os.environ['ROOT_WORK_ID'];nid=os.environ['ROOT_NATIVE_ID']
+          expected=json.loads(Path('/tmp/root-output.json').read_text())
+          verified=verified_work_invocation(root,wid)
+          if verified['output']!=expected: raise SystemExit('Root output mismatch')
+          native=json.loads((root/'.continual/runs'/run_id/'invocations'/f'{nid}.json').read_text())
+          if native.get('status')!='complete' or native.get('component')!='root' or native.get('output')!=expected: raise SystemExit('Root native mismatch')
+          after=verify_work_invocations(root,run_id=run_id)
+          if after.get('valid') is not True or after.get('responses')!=148 or after.get('pending')!=1 or after.get('native_completed')!=142 or after.get('native_fragments')!=142 or after.get('native_local_learn')!=129: raise SystemExit(f'after counts mismatch: {after}')
+          pending=pending_work_invocations(root,run_id=run_id)
+          if len(pending)!=1: raise SystemExit('successor is not unique')
+          successor=pending[0]
+          if successor.get('component') not in ('candidate_evaluate','execute'): raise SystemExit(f'unexpected successor: {successor.get("component")}')
+          snapshot=json.loads((root/'.continual/runs'/run_id/'snapshot.json').read_text())
+          if snapshot.get('revision')!=137 or snapshot.get('status')!='continue': raise SystemExit(f'bad revision137 snapshot: {snapshot.get("revision")} {snapshot.get("phase")}')
+          native_pending=[]
+          for p in sorted((root/'.continual/runs'/run_id/'invocations').glob('*.json')):
+            v=json.loads(p.read_text())
+            if v.get('status')=='awaiting_work_model': native_pending.append((p,v))
+          if len(native_pending)!=1 or native_pending[0][1].get('work_invocation_id')!=successor['invocation_id']: raise SystemExit('native successor mismatch')
+          response_rel=f'.continual/work-model/invocations/{wid}/response.json'
+          successor_rel=f'.continual/work-model/invocations/{successor["invocation_id"]}/request.json'
+          receipt={
+            'schema_version':1,'record_type':'generation29_root_consume_receipt','recorded_at':datetime.now(UTC).isoformat().replace('+00:00','Z'),
+            'authority':{'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},
+            'source_main_sha':os.environ['EXPECTED_MAIN'],'source_state_blob_sha':os.environ['EXPECTED_STATE_BLOB'],'source_ci_workflow_run_id':int(os.environ['SOURCE_CI_RUN_ID']),
+            'idempotency_key':'o-work-gen29:consume-root-invoke-f72ab3eeeccf55038abb9407:freeze-formal-proof-successor:revision38:v1',
+            'completed_effect':{'component':'root','native_invocation_id':nid,'work_invocation_id':wid,'request_blob_sha':os.environ['ROOT_REQUEST_BLOB'],'request_digest':os.environ['ROOT_REQUEST_DIGEST'],'response_ref':response_rel,'response_blob_sha':subprocess.check_output(['git','hash-object',response_rel],text=True).strip(),'response_digest':verified['response']['response_digest'],'unit_id':'unit-generation29-external-formal-proof-synthesis-v1'},
+            'pending_successor':{'component':successor['component'],'work_invocation_id':successor['invocation_id'],'request_ref':successor_rel,'request_blob_sha':subprocess.check_output(['git','hash-object',successor_rel],text=True).strip(),'request_digest':successor['request_digest'],'native_invocation_id':native_pending[0][1]['invocation_id'],'native_ref':native_pending[0][0].relative_to(root).as_posix(),'native_blob_sha':subprocess.check_output(['git','hash-object',str(native_pending[0][0])],text=True).strip(),'snapshot_ref':f'.continual/runs/{run_id}/snapshot.json','snapshot_blob_sha':subprocess.check_output(['git','hash-object',f'.continual/runs/{run_id}/snapshot.json'],text=True).strip(),'snapshot_revision':137,'snapshot_phase':snapshot.get('phase')},
+            'request_recreated':False,'response_repeated':False,'resume_required':True,'upper_objective_achieved':False,'agi_achieved':False,
+            'next_action':'Publish exact Root lifecycle through protected CI and expected-head merge, bind state, then consume the unique formal-proof successor exactly once.'
+          }
+          rp=root/'.continual/runs'/run_id/'recovery-receipts/gen29-root-cross-source-consume-formal-proof-successor-v1.json'
+          rp.parent.mkdir(parents=True,exist_ok=True);rp.write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+
+      - name: Stage only native lifecycle delta and push once
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- agi/WORK_EXECUTION_STATE.json
+          test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
+          python - <<'PY'
+          import subprocess,os
+          from pathlib import Path
+          run_id=os.environ['RUN_ID']
+          changed=[]
+          for line in subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],text=True).splitlines():
+            path=line[3:]
+            if ' -> ' in path: path=path.split(' -> ',1)[1]
+            if path.startswith('src/agi/__pycache__/') or path.startswith('src/continual/__pycache__/') or path.startswith('src/continual_chatgpt.egg-info/'): continue
+            if not (path.startswith(f'.continual/runs/{run_id}/') or path.startswith('.continual/work-model/invocations/')):
+              raise SystemExit(f'unexpected mutation: {path}')
+            changed.append(path)
+          if not changed: raise SystemExit('no lifecycle delta')
+          response=f'.continual/work-model/invocations/{os.environ["ROOT_WORK_ID"]}/response.json'
+          if response not in changed: raise SystemExit('Root response missing')
+          subprocess.run(['git','add','-f','--',*changed],check=True)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '[native-root-formal-proof-result] gen29 consume Root and freeze formal-proof successor'
+          git push origin "HEAD:$GITHUB_REF_NAME"
