@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "record_type": "generation29_two_task_cross_repository_repair_transfer_precommit",
+  "created_at": "2026-09-01T05:29:37.829Z",
+  "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+  "lease_generation": 29,
+  "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+  "unit_id": "unit-generation29-cross-repository-repair-transfer-v1",
+  "source_main_sha": "8a713203b146817f40b9d31dee276de8ceb8bd9e",
+  "source_state_blob_sha": "d7d4b983a6fc2dd30d62a3d82c56debef3d4e1cd",
+  "selection_rule": "Exactly two unseen open issues from distinct permissively licensed repositories and distinct failure categories, with no issue comments read and immutable commits at or before issue creation.",
+  "tasks": [
+    {
+      "task_id": "task-a-domain-error-validation",
+      "repository": "ipolharvard/cms-icd",
+      "issue": {
+        "url": "https://github.com/ipolharvard/cms-icd/issues/25",
+        "api_url": "https://api.github.com/repos/ipolharvard/cms-icd/issues/25",
+        "number": 25,
+        "id": 5308136941,
+        "node_id": "I_kwDOTazdaM8AAAABPGO97Q",
+        "title": "DirectoryProvider.paths raises a raw KeyError instead of a domain error for unsupported system or material",
+        "body": "<!-- qwen:managed-issue:v1 -->\n\n## Problem\n\n`DirectoryProvider.paths` raises a raw `KeyError` instead of a domain error when called with an unsupported `(system, material)` pair. The provider is a documented public extension point, and its constructor validates only that the directory exists — `paths` indexes the internal filename-pattern table directly, so an unsupported pair surfaces as a bare tuple-keyed `KeyError` with no information about which pairs are supported.\n\n## Example\n\n- `DirectoryProvider(existing_dir, release).paths(\"cm\", \"tabular2\")` raises a raw `KeyError` for the tuple key `('cm', 'tabular2')` instead of a `ValueError` naming the unsupported pair and the supported pairs.\n\n## Evidence\n\n- `DirectoryProvider.paths` (src/cms_icd/sources.py:345-346) begins with `patterns = _PATTERNS[(system, material)]`; `_PATTERNS` is an 8-key dict literal (sources.py:46-63) and `__init__` (sources.py:335-343) validates only directory existence, so unsupported pairs such as `(\"cm\", \"tabular2\")`, `(\"dx\", \"tabular\")`, and `(\"pcs\", \"tabular2\")` raise a raw tuple-keyed `KeyError`.\n- `DirectoryProvider` is a documented public extension point (docs/reference/sources.md).\n- Sibling validations for the same input class raise `ValueError` naming the unsupported value: parsers.py:46-47, gems.py:31-32, guidelines.py:197-198.\n- `CMSProvider.paths` does not share the leak: it selects from the release catalog first and raises `ReleaseUnavailableError` for pairs the catalog does not contain, so the fix stays in `DirectoryProvider` only.\n\n## Required outcome\n\n- `DirectoryProvider.paths` raises a clear domain error (`ValueError`, consistent with the sibling validations) naming the unsupported `(system, material)` pair and the supported pairs.\n- Focused pytest in `tests/test_sources.py` asserting the error type for an invalid system and an invalid material; existing tests pass unmodified.\n- No change to valid-pair behavior, `_PATTERNS` contents, cache layout, or selection semantics.\n\n## Scope boundaries\n\nArgument validation at the head of `DirectoryProvider.paths` in `src/cms_icd/sources.py` plus a focused pytest in `tests/test_sources.py`; no change to valid-pair behavior, `_PATTERNS`, cache layout, or selection semantics.",
+        "state": "open",
+        "created_at": "2026-09-01T05:24:54Z",
+        "updated_at": "2026-09-01T05:24:54Z",
+        "comments_read": 0,
+        "comments_at_selection": 0
+      },
+      "failure_category": "domain-error/input-validation",
+      "exact_pre_repair_commit": "b65d2955be39affbfe3fa4cab8868423c89def44",
+      "license": {
+        "spdx": "Apache-2.0",
+        "blob_sha": "d645695673349e3947e8e5ae42332d0ac3164cd7"
+      },
+      "pyproject_blob_sha": "0fab037540ed8573b5e9c08d7223a68bc87d879c",
+      "python_version": "3.12",
+      "allowed_patch_paths": [
+        "src/cms_icd/sources.py"
+      ],
+      "focused_baseline_command": "python /tmp/task-a-domain-error-validation-focused.py",
+      "official_regression_command": "python -m pytest -q",
+      "solution_access_exclusions": [
+        "issue comments",
+        "pull requests",
+        "review comments",
+        "later commits",
+        "gold patches",
+        "prior Run solutions",
+        "other task solution context"
+      ],
+      "upstream_writes_allowed": false
+    },
+    {
+      "task_id": "task-b-location-code-mapping",
+      "repository": "jorgebotas/publiplots",
+      "issue": {
+        "url": "https://github.com/jorgebotas/publiplots/issues/223",
+        "api_url": "https://api.github.com/repos/jorgebotas/publiplots/issues/223",
+        "number": 223,
+        "id": 5308097334,
+        "node_id": "I_kwDOQK7ONM8AAAABPGMjNg",
+        "title": "Numeric loc codes work for an inside legend but raise for an inside colorbar",
+        "body": "Numeric matplotlib `loc` codes work for an inside **legend** but raise for an inside\n**colorbar**.\n\n```python\npp.scatterplot(..., hue=<categorical>, legend_kws={\"inside\": True, \"loc\": 1})  # renders\npp.scatterplot(..., hue=<continuous>,  legend_kws={\"inside\": True, \"loc\": 1})\n# ValueError: inside colorbar loc must be one of ...\n```\n\nmatplotlib accepts integer location codes 1-10 as well as the string names, and the\ncategorical path passes them straight to `ax.legend(loc=...)`. `_inside_cbar_anchor`\n(`src/publiplots/utils/legend.py:1499`) only special-cases `0` / `'best'` and rejects the\nrest.\n\n**Impact**\n\nSwitching a column from categorical to continuous — an ordinary thing to do — breaks a call\nthat previously worked, with no other change. The error is publiplots' own and readable, and\n`skills/legend-placement/SKILL.md` only promises the nine string positions, so the docs do\nnot overclaim. But the asymmetry is arbitrary from a caller's point of view.\n\n**Fix**\n\nMap matplotlib's 1-10 codes to the string positions in `_inside_cbar_anchor`.\n\nFound while reviewing #218, which introduced the inside-colorbar path. Not a regression:\nbefore that PR the same call raised a `TypeError` from inside matplotlib instead.\n",
+        "state": "open",
+        "created_at": "2026-09-01T05:18:09Z",
+        "updated_at": "2026-09-01T05:18:09Z",
+        "comments_read": 0,
+        "comments_at_selection": 0
+      },
+      "failure_category": "numeric-enum/rendering-anchor-mapping",
+      "exact_pre_repair_commit": "6dd597386797ddcffbe5113a18ab0a5cbae7d863",
+      "license": {
+        "spdx": "MIT",
+        "blob_sha": "fdcc6d60f5efa7703582c360bbd932455ed1b426"
+      },
+      "pyproject_blob_sha": "978e5e33cc65d9259d3b3bdc37d7ac34cd5bc437",
+      "python_version": "3.11",
+      "allowed_patch_paths": [
+        "src/publiplots/utils/legend.py"
+      ],
+      "focused_baseline_command": "python /tmp/task-b-location-code-mapping-focused.py",
+      "official_regression_command": "python -m pytest -q",
+      "solution_access_exclusions": [
+        "issue comments",
+        "pull requests",
+        "review comments",
+        "later commits",
+        "gold patches",
+        "prior Run solutions",
+        "other task solution context"
+      ],
+      "upstream_writes_allowed": false
+    }
+  ],
+  "budgets": {
+    "task_count": 2,
+    "max_changed_source_files_per_task": 1,
+    "max_changed_lines_per_task": 20,
+    "dependency_file_changes": 0,
+    "max_wall_minutes": 55,
+    "max_patch_attempts_per_task": 1
+  },
+  "ordering": [
+    "persist this manifest before source inspection or repair implementation",
+    "verify exact issue fields, licenses, commits, and clean checkouts",
+    "run and record both baselines before generating either patch",
+    "generate and apply task A patch independently",
+    "generate and apply task B patch independently without task A solution context",
+    "run focused and official suites for both",
+    "clean replay both patches and compute joint verdict"
+  ],
+  "joint_verdict_rule": {
+    "BOTH_SOLVED": "Both baselines reproduce; both minimal patches pass focused checks and all frozen official regressions; both clean replays match; no protocol drift or upstream write.",
+    "PARTIAL": "Exactly one task satisfies every solved condition and the other truthfully fails or is not evaluable.",
+    "FAILED": "Neither task is solved or a protocol/contamination violation invalidates the joint trial.",
+    "NOT_EVALUABLE": "The precommitted trial cannot be safely evaluated before patch scoring due to missing immutable source, license, dependencies, baseline reproducibility, or bounded execution surface."
+  },
+  "claim_boundary": "Any result is limited to these two issues at these two commits. No Candidate activation, route change, generalized transfer, AGI, upper-objective, or user-completion claim."
+}
