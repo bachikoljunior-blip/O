@@ -185,19 +185,19 @@
       "automation_id": "6a902927853481919931a1a1a1a7072d",
       "conversation_id": "6a901eda-f360-83e8-99b0-7ada04dc36c7",
       "enabled": true,
-      "last_run_time": "2026-08-31T23:02:50.938498+00:00",
-      "next_run_time": null,
-      "readback_at": "2026-08-31T23:15:13.593Z",
       "schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
       "timezone": "Asia/Tokyo",
       "timing_mode": "exact_schedule",
-      "updated_at": "2026-08-31T23:03:12.932518+00:00"
+      "last_run_time": "2026-08-31T23:02:50.938498+00:00",
+      "next_run_time": null,
+      "updated_at": "2026-08-31T23:03:12.932518+00:00",
+      "readback_at": "2026-09-01T00:23:46.112Z"
     },
     "branch": "main",
     "branch_head_sha": "283bdb92c737ad098fa33930ba3a9b977532fd7f",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T00:17:35.676Z",
+    "checkpointed_at": "2026-09-01T00:23:46.112Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-candidate-task-evaluate-external-repair-preflight-consume-task-evaluate-freeze-v1.json",
       "blob_sha": "a37ebf8b6b1b9746ef8c700572b0b45b7f1f8a39",
@@ -575,8 +575,8 @@
       33451087993,
       33451088030
     ],
-    "current_main_sha": "5fb4731a50834dbf99311801346a28c7662ce34e",
-    "current_state_blob_sha": "1fc77bb9c774d8e2780e03a2f7cec9138546c99d",
+    "current_main_sha": "d07ddafaa8a7f7bb9502b7e9873773ea0ff6c40f",
+    "current_state_blob_sha": "fc6e750d541cc290a9a2cee1d61ad55ae869bbef",
     "exact_completed_native_invocation_id": "invoke-1487948ebb1ccf851231d1b1",
     "exact_completed_request_digest": "7d59bc824db5c941c7a88a06aec81a864278b3192265b68f2bb0b741e189767c",
     "exact_completed_response_digest": "e8ea7ed6e8cb4630c54c558d05887c8f71b32f207e4b6cf120b0a4f368f5f7c6",
@@ -600,7 +600,7 @@
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
     "idempotency_key": "o-work-gen29:pr395:c91fa424:bind-external-repair-task-evaluate:v1",
-    "last_verified_effect": "PR395 merged with directive and all five protected CI jobs successful; exact Candidate response and unique Task Evaluate request read back.",
+    "last_verified_effect": "PR395 lifecycle and exact Task Evaluate freeze are read back; slot 00:12 UTC is bound to the same execution; response remains absent.",
     "lease_generation": 29,
     "merge_authorization": {
       "base_sha": "dbb2b3ecf1168c576de904aff74f6aef5412c232",
@@ -761,36 +761,43 @@
       }
     },
     "scheduled_slot_integrity": {
-      "intended_slot": "2026-08-31T23:12:00Z",
+      "intended_slot": "2026-09-01T00:12:00Z",
       "actual_start": "2026-08-31T22:34:03Z",
       "start_delay_seconds": 0,
-      "previous_slot_coverage": "2026-08-31T22:12:00Z covered by the same authoritative generation29 invocation and durable checkpoint/readback",
+      "previous_slot_coverage": {
+        "intended_slot": "2026-08-31T23:12:00Z",
+        "receipt": "automation_control/receipts/o_work_monitor_recovery/20260831T234657Z-gen29-scheduled-slot-overlap-2312.json",
+        "blob_sha": "e38a7188c8c393bac01a262432cb6fa891f1801d",
+        "gap_classification": "covered_by_same_authoritative_invocation_overlap"
+      },
       "gap_classification": "covered_by_same_authoritative_invocation_overlap",
-      "repair_action": "none; preserve enabled exact hourly task and current generation29 owner",
-      "exact_task_enabled_schedule_readback": {
+      "repair_action": "No scheduler mutation and no duplicate writer; exact enabled/schedule readback matches and the same authoritative execution overlapped this slot.",
+      "exact_task_readback": {
         "automation_id": "6a902927853481919931a1a1a1a7072d",
         "conversation_id": "6a901eda-f360-83e8-99b0-7ada04dc36c7",
         "enabled": true,
-        "last_run_time": "2026-08-31T23:02:50.938498+00:00",
-        "next_run_time": null,
-        "readback_at": "2026-08-31T23:15:13.593Z",
         "schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
         "timezone": "Asia/Tokyo",
         "timing_mode": "exact_schedule",
-        "updated_at": "2026-08-31T23:03:12.932518+00:00"
-      }
+        "last_run_time": "2026-08-31T23:02:50.938498+00:00",
+        "next_run_time": null,
+        "updated_at": "2026-08-31T23:03:12.932518+00:00",
+        "readback_at": "2026-09-01T00:23:46.112Z"
+      },
+      "source_receipt": "automation_control/receipts/o_work_monitor_recovery/20260901T002137Z-gen29-scheduled-slot-overlap-0012.json",
+      "source_receipt_blob_sha": "06b9b0db45102204d1186f17f78d1aa9e8caffc6"
     },
     "scheduled_slot_integrity_receipt": {
-      "blob_sha": "5bbfabbc7403432cd2d13ce9e18c4d18a4a6b6dc",
-      "commit_sha": "b867cee9a224a6459a0c08574c60820e8e38d553",
-      "exact_readback": true,
-      "intended_slot": "2026-08-31T02:12:00Z",
-      "path": "automation_control/receipts/o_work_monitor_recovery/20260831T021345Z-gen29-scheduled-slot-overlap-0212.json"
+      "path": "automation_control/receipts/o_work_monitor_recovery/20260901T002137Z-gen29-scheduled-slot-overlap-0012.json",
+      "blob_sha": "06b9b0db45102204d1186f17f78d1aa9e8caffc6",
+      "commit_sha": "d07ddafaa8a7f7bb9502b7e9873773ea0ff6c40f",
+      "intended_slot": "2026-09-01T00:12:00Z",
+      "exact_readback": true
     },
     "snapshot_blob_sha": "e39abed425d8fbba0baaf04b3da3870ab2d79c0d",
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 125,
-    "status": "task_evaluate_state_cas_committed_pending_exact_readback",
+    "status": "task_evaluate_state_cas_exact_readback_verified_pending_native_consume",
     "stop_cause": {
       "evidence": "GitHub Actions job 99500084280 failed in Context Kernel before Execute preflight/successor freeze; authoritative Candidate response remains absent on main.",
       "failed_run_id": 33395856265,
@@ -1725,9 +1732,9 @@
     "agi_achieved": false,
     "next_action": "Consume Task Evaluate invoke-dbef4e8815ff89b7cb56aa50 exactly once, verify the bounded issue-89 repair independently, freeze the post-result Candidate successor, and continue.",
     "verified_remote_readback": true,
-    "verified_at": "2026-09-01T00:17:35.676Z",
-    "verified_state_commit_sha": "5fb4731a50834dbf99311801346a28c7662ce34e",
-    "verified_state_blob_sha": "1fc77bb9c774d8e2780e03a2f7cec9138546c99d"
+    "verified_at": "2026-09-01T00:23:46.112Z",
+    "verified_state_commit_sha": "48f79870ccfd026ed289a70e4ba5a38aa301e77c",
+    "verified_state_blob_sha": "fc6e750d541cc290a9a2cee1d61ad55ae869bbef"
   },
   "continuation_source": "repository_latest_main_only",
   "continuous_execution_authorization": {
@@ -1799,9 +1806,9 @@
     "agi_achieved": false,
     "next_action": "Consume Task Evaluate invoke-dbef4e8815ff89b7cb56aa50 exactly once, verify the bounded issue-89 repair independently, freeze the post-result Candidate successor, and continue.",
     "verified_remote_readback": true,
-    "verified_at": "2026-09-01T00:17:35.676Z",
-    "verified_state_commit_sha": "5fb4731a50834dbf99311801346a28c7662ce34e",
-    "verified_state_blob_sha": "1fc77bb9c774d8e2780e03a2f7cec9138546c99d"
+    "verified_at": "2026-09-01T00:23:46.112Z",
+    "verified_state_commit_sha": "48f79870ccfd026ed289a70e4ba5a38aa301e77c",
+    "verified_state_blob_sha": "fc6e750d541cc290a9a2cee1d61ad55ae869bbef"
   },
   "exact_head_ci_observation": {
     "conclusion": "success",
@@ -12160,7 +12167,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T00:17:35.676Z",
+  "heartbeat_at": "2026-09-01T00:23:46.112Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -14724,38 +14731,38 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "scheduled_slot_integrity": {
-    "actual_start": "2026-08-30T23:48:22.350001Z",
+    "intended_slot": "2026-09-01T00:12:00Z",
+    "actual_start": "2026-08-31T22:34:03Z",
+    "start_delay_seconds": 0,
+    "previous_slot_coverage": {
+      "intended_slot": "2026-08-31T23:12:00Z",
+      "receipt": "automation_control/receipts/o_work_monitor_recovery/20260831T234657Z-gen29-scheduled-slot-overlap-2312.json",
+      "blob_sha": "e38a7188c8c393bac01a262432cb6fa891f1801d",
+      "gap_classification": "covered_by_same_authoritative_invocation_overlap"
+    },
+    "gap_classification": "covered_by_same_authoritative_invocation_overlap",
+    "repair_action": "No scheduler mutation and no duplicate writer; exact enabled/schedule readback matches and the same authoritative execution overlapped this slot.",
     "exact_task_readback": {
       "automation_id": "6a902927853481919931a1a1a1a7072d",
       "conversation_id": "6a901eda-f360-83e8-99b0-7ada04dc36c7",
       "enabled": true,
-      "last_run_time": "2026-08-30T23:48:22.350001+00:00",
-      "next_run_time": null,
-      "readback_at": "2026-08-31T00:36:48.024Z",
       "schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
       "timezone": "Asia/Tokyo",
       "timing_mode": "exact_schedule",
-      "updated_at": "2026-08-30T23:48:45.249084+00:00"
+      "last_run_time": "2026-08-31T23:02:50.938498+00:00",
+      "next_run_time": null,
+      "updated_at": "2026-08-31T23:03:12.932518+00:00",
+      "readback_at": "2026-09-01T00:23:46.112Z"
     },
-    "gap_classification": "covered_by_same_authoritative_invocation_overlap",
-    "intended_slot": "2026-08-31T00:12:00Z",
-    "previous_slot_coverage": {
-      "blob_sha": "9f469e6c450230ae9a9ed31001fa9967c760d2c5",
-      "gap_classification": "covered_by_same_authoritative_invocation_overlap",
-      "intended_slot": "2026-08-30T23:12:00Z",
-      "receipt": "automation_control/receipts/o_work_monitor_recovery/20260830T235436Z-gen29-candidate-consume-inbox37-checkpoint.json"
-    },
-    "repair_action": "No scheduler mutation: this same authoritative task-chat invocation remained active across the 00:12 slot; the same automation id is enabled with the identical hourly RRULE, and no duplicate writer, task, workflow, CI run, or native launch is created.",
-    "source_receipt": "automation_control/receipts/o_work_monitor_recovery/20260831T001828Z-gen29-scheduled-slot-overlap-0012.json",
-    "source_receipt_blob_sha": "ccfb51d4d9ea3c642c35dd4426b16760c0ccdecf",
-    "start_delay_seconds": 0
+    "source_receipt": "automation_control/receipts/o_work_monitor_recovery/20260901T002137Z-gen29-scheduled-slot-overlap-0012.json",
+    "source_receipt_blob_sha": "06b9b0db45102204d1186f17f78d1aa9e8caffc6"
   },
   "scheduled_slot_integrity_receipt": {
-    "blob_sha": "ccfb51d4d9ea3c642c35dd4426b16760c0ccdecf",
-    "commit_sha": "c21a28441396cbc298ac3264f45e6ea2236aec72",
-    "exact_readback": true,
-    "intended_slot": "2026-08-31T00:12:00Z",
-    "path": "automation_control/receipts/o_work_monitor_recovery/20260831T001828Z-gen29-scheduled-slot-overlap-0012.json"
+    "path": "automation_control/receipts/o_work_monitor_recovery/20260901T002137Z-gen29-scheduled-slot-overlap-0012.json",
+    "blob_sha": "06b9b0db45102204d1186f17f78d1aa9e8caffc6",
+    "commit_sha": "d07ddafaa8a7f7bb9502b7e9873773ea0ff6c40f",
+    "intended_slot": "2026-09-01T00:12:00Z",
+    "exact_readback": true
   },
   "schema_version": 1,
   "snapshot_blob_sha": "9a522d2a71880f91ad0bca7e6f467a4938a98ce5",
@@ -15368,7 +15375,7 @@
   },
   "generation29_task_evaluate_external_repair_bind_v1": {
     "schema_version": 1,
-    "phase": "state_cas_committed_pending_exact_readback",
+    "phase": "state_cas_exact_readback_verified_task_evaluate_pending_native_consume",
     "recorded_at": "2026-09-01T00:16:38.749Z",
     "expected_prior_main_sha": "283bdb92c737ad098fa33930ba3a9b977532fd7f",
     "expected_prior_state_blob_sha": "d47d05e396fc3ad8cbb03508a794569f903e5f5d",
@@ -15410,12 +15417,19 @@
     "pending_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "response_exists_on_authoritative_remote": false,
     "idempotency_key": "o-work-gen29:pr395:c91fa424:bind-external-repair-task-evaluate:v1",
-    "next_action": "complete final CAS binding and exact-readback, then consume the existing frozen Task Evaluate request exactly once",
+    "next_action": "consume the existing frozen Task Evaluate request exactly once",
     "resume_required": true,
     "phase1_commit_sha": "5fb4731a50834dbf99311801346a28c7662ce34e",
     "phase1_state_blob_sha": "1fc77bb9c774d8e2780e03a2f7cec9138546c99d",
-    "applied_at": "2026-09-01T00:17:35.676Z"
+    "applied_at": "2026-09-01T00:17:35.676Z",
+    "verified_at": "2026-09-01T00:23:46.112Z",
+    "phase2_commit_sha": "48f79870ccfd026ed289a70e4ba5a38aa301e77c",
+    "phase2_state_blob_sha": "fc6e750d541cc290a9a2cee1d61ad55ae869bbef",
+    "exact_readback": true,
+    "response_absent_exact_readback": true,
+    "slot_receipt_ref": "automation_control/receipts/o_work_monitor_recovery/20260901T002137Z-gen29-scheduled-slot-overlap-0012.json",
+    "slot_receipt_blob_sha": "06b9b0db45102204d1186f17f78d1aa9e8caffc6"
   },
-  "last_action": "PR395 exact-head lifecycle merged and unique external-repair Task Evaluate request bound pending native consume",
-  "continuation": "Consume the exact frozen Task Evaluate request once, publish and bind its post-result Candidate successor, then continue Consolidate, Learn, Root, and materially different safe work."
+  "last_action": "Task Evaluate pending binding exact-readback verified; 00:12 UTC slot overlap durably bound",
+  "continuation": "Consume invoke-dbef4e8815ff89b7cb56aa50 exactly once, freeze the post-result Candidate successor, then continue Consolidate, Learn, Root, and materially different safe work."
 }
