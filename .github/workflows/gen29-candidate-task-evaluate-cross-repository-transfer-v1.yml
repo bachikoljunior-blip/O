@@ -98,6 +98,31 @@ jobs:
           Path('/tmp/before.json').write_text(json.dumps(before,sort_keys=True)+'\n')
           PY
 
+      - name: Record fresh Work and CI source observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          continual --root . work-source-observation-prepare "$RUN_ID" --state-blob-sha "$RUNTIME_STATE_BLOB" --expected-commit-sha "$RUNTIME_MAIN" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-prepare.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from continual.store import Store
+          s=json.loads(Path('agi/WORK_EXECUTION_STATE.json').read_text())
+          projection={'status':s['status'],'owner_kind':s['owner_kind'],'execution_id':s['execution_id'],'lease_generation':s['lease_generation'],'fence_token_digest':Store(Path('.')).stable_digest(s['fence_token'],length=64),'heartbeat_at':s['heartbeat_at']}
+          Path('/tmp/work-projection.json').write_text(json.dumps(projection,sort_keys=True)+'\n')
+          PY
+          OID="$(jq -r .observation_id /tmp/work-source-prepare.json)"
+          ODIG="$(jq -r .request_digest /tmp/work-source-prepare.json)"
+          NOW="$(python -c 'from datetime import UTC,datetime;print(datetime.now(UTC).isoformat().replace("+00:00","Z"))')"
+          continual --root . work-source-observation-record "$RUN_ID" "$OID" --request-digest "$ODIG" --commit-sha "$RUNTIME_MAIN" --blob-sha "$RUNTIME_STATE_BLOB" --projection /tmp/work-projection.json --observed-at "$NOW" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+          continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
+          jq '{id,workflow_id,name,status,conclusion,head_sha}' /tmp/test-run.json > /tmp/test-run-projection.json
+          jq '[.jobs[]|{id,name,status,conclusion}]|sort_by(.id)' /tmp/test-jobs.json > /tmp/test-jobs-projection.json
+          COID="$(jq -r .observation_id /tmp/ci-source-prepare.json)"
+          CDIG="$(jq -r .request_digest /tmp/ci-source-prepare.json)"
+          NOW="$(python -c 'from datetime import UTC,datetime;print(datetime.now(UTC).isoformat().replace("+00:00","Z"))')"
+          continual --root . ci-source-observation-record "$RUN_ID" "$COID" --request-digest "$CDIG" --workflow-run /tmp/test-run-projection.json --jobs /tmp/test-jobs-projection.json --observed-at "$NOW" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+
       - name: Consume Candidate exactly once and freeze Task Evaluate
         shell: bash
         run: |
@@ -153,7 +178,8 @@ jobs:
           import json,os,subprocess
           from pathlib import Path
           run=os.environ['RUN_ID']; cid=os.environ['CANDIDATE_NATIVE_ID']; wid=os.environ['CANDIDATE_WORK_ID']; x=json.loads(Path('/tmp/paths.json').read_text())
-          required=[f'.continual/runs/{run}/events.jsonl',f'.continual/runs/{run}/invocations/{cid}.json',x['candidate_response_ref'],x['candidate_fragment_ref'],x['candidate_local_learn_ref'],x['semantic_preflight_ref'],x['pending_native_invocation_ref'],x['pending_request_ref'],x['receipt']]
+          wo=json.loads(Path('/tmp/work-source-prepare.json').read_text())['observation_id']; co=json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
+          required=[f'.continual/runs/{run}/events.jsonl',f'.continual/runs/{run}/invocations/{cid}.json',x['candidate_response_ref'],x['candidate_fragment_ref'],x['candidate_local_learn_ref'],x['semantic_preflight_ref'],x['pending_native_invocation_ref'],x['pending_request_ref'],x['receipt'],f'.continual/runs/{run}/work-source-observations/{wo}/request.json',f'.continual/runs/{run}/work-source-observations/{wo}/receipt.json',f'.continual/runs/{run}/ci-source-observations/{co}/request.json',f'.continual/runs/{run}/ci-source-observations/{co}/receipt.json']
           for p in required:
             if not Path(p).is_file(): raise SystemExit('missing '+p)
           subprocess.run(['git','add','-f','--',*required],check=True)
