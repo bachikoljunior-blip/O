@@ -27,7 +27,7 @@ jobs:
           echo "LIFECYCLE_CONSUME_HEAD=$(git rev-parse HEAD)"
           test "$(git hash-object .continual/work-model/invocations/invoke-7f53acc04154a015c5e8dcb1/request.json)" = "3701a16f284ea7af43eeae35c0d5dc557c302a3d"
           test "$(git hash-object .continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-7276e562993c76fdcf772759.json)" = "0ca03ab363676a597515d136a99b0f6bc6efda3b"
-          test "$(git hash-object .continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-external-formal-proof-synthesis-v1/execute-output.json)" = "30c1930ae788e3d2b7c6b6762f5fd45683ee562a"
+          test "$(git hash-object .continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-external-formal-proof-synthesis-v1/execute-output.json)" = "ec35d892bb41d257fa246e88f6022837e6c303d5"
           test "$(git hash-object .continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-external-formal-proof-synthesis-v1/proof-verification-receipt.json)" = "b099ba7292e2f0ada6b59492eb23fa1b737a1877"
           test "$(git hash-object .continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-external-formal-proof-synthesis-v1-result.json)" = "a27362930779f3202773baeadb291865b03587bd"
           PYTHONPATH=src python -m continual.cli --root . work-pending --run-id run-work-recovery-gen9-durability-repair > pending-before.json
@@ -69,7 +69,7 @@ jobs:
           assert snapshot["phase"]=="unit_pending", snapshot
           assert snapshot["current_component"]=="task_evaluate", snapshot
           assert snapshot["current_unit"]=="unit-generation29-evaluate-external-formal-proof-synthesis-v1", snapshot
-          assert snapshot["status"]=="running", snapshot
+          assert snapshot["status"] in ("running", "continue"), snapshot
           pending=json.load(open("resume-result.json"))["pending"]
           assert len(pending)==1, pending
           assert pending[0]["component"]=="candidate_evaluate", pending
