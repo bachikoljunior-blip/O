@@ -120,7 +120,7 @@ jobs:
           NOW="$(python -c 'from datetime import UTC,datetime;print(datetime.now(UTC).isoformat().replace("+00:00","Z"))')"
           continual --root . ci-source-observation-record "$RUN_ID" "$COID" --request-digest "$CDIG" --workflow-run /tmp/test-run-projection.json --jobs /tmp/test-jobs-projection.json --observed-at "$NOW" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
 
-      - name: Consume Root exactly once and freeze Candidate Evaluate
+      - name: Consume Root exactly once and freeze Execute
         shell: bash
         run: |
           set -euo pipefail
@@ -132,7 +132,7 @@ jobs:
           continual --root . work-resume "$RUN_ID" --max-steps 2 --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/resume.json
           continual --root . work-verify --run-id "$RUN_ID" > /tmp/after.json
 
-      - name: Validate exact Candidate successor and receipt
+      - name: Validate exact Execute successor and receipt
         shell: bash
         run: |
           set -euo pipefail
@@ -148,21 +148,20 @@ jobs:
           verified=verified_work_invocation(root,wid); assert verified['output']==out
           npath=root/'.continual/runs'/run/'invocations'/f'{nid}.json'; native=json.loads(npath.read_text()); assert native['status']=='complete' and native['output']==out
           snap_path=root/'.continual/runs'/run/'snapshot.json'; snap=json.loads(snap_path.read_text())
-          print('SNAPSHOT_DIAGNOSTIC='+json.dumps({k:snap.get(k) for k in ['revision','phase','current_component','current_unit']},sort_keys=True))
-          assert snap['revision']==132 and snap['phase']=='unit_pending' and snap['current_component']=='candidate_evaluate' and snap['current_unit']==os.environ['UNIT_ID']
-          pending=pending_work_invocations(root,run_id=run); assert len(pending)==1 and pending[0]['component']=='candidate_evaluate'
-          req=pending[0]; nwid=req['invocation_id']; nreq=f'.continual/work-model/invocations/{nwid}/request.json'; assert req['prompt_path']=='prompts/candidate_evaluate.md' and not (root/nreq).with_name('response.json').exists()
+          assert snap['revision']==132 and snap['phase']=='unit_pending' and snap['current_component']=='execute' and snap['current_unit']==os.environ['UNIT_ID']
+          pending=pending_work_invocations(root,run_id=run); assert len(pending)==1 and pending[0]['component']=='execute'
+          req=pending[0]; nwid=req['invocation_id']; nreq=f'.continual/work-model/invocations/{nwid}/request.json'; assert req['prompt_path']=='prompts/execute.md' and not (root/nreq).with_name('response.json').exists()
           awaiting=[]
           for p in (root/'.continual/runs'/run/'invocations').glob('*.json'):
             v=json.loads(p.read_text())
             if v.get('status')=='awaiting_work_model': awaiting.append((p,v))
-          assert len(awaiting)==1; np,nv=awaiting[0]; assert nv['component']=='candidate_evaluate' and nv['work_invocation_id']==nwid and nv['work_request_digest']==req['request_digest']
+          assert len(awaiting)==1; np,nv=awaiting[0]; assert nv['component']=='execute' and nv['work_invocation_id']==nwid and nv['work_request_digest']==req['request_digest']
           unit_ref=f'.continual/runs/{run}/execution-units/{os.environ["UNIT_ID"]}.json'; unit_path=root/unit_ref
           assert unit_path.is_file(); unit=json.loads(unit_path.read_text()); assert unit['component']=='execute' and unit['unit_id']==os.environ['UNIT_ID']
           h=lambda p:subprocess.check_output(['git','hash-object',str(p)],text=True).strip()
           response=f'.continual/work-model/invocations/{wid}/response.json'; local=f'.continual/runs/{run}/local-learn/{nid}-root.json'
-          summary={'root_native_invocation_id':nid,'root_work_invocation_id':wid,'root_response_ref':response,'root_response_digest':verified['response']['response_digest'],'root_response_blob_sha':h(response),'root_native_blob_sha':h(npath),'root_fragment_ref':native['fragment_ref'],'root_fragment_blob_sha':h(native['fragment_ref']),'root_local_learn_ref':local,'root_local_learn_blob_sha':h(local),'execution_unit_ref':unit_ref,'execution_unit_blob_sha':h(unit_path),'selected_semantic_component':'execute','pending_native_invocation_id':nv['invocation_id'],'pending_native_invocation_ref':np.relative_to(root).as_posix(),'pending_native_invocation_blob_sha':h(np),'pending_work_invocation_id':nwid,'pending_request_ref':nreq,'pending_request_digest':req['request_digest'],'pending_request_blob_sha':h(nreq),'pending_preflight_component':'candidate_evaluate','snapshot_ref':snap_path.relative_to(root).as_posix(),'snapshot_revision':132,'snapshot_phase':'unit_pending','snapshot_blob_sha':h(snap_path),'verification':expected}
-          receipt={'schema_version':1,'record_type':'generation29_root_response_and_candidate_preflight_receipt','recorded_at':datetime.now(UTC).isoformat().replace('+00:00','Z'),'authority':{'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},'source_main_sha':os.environ['RUNTIME_MAIN'],'source_state_blob_sha':os.environ['RUNTIME_STATE_BLOB'],'source_ci_workflow_run_id':33483568370,'completed_effect':summary,'idempotency_key':f'o-work-gen29:consume-root-{wid}:freeze-cross-source-data-reconciliation-preflight:v1','request_recreated':False,'root_reinvoked':False,'resume_required':True,'next_action':'Remove one-shot files, exact-head validate and merge, bind state to the unique Candidate Evaluate request, consume it once, then execute the bounded cross-source data reconciliation unit.'}
+          summary={'root_native_invocation_id':nid,'root_work_invocation_id':wid,'root_response_ref':response,'root_response_digest':verified['response']['response_digest'],'root_response_blob_sha':h(response),'root_native_blob_sha':h(npath),'root_fragment_ref':native['fragment_ref'],'root_fragment_blob_sha':h(native['fragment_ref']),'root_local_learn_ref':local,'root_local_learn_blob_sha':h(local),'execution_unit_ref':unit_ref,'execution_unit_blob_sha':h(unit_path),'selected_semantic_component':'execute','pending_native_invocation_id':nv['invocation_id'],'pending_native_invocation_ref':np.relative_to(root).as_posix(),'pending_native_invocation_blob_sha':h(np),'pending_work_invocation_id':nwid,'pending_request_ref':nreq,'pending_request_digest':req['request_digest'],'pending_request_blob_sha':h(nreq),'pending_preflight_component':'execute','snapshot_ref':snap_path.relative_to(root).as_posix(),'snapshot_revision':132,'snapshot_phase':'unit_pending','snapshot_blob_sha':h(snap_path),'verification':expected}
+          receipt={'schema_version':1,'record_type':'generation29_root_response_and_execute_freeze_receipt','recorded_at':datetime.now(UTC).isoformat().replace('+00:00','Z'),'authority':{'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},'source_main_sha':os.environ['RUNTIME_MAIN'],'source_state_blob_sha':os.environ['RUNTIME_STATE_BLOB'],'source_ci_workflow_run_id':33483568370,'completed_effect':summary,'idempotency_key':f'o-work-gen29:consume-root-{wid}:freeze-cross-source-data-reconciliation-preflight:v1','request_recreated':False,'root_reinvoked':False,'resume_required':True,'next_action':'Remove one-shot files, exact-head validate and merge, bind state to the unique Execute request, consume it once, and run the bounded cross-source data reconciliation unit.'}
           rp=root/'.continual/runs'/run/'recovery-receipts'/'gen29-root-consume-cross-source-data-reconciliation-freeze-v1.json'; rp.parent.mkdir(parents=True,exist_ok=True); rp.write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
           Path('/tmp/paths.json').write_text(json.dumps({**summary,'receipt':rp.relative_to(root).as_posix()}))
           PY
@@ -186,5 +185,5 @@ jobs:
           PY
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git commit -m '[native-root-cross-source-data-reconciliation-result] gen29 select unit and freeze Candidate'
+          git commit -m '[native-root-cross-source-data-reconciliation-result] gen29 select unit and freeze Execute'
           git push origin "HEAD:$GITHUB_REF_NAME"
