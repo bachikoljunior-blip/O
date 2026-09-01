@@ -198,7 +198,7 @@
     "branch_head_sha": "2d009c2fcec6f63b10cb130c191af0da12c00344",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T10:36:08.555Z",
+    "checkpointed_at": "2026-09-01T10:38:58.342Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-candidate-cross-source-reconciliation-preflight-consume-execute-freeze-v1.json",
       "blob_sha": "d29fb0df1427c86a274c7e6d2d81bbc5dd97aaac",
@@ -341,13 +341,13 @@
       33451087993,
       33451088030
     ],
-    "current_main_sha": "e7fc9022958169d08967428b23ef58f04245d4e5",
-    "current_state_blob_sha": "e8303f854b23c744d6e39b9a6566a574947e3c77",
+    "current_main_sha": "6db2e0c7d9cb8cbe7bc839415b48e8ee669ee012",
+    "current_state_blob_sha": "e6d03155cbdc738643c02779d67ac64e60b62c3f",
     "exact_completed_native_invocation_id": "invoke-4207db89def9709f3545b270",
     "exact_completed_request_digest": "ebe32784af1b5c6561369c24df2a19ebbd0259db6ac24e4e2476f6010f11ddc2",
     "exact_completed_response_digest": "36e6b3239413c046038ed6b0ee4bd8380afc565205e13628b264b48dad20a9be",
     "exact_completed_work_invocation_id": "invoke-047ed5d16b7ff5cfbdbc716b",
-    "exact_frontier": "Execute is bound and unanswered; selector/protocol precommit CAS is written before selected record values.",
+    "exact_frontier": "Selector/protocol precommit exact-readback is verified before any selected target record values; Execute remains bound and unanswered.",
     "exact_frozen_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
     "exact_frozen_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-dbef4e8815ff89b7cb56aa50/request.json",
@@ -366,7 +366,7 @@
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
     "idempotency_key": "o-work-gen29:cross-source-reconciliation:selector-protocol:datasets-6a595f1a:country-json-41d4084b:v1",
-    "last_verified_effect": "Frozen Execute request remains unanswered; exact two-source selector/protocol has been written by expected-blob CAS before selected record values are read.",
+    "last_verified_effect": "Exact state blob e6d03155cbdc738643c02779d67ac64e60b62c3f at commit 6db2e0c7d9cb8cbe7bc839415b48e8ee669ee012 verified the frozen selector/protocol, unchanged authority, and absent Execute response before selected source-value acquisition.",
     "lease_generation": 29,
     "merge_authorization": {
       "base_sha": "dbb2b3ecf1168c576de904aff74f6aef5412c232",
@@ -389,9 +389,9 @@
     },
     "merge_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "merge_tree_sha": "4697405584d3c30a86cc839bd7d1555fb363ad09",
-    "next_action": "Exact-read the selector/protocol precommit, then acquire only the exact selected source blobs read-only, run deterministic reconciliation and corruption controls, replay, persist artifacts, and answer Execute exactly once.",
-    "next_tool": "Exact-read selector/protocol CAS before selected source data acquisition.",
-    "next_tool_action": "Exact-read selector CAS fields and state blob; only then fetch selected data blob contents at exact commits.",
+    "next_action": "Acquire only the exact selected source blobs read-only, verify declared Git blob identities, run the deterministic reconciliation and both corruption controls twice, persist all eight artifacts, then answer Execute exactly once.",
+    "next_tool": "Create an exact-head one-shot workflow for bounded acquisition/reconciliation artifact publication.",
+    "next_tool_action": "Create an exact-head one-shot workflow for bounded acquisition/reconciliation artifact publication.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
@@ -16317,6 +16317,10 @@
     "resume_required": true,
     "upper_objective_achieved": false,
     "agi_achieved": false,
-    "status": "precommit_cas_written_pending_exact_readback"
+    "status": "precommit_exact_readback_verified",
+    "precommit_cas_commit_sha": "6db2e0c7d9cb8cbe7bc839415b48e8ee669ee012",
+    "precommit_state_blob_sha": "e6d03155cbdc738643c02779d67ac64e60b62c3f",
+    "exact_readback_verified": true,
+    "exact_readback_verified_at": "2026-09-01T10:38:58.342Z"
   }
 }
