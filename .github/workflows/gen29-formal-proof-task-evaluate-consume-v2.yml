@@ -106,8 +106,18 @@ jobs:
           repair['next_action']='Exact-read this runner-start refresh, then consume the unchanged Task Evaluate request once.'
           p.write_text(json.dumps(s,indent=2,sort_keys=True)+'\n')
           PY
-          B64="$(base64 -w0 agi/WORK_EXECUTION_STATE.json)"
-          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json" -f message="o-work: refresh Task Evaluate heartbeat at runner start" -f content="$B64" -f sha="$EXPECTED_STATE_BLOB" -f branch=main > /tmp/heartbeat-write.json
+          python - <<'PY'
+          import base64,json,os
+          from pathlib import Path
+          payload={
+            'message':'o-work: refresh Task Evaluate heartbeat at runner start',
+            'content':base64.b64encode(Path('agi/WORK_EXECUTION_STATE.json').read_bytes()).decode(),
+            'sha':os.environ['EXPECTED_STATE_BLOB'],
+            'branch':'main',
+          }
+          Path('/tmp/heartbeat-payload.json').write_text(json.dumps(payload,separators=(',',':')))
+          PY
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json" --input /tmp/heartbeat-payload.json > /tmp/heartbeat-write.json
           RUNTIME_MAIN="$(jq -r '.commit.sha' /tmp/heartbeat-write.json)"
           RUNTIME_STATE_BLOB="$(jq -r '.content.sha' /tmp/heartbeat-write.json)"
           gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$RUNTIME_MAIN" > /tmp/heartbeat-readback.json
