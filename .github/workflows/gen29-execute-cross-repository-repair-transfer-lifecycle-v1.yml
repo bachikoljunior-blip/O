@@ -120,8 +120,8 @@ jobs:
           test "$(git -C /tmp/task-b rev-parse HEAD:LICENSE)" = fdcc6d60f5efa7703582c360bbd932455ed1b426
           test "$(git -C /tmp/task-b rev-parse HEAD:pyproject.toml)" = 978e5e33cc65d9259d3b3bdc37d7ac34cd5bc437
           test "$(git -C /tmp/task-b rev-parse HEAD:src/publiplots/utils/legend.py)" = d49d7d05b82f56f05526ada2089f1a1868e4abd9
-          gh api repos/ipolharvard/cms-icd/issues/25 > /tmp/task-a-issue.json
-          gh api repos/jorgebotas/publiplots/issues/223 > /tmp/task-b-issue.json
+          curl -fsSL https://api.github.com/repos/ipolharvard/cms-icd/issues/25 > /tmp/task-a-issue.json
+          curl -fsSL https://api.github.com/repos/jorgebotas/publiplots/issues/223 > /tmp/task-b-issue.json
           jq -e '.number==25 and .state=="open" and .created_at=="2026-09-01T05:24:54Z" and .comments==0' /tmp/task-a-issue.json
           jq -e '.number==223 and .state=="open" and .created_at=="2026-09-01T05:18:09Z" and .comments==0' /tmp/task-b-issue.json
           python -m pip install -e /tmp/task-a
@@ -192,7 +192,7 @@ jobs:
           set -euo pipefail
           git fetch origin main --no-tags
           test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
-          gh api "repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$EXPECTED_MAIN" > /tmp/state-doc.json
+          curl -fsSL "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/agi/WORK_EXECUTION_STATE.json?ref=$EXPECTED_MAIN" > /tmp/state-doc.json
           test "$(jq -r .sha /tmp/state-doc.json)" = "$EXPECTED_STATE_BLOB"
           python - <<'PY'
           import json, os
