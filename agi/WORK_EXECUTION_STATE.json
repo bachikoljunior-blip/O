@@ -197,7 +197,7 @@
     "branch_head_sha": "d5c4aa051fa2b7a8c3bac21d81640b10be464886",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T02:00:36.738Z",
+    "checkpointed_at": "2026-09-01T02:00:51.036Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-task-evaluate-external-repair-consume-consolidate-freeze-v1.json",
       "blob_sha": "5106ae4021e0af50affe65b26e218ddb3d45f186",
@@ -346,7 +346,7 @@
     "exact_completed_request_digest": "7d59bc824db5c941c7a88a06aec81a864278b3192265b68f2bb0b741e189767c",
     "exact_completed_response_digest": "e8ea7ed6e8cb4630c54c558d05887c8f71b32f207e4b6cf120b0a4f368f5f7c6",
     "exact_completed_work_invocation_id": "invoke-089a664f465dbc66e143b9ed",
-    "exact_frontier": "Phase1 exact readback verified; phase2 applies the authoritative Consolidate pending bind.",
+    "exact_frontier": "Authoritative main exact readback verifies Task Evaluate completion exactly once and the frozen Consolidate request remains unanswered.",
     "exact_frozen_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
     "exact_frozen_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-dbef4e8815ff89b7cb56aa50/request.json",
@@ -1496,8 +1496,8 @@
     "pending_component": "consolidate_episode",
     "target_component": "task_evaluate",
     "source_main_sha": "d5c4aa051fa2b7a8c3bac21d81640b10be464886",
-    "durability_status": "phase2_state_cas_applied_consolidate_pending",
-    "status": "phase2_state_cas_applied",
+    "durability_status": "pending_native_consume",
+    "status": "remote_main_readback_verified",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1505,10 +1505,10 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "next_action": "Consume Consolidate invoke-7951f174fecae923310eb7a9 exactly once, verify its durable response, freeze Learn, and continue.",
-    "verified_remote_readback": false,
-    "verified_at": null,
-    "verified_state_commit_sha": null,
-    "verified_state_blob_sha": null
+    "verified_remote_readback": true,
+    "verified_at": "2026-09-01T02:00:51.036Z",
+    "verified_state_commit_sha": "5885ee790a12a258cf9b4475e58c9afe3453541f",
+    "verified_state_blob_sha": "b50349dc97877f51411b34fc178f8bf6af1cb239"
   },
   "continuation_source": "repository_latest_main_only",
   "continuous_execution_authorization": {
@@ -1570,8 +1570,8 @@
     "pending_component": "consolidate_episode",
     "target_component": "task_evaluate",
     "source_main_sha": "d5c4aa051fa2b7a8c3bac21d81640b10be464886",
-    "durability_status": "phase2_state_cas_applied_consolidate_pending",
-    "status": "phase2_state_cas_applied",
+    "durability_status": "pending_native_consume",
+    "status": "remote_main_readback_verified",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1579,10 +1579,10 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "next_action": "Consume Consolidate invoke-7951f174fecae923310eb7a9 exactly once, verify its durable response, freeze Learn, and continue.",
-    "verified_remote_readback": false,
-    "verified_at": null,
-    "verified_state_commit_sha": null,
-    "verified_state_blob_sha": null
+    "verified_remote_readback": true,
+    "verified_at": "2026-09-01T02:00:51.036Z",
+    "verified_state_commit_sha": "5885ee790a12a258cf9b4475e58c9afe3453541f",
+    "verified_state_blob_sha": "b50349dc97877f51411b34fc178f8bf6af1cb239"
   },
   "exact_head_ci_observation": {
     "conclusion": "success",
@@ -11941,7 +11941,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T02:00:36.738Z",
+  "heartbeat_at": "2026-09-01T02:00:51.036Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -12770,8 +12770,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-09-01T02:00:36.738Z",
-  "last_progress_at": "2026-09-01T02:00:36.738Z",
+  "last_activity_at": "2026-09-01T02:00:51.036Z",
+  "last_progress_at": "2026-09-01T02:00:51.036Z",
   "last_verified_effect": {
     "kind": "task_evaluate_response_merged_exact_readback",
     "pull_request": 397,
@@ -12987,7 +12987,7 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Consume Consolidate invoke-7951f174fecae923310eb7a9 exactly once, verify its durable response, freeze Learn, and continue.",
-  "next_tool_action": "Exact-read phase2 state CAS, finalize phase3 verified readback, then consume the frozen Consolidate request exactly once.",
+  "next_tool_action": "Consume Consolidate invoke-7951f174fecae923310eb7a9 exactly once; verify durable response and freeze Learn.",
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
     "base_main_sha": "aadfa7c049961e79ab7e15cd634c25b292293ff8",
@@ -15259,7 +15259,7 @@
   },
   "generation29_consolidate_external_repair_bind_v1": {
     "schema_version": 1,
-    "phase": "phase2_state_cas_applied",
+    "phase": "state_cas_exact_readback_verified_consolidate_pending_native_consume",
     "recorded_at": "2026-09-01T02:00:13.597Z",
     "expected_prior_main_sha": "d5c4aa051fa2b7a8c3bac21d81640b10be464886",
     "expected_prior_state_blob_sha": "fc3163d06e56c9cd3921fbe09124181916362e63",
@@ -15281,6 +15281,11 @@
     "phase1_commit_sha": "44dc72fab326d7c1287642b3c08c5371e3bbdf82",
     "phase1_state_blob_sha": "ba3211b711ce61722565ca048be7fbb0876887ca",
     "applied_at": "2026-09-01T02:00:36.738Z",
-    "phase2_expected_blob_sha": "ba3211b711ce61722565ca048be7fbb0876887ca"
+    "phase2_expected_blob_sha": "ba3211b711ce61722565ca048be7fbb0876887ca",
+    "phase2_commit_sha": "5885ee790a12a258cf9b4475e58c9afe3453541f",
+    "phase2_state_blob_sha": "b50349dc97877f51411b34fc178f8bf6af1cb239",
+    "verified_at": "2026-09-01T02:00:51.036Z",
+    "exact_readback": true,
+    "response_absent_exact_readback": true
   }
 }
