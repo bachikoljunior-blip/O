@@ -1,0 +1,92 @@
+name: gen29-formal-proof-baseline-v1
+
+on:
+  push:
+    branches:
+      - work/gen29-formal-proof-execute-precommit-v1
+    paths:
+      - .github/workflows/gen29-formal-proof-baseline-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Sparse checkout frozen upstream source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --no-checkout https://github.com/aimmerwahr/lean-math-exercises.git external
+          git -C external sparse-checkout init --no-cone
+          {
+            echo "/lean-toolchain"
+            echo "/lakefile.toml"
+            echo "/lake-manifest.json"
+            echo "/LICENSE"
+            echo "/Exercises/Analysis/01OrderCompleteness.lean"
+          } > external/.git/info/sparse-checkout
+          git -C external checkout ef9d2506ecf03bb3338e59d33edded195d94a9be
+          test "$(git -C external rev-parse HEAD)" = "ef9d2506ecf03bb3338e59d33edded195d94a9be"
+          test "$(git -C external hash-object LICENSE)" = "e96cb121c4f899640c741149fd80f1293b377eac"
+          test "$(git -C external hash-object lean-toolchain)" = "fd85b262bf1c734663aa8292b0101f672168788f"
+          test "$(git -C external hash-object lakefile.toml)" = "8c225ae03f6eeebfc75a3a9dad604b419a012470"
+          test "$(git -C external hash-object lake-manifest.json)" = "79c3014a9dfd92cc1516b1c08554d59431dcf2c7"
+          test "$(git -C external hash-object Exercises/Analysis/01OrderCompleteness.lean)" = "b1472e9b72df28045f33d0270f860ce793ffbd5e"
+          test ! -e external/Solutions
+          test ! -e external/Meta/Checks
+
+      - name: Install exact Lean toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: external
+          auto-config: false
+          use-github-cache: false
+
+      - name: Fetch frozen dependencies without solution paths
+        working-directory: external
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake update
+          lake exe cache get
+
+      - name: Apply precommitted invalid sentinel
+        working-directory: external
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("Exercises/Analysis/01OrderCompleteness.lean")
+          s = p.read_text()
+          old = """theorem q1_integer_fractional_decomposition (x : ℝ) :
+              ∃! p : ℤ × ℝ, x = (p.1 : ℝ) + p.2 ∧ 0 ≤ p.2 ∧ p.2 < 1 := by
+            sorry"""
+          new = """theorem q1_integer_fractional_decomposition (x : ℝ) :
+              ∃! p : ℤ × ℝ, x = (p.1 : ℝ) + p.2 ∧ 0 ≤ p.2 ∧ p.2 < 1 := by
+            exact True.intro"""
+          if s.count(old) != 1:
+              raise SystemExit(f"selector cardinality mismatch: {s.count(old)}")
+          p.write_text(s.replace(old, new, 1))
+          PY
+
+      - name: Require theorem-local baseline failure
+        working-directory: external
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          lake env lean Exercises/Analysis/01OrderCompleteness.lean > baseline.log 2>&1
+          code=$?
+          set -e
+          sed -n '1,120p' baseline.log
+          test "$code" -ne 0
+          grep -q "q1_integer_fractional_decomposition" baseline.log
+          grep -Eq "type mismatch|application type mismatch|has type" baseline.log
+          echo "BASELINE_SENTINEL_EXPECTED_FAILURE exit=$code source=b1472e9b72df28045f33d0270f860ce793ffbd5e"
