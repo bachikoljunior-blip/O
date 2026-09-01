@@ -198,7 +198,7 @@
     "branch_head_sha": "2c9e42b66e207ba04bed4a49d8b3b0f9a5963f11",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T08:35:22.176Z",
+    "checkpointed_at": "2026-09-01T08:35:39.633Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-task-evaluate-cross-repository-transfer-consume-root-freeze-v1.json",
       "blob_sha": "a7131709fdab6003ce219debe590dc7a3122d2b4",
@@ -341,8 +341,8 @@
       33451087993,
       33451088030
     ],
-    "current_main_sha": "2c9e42b66e207ba04bed4a49d8b3b0f9a5963f11",
-    "current_state_blob_sha": "2f2e86eaa045c082e53398ebb6de89de1cf34c86",
+    "current_main_sha": "ec386b70734c4b08a4a020ba4595f0c50aa1926d",
+    "current_state_blob_sha": "bbcf702c3cc63c17dddcc2bb47ab01203efa0d2a",
     "exact_completed_native_invocation_id": "invoke-c116b3460cbaeaaa1d8dfd9b",
     "exact_completed_request_digest": "6940682af5f27f6ecfe2e459b425769147822411307e9e203248d836dd5c579e",
     "exact_completed_response_digest": "5124c7fcf09ddce1ce833aabfe5f57b2d15b1ac8848b2c158c2e70a9f3e7af75",
@@ -365,7 +365,7 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
-    "idempotency_key": "o-work-gen29:pr404:c259f434:root-bind-phase1:v1",
+    "idempotency_key": "o-work-gen29:pr404:c259f434:root-bind-phase2:v1",
     "last_verified_effect": "PR404 exact-head directive and five-job CI succeeded; expected-head merge 2c9e42b completed; Task Evaluate response is exact-once durable and the unique Root request is frozen unanswered.",
     "lease_generation": 29,
     "merge_authorization": {
@@ -390,7 +390,7 @@
     "merge_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "merge_tree_sha": "4697405584d3c30a86cc839bd7d1555fb363ad09",
     "next_action": "Consume Root invoke-b26b9b21916d14afae757348 exactly once, select one materially different concrete falsifiable safe unit, freeze its unique successor, and continue.",
-    "next_tool": "Exact-read phase1 state, then commit phase2 CAS metadata and exact-read it.",
+    "next_tool": "Exact-read phase2 blob, then write final verified CAS state and exact-read it.",
     "next_tool_action": "Complete phase1/phase2/exact-readback CAS, then launch one protected Root consume workflow without recreating or duplicating the request.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
@@ -1573,7 +1573,7 @@
     "target_component": "execute",
     "source_main_sha": "2c9e42b66e207ba04bed4a49d8b3b0f9a5963f11",
     "durability_status": "pending_native_consume",
-    "status": "phase1_expected_blob_cas_written",
+    "status": "phase2_cas_written_pending_final_readback",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1583,7 +1583,11 @@
     "next_action": "Consume Root invoke-b26b9b21916d14afae757348 exactly once, select one materially different concrete falsifiable safe unit, freeze its unique successor, and continue.",
     "verified_remote_readback": false,
     "phase1_expected_prior_state_blob_sha": "2f2e86eaa045c082e53398ebb6de89de1cf34c86",
-    "phase1_recorded_at": "2026-09-01T08:35:22.176Z"
+    "phase1_recorded_at": "2026-09-01T08:35:22.176Z",
+    "phase1_commit_sha": "ec386b70734c4b08a4a020ba4595f0c50aa1926d",
+    "phase1_state_blob_sha": "bbcf702c3cc63c17dddcc2bb47ab01203efa0d2a",
+    "phase1_exact_readback_verified": true,
+    "phase1_verified_at": "2026-09-01T08:35:39.633Z"
   },
   "exact_head_ci_observation": {
     "repository_full_name": "bachikoljunior-blip/O",
@@ -11942,7 +11946,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T08:35:22.176Z",
+  "heartbeat_at": "2026-09-01T08:35:39.633Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -12771,8 +12775,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-09-01T08:35:22.176Z",
-  "last_progress_at": "2026-09-01T08:35:22.176Z",
+  "last_activity_at": "2026-09-01T08:35:39.633Z",
+  "last_progress_at": "2026-09-01T08:35:39.633Z",
   "last_verified_effect": "PR404 exact-head directive and five-job CI succeeded; expected-head merge 2c9e42b completed; Task Evaluate response is exact-once durable and the unique Root request is frozen unanswered.",
   "lease_generation": 29,
   "lease_renewal": {
@@ -14540,8 +14544,8 @@
   "snapshot_phase": "root_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
   "snapshot_revision": 131,
-  "source_main_sha": "2c9e42b66e207ba04bed4a49d8b3b0f9a5963f11",
-  "source_state_blob_sha": "2f2e86eaa045c082e53398ebb6de89de1cf34c86",
+  "source_main_sha": "ec386b70734c4b08a4a020ba4595f0c50aa1926d",
+  "source_state_blob_sha": "bbcf702c3cc63c17dddcc2bb47ab01203efa0d2a",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -15900,7 +15904,7 @@
   },
   "generation29_task_evaluate_cross_repository_repair_transfer_root_bind_v1": {
     "schema_version": 1,
-    "status": "phase1_expected_blob_cas_written",
+    "status": "phase2_cas_written_pending_final_readback",
     "recorded_at": "2026-09-01T08:35:22.176Z",
     "source_main_sha": "2c9e42b66e207ba04bed4a49d8b3b0f9a5963f11",
     "source_state_blob_sha": "2f2e86eaa045c082e53398ebb6de89de1cf34c86",
@@ -15963,6 +15967,10 @@
     "agi_achieved": false,
     "claim_boundary": "Task Evaluate recorded UNCERTAIN / NOT_EVALUABLE; transfer, Candidate activation, AGI, and user completion remain unproven.",
     "next_action": "Consume Root invoke-b26b9b21916d14afae757348 exactly once, select materially different safe work, freeze its unique successor, and continue.",
-    "exact_readback_verified": false
+    "exact_readback_verified": false,
+    "phase1_commit_sha": "ec386b70734c4b08a4a020ba4595f0c50aa1926d",
+    "phase1_blob_sha": "bbcf702c3cc63c17dddcc2bb47ab01203efa0d2a",
+    "phase1_exact_readback_verified": true,
+    "phase1_verified_at": "2026-09-01T08:35:39.633Z"
   }
 }
