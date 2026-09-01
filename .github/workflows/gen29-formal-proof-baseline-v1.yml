@@ -87,6 +87,7 @@ jobs:
           set -e
           sed -n '1,120p' baseline.log
           test "$code" -ne 0
-          grep -q "q1_integer_fractional_decomposition" baseline.log
+          grep -q "Exercises/Analysis/01OrderCompleteness.lean:55:2: error" baseline.log
+          grep -q "∃! p" baseline.log
           grep -Eq "type mismatch|application type mismatch|has type" baseline.log
           echo "BASELINE_SENTINEL_EXPECTED_FAILURE exit=$code source=b1472e9b72df28045f33d0270f860ce793ffbd5e"
