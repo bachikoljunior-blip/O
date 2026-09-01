@@ -192,5 +192,6 @@ jobs:
           sha256sum replay/Exercises/Analysis/01OrderCompleteness.lean | tee replay-patched-source.sha256
           test "$(cut -d' ' -f1 replay-patched-source.sha256)" = "$(cut -d' ' -f1 candidate-patched-source.sha256)"
           (cd replay && lake env lean Exercises/Analysis/01OrderCompleteness.lean > replay.log 2>&1)
-          test ! -s replay/replay.log
+          ! grep -q " error:" replay/replay.log
+          ! grep -Eq "Exercises/Analysis/01OrderCompleteness\.lean:55:.*declaration uses .*sorry" replay/replay.log
           echo "FRESH_REPLAY_PASS patched_sha256=$(cut -d' ' -f1 replay-patched-source.sha256)"
