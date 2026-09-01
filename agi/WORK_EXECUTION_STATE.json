@@ -1,5 +1,5 @@
 {
-  "acquisition_phase": "phase2_remote_cas_written",
+  "acquisition_phase": "verified_two_phase_remote_readback",
   "active_component": "generation29_execute_cross_source_data_reconciliation_pending_native_consume",
   "active_prompt": "prompts/execute.md",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
@@ -198,7 +198,7 @@
     "branch_head_sha": "2d009c2fcec6f63b10cb130c191af0da12c00344",
     "branch_head_tree_sha": null,
     "branch_result_receipt_blob_sha": "e259126c9c3b210d238ecd533fa32fbed7d18fb9",
-    "checkpointed_at": "2026-09-01T10:34:55.810Z",
+    "checkpointed_at": "2026-09-01T10:35:17.958Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-candidate-cross-source-reconciliation-preflight-consume-execute-freeze-v1.json",
       "blob_sha": "d29fb0df1427c86a274c7e6d2d81bbc5dd97aaac",
@@ -341,13 +341,13 @@
       33451087993,
       33451088030
     ],
-    "current_main_sha": "e69c35d7d34db86387b372b25499a25c24a6c9ec",
-    "current_state_blob_sha": "c5fdc5bbeea6cc89a7a97a27ee9beb900388f5c0",
+    "current_main_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
+    "current_state_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
     "exact_completed_native_invocation_id": "invoke-4207db89def9709f3545b270",
     "exact_completed_request_digest": "ebe32784af1b5c6561369c24df2a19ebbd0259db6ac24e4e2476f6010f11ddc2",
     "exact_completed_response_digest": "36e6b3239413c046038ed6b0ee4bd8380afc565205e13628b264b48dad20a9be",
     "exact_completed_work_invocation_id": "invoke-047ed5d16b7ff5cfbdbc716b",
-    "exact_frontier": "Candidate Evaluate response and PR406 merge are durable; unique Execute request is being CAS-bound and remains unanswered.",
+    "exact_frontier": "Candidate response and PR406 merge are durable; unique Execute request is CAS-bound, exact-readback verified, and unanswered pending immutable selector precommit.",
     "exact_frozen_request_blob_sha": "2f057623fa0688cbb33bcb0cd642793474be230f",
     "exact_frozen_request_digest": "f8ba0ece87631b09a8c3581da0aeac5be2e34e148f5c254db38c1165e712eeaa",
     "exact_frozen_request_ref": ".continual/work-model/invocations/invoke-dbef4e8815ff89b7cb56aa50/request.json",
@@ -365,8 +365,8 @@
     "frozen_request_log_job_id": 99140671439,
     "frozen_work_invocation_id": "invoke-c5c119aff74ae340fd143b9b",
     "goal_revision": 114,
-    "idempotency_key": "o-work-gen29:bind-execute-cross-source-phase2:v1",
-    "last_verified_effect": "Phase1 exact readback verified the unchanged generation/fence plus Candidate completion, Execute native/request blobs and digest, snapshot revision 132, and zero Execute response.",
+    "idempotency_key": "o-work-gen29:bind-execute-cross-source-final:v1",
+    "last_verified_effect": "Two-phase expected-blob CAS and exact readback bound the unique Execute request under unchanged execution, generation, fence, inbox, snapshot, and zero-response proof.",
     "lease_generation": 29,
     "merge_authorization": {
       "base_sha": "dbb2b3ecf1168c576de904aff74f6aef5412c232",
@@ -390,8 +390,8 @@
     "merge_sha": "3ceca06109ea67a7956c411ed37dc16af568ddc0",
     "merge_tree_sha": "4697405584d3c30a86cc839bd7d1555fb363ad09",
     "next_action": "Consume Execute invoke-5c28ad87d810c530cf9f8371 exactly once after durably freezing the exact two-source selector and protocol before reading selected target record values; produce bounded reconciliation evidence, freeze Task Evaluate, and continue.",
-    "next_tool": "Exact-read phase2 and finalize Execute binding.",
-    "next_tool_action": "Exact-read phase2 and finalize the Execute binding before selector precommit.",
+    "next_tool": "Publish immutable selector/protocol precommit without reading selected target values.",
+    "next_tool_action": "Publish and exact-read an immutable two-source selector/protocol manifest before reading selected source record values; then execute the bounded reconciliation and answer invoke-5c28ad87d810c530cf9f8371 exactly once.",
     "no_partial_result_claimed": true,
     "no_response_on_authoritative_remote": true,
     "pending_candidate_native_invocation_id": "invoke-fd11f11bbd6be39ea81351ca",
@@ -1493,7 +1493,7 @@
     "target_component": "task_evaluate",
     "source_main_sha": "2d009c2fcec6f63b10cb130c191af0da12c00344",
     "durability_status": "pending_native_consume",
-    "status": "phase2_remote_cas_written",
+    "status": "remote_main_readback_verified",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1501,13 +1501,18 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "next_action": "Consume Execute invoke-5c28ad87d810c530cf9f8371 exactly once after durably freezing the exact two-source selector and protocol before reading selected target record values; produce bounded reconciliation evidence, freeze Task Evaluate, and continue.",
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "phase1_expected_prior_state_blob_sha": "52d3094330f5266377a750ad83b2255117520924",
     "phase1_recorded_at": "2026-09-01T10:34:37.038Z",
     "phase1_commit_sha": "e69c35d7d34db86387b372b25499a25c24a6c9ec",
     "phase1_state_blob_sha": "c5fdc5bbeea6cc89a7a97a27ee9beb900388f5c0",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T10:34:55.810Z"
+    "phase1_verified_at": "2026-09-01T10:34:55.810Z",
+    "phase2_commit_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
+    "phase2_state_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
+    "verified_state_commit_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
+    "verified_state_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
+    "verified_at": "2026-09-01T10:35:17.958Z"
   },
   "continuation_source": "repository_latest_main_only",
   "continuous_execution_authorization": {
@@ -1568,7 +1573,7 @@
     "target_component": "task_evaluate",
     "source_main_sha": "2d009c2fcec6f63b10cb130c191af0da12c00344",
     "durability_status": "pending_native_consume",
-    "status": "phase2_remote_cas_written",
+    "status": "remote_main_readback_verified",
     "request_recreated": false,
     "prior_requests_recreated": false,
     "response_repeated": false,
@@ -1576,13 +1581,18 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "next_action": "Consume Execute invoke-5c28ad87d810c530cf9f8371 exactly once after durably freezing the exact two-source selector and protocol before reading selected target record values; produce bounded reconciliation evidence, freeze Task Evaluate, and continue.",
-    "verified_remote_readback": false,
+    "verified_remote_readback": true,
     "phase1_expected_prior_state_blob_sha": "52d3094330f5266377a750ad83b2255117520924",
     "phase1_recorded_at": "2026-09-01T10:34:37.038Z",
     "phase1_commit_sha": "e69c35d7d34db86387b372b25499a25c24a6c9ec",
     "phase1_state_blob_sha": "c5fdc5bbeea6cc89a7a97a27ee9beb900388f5c0",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T10:34:55.810Z"
+    "phase1_verified_at": "2026-09-01T10:34:55.810Z",
+    "phase2_commit_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
+    "phase2_state_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
+    "verified_state_commit_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
+    "verified_state_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
+    "verified_at": "2026-09-01T10:35:17.958Z"
   },
   "exact_head_ci_observation": {
     "repository_full_name": "bachikoljunior-blip/O",
@@ -1601,7 +1611,7 @@
     "observed_at": "2026-09-01T07:25:00.000Z"
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "c5fdc5bbeea6cc89a7a97a27ee9beb900388f5c0",
+  "expected_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
@@ -11941,7 +11951,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 114,
-  "heartbeat_at": "2026-09-01T10:34:55.810Z",
+  "heartbeat_at": "2026-09-01T10:35:17.958Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -12770,9 +12780,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_activity_at": "2026-09-01T10:34:55.810Z",
-  "last_progress_at": "2026-09-01T10:34:55.810Z",
-  "last_verified_effect": "Phase1 exact readback verified the unchanged generation/fence plus Candidate completion, Execute native/request blobs and digest, snapshot revision 132, and zero Execute response.",
+  "last_activity_at": "2026-09-01T10:35:17.958Z",
+  "last_progress_at": "2026-09-01T10:35:17.958Z",
+  "last_verified_effect": "Two-phase expected-blob CAS and exact readback bound the unique Execute request under unchanged execution, generation, fence, inbox, snapshot, and zero-response proof.",
   "lease_generation": 29,
   "lease_renewal": {
     "expected_blob_sha": "4cfcffe49290f53879863d2ac9029944782c3535",
@@ -12978,7 +12988,7 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Consume Execute invoke-5c28ad87d810c530cf9f8371 exactly once after durably freezing the exact two-source selector and protocol before reading selected target record values; produce bounded reconciliation evidence, freeze Task Evaluate, and continue.",
-  "next_tool_action": "Exact-read phase2 and finalize the Execute binding before selector precommit.",
+  "next_tool_action": "Publish and exact-read an immutable two-source selector/protocol manifest before reading selected source record values; then execute the bounded reconciliation and answer invoke-5c28ad87d810c530cf9f8371 exactly once.",
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
     "base_main_sha": "aadfa7c049961e79ab7e15cd634c25b292293ff8",
@@ -14539,8 +14549,8 @@
   "snapshot_phase": "unit_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
   "snapshot_revision": 132,
-  "source_main_sha": "2d009c2fcec6f63b10cb130c191af0da12c00344",
-  "source_state_blob_sha": "c5fdc5bbeea6cc89a7a97a27ee9beb900388f5c0",
+  "source_main_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
+  "source_state_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -16062,7 +16072,7 @@
   },
   "generation29_candidate_cross_source_data_reconciliation_execute_bind_v1": {
     "schema_version": 1,
-    "status": "phase2_remote_cas_written",
+    "status": "state_cas_exact_readback_verified_execute_pending_native_consume",
     "recorded_at": "2026-09-01T10:34:37.038Z",
     "source_main_sha": "2d009c2fcec6f63b10cb130c191af0da12c00344",
     "source_state_blob_sha": "52d3094330f5266377a750ad83b2255117520924",
@@ -16124,10 +16134,13 @@
     "agi_achieved": false,
     "claim_boundary": "Candidate selected the unchanged active baseline; selected-source evidence, Execute result, AGI, and user completion remain unproven.",
     "next_action": "Consume Execute invoke-5c28ad87d810c530cf9f8371 exactly once after durably freezing the exact two-source selector and protocol before reading selected target record values; produce bounded reconciliation evidence, freeze Task Evaluate, and continue.",
-    "exact_readback_verified": false,
+    "exact_readback_verified": true,
     "phase1_commit_sha": "e69c35d7d34db86387b372b25499a25c24a6c9ec",
     "phase1_blob_sha": "c5fdc5bbeea6cc89a7a97a27ee9beb900388f5c0",
     "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-01T10:34:55.810Z"
+    "phase1_verified_at": "2026-09-01T10:34:55.810Z",
+    "phase2_commit_sha": "740a27a1a6591ea28166323ba84a367c09890ac4",
+    "phase2_blob_sha": "93efe36ca4b73f866e1fd7faebc62aca169c8405",
+    "verified_at": "2026-09-01T10:35:17.958Z"
   }
 }
