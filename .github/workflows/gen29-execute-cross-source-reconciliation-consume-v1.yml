@@ -28,8 +28,10 @@ jobs:
       EXEC_WORK_ID: invoke-5c28ad87d810c530cf9f8371
       EXEC_REQUEST_BLOB: badc15b3967b928839359735ea04823cb5a9972c
       EXEC_REQUEST_DIGEST: a866c9a5c3cf1d2ce70f17f9fa3d347e1faec55e805aeea5c4cacfe69b8b3000
-      SOURCE_CI_RUN_ID: '33498703511'
-      SOURCE_CI_HEAD: 4082122194952c0363830871b0232fd24c575de1
+      RESULT_CI_RUN_ID: '33498703511'
+      RESULT_CI_HEAD: 4082122194952c0363830871b0232fd24c575de1
+      SOURCE_CI_RUN_ID: '33494389195'
+      SOURCE_CI_HEAD: 12a61d6e7e87fcfb9d780fbdc0313cdb722b8e34
       RESULT_MERGE_SHA: 765064d5b2de4bfc828a99695f42a94690cd0225
       RUN_ID: run-work-recovery-gen9-durability-repair
       EXECUTOR_BINDING: current_chatgpt_work_session
@@ -116,12 +118,12 @@ jobs:
               raise SystemExit('bounded result mismatch')
           Path('/tmp/work-verify-before.json').write_text(json.dumps(before,sort_keys=True)+'\n')
           PY
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
-          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
-          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = completed
-          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = success
-          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESULT_CI_RUN_ID" > /tmp/result-workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESULT_CI_RUN_ID/jobs?per_page=100" > /tmp/result-workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/result-workflow-run-full.json)" = "$RESULT_CI_HEAD"
+          test "$(jq -r '.status' /tmp/result-workflow-run-full.json)" = completed
+          test "$(jq -r '.conclusion' /tmp/result-workflow-run-full.json)" = success
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/result-workflow-jobs-full.json
 
       - name: Record and verify fresh exact source observations
         shell: bash
@@ -140,6 +142,9 @@ jobs:
           WORK_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/work-source-prepare.json)"
           OBSERVED_AT="$(python -c 'from datetime import UTC,datetime;print(datetime.now(UTC).isoformat().replace("+00:00","Z"))')"
           continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$RUNTIME_MAIN" --blob-sha "$EXPECTED_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
           continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
           jq '{id,workflow_id,name,status,conclusion,head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
           jq '[.jobs[]|{id,name,status,conclusion}]|sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
@@ -235,7 +240,7 @@ jobs:
            'verification':expected_after
           }
           Path('/tmp/consume-summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
-          receipt={'schema_version':1,'record_type':'generation29_cross_source_execute_consume_receipt','recorded_at':datetime.now(UTC).isoformat().replace('+00:00','Z'),'authority':{'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},'source_main_sha':os.environ['RUNTIME_MAIN'],'source_state_blob_sha':os.environ['EXPECTED_STATE_BLOB'],'source_result_merge_sha':os.environ['RESULT_MERGE_SHA'],'source_ci_workflow_run_id':int(os.environ['SOURCE_CI_RUN_ID']),'idempotency_key':'o-work-gen29:consume-execute-invoke-5c28ad87d810c530cf9f8371:freeze-independent-task-evaluate-boundary:v1','completed_effect':summary,'request_recreated':False,'response_repeated':False,'resume_required':True,'upper_objective_achieved':False,'agi_achieved':False,'next_action':'Protect and merge this exact Execute completion and unique successor, bind state by two-phase readback CAS, then consume the successor exactly once.'}
+          receipt={'schema_version':1,'record_type':'generation29_cross_source_execute_consume_receipt','recorded_at':datetime.now(UTC).isoformat().replace('+00:00','Z'),'authority':{'execution_id':'work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3','lease_generation':29,'fence_token_digest':'c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d'},'source_main_sha':os.environ['RUNTIME_MAIN'],'source_state_blob_sha':os.environ['EXPECTED_STATE_BLOB'],'source_result_merge_sha':os.environ['RESULT_MERGE_SHA'],'source_ci_workflow_run_id':int(os.environ['RESULT_CI_RUN_ID']),'idempotency_key':'o-work-gen29:consume-execute-invoke-5c28ad87d810c530cf9f8371:freeze-independent-task-evaluate-boundary:v1','completed_effect':summary,'request_recreated':False,'response_repeated':False,'resume_required':True,'upper_objective_achieved':False,'agi_achieved':False,'next_action':'Protect and merge this exact Execute completion and unique successor, bind state by two-phase readback CAS, then consume the successor exactly once.'}
           rp=root/f'.continual/runs/{run_id}/recovery-receipts/gen29-cross-source-execute-consume-successor-freeze-v1.json';rp.parent.mkdir(parents=True,exist_ok=True);rp.write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
           print(json.dumps(summary,sort_keys=True))
           PY
