@@ -1,0 +1,112 @@
+name: Bind USER_DIRECTIVE_EVENTS to inbox revision 39
+
+on:
+  push:
+    branches:
+      - user-input/rev39-matched-evidence-acquisition-20260902
+
+permissions:
+  contents: write
+
+jobs:
+  bind-directive-events:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: user-input/rev39-matched-evidence-acquisition-20260902
+          fetch-depth: 0
+
+      - name: Bind typed directives to the exact revision-39 inbox
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          inbox_path = Path("agi/USER_INPUT_INBOX.json")
+          ledger_path = Path("agi/USER_DIRECTIVE_EVENTS.json")
+          inbox = json.loads(inbox_path.read_text(encoding="utf-8"))
+          ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+
+          def digest(value):
+              payload = json.dumps(
+                  value,
+                  ensure_ascii=False,
+                  sort_keys=True,
+                  separators=(",", ":"),
+                  default=str,
+              ).encode("utf-8")
+              return hashlib.sha256(payload).hexdigest()
+
+          expected_entry_id = "user-direction-matched-evidence-candidate-20260902-v39"
+          expected_entry_digest = "3107b99820bb368c1925c3219073bbbd5fa4d014c1c379142e4eada9e5b0c724"
+          expected_inbox_digest = "57b0abfe222a71e6c1d56ebf17b06ff0288ead1c41c545532fe334a1673613c2"
+
+          if inbox.get("revision") != 39:
+              raise SystemExit(f"expected inbox revision 39, found {inbox.get('revision')!r}")
+          if digest(inbox) != expected_inbox_digest:
+              raise SystemExit("revision-39 inbox digest mismatch")
+
+          entry = next(
+              (item for item in inbox.get("entries", []) if item.get("id") == expected_entry_id),
+              None,
+          )
+          if entry is None:
+              raise SystemExit("revision-39 entry is missing")
+          if digest(entry) != expected_entry_digest:
+              raise SystemExit("revision-39 entry digest mismatch")
+
+          atoms = [
+              {
+                  "atom_id": "r39-matched-evidence-self-sealing-risk",
+                  "source_entry_id": expected_entry_id,
+                  "source_entry_digest": expected_entry_digest,
+                  "source_directive_indices": [0],
+                  "slot": "learning.evidence_acquisition",
+                  "cardinality": "many",
+                  "value": "when_no_change_is_due_only_to_missing_same_capability_evidence_and_root_immediately_switches_domains_treat_the_self_sealing_gap_as_a_falsifiable_hypothesis_unless_an_equivalent_mechanism_already_exists",
+                  "precedence": 39,
+                  "supersedes": [],
+              },
+              {
+                  "atom_id": "r39-minimum-reversible-matched-evidence-sequence",
+                  "source_entry_id": expected_entry_id,
+                  "source_entry_digest": expected_entry_digest,
+                  "source_directive_indices": [1],
+                  "slot": "learning.candidate_evidence_sequence",
+                  "cardinality": "many",
+                  "value": "create_only_the_minimum_reversible_candidate_or_bounded_matched_held_out_sequence_with_baseline_comparison_protected_regression_retention_causal_adoption_deduplication_and_information_value_stop",
+                  "precedence": 39,
+                  "supersedes": [],
+              },
+          ]
+
+          existing = {item.get("atom_id"): item for item in ledger.get("atoms", [])}
+          for atom in atoms:
+              prior = existing.get(atom["atom_id"])
+              if prior is not None and prior != atom:
+                  raise SystemExit(f"conflicting existing atom: {atom['atom_id']}")
+              if prior is None:
+                  ledger.setdefault("atoms", []).append(atom)
+
+          ledger["source"] = {
+              "path": "agi/USER_INPUT_INBOX.json",
+              "revision": 39,
+              "content_digest": expected_inbox_digest,
+              "interpreted_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+          }
+          ledger_path.write_text(
+              json.dumps(ledger, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          git rm .github/workflows/zz-bind-user-directive-events-rev39.yml
+          git config user.name "chatgpt-user-input-bridge"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add agi/USER_DIRECTIVE_EVENTS.json
+          git commit -m "user input: bind typed directives to revision 39"
+          git push origin HEAD:user-input/rev39-matched-evidence-acquisition-20260902
