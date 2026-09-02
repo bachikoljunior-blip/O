@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "record_type": "generation29_external_relational_query_repaired_execution_evidence",
-  "created_at": "2026-09-02T06:07:46.400Z",
+  "created_at": "2026-09-02T06:26:39.545Z",
   "authority": {
     "repository": "bachikoljunior-blip/O",
     "preaccess_repair_main_sha": "7faf87896dec84af8ce61dd1a3027ca069357790",
@@ -32,14 +32,28 @@
   },
   "repaired_execution_provenance": {
     "pull_request": 426,
-    "exact_head_sha": "8cf2c3724c32fc29d2576574ecf00d19b3d5d1d2",
-    "workflow_run_id": 33596782363,
-    "workflow_job_id": 100141722023,
+    "exact_head_sha": "00ff07efb8bb3889a8dd95e1bfc22faaea1dbbb2",
+    "workflow_run_id": 33598688390,
+    "workflow_job_id": 100147376942,
     "workflow_name": "generation29 relational v1.4.1 one-shot",
     "workflow_conclusion": "success",
-    "runner_blob_sha": "7f81059f3c08bfdc1914229354270443ed467cea",
+    "runner_blob_sha": "pending_exact_readback",
     "workflow_blob_sha": "e6ed3dbe6bb1663e14e8eb35325c67908c56f30d",
-    "transport": "depth-1 no-tags fetch of the exact public commit after the repair manifest merged"
+    "transport": "depth-1 no-tags fetch of the exact public commit after the repair manifest merged",
+    "initial_success_run": {
+      "pull_request": 426,
+      "exact_head_sha": "8cf2c3724c32fc29d2576574ecf00d19b3d5d1d2",
+      "workflow_run_id": 33596782363,
+      "workflow_job_id": 100141722023,
+      "conclusion": "success"
+    },
+    "recurrence_validation": {
+      "exact_head_sha": "00ff07efb8bb3889a8dd95e1bfc22faaea1dbbb2",
+      "workflow_run_id": 33598688390,
+      "workflow_job_id": 100147376942,
+      "conclusion": "success",
+      "purpose": "unchanged candidate SQL clean recurrence with complete engine/plan/timing/resource/row-set-digest evidence"
+    }
   },
   "result": {
     "broken_join_rows": [
@@ -196,6 +210,98 @@
         213,
         "Scholars Baroque Ensemble",
         99
+      ]
+    ],
+    "candidate_query_plan": [
+      [
+        2,
+        0,
+        0,
+        "CO-ROUTINE ranked"
+      ],
+      [
+        5,
+        2,
+        0,
+        "CO-ROUTINE (subquery-4)"
+      ],
+      [
+        7,
+        5,
+        0,
+        "CO-ROUTINE genre_artist_revenue"
+      ],
+      [
+        18,
+        7,
+        0,
+        "SCAN il"
+      ],
+      [
+        20,
+        7,
+        0,
+        "SEARCH i USING INTEGER PRIMARY KEY (rowid=?)"
+      ],
+      [
+        27,
+        7,
+        0,
+        "SEARCH t USING INTEGER PRIMARY KEY (rowid=?)"
+      ],
+      [
+        30,
+        7,
+        0,
+        "SEARCH g USING INTEGER PRIMARY KEY (rowid=?)"
+      ],
+      [
+        33,
+        7,
+        0,
+        "SEARCH al USING INTEGER PRIMARY KEY (rowid=?)"
+      ],
+      [
+        36,
+        7,
+        0,
+        "SEARCH ar USING INTEGER PRIMARY KEY (rowid=?)"
+      ],
+      [
+        39,
+        7,
+        0,
+        "USE TEMP B-TREE FOR GROUP BY"
+      ],
+      [
+        93,
+        5,
+        0,
+        "SCAN genre_artist_revenue"
+      ],
+      [
+        107,
+        5,
+        0,
+        "USE TEMP B-TREE FOR ORDER BY"
+      ],
+      [
+        128,
+        2,
+        0,
+        "SCAN (subquery-4)"
+      ],
+      [
+        181,
+        0,
+        0,
+        "SCAN ranked"
+      ],
+      [
+        194,
+        0,
+        0,
+        "USE TEMP B-TREE FOR ORDER BY"
       ]
     ],
     "candidate_rows": [
@@ -546,6 +652,182 @@
       ]
     ],
     "record_type": "generation29_external_relational_query_repaired_execution",
+    "reported_output": {
+      "columns": [
+        "GenreId",
+        "GenreName",
+        "ArtistId",
+        "ArtistName",
+        "Revenue"
+      ],
+      "revenue_representation": "exact decimal string normalized from internally compared integer cents",
+      "rows": [
+        [
+          1,
+          "Rock",
+          22,
+          "Led Zeppelin",
+          "23.76"
+        ],
+        [
+          2,
+          "Jazz",
+          6,
+          "Antônio Carlos Jobim",
+          "1.98"
+        ],
+        [
+          3,
+          "Metal",
+          50,
+          "Metallica",
+          "25.74"
+        ],
+        [
+          4,
+          "Alternative & Punk",
+          13,
+          "Body Count",
+          "5.94"
+        ],
+        [
+          5,
+          "Rock And Roll",
+          9,
+          "BackBeat",
+          "1.98"
+        ],
+        [
+          6,
+          "Blues",
+          137,
+          "The Black Crowes",
+          "3.96"
+        ],
+        [
+          7,
+          "Latin",
+          113,
+          "Os Paralamas Do Sucesso",
+          "13.86"
+        ],
+        [
+          8,
+          "Reggae",
+          19,
+          "Cidade Negra",
+          "2.97"
+        ],
+        [
+          9,
+          "Pop",
+          150,
+          "U2",
+          "3.96"
+        ],
+        [
+          10,
+          "Soundtrack",
+          21,
+          "Various Artists",
+          "1.98"
+        ],
+        [
+          13,
+          "Heavy Metal",
+          90,
+          "Iron Maiden",
+          "2.97"
+        ],
+        [
+          14,
+          "R&B/Soul",
+          91,
+          "James Brown",
+          "2.97"
+        ],
+        [
+          15,
+          "Electronica/Dance",
+          36,
+          "O Rappa",
+          "1.98"
+        ],
+        [
+          16,
+          "World",
+          97,
+          "João Suplicy",
+          "1.98"
+        ],
+        [
+          17,
+          "Hip Hop/Rap",
+          121,
+          "Planet Hemp",
+          "1.98"
+        ],
+        [
+          18,
+          "Science Fiction",
+          147,
+          "Battlestar Galactica",
+          "1.99"
+        ],
+        [
+          19,
+          "TV Shows",
+          156,
+          "The Office",
+          "13.93"
+        ],
+        [
+          20,
+          "Sci Fi & Fantasy",
+          158,
+          "Battlestar Galactica (Classic)",
+          "9.95"
+        ],
+        [
+          21,
+          "Drama",
+          149,
+          "Lost",
+          "11.94"
+        ],
+        [
+          22,
+          "Comedy",
+          156,
+          "The Office",
+          "11.94"
+        ],
+        [
+          23,
+          "Alternative",
+          8,
+          "Audioslave",
+          "1.98"
+        ],
+        [
+          24,
+          "Classical",
+          245,
+          "Michael Tilson Thomas & San Francisco Symphony",
+          "1.98"
+        ]
+      ]
+    },
+    "resources": {
+      "max_rss_kib": 20584
+    },
+    "row_set_digests": {
+      "broken_join_sha256": "fd703d943977256dfd95a7f118960e0d3dcde4b2a618b4fd04cdf816288872fb",
+      "candidate_sha256": "0273e362919b051411dbc0e665bc876580ca6bf107615b488a01852c6615c8b9",
+      "oracle_sha256": "0273e362919b051411dbc0e665bc876580ca6bf107615b488a01852c6615c8b9",
+      "replay_sha256": "0273e362919b051411dbc0e665bc876580ca6bf107615b488a01852c6615c8b9",
+      "wrong_year_sha256": "afb8c24c21c81109cc0f48cd2434a0c3293e7330aaf005628b5aea9782492297"
+    },
     "schema": {
       "Album": [
         {
@@ -773,6 +1055,19 @@
     "schema_version": 1,
     "source_status_after": "",
     "source_status_before": "",
+    "sqlite": {
+      "engine_version": "3.45.1",
+      "python_module_version": "2.6.0"
+    },
+    "timings_seconds": {
+      "broken_join": 0.0013825819999908617,
+      "candidate": 0.0018417429999999513,
+      "oracle": 0.0058634229999938725,
+      "replay": 0.000998893000001999,
+      "schema": 0.0006315580000091359,
+      "total": 0.3050003019999963,
+      "wrong_year": 0.0010279249999882722
+    },
     "verdict": "SOLVED",
     "wrong_year_rows": [
       [
@@ -939,6 +1234,6 @@
     ]
   },
   "verdict": "SOLVED",
-  "exact_claim": "The frozen relational task is SOLVED on exactly Chinook v1.4.1 commit e7e6d5f with all specified controls. This is not Candidate activation, generalized data reasoning, production readiness, AGI, upper-objective, user-level, or monitor completion.",
-  "idempotency_key": "o-work-gen29:invoke-1f60ea1b0640d22db760389a:relational-v141-solved:8cf2c372:33596782363"
+  "exact_claim": "The frozen relational task is SOLVED on exactly Chinook v1.4.1 commit e7e6d5f: exact source identities, nonempty 2012 scope, candidate/oracle equality, divergent wrong-year and broken-join controls, clean replay, byte-identical fixture, zero writes, SQLite engine/query plan, timings, resources, and equal candidate/oracle/replay row-set digests are recorded. This is not Candidate activation, generalized data reasoning, production readiness, AGI, upper-objective, user-level, or monitor completion.",
+  "idempotency_key": "o-work-gen29:invoke-1f60ea1b0640d22db760389a:relational-v141-solved-recurrence:00ff07ef:33598688390"
 }
