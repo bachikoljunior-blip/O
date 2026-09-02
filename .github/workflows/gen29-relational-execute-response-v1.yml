@@ -277,10 +277,15 @@ jobs:
           if len(pending)!=1:
               raise SystemExit(f'expected one next pending request, got {len(pending)}')
           request=pending[0]; component=request.get('component')
-          if component not in {'candidate_evaluate','task_evaluate'}:
+          if component not in {'candidate_evaluate','task_evaluate','root'}:
               raise SystemExit(f'unexpected next component: {component!r}')
           if component=='candidate_evaluate' and request.get('payload',{}).get('target_component')!='task_evaluate':
               raise SystemExit('next Candidate preflight does not target Task Evaluate')
+          if component=='root' and request.get('payload',{}).get('active_component_path')!='prompts/root.md':
+              raise SystemExit('next Root request is not bound to prompts/root.md')
+          snapshot=json.loads((root/'.continual'/'runs'/run_id/'snapshot.json').read_text())
+          if component=='root' and (snapshot.get('revision')!=143 or snapshot.get('current_component')!='root'):
+              raise SystemExit(f'next Root snapshot mismatch: revision={snapshot.get("revision")!r}, component={snapshot.get("current_component")!r}')
           if request.get('executor_binding')!=os.environ['EXECUTOR_BINDING'] or request.get('model_identity')!=os.environ['MODEL_IDENTITY']:
               raise SystemExit('next request identity mismatch')
           work_id=request['invocation_id']
