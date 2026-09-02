@@ -182,13 +182,13 @@
   "branch_head_tree_sha": null,
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-02T01:34:18.775Z",
+    "checkpointed_at": "2026-09-02T01:42:51.145Z",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "branch": "main",
-    "current_main_sha": "37a11e2e9ffb89ba2ad090d2f0e25f8a94f75ac5",
-    "current_state_blob_sha": "e793e07cac9f4bb4c94ca39e0286c93361c64b71",
+    "current_main_sha": "455be34aaab4c8693c7c3a88766c46896791a5ac",
+    "current_state_blob_sha": "403d250c20ef04cbdefb71ef4061728c86f7fe43",
     "goal_revision": 116,
     "active_component": "generation29_learn_formal_proof_pending_native_consume",
     "active_prompt": "prompts/learn.md",
@@ -251,9 +251,9 @@
       100089833644
     ],
     "exact_frontier": "Consume invoke-f05fdfdd0ff2e2d2eb017a5d exactly once; verify Learn response and unique Root successor; publish, bind, and continue.",
-    "next_tool": "github actions one-shot Work consume",
-    "next_tool_action": "Dispatch the exact frozen Learn request with source and continuity preflight; never recreate it.",
-    "next_action": "Consume invoke-f05fdfdd0ff2e2d2eb017a5d exactly once and freeze Root.",
+    "next_tool": "github workflow corrected one-shot",
+    "next_tool_action": "Reset branch and create corrected workflow without escaped github.token expression.",
+    "next_action": "Refire corrected exact Learn consumer; response remains absent.",
     "blocker": null,
     "termination": null,
     "no_partial_result_claimed": true,
@@ -14645,7 +14645,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 116,
-  "heartbeat_at": "2026-09-02T01:30:10.631Z",
+  "heartbeat_at": "2026-09-02T01:42:51.145Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -15519,7 +15519,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "formal_proof_candidate_consume_task_evaluate_bind_finalization",
-  "last_activity_at": "2026-09-02T01:30:10.631Z",
+  "last_activity_at": "2026-09-02T01:42:51.145Z",
   "last_progress_at": "2026-09-02T01:30:10.631Z",
   "last_verified_effect": {
     "bounded_unit_verdict": "PASS",
@@ -17594,5 +17594,33 @@
     "phase2_recorded_at": "2026-09-02T01:33:42.880Z",
     "phase2_verified_at": "2026-09-02T01:34:18.775Z",
     "verified_at": "2026-09-02T01:34:18.775Z"
+  },
+  "generation29_formal_proof_learn_runner_repair_v1": {
+    "schema_version": 1,
+    "status": "repair_applied_recurrence_validation_pending",
+    "recorded_at": "2026-09-02T01:42:51.145Z",
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "failed_workflow_run_id": 33580385605,
+    "failed_job_id": 100093238231,
+    "failed_head_sha": "509e75ef1af3ff092eec1c37d5848032d83b6e64",
+    "concrete_stop_cause": "The one-shot YAML preserved a literal backslash before the GitHub expression for github.token, so GH_TOKEN became a backslash-prefixed credential and gh failed with HTTP 401 before any heartbeat CAS, source observation, work-submit, or lifecycle mutation.",
+    "durable_effects_before_failure": "none; authoritative Learn response is absent, snapshot remains revision140 post_task_learn_pending, and the frozen Work/native request identities are unchanged.",
+    "repair": "Regenerate the one-shot without the literal backslash, reset the launch branch onto this exact repaired main, and rerun with the same frozen Learn request.",
+    "recurrence_validation": "pending corrected runner",
+    "frozen_request": {
+      "work_invocation_id": "invoke-f05fdfdd0ff2e2d2eb017a5d",
+      "native_invocation_id": "invoke-8371529e801f3595b97f6edc",
+      "request_blob_sha": "471944cf792f235af6141f7f2258b30d5cd5f9ca",
+      "request_digest": "d17c6fb573b81e83e29b8829ff8cd680f9e10807fb5055dbce4ecf82f102279a",
+      "response_exists_on_authoritative_remote": false,
+      "snapshot_revision": 140,
+      "snapshot_blob_sha": "f4b831e10fb39b8b1d1dba7abf3beb3682ba5e98"
+    },
+    "request_recreated": false,
+    "response_repeated": false,
+    "resume_required": true,
+    "next_action": "Reset launch branch to this repaired main, install corrected one-shot, consume the unchanged Learn request once, and validate Root freeze."
   }
 }
