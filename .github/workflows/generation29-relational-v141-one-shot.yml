@@ -1,0 +1,32 @@
+name: generation29 relational v1.4.1 one-shot
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/generation29-relational-v141-one-shot.yml"
+      - "scripts/run_generation29_relational_v141.py"
+      - "agi/experiments/generation29-external-relational-query-reasoning-v1/**"
+
+permissions:
+  contents: read
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Fetch exact public v1.4.1 snapshot only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/chinook"
+          git -C "$RUNNER_TEMP/chinook" init
+          git -C "$RUNNER_TEMP/chinook" remote add origin https://github.com/lerocha/chinook-database.git
+          git -C "$RUNNER_TEMP/chinook" fetch --depth=1 --no-tags origin e7e6d5f008e35d3f89d8b8a4f8d38e3bfa7e34bd
+          git -C "$RUNNER_TEMP/chinook" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/chinook" rev-parse HEAD)" = "e7e6d5f008e35d3f89d8b8a4f8d38e3bfa7e34bd"
+      - name: Run frozen relational protocol
+        env:
+          CHINOOK_ROOT: ${{ runner.temp }}/chinook
+        run: python scripts/run_generation29_relational_v141.py
