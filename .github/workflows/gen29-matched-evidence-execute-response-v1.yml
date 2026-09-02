@@ -175,19 +175,27 @@ jobs:
           continual --root . work-source-observation-record "$RUN_ID" "$WORK_OBSERVATION_ID" --request-digest "$WORK_REQUEST_DIGEST" --commit-sha "$EXPECTED_MAIN" --blob-sha "$EXPECTED_STATE_BLOB" --projection /tmp/work-source-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/work-source-receipt.json
 
           continual --root . ci-source-observation-prepare "$RUN_ID" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-prepare.json
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/workflow-run-full.json
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/workflow-jobs-full.json
-          test "$(jq -r '.head_sha' /tmp/workflow-run-full.json)" = "$SOURCE_CI_HEAD"
-          test "$(jq -r '.status' /tmp/workflow-run-full.json)" = completed
-          test "$(jq -r '.conclusion' /tmp/workflow-run-full.json)" = success
-          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/workflow-jobs-full.json
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$DIRECTIVE_CI_RUN_ID" | jq -e '.head_sha == env.SOURCE_CI_HEAD and .status == "completed" and .conclusion == "success"'
-          jq '{id, workflow_id, name, status, conclusion, head_sha}' /tmp/workflow-run-full.json > /tmp/workflow-run-projection.json
-          jq '[.jobs[] | {id, name, status, conclusion}] | sort_by(.id)' /tmp/workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
+          POLICY_CI_RUN_ID="$(jq -r '.source.workflow_run_id' /tmp/ci-source-prepare.json)"
+          POLICY_CI_HEAD="$(jq -r '.source.exact_head_sha' /tmp/ci-source-prepare.json)"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$POLICY_CI_RUN_ID" > /tmp/policy-workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$POLICY_CI_RUN_ID/jobs?per_page=100" > /tmp/policy-workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/policy-workflow-run-full.json)" = "$POLICY_CI_HEAD"
+          test "$(jq -r '.status' /tmp/policy-workflow-run-full.json)" = completed
+          test "$(jq -r '.conclusion' /tmp/policy-workflow-run-full.json)" = success
+          jq '{id, workflow_id, name, status, conclusion, head_sha}' /tmp/policy-workflow-run-full.json > /tmp/workflow-run-projection.json
+          jq '[.jobs[] | {id, name, status, conclusion}] | sort_by(.id)' /tmp/policy-workflow-jobs-full.json > /tmp/workflow-jobs-projection.json
           CI_OBSERVATION_ID="$(jq -r '.observation_id' /tmp/ci-source-prepare.json)"
           CI_REQUEST_DIGEST="$(jq -r '.request_digest' /tmp/ci-source-prepare.json)"
           OBSERVED_AT="$(python -c 'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat().replace("+00:00", "Z"))')"
           continual --root . ci-source-observation-record "$RUN_ID" "$CI_OBSERVATION_ID" --request-digest "$CI_REQUEST_DIGEST" --workflow-run /tmp/workflow-run-projection.json --jobs /tmp/workflow-jobs-projection.json --observed-at "$OBSERVED_AT" --executor-binding "$EXECUTOR_BINDING" --model-identity "$MODEL_IDENTITY" > /tmp/ci-source-receipt.json
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID" > /tmp/source-workflow-run-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_CI_RUN_ID/jobs?per_page=100" > /tmp/source-workflow-jobs-full.json
+          test "$(jq -r '.head_sha' /tmp/source-workflow-run-full.json)" = "$SOURCE_CI_HEAD"
+          test "$(jq -r '.status' /tmp/source-workflow-run-full.json)" = completed
+          test "$(jq -r '.conclusion' /tmp/source-workflow-run-full.json)" = success
+          jq -e '[.jobs[] | select(.name == "pytest shard 0 of 4" or .name == "pytest shard 1 of 4" or .name == "pytest shard 2 of 4" or .name == "pytest shard 3 of 4" or .name == "test") | select(.status == "completed" and .conclusion == "success")] | length == 5' /tmp/source-workflow-jobs-full.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$DIRECTIVE_CI_RUN_ID" | jq -e '.head_sha == env.SOURCE_CI_HEAD and .status == "completed" and .conclusion == "success"'
 
       - name: Recheck exact CAS and continuity preflight
         shell: bash
