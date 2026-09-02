@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "record_type": "generation29_matched_evidence_learn_consume_root_freeze_receipt",
+  "recorded_at": "2026-09-02T19:31:21.766Z",
+  "authority": {
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d"
+  },
+  "source_main_sha": "316caa75cbe6a98aeba9336fbb467410f91938ac",
+  "source_state_blob_sha": "5bb1222ef7368f9582f6491ba1bb54b8213911cc",
+  "completed_effect": {
+    "component": "learn",
+    "decision": "NO_CHANGE",
+    "completed_exactly_once": true,
+    "work_invocation_id": "invoke-de9a6e043ba3f51f6d9f32fa",
+    "native_invocation_id": "invoke-af0fdc46dfdd59a7d8fd1ad6",
+    "request_blob_sha": "c413b560716a1e708f3d5fe7f48111da53633de3",
+    "request_digest": "23b916b8b7d13a8821236f8b772f1392a6dae30b94fc44bf9affdff523b17ab9",
+    "response_ref": ".continual/work-model/invocations/invoke-de9a6e043ba3f51f6d9f32fa/response.json",
+    "response_blob_sha": "130e344789ec08aa6a40fe72a22f853bf54d8650",
+    "response_digest": "3b9bf61f740486d92cb0cd27050f52bf3f3fd7e00f30a879a1f537d6543dd951",
+    "native_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-af0fdc46dfdd59a7d8fd1ad6.json",
+    "native_blob_sha": "6eb235bce0eb6e538d4118d270f15d7789dcf2f8",
+    "candidate_activation": false,
+    "candidate_promotion": false,
+    "upper_objective_achieved": false,
+    "agi_achieved": false
+  },
+  "stop_cause_repair": {
+    "cause": "The frozen Learn native journal was absent from the first continuation source commit.",
+    "repair_commit_sha": "11f5a98a8982319bae6c16906d9d597a220d9b84",
+    "repair_blob_sha": "24cdb2fd3f184e8aede0ad290a8d0a056ebcca76",
+    "exact_readback_verified": true,
+    "two_phase_rebind_commit_sha": "316caa75cbe6a98aeba9336fbb467410f91938ac",
+    "recurrence_validation": "strict continuity preflight returned resume_authorized=true before the Learn response was submitted"
+  },
+  "source_observations": {
+    "ci": {
+      "observation_id": "ci-run-7e6fd81464bb71f257cbbe9a",
+      "request_digest": "69c1e9f9d2bc6951521839bdbc02c51e7a3ae5fca39519f0a24ee328d1d74228",
+      "receipt_digest": "6dd9e7ee38d1cd2c872fece018701203a6be1c11eb4d3247d5177b316468293e",
+      "workflow_run_id": 33587996147
+    },
+    "work": {
+      "observation_id": "work-state-7343e03f97fd0b9ff66cef6e",
+      "request_digest": "9dee31e4a8f7670c7e26ac1aeb4a8890dbc39ec0448c442492748879644d4035",
+      "receipt_digest": "d8dfe856ec4620ee1caff4e779ed32b9cfee14478211031d93e9802e13d0c532"
+    }
+  },
+  "successor": {
+    "component": "root",
+    "work_invocation_id": "invoke-95fad610dd82a262b7619f07",
+    "native_invocation_id": "invoke-85816e6ca30725c9e71ee886",
+    "request_ref": ".continual/work-model/invocations/invoke-95fad610dd82a262b7619f07/request.json",
+    "request_blob_sha": "21af423df21e9a076971cd1bf6d32f5aed871c41",
+    "request_digest": "623f4a945e5403b0bc84ec706b14dc70321cfe28977465a4d8351bc87a3a5a91",
+    "native_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-85816e6ca30725c9e71ee886.json",
+    "native_blob_sha": "87c538535a52b333f6b03ec968432decc718c99a",
+    "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+    "snapshot_blob_sha": "aa398d382a03a93b0cc4be0202596857aef22516",
+    "snapshot_revision": 150,
+    "snapshot_phase": "root_pending",
+    "response_absent": true
+  },
+  "idempotency_key": "o-work-gen29:consume-learn-invoke-de9a6e04:freeze-root:v1",
+  "request_recreated": false,
+  "response_repeated": false,
+  "resume_required": true,
+  "next_action": "Publish and exact-read the Learn lifecycle, bind the unique frozen Root request by two-phase CAS, consume Root exactly once, and execute a materially different safe unit.",
+  "upper_objective_achieved": false,
+  "agi_achieved": false
+}
