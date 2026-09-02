@@ -1195,7 +1195,7 @@
     },
     "durability_main_alignment_repair": {
       "schema_version": 1,
-      "status": "phase2_prepared",
+      "status": "remote_main_readback_verified",
       "cause": "exact_continuation.snapshot_head_sha did not equal continuation_durability.source_main_sha, causing fail-closed ContinuityPreflightError before response submission.",
       "failed_workflow_run_ids": [
         33606523975
@@ -1217,7 +1217,14 @@
       "phase1_verified_at": "2026-09-02T08:06:31.167Z",
       "phase2_expected_prior_main_sha": "dd5cc9a54a94b2035ccc038ce0efd48127f831ee",
       "phase2_expected_prior_state_blob_sha": "49c7b6d2479f842c302b59af798067cbbab6852b",
-      "phase2_prepared_at": "2026-09-02T08:06:31.167Z"
+      "phase2_prepared_at": "2026-09-02T08:06:31.167Z",
+      "verified_remote_readback": true,
+      "phase2_commit_sha": "ce5eac534fbdf359918db2fd363153a13d05ed6d",
+      "phase2_state_blob_sha": "2c176e5bb986277052c5b92f3e1cb53af56a3b31",
+      "phase2_exact_readback_verified": true,
+      "phase2_verified_at": "2026-09-02T08:06:54.579Z",
+      "verified_at": "2026-09-02T08:06:54.579Z",
+      "recurrence_validation_pending": true
     }
   },
   "exact_head_ci_observation": {
@@ -15009,7 +15016,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-02T08:06:31.167Z",
+  "heartbeat_at": "2026-09-02T08:06:54.579Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -17676,7 +17683,7 @@
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-09-02T08:06:31.167Z",
+    "evaluated_at": "2026-09-02T08:06:54.579Z",
     "evidence_refs": [
       "github://bachikoljunior-blip/O@e0ce49414b911073b21af5cf25e9d1d7b6cc7f1d/agi/USER_INPUT_INBOX.json",
       "github://bachikoljunior-blip/O@e0ce49414b911073b21af5cf25e9d1d7b6cc7f1d/agi/USER_DIRECTIVE_EVENTS.json",
@@ -17685,7 +17692,8 @@
       "github-actions:run/33597567661#success",
       "github://bachikoljunior-blip/note/automation_control/O_OPERATIONS.json#revision15",
       "github://bachikoljunior-blip/O@0080bcf66ca3e4d3c18b25f2f988dc6a97c1b39f/agi/WORK_EXECUTION_STATE.json#phase1-exact-readback",
-      "github://bachikoljunior-blip/O@0f03a9615854bf093fb51f9ff91377eede0ebd97/agi/WORK_EXECUTION_STATE.json#phase2-exact-readback"
+      "github://bachikoljunior-blip/O@0f03a9615854bf093fb51f9ff91377eede0ebd97/agi/WORK_EXECUTION_STATE.json#phase2-exact-readback",
+      "github://bachikoljunior-blip/O@ce5eac534fbdf359918db2fd363153a13d05ed6d/agi/WORK_EXECUTION_STATE.json#durability-main-alignment-phase2-readback"
     ],
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "executor_binding": "current_chatgpt_work_session",
@@ -17707,7 +17715,7 @@
     "remediations": [
       "Bound revision39 exact raw policy digests and preserved the same frozen Execute request without recreation."
     ],
-    "resume_authorized": false,
+    "resume_authorized": true,
     "root_causes": [
       "Revision39 arrived after the immutable Execute request was frozen; the required safe-boundary refresh must acknowledge it without mutating that request."
     ],
