@@ -178,13 +178,13 @@
     }
   },
   "branch": "main",
-  "branch_head_sha": "9bedc947f291088045cfe78294bfd7199f5fec3c",
+  "branch_head_sha": "92b4752443cd7c6d108c6984d09839c3511262c4",
   "branch_head_tree_sha": null,
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-02T10:21:15Z",
-    "current_main_sha": "9bedc947f291088045cfe78294bfd7199f5fec3c",
-    "current_state_blob_sha": "26831058ceea78fdfe617d3f28341263abbcdccc",
+    "checkpointed_at": "2026-09-02T10:22:45Z",
+    "current_main_sha": "92b4752443cd7c6d108c6984d09839c3511262c4",
+    "current_state_blob_sha": "47a5ad9ece2229bb9792a4f2edd8e7df5f96ed00",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -255,8 +255,8 @@
     "idempotency_key": "o-work-gen29:pr429:f6f57932:bind-matched-evidence-candidate:v1",
     "exact_frontier": "Consume invoke-d5beb42702e149bd1539e662 exactly once with a baseline-first, no-activation decision for the unverified repository-development Candidate, freeze the Execute successor, then implement and falsifiably test the bounded matched-evidence acquisition guard.",
     "next_tool": "GitHub state CAS then exact Candidate Evaluate response consumer",
-    "next_action": "Consume invoke-d5beb42702e149bd1539e662 exactly once with a baseline-first, no-activation decision for the unverified repository-development Candidate, freeze the Execute successor, then implement and falsifiably test the bounded matched-evidence acquisition guard.",
-    "next_tool_action": "Exact-read phase1 state, write phase2 binding, verify continuity, consume invoke-d5beb42702e149bd1539e662 once, and freeze the unique Execute successor.",
+    "next_action": "Consume the exact Candidate Evaluate request once with baseline-first and no activation, then freeze the unique Execute successor.",
+    "next_tool_action": "Create a one-shot Candidate response consumer from verified main with exact request/snapshot/authority guards.",
     "resume_required": true,
     "termination": null,
     "blocker": null,
@@ -1057,8 +1057,8 @@
   "continuation": "Consume invoke-d5beb42702e149bd1539e662 exactly once with a baseline-first, no-activation decision for the unverified repository-development Candidate, freeze the Execute successor, then implement and falsifiably test the bounded matched-evidence acquisition guard.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "phase2_remote_readback_pending",
-    "verified_remote_readback": false,
+    "status": "remote_main_readback_verified",
+    "verified_remote_readback": true,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -1085,11 +1085,11 @@
     "phase2_expected_prior_main_sha": "9bedc947f291088045cfe78294bfd7199f5fec3c",
     "phase2_expected_prior_state_blob_sha": "26831058ceea78fdfe617d3f28341263abbcdccc",
     "phase2_prepared_at": "2026-09-02T10:21:15Z",
-    "phase2_commit_sha": null,
-    "phase2_state_blob_sha": null,
-    "phase2_exact_readback_verified": false,
-    "phase2_verified_at": null,
-    "verified_at": null
+    "phase2_commit_sha": "92b4752443cd7c6d108c6984d09839c3511262c4",
+    "phase2_state_blob_sha": "47a5ad9ece2229bb9792a4f2edd8e7df5f96ed00",
+    "phase2_exact_readback_verified": true,
+    "phase2_verified_at": "2026-09-02T10:22:45Z",
+    "verified_at": "2026-09-02T10:22:45Z"
   },
   "continuation_source": "repository_latest_main_only",
   "continuous_execution_authorization": {
@@ -1105,9 +1105,9 @@
   "durability_status": "pending_native_consume",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "phase2_remote_readback_pending",
-    "verified_remote_readback": false,
-    "durability_status": "phase2_remote_readback_pending",
+    "status": "remote_main_readback_verified",
+    "verified_remote_readback": true,
+    "durability_status": "remote_main_readback_verified",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -1177,11 +1177,11 @@
     "phase2_expected_prior_main_sha": "9bedc947f291088045cfe78294bfd7199f5fec3c",
     "phase2_expected_prior_state_blob_sha": "26831058ceea78fdfe617d3f28341263abbcdccc",
     "phase2_prepared_at": "2026-09-02T10:21:15Z",
-    "phase2_commit_sha": null,
-    "phase2_state_blob_sha": null,
-    "phase2_exact_readback_verified": false,
-    "phase2_verified_at": null,
-    "verified_at": null
+    "phase2_commit_sha": "92b4752443cd7c6d108c6984d09839c3511262c4",
+    "phase2_state_blob_sha": "47a5ad9ece2229bb9792a4f2edd8e7df5f96ed00",
+    "phase2_exact_readback_verified": true,
+    "phase2_verified_at": "2026-09-02T10:22:45Z",
+    "verified_at": "2026-09-02T10:22:45Z"
   },
   "exact_head_ci_observation": {
     "conclusion": "success",
@@ -14972,7 +14972,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-02T10:21:15Z",
+  "heartbeat_at": "2026-09-02T10:22:45Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -15846,8 +15846,8 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "formal_proof_candidate_consume_task_evaluate_bind_finalization",
-  "last_activity_at": "2026-09-02T10:21:15Z",
-  "last_progress_at": "2026-09-02T10:21:15Z",
+  "last_activity_at": "2026-09-02T10:22:45Z",
+  "last_progress_at": "2026-09-02T10:22:45Z",
   "last_verified_effect": {
     "component": "root",
     "work_invocation_id": "invoke-26847939d433f6e581167854",
@@ -16075,9 +16075,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Consume invoke-d5beb42702e149bd1539e662 exactly once with a baseline-first, no-activation decision for the unverified repository-development Candidate, freeze the Execute successor, then implement and falsifiably test the bounded matched-evidence acquisition guard.",
-  "next_tool": "GitHub state CAS then exact Candidate Evaluate response consumer",
-  "next_tool_action": "Exact-read phase1 state, write phase2 binding, verify continuity, consume invoke-d5beb42702e149bd1539e662 once, and freeze the unique Execute successor.",
+  "next_action": "Consume the exact frozen Candidate Evaluate request invoke-d5beb42702e149bd1539e662 once with baseline-first and no activation; freeze and continue its Execute successor.",
+  "next_tool": "GitHub Actions exact one-shot Candidate response consumer",
+  "next_tool_action": "Launch from verified main, revalidate request/snapshot/authority and revision39, submit one response, resume two native steps, validate unique Execute successor, persist receipt, and publish through exact-head CI.",
   "no_response_on_authoritative_remote": true,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -16351,7 +16351,7 @@
   "pending_task_evaluate_work_invocation_id": null,
   "pending_work_invocation_id": "invoke-d5beb42702e149bd1539e662",
   "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-d5beb42702e149bd1539e662/request.json",
-  "phase2_readback_verified": false,
+  "phase2_readback_verified": true,
   "post_acquisition_progress_contract": {
     "concrete_effect_selected": "Renew mandatory source receipts against exact remote main revision 92 and state blob 499cad1, freeze and answer Execute exactly once for the selected recursive-context retrieval ablation, validate and publish its substantive result, then continue to the next safe effect.",
     "effect_attempted": false,
@@ -17653,14 +17653,15 @@
   "start_of_run_continuity_preflight": {
     "schema_version": 1,
     "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-09-02T10:21:15Z",
+    "evaluated_at": "2026-09-02T10:22:45Z",
     "evidence_refs": [
       "github://bachikoljunior-blip/O@b4fa86ed59a0bfb8209207581950f325703f9523/.continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-root-consume-matched-evidence-freeze-v1.json",
       "github-actions:run/33614405034#success",
       "github-actions:run/33614815007#success",
       "github-actions:run/33614815012#success",
       "github://bachikoljunior-blip/note@0e2f76cf92ab538e4bf1d0ead00fce88624ff666/automation_control/receipts/o_work_monitor_recovery/20260902T1015Z-gen29-scheduled-slot-overlap-1012-pr429-ci.json",
-      "github://bachikoljunior-blip/O@9bedc947f291088045cfe78294bfd7199f5fec3c/agi/WORK_EXECUTION_STATE.json#phase1-exact-readback"
+      "github://bachikoljunior-blip/O@9bedc947f291088045cfe78294bfd7199f5fec3c/agi/WORK_EXECUTION_STATE.json#phase1-exact-readback",
+      "github://bachikoljunior-blip/O@92b4752443cd7c6d108c6984d09839c3511262c4/agi/WORK_EXECUTION_STATE.json#phase2-exact-readback"
     ],
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "executor_binding": "current_chatgpt_work_session",
@@ -17674,7 +17675,7 @@
       "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
     },
     "remediations": [
-      "Bound the merged Root lifecycle and unique Candidate Evaluate request through phase1 exact readback; phase2 exact readback is pending."
+      "Bound the merged Root lifecycle and unique Candidate Evaluate request through two-phase expected-main/state CAS and exact readback."
     ],
     "resume_authorized": true,
     "root_causes": [
@@ -18098,7 +18099,7 @@
   },
   "generation29_matched_evidence_root_consume_candidate_bind_v1": {
     "schema_version": 1,
-    "status": "phase2_remote_readback_pending",
+    "status": "remote_main_readback_verified",
     "pull_request": 429,
     "head_sha": "f6f579322f707403bf1ec0f535c7db6225bb6a33",
     "merge_sha": "b4fa86ed59a0bfb8209207581950f325703f9523",
@@ -18149,9 +18150,9 @@
     "phase1_commit_sha": "9bedc947f291088045cfe78294bfd7199f5fec3c",
     "phase1_state_blob_sha": "26831058ceea78fdfe617d3f28341263abbcdccc",
     "phase1_exact_readback_verified": true,
-    "phase2_commit_sha": null,
-    "phase2_state_blob_sha": null,
-    "phase2_exact_readback_verified": false,
+    "phase2_commit_sha": "92b4752443cd7c6d108c6984d09839c3511262c4",
+    "phase2_state_blob_sha": "47a5ad9ece2229bb9792a4f2edd8e7df5f96ed00",
+    "phase2_exact_readback_verified": true,
     "request_recreated": false,
     "response_repeated": false,
     "upper_objective_achieved": false,
@@ -18160,6 +18161,9 @@
     "phase1_verified_at": "2026-09-02T10:21:15Z",
     "phase2_expected_prior_main_sha": "9bedc947f291088045cfe78294bfd7199f5fec3c",
     "phase2_expected_prior_state_blob_sha": "26831058ceea78fdfe617d3f28341263abbcdccc",
-    "phase2_prepared_at": "2026-09-02T10:21:15Z"
+    "phase2_prepared_at": "2026-09-02T10:21:15Z",
+    "verified_remote_readback": true,
+    "phase2_verified_at": "2026-09-02T10:22:45Z",
+    "verified_at": "2026-09-02T10:22:45Z"
   }
 }
