@@ -284,8 +284,8 @@ jobs:
           if component=='root' and request.get('payload',{}).get('active_component_path')!='prompts/root.md':
               raise SystemExit('next Root request is not bound to prompts/root.md')
           snapshot=json.loads((root/'.continual'/'runs'/run_id/'snapshot.json').read_text())
-          if component=='root' and (snapshot.get('revision')!=143 or snapshot.get('current_component')!='root'):
-              raise SystemExit(f'next Root snapshot mismatch: revision={snapshot.get("revision")!r}, component={snapshot.get("current_component")!r}')
+          if component=='root' and (snapshot.get('revision')!=143 or snapshot.get('phase')!='root_pending'):
+              raise SystemExit(f'next Root snapshot mismatch: revision={snapshot.get("revision")!r}, phase={snapshot.get("phase")!r}')
           if request.get('executor_binding')!=os.environ['EXECUTOR_BINDING'] or request.get('model_identity')!=os.environ['MODEL_IDENTITY']:
               raise SystemExit('next request identity mismatch')
           work_id=request['invocation_id']
