@@ -18,8 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      EXPECTED_MAIN: 95c95febac387b1bc166e611a62a50ca8be88720
-      EXPECTED_STATE_BLOB: ede095000fb54f76554a124ff0a870e3d3262b80
+      EXPECTED_BASE_MAIN: 95c95febac387b1bc166e611a62a50ca8be88720
+      EXPECTED_MAIN: b7c07bae7bfb04502fd020d43ca6cd670da9e2c9
+      EXPECTED_STATE_BLOB: c2d08c0a84fce93d861502c6a0efb0d08907dba7
       EXPECTED_SNAPSHOT_BLOB: ef4e365249df108da476c76eae3db4c6f6b5c17b
       EXPECTED_INBOX_BLOB: 89a98913189a88ddef9e7cc53ed5436b1c3379fa
       EXPECTED_INBOX_REVISION: '40'
@@ -58,7 +59,7 @@ jobs:
           set -euo pipefail
           git fetch origin main --no-tags
           test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
-          test "$(git merge-base "$EXPECTED_MAIN" HEAD)" = "$EXPECTED_MAIN"
+          test "$(git merge-base "$EXPECTED_BASE_MAIN" HEAD)" = "$EXPECTED_BASE_MAIN"
           python - <<'PY'
           import os, subprocess
           expected = [
@@ -66,11 +67,19 @@ jobs:
               '.github/workflows/gen29-matched-evidence-execute-response-v1.yml',
           ]
           observed = subprocess.check_output(
-              ['git', 'diff', '--name-only', os.environ['EXPECTED_MAIN'], 'HEAD'], text=True
+              ['git', 'diff', '--name-only', os.environ['EXPECTED_BASE_MAIN'], 'HEAD'], text=True
           ).splitlines()
           if observed != expected:
               raise SystemExit(f'launch delta mismatch: {observed!r}')
+          runtime_delta = subprocess.check_output(
+              ['git', 'diff', '--name-status', os.environ['EXPECTED_BASE_MAIN'], os.environ['EXPECTED_MAIN']], text=True
+          ).splitlines()
+          if runtime_delta != ['M\tagi/WORK_EXECUTION_STATE.json']:
+              raise SystemExit(f'unsafe runtime-main delta: {runtime_delta!r}')
           PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-edit "$EXPECTED_MAIN"
           test "$(git hash-object "$RESPONSE_INPUT")" = "$RESPONSE_INPUT_BLOB"
           test "$(git hash-object agi/WORK_EXECUTION_STATE.json)" = "$EXPECTED_STATE_BLOB"
           test "$(git hash-object agi/USER_INPUT_INBOX.json)" = "$EXPECTED_INBOX_BLOB"
