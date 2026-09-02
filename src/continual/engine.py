@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import Any
 
 from .contracts import ContractError, validate_component_output
+from .matched_evidence_acquisition import (
+    decide_matched_evidence_acquisition,
+    matched_evidence_authority,
+    matched_evidence_source_clock,
+)
 from .openai_client import ModelClient
 from .store import Store
 from .work_session import WorkModelPending
@@ -811,6 +816,63 @@ class Engine:
             continuation_stack=stack,
         )
 
+    def _guard_root_selection(
+        self,
+        run_id: str,
+        proposed_unit: dict[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Apply the optional typed one-shot matched-evidence guard.
+
+        Ordinary Root output is unchanged unless the latest Learn artifact
+        carries the complete schema and every live binding still matches.
+        """
+
+        rd = self.store.run_dir(run_id)
+        learn_result = self.store.read_json(rd / "artifacts" / "post-task-learn.json", {})
+        receipt_dir = rd / "matched-evidence-acquisition"
+        seen: set[str] = set()
+        if receipt_dir.exists():
+            for path in sorted(receipt_dir.glob("*.json")):
+                value = self.store.read_json(path, {})
+                if isinstance(value, dict) and isinstance(value.get("idempotency_key"), str):
+                    seen.add(value["idempotency_key"])
+        decision = decide_matched_evidence_acquisition(
+            learn_result=learn_result,
+            proposed_root_unit=proposed_unit,
+            current_authority=matched_evidence_authority(self.root),
+            current_source_clock=matched_evidence_source_clock(self.root),
+            seen_idempotency_keys=seen,
+        )
+        selected = decision.get("selected_unit")
+        if decision.get("decision") != "SCHEDULE_ONCE" or not isinstance(selected, dict):
+            return proposed_unit, decision
+        return selected, decision
+
+    def _record_matched_evidence_schedule(
+        self,
+        run_id: str,
+        proposed_unit: dict[str, Any],
+        decision: dict[str, Any],
+        scheduled_snapshot: dict[str, Any],
+    ) -> None:
+        receipt_dir = self.store.run_dir(run_id) / "matched-evidence-acquisition"
+        receipt = decision["receipt"]
+        receipt["recorded_at"] = self.store.utc_now()
+        receipt["run_id"] = run_id
+        receipt["proposed_root_unit"] = deepcopy(proposed_unit)
+        receipt["scheduled_snapshot_revision"] = scheduled_snapshot.get("revision")
+        receipt["scheduled_unit_id"] = scheduled_snapshot.get("current_unit")
+        digest = str(decision["idempotency_key"]).split(":", 1)[1]
+        self.store.atomic_json(receipt_dir / f"{digest}.json", receipt)
+        self.store.append_event(
+            run_id,
+            {
+                "type": "matched_evidence_acquisition_scheduled",
+                "idempotency_key": decision["idempotency_key"],
+                "capability_id": receipt["capability_id"],
+            },
+        )
+
     def resume(self, run_id: str, max_steps: int = 64) -> dict[str, Any]:
         if max_steps < 1:
             raise ValueError("max_steps must be at least 1")
@@ -852,7 +914,25 @@ class Engine:
                             "continuation_stack": snapshot.get("continuation_stack", []),
                         },
                     )
-                    self._schedule_unit(run_id, snapshot, output.get("result", {}))
+                    proposed = output.get("result", {})
+                    if not isinstance(proposed, dict):
+                        proposed = {}
+                    selected, guard_decision = self._guard_root_selection(
+                        run_id,
+                        proposed,
+                    )
+                    scheduled = self._schedule_unit(
+                        run_id,
+                        snapshot,
+                        selected,
+                    )
+                    if guard_decision.get("decision") == "SCHEDULE_ONCE":
+                        self._record_matched_evidence_schedule(
+                            run_id,
+                            proposed,
+                            guard_decision,
+                            scheduled,
+                        )
                     continue
 
                 if phase == "unit_pending":
