@@ -186,7 +186,7 @@
     "agi_claim_supported": false,
     "blocker": null,
     "branch": "main",
-    "checkpointed_at": "2026-09-02T01:44:33.517Z",
+    "checkpointed_at": "2026-09-02T01:46:43.546Z",
     "completed_effect_receipt": {
       "blob_sha": "f428a9f034cce0d867a6cf2b291ca7f08650e6bf",
       "ref": ".continual/work-model/invocations/invoke-7d9a5dc703734404449aae3d/response.json"
@@ -211,8 +211,8 @@
       33577260168,
       33577260187
     ],
-    "current_main_sha": "d505e29b2b07551b26381cbdd77f903bf1f6425a",
-    "current_state_blob_sha": "9b4ab0951ed7ff8aa1314fbb110081d203fc35f4",
+    "current_main_sha": "c1798b81431400e6dec7425b91ccf878bf795d31",
+    "current_state_blob_sha": "62d92c47b8e884a90b185a66f389f9c55414d517",
     "exact_completed_native_invocation_id": "invoke-c12c2d3c0055ceeb69e6d9c5",
     "exact_completed_request_digest": "87197eca087739bf7fcfc2b4d329e7f8bbc1347da67f76f7097b7285b9d7717a",
     "exact_completed_response_digest": "d749b22a588114acb69e13fb44c031424ea8c5289aadf0fe203a54199a2cc9f4",
@@ -243,9 +243,9 @@
     },
     "lease_generation": 29,
     "native_phase": "post_task_learn_pending",
-    "next_action": "Refire unchanged Learn after validating file-based payload repair.",
-    "next_tool": "github workflow corrected one-shot",
-    "next_tool_action": "Construct heartbeat contents API payload from files in Python and rerun.",
+    "next_action": "Refire unchanged Learn with state-precommitted CI source.",
+    "next_tool": "github workflow policy-derived CI one-shot",
+    "next_tool_action": "Read exact CI source from ci-source-observation request and rerun.",
     "no_partial_result_claimed": true,
     "pending_component": "learn",
     "pull_request": {
@@ -7263,7 +7263,7 @@
       }
     },
     "resume_required": true,
-    "runner_start_refresh_pending_exact_readback": true,
+    "runner_start_refresh_pending_exact_readback": false,
     "runner_start_refreshes": [
       {
         "reason": "Bound queue delay so Context Kernel sees a current durable owner heartbeat immediately before the unchanged exact Learn consume.",
@@ -7278,10 +7278,14 @@
     "status": "remote_main_readback_verified",
     "upper_objective_achieved": false,
     "verified_at": "2026-09-02T01:34:18.775Z",
-    "verified_remote_readback": true
+    "verified_remote_readback": true,
+    "runner_start_refresh_exact_readback_verified": true,
+    "runner_start_refresh_commit_sha": "c1798b81431400e6dec7425b91ccf878bf795d31",
+    "runner_start_refresh_state_blob_sha": "62d92c47b8e884a90b185a66f389f9c55414d517",
+    "runner_start_refresh_verified_at": "2026-09-02T01:46:43.546Z"
   },
   "generation29_formal_proof_learn_runner_repair_v1": {
-    "concrete_stop_cause": "Runner launch defects before semantic mutation: first a literal backslash corrupted GH_TOKEN; after that repair, the heartbeat payload exceeded the OS command-argument limit.",
+    "concrete_stop_cause": "After token and oversized-payload repairs, the runner used a hard-coded CI run that did not match the exact state-precommitted CI observation policy, causing a fail-closed workflow run id mismatch.",
     "durable_effects_before_failure": "none; authoritative Learn response is absent, snapshot remains revision140 post_task_learn_pending, and the frozen Work/native request identities are unchanged.",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "failed_head_sha": "509e75ef1af3ff092eec1c37d5848032d83b6e64",
@@ -7298,7 +7302,7 @@
       "work_invocation_id": "invoke-f05fdfdd0ff2e2d2eb017a5d"
     },
     "lease_generation": 29,
-    "next_action": "Reset launch branch to this repaired main, create a file-payload one-shot, consume the unchanged Learn request once, and validate Root freeze.",
+    "next_action": "Reset launch branch to this exact main, run the same frozen Learn request with policy-derived CI observation, and validate Root freeze.",
     "prior_failures": [
       {
         "cause": "The corrected runner passed authentication and exact frozen-request validation, then expanded the approximately 0.9 MB base64 state as one jq command argument; the OS rejected it with 'Argument list too long' before the heartbeat PUT.",
@@ -7306,16 +7310,23 @@
         "head_sha": "7779ea724a38f8c17ad33efbaf66bd3123099ae4",
         "job_id": 100093596283,
         "workflow_run_id": 33580509348
+      },
+      {
+        "workflow_run_id": 33580599551,
+        "job_id": 100093872113,
+        "head_sha": "4efa0ca04b2b62955328c478cff4a0c7ef7d7e31",
+        "cause": "The file-based heartbeat repair succeeded and exact-read back. CI source observation then failed closed because the runner supplied PR420 run 33577260187 while state ci_source_observation_policy precommitted run 33532115535 at exact head 1196d08af36e129e7398cc00e0b3bc8a0280eb25.",
+        "durable_effects_before_failure": "One same-owner heartbeat/source-liveness CAS committed as c1798b81431400e6dec7425b91ccf878bf795d31 with state blob 62d92c47b8e884a90b185a66f389f9c55414d517; no source receipt, Learn response, or lifecycle mutation was pushed."
       }
     ],
     "recorded_at": "2026-09-02T01:42:51.145Z",
-    "recurrence_validation": "pending corrected file-based heartbeat payload runner",
-    "repair": "Use the unescaped github.token expression and construct the GitHub contents payload from files inside Python, never as a shell argument; reset the launch branch onto this exact repaired main and rerun the unchanged frozen Learn request.",
+    "recurrence_validation": "pending policy-derived CI source runner",
+    "repair": "Read workflow_run_id, exact_head_sha, workflow_id, and required job identities from the immutable ci-source observation request generated from current state; query and record exactly that source instead of a hard-coded newer run.",
     "request_recreated": false,
     "response_repeated": false,
     "resume_required": true,
     "schema_version": 1,
-    "status": "file_payload_repair_applied_recurrence_validation_pending"
+    "status": "state_precommitted_ci_source_repair_applied_recurrence_validation_pending"
   },
   "generation29_formal_proof_task_evaluate_consolidate_bind_v1": {
     "agi_achieved": false,
@@ -14779,7 +14790,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 116,
-  "heartbeat_at": "2026-09-02T01:45:16.487615Z",
+  "heartbeat_at": "2026-09-02T01:46:43.546Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -15419,7 +15430,7 @@
     "resolved_at": "2026-08-24T04:54:31.496Z",
     "reviewed_blob_count": 3,
     "rule": "No remote branch, remote commit object, PR, workflow, ref update, or merge for this publication may occur before this state-only CAS and exact readback.",
-    "semantic_rule": "Restore entries 1-15 byte-semantically from the valid parent, record revision 16 only as withdrawn integrity provenance, and apply the user's exact revision-17 words \u518d\u958b\u3057\u3066 without inferring missing revision-16 semantics.",
+    "semantic_rule": "Restore entries 1-15 byte-semantically from the valid parent, record revision 16 only as withdrawn integrity provenance, and apply the user's exact revision-17 words 再開して without inferring missing revision-16 semantics.",
     "status": "merged_to_main_verified",
     "valid_parent_commit": "cb6b161e3a96ab2b1d6f2e940d6ae809b2d76fab",
     "verified_remote_readback": true,
@@ -15653,7 +15664,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "formal_proof_candidate_consume_task_evaluate_bind_finalization",
-  "last_activity_at": "2026-09-02T01:45:16.487615Z",
+  "last_activity_at": "2026-09-02T01:46:43.546Z",
   "last_progress_at": "2026-09-02T01:30:10.631Z",
   "last_verified_effect": {
     "bounded_unit_verdict": "PASS",
