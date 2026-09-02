@@ -174,14 +174,15 @@ jobs:
           if wver['observation_id']!=wreq['observation_id']: raise SystemExit('Work observation mismatch')
 
           creq=prepare_ci_source_observation(root,run_id=run_id,state=state,model_identity=os.environ['MODEL_IDENTITY'])
+          ci_now=datetime.now(UTC).isoformat().replace('+00:00','Z')
           policy=state['ci_source_observation_policy'];rid=policy['workflow_run_id']
           rr=get(f'https://api.github.com/repos/bachikoljunior-blip/O/actions/runs/{rid}')
           remote_jobs=get(f'https://api.github.com/repos/bachikoljunior-blip/O/actions/runs/{rid}/jobs?per_page=100')['jobs']
           required={x['id'] for x in policy['required_jobs']}
           jobs=[{'id':x['id'],'name':x['name'],'status':x['status'],'conclusion':x['conclusion']} for x in remote_jobs if x['id'] in required]
           run_projection={'id':rr['id'],'workflow_id':rr['workflow_id'],'name':rr['name'],'status':rr['status'],'conclusion':rr['conclusion'],'head_sha':rr['head_sha']}
-          crec=record_ci_source_observation_receipt(root,run_id=run_id,observation_id=creq['observation_id'],request_digest=creq['request_digest'],executor_binding=policy['executor_binding'],model_identity=os.environ['MODEL_IDENTITY'],workflow_run=run_projection,jobs=jobs,observed_at=now)
-          cver=verify_ci_source_observation(root,run_id=run_id,state=state,now=now)
+          crec=record_ci_source_observation_receipt(root,run_id=run_id,observation_id=creq['observation_id'],request_digest=creq['request_digest'],executor_binding=policy['executor_binding'],model_identity=os.environ['MODEL_IDENTITY'],workflow_run=run_projection,jobs=jobs,observed_at=ci_now)
+          cver=verify_ci_source_observation(root,run_id=run_id,state=state,now=ci_now)
           if cver['observation_id']!=creq['observation_id']: raise SystemExit('CI observation mismatch')
           print(json.dumps({'work_request':wreq,'work_receipt':wrec,'ci_request':creq,'ci_receipt':crec},sort_keys=True))
           PY
