@@ -203,7 +203,7 @@
     "exact_completed_request_digest": "a62d14f4a8cdd580b43d3544cb6af2ec2e9dc0ef3e9212efe0bbbab878cefa62",
     "exact_completed_response_digest": "2eeb4068762a24d35cc5c38e7d0c97ae856d9d0f4f95c10c7df91621904a908a",
     "exact_completed_work_invocation_id": "invoke-d5beb42702e149bd1539e662",
-    "exact_frontier": "Independently reassess the exact frozen Execute request under revision-40 non-prescriptive scope, consume invoke-8c0631efda2c841677254d63 exactly once only if independently justified (otherwise return NOT_APPLICABLE with evidence), then continue the lifecycle and further safe work.",
+    "exact_frontier": "Complete phase1/phase2 exact readback of the revision-40 continuity-preflight schema repair, then refire the exact frozen Execute consumer once.",
     "exact_pending_native_invocation_id": "invoke-e5d00feed2c8ab4735526a1a",
     "exact_pending_request_blob_sha": "16a4c54024a8375d558ae48ae35ae4e015304421",
     "exact_pending_request_digest": "ef920e42abb657f6a42c000b9fa6bfec0673e927a1fa6a50fa52d56c345ad92e",
@@ -246,7 +246,7 @@
     },
     "lease_generation": 29,
     "native_phase": "unit_pending",
-    "next_action": "Independently reassess the exact frozen Execute request under revision-40 non-prescriptive scope, consume invoke-8c0631efda2c841677254d63 exactly once only if independently justified (otherwise return NOT_APPLICABLE with evidence), then continue the lifecycle and further safe work.",
+    "next_action": "Complete phase1/phase2 exact readback of the revision-40 continuity-preflight schema repair, then refire the exact frozen Execute consumer once.",
     "next_tool": "GitHub state CAS then exact one-shot Execute response consumer",
     "next_tool_action": "Re-read exact main/inbox/directive/state/request/native/snapshot source clocks, then launch one guarded Execute consumer with policy_revision=40; never recreate or duplicate the request.",
     "no_partial_result_claimed": true,
@@ -1201,7 +1201,7 @@
     "inbox_revision": 40,
     "lease_generation": 29,
     "native_phase": "unit_pending",
-    "next_action": "Independently reassess the exact frozen Execute request under revision-40 non-prescriptive scope, consume invoke-8c0631efda2c841677254d63 exactly once only if independently justified (otherwise return NOT_APPLICABLE with evidence), then continue the lifecycle and further safe work.",
+    "next_action": "Complete phase1/phase2 exact readback of the revision-40 continuity-preflight schema repair, then refire the exact frozen Execute consumer once.",
     "pending_component": "execute",
     "pending_native_invocation_blob_sha": "29d2e82109376b9af0f9a50d1f7920796d115c4b",
     "pending_native_invocation_id": "invoke-e5d00feed2c8ab4735526a1a",
@@ -1253,7 +1253,23 @@
     "upper_objective_achieved": false,
     "verified_at": "2026-09-02T13:37:54Z",
     "verified_remote_readback": true,
-    "durability_status": "remote_main_readback_verified"
+    "durability_status": "remote_main_readback_verified",
+    "preflight_stop_cause_repair": {
+      "schema_version": 1,
+      "status": "phase1_remote_readback_pending",
+      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+      "lease_generation": 29,
+      "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+      "expected_prior_main_sha": "95c95febac387b1bc166e611a62a50ca8be88720",
+      "expected_prior_state_blob_sha": "ede095000fb54f76554a124ff0a870e3d3262b80",
+      "pending_work_invocation_id": "invoke-8c0631efda2c841677254d63",
+      "pending_request_digest": "ef920e42abb657f6a42c000b9fa6bfec0673e927a1fa6a50fa52d56c345ad92e",
+      "stop_cause": "revision40_continuity_preflight_schema_mismatch",
+      "prepared_at": "2026-09-02T14:48:00Z",
+      "resume_authorized": false,
+      "request_recreated": false,
+      "response_repeated": false
+    }
   },
   "exact_head_ci_observation": {
     "conclusion": "success",
@@ -15431,7 +15447,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-02T13:37:54Z",
+  "heartbeat_at": "2026-09-02T14:48:00Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -18186,8 +18202,8 @@
   "source_state_blob_sha": "04c4ddd731fa626d8391ec36b3d3e9d978394377",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
-    "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-09-02T13:37:54Z",
+    "classification": "concrete_continuity_preflight_schema_stop_identified",
+    "evaluated_at": "2026-09-02T14:48:00Z",
     "evidence_refs": [
       "github://bachikoljunior-blip/O@c7cb530d595465a1cff716500e6c2b51e5222c2c/.continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-candidate-matched-evidence-consume-execute-freeze-v1.json",
       "github-actions:run/33620006085#success",
@@ -18195,30 +18211,34 @@
       "github-actions:run/33631527370#success",
       "github://bachikoljunior-blip/O@b466e5315b7626ccb84719284f541724f2a279e7/agi/USER_DIRECTIVE_EVENTS.json#rev40-slot-repair",
       "github://bachikoljunior-blip/O@f836ce0094d7149442a630a7d2450f249db6c611/agi/WORK_EXECUTION_STATE.json#phase1-exact-readback",
-      "github://bachikoljunior-blip/O@f90d6d40b2af72b4d9bc2d3cd5f6e7af1a9f02cd/agi/WORK_EXECUTION_STATE.json#phase2-exact-readback"
+      "github://bachikoljunior-blip/O@f90d6d40b2af72b4d9bc2d3cd5f6e7af1a9f02cd/agi/WORK_EXECUTION_STATE.json#phase2-exact-readback",
+      "github-actions:run/33644085417#failed-before-response-native-run-mismatch"
     ],
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "executor_binding": "current_chatgpt_work_session",
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
-    "idempotency_key": "o-work-preflight:g29:c03cdd410193:revision40:execute-invoke-8c0631efda2c841677254d63:v1",
+    "idempotency_key": "o-work-preflight:g29:c03cdd410193:revision40:repair-schema-invoke-8c0631efda2c841677254d63:v1",
     "lease_generation": 29,
     "model_identity": "chatgpt-work-model-unverified",
-    "policy_blob_bindings": {
-      "agi/USER_DIRECTIVE_EVENTS.json": "07dd635529549a570824b9b67f1a65b34445579d",
-      "agi/USER_INPUT_INBOX.json": "89a98913189a88ddef9e7cc53ed5436b1c3379fa",
-      "agi/WORK_STRATEGY.json": "0328a8372d5712f005149e0fad33d0bc7d25e4df"
-    },
     "policy_revision": 40,
     "remediations": [
-      "Bound revision 40 and the exact immutable Execute successor through two-phase expected-main/state CAS and exact readback."
+      "Prepared canonical run_id and byte-SHA256 policy_bindings for the exact revision-40 policy files.",
+      "Kept resume_authorized=false until phase1, phase2, and final exact remote-main readback complete."
     ],
-    "resume_authorized": true,
+    "resume_authorized": false,
     "root_causes": [
-      "The Candidate response was consumed once and the unique successor is the frozen Execute request.",
-      "Revision 40 withdrew the named procedure as a user requirement."
+      "Revision 40 state publication omitted start_of_run_continuity_preflight.run_id.",
+      "Revision 40 state publication replaced canonical SHA-256 policy_bindings with incompatible Git blob policy_blob_bindings.",
+      "The guarded Execute consumer therefore failed closed before submitting a response."
     ],
     "schema_version": 1,
-    "stop_cause_eliminated": true
+    "stop_cause_eliminated": false,
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "policy_bindings": {
+      "agi/USER_INPUT_INBOX.json": "730d960a8e8ec068dafe4ad8364fc1bb8d11d5302acc8b3ce3041f237ae5beb0",
+      "agi/USER_DIRECTIVE_EVENTS.json": "0ef88b3ca6f033e043522e1144a73ff8f0951bc5bba1d50e9aa2004de6372090",
+      "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
+    }
   },
   "started_at": "2026-08-28T05:38:45.882Z",
   "status": "running",
@@ -18393,5 +18413,6 @@
   "user_level_objective_met": false,
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_remote_readback": true,
-  "working_branch": "main"
+  "working_branch": "main",
+  "last_checked_at": "2026-09-02T14:48:00Z"
 }
