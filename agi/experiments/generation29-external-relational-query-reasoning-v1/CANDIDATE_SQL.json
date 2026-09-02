@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "record_type": "generation29_relational_query_candidate_sql",
+  "frozen_at": "2026-09-02T05:06:51.475Z",
+  "status": "frozen_before_data_row_access",
+  "manifest_blob_sha": "d1d5aab5d43db86caa5ef81a61be34eab2fcc823",
+  "schema_readiness_ref": "agi/experiments/generation29-external-relational-query-reasoning-v1/SCHEMA_READINESS.json",
+  "source_database_blob_sha": "f385c2651f80914c3b93c62431b0b000465a921b",
+  "work_invocation_id": "invoke-1f60ea1b0640d22db760389a",
+  "native_invocation_id": "invoke-87e26ab01e3f6279e8b40936",
+  "statement_count": 1,
+  "read_only": true,
+  "allowed_tables": [
+    "Genre",
+    "Track",
+    "Album",
+    "Artist",
+    "InvoiceLine",
+    "Invoice"
+  ],
+  "sql": "WITH revenue AS (\n  SELECT\n    g.GenreId AS GenreId,\n    g.Name AS GenreName,\n    ar.ArtistId AS ArtistId,\n    ar.Name AS ArtistName,\n    SUM(CAST(ROUND(il.UnitPrice * 100.0) AS INTEGER) * il.Quantity) AS RevenueCents\n  FROM Invoice AS i\n  JOIN InvoiceLine AS il ON il.InvoiceId = i.InvoiceId\n  JOIN Track AS t ON t.TrackId = il.TrackId\n  JOIN Genre AS g ON g.GenreId = t.GenreId\n  JOIN Album AS al ON al.AlbumId = t.AlbumId\n  JOIN Artist AS ar ON ar.ArtistId = al.ArtistId\n  WHERE i.InvoiceDate >= '2012-01-01 00:00:00'\n    AND i.InvoiceDate < '2013-01-01 00:00:00'\n  GROUP BY g.GenreId, g.Name, ar.ArtistId, ar.Name\n),\nranked AS (\n  SELECT\n    GenreId,\n    GenreName,\n    ArtistId,\n    ArtistName,\n    RevenueCents,\n    ROW_NUMBER() OVER (\n      PARTITION BY GenreId\n      ORDER BY RevenueCents DESC, ArtistId ASC\n    ) AS WinnerRank\n  FROM revenue\n)\nSELECT\n  GenreId,\n  GenreName,\n  ArtistId,\n  ArtistName,\n  printf('%d.%02d', RevenueCents / 100, abs(RevenueCents % 100)) AS Revenue\nFROM ranked\nWHERE WinnerRank = 1\nORDER BY GenreId ASC",
+  "canonicalization": {
+    "revenue": "integer cents computed from InvoiceLine.UnitPrice times Quantity, rendered to two fractional digits",
+    "order": [
+      "GenreId ASC"
+    ]
+  },
+  "data_rows_read_before_freeze": false,
+  "query_executed_before_freeze": false,
+  "claim_boundary": "Frozen candidate SQL only; no result or capability claim.",
+  "idempotency_key": "o-work-gen29:invoke-1f60ea1b0640d22db760389a:candidate-sql:2012-genre-artist-revenue:v1",
+  "next_action": "Exact-read this remote branch artifact, then execute it once against the immutable read-only fixture and independently compute the row-iteration oracle."
+}
