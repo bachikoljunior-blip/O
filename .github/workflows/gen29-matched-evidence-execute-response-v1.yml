@@ -376,7 +376,8 @@ jobs:
           if status != exact:
               raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({'expected': exact, 'observed': status}, sort_keys=True))
           required = sorted(exact)
-          subprocess.run(['git', 'add', '-f', '--', *required], check=True)
+          to_add = sorted(path for path, code in exact.items() if code != 'D')
+          subprocess.run(['git', 'add', '-f', '--', *to_add], check=True)
           staged = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines())
           if staged != set(required):
               raise SystemExit('staged set mismatch')
