@@ -182,11 +182,11 @@
   "branch_head_tree_sha": null,
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-02T23:38:17.822Z",
+    "checkpointed_at": "2026-09-02T23:52:58.659Z",
     "active_component": "generation29_external_arc_answered_root_pending_native_consume",
     "active_prompt": "prompts/root.md",
-    "current_main_sha": "fba4d07e876a89e419d17ffce11590aaade9bd32",
-    "current_state_blob_sha": "e558aef0d23d8a24dda4f56b818c640c14122b23",
+    "current_main_sha": "1649ac710c06b6d86f1b8314dc7de223f66fec84",
+    "current_state_blob_sha": "5f047cb3ad303861c825a0bbf495a7b92e4a3f84",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
@@ -194,8 +194,8 @@
     "inbox_revision": 40,
     "inbox_blob_sha": "89a98913189a88ddef9e7cc53ed5436b1c3379fa",
     "completed_effect_receipt": {
-      "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-external-arc-sequential-transfer-v1-result.json",
-      "blob_sha": "44e55fef008fedf4489264f7d27c63ab837ddc44"
+      "ref": "https://github.com/bachikoljunior-blip/O/pull/445",
+      "blob_sha": "1649ac710c06b6d86f1b8314dc7de223f66fec84"
     },
     "exact_completed_work_invocation_id": "invoke-aa7f4d5006e721dc60bd1dbe",
     "exact_completed_native_invocation_id": "invoke-8f151c5155c5d99fd4890f23",
@@ -212,17 +212,17 @@
     "snapshot_blob_sha": "d298f5b763e137770598ca2e90155b0850001eaf",
     "snapshot_revision": 152,
     "snapshot_phase": "root_pending",
-    "idempotency_key": "o-work-gen29:pr445:df0bda99:repair-ci-3of4:v1",
-    "exact_frontier": "Consume the already answered Root invocation invoke-f5cdc2052969df74f5772131 exactly once with work-resume; do not submit it again; freeze and then consume independent Task Evaluate.",
-    "next_action": "Continue bounded wait for the one running shard of exact-head PR 445 CI; merge only if it and aggregate succeed; then exact-read repair and consume answered Root.",
+    "idempotency_key": "o-work-gen29:pr446:1bf8cea8:root-consume-candidate-freeze-ci:v1",
+    "exact_frontier": "Merge unchanged-head PR 446 after all required jobs succeed; exact-read all eight lifecycle blobs; then two-phase bind the answered Candidate Evaluate continuation and consume it exactly once.",
+    "next_action": "Wait for exact-head PR 446 directive and protected test workflows; merge only unchanged expected head after every required job succeeds; then exact-read and bind Candidate Evaluate continuation.",
     "next_tool": "GitHub exact-head workflow/status readback",
-    "next_tool_action": "Consume the already answered Root invocation invoke-f5cdc2052969df74f5772131 exactly once with work-resume; do not submit it again; freeze and then consume independent Task Evaluate.",
+    "next_tool_action": "Merge PR 446 at head 1bf8cea87fc9eaf2bc7f4702ddafd68f2485352f only after all required jobs succeed; then two-phase CAS/readback bind and consume invoke-36832e2a6a032de309e1430a exactly once.",
     "pull_request": {
-      "number": 444,
-      "head_sha": "462f61b831081a9643fc199a63ba835a44792f53",
-      "merge_sha": "f4336051ff263f824eda815c2661f2dbdd8a3261"
+      "number": 446,
+      "head_sha": "1bf8cea87fc9eaf2bc7f4702ddafd68f2485352f",
+      "base_sha": "1649ac710c06b6d86f1b8314dc7de223f66fec84"
     },
-    "pending_component": "root",
+    "pending_component": "root_remote_main_candidate_evaluate_branch_answered",
     "native_phase": "root_pending",
     "resume_required": true,
     "termination": null,
@@ -15430,7 +15430,7 @@
     "next_action": "After exact CAS/readback, re-read latest main, authority, inbox, PR exact head, all jobs, and mergeability; merge only unchanged expected head and then publish a two-phase continuation repair for the answered Root request."
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-02T23:38:17.822Z",
+  "heartbeat_at": "2026-09-02T23:52:58.659Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -16303,9 +16303,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "rev40_execute_successor_two_phase_cas_exact_readback_verified",
-  "last_activity_at": "2026-09-02T23:38:17.822Z",
-  "last_progress_at": "2026-09-02T23:38:17.822Z",
+  "last_action": "root_consumed_exactly_once_candidate_evaluate_response_frozen_publication_pr_ci_pending",
+  "last_activity_at": "2026-09-02T23:52:58.659Z",
+  "last_progress_at": "2026-09-02T23:52:58.659Z",
   "last_verified_effect": {
     "component": "execute",
     "unit_id": "unit-generation29-external-arc-sequential-transfer-v1",
@@ -18393,7 +18393,7 @@
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_remote_readback": false,
   "working_branch": "main",
-  "last_checked_at": "2026-09-02T23:38:17.822Z",
+  "last_checked_at": "2026-09-02T23:52:58.659Z",
   "generation29_matched_evidence_execute_consume_candidate_evaluate_bind_v1": {
     "schema_version": 1,
     "status": "remote_main_readback_verified_exact_continuation_repair_phase1_pending",
@@ -19018,7 +19018,7 @@
   },
   "generation29_completed_native_artifact_stop_cause_repair_v1": {
     "schema_version": 1,
-    "status": "repair_pr_exact_head_ci_three_shards_succeeded_one_running",
+    "status": "repair_merged_remote_recurrence_verified",
     "observed_at": "2026-09-02T23:09:03.859Z",
     "authority": {
       "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
@@ -19103,7 +19103,7 @@
         "conclusion": "success"
       }
     ],
-    "stop_cause_eliminated_on_remote": false,
+    "stop_cause_eliminated_on_remote": true,
     "resume_attempted_after_repair": false,
     "idempotency_key": "o-work-gen29:pr445:df0bda99:native-artifact-stop-cause-repair:v1",
     "request_recreated": false,
@@ -19111,7 +19111,98 @@
     "resume_required": true,
     "upper_objective_achieved": false,
     "agi_achieved": false,
-    "next_action": "Continue bounded wait for shard 1 and aggregate, then exact-head merge/readback, recurrence validation, and answered Root consume.",
-    "last_checked_at": "2026-09-02T23:38:17.822Z"
+    "next_action": "Publish and merge the exactly-once Root consume plus answered Candidate Evaluate freeze, then bind its exact continuation.",
+    "last_checked_at": "2026-09-02T23:52:58.659Z",
+    "merge": {
+      "pull_request": 445,
+      "head_sha": "df0bda998ee708027d4baa7c14e8d2f80410cb77",
+      "merge_sha": "1649ac710c06b6d86f1b8314dc7de223f66fec84"
+    },
+    "recurrence_validation": {
+      "work_verify": {
+        "valid": true,
+        "requests": 169,
+        "responses": 169,
+        "native_completed": 162,
+        "native_fragments": 162,
+        "native_local_learn": 147,
+        "pending": 0
+      },
+      "remote_blobs_exact": true
+    }
+  },
+  "generation29_root_consume_candidate_freeze_publication_v1": {
+    "schema_version": 1,
+    "status": "pull_request_exact_head_ci_queued",
+    "observed_at": "2026-09-02T23:52:58.659Z",
+    "authority": {
+      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+      "lease_generation": 29,
+      "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d"
+    },
+    "expected_prior_main_sha": "1649ac710c06b6d86f1b8314dc7de223f66fec84",
+    "expected_prior_state_blob_sha": "5f047cb3ad303861c825a0bbf495a7b92e4a3f84",
+    "inbox_revision": 40,
+    "inbox_blob_sha": "89a98913189a88ddef9e7cc53ed5436b1c3379fa",
+    "root": {
+      "work_invocation_id": "invoke-f5cdc2052969df74f5772131",
+      "native_invocation_id": "invoke-805a2b579072870c131e038f",
+      "request_digest": "322e5dfc799d6feb70e86f9076eafb43d0e8f5a849b3c24223d383aa9b8134ff",
+      "response_digest": "cfb0b7af8970e0c0883aa9875eb36ff68989e66205086621f3947c562ed6204b",
+      "completed_native_blob_sha": "2dbf0f088f0151daf01fc5401a0e7a05243ff51c",
+      "consumed_exactly_once": true
+    },
+    "candidate_evaluate": {
+      "work_invocation_id": "invoke-36832e2a6a032de309e1430a",
+      "native_invocation_id": "invoke-a31c9704caddc96f4d24b8fa",
+      "request_blob_sha": "13df057de6d6c25d9a00492f10cc4d68ea9dbd5e",
+      "request_digest": "a786bc59fd0cedd2635c59e0c8a18f5eafad8576d4b79e4178b7a2b5dce6d01a",
+      "response_blob_sha": "8abe445ef657e9f827d030bf6dd0afb302031b20",
+      "response_digest": "243913ad5db60dab9282125eaabddca64ebd2eeaa740f2a8844bba54c99adc4e",
+      "output_digest": "418669794b38c329ff73d22b878089e6e3ed211f892b27a38cf6d7bd70bb359f",
+      "response_submitted_exactly_once": true,
+      "response_consumed": false
+    },
+    "snapshot": {
+      "revision": 153,
+      "phase": "unit_pending",
+      "blob_sha": "011740b93ae2f0a7d137b26d8c0128efd92fe864"
+    },
+    "pull_request": {
+      "number": 446,
+      "head_sha": "1bf8cea87fc9eaf2bc7f4702ddafd68f2485352f",
+      "tree_sha": "d205183e1157ea02071437d50c51ca81151ea454",
+      "base_sha": "1649ac710c06b6d86f1b8314dc7de223f66fec84"
+    },
+    "workflows": [
+      {
+        "id": 33697015209,
+        "name": "directive-source-preflight",
+        "status": "queued",
+        "conclusion": null
+      },
+      {
+        "id": 33697015324,
+        "name": "test",
+        "status": "queued",
+        "conclusion": null
+      }
+    ],
+    "work_verify": {
+      "valid": true,
+      "requests": 170,
+      "responses": 170,
+      "native_completed": 163,
+      "native_fragments": 163,
+      "native_local_learn": 148,
+      "pending": 0
+    },
+    "request_recreated": false,
+    "response_repeated": false,
+    "resume_required": true,
+    "upper_objective_achieved": false,
+    "agi_achieved": false,
+    "idempotency_key": "o-work-gen29:pr446:1bf8cea8:root-consume-candidate-freeze:v1",
+    "next_action": "Wait exact-head CI, merge unchanged head, exact-read eight blobs, two-phase bind answered Candidate Evaluate, then consume exactly once."
   }
 }
