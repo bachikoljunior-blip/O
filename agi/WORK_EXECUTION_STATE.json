@@ -1,6 +1,6 @@
 {
   "acquisition_phase": "verified_two_phase_remote_readback",
-  "active_component": "generation29_matched_evidence_candidate_evaluate_pending_native_consume",
+  "active_component": "generation29_candidate_continuation_fence_repair_pending_readback",
   "active_prompt": "prompts/candidate_evaluate.md",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
   "active_unit_id": "unit-generation29-matched-evidence-acquisition-loop-v1",
@@ -1058,11 +1058,11 @@
   "continuation": "Independently reassess the exact frozen Execute request under revision-40 non-prescriptive scope, consume invoke-8c0631efda2c841677254d63 exactly once only if independently justified (otherwise return NOT_APPLICABLE with evidence), then continue the lifecycle and further safe work.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "remote_main_readback_verified",
-    "durability_status": "remote_main_readback_verified",
-    "prepared_at": "2026-09-02T15:39:00Z",
-    "verified_at": "2026-09-02T15:43:00Z",
-    "verified_remote_readback": true,
+    "status": "pending_remote_readback",
+    "durability_status": "pending_remote_readback",
+    "prepared_at": "2026-09-02T16:19:48.373Z",
+    "verified_at": null,
+    "verified_remote_readback": false,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "inbox_revision": 40,
@@ -1136,7 +1136,8 @@
     "resume_required": true,
     "next_action": "Consume the exact frozen Candidate Evaluate request once; require a post-response native lifecycle effect and freeze the unique Task Evaluate successor.",
     "upper_objective_achieved": false,
-    "agi_achieved": false
+    "agi_achieved": false,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d"
   },
   "continuation_source": "repository_latest_main_only",
   "continuous_execution_authorization": {
@@ -1152,11 +1153,11 @@
   "durability_status": "pending_native_consume",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "remote_main_readback_verified",
-    "durability_status": "remote_main_readback_verified",
-    "prepared_at": "2026-09-02T15:39:00Z",
-    "verified_at": "2026-09-02T15:43:00Z",
-    "verified_remote_readback": true,
+    "status": "pending_remote_readback",
+    "durability_status": "pending_remote_readback",
+    "prepared_at": "2026-09-02T16:19:48.373Z",
+    "verified_at": null,
+    "verified_remote_readback": false,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "inbox_revision": 40,
@@ -1230,7 +1231,8 @@
     "resume_required": true,
     "next_action": "Consume the exact frozen Candidate Evaluate request once; require a post-response native lifecycle effect and freeze the unique Task Evaluate successor.",
     "upper_objective_achieved": false,
-    "agi_achieved": false
+    "agi_achieved": false,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d"
   },
   "exact_head_ci_observation": {
     "conclusion": "success",
@@ -15408,7 +15410,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-02T14:52:00Z",
+  "heartbeat_at": "2026-09-02T16:19:48.373Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -18475,5 +18477,42 @@
       "phase2_prepared_at": "2026-09-02T15:46:00Z",
       "phase2_exact_readback_verified": false
     }
+  },
+  "generation29_candidate_continuation_fence_repair_v1": {
+    "schema_version": 1,
+    "record_type": "generation29_candidate_continuation_fence_repair",
+    "recorded_at": "2026-09-02T16:19:48.373Z",
+    "authority": {
+      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+      "lease_generation": 29,
+      "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d"
+    },
+    "concrete_stop_cause": "continuation_durability omitted fence_token_digest, so assert_work_resume_continuity_preflight failed closed with 'continuation durability fence mismatch' before Candidate response submission.",
+    "stop_proof": {
+      "observed_at": "2026-09-02T16:18:20Z",
+      "source_main_sha": "866c6711e2140141a12d0bcc2c9330156316ed1a",
+      "source_state_blob_sha": "107bb0b15b85ef2aa68a6411d03083575f4f3d4b",
+      "branch_head_sha": "5f9426cd07e6df0f5055db2d82a4594e219394cc",
+      "candidate_response_absent": true,
+      "preflight_error": "continuation durability fence mismatch"
+    },
+    "repair": {
+      "field": "continuation_durability.fence_token_digest",
+      "value": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+      "also_bound_exact_continuation": true,
+      "request_recreated": false,
+      "response_repeated": false
+    },
+    "phase1_expected_prior_main_sha": "866c6711e2140141a12d0bcc2c9330156316ed1a",
+    "phase1_expected_prior_state_blob_sha": "107bb0b15b85ef2aa68a6411d03083575f4f3d4b",
+    "phase1_exact_readback_verified": false,
+    "recurrence_validation": {
+      "required": "assert_work_resume_continuity_preflight returns resume_authorized=true against exact remote state before response submission",
+      "status": "pending"
+    },
+    "status": "repair_prepared_pending_remote_readback",
+    "resume_required": true,
+    "upper_objective_achieved": false,
+    "agi_achieved": false
   }
 }
