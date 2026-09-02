@@ -86,6 +86,12 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
     assert effective["r20-external-method-failure-attribution"]["value"] == (
         "distinguish_tested_variant_failure_adaptation_or_ablation_loss_baseline_reproduction_failure_and_untested_mechanisms"
     )
+    assert effective["r40-rev39-nonprescriptive-evidence-gap-context"]["value"] == (
+        "preserve_only_the_self_perpetuating_evidence_gap_observation_as_nonprescriptive_context_with_no_action_priority_continuation_or_stopping_rule"
+    )
+    assert effective["r40-rev39-candidate-procedure-withdrawal"]["value"] == (
+        "withdraw_revision_39_specific_candidate_and_experiment_procedure_as_user_requirements_and_leave_action_selection_to_o_under_prior_objective_and_constraints"
+    )
     assert effective["r24-primary-o-routing-targeting-correction"]["value"] == (
         "revision23_does_not_apply_to_primary_o_restore_pre_revision23_routing"
     )
@@ -126,6 +132,8 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
         "r23-least-work-routing": "r24-primary-o-routing-targeting-correction",
         "r23-retain-smartphone-and-account-constraints": "r24-revision5-constraint-authority",
         "r23-preserve-frozen-work-contracts": "r24-resume-frozen-revision22-execute",
+        "r39-matched-evidence-self-sealing-risk": "r40-rev39-nonprescriptive-evidence-gap-context",
+        "r39-minimum-reversible-matched-evidence-sequence": "r40-rev39-candidate-procedure-withdrawal",
     }
     rendered = json.dumps(first, ensure_ascii=False)
     assert "strict independent external production evidence gate" not in rendered
