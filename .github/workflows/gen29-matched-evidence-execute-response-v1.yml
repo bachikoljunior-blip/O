@@ -341,37 +341,41 @@ jobs:
           ci_obs = json.loads(Path('/tmp/ci-source-prepare.json').read_text())['observation_id']
           receipt = f'.continual/runs/{run_id}/recovery-receipts/gen29-matched-evidence-execute-consume-next-freeze-v1.json'
           status = {}
-          for line in subprocess.check_output(['git', 'status', '--porcelain=v1', '--untracked-files=all'], text=True).splitlines():
-              code = line[:2].strip(); path = line[3:]
-              status[path] = code
-          for path in list(status):
-              if path.startswith('src/continual_chatgpt.egg-info/') or '/__pycache__/' in path or path.startswith('pytest-of-root/'):
-                  status.pop(path)
+          for line in subprocess.check_output(['git', 'diff', 'HEAD', '--name-status'], text=True).splitlines():
+              code, path = line.split('\t', 1); status[path] = code
+          untracked = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], text=True).splitlines()
+          ignored = subprocess.check_output(['git', 'ls-files', '--others', '--ignored', '--exclude-standard'], text=True).splitlines()
+          for path in untracked + ignored:
+              status.setdefault(path, 'A')
+          install = {path for path in status if path.startswith('src/continual_chatgpt.egg-info/') or '/__pycache__/' in path or path.startswith('pytest-of-root/')}
+          for path in install:
+              status.pop(path)
           exact = {
               os.environ['RESPONSE_INPUT']: 'D', os.environ['WORKFLOW_PATH']: 'D',
               f'.continual/runs/{run_id}/events.jsonl': 'M',
               f'.continual/runs/{run_id}/snapshot.json': 'M',
+              f'.continual/runs/{run_id}/execution-units/{os.environ["RESULT_UNIT_ID"]}.json': 'M',
               f'.continual/runs/{run_id}/invocations/{current_native}.json': 'M',
-              f'.continual/work-model/invocations/{current_work}/response.json': '??',
-              summary['execute_fragment_ref']: '??', summary['execute_local_learn_ref']: '??',
-              summary['pending_native_invocation_ref']: '??', summary['pending_request_ref']: '??',
-              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json': '??',
-              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/receipt.json': '??',
-              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/request.json': '??',
-              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/receipt.json': '??',
-              receipt: '??',
+              f'.continual/work-model/invocations/{current_work}/response.json': 'A',
+              summary['execute_fragment_ref']: 'A', summary['execute_local_learn_ref']: 'A',
+              summary['pending_native_invocation_ref']: 'A', summary['pending_request_ref']: 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/work-source-observations/{work_obs}/receipt.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/request.json': 'A',
+              f'.continual/runs/{run_id}/ci-source-observations/{ci_obs}/receipt.json': 'A',
+              receipt: 'A',
           }
           optional_prefixes = (f'.continual/runs/{run_id}/preflight/preflight-', f'.continual/runs/{run_id}/effective-prompts/')
           for path, code in status.items():
               if path in exact:
                   continue
-              if code == '??' and path.startswith(optional_prefixes):
-                  exact[path] = '??'; continue
+              if code == 'A' and path.startswith(optional_prefixes):
+                  exact[path] = 'A'; continue
               raise SystemExit('unexpected lifecycle mutation: ' + json.dumps({'path': path, 'code': code, 'all': status}, sort_keys=True))
           if status != exact:
               raise SystemExit('lifecycle mutation mismatch: ' + json.dumps({'expected': exact, 'observed': status}, sort_keys=True))
           required = sorted(exact)
-          subprocess.run(['git', 'add', '-A', '-f', '--', *required], check=True)
+          subprocess.run(['git', 'add', '-f', '--', *required], check=True)
           staged = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines())
           if staged != set(required):
               raise SystemExit('staged set mismatch')
