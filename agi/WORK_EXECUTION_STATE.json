@@ -178,13 +178,13 @@
     }
   },
   "branch": "main",
-  "branch_head_sha": "8bb96c526d2cfd45dcbdae4e046bf17584294212",
+  "branch_head_sha": "df73617f82d8ca8b01fa903e7b693d0604a4c2cd",
   "branch_head_tree_sha": null,
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-02T09:22:00Z",
-    "current_main_sha": "8bb96c526d2cfd45dcbdae4e046bf17584294212",
-    "current_state_blob_sha": "3953937dc9f1d6e4d615811934cd45ee95178fc5",
+    "checkpointed_at": "2026-09-02T09:24:15Z",
+    "current_main_sha": "df73617f82d8ca8b01fa903e7b693d0604a4c2cd",
+    "current_state_blob_sha": "7de37ec69dd1e4cec782daed919bb36c005763e6",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -1055,7 +1055,7 @@
   "continuation": "Consume invoke-1f60ea1b0640d22db760389a exactly once under the immutable pre-access Chinook relational-query protocol; persist manifest before any schema or data access, verify SQL against an independent row-iteration oracle and corruption controls, Task Evaluate separately, then continue the unchanged lifecycle.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "phase1_remote_readback_pending",
+    "status": "phase2_remote_readback_pending",
     "verified_remote_readback": false,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
@@ -1076,16 +1076,18 @@
     "phase1_expected_prior_state_blob_sha": "3953937dc9f1d6e4d615811934cd45ee95178fc5",
     "prepared_at": "2026-09-02T09:22:00Z",
     "resume_required": true,
-    "phase1_commit_sha": null,
-    "phase1_state_blob_sha": null,
-    "phase1_exact_readback_verified": false,
-    "phase2_expected_prior_main_sha": null,
-    "phase2_expected_prior_state_blob_sha": null,
-    "phase2_prepared_at": null,
+    "phase1_commit_sha": "df73617f82d8ca8b01fa903e7b693d0604a4c2cd",
+    "phase1_state_blob_sha": "7de37ec69dd1e4cec782daed919bb36c005763e6",
+    "phase1_exact_readback_verified": true,
+    "phase2_expected_prior_main_sha": "df73617f82d8ca8b01fa903e7b693d0604a4c2cd",
+    "phase2_expected_prior_state_blob_sha": "7de37ec69dd1e4cec782daed919bb36c005763e6",
+    "phase2_prepared_at": "2026-09-02T09:24:15Z",
     "phase2_commit_sha": null,
     "phase2_state_blob_sha": null,
     "phase2_exact_readback_verified": false,
-    "verified_at": null
+    "verified_at": null,
+    "phase1_verified_at": "2026-09-02T09:24:15Z",
+    "phase2_verified_at": null
   },
   "continuation_source": "repository_latest_main_only",
   "continuous_execution_authorization": {
@@ -1101,9 +1103,9 @@
   "durability_status": "pending_native_consume",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "phase1_remote_readback_pending",
+    "status": "phase2_remote_readback_pending",
     "verified_remote_readback": false,
-    "durability_status": "phase1_remote_readback_pending",
+    "durability_status": "phase2_remote_readback_pending",
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -1165,13 +1167,13 @@
     "agi_achieved": false,
     "prepared_at": "2026-09-02T09:22:00Z",
     "next_action": "Consume invoke-26847939d433f6e581167854 exactly once at the revision39-safe Root boundary, test the matched-evidence acquisition hypothesis only if no equivalent mechanism already exists, and immediately continue the selected concrete unit.",
-    "phase1_commit_sha": null,
-    "phase1_state_blob_sha": null,
-    "phase1_exact_readback_verified": false,
-    "phase1_verified_at": null,
-    "phase2_expected_prior_main_sha": null,
-    "phase2_expected_prior_state_blob_sha": null,
-    "phase2_prepared_at": null,
+    "phase1_commit_sha": "df73617f82d8ca8b01fa903e7b693d0604a4c2cd",
+    "phase1_state_blob_sha": "7de37ec69dd1e4cec782daed919bb36c005763e6",
+    "phase1_exact_readback_verified": true,
+    "phase1_verified_at": "2026-09-02T09:24:15Z",
+    "phase2_expected_prior_main_sha": "df73617f82d8ca8b01fa903e7b693d0604a4c2cd",
+    "phase2_expected_prior_state_blob_sha": "7de37ec69dd1e4cec782daed919bb36c005763e6",
+    "phase2_prepared_at": "2026-09-02T09:24:15Z",
     "phase2_commit_sha": null,
     "phase2_state_blob_sha": null,
     "phase2_exact_readback_verified": false,
@@ -15029,7 +15031,7 @@
     "upper_objective_achieved": false
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-02T09:22:00Z",
+  "heartbeat_at": "2026-09-02T09:24:15Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -17696,22 +17698,18 @@
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-09-02T08:06:54.579Z",
+    "evaluated_at": "2026-09-02T09:24:15Z",
     "evidence_refs": [
-      "github://bachikoljunior-blip/O@e0ce49414b911073b21af5cf25e9d1d7b6cc7f1d/agi/USER_INPUT_INBOX.json",
-      "github://bachikoljunior-blip/O@e0ce49414b911073b21af5cf25e9d1d7b6cc7f1d/agi/USER_DIRECTIVE_EVENTS.json",
-      "github://bachikoljunior-blip/O@e0ce49414b911073b21af5cf25e9d1d7b6cc7f1d/agi/WORK_STRATEGY.json",
-      "github-actions:run/33597567655#success",
-      "github-actions:run/33597567661#success",
-      "github://bachikoljunior-blip/note/automation_control/O_OPERATIONS.json#revision15",
-      "github://bachikoljunior-blip/O@0080bcf66ca3e4d3c18b25f2f988dc6a97c1b39f/agi/WORK_EXECUTION_STATE.json#phase1-exact-readback",
-      "github://bachikoljunior-blip/O@0f03a9615854bf093fb51f9ff91377eede0ebd97/agi/WORK_EXECUTION_STATE.json#phase2-exact-readback",
-      "github://bachikoljunior-blip/O@ce5eac534fbdf359918db2fd363153a13d05ed6d/agi/WORK_EXECUTION_STATE.json#durability-main-alignment-phase2-readback"
+      "github://bachikoljunior-blip/O@8bb96c526d2cfd45dcbdae4e046bf17584294212/.continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-relational-execute-consume-next-freeze-v1.json",
+      "github-actions:run/33607982828#success",
+      "github-actions:run/33608308791#success",
+      "github-actions:run/33608308815#success",
+      "github://bachikoljunior-blip/O@df73617f82d8ca8b01fa903e7b693d0604a4c2cd/agi/WORK_EXECUTION_STATE.json#phase1-exact-readback"
     ],
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "executor_binding": "current_chatgpt_work_session",
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
-    "idempotency_key": "o-work-preflight:g29:c03cdd410193:revision39:execute-invoke-1f60ea1b0640d22db760389a:v1",
+    "idempotency_key": "o-work-preflight:g29:c03cdd410193:revision39:root-invoke-26847939d433f6e581167854:v1",
     "lease_generation": 29,
     "model_identity": "chatgpt-work-model-unverified",
     "policy_bindings": {
@@ -17726,11 +17724,11 @@
       "status": "enforced"
     },
     "remediations": [
-      "Bound revision39 exact raw policy digests and preserved the same frozen Execute request without recreation."
+      "Bound the merged Execute lifecycle and Root request through phase1 expected-main/state CAS; phase2 exact readback is pending."
     ],
     "resume_authorized": true,
     "root_causes": [
-      "Revision39 arrived after the immutable Execute request was frozen; the required safe-boundary refresh must acknowledge it without mutating that request."
+      "The exact frozen Execute response was consumed once and merged; the unique successor is a Root request at a revision39-safe boundary."
     ],
     "run_id": "run-work-recovery-gen9-durability-repair",
     "schema_version": 1,
@@ -18090,7 +18088,7 @@
   },
   "relational_execute_consume_integration": {
     "schema_version": 1,
-    "status": "phase1_remote_readback_pending",
+    "status": "phase2_remote_readback_pending",
     "pull_request": 428,
     "head_sha": "44a28c53f3c2f9766eeda1fb988b9b830bce1091",
     "merge_sha": "8bb96c526d2cfd45dcbdae4e046bf17584294212",
@@ -18139,9 +18137,9 @@
     },
     "phase1_expected_prior_main_sha": "8bb96c526d2cfd45dcbdae4e046bf17584294212",
     "phase1_expected_prior_state_blob_sha": "3953937dc9f1d6e4d615811934cd45ee95178fc5",
-    "phase1_commit_sha": null,
-    "phase1_state_blob_sha": null,
-    "phase1_exact_readback_verified": false,
+    "phase1_commit_sha": "df73617f82d8ca8b01fa903e7b693d0604a4c2cd",
+    "phase1_state_blob_sha": "7de37ec69dd1e4cec782daed919bb36c005763e6",
+    "phase1_exact_readback_verified": true,
     "phase2_commit_sha": null,
     "phase2_state_blob_sha": null,
     "phase2_exact_readback_verified": false,
@@ -18149,6 +18147,10 @@
     "response_repeated": false,
     "upper_objective_achieved": false,
     "agi_achieved": false,
-    "prepared_at": "2026-09-02T09:22:00Z"
+    "prepared_at": "2026-09-02T09:22:00Z",
+    "phase1_verified_at": "2026-09-02T09:24:15Z",
+    "phase2_expected_prior_main_sha": "df73617f82d8ca8b01fa903e7b693d0604a4c2cd",
+    "phase2_expected_prior_state_blob_sha": "7de37ec69dd1e4cec782daed919bb36c005763e6",
+    "phase2_prepared_at": "2026-09-02T09:24:15Z"
   }
 }
