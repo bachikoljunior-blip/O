@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "record_type": "generation29_relational_query_schema_readiness",
+  "recorded_at": "2026-09-02T05:06:28.842Z",
+  "pre_access_manifest": {
+    "path": "agi/experiments/generation29-external-relational-query-reasoning-v1/PRE_ACCESS_MANIFEST.json",
+    "blob_sha": "d1d5aab5d43db86caa5ef81a61be34eab2fcc823",
+    "merge_sha": "06e4daaf82b3507cd83e5ae253f27a8965d231c8",
+    "exact_main_readback_verified": true
+  },
+  "source": {
+    "repository": "lerocha/chinook-database",
+    "commit_sha": "7f67772503d71ba90f19283c38e93923addb43fa",
+    "database_path": "ChinookDatabase/DataSources/Chinook_Sqlite.sqlite",
+    "database_blob_sha": "f385c2651f80914c3b93c62431b0b000465a921b",
+    "database_sha256": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+    "database_bytes": 1007616,
+    "sqlite_version": "3.53.1",
+    "open_mode": "mode=ro&immutable=1"
+  },
+  "allowed_schema": {
+    "Genre": [
+      [
+        "GenreId",
+        "INTEGER",
+        true,
+        1
+      ],
+      [
+        "Name",
+        "NVARCHAR(120)",
+        false,
+        0
+      ]
+    ],
+    "Track": [
+      [
+        "TrackId",
+        "INTEGER",
+        true,
+        1
+      ],
+      [
+        "Name",
+        "NVARCHAR(200)",
+        true,
+        0
+      ],
+      [
+        "AlbumId",
+        "INTEGER",
+        false,
+        0
+      ],
+      [
+        "MediaTypeId",
+        "INTEGER",
+        true,
+        0
+      ],
+      [
+        "GenreId",
+        "INTEGER",
+        false,
+        0
+      ],
+      [
+        "Composer",
+        "NVARCHAR(220)",
+        false,
+        0
+      ],
+      [
+        "Milliseconds",
+        "INTEGER",
+        true,
+        0
+      ],
+      [
+        "Bytes",
+        "INTEGER",
+        false,
+        0
+      ],
+      [
+        "UnitPrice",
+        "NUMERIC(10,2)",
+        true,
+        0
+      ]
+    ],
+    "Album": [
+      [
+        "AlbumId",
+        "INTEGER",
+        true,
+        1
+      ],
+      [
+        "Title",
+        "NVARCHAR(160)",
+        true,
+        0
+      ],
+      [
+        "ArtistId",
+        "INTEGER",
+        true,
+        0
+      ]
+    ],
+    "Artist": [
+      [
+        "ArtistId",
+        "INTEGER",
+        true,
+        1
+      ],
+      [
+        "Name",
+        "NVARCHAR(120)",
+        false,
+        0
+      ]
+    ],
+    "InvoiceLine": [
+      [
+        "InvoiceLineId",
+        "INTEGER",
+        true,
+        1
+      ],
+      [
+        "InvoiceId",
+        "INTEGER",
+        true,
+        0
+      ],
+      [
+        "TrackId",
+        "INTEGER",
+        true,
+        0
+      ],
+      [
+        "UnitPrice",
+        "NUMERIC(10,2)",
+        true,
+        0
+      ],
+      [
+        "Quantity",
+        "INTEGER",
+        true,
+        0
+      ]
+    ],
+    "Invoice": [
+      [
+        "InvoiceId",
+        "INTEGER",
+        true,
+        1
+      ],
+      [
+        "CustomerId",
+        "INTEGER",
+        true,
+        0
+      ],
+      [
+        "InvoiceDate",
+        "DATETIME",
+        true,
+        0
+      ],
+      [
+        "BillingAddress",
+        "NVARCHAR(70)",
+        false,
+        0
+      ],
+      [
+        "BillingCity",
+        "NVARCHAR(40)",
+        false,
+        0
+      ],
+      [
+        "BillingState",
+        "NVARCHAR(40)",
+        false,
+        0
+      ],
+      [
+        "BillingCountry",
+        "NVARCHAR(40)",
+        false,
+        0
+      ],
+      [
+        "BillingPostalCode",
+        "NVARCHAR(10)",
+        false,
+        0
+      ],
+      [
+        "Total",
+        "NUMERIC(10,2)",
+        true,
+        0
+      ]
+    ]
+  },
+  "observations": {
+    "schema_access_after_manifest": true,
+    "data_rows_read": false,
+    "example_queries_read": false,
+    "solution_artifacts_read": false,
+    "discussions_or_later_commits_read": false,
+    "external_query_service_used": false,
+    "non_allowed_table_schema_read": false
+  },
+  "status": "ready_to_freeze_candidate_sql",
+  "claim_boundary": "Schema readiness only; no query result, bounded-unit verdict, Candidate activation, AGI evidence, or completion claim.",
+  "idempotency_key": "o-work-gen29:invoke-1f60ea1b0640d22db760389a:schema-readiness:d1d5aab5:f385c265:v1",
+  "next_action": "Freeze one deterministic read-only SQL statement from only the manifest and allowed schema before reading data rows."
+}
