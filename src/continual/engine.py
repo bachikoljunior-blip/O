@@ -570,7 +570,26 @@ class Engine:
             "environment": self._run_environment(run_id),
             "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
         }
-        preflight_id = f"preflight-{target}-{self.store.stable_digest(payload)}"
+        # A suspended Work call can advance the run snapshot before the target
+        # component itself executes (for example, when an answered Candidate
+        # preflight is consumed and the following Context Kernel check fails
+        # closed).  The mutable snapshot is useful evaluator context, but it is
+        # not part of the semantic execution-unit identity.  Keying the cached
+        # preflight by the whole payload would therefore mint another Candidate
+        # invocation on every resume of the same unit.
+        identity_unit: dict[str, Any] = unit
+        nested_unit = unit.get("execution_unit")
+        if isinstance(nested_unit, dict):
+            identity_unit = nested_unit
+        preflight_identity = {
+            "mode": "pre-application",
+            "target_component": target,
+            "execution_unit": identity_unit,
+            "candidate_index": relevant,
+        }
+        preflight_id = (
+            f"preflight-{target}-{self.store.stable_digest(preflight_identity)}"
+        )
         path = rd / "preflight" / f"{preflight_id}.json"
         existing = self.store.read_json(path, {})
         if isinstance(existing, dict) and existing.get("result"):

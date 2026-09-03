@@ -114,6 +114,49 @@ def test_preflight_identity_is_stable_across_environment_change(runtime_repo: Pa
     assert [name for name, _ in engine.model.calls].count("candidate_evaluate") == 1
 
 
+def test_preflight_identity_ignores_mutable_snapshot_on_resume(runtime_repo: Path, monkeypatch):
+    engine = make_engine(runtime_repo, monkeypatch)
+    _register_execute_candidate(engine, runtime_repo)
+
+    run_id = engine.store.new_id("run")
+    run_dir = engine.store.run_dir(run_id)
+    run_dir.mkdir(parents=True)
+    engine.store.atomic_json(
+        run_dir / "snapshot.json",
+        {"run_id": run_id, "revision": 0, "status": "continue"},
+    )
+
+    semantic_unit = {
+        "component": "execute",
+        "goal": "do the unit",
+        "scope": "stable-scope",
+        "unit_id": "unit-stable",
+    }
+    first = engine._preflight(
+        run_id,
+        "execute",
+        {
+            "execution_unit": semantic_unit,
+            "snapshot": {"revision": 7, "phase": "unit_pending"},
+        },
+    )
+    second = engine._preflight(
+        run_id,
+        "execute",
+        {
+            "execution_unit": semantic_unit,
+            "snapshot": {
+                "revision": 8,
+                "phase": "unit_pending",
+                "last_error": {"type": "WorkSessionError"},
+            },
+        },
+    )
+
+    assert first == second
+    assert [name for name, _ in engine.model.calls].count("candidate_evaluate") == 1
+
+
 def test_default_provider_refuses_awaiting_work_model_invocation(tmp_path: Path):
     root = _work_root(tmp_path)
     session = WorkSession(root)
