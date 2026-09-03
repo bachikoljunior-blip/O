@@ -1,0 +1,134 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-9f3311f1d6ab37e02efdc854",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "task_evaluate",
+      "evidence_refs": [
+        "artifacts/unit-generation29-external-arc-sequential-transfer-v1-precommit.json",
+        "artifacts/unit-generation29-external-arc-sequential-transfer-v1-baseline-predictions.json",
+        "artifacts/unit-generation29-external-arc-sequential-transfer-v1-learning-record.json",
+        "artifacts/unit-generation29-external-arc-sequential-transfer-v1-adapted-task-b-prediction.json",
+        "artifacts/unit-generation29-external-arc-sequential-transfer-v1-result.json",
+        ".continual/work-model/invocations/invoke-aa7f4d5006e721dc60bd1dbe/request.json",
+        ".continual/work-model/invocations/invoke-aa7f4d5006e721dc60bd1dbe/response.json"
+      ],
+      "observations": [
+        "The exact two-task transpose-family unit passes with strict task-B improvement from 22/36 to 36/36 exact cells.",
+        "The chronology, no-leakage, identity, replay, negative-control, and zero-upstream-write conditions are supported by the frozen evidence.",
+        "Candidate activation remains false; generalized ARC, AGI, upper-objective, and user-level verdicts remain false."
+      ],
+      "purpose": "Independently evaluate the frozen external ARC sequential-transfer result without widening its two-task claim boundary.",
+      "unresolved": [
+        "cross-family and broader held-out transfer",
+        "long-horizon robustness and autonomous continual learning",
+        "verified serving-model identity",
+        "strict independent external AGI evidence",
+        "unchanged user objective"
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "observation": "The existing Task Evaluate contract correctly separates a reproducible bounded-unit PASS from the unchanged user-level and AGI FAIL; no evaluator-policy change or Candidate activation is justified by this two-task result."
+    },
+    "result": {
+      "agi_claim_supported": false,
+      "candidate_activation": false,
+      "claim_boundary": "PASS applies only to the exact immutable two-task external ARC sequential-transfer unit and its declared controls. It does not establish generalized ARC capability, cross-family transfer, production reliability, autonomous self-improvement, AGI, upper-objective completion, user-level completion, Candidate activation, or monitor completion.",
+      "continuation": "Run post-result Candidate Evaluate, Consolidate Episode, and Learn; return to Root and select materially different safe work while the upper objective remains open.",
+      "evaluated_goal": "Independently evaluate the exact generation-29 external ARC sequential-transfer unit separately from the unchanged user-level and AGI objective.",
+      "evidence": [
+        {
+          "finding": "The source is fchollet/ARC-AGI commit 399030444e0ab0cc8b4e199870fb20b863846f34 under Apache-2.0; the deterministic selector chose only tasks 74dd1130 and 9dfd6313, with immutable source blobs, sanitized projections, holder commitments, reveal ordering, identity_v1 baseline, and matrix_transpose_v1 adaptation all precommitted.",
+          "source": "artifacts/unit-generation29-external-arc-sequential-transfer-v1-precommit.json"
+        },
+        {
+          "finding": "The same frozen identity baseline returned each test input unchanged for both task A and task B.",
+          "source": "artifacts/unit-generation29-external-arc-sequential-transfer-v1-baseline-predictions.json"
+        },
+        {
+          "finding": "The learning record identifies only matrix_transpose_v1 from task A, records that the task-A baseline was not exact, verifies the task-A holder commitment, and contains no task-B output cells or answer-bearing derivative.",
+          "source": "artifacts/unit-generation29-external-arc-sequential-transfer-v1-learning-record.json"
+        },
+        {
+          "finding": "The task-B prediction is the transpose of the task-B input, is bound to the task-A learning-record digest, and records task_b_output_unrevealed=true before scoring.",
+          "source": "artifacts/unit-generation29-external-arc-sequential-transfer-v1-adapted-task-b-prediction.json"
+        },
+        {
+          "finding": "Deterministic recomputation gives baseline task A 3/9 exact cells (0.3333333333333333), baseline task B 22/36 (0.6111111111111112), and adapted task B 36/36 (1.0) with exact-grid true and strict improvement true.",
+          "source": "artifacts/unit-generation29-external-arc-sequential-transfer-v1-result.json"
+        },
+        {
+          "finding": "All six declared negative controls pass: changed selector digest, changed source commit, changed task identity, mismatched holder commitment, leaked answer cells, and duplicate replay. Replay accepted the first effect and rejected the duplicate under digest 8952cf12bfe66859fd4256fd081a3cdc952e2cc5f1d011cb90c6b0caf8f13b84.",
+          "source": "artifacts/unit-generation29-external-arc-sequential-transfer-v1-result.json"
+        },
+        {
+          "finding": "The ARC source before/after head, object-count digest, status digest, and status-line count are identical, establishing zero upstream writes within the recorded audit.",
+          "source": "artifacts/unit-generation29-external-arc-sequential-transfer-v1-result.json"
+        },
+        {
+          "finding": "The Execute response is bound to request digest 6213c0c9f7ecb4adbe21b6ed9671d8c3d487b0537185909bd9cfb9e5ed3fe436 and reports the same bounded scores, controls, claim boundary, Candidate inactivity, and false upper/user/AGI conclusions.",
+          "source": ".continual/work-model/invocations/invoke-aa7f4d5006e721dc60bd1dbe/response.json"
+        },
+        {
+          "finding": "The decision-relevant protected workflow at exact head ba0cd78295ea26debccd62c7ad0a7ba0ab590c70 succeeded in all four shards and the aggregate test job; the observation is bound by receipt digest 7c864582f72372f674ef28859ff05d48daeea2b16f146644ce1106dda1e0b2ae.",
+          "source": "protected exact-head workflow observation ci-run-ee5cc08617ee946f18520321"
+        }
+      ],
+      "global_activation_authorized": false,
+      "negative_evidence": [
+        "The selector yielded only two tasks from one matrix-transpose family; no evidence covers additional ARC transformation families or unseen capability classes.",
+        "The learned adaptation is one fixed transpose rule, so the result does not establish open-ended rule induction, retention across episodes, autonomous goal pursuit, or continual self-improvement.",
+        "The serving model identity remains unverified and the evaluator remains within the project execution boundary.",
+        "No independent external evaluation establishes AGI, production reliability, broad robustness, autonomy, or user-level completion.",
+        "Protected repository CI validates the frozen implementation and artifacts but cannot widen the two-task empirical claim."
+      ],
+      "quantitative_findings": {
+        "adapted_task_b_accuracy": 1.0,
+        "adapted_task_b_exact_cells": 36,
+        "adapted_task_b_exact_grid": true,
+        "adapted_task_b_total_cells": 36,
+        "baseline_task_a_accuracy": 0.3333333333333333,
+        "baseline_task_a_exact_cells": 3,
+        "baseline_task_a_total_cells": 9,
+        "baseline_task_b_accuracy": 0.6111111111111112,
+        "baseline_task_b_exact_cells": 22,
+        "baseline_task_b_total_cells": 36,
+        "candidate_activations": 0,
+        "declared_negative_controls_passed": 6,
+        "duplicate_replays_accepted": 0,
+        "independent_agi_evaluations": 0,
+        "selected_task_count": 2,
+        "upstream_writes": 0
+      },
+      "repair_information": {
+        "bounded_unit": "No repair is required for the exact two-task unit under its declared scope.",
+        "claim_boundary": "Keep Candidate activation false and preserve separate unit and upper-objective verdicts.",
+        "next": "Continue the frozen post-result Candidate Evaluate, Consolidate Episode, Learn, and Root sequence, then select a materially different safe executable unit while AGI and user-level completion remain false.",
+        "recurrence": "Recheck source/license/task/holder/selector identities, pre-reveal ordering, absence of task-B leakage, deterministic scores, all negative controls, replay suppression, zero upstream writes, exact-head CI, expected-head merge, and remote blob readback."
+      },
+      "task_completion_verdict": "FAIL",
+      "unit_completion_verdict": "PASS",
+      "unit_id": "unit-generation29-external-arc-sequential-transfer-v1",
+      "unit_scope": "Exactly two deterministically selected public ARC training tasks, 74dd1130 as task A and 9dfd6313 as task B, using the frozen identity_v1 baseline and one matrix_transpose_v1 rule learned from task A before task B output reveal.",
+      "unit_verdict": "PASS",
+      "unit_verdict_reason": "The frozen evidence establishes the declared bounded transfer result: identity baselines were inexact on both tasks, the task-A-derived transpose prediction for task B was frozen before task-B output reveal and was exact, every declared identity/leakage/replay control failed closed, and the upstream ARC source audit was unchanged.",
+      "unmet_conditions": [
+        "Complete the post-result Candidate Evaluate, Consolidate Episode, Learn, and Root lifecycle without widening the bounded PASS.",
+        "Select materially different safe evidence units spanning transformation families, transfer settings, robustness, autonomy, and continual-learning behavior.",
+        "Obtain strict independent external evidence sufficient for the AGI evidence gate before any AGI, upper-objective, or user-level PASS."
+      ],
+      "upper_objective_verdict": "FAIL",
+      "user_level_verdict": "FAIL",
+      "verdict": "FAIL",
+      "verdict_reason": "A PASS for one precommitted two-task transpose-family unit is not evidence of generalized ARC transfer, broad continual learning, robust autonomous performance, independent AGI evaluation, or satisfaction of the unchanged user objective. Those conditions remain unestablished."
+    }
+  },
+  "output_digest": "8ecb95c2df1ddcb6143a980b59e189e6652aa54ac50cd41a4ef8f80e4b2afeff",
+  "received_at": "2026-09-03T02:06:17.827539Z",
+  "request_digest": "b85078568dd0acbae6af72dfa8ed1c3fe4dc584f4f016b8e8b473985e81b2c3a",
+  "response_digest": "c49e9ece8b7d1f5f113aac698ea03c8d12b748a5156b4731beb0674d09304023",
+  "schema_version": 1
+}
