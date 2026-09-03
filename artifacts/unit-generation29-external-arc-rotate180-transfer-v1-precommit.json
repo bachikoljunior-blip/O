@@ -1,0 +1,81 @@
+{
+  "adaptation": {
+    "adapted_rule": "matrix_rotate_180_v1",
+    "permitted_learning_record": "A rule identifier and evidence digests only; no task-B answer cells.",
+    "task_b_reveal_forbidden_until_adapted_prediction_frozen": true
+  },
+  "baseline": {
+    "frozen_rule": "Return the supplied test input unchanged.",
+    "same_solver_for_A_and_B": true,
+    "solver": "identity_v1"
+  },
+  "claim_boundary": "Exactly two deterministically selected ARC tasks in one rotate-180 family and one bounded rule-library transfer; no generalized ARC, broad continual-learning, autonomy, production, AGI, user-level, or upper-objective inference.",
+  "holder_sha256": "b1b8f5a9f39023c207521281621c1e9c8359f2b5f3960ea29e9ad99fadb9a034",
+  "idempotency_key": "o-work-gen29:arc-sequential-transfer:39903044:rotate180:v1",
+  "negative_controls": [
+    "changed_source_commit",
+    "changed_task_identity",
+    "mismatched_holder_commitment",
+    "leaked_answer_cells",
+    "changed_selector_digest",
+    "family_mismatch",
+    "duplicate_replay"
+  ],
+  "orchestrator_sha256": "59d9aa814a1fd61923565c5fb72697e9296a7f3b29b91328663619b0d4ca9b0a",
+  "record_type": "external_arc_rotate180_transfer_precommit",
+  "recorded_at": "2026-09-03T03:06:59.241Z",
+  "schema_version": 1,
+  "scoring": {
+    "exact_cell": "if shape differs, score 0/target_cell_count; otherwise count equal cells",
+    "exact_grid": "shape and every cell must match",
+    "improvement": "adapted task-B exact-cell accuracy must strictly exceed baseline task-B accuracy"
+  },
+  "selector": {
+    "algorithm": "lexicographically first two public training-or-evaluation tasks with exactly one test case, every demonstration output equal to matrix rotate-180, a test input not invariant under rotate-180, no prior exact task-id occurrence in O, and explicit exclusion of 74dd1130 and 9dfd6313",
+    "candidate_count": 2,
+    "excluded_outcome_fields": [
+      "test[*].output"
+    ],
+    "excluded_task_ids": [
+      "74dd1130",
+      "9dfd6313"
+    ],
+    "family": "matrix_rotate_180",
+    "selected_task_ids": [
+      "3c9b0459",
+      "6150a2bd"
+    ]
+  },
+  "source": {
+    "commit": "399030444e0ab0cc8b4e199870fb20b863846f34",
+    "license": "Apache-2.0",
+    "license_path": "LICENSE",
+    "license_sha256": "b3a161754ffc20840ccf92aec0fe464fbbcf42f14c22f78a3ec2e98fca3864ca",
+    "repository": "fchollet/ARC-AGI"
+  },
+  "tasks": [
+    {
+      "holder_output_commitment_sha256": "99e7b321e80aacff5a3236657fc22050447a33acee8bce3f8b4253aa6e9063fc",
+      "prior_use_scan_match": false,
+      "role": "A",
+      "sanitized_projection_sha256": "de6a5ba5a501913cdc203959b328d36f6e364f00993724c48b0c6696f091e33c",
+      "source_blob_sha": "bc5aef84b55ae79464c77627e426d5faac414a65",
+      "source_path": "data/training/3c9b0459.json",
+      "source_split": "training",
+      "task_id": "3c9b0459",
+      "test_count": 1
+    },
+    {
+      "holder_output_commitment_sha256": "d49d9ef9d66611b68baf8e0b138046b58120bb22dbd57e614b39b975c70bc716",
+      "prior_use_scan_match": false,
+      "role": "B",
+      "sanitized_projection_sha256": "007a2831db044b10bde948e7260e5c516b59643d2e78cee5f6d23f2f5db7e868",
+      "source_blob_sha": "88b20f5b281380120bde8719c4022beafa20486a",
+      "source_path": "data/training/6150a2bd.json",
+      "source_split": "training",
+      "task_id": "6150a2bd",
+      "test_count": 1
+    }
+  ],
+  "unit_id": "unit-generation29-external-arc-rotate180-transfer-v1"
+}
