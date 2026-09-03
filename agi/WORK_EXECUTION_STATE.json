@@ -182,11 +182,11 @@
   "branch_head_tree_sha": null,
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-02T23:52:58.659Z",
+    "checkpointed_at": "2026-09-03T00:14:37.093Z",
     "active_component": "generation29_external_arc_answered_root_pending_native_consume",
     "active_prompt": "prompts/root.md",
-    "current_main_sha": "1649ac710c06b6d86f1b8314dc7de223f66fec84",
-    "current_state_blob_sha": "5f047cb3ad303861c825a0bbf495a7b92e4a3f84",
+    "current_main_sha": "c0481d115d0eb40ee31810618fe50bd9535847c2",
+    "current_state_blob_sha": "f4a961f7f6e70bdeade54928364ce185b1df9ff1",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
@@ -212,9 +212,9 @@
     "snapshot_blob_sha": "d298f5b763e137770598ca2e90155b0850001eaf",
     "snapshot_revision": 152,
     "snapshot_phase": "root_pending",
-    "idempotency_key": "o-work-gen29:pr446:1bf8cea8:root-consume-candidate-freeze-ci:v1",
+    "idempotency_key": "o-work-gen29:pr446:1bf8cea8:ci-3of4:v1",
     "exact_frontier": "Merge unchanged-head PR 446 after all required jobs succeed; exact-read all eight lifecycle blobs; then two-phase bind the answered Candidate Evaluate continuation and consume it exactly once.",
-    "next_action": "Wait for exact-head PR 446 directive and protected test workflows; merge only unchanged expected head after every required job succeeds; then exact-read and bind Candidate Evaluate continuation.",
+    "next_action": "Continue bounded wait for shard 1 and aggregate on exact-head PR 446; merge only after both succeed; exact-read eight lifecycle blobs; then bind and consume answered Candidate Evaluate once.",
     "next_tool": "GitHub exact-head workflow/status readback",
     "next_tool_action": "Merge PR 446 at head 1bf8cea87fc9eaf2bc7f4702ddafd68f2485352f only after all required jobs succeed; then two-phase CAS/readback bind and consume invoke-36832e2a6a032de309e1430a exactly once.",
     "pull_request": {
@@ -15430,7 +15430,7 @@
     "next_action": "After exact CAS/readback, re-read latest main, authority, inbox, PR exact head, all jobs, and mergeability; merge only unchanged expected head and then publish a two-phase continuation repair for the answered Root request."
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-02T23:52:58.659Z",
+  "heartbeat_at": "2026-09-03T00:14:37.093Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -16303,9 +16303,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "root_consumed_exactly_once_candidate_evaluate_response_frozen_publication_pr_ci_pending",
-  "last_activity_at": "2026-09-02T23:52:58.659Z",
-  "last_progress_at": "2026-09-02T23:52:58.659Z",
+  "last_action": "root_consume_publication_pr446_exact_head_ci_three_shards_succeeded_one_running",
+  "last_activity_at": "2026-09-03T00:14:37.093Z",
+  "last_progress_at": "2026-09-03T00:14:37.093Z",
   "last_verified_effect": {
     "component": "execute",
     "unit_id": "unit-generation29-external-arc-sequential-transfer-v1",
@@ -18393,7 +18393,7 @@
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_remote_readback": false,
   "working_branch": "main",
-  "last_checked_at": "2026-09-02T23:52:58.659Z",
+  "last_checked_at": "2026-09-03T00:14:37.093Z",
   "generation29_matched_evidence_execute_consume_candidate_evaluate_bind_v1": {
     "schema_version": 1,
     "status": "remote_main_readback_verified_exact_continuation_repair_phase1_pending",
@@ -19133,7 +19133,7 @@
   },
   "generation29_root_consume_candidate_freeze_publication_v1": {
     "schema_version": 1,
-    "status": "pull_request_exact_head_ci_queued",
+    "status": "pull_request_exact_head_ci_three_shards_succeeded_one_running",
     "observed_at": "2026-09-02T23:52:58.659Z",
     "authority": {
       "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
@@ -19178,13 +19178,13 @@
       {
         "id": 33697015209,
         "name": "directive-source-preflight",
-        "status": "queued",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 33697015324,
         "name": "test",
-        "status": "queued",
+        "status": "in_progress",
         "conclusion": null
       }
     ],
@@ -19203,6 +19203,33 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "idempotency_key": "o-work-gen29:pr446:1bf8cea8:root-consume-candidate-freeze:v1",
-    "next_action": "Wait exact-head CI, merge unchanged head, exact-read eight blobs, two-phase bind answered Candidate Evaluate, then consume exactly once."
+    "next_action": "Continue bounded wait for shard 1 and aggregate, then exact-head merge/readback and continuation bind.",
+    "last_checked_at": "2026-09-03T00:14:37.093Z",
+    "jobs": [
+      {
+        "id": 100467975283,
+        "name": "pytest shard 2 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 100467975425,
+        "name": "pytest shard 0 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 100467975605,
+        "name": "pytest shard 3 of 4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 100467975609,
+        "name": "pytest shard 1 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ]
   }
 }
