@@ -92,6 +92,53 @@ def test_valid_completed_checkpoint_is_verified_and_read_only(tmp_path: Path) ->
     assert _record_bytes(root) == before
 
 
+def test_unit_pending_checkpoint_requires_exact_execution_unit(tmp_path: Path) -> None:
+    root, state, _ = _completed_checkpoint(tmp_path)
+    run_id = state["active_run_id"]
+    snapshot_path = root / state["exact_continuation"]["run_snapshot_ref"]
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    unit_id = "unit-checkpoint-integrity"
+    snapshot.update(
+        {
+            "phase": "unit_pending",
+            "current_unit": unit_id,
+            "current_component": "task_evaluate",
+        }
+    )
+    snapshot_path.write_text(json.dumps(snapshot), encoding="utf-8")
+    unit_path = (
+        root
+        / ".continual"
+        / "runs"
+        / run_id
+        / "execution-units"
+        / f"{unit_id}.json"
+    )
+    unit_path.parent.mkdir(parents=True, exist_ok=True)
+    unit_path.write_text(
+        json.dumps(
+            {
+                "unit_id": unit_id,
+                "component": "task_evaluate",
+                "goal": "verify the exact frozen unit",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    valid = verify_work_checkpoint_integrity(root, state=state)
+    assert valid["valid"] is True
+    assert any(
+        item.get("kind") == "execution_unit" and item.get("unit_id") == unit_id
+        for item in valid["verified_references"]
+    )
+
+    unit_path.unlink()
+    missing = verify_work_checkpoint_integrity(root, state=state)
+    assert missing["valid"] is False
+    assert _codes(missing) == {"EXECUTION_UNIT_MISSING"}
+
+
 def test_pending_request_is_verified_without_requiring_a_response(tmp_path: Path) -> None:
     root = _root(tmp_path)
     run_id = "run-checkpoint-pending"

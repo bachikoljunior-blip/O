@@ -18,6 +18,7 @@ _ANSWERED_CLAIM = re.compile(
     r"^(invoke-[0-9a-f]{24})(?:\s+\([^()\r\n]+\))?$"
 )
 _COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
+_SAFE_UNIT_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 _DEFAULT_STATE_PATH = Path("agi/WORK_EXECUTION_STATE.json")
 
 
@@ -270,6 +271,62 @@ def verify_work_checkpoint_integrity(
                             "phase": snapshot.get("phase"),
                         }
                     )
+                    if snapshot.get("phase") == "unit_pending":
+                        unit_id = snapshot.get("current_unit")
+                        unit_path_key = "run_snapshot.current_unit"
+                        if not isinstance(unit_id, str) or not _SAFE_UNIT_ID.fullmatch(unit_id):
+                            _issue(
+                                issues,
+                                "EXECUTION_UNIT_ID_MALFORMED",
+                                unit_path_key,
+                                "unit_pending snapshot current_unit must be a safe unit id",
+                            )
+                        elif run_id is None:
+                            _issue(
+                                issues,
+                                "EXECUTION_UNIT_RUN_UNKNOWN",
+                                unit_path_key,
+                                "cannot resolve current execution unit without primary run_id",
+                            )
+                        else:
+                            unit_ref = (
+                                f".continual/runs/{run_id}/execution-units/"
+                                f"{unit_id}.json"
+                            )
+                            unit_path = root / unit_ref
+                            try:
+                                unit = json.loads(unit_path.read_text(encoding="utf-8"))
+                            except FileNotFoundError:
+                                _issue(
+                                    issues,
+                                    "EXECUTION_UNIT_MISSING",
+                                    unit_path_key,
+                                    f"referenced execution unit does not exist: {unit_ref}",
+                                )
+                            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                                _issue(
+                                    issues,
+                                    "EXECUTION_UNIT_MALFORMED",
+                                    unit_path_key,
+                                    f"referenced execution unit is unreadable or invalid JSON: {exc}",
+                                )
+                            else:
+                                if not isinstance(unit, dict) or unit.get("unit_id") != unit_id:
+                                    _issue(
+                                        issues,
+                                        "EXECUTION_UNIT_ID_MISMATCH",
+                                        unit_path_key,
+                                        "execution unit identity does not match snapshot current_unit",
+                                    )
+                                else:
+                                    verified.append(
+                                        {
+                                            "kind": "execution_unit",
+                                            "path": unit_ref,
+                                            "unit_id": unit_id,
+                                            "component": unit.get("component"),
+                                        }
+                                    )
 
     if exact.get("snapshot_branch") != "main":
         _issue(
