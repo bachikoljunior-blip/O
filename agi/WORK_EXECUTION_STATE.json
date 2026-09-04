@@ -122,11 +122,11 @@
   "branch_head_sha": "71ffea2bfe46e2574127a6baa411b73bd8de8e98",
   "branch_head_tree_sha": null,
   "checkpoint": {
-    "active_component": "generation29_continuation_durability_contract_repair_phase1",
+    "active_component": "generation29_continuation_durability_contract_repair_exact_readback_verified",
     "active_prompt": "prompts/execute.md",
     "agi_claim_supported": false,
     "blocker": null,
-    "checkpointed_at": "2026-09-04T18:27:00.000Z",
+    "checkpointed_at": "2026-09-04T18:28:00.000Z",
     "completed_effect_receipt": {
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-2f0033923ddabcf813daf833.json",
       "blob_sha": "0746e814668bb224adf9cc88a07a23ec8a851727"
@@ -177,8 +177,8 @@
       33841152207,
       33841152298
     ],
-    "current_main_sha": "b28cdeac56cb2f96fd564554edecc6c5e79ac296",
-    "current_state_blob_sha": "cc0cf337206d5215c44501f28b6c718ed5e07cdd",
+    "current_main_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+    "current_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
     "exact_completed_native_invocation_id": "invoke-2f0033923ddabcf813daf833",
     "exact_completed_request_digest": "f7e8b555d98d211ae5f18b26d5455eb9bfa4664020ae1a6afae985dbc677e928",
     "exact_completed_response_blob_sha": "0f4fdb1b891c1b0b8536c31f40d47da8a42911ad",
@@ -195,13 +195,13 @@
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "goal_revision": 118,
-    "idempotency_key": "o-work-gen29:b28cdeac:repair-continuation-durability-contract-phase1:v1",
+    "idempotency_key": "o-work-gen29:b28cdeac:repair-continuation-durability-contract-phase2:v1",
     "inbox_blob_sha": "0972d6f37eb73f7a9dd83fec27a5f6c3fc255e2e",
     "inbox_revision": 41,
     "last_verified_effect": {
       "schema_version": 1,
-      "status": "phase1_prepared_continuation_durability_contract_repair",
-      "recorded_at": "2026-09-04T18:27:00.000Z",
+      "status": "state_cas_exact_readback_verified_continuation_durability_contract_repair",
+      "recorded_at": "2026-09-04T18:28:00.000Z",
       "authority": {
         "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
         "lease_generation": 29,
@@ -224,9 +224,12 @@
         "preserves_execution_generation_fence_and_frozen_invocation": true
       },
       "recurrence_validation": {
-        "status": "pending_phase2_exact_readback_and_read_only_resume_preflight",
+        "status": "passed",
         "entrypoint": "PYTHONPATH=src python -m continual.cli work-resume run-work-recovery-gen9-durability-repair --max-steps 0",
-        "focused_tests": "tests/test_work_response_evidence_binding.py and tests/test_engine_work_safety.py"
+        "focused_tests": "tests/test_work_response_evidence_binding.py and tests/test_engine_work_safety.py",
+        "result": "The repaired phase2 state passed the full continuity preflight and reached Engine.resume, where the intentional max_steps=0 probe stopped before mutation; 20 focused evidence-binding and engine-safety tests also passed.",
+        "focused_test_count": 20,
+        "response_resubmitted": false
       },
       "authoritative_source_observation": {
         "observation_id": "work-state-4d8a6fb754daa539d1f9017e",
@@ -246,7 +249,10 @@
       "upper_objective_achieved": false,
       "agi_achieved": false,
       "idempotency_key": "o-work-gen29:b28cdeac:repair-continuation-durability-contract:v1",
-      "next_action": "After phase2 exact readback and recurrence validation, consume the already-accepted Execute response exactly once without resubmission, verify fragment/local-learn/result effects, and freeze independent Task Evaluate."
+      "next_action": "After phase2 exact readback and recurrence validation, consume the already-accepted Execute response exactly once without resubmission, verify fragment/local-learn/result effects, and freeze independent Task Evaluate.",
+      "phase1_commit_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+      "phase1_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
+      "phase1_exact_readback_verified": true
     },
     "lease_generation": 29,
     "native_phase": "unit_pending",
@@ -1159,11 +1165,11 @@
   "continuation": "Consume the already-answered Candidate Evaluate invocation invoke-7c5d3f1502a4933930221c2b exactly once; do not submit it again; freeze the unique Task Evaluate request for unit-generation29-external-arc-rotate180-transfer-v1, answer it from bounded evidence, and continue post-result Candidate, Consolidate, Learn, Root, and further safe work.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "phase1_prepared",
+    "status": "remote_main_readback_verified",
     "durability_status": "pending_native_consume",
     "prepared_at": "2026-09-04T09:06:22.127Z",
-    "verified_at": null,
-    "verified_remote_readback": false,
+    "verified_at": "2026-09-04T18:28:00.000Z",
+    "verified_remote_readback": true,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -1284,12 +1290,12 @@
     "source_state_blob_sha": "20f5b1d8847298f2ade52b396e54e4c1d77dfea3",
     "phase1_expected_prior_main_sha": "b28cdeac56cb2f96fd564554edecc6c5e79ac296",
     "phase1_expected_prior_state_blob_sha": "cc0cf337206d5215c44501f28b6c718ed5e07cdd",
-    "phase1_commit_sha": null,
-    "phase1_state_blob_sha": null,
-    "phase1_exact_readback_verified": false,
-    "phase1_verified_at": null,
-    "phase2_expected_prior_main_sha": null,
-    "phase2_expected_prior_state_blob_sha": null,
+    "phase1_commit_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+    "phase1_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
+    "phase1_exact_readback_verified": true,
+    "phase1_verified_at": "2026-09-04T18:28:00.000Z",
+    "phase2_expected_prior_main_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+    "phase2_expected_prior_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
     "phase2_commit_sha": null,
     "phase2_state_blob_sha": null,
     "phase2_exact_readback_verified": false,
@@ -1316,11 +1322,11 @@
   "durability_status": "pending_native_consume",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "phase1_prepared",
+    "status": "remote_main_readback_verified",
     "durability_status": "pending_native_consume",
     "prepared_at": "2026-09-04T09:06:22.127Z",
-    "verified_at": null,
-    "verified_remote_readback": false,
+    "verified_at": "2026-09-04T18:28:00.000Z",
+    "verified_remote_readback": true,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -1441,12 +1447,12 @@
     "source_state_blob_sha": "20f5b1d8847298f2ade52b396e54e4c1d77dfea3",
     "phase1_expected_prior_main_sha": "b28cdeac56cb2f96fd564554edecc6c5e79ac296",
     "phase1_expected_prior_state_blob_sha": "cc0cf337206d5215c44501f28b6c718ed5e07cdd",
-    "phase1_commit_sha": null,
-    "phase1_state_blob_sha": null,
-    "phase1_exact_readback_verified": false,
-    "phase1_verified_at": null,
-    "phase2_expected_prior_main_sha": null,
-    "phase2_expected_prior_state_blob_sha": null,
+    "phase1_commit_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+    "phase1_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
+    "phase1_exact_readback_verified": true,
+    "phase1_verified_at": "2026-09-04T18:28:00.000Z",
+    "phase2_expected_prior_main_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+    "phase2_expected_prior_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
     "phase2_commit_sha": null,
     "phase2_state_blob_sha": null,
     "phase2_exact_readback_verified": false,
@@ -1473,17 +1479,17 @@
     ]
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "cc0cf337206d5215c44501f28b6c718ed5e07cdd",
+  "expected_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
     "strict_gate_passed": false
   },
   "fence_token": "work-recovery-fence-v29-9029e9e75e8c5ebc3de703ea3487bab67b05acea03d54489cd13b4cd18e77781",
-  "finalization_blob_sha": "015f635631e2310c2b33aae0e5af459a1e2808a6",
-  "finalization_commit_sha": "8b5b795e716ccc10b355587850929e76776c4806",
+  "finalization_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
+  "finalization_commit_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
   "finalization_readback_verified": true,
-  "finalize_expected_blob_sha": "015f635631e2310c2b33aae0e5af459a1e2808a6",
+  "finalize_expected_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
   "generation23_payload_publication_hold": {
     "cause_guard_merge_sha": "e6a9b8f1bbe5887035019362f7dc0a7f4d6c991c",
     "continuation_invocation_id": "invoke-748f38dc8ef56693dba2f7b7",
@@ -18834,7 +18840,7 @@
     "validation": "The source commit contains the exact frozen request, response, native journal, snapshot, and restored execution-unit blobs and is an ancestor of current main."
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-04T18:27:00.000Z",
+  "heartbeat_at": "2026-09-04T18:28:00.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -19708,13 +19714,13 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Persist and bind the exact answered rotate-180 Root continuation after eliminating the missing pending-ID stop cause.",
-  "last_activity_at": "2026-09-04T18:27:00.000Z",
-  "last_checked_at": "2026-09-04T18:27:00.000Z",
+  "last_activity_at": "2026-09-04T18:28:00.000Z",
+  "last_checked_at": "2026-09-04T18:28:00.000Z",
   "last_progress_at": "2026-09-04T09:06:56.032Z",
   "last_verified_effect": {
     "schema_version": 1,
-    "status": "phase1_prepared_continuation_durability_contract_repair",
-    "recorded_at": "2026-09-04T18:27:00.000Z",
+    "status": "state_cas_exact_readback_verified_continuation_durability_contract_repair",
+    "recorded_at": "2026-09-04T18:28:00.000Z",
     "authority": {
       "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
       "lease_generation": 29,
@@ -19737,9 +19743,12 @@
       "preserves_execution_generation_fence_and_frozen_invocation": true
     },
     "recurrence_validation": {
-      "status": "pending_phase2_exact_readback_and_read_only_resume_preflight",
+      "status": "passed",
       "entrypoint": "PYTHONPATH=src python -m continual.cli work-resume run-work-recovery-gen9-durability-repair --max-steps 0",
-      "focused_tests": "tests/test_work_response_evidence_binding.py and tests/test_engine_work_safety.py"
+      "focused_tests": "tests/test_work_response_evidence_binding.py and tests/test_engine_work_safety.py",
+      "result": "The repaired phase2 state passed the full continuity preflight and reached Engine.resume, where the intentional max_steps=0 probe stopped before mutation; 20 focused evidence-binding and engine-safety tests also passed.",
+      "focused_test_count": 20,
+      "response_resubmitted": false
     },
     "authoritative_source_observation": {
       "observation_id": "work-state-4d8a6fb754daa539d1f9017e",
@@ -19759,7 +19768,10 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "idempotency_key": "o-work-gen29:b28cdeac:repair-continuation-durability-contract:v1",
-    "next_action": "After phase2 exact readback and recurrence validation, consume the already-accepted Execute response exactly once without resubmission, verify fragment/local-learn/result effects, and freeze independent Task Evaluate."
+    "next_action": "After phase2 exact readback and recurrence validation, consume the already-accepted Execute response exactly once without resubmission, verify fragment/local-learn/result effects, and freeze independent Task Evaluate.",
+    "phase1_commit_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+    "phase1_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
+    "phase1_exact_readback_verified": true
   },
   "lease_generation": 29,
   "lease_renewal": {
@@ -20632,7 +20644,7 @@
     "merge_sha": "413495647af597f5e0858fa65266d340629b0949",
     "tree_sha": "02e3aeb8cbe2d9801c9961aa2ad6a77e5d52a170"
   },
-  "readback_of_commit_sha": "8b5b795e716ccc10b355587850929e76776c4806",
+  "readback_of_commit_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
   "reason": "Candidate preflight launch run 33409343474 failed before response submission because status was continue while mandatory Work source observation requires running; status repaired by expected-blob CAS and the exact frozen Candidate request remains unanswered.",
   "recent_main_integration": {
     "claim_boundary": "Execution-unit artifact integrity repair and duplicate suppression only; the original answered Candidate invocation remains authoritative and unconsumed; Candidate activation, upper objective, user completion, and AGI remain false.",
@@ -21611,8 +21623,8 @@
   "snapshot_phase": "unit_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
   "snapshot_revision": 183,
-  "source_main_sha": "b28cdeac56cb2f96fd564554edecc6c5e79ac296",
-  "source_state_blob_sha": "cc0cf337206d5215c44501f28b6c718ed5e07cdd",
+  "source_main_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+  "source_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -22448,8 +22460,8 @@
   },
   "generation29_continuation_durability_contract_repair_v1": {
     "schema_version": 1,
-    "status": "phase1_prepared_continuation_durability_contract_repair",
-    "recorded_at": "2026-09-04T18:27:00.000Z",
+    "status": "state_cas_exact_readback_verified_continuation_durability_contract_repair",
+    "recorded_at": "2026-09-04T18:28:00.000Z",
     "authority": {
       "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
       "lease_generation": 29,
@@ -22472,9 +22484,12 @@
       "preserves_execution_generation_fence_and_frozen_invocation": true
     },
     "recurrence_validation": {
-      "status": "pending_phase2_exact_readback_and_read_only_resume_preflight",
+      "status": "passed",
       "entrypoint": "PYTHONPATH=src python -m continual.cli work-resume run-work-recovery-gen9-durability-repair --max-steps 0",
-      "focused_tests": "tests/test_work_response_evidence_binding.py and tests/test_engine_work_safety.py"
+      "focused_tests": "tests/test_work_response_evidence_binding.py and tests/test_engine_work_safety.py",
+      "result": "The repaired phase2 state passed the full continuity preflight and reached Engine.resume, where the intentional max_steps=0 probe stopped before mutation; 20 focused evidence-binding and engine-safety tests also passed.",
+      "focused_test_count": 20,
+      "response_resubmitted": false
     },
     "authoritative_source_observation": {
       "observation_id": "work-state-4d8a6fb754daa539d1f9017e",
@@ -22494,6 +22509,9 @@
     "upper_objective_achieved": false,
     "agi_achieved": false,
     "idempotency_key": "o-work-gen29:b28cdeac:repair-continuation-durability-contract:v1",
-    "next_action": "After phase2 exact readback and recurrence validation, consume the already-accepted Execute response exactly once without resubmission, verify fragment/local-learn/result effects, and freeze independent Task Evaluate."
+    "next_action": "After phase2 exact readback and recurrence validation, consume the already-accepted Execute response exactly once without resubmission, verify fragment/local-learn/result effects, and freeze independent Task Evaluate.",
+    "phase1_commit_sha": "48d7cb4a8cc46716788d4c8a8ca30afe09ad1b52",
+    "phase1_state_blob_sha": "617be5ab409d878ce548dd464b84777537d6bedb",
+    "phase1_exact_readback_verified": true
   }
 }
