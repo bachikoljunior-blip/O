@@ -122,11 +122,11 @@
   "branch_head_sha": "71ffea2bfe46e2574127a6baa411b73bd8de8e98",
   "branch_head_tree_sha": null,
   "checkpoint": {
-    "active_component": "generation29_pr478_root_response_exact_readback_verified_pending_native_consume",
+    "active_component": "generation29_pr478_native_phase_binding_repair_phase1_pending",
     "active_prompt": "prompts/execute.md",
     "agi_claim_supported": false,
     "blocker": null,
-    "checkpointed_at": "2026-09-04T01:35:00.000Z",
+    "checkpointed_at": "2026-09-04T01:40:00.000Z",
     "completed_effect_receipt": {
       "blob_sha": "30aea9526374b47e67945d4e1e3365a360c03a5d",
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-231900dc9c53473bc58b7b55.json"
@@ -171,8 +171,8 @@
       33824204689,
       33824204665
     ],
-    "current_main_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
-    "current_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
+    "current_main_sha": "3dc0668a334f329fa9c4aa4dcf6a9955ddde667d",
+    "current_state_blob_sha": "538d547a09f63e72e98ac4f4cc6b29717eeae4bf",
     "exact_completed_native_invocation_id": "invoke-231900dc9c53473bc58b7b55",
     "exact_completed_request_digest": "2e3f6cf40e0c929f64c29411cf6fe22c1ef836c40d0e57d5227d7b3df1ffee6d",
     "exact_completed_response_blob_sha": "765f1bf06251c75814cea896e123c30187ea527d",
@@ -189,104 +189,58 @@
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
     "goal_revision": 118,
-    "idempotency_key": "o-work-gen29:pr478:e92906c3:bind-root-response-phase2:v1",
+    "idempotency_key": "o-work-gen29:pr478:native-phase-repair-phase1:v1",
     "inbox_blob_sha": "0972d6f37eb73f7a9dd83fec27a5f6c3fc255e2e",
     "inbox_revision": 41,
     "last_verified_effect": {
       "schema_version": 1,
-      "status": "state_cas_exact_readback_verified_pr478_root_response_pending_native_consume",
-      "recorded_at": "2026-09-04T01:35:00.000Z",
-      "authority": {
-        "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-        "lease_generation": 29,
-        "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d"
+      "status": "phase1_prepared_pr478_native_phase_binding_repair",
+      "recorded_at": "2026-09-04T01:40:00.000Z",
+      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+      "lease_generation": 29,
+      "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+      "expected_prior_main_sha": "3dc0668a334f329fa9c4aa4dcf6a9955ddde667d",
+      "expected_prior_state_blob_sha": "538d547a09f63e72e98ac4f4cc6b29717eeae4bf",
+      "stop_cause": {
+        "kind": "state_projection_binding_error",
+        "mechanism": "The PR478 binding projected native_phase as pending_native_consume while the immutable revision-180 native snapshot phase is root_pending; continuity preflight correctly rejected the mismatch before response consumption.",
+        "response_consumed": false,
+        "response_repeated": false
       },
-      "expected_prior_main_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1",
-      "expected_prior_state_blob_sha": "27d1104762796f8cacd8ef5ed11995cfd8760f35",
-      "inbox_revision": 41,
-      "inbox_blob_sha": "0972d6f37eb73f7a9dd83fec27a5f6c3fc255e2e",
-      "pending_root": {
-        "component": "root",
-        "work_invocation_id": "invoke-30ca9ead36112f788d6ab9f5",
-        "native_invocation_id": "invoke-2f0033923ddabcf813daf833",
-        "request_ref": ".continual/work-model/invocations/invoke-30ca9ead36112f788d6ab9f5/request.json",
+      "repair": {
+        "field": "native_phase",
+        "prior_value": "pending_native_consume",
+        "repaired_value": "root_pending",
+        "exact_continuation_field": "exact_continuation.native_phase",
+        "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "snapshot_blob_sha": "a427783c981977669c0484b127bd45cf7fc123cb",
+        "snapshot_revision": 180,
+        "snapshot_phase": "root_pending"
+      },
+      "recurrence_validation": {
+        "top_level_matches_snapshot": true,
+        "exact_continuation_matches_snapshot": true,
         "request_blob_sha": "00ddbd7e186039e833f7e254268d165d857c5a3f",
-        "request_digest": "f7e8b555d98d211ae5f18b26d5455eb9bfa4664020ae1a6afae985dbc677e928",
-        "response_ref": ".continual/work-model/invocations/invoke-30ca9ead36112f788d6ab9f5/response.json",
         "response_blob_sha": "0f4fdb1b891c1b0b8536c31f40d47da8a42911ad",
-        "response_digest": "30f270ad446dd34af617dd9bad0a9c77ece5d17509a81cf48b986ea21b6a4b1c",
-        "output_digest": "fac3f962d84f0e9b6ca976f959d28e7181becd1dbfe974ccf13041eb61694f9b",
-        "native_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-2f0033923ddabcf813daf833.json",
         "native_blob_sha": "1d340d665bacd6b7687789d2e881e2d5e45c167a",
-        "response_exists": true,
-        "response_submitted": true
+        "immutable_response_preserved": true
       },
-      "response_correction": {
+      "response_correction_preserved": {
         "ref": "artifacts/unit-generation29-external-arc-nonzero-bounding-box-transfer-v1-response-correction.json",
         "blob_sha": "b4515a1871fc7e34169fb773b9d86c89adb671e3",
-        "incorrect_result_blob_sha": "4023b9f862ab57306cb8de31d8b23e3606a5b452",
-        "correct_result_blob_sha": "4023b9fb126f3422ae91b5e37fea976ba59839e6",
-        "used_as_negative_evidence": true,
-        "immutable_response_mutated": false,
-        "response_resubmitted": false
+        "correct_result_blob_sha": "4023b9fb126f3422ae91b5e37fea976ba59839e6"
       },
-      "selected_unit": {
-        "component": "execute",
-        "scope": "generation29/work-response-evidence-blob-integrity-v1",
-        "candidate_activation": false,
-        "production_routing": false,
-        "upper_objective_achieved": false,
-        "agi_achieved": false
-      },
-      "snapshot": {
-        "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-        "blob_sha": "a427783c981977669c0484b127bd45cf7fc123cb",
-        "revision": 180,
-        "phase": "root_pending",
-        "source_commit_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1"
-      },
-      "pull_request": {
-        "number": 478,
-        "head_sha": "e92906c3454235925577cf35f8f00346b91daffe",
-        "base_sha": "93c927727938c10216f54995017f7429f5d2f44d",
-        "merge_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1",
-        "tree_sha": "4957d715f1ec9883545f84018aa4293d4978e01f"
-      },
-      "exact_head_ci": {
-        "directive_run_id": 33824204689,
-        "protected_test_run_id": 33824204665,
-        "shard_job_ids": [
-          100873254758,
-          100873254973,
-          100873254994,
-          100873255628
-        ],
-        "aggregate_job_id": 100879427355,
-        "all_success": true,
-        "exact_head_sha": "e92906c3454235925577cf35f8f00346b91daffe"
-      },
-      "scheduled_slot_receipt": {
-        "path": "automation_control/receipts/o_work_monitor_recovery/20260904T0112Z-gen29-same-invocation-overlap-pr478-ci.json",
-        "blob_sha": "8c9f04cb69f798686b339327aa2abd69439e6139",
-        "commit_sha": "39ae9f593de43a11025d6216c2bbc64b9bd852e5",
-        "exact_readback": true
-      },
-      "request_recreated": false,
-      "response_repeated": false,
+      "idempotency_key": "o-work-gen29:pr478:native-phase-root-pending-repair:v1",
       "resume_required": true,
       "upper_objective_achieved": false,
       "agi_achieved": false,
-      "idempotency_key": "o-work-gen29:pr478:e92906c3:bind-root-response:v1",
-      "next_action": "After phase-2 CAS exact readback, consume the accepted Root response exactly once, freeze the next unique lifecycle request, and continue the bounded evidence-integrity unit without replay.",
-      "phase1_commit_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
-      "phase1_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
-      "phase1_exact_readback_verified": true
+      "next_action": "After phase-2 CAS exact readback, rerun the continuity preflight with the exact native run id and consume the already accepted Root response exactly once."
     },
     "lease_generation": 29,
-    "native_phase": "pending_native_consume",
-    "next_action": "After phase-2 CAS exact readback, consume the accepted Root response exactly once, freeze the next unique lifecycle request, and continue the bounded evidence-integrity unit without replay.",
-    "next_tool": "PYTHONPATH=src python -m continual.cli work-resume .continual/runs/run-work-recovery-gen9-durability-repair --max-steps 2",
-    "next_tool_action": "After phase-2 CAS exact readback, consume the accepted Root response exactly once, freeze the next unique lifecycle request, and continue the bounded evidence-integrity unit without replay.",
+    "native_phase": "root_pending",
+    "next_action": "After phase-2 CAS exact readback, rerun the continuity preflight with the exact native run id and consume the already accepted Root response exactly once.",
+    "next_tool": "PYTHONPATH=src python -m continual.cli work-resume run-work-recovery-gen9-durability-repair --max-steps 2",
+    "next_tool_action": "After phase-2 CAS exact readback, rerun the continuity preflight with the exact native run id and consume the already accepted Root response exactly once.",
     "no_partial_result_claimed": true,
     "pending_component": "root",
     "pull_request": {
@@ -1193,11 +1147,11 @@
   "continuation": "Consume the already-answered Candidate Evaluate invocation invoke-7c5d3f1502a4933930221c2b exactly once; do not submit it again; freeze the unique Task Evaluate request for unit-generation29-external-arc-rotate180-transfer-v1, answer it from bounded evidence, and continue post-result Candidate, Consolidate, Learn, Root, and further safe work.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "remote_main_readback_verified",
+    "status": "phase1_prepared",
     "durability_status": "pending_native_consume",
     "prepared_at": "2026-09-04T01:34:00.000Z",
-    "verified_at": "2026-09-04T01:35:00.000Z",
-    "verified_remote_readback": true,
+    "verified_at": null,
+    "verified_remote_readback": false,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -1295,7 +1249,7 @@
     "completed_exactly_once": false,
     "pending_component": "root",
     "target_component": "execute",
-    "native_phase": "pending_native_consume",
+    "native_phase": "root_pending",
     "pending_native_invocation_id": "invoke-2f0033923ddabcf813daf833",
     "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-2f0033923ddabcf813daf833.json",
     "pending_native_invocation_blob_sha": "1d340d665bacd6b7687789d2e881e2d5e45c167a",
@@ -1316,14 +1270,14 @@
     "snapshot_revision": 180,
     "source_main_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1",
     "source_state_blob_sha": "27d1104762796f8cacd8ef5ed11995cfd8760f35",
-    "phase1_expected_prior_main_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1",
-    "phase1_expected_prior_state_blob_sha": "27d1104762796f8cacd8ef5ed11995cfd8760f35",
-    "phase1_commit_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
-    "phase1_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
-    "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-04T01:35:00.000Z",
-    "phase2_expected_prior_main_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
-    "phase2_expected_prior_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
+    "phase1_expected_prior_main_sha": "3dc0668a334f329fa9c4aa4dcf6a9955ddde667d",
+    "phase1_expected_prior_state_blob_sha": "538d547a09f63e72e98ac4f4cc6b29717eeae4bf",
+    "phase1_commit_sha": null,
+    "phase1_state_blob_sha": null,
+    "phase1_exact_readback_verified": false,
+    "phase1_verified_at": null,
+    "phase2_expected_prior_main_sha": null,
+    "phase2_expected_prior_state_blob_sha": null,
     "phase2_commit_sha": null,
     "phase2_state_blob_sha": null,
     "phase2_exact_readback_verified": false,
@@ -1349,11 +1303,11 @@
   "durability_status": "pending_native_consume",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "remote_main_readback_verified",
+    "status": "phase1_prepared",
     "durability_status": "pending_native_consume",
     "prepared_at": "2026-09-04T01:34:00.000Z",
-    "verified_at": "2026-09-04T01:35:00.000Z",
-    "verified_remote_readback": true,
+    "verified_at": null,
+    "verified_remote_readback": false,
     "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
     "lease_generation": 29,
     "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
@@ -1451,7 +1405,7 @@
     "completed_exactly_once": false,
     "pending_component": "root",
     "target_component": "execute",
-    "native_phase": "pending_native_consume",
+    "native_phase": "root_pending",
     "pending_native_invocation_id": "invoke-2f0033923ddabcf813daf833",
     "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-2f0033923ddabcf813daf833.json",
     "pending_native_invocation_blob_sha": "1d340d665bacd6b7687789d2e881e2d5e45c167a",
@@ -1472,14 +1426,14 @@
     "snapshot_revision": 180,
     "source_main_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1",
     "source_state_blob_sha": "27d1104762796f8cacd8ef5ed11995cfd8760f35",
-    "phase1_expected_prior_main_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1",
-    "phase1_expected_prior_state_blob_sha": "27d1104762796f8cacd8ef5ed11995cfd8760f35",
-    "phase1_commit_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
-    "phase1_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
-    "phase1_exact_readback_verified": true,
-    "phase1_verified_at": "2026-09-04T01:35:00.000Z",
-    "phase2_expected_prior_main_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
-    "phase2_expected_prior_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
+    "phase1_expected_prior_main_sha": "3dc0668a334f329fa9c4aa4dcf6a9955ddde667d",
+    "phase1_expected_prior_state_blob_sha": "538d547a09f63e72e98ac4f4cc6b29717eeae4bf",
+    "phase1_commit_sha": null,
+    "phase1_state_blob_sha": null,
+    "phase1_exact_readback_verified": false,
+    "phase1_verified_at": null,
+    "phase2_expected_prior_main_sha": null,
+    "phase2_expected_prior_state_blob_sha": null,
     "phase2_commit_sha": null,
     "phase2_state_blob_sha": null,
     "phase2_exact_readback_verified": false,
@@ -1505,7 +1459,7 @@
     ]
   },
   "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-  "expected_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
+  "expected_blob_sha": "538d547a09f63e72e98ac4f4cc6b29717eeae4bf",
   "external_evidence_state": {
     "agi_claim_supported": false,
     "independent_production_evidence_observed": false,
@@ -18866,7 +18820,7 @@
     "validation": "The source commit contains the exact frozen request, response, native journal, snapshot, and restored execution-unit blobs and is an ancestor of current main."
   },
   "goal_revision": 118,
-  "heartbeat_at": "2026-09-04T01:35:00.000Z",
+  "heartbeat_at": "2026-09-04T01:40:00.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -19740,98 +19694,52 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Persist and bind the exact answered rotate-180 Root continuation after eliminating the missing pending-ID stop cause.",
-  "last_activity_at": "2026-09-04T01:35:00.000Z",
-  "last_checked_at": "2026-09-04T01:35:00.000Z",
-  "last_progress_at": "2026-09-04T01:35:00.000Z",
+  "last_activity_at": "2026-09-04T01:40:00.000Z",
+  "last_checked_at": "2026-09-04T01:40:00.000Z",
+  "last_progress_at": "2026-09-04T01:40:00.000Z",
   "last_verified_effect": {
     "schema_version": 1,
-    "status": "state_cas_exact_readback_verified_pr478_root_response_pending_native_consume",
-    "recorded_at": "2026-09-04T01:35:00.000Z",
-    "authority": {
-      "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
-      "lease_generation": 29,
-      "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d"
+    "status": "phase1_prepared_pr478_native_phase_binding_repair",
+    "recorded_at": "2026-09-04T01:40:00.000Z",
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "expected_prior_main_sha": "3dc0668a334f329fa9c4aa4dcf6a9955ddde667d",
+    "expected_prior_state_blob_sha": "538d547a09f63e72e98ac4f4cc6b29717eeae4bf",
+    "stop_cause": {
+      "kind": "state_projection_binding_error",
+      "mechanism": "The PR478 binding projected native_phase as pending_native_consume while the immutable revision-180 native snapshot phase is root_pending; continuity preflight correctly rejected the mismatch before response consumption.",
+      "response_consumed": false,
+      "response_repeated": false
     },
-    "expected_prior_main_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1",
-    "expected_prior_state_blob_sha": "27d1104762796f8cacd8ef5ed11995cfd8760f35",
-    "inbox_revision": 41,
-    "inbox_blob_sha": "0972d6f37eb73f7a9dd83fec27a5f6c3fc255e2e",
-    "pending_root": {
-      "component": "root",
-      "work_invocation_id": "invoke-30ca9ead36112f788d6ab9f5",
-      "native_invocation_id": "invoke-2f0033923ddabcf813daf833",
-      "request_ref": ".continual/work-model/invocations/invoke-30ca9ead36112f788d6ab9f5/request.json",
+    "repair": {
+      "field": "native_phase",
+      "prior_value": "pending_native_consume",
+      "repaired_value": "root_pending",
+      "exact_continuation_field": "exact_continuation.native_phase",
+      "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+      "snapshot_blob_sha": "a427783c981977669c0484b127bd45cf7fc123cb",
+      "snapshot_revision": 180,
+      "snapshot_phase": "root_pending"
+    },
+    "recurrence_validation": {
+      "top_level_matches_snapshot": true,
+      "exact_continuation_matches_snapshot": true,
       "request_blob_sha": "00ddbd7e186039e833f7e254268d165d857c5a3f",
-      "request_digest": "f7e8b555d98d211ae5f18b26d5455eb9bfa4664020ae1a6afae985dbc677e928",
-      "response_ref": ".continual/work-model/invocations/invoke-30ca9ead36112f788d6ab9f5/response.json",
       "response_blob_sha": "0f4fdb1b891c1b0b8536c31f40d47da8a42911ad",
-      "response_digest": "30f270ad446dd34af617dd9bad0a9c77ece5d17509a81cf48b986ea21b6a4b1c",
-      "output_digest": "fac3f962d84f0e9b6ca976f959d28e7181becd1dbfe974ccf13041eb61694f9b",
-      "native_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-2f0033923ddabcf813daf833.json",
       "native_blob_sha": "1d340d665bacd6b7687789d2e881e2d5e45c167a",
-      "response_exists": true,
-      "response_submitted": true
+      "immutable_response_preserved": true
     },
-    "response_correction": {
+    "response_correction_preserved": {
       "ref": "artifacts/unit-generation29-external-arc-nonzero-bounding-box-transfer-v1-response-correction.json",
       "blob_sha": "b4515a1871fc7e34169fb773b9d86c89adb671e3",
-      "incorrect_result_blob_sha": "4023b9f862ab57306cb8de31d8b23e3606a5b452",
-      "correct_result_blob_sha": "4023b9fb126f3422ae91b5e37fea976ba59839e6",
-      "used_as_negative_evidence": true,
-      "immutable_response_mutated": false,
-      "response_resubmitted": false
+      "correct_result_blob_sha": "4023b9fb126f3422ae91b5e37fea976ba59839e6"
     },
-    "selected_unit": {
-      "component": "execute",
-      "scope": "generation29/work-response-evidence-blob-integrity-v1",
-      "candidate_activation": false,
-      "production_routing": false,
-      "upper_objective_achieved": false,
-      "agi_achieved": false
-    },
-    "snapshot": {
-      "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-      "blob_sha": "a427783c981977669c0484b127bd45cf7fc123cb",
-      "revision": 180,
-      "phase": "root_pending",
-      "source_commit_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1"
-    },
-    "pull_request": {
-      "number": 478,
-      "head_sha": "e92906c3454235925577cf35f8f00346b91daffe",
-      "base_sha": "93c927727938c10216f54995017f7429f5d2f44d",
-      "merge_sha": "01f1389e0e1263c3621495df7d8d365eafb34bc1",
-      "tree_sha": "4957d715f1ec9883545f84018aa4293d4978e01f"
-    },
-    "exact_head_ci": {
-      "directive_run_id": 33824204689,
-      "protected_test_run_id": 33824204665,
-      "shard_job_ids": [
-        100873254758,
-        100873254973,
-        100873254994,
-        100873255628
-      ],
-      "aggregate_job_id": 100879427355,
-      "all_success": true,
-      "exact_head_sha": "e92906c3454235925577cf35f8f00346b91daffe"
-    },
-    "scheduled_slot_receipt": {
-      "path": "automation_control/receipts/o_work_monitor_recovery/20260904T0112Z-gen29-same-invocation-overlap-pr478-ci.json",
-      "blob_sha": "8c9f04cb69f798686b339327aa2abd69439e6139",
-      "commit_sha": "39ae9f593de43a11025d6216c2bbc64b9bd852e5",
-      "exact_readback": true
-    },
-    "request_recreated": false,
-    "response_repeated": false,
+    "idempotency_key": "o-work-gen29:pr478:native-phase-root-pending-repair:v1",
     "resume_required": true,
     "upper_objective_achieved": false,
     "agi_achieved": false,
-    "idempotency_key": "o-work-gen29:pr478:e92906c3:bind-root-response:v1",
-    "next_action": "After phase-2 CAS exact readback, consume the accepted Root response exactly once, freeze the next unique lifecycle request, and continue the bounded evidence-integrity unit without replay.",
-    "phase1_commit_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
-    "phase1_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
-    "phase1_exact_readback_verified": true
+    "next_action": "After phase-2 CAS exact readback, rerun the continuity preflight with the exact native run id and consume the already accepted Root response exactly once."
   },
   "lease_generation": 29,
   "lease_renewal": {
@@ -19966,7 +19874,7 @@
     "role": "insurance_only",
     "stale_or_interrupted_action": "classify_then_require_fenced_cas_readback"
   },
-  "native_phase": "pending_native_consume",
+  "native_phase": "root_pending",
   "negative_evidence_scope_audit_checkpoint": {
     "blob_manifest_sha256": "a21d714701f56e3dd2075e777eae6038b3af94acd2285aaba3568ea380fb578e",
     "branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
@@ -20037,9 +19945,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "After phase-2 CAS exact readback, consume the accepted Root response exactly once, freeze the next unique lifecycle request, and continue the bounded evidence-integrity unit without replay.",
-  "next_tool": "PYTHONPATH=src python -m continual.cli work-resume .continual/runs/run-work-recovery-gen9-durability-repair --max-steps 2",
-  "next_tool_action": "After phase-2 CAS exact readback, consume the accepted Root response exactly once, freeze the next unique lifecycle request, and continue the bounded evidence-integrity unit without replay.",
+  "next_action": "After phase-2 CAS exact readback, rerun the continuity preflight with the exact native run id and consume the already accepted Root response exactly once.",
+  "next_tool": "PYTHONPATH=src python -m continual.cli work-resume run-work-recovery-gen9-durability-repair --max-steps 2",
+  "next_tool_action": "After phase-2 CAS exact readback, rerun the continuity preflight with the exact native run id and consume the already accepted Root response exactly once.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -21683,8 +21591,8 @@
   "snapshot_phase": "root_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
   "snapshot_revision": 180,
-  "source_main_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
-  "source_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
+  "source_main_sha": "3dc0668a334f329fa9c4aa4dcf6a9955ddde667d",
+  "source_state_blob_sha": "538d547a09f63e72e98ac4f4cc6b29717eeae4bf",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
@@ -21963,5 +21871,49 @@
     "phase1_commit_sha": "03a7884fbdf826cd2795dd980a856ecdc480c1c2",
     "phase1_state_blob_sha": "1c0db22d21edc5be7702d8f457599f3dff7f101e",
     "phase1_exact_readback_verified": true
+  },
+  "generation29_pr478_native_phase_binding_repair_v1": {
+    "schema_version": 1,
+    "status": "phase1_prepared_pr478_native_phase_binding_repair",
+    "recorded_at": "2026-09-04T01:40:00.000Z",
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "expected_prior_main_sha": "3dc0668a334f329fa9c4aa4dcf6a9955ddde667d",
+    "expected_prior_state_blob_sha": "538d547a09f63e72e98ac4f4cc6b29717eeae4bf",
+    "stop_cause": {
+      "kind": "state_projection_binding_error",
+      "mechanism": "The PR478 binding projected native_phase as pending_native_consume while the immutable revision-180 native snapshot phase is root_pending; continuity preflight correctly rejected the mismatch before response consumption.",
+      "response_consumed": false,
+      "response_repeated": false
+    },
+    "repair": {
+      "field": "native_phase",
+      "prior_value": "pending_native_consume",
+      "repaired_value": "root_pending",
+      "exact_continuation_field": "exact_continuation.native_phase",
+      "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+      "snapshot_blob_sha": "a427783c981977669c0484b127bd45cf7fc123cb",
+      "snapshot_revision": 180,
+      "snapshot_phase": "root_pending"
+    },
+    "recurrence_validation": {
+      "top_level_matches_snapshot": true,
+      "exact_continuation_matches_snapshot": true,
+      "request_blob_sha": "00ddbd7e186039e833f7e254268d165d857c5a3f",
+      "response_blob_sha": "0f4fdb1b891c1b0b8536c31f40d47da8a42911ad",
+      "native_blob_sha": "1d340d665bacd6b7687789d2e881e2d5e45c167a",
+      "immutable_response_preserved": true
+    },
+    "response_correction_preserved": {
+      "ref": "artifacts/unit-generation29-external-arc-nonzero-bounding-box-transfer-v1-response-correction.json",
+      "blob_sha": "b4515a1871fc7e34169fb773b9d86c89adb671e3",
+      "correct_result_blob_sha": "4023b9fb126f3422ae91b5e37fea976ba59839e6"
+    },
+    "idempotency_key": "o-work-gen29:pr478:native-phase-root-pending-repair:v1",
+    "resume_required": true,
+    "upper_objective_achieved": false,
+    "agi_achieved": false,
+    "next_action": "After phase-2 CAS exact readback, rerun the continuity preflight with the exact native run id and consume the already accepted Root response exactly once."
   }
 }
