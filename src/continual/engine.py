@@ -404,6 +404,20 @@ class Engine:
             preflight_call = getattr(self.model, "preflight_call", None)
             if not bound_resume and callable(preflight_call):
                 preflight_call(component, payload, prompt_path=prompt_path)
+            # Verify and load an immutable bound Work response before changing
+            # the native journal.  In particular, stale/missing repository
+            # evidence must leave the exact awaiting_work_model continuation
+            # intact so recovery can repair the cause without losing its
+            # frozen request binding.
+            if bound_resume:
+                output = self.model.resume_bound(
+                    component,
+                    payload,
+                    prompt_path=prompt_path,
+                    invocation_id=journal.get("work_invocation_id"),
+                    request_ref=journal.get("work_request_ref"),
+                    request_digest=journal.get("work_request_digest"),
+                )
             self.store.atomic_json(
                 path,
                 {
@@ -417,16 +431,7 @@ class Engine:
                 },
             )
             try:
-                if bound_resume:
-                    output = self.model.resume_bound(
-                        component,
-                        payload,
-                        prompt_path=prompt_path,
-                        invocation_id=journal.get("work_invocation_id"),
-                        request_ref=journal.get("work_request_ref"),
-                        request_digest=journal.get("work_request_digest"),
-                    )
-                else:
+                if not bound_resume:
                     output = self.model.call(component, payload, prompt_path=prompt_path)
                 validate_component_output(component, output, evaluator_mode=evaluator_mode)
             except WorkModelPending as pending:
