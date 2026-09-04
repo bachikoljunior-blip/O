@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import posixpath
 import re
+import stat
+import subprocess
 from copy import deepcopy
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 from .context_kernel import (
@@ -41,6 +44,10 @@ _SECRET_TEXT = re.compile(
     r"(?:\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|\b(?:ghp|github_pat|sk)-[A-Za-z0-9_-]{12,})",
     re.IGNORECASE,
 )
+_GIT_BLOB_SHA = re.compile(r"^[0-9a-f]{40}$")
+_MAX_EVIDENCE_BINDING_DEPTH = 32
+_MAX_EVIDENCE_BINDING_NODES = 4096
+_MAX_EVIDENCE_BINDINGS = 256
 
 
 class WorkSessionError(ValueError):
@@ -97,6 +104,155 @@ def _walk_public(value: Any, path: str = "output") -> None:
         raise WorkSessionError(f"secret-like text is forbidden at {path}")
 
 
+def _normalized_repository_file(root: Path, declared: Any, *, field: str) -> Path:
+    if not isinstance(declared, str) or not declared:
+        raise WorkSessionError(f"evidence path must be a non-empty string at {field}")
+    if "\\" in declared or "\x00" in declared:
+        raise WorkSessionError(f"evidence path is not normalized at {field}")
+    pure = PurePosixPath(declared)
+    if pure.is_absolute() or declared != pure.as_posix():
+        raise WorkSessionError(f"evidence path must be normalized and relative at {field}")
+    if posixpath.normpath(declared) != declared or any(
+        part in {"", ".", ".."} for part in pure.parts
+    ):
+        raise WorkSessionError(f"evidence path must be normalized and relative at {field}")
+
+    candidate = root.joinpath(*pure.parts)
+    current = root
+    for part in pure.parts:
+        current = current / part
+        if current.is_symlink():
+            raise WorkSessionError(f"evidence path traverses a symlink at {field}")
+    try:
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(root)
+        mode = candidate.stat(follow_symlinks=False).st_mode
+    except (FileNotFoundError, OSError, ValueError) as exc:
+        raise WorkSessionError(
+            f"evidence path is missing or escapes repository at {field}"
+        ) from exc
+    if not stat.S_ISREG(mode):
+        raise WorkSessionError(f"evidence path is not a regular file at {field}")
+    return resolved
+
+
+def _git_blob_sha(root: Path, declared_path: str, *, field: str) -> str:
+    try:
+        result = subprocess.run(
+            ["git", "hash-object", "--no-filters", "--", declared_path],
+            cwd=root,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise WorkSessionError(f"git hash-object failed at {field}") from exc
+    actual = result.stdout.strip()
+    if result.returncode != 0 or not _GIT_BLOB_SHA.fullmatch(actual):
+        raise WorkSessionError(f"git hash-object failed at {field}")
+    return actual
+
+
+def verify_declared_repository_blob_bindings(
+    root: Path,
+    output: Mapping[str, Any],
+) -> list[dict[str, str]]:
+    """Verify explicit response path/blob declarations from repository bytes.
+
+    The accepted declaration forms are deliberately narrow: an object with a
+    ``path`` plus ``git_blob_sha`` or ``blob_sha``, or a named
+    ``<label>_git_blob_sha`` plus ``<label>_path``/``<label>_ref`` in the same
+    object.  Other strings and prose are not interpreted as evidence.
+    """
+
+    root = root.resolve()
+    stack: list[tuple[Any, str, int]] = [(output, "output", 0)]
+    node_count = 0
+    declarations: list[tuple[str, Any, Any]] = []
+
+    while stack:
+        value, json_path, depth = stack.pop()
+        node_count += 1
+        if node_count > _MAX_EVIDENCE_BINDING_NODES:
+            raise WorkSessionError("declared evidence exceeds bounded node limit")
+        if depth > _MAX_EVIDENCE_BINDING_DEPTH:
+            raise WorkSessionError("declared evidence exceeds bounded depth limit")
+        if isinstance(value, Mapping):
+            path_value = value.get("path")
+            paired_keys = [key for key in ("git_blob_sha", "blob_sha") if key in value]
+            if path_value is not None and paired_keys:
+                for key in paired_keys:
+                    declarations.append((f"{json_path}.{key}", path_value, value[key]))
+            elif "git_blob_sha" in value:
+                raise WorkSessionError(
+                    f"declared git_blob_sha is missing its path at {json_path}"
+                )
+
+            for raw_key, child in value.items():
+                key = str(raw_key)
+                if key != "git_blob_sha" and key.endswith("_git_blob_sha"):
+                    label = key[: -len("_git_blob_sha")]
+                    companions = [
+                        value[name]
+                        for name in (
+                            f"{label}_path",
+                            f"{label}_ref",
+                            f"{label}_artifact_ref",
+                        )
+                        if name in value
+                    ]
+                    if not companions:
+                        raise WorkSessionError(
+                            f"declared {key} is missing its named path at {json_path}"
+                        )
+                    if any(item != companions[0] for item in companions[1:]):
+                        raise WorkSessionError(
+                            f"conflicting named evidence paths at {json_path}.{key}"
+                        )
+                    declarations.append((f"{json_path}.{key}", companions[0], child))
+                if isinstance(child, (Mapping, list)):
+                    stack.append((child, f"{json_path}.{key}", depth + 1))
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                if isinstance(child, (Mapping, list)):
+                    stack.append((child, f"{json_path}[{index}]", depth + 1))
+
+    if len(declarations) > _MAX_EVIDENCE_BINDINGS:
+        raise WorkSessionError("declared evidence exceeds bounded binding limit")
+
+    # Resolve declaration-level conflicts before touching repository bytes.  A
+    # response that names two identities for one path is internally invalid
+    # regardless of which (if either) currently matches the checkout.
+    seen: dict[str, str] = {}
+    for field, declared_path, declared_sha in declarations:
+        if not isinstance(declared_sha, str) or not _GIT_BLOB_SHA.fullmatch(
+            declared_sha
+        ):
+            raise WorkSessionError(
+                f"evidence blob identity is not full lowercase hex at {field}"
+            )
+        if isinstance(declared_path, str):
+            prior = seen.get(declared_path)
+            if prior is not None and prior != declared_sha:
+                raise WorkSessionError(
+                    f"conflicting evidence bindings for {declared_path}"
+                )
+            seen[declared_path] = declared_sha
+
+    verified: list[dict[str, str]] = []
+    for field, declared_path, declared_sha in declarations:
+        _normalized_repository_file(root, declared_path, field=field)
+        actual_sha = _git_blob_sha(root, declared_path, field=field)
+        if actual_sha != declared_sha:
+            raise WorkSessionError(f"evidence blob identity mismatch at {field}")
+        verified.append(
+            {"field": field, "path": declared_path, "git_blob_sha": actual_sha}
+        )
+    return verified
+
+
 def _verified_request(store: Store, request_path: Path) -> dict[str, Any]:
     invocation_id = request_path.parent.name
     try:
@@ -132,6 +288,8 @@ def _verified_response(
     store: Store,
     request: Mapping[str, Any],
     response_path: Path,
+    *,
+    verify_evidence_bindings: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     invocation_id = response_path.parent.name
     try:
@@ -171,6 +329,8 @@ def _verified_response(
     validate_component_output(component, output, evaluator_mode=evaluator_mode)
     if response.get("output_digest") != store.stable_digest(output, length=64):
         raise WorkSessionError("Work response output_digest mismatch")
+    if verify_evidence_bindings:
+        verify_declared_repository_blob_bindings(store.root, output)
     return response, deepcopy(output)
 
 
@@ -382,7 +542,12 @@ class WorkModelClient:
         request_ref = request_path.relative_to(self.root).as_posix()
         if response is None:
             raise WorkModelPending(invocation_id, request_ref, request["request_digest"])
-        _, output = _verified_response(self.store, existing or request, response_path)
+        _, output = _verified_response(
+            self.store,
+            existing or request,
+            response_path,
+            verify_evidence_bindings=True,
+        )
         return output
 
     def resume_bound(
@@ -440,7 +605,12 @@ class WorkModelClient:
         response_path = request_path.parent / "response.json"
         if not response_path.is_file():
             raise WorkModelPending(invocation_id, request_ref, request_digest)
-        _, output = _verified_response(self.store, request, response_path)
+        _, output = _verified_response(
+            self.store,
+            request,
+            response_path,
+            verify_evidence_bindings=True,
+        )
         return output
 
 
@@ -827,6 +997,7 @@ def submit_work_response(
         else None
     )
     validate_component_output(component, public_output, evaluator_mode=evaluator_mode)
+    verify_declared_repository_blob_bindings(root, public_output)
     response = {
         "schema_version": 1,
         "invocation_id": invocation_id,
