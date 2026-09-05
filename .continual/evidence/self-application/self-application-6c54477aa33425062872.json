@@ -1,0 +1,102 @@
+{
+  "actions": [
+    "Read the exact failed CI job and reproduced its stale revision assumption.",
+    "Separated checked-in queue invariant validation from controlled behavior fixtures.",
+    "Verified nonzero revision increment, idempotent replay, stale-writer rejection without byte changes, and deadline/closed-status boundaries."
+  ],
+  "admissible_for_agi_claim": false,
+  "artifacts": [
+    "artifacts/unit-generation30-queue-test-fixture-repair-v1-result.json",
+    "tests/test_user_request_queue.py"
+  ],
+  "candidate_ids": [],
+  "claim_boundary": "This task-chat self-application record is internal development evidence only. It cannot establish AGI or evaluator independence.",
+  "claims": [
+    "Four local fixture tests pass. This is test maintenance and does not establish model capability or AGI."
+  ],
+  "context": {
+    "boundary": "development",
+    "boundary_satisfied": true,
+    "decision": {
+      "boundary": "development",
+      "fresh_execution_required": false,
+      "independent_execution_required": false,
+      "logical_reset_required": false,
+      "mode": "reuse_current_context",
+      "persist_before_switch": false,
+      "reason_codes": [
+        "no_contamination_signal"
+      ]
+    },
+    "fresh_execution_used": false,
+    "independent_execution_used": false,
+    "logical_reset_used": false,
+    "physical_fresh_context_fixed_requirement": false,
+    "repository_latest_main_is_durable_state": true,
+    "risk_signals": []
+  },
+  "decisions": [
+    "Preserve the old failed head and its evidence.",
+    "Keep production queue CAS and validation unchanged.",
+    "Require full protected CI for the corrected PR head."
+  ],
+  "episode_id": "episode-self-6c54477aa33425062872",
+  "evidence_id": "self-application-6c54477aa33425062872",
+  "evidence_tier": "internal_development",
+  "execution_id": "development-g30-queue-test-fixture-repair-v1",
+  "failures": [
+    "CI at head 17ff373835c7e0461df12ba5502ed08cdfe676dc failed because a behavior test expected live revision 0 after legitimate revision 1 publication."
+  ],
+  "kind": "self_application_repository_development",
+  "observations": [
+    {
+      "status": "passed",
+      "test": "test_checked_in_queue_is_non_blocking_secret_free_and_finitely_reevaluated"
+    },
+    {
+      "status": "passed",
+      "test": "test_due_requests_include_deadline_and_exclude_closed_requests"
+    },
+    {
+      "status": "passed",
+      "test": "test_enqueue_is_revision_bound_atomic_and_idempotent"
+    },
+    {
+      "status": "passed",
+      "test": "test_queue_rejects_secret_bearing_fields_and_duplicate_ids"
+    }
+  ],
+  "payload_digest": "2c9b7467481bd8b0a12ca010c7b801870e192bca47a74765d661ac9874230d6f",
+  "producer": {
+    "binding": "current_chatgpt_work_session",
+    "model_identity": "chatgpt-work-model-unverified",
+    "model_verified": false
+  },
+  "recorded_at": "2026-09-05T11:31:04.488162Z",
+  "repository": {},
+  "request_digest": "533ee9c6fda3dd6d473ca8affd0401ba8a900f4f49ac88dedd534ec129a75cfa",
+  "run_id": "run-self-6c54477aa33425062872",
+  "schema_version": 1,
+  "strict_external_gate_unchanged": true,
+  "unknowns": [
+    "Full protected CI has not completed for the corrected head."
+  ],
+  "validation": [
+    {
+      "status": "passed",
+      "test": "test_checked_in_queue_is_non_blocking_secret_free_and_finitely_reevaluated"
+    },
+    {
+      "status": "passed",
+      "test": "test_due_requests_include_deadline_and_exclude_closed_requests"
+    },
+    {
+      "status": "passed",
+      "test": "test_enqueue_is_revision_bound_atomic_and_idempotent"
+    },
+    {
+      "status": "passed",
+      "test": "test_queue_rejects_secret_bearing_fields_and_duplicate_ids"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "cause": "Behavior tests copied live queue state but hardcoded revision0 and August2026 deadlines. The operational review advanced revision and deadlines legitimately.",
+  "changes": [
+    "Keep checked-in validation for actual queue invariants.",
+    "Use a controlled nonzero-revision fixture for append/replay/stale-writer atomicity.",
+    "Test deadline inclusion and closed-request exclusion with explicit fixed dates."
+  ],
+  "full_protected_ci_passed": false,
+  "production_queue_guard_changed": false,
+  "recorded_at": "2026-09-05T11:31:04.488162Z",
+  "runtime_note": "Direct existing test functions; unittest exception context substitutes only for pytest.raises because pytest is unavailable locally. Full protected CI remains required.",
+  "source_failed_head": "17ff373835c7e0461df12ba5502ed08cdfe676dc",
+  "source_failed_job": 101297216222,
+  "source_failed_run": 33962687760,
+  "test_sha256": "88baae9387ca9e16bb31573a7113a8e0392026b3159b86400237c799c0a3cc73",
+  "validation": [
+    {
+      "status": "passed",
+      "test": "test_checked_in_queue_is_non_blocking_secret_free_and_finitely_reevaluated"
+    },
+    {
+      "status": "passed",
+      "test": "test_due_requests_include_deadline_and_exclude_closed_requests"
+    },
+    {
+      "status": "passed",
+      "test": "test_enqueue_is_revision_bound_atomic_and_idempotent"
+    },
+    {
+      "status": "passed",
+      "test": "test_queue_rejects_secret_bearing_fields_and_duplicate_ids"
+    }
+  ]
+}

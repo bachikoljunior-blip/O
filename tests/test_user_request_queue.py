@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
-import shutil
 
 import pytest
 
@@ -45,39 +44,61 @@ def test_checked_in_queue_is_non_blocking_secret_free_and_finitely_reevaluated()
     assert queue["policy"]["project_waiting_is_stop_condition"] is False
     assert queue["policy"]["secrets_allowed"] is False
     assert all(item["non_blocking"] is True for item in queue["requests"] if item["status"] == "open")
-    assert due_user_requests(queue, now=NOW) == []
-    assert len(due_user_requests(queue, now=datetime(2026, 8, 23, 13, 0, tzinfo=timezone.utc))) == 2
+
+
+def _behavior_queue() -> dict:
+    queue = deepcopy(load_user_request_queue(ROOT))
+    queue.update(revision=7, requests=[], updated_at=NOW.isoformat())
+    return queue
+
+
+def test_due_requests_include_deadline_and_exclude_closed_requests() -> None:
+    queue = _behavior_queue()
+    queue["requests"] = [
+        {**_new_request(), "id": "due-now", "reevaluate_by": NOW.isoformat()},
+        {**_new_request(), "id": "due-later", "reevaluate_by": (NOW + timedelta(days=1)).isoformat()},
+        {**_new_request(), "id": "closed", "status": "fulfilled", "reevaluate_by": NOW.isoformat()},
+    ]
+
+    assert due_user_requests(queue, now=NOW - timedelta(seconds=1)) == []
+    assert [item["id"] for item in due_user_requests(queue, now=NOW)] == ["due-now"]
+    assert [item["id"] for item in due_user_requests(queue, now=NOW + timedelta(days=1))] == ["due-now", "due-later"]
 
 
 def test_enqueue_is_revision_bound_atomic_and_idempotent(tmp_path: Path) -> None:
     (tmp_path / "agi").mkdir()
-    shutil.copy2(ROOT / "agi" / "USER_REQUEST_QUEUE.json", tmp_path / "agi" / "USER_REQUEST_QUEUE.json")
+    queue_path = tmp_path / "agi" / "USER_REQUEST_QUEUE.json"
+    fixture = _behavior_queue()
+    initial_revision = fixture["revision"]
+    queue_path.write_text(json.dumps(fixture), encoding="utf-8")
     request = _new_request()
 
     updated = enqueue_user_request(
         tmp_path,
         request,
-        expected_revision=0,
+        expected_revision=initial_revision,
         updated_at=NOW,
     )
     replay = enqueue_user_request(
         tmp_path,
         request,
-        expected_revision=0,
+        expected_revision=initial_revision,
         updated_at=NOW,
     )
 
-    assert updated["revision"] == 1
+    assert updated["revision"] == initial_revision + 1
     assert replay == updated
     assert load_user_request_queue(tmp_path) == updated
 
+    before_conflict = queue_path.read_bytes()
     with pytest.raises(UserRequestQueueError, match="revision conflict"):
         enqueue_user_request(
             tmp_path,
             {**_new_request(), "id": "different-request-v1"},
-            expected_revision=0,
+            expected_revision=initial_revision,
             updated_at=NOW,
         )
+    assert queue_path.read_bytes() == before_conflict
 
 
 def test_queue_rejects_secret_bearing_fields_and_duplicate_ids() -> None:
