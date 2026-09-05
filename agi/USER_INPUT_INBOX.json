@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 44,
+  "revision": 45,
   "policy": {
     "append_only_semantics": true,
     "development_writer_lease_required_to_read": false,
@@ -752,7 +752,23 @@
       "supersedes": [],
       "source": "user_chat",
       "sequence": 44
+    },
+    {
+      "id": "operator-context-o-handover-target-d96c6d9cad22-v1",
+      "received_at": "2026-09-05T09:46:21.812Z",
+      "kind": "handover_target_disambiguation_context",
+      "status": "active",
+      "source": "successor_operator_context_for_existing_user_requests",
+      "source_event_id": "user-request-o-execution-handover-20260905-d96c6d9cad22/target-binding-v1",
+      "summary": "Routing context for existing user entries 42-44: the requested successor is the separate Work session whose workspace identifier is d96c6d9cad22, not the already-running generation-29 automation session.",
+      "directives": [
+        "Interpret the existing user handover request in entries 42-44 as transfer to the separate successor Work session identified by workspace d96c6d9cad22. This is operator-supplied target disambiguation, not a new user message or a claim that takeover has occurred.",
+        "The successor has restored the exact state bytes in commit 8439c7d23efca11df5470c8b615c11006b5e67b8, prepared reconstruction of six missing Local Learn artifacts and one fragment from completed journals, and remains read-only as development owner while generation 29 is active. The successor observed PR 504 and will preserve its already-published response without reexecuting it.",
+        "At a safe durable boundary, handle the user's requested handover explicitly through the existing single-writer lease and readback protocol; persist an unambiguous acknowledgement and exact pending continuation. This context does not stop O's upper objective, grant concurrent writer authority, replace frozen requests, or weaken evidence or protected policies."
+      ],
+      "supersedes": [],
+      "sequence": 45
     }
   ],
-  "updated_at": "2026-09-05T09:26:02.671463Z"
+  "updated_at": "2026-09-05T09:46:29.123678Z"
 }
