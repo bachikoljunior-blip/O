@@ -1,0 +1,118 @@
+{
+  "active_prompt_workflow_or_pointer_changed": false,
+  "actual_proposed_source_validation": {
+    "active_checkout_changed": false,
+    "actual_proposed_source_sha256": "0adf5de74b826e64d377d884caf64c846fed852247cc62602b53b5b256ad1a6c",
+    "controls": [
+      "mechanical_output",
+      "journal_reused_once",
+      "semantic_descriptor_enrichment_preserved",
+      "wrong_scope_denied",
+      "scope_mismatch_denied",
+      "revoked_scope_cannot_reuse_journal"
+    ],
+    "live_model_forbidden_by_existing_fixture": true,
+    "status": "passed"
+  },
+  "agi_achieved": false,
+  "attempt_order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "attempts": [
+    {
+      "completed_at": "2026-09-05T10:31:18.213786Z",
+      "descriptor_calls": 22276,
+      "elapsed_seconds": 124.99757598999713,
+      "index": 0,
+      "started_at": "2026-09-05T10:29:13.216218Z",
+      "status": "passed",
+      "variant": "baseline"
+    },
+    {
+      "completed_at": "2026-09-05T10:32:49.606432Z",
+      "descriptor_calls": 11138,
+      "elapsed_seconds": 91.2642301809974,
+      "index": 1,
+      "started_at": "2026-09-05T10:31:18.342200Z",
+      "status": "passed",
+      "variant": "candidate"
+    },
+    {
+      "completed_at": "2026-09-05T10:34:19.857172Z",
+      "descriptor_calls": 11138,
+      "elapsed_seconds": 90.11135346299852,
+      "index": 2,
+      "started_at": "2026-09-05T10:32:49.745822Z",
+      "status": "passed",
+      "variant": "candidate"
+    },
+    {
+      "completed_at": "2026-09-05T10:36:20.754156Z",
+      "descriptor_calls": 22276,
+      "elapsed_seconds": 120.75652658600302,
+      "index": 3,
+      "started_at": "2026-09-05T10:34:19.997630Z",
+      "status": "passed",
+      "variant": "baseline"
+    }
+  ],
+  "candidate_activated": false,
+  "change": "Handle explicit mechanical calls before semantic prompt enrichment. Preserve the mechanical dispatcher descriptor lookup, registry.apply re-verification, exact scope checks, journal reuse validation, and semantic-path enrichment.",
+  "code_path": "src/continual/learning_engine.py",
+  "controls": [
+    {
+      "denials": [
+        "wrong_scope",
+        "scope_mismatch",
+        "revoked_scope_cannot_reuse_journal"
+      ],
+      "journal_reused_once": true,
+      "status": "passed",
+      "variant": "baseline"
+    },
+    {
+      "denials": [
+        "wrong_scope",
+        "scope_mismatch",
+        "revoked_scope_cannot_reuse_journal"
+      ],
+      "journal_reused_once": true,
+      "status": "passed",
+      "variant": "candidate"
+    }
+  ],
+  "evidence_refs": [
+    "artifacts/unit-generation30-mechanical-dispatch-cost-reduction-v1/profile.json",
+    "artifacts/unit-generation30-mechanical-dispatch-cost-reduction-v1/precommit.json",
+    "artifacts/unit-generation30-mechanical-dispatch-cost-reduction-v1/comparison.json",
+    "artifacts/unit-generation30-mechanical-dispatch-cost-reduction-v1/source-validation.json",
+    "artifacts/unit-generation30-mechanical-dispatch-cost-reduction-v1/setup-failure.json",
+    "artifacts/unit-generation30-mechanical-dispatch-cost-reduction-v1/executed-comparison.py",
+    "artifacts/unit-generation30-mechanical-dispatch-cost-reduction-v1/executed-source-validation.py"
+  ],
+  "execution_id": "work-recovery-20260905T094940Z-ae2fd192aee54c9485ba9966c722d918",
+  "frozen_primary_Work_response_replayed": false,
+  "lease_generation": 30,
+  "measurements": {
+    "baseline_median_seconds": 122.87705128800008,
+    "candidate_median_seconds": 90.68779182199796,
+    "descriptor_calls_reduced": true,
+    "eligible_for_review": true,
+    "median_elapsed_reduction_fraction": 0.2619631503897071
+  },
+  "next_action": "Review and publish the isolated code change, pass protected exact-head CI, then merge into main after PR504 while continuing the primary native lifecycle.",
+  "problem": "Explicit learned-tool calls enriched a semantic prompt with a complete verified-tool catalog, then ignored that catalog and repeated the descriptor lookup in the mechanical dispatch path. Profiling an existing five-round regression found 22276 descriptor scans across 11138 calls.",
+  "proposed_source_sha256": "0adf5de74b826e64d377d884caf64c846fed852247cc62602b53b5b256ad1a6c",
+  "record_type": "measured_mechanical_dispatch_cost_reduction",
+  "recorded_at": "2026-09-05T10:38:00.197426Z",
+  "reproduction_note": "The exact experiment scripts are retained as executed. They expect an experiment directory next to a checkout named O; the source-validation driver copies source into an isolated temporary package. The existing regression and proposed source hashes bind this comparison.",
+  "schema_version": 1,
+  "scope": "One deterministic five-round regression on the current runtime, two timed repetitions per variant. No general GitHub runner speed guarantee is inferred.",
+  "source_head": "d867e5258d686fe93571cf086db804e9c2df8967",
+  "source_user_input_revision": 46,
+  "upper_objective_achieved": false,
+  "validation_gate": "Independent protected exact-head CI is required before integration."
+}
