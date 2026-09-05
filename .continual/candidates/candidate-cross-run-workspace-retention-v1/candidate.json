@@ -1,0 +1,47 @@
+{
+  "candidate_id": "candidate-cross-run-workspace-retention-v1",
+  "target_component": "execute",
+  "expected_scope": "agi/live-cross-run-retention-evaluation",
+  "status": "candidate",
+  "prompt_mode": "overlay",
+  "prompt_path": ".continual/candidates/candidate-cross-run-workspace-retention-v1/prompt.md",
+  "what_it_changes": "Add a bounded genuine-model retention evaluation that acquires explicit workspace memory/procedure state, reconstructs only that persisted state into a fresh agent instance, requires recall/reuse without re-learning or re-adoption, and reruns protected transfer/robustness checks.",
+  "applicability": [
+    "agi/live-cross-run-retention-evaluation",
+    "bounded genuine-model continual-learning validation after a stable workspace campaign"
+  ],
+  "non_applicability": [
+    "external AGI claim evaluation",
+    "production-tier evaluator independence",
+    "unbounded retries or duplicate live requests",
+    "ordinary unrelated software tasks"
+  ],
+  "scope_states": {
+    "agi/live-cross-run-retention-evaluation": "candidate",
+    "global": "untested"
+  },
+  "supporting_evidence": [
+    {
+      "scope": "agi/live-cross-run-retention-evaluation",
+      "finding": "PR 165 exact head 6103859360fe188fa61e509b0916743d4e6c9c3e passed full repository CI run 32090123069. Deterministic tests prove a fresh agent can consume explicitly reconstructed state, protected transfer/robustness remain passing, and redundant remember/adopt events are rejected even when outputs remain correct.",
+      "evidence_kind": "exact_head_ci"
+    }
+  ],
+  "contradictory_evidence": [],
+  "rejected_reasons": [],
+  "depends_on": [
+    "candidate-copilot-sdk-live-campaign-v1",
+    "candidate-live-campaign-stage-isolation-v1"
+  ],
+  "conflicts_with": [],
+  "tested_with": [
+    "PR165 head 6103859360fe188fa61e509b0916743d4e6c9c3e / CI 32090123069"
+  ],
+  "incompatible_with": [],
+  "source_refs": [
+    "src/agi/cross_run_workspace_retention.py",
+    "src/agi/copilot_cli.py",
+    "tests/test_cross_run_workspace_retention.py",
+    "agi/HOURLY_EXECUTION_STATE.json"
+  ]
+}
