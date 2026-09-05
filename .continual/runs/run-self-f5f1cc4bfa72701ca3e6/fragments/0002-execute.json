@@ -1,0 +1,93 @@
+{
+  "actions": [
+    "Read the scheduler and failure-transition tests from a clean main worktree.",
+    "Reproduced skipped post-task Learn in an isolated no-live-model fixture.",
+    "Changed only mechanical dispatch of an explicitly chosen consolidation component.",
+    "Verified two new negative-outcome lifecycle regressions and three existing PASS/FAIL/UNCERTAIN controls."
+  ],
+  "artifacts": [
+    "artifacts/unit-generation30-explicit-failure-consolidation-v1-result.json",
+    "src/continual/engine.py",
+    "tests/test_root_selected_failure_consolidation.py"
+  ],
+  "component": "execute",
+  "decisions": [
+    "Leave consolidation choice with Root and preserve failed task/unit verdicts.",
+    "Do not change active prompts, workflows or the current frozen primary response.",
+    "Keep adoption pending full protected CI."
+  ],
+  "failures": [
+    "Before the fix, explicit consolidation returned to Root without canonical episode persistence or post-task Learn."
+  ],
+  "observations": [
+    {
+      "direct_regression_tests": [
+        {
+          "status": "passed",
+          "test": "test_root_selected_failed_unit_consolidates_and_learns"
+        },
+        {
+          "status": "passed",
+          "test": "test_root_selected_uncertain_unit_consolidates_and_learns"
+        }
+      ],
+      "existing_controls": [
+        {
+          "existing_control_verdict": "FAIL",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "UNCERTAIN",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "PASS",
+          "status": "passed"
+        }
+      ],
+      "live_model_calls": 0,
+      "primary_work_mutated": false,
+      "validation_scope": "Explicit Root consolidation preserves FAIL/UNCERTAIN, writes the episode, runs post-task Learn and returns to Root; full protected CI still required."
+    }
+  ],
+  "unknowns": [
+    "The full protected suite has not yet completed at the proposed head."
+  ],
+  "validation": [
+    {
+      "baseline_failure_reproduced": true,
+      "claim_boundary": "Isolated no-live-model regression fixture; no primary Work mutation.",
+      "traceback": "Traceback (most recent call last):\n  File \"<stdin>\", line 7, in <module>\n  File \"/workspace/scratch/d96c6d9cad22/O/tests/test_root_selected_failure_consolidation.py\", line 65, in test_root_selected_failed_unit_consolidates_and_learns\n    _assert_failed_episode_is_learned(runtime_repo, 'FAIL')\n  File \"/workspace/scratch/d96c6d9cad22/O/tests/test_root_selected_failure_consolidation.py\", line 49, in _assert_failed_episode_is_learned\n    assert model.calls == ['entry', 'root', 'execute', 'root', 'task_evaluate', 'root', 'consolidate_episode', 'learn']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+      "type": "AssertionError"
+    },
+    {
+      "direct_regression_tests": [
+        {
+          "status": "passed",
+          "test": "test_root_selected_failed_unit_consolidates_and_learns"
+        },
+        {
+          "status": "passed",
+          "test": "test_root_selected_uncertain_unit_consolidates_and_learns"
+        }
+      ],
+      "existing_controls": [
+        {
+          "existing_control_verdict": "FAIL",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "UNCERTAIN",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "PASS",
+          "status": "passed"
+        }
+      ],
+      "live_model_calls": 0,
+      "primary_work_mutated": false,
+      "validation_scope": "Explicit Root consolidation preserves FAIL/UNCERTAIN, writes the episode, runs post-task Learn and returns to Root; full protected CI still required."
+    }
+  ]
+}

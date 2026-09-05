@@ -831,10 +831,14 @@ class Engine:
         stack = list(snapshot.get("continuation_stack", []))
         if parent is not None:
             stack.append(parent)
+        # An explicit consolidation choice must use the episode lifecycle:
+        # persist the episode, run post-task Learn, then reconsider the task.
+        # Generic unit dispatch would only save a result and skip that lifecycle.
+        phase = "consolidate_pending" if component == "consolidate_episode" else "unit_pending"
         return self._advance(
             run_id,
             snapshot,
-            phase="unit_pending",
+            phase=phase,
             current_unit=unit_id,
             current_component=component,
             continuation_stack=stack,
