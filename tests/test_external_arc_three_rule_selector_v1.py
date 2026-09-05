@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).parents[1] / "agi" / "experiments" / "external_arc_three_rule_selector_v1.py"
@@ -74,6 +76,34 @@ def test_prior_use_scan_returns_exact_ids_not_ripgrep_help(tmp_path: Path) -> No
     (tmp_path / "receipt.json").write_text('{"task_id":"1cf80156"}\n')
     catalog = [{"task_id": "1cf80156"}, {"task_id": "deadbeef"}]
     assert prior_task_ids(catalog, tmp_path) == {"1cf80156"}
+
+
+def test_prior_use_scan_works_without_external_commands(tmp_path: Path) -> None:
+    (tmp_path / "receipt.json").write_text('{"task_id":"1cf80156"}\n')
+    with patch.dict(os.environ, {"PATH": ""}):
+        assert prior_task_ids([{"task_id": "1cf80156"}, {"task_id": "deadbeef"}], tmp_path) == {"1cf80156"}
+
+
+def test_prior_use_scan_includes_ignored_history_and_chunk_boundaries(tmp_path: Path) -> None:
+    history = tmp_path / ".continual" / "runs"
+    history.mkdir(parents=True)
+    (tmp_path / ".gitignore").write_text(".continual/runs/\n")
+    (history / "receipt.bin").write_bytes(b"\x00" * (64 * 1024 - 4) + b"1cf80156")
+    git_dir = tmp_path / ".git"
+    git_dir.mkdir()
+    (git_dir / "internal").write_text("deadbeef")
+    assert prior_task_ids([{"task_id": "1cf80156"}, {"task_id": "deadbeef"}], tmp_path) == {"1cf80156"}
+
+
+def test_prior_use_scan_read_error_cannot_declare_task_fresh(tmp_path: Path) -> None:
+    (tmp_path / "receipt.json").write_text('{"task_id":"1cf80156"}\n')
+    with patch.object(Path, "open", side_effect=PermissionError("unreadable prior record")):
+        try:
+            prior_task_ids([{"task_id": "1cf80156"}], tmp_path)
+        except PermissionError:
+            pass
+        else:
+            raise AssertionError("An incomplete prior-use scan must fail closed")
 
 
 def test_frozen_attempt_is_fail_closed_without_retry() -> None:

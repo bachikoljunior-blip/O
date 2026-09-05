@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import inspect
 import json
+import os
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -129,28 +130,41 @@ def unique_zero_error_rule(scores: list[dict[str, object]]) -> str | None:
 
 
 def prior_task_ids(catalog: list[dict[str, object]], o_root: Path) -> set[str]:
-    task_ids = sorted(str(record["task_id"]) for record in catalog)
-    scan = subprocess.run(
-        [
-            "rg",
-            "--hidden",
-            "-F",
-            "--no-filename",
-            "-o",
-            "-f",
-            "-",
-            "--glob",
-            "!.git/**",
-            str(o_root),
-        ],
-        input="\n".join(task_ids) + "\n",
-        text=True,
-        stdout=subprocess.PIPE,
-        check=False,
-    )
-    if scan.returncode not in (0, 1):
-        raise RuntimeError(f"prior-use scan failed with exit {scan.returncode}")
-    return set(scan.stdout.splitlines())
+    """Conservatively scan prior files without an optional CLI dependency.
+
+    Hidden and ignored records are evidence too. Only Git internals and
+    symlinks are excluded. Read/walk errors propagate rather than declaring
+    potentially used tasks fresh. The frozen generation-29 event is not rerun.
+    """
+    remaining = {str(record["task_id"]).encode(): str(record["task_id"]) for record in catalog}
+    if not remaining:
+        return set()
+    if b"" in remaining:
+        raise ValueError("prior-use scan requires non-empty task identifiers")
+    if not o_root.is_dir():
+        raise NotADirectoryError(o_root)
+    overlap = max(map(len, remaining)) - 1
+    found: set[str] = set()
+
+    def fail_on_walk_error(error: OSError) -> None:
+        raise error
+
+    for directory, directories, files in os.walk(o_root, onerror=fail_on_walk_error):
+        directories[:] = sorted(name for name in directories if name != ".git")
+        for name in sorted(files):
+            path = Path(directory) / name
+            if name == ".git" or path.is_symlink():
+                continue
+            tail = b""
+            with path.open("rb") as source:
+                while chunk := source.read(64 * 1024):
+                    data = tail + chunk
+                    matched = [needle for needle in remaining if needle in data]
+                    found.update(remaining.pop(needle) for needle in matched)
+                    if not remaining:
+                        return found
+                    tail = data[-overlap:] if overlap else b""
+    return found
 
 
 def eligible_records(catalog: list[dict[str, object]], prior_ids: set[str]) -> list[dict[str, object]]:
