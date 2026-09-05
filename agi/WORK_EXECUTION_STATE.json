@@ -177,7 +177,7 @@
     "active_prompt": "prompts/execute.md",
     "agi_claim_supported": false,
     "blocker": null,
-    "checkpointed_at": "2026-09-05T20:36:30Z",
+    "checkpointed_at": "2026-09-05T20:41:20Z",
     "completed_effect_receipt": {
       "blob_sha": "0e1ffb0e8679ddc5c115bdb63e90ebe078128275",
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-776522f2a0f94272af62435a.json"
@@ -264,8 +264,8 @@
       33956167234,
       33956167235
     ],
-    "current_main_sha": "9804de132770b7596b97a6a1ce1697bdecbd4140",
-    "current_state_blob_sha": "d8327a858cd6f543ad01f9858feabc053628a882",
+    "current_main_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
+    "current_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
     "exact_completed_native_invocation_id": "invoke-776522f2a0f94272af62435a",
     "exact_completed_request_digest": "951e295c00ee08cd7a9c4eca08f3fb10992fcd2088c80d639c6d0a6abec8a029",
     "exact_completed_response_blob_sha": "ce8646624a93405360b8205bdb98f079432f370d",
@@ -366,8 +366,8 @@
     },
     "lease_generation": 33,
     "native_phase": "unit_pending",
-    "next_action": "Publish protected lifecycle branch and merge unchanged exact head after CI.",
-    "next_tool": "github_state_cas_then_protected_pr",
+    "next_action": "Open protected PR and verify unchanged exact-head CI.",
+    "next_tool": "github_create_pull_request",
     "next_tool_action": "Publish branch work/recovery-gen31-consume-candidate-source-observation-v1, await protected tests, merge unchanged head, exact-readback, then refresh source receipt and run work-resume.",
     "no_partial_result_claimed": true,
     "pending_component": "task_evaluate",
@@ -383,7 +383,9 @@
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 197,
     "termination": null,
-    "upper_objective_achieved": false
+    "upper_objective_achieved": false,
+    "pending_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+    "working_branch": "work/g33-candidate-consume-execute-preflight-repair-v1"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1324,10 +1326,10 @@
     "workflow_id": 335420036,
     "workflow_run": 32717303596
   },
-  "continuation": "Publish the exactly-once Candidate Evaluate consumption, revision204 snapshot, fresh Work/CI observations, fragment, Local Learn, and Execute preflight through protected exact-head CI and exact main readback; then record a fresh Work source observation and freeze the unique Execute request without replay.",
+  "continuation": "Open protected PR from exact head 454919df, require directive plus four pytest shards and aggregate success at that unchanged head, merge and exact-read back main, phase-2 bind revision204, then record a fresh Work source observation and freeze Execute exactly once.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "local_native_progress_pending_protected_publication",
+    "status": "branch_exact_readback_verified_pending_pull_request",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
@@ -1356,13 +1358,13 @@
     "snapshot_revision": 204,
     "snapshot_phase": "unit_pending",
     "snapshot_blob_sha": "857ab85b88f88bc57b22af25e4a1cb5a80cd2ad6",
-    "snapshot_branch": "local_pending_publication",
-    "snapshot_head_sha": null,
-    "source_main_sha": "9804de132770b7596b97a6a1ce1697bdecbd4140",
-    "source_state_blob_sha": "d8327a858cd6f543ad01f9858feabc053628a882",
+    "snapshot_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
+    "snapshot_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+    "source_main_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
+    "source_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@9804de132770b7596b97a6a1ce1697bdecbd4140/agi/WORK_EXECUTION_STATE.json",
-    "verified_remote_readback": false,
-    "verified_at": null
+    "verified_remote_readback": true,
+    "verified_at": "2026-09-05T20:41:20Z"
   },
   "continuation_source": "repository_latest_main_only",
   "continuity_correction": {
@@ -1475,10 +1477,10 @@
     "status": "active"
   },
   "current_blockers": [],
-  "durability_status": "local_native_progress_pending_protected_publication",
+  "durability_status": "branch_exact_readback_verified_pending_pull_request",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "local_native_progress_pending_protected_publication",
+    "status": "branch_exact_readback_verified_pending_pull_request",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
@@ -1507,13 +1509,13 @@
     "snapshot_revision": 204,
     "snapshot_phase": "unit_pending",
     "snapshot_blob_sha": "857ab85b88f88bc57b22af25e4a1cb5a80cd2ad6",
-    "snapshot_branch": "local_pending_publication",
-    "snapshot_head_sha": null,
-    "source_main_sha": "9804de132770b7596b97a6a1ce1697bdecbd4140",
-    "source_state_blob_sha": "d8327a858cd6f543ad01f9858feabc053628a882",
+    "snapshot_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
+    "snapshot_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+    "source_main_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
+    "source_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@9804de132770b7596b97a6a1ce1697bdecbd4140/agi/WORK_EXECUTION_STATE.json",
-    "verified_remote_readback": false,
-    "verified_at": null
+    "verified_remote_readback": true,
+    "verified_at": "2026-09-05T20:41:20Z"
   },
   "exact_head_ci_observation": {
     "aggregate_job_id": 100542530304,
@@ -21998,7 +22000,7 @@
     "successor_substantive_progress_at": "2026-09-05T09:56:51.073Z",
     "successor_workspace_identifier": "d96c6d9cad22"
   },
-  "heartbeat_at": "2026-09-05T20:36:30Z",
+  "heartbeat_at": "2026-09-05T20:41:20Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -22871,9 +22873,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Consumed Candidate Evaluate invoke-c73be2195f77f04695fa3679 exactly once after fresh Work and exact-head CI connector observations; native invoke-75e6756a6c50bad76871963f completed and snapshot advanced 203 to 204. Execute preflight then failed closed before any Execute request freeze because CI evidence was stale; fresh CI observation is now recorded.",
-  "last_activity_at": "2026-09-05T20:36:30Z",
-  "last_checked_at": "2026-09-05T20:36:30Z",
+  "last_action": "Phase-1 state CAS 4dcd40e1/f8d6c328 succeeded; isolated branch head 454919df exact-read back all ten lifecycle blobs for Candidate consumption, revision204, Work/CI observations, and repaired Execute preflight.",
+  "last_activity_at": "2026-09-05T20:41:20Z",
+  "last_checked_at": "2026-09-05T20:41:20Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
     "message": "Candidate Evaluate response was consumed exactly once and native revision advanced to 197; Task Evaluate freeze then failed closed because no fresh authoritative Work source observation matched the generation31 state.",
@@ -22891,10 +22893,10 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-05T20:36:30Z",
+  "last_progress_at": "2026-09-05T20:41:20Z",
   "last_verified_effect": {
     "schema_version": 1,
-    "status": "generation33_candidate_response_consumed_locally_pending_protected_publication",
+    "status": "generation33_candidate_consume_branch_exact_readback_verified_pending_pr",
     "recorded_at": "2026-09-05T20:36:30Z",
     "authority": {
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -22929,7 +22931,12 @@
     "execute_request_created": false,
     "preflight_failure": "fresh CI source observation was missing at first Execute preflight; repaired before retry",
     "upper_objective_achieved": false,
-    "agi_achieved": false
+    "agi_achieved": false,
+    "phase1_commit_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
+    "phase1_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
+    "publication_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
+    "publication_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+    "all_published_blobs_exact_readback": true
   },
   "latest_integrated_source": {
     "additional_pull_requests": [
@@ -23440,7 +23447,7 @@
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
   "pending_consolidate_work_invocation_id": null,
-  "pending_head_sha": null,
+  "pending_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
   "pending_learn_native_invocation_id": null,
   "pending_learn_request_blob_sha": null,
   "pending_learn_request_digest": null,
@@ -23649,203 +23656,27 @@
     "voluntary_exit_permitted": false
   },
   "publication_effect": {
-    "created_at": "2026-08-26T11:58:10.000Z",
-    "execute_invocation_id": "invoke-ff60e9306310c18395b20938",
-    "execute_request_digest": "b7b588f0b25e3543193fb21684c4643c847fd806e7ce73b83f11d50ff69d0482",
-    "fence_token_digest": "51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e",
-    "frozen_invocation_id": "invoke-248450c08547af10470c50e6",
-    "frozen_response_digest": "d16aebc1469512d1c28f4d0131cdb0b7ca22276fdd19260ec454206610dadee1",
-    "generation": 21,
-    "idempotency_key": "o-work-publication:g21:51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e:unit-b2698e1aa6dad8f3da3d783a:b7b588f0b25e3543193fb21684c4643c847fd806e7ce73b83f11d50ff69d0482:continuation-and-lifecycle-v1",
-    "request_recreated": false,
     "schema_version": 1,
-    "stage1": {
-      "blob_mismatch_count": 0,
-      "exact_head_sha": "e7f9597fddadb5799eccecbb7fca3290b4227ced",
-      "merge_sha": "d3b74bec1a260df0b47704059a2d8adac46d3d59",
-      "merge_tree_sha": "ad7a4c1780ee79b0267ef2657946f32454b76478",
-      "merged_at": "2026-08-26T12:17:56.000Z",
-      "pull_request": 316,
-      "required_jobs_success": 5,
-      "status": "merged_main_exact_readback",
-      "verified_blob_count": 11,
-      "workflow_runs": [
-        32964393426,
-        32964393474
-      ]
+    "status": "branch_exact_readback_verified_pending_pull_request",
+    "phase1_commit_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
+    "phase1_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
+    "branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
+    "head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+    "published_blobs": {
+      ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl": "76a8ff134363a66a56f5e2a707208191beb5120e",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json": "857ab85b88f88bc57b22af25e4a1cb5a80cd2ad6",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-75e6756a6c50bad76871963f.json": "a776f255383a71c59d7559c8c82c6ceea7770bb3",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-75e6756a6c50bad76871963f-candidate_evaluate.json": "a1743c34d0baf4fe1b728395c456ae89c6fb1556",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-75e6756a6c50bad76871963f-candidate_evaluate.json": "4036d5405cf5b18f71f568d80c1b147d7929aabd",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-execute-ed2d6dc9de7ec524ed6f9609.json": "820d402aa5c9624e5de4f724f436770bce5c14f4",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-be359222210ec4c220d8d02e/request.json": "200f3fca3e4f62882abd3a175a80b9142c7ebe6b",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-be359222210ec4c220d8d02e/receipt.json": "57138adef6b5b6f9ee696708ed4409ecc59c5d69",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-f6d94370eca4e3ce1dc52a1a/request.json": "0e0074662b2a89da646772bc905588751382b0a4",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-f6d94370eca4e3ce1dc52a1a/receipt.json": "69930e7fd80f414a3982f5c3333580c123acd224"
     },
-    "stage2": {
-      "base_sha": "d3b74bec1a260df0b47704059a2d8adac46d3d59",
-      "blob_mismatch_count": 0,
-      "branch": "work/recovery-gen21-revision22-lifecycle-records-v1",
-      "exact_head_sha": "9f500918c73d84449015a9133d23f53d388c9841",
-      "exact_head_tree_sha": "654c8b65d41eead03bccad5d376b9b1dd482a71a",
-      "merge_sha": "a605c7bbdad9205e02f7843263c695c7405b03d4",
-      "merge_tree_sha": "509c426056a555b8dcc7a6445f78d1e75ab85d7f",
-      "merged_at": "2026-08-26T12:59:41.000Z",
-      "pull_request": 317,
-      "record_file_count": 74,
-      "required_jobs_success": 5,
-      "status": "merged_main_exact_readback",
-      "verified_blob_count": 74,
-      "workflow_runs": [
-        32967925246,
-        32967925259
-      ]
-    },
-    "stage3": {
-      "base_sha": "a605c7bbdad9205e02f7843263c695c7405b03d4",
-      "blob_mismatch_count": 0,
-      "branch": "work/recovery-gen21-publication-execute-records-v1",
-      "ci_observed_at": "2026-08-26T13:52:38.270Z",
-      "claim_boundary": "Protocol-required records for the already-submitted publication Execute and its native Root transition only. This is not external production evidence, AGI evidence, or user-objective completion evidence.",
-      "corrected_at": "2026-08-26T13:11:46.605Z",
-      "correction_reason": "The runtime has read-only git transport credentials. The connector-created commit has the exact precommitted tree and parent but a connector-authored commit identity; no branch/ref or PR was dispatched before this correction.",
-      "exact_head_ci": {
-        "aggregate_job": {
-          "conclusion": "success",
-          "id": 98202894568,
-          "name": "test",
-          "status": "completed"
-        },
-        "directive_preflight": {
-          "conclusion": "success",
-          "head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
-          "id": 32972879540,
-          "job": {
-            "conclusion": "success",
-            "id": 98190514449,
-            "name": "directive-source-integrity",
-            "status": "completed"
-          },
-          "name": "directive-source-preflight",
-          "status": "completed",
-          "workflow_id": 342801498
-        },
-        "required_job_ids": [
-          98190515458,
-          98190515591,
-          98190515656,
-          98190515689,
-          98202894568
-        ],
-        "required_jobs_success": 5,
-        "shard_jobs": [
-          {
-            "conclusion": "success",
-            "id": 98190515458,
-            "name": "pytest shard 2 of 4",
-            "status": "completed"
-          },
-          {
-            "conclusion": "success",
-            "id": 98190515591,
-            "name": "pytest shard 3 of 4",
-            "status": "completed"
-          },
-          {
-            "conclusion": "success",
-            "id": 98190515656,
-            "name": "pytest shard 0 of 4",
-            "status": "completed"
-          },
-          {
-            "conclusion": "success",
-            "id": 98190515689,
-            "name": "pytest shard 1 of 4",
-            "status": "completed"
-          }
-        ],
-        "test_run": {
-          "conclusion": "success",
-          "head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
-          "id": 32972879530,
-          "name": "test",
-          "status": "completed",
-          "workflow_id": 335420036
-        }
-      },
-      "exact_head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
-      "exact_head_tree_sha": "3146b8a892946a0f9550e12ad0edd7ad56b1c65e",
-      "exact_head_workflow_runs": [
-        32972879530,
-        32972879540
-      ],
-      "execute_output_digest": "a5c15d1ac0fcddf7b229a90cbb1601a347b8c8ad31cd79cbecd166bdb88d7b9b",
-      "execute_response_digest": "377357f13b4e2ba3797a137eba473cb2a17f32de3cf807dc60549cf5cbfb6247",
-      "idempotency_key": "o-work-publication-execute-records:g21:51d413a07c0251e60de065e1fc3ec62084b7ced493f3d64f18a3647da9a76a0e:invoke-ff60e9306310c18395b20938:tree-3146b8a892946a0f9550e12ad0edd7ad56b1c65e:v1",
-      "local_combined_regression": {
-        "command": "pytest -q",
-        "duration_seconds": 5015.98,
-        "exact_head_substitute": false,
-        "observed_at": "2026-08-26T13:24:18.531Z",
-        "result": "750 passed"
-      },
-      "local_reference_head_sha": "b350f90b14165dd2c62a6d94d6f4e275d77d85d8",
-      "main_readback_at": "2026-08-26T13:55:34.467Z",
-      "merge_sha": "bbb0899e952c10b912dce4f0c2dd92eafee5e0da",
-      "merge_tree_sha": "87c70f8c7507a3371aecd8f80698070eb6b6dbd0",
-      "merged_at": "2026-08-26T13:53:12.000Z",
-      "native_phase": "root_pending",
-      "native_snapshot_revision": 67,
-      "postmerge_snapshot": {
-        "blob_sha": "6f464a59248a5991ab3878ce393643fd32caaf27",
-        "phase": "root_pending",
-        "revision": 67
-      },
-      "premerge_authorization": {
-        "changed_path_intersection_count": 0,
-        "exact_head_ci_status": "all_required_jobs_success",
-        "exact_head_sha": "420a61d9cedbfc778e25c361459a23dcd1a4caa8",
-        "exact_head_tree_sha": "3146b8a892946a0f9550e12ad0edd7ad56b1c65e",
-        "expected_state_blob_sha": "7e28d737c1442ed6b38e4c0d0ba92918d0de635c",
-        "latest_main_sha": "7b35869454c2345d6dfdef96b44303fa2c6daf50",
-        "main_changed_paths": [
-          "agi/WORK_EXECUTION_STATE.json"
-        ],
-        "merge_requires_expected_head": true,
-        "merge_tree_sha": "d95462527a9144174a9b876c5783201fec53f123",
-        "merge_tree_status": "success",
-        "pr_changed_paths": [
-          ".continual/episodes/episode-work-recovery-gen9-durability-repair/episode.json",
-          ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-          ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-61127f25eb2a2c577ffe970c.json",
-          ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-          ".continual/work-model/invocations/invoke-ff60e9306310c18395b20938/response.json"
-        ],
-        "pull_request": 318,
-        "verified_at": "2026-08-26T13:52:38.270Z"
-      },
-      "prepared_at": "2026-08-26T13:09:31.254Z",
-      "publication_transport": "github_connector_objects_then_ref",
-      "pull_request": 318,
-      "record_blobs": {
-        ".continual/episodes/episode-work-recovery-gen9-durability-repair/episode.json": "7c962f871f9251d1315afbd775f5557aed9306fa",
-        ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl": "218555831411366a7e0b6ee07bd44bea3f0aeefe",
-        ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-61127f25eb2a2c577ffe970c.json": "05ca188dadeff1e1d76d1f21da44461acf8aad4c",
-        ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json": "6f464a59248a5991ab3878ce393643fd32caaf27",
-        ".continual/work-model/invocations/invoke-ff60e9306310c18395b20938/response.json": "79da2df319d32fd39289b80b6f6a35254646875a"
-      },
-      "record_file_count": 5,
-      "required_jobs_success": 5,
-      "status": "merged_main_exact_readback",
-      "verified_blob_count": 5,
-      "work_verify": {
-        "pending": 0,
-        "requests": 60,
-        "responses": 60,
-        "valid": true
-      },
-      "work_verify_after_merge": {
-        "pending": 0,
-        "requests": 60,
-        "responses": 60,
-        "valid": true
-      }
-    },
-    "status": "completed_merged_main_exact_readback",
-    "unit_id": "unit-b2698e1aa6dad8f3da3d783a",
-    "updated_at": "2026-08-26T13:55:34.467Z"
+    "all_exact_readback": true,
+    "idempotency_key": "o-work-g33:68fc8111:candidate-consume-rev204:publish:v1",
+    "recorded_at": "2026-09-05T20:41:20Z"
   },
   "pull_request": 504,
   "readback_of_commit_sha": "b6d8baf098e90266acf4e667c6dcde088f6c7d76",
@@ -25088,7 +24919,7 @@
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_remote_readback": true,
   "work_status": "executing",
-  "working_branch": "main",
+  "working_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
   "handover_continuation_v32": {
     "authority_effect": "Only this new fence becomes the development authority after verified phase2; preserve all earlier requests, responses and published histories.",
     "basis": "The user's instructions to take over O, persist until handover and continue after the performance-setting change remain active. Generation31 was acquired by the monitor while this chat retained an unpublished valid preflight completion and Task Evaluate response. This is the continuing operator-requested handover, not an ordinary watchdog inference that the intervening process stopped.",
@@ -25314,7 +25145,7 @@
   },
   "generation33_candidate_consume_execute_preflight_repair_v1": {
     "schema_version": 1,
-    "status": "generation33_candidate_response_consumed_locally_pending_protected_publication",
+    "status": "generation33_candidate_consume_branch_exact_readback_verified_pending_pr",
     "recorded_at": "2026-09-05T20:36:30Z",
     "authority": {
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -25349,6 +25180,11 @@
     "execute_request_created": false,
     "preflight_failure": "fresh CI source observation was missing at first Execute preflight; repaired before retry",
     "upper_objective_achieved": false,
-    "agi_achieved": false
+    "agi_achieved": false,
+    "phase1_commit_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
+    "phase1_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
+    "publication_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
+    "publication_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+    "all_published_blobs_exact_readback": true
   }
 }
