@@ -1,0 +1,159 @@
+{
+  "actions": [
+    "Retrieved the actual failed protected CI job.",
+    "Reproduced missing-rg FileNotFoundError with an empty PATH.",
+    "Replaced the scan with conservative streaming standard-library file reads.",
+    "Ran all ten selector test functions directly, including missing-command, ignored-history, chunk-boundary and read-error cases."
+  ],
+  "artifacts": [
+    "artifacts/unit-generation30-selector-portable-prior-scan-repair-v1.json",
+    "agi/experiments/external_arc_three_rule_selector_v1.py",
+    "tests/test_external_arc_three_rule_selector_v1.py"
+  ],
+  "component": "execute",
+  "decisions": [
+    "Preserve the immutable generation29 FAIL response and artifacts.",
+    "Do not skip the regression test or modify protected workflows."
+  ],
+  "failures": [
+    {
+      "ci_job_id": 101288124656,
+      "ci_run_id": 33959262465,
+      "current_same_code_head": "c051bdfacd51aa91b21743522fc264cc46e456ef",
+      "error_type": "FileNotFoundError",
+      "expected_prior_ids": [
+        "1cf80156"
+      ],
+      "filename": "rg",
+      "kind": "missing_optional_ripgrep",
+      "old_head": "b71b36a23af1237b23cfb52100ae66a0187d2923",
+      "reproduced": true
+    }
+  ],
+  "observations": [
+    {
+      "ci_job_id": 101288124656,
+      "ci_run_id": 33959262465,
+      "current_same_code_head": "c051bdfacd51aa91b21743522fc264cc46e456ef",
+      "error_type": "FileNotFoundError",
+      "expected_prior_ids": [
+        "1cf80156"
+      ],
+      "filename": "rg",
+      "kind": "missing_optional_ripgrep",
+      "old_head": "b71b36a23af1237b23cfb52100ae66a0187d2923",
+      "reproduced": true
+    },
+    {
+      "frozen_event_replayed": false,
+      "frozen_response_unchanged": true,
+      "passed": 10,
+      "runner": "direct execution of pytest-compatible test functions (pytest unavailable locally)",
+      "tests": [
+        {
+          "name": "test_frozen_attempt_is_fail_closed_without_retry",
+          "status": "passed"
+        },
+        {
+          "name": "test_prior_use_scan_includes_ignored_history_and_chunk_boundaries",
+          "status": "passed"
+        },
+        {
+          "name": "test_prior_use_scan_read_error_cannot_declare_task_fresh",
+          "status": "passed"
+        },
+        {
+          "name": "test_prior_use_scan_returns_exact_ids_not_ripgrep_help",
+          "status": "passed"
+        },
+        {
+          "name": "test_prior_use_scan_works_without_external_commands",
+          "status": "passed"
+        },
+        {
+          "name": "test_score_fails_shape_mismatch_closed",
+          "status": "passed"
+        },
+        {
+          "name": "test_selector_excludes_prior_ids_and_never_needs_test_output",
+          "status": "passed"
+        },
+        {
+          "name": "test_selector_rejects_nonunique_training_winner",
+          "status": "passed"
+        },
+        {
+          "name": "test_three_frozen_rules_have_expected_behavior",
+          "status": "passed"
+        },
+        {
+          "name": "test_unique_zero_error_winner_requires_exactly_one",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "unknowns": [
+    "Full exact-head protected CI has not yet run for this repair."
+  ],
+  "validation": [
+    {
+      "frozen_event_replayed": false,
+      "frozen_response_unchanged": true,
+      "passed": 10,
+      "runner": "direct execution of pytest-compatible test functions (pytest unavailable locally)",
+      "tests": [
+        {
+          "name": "test_frozen_attempt_is_fail_closed_without_retry",
+          "status": "passed"
+        },
+        {
+          "name": "test_prior_use_scan_includes_ignored_history_and_chunk_boundaries",
+          "status": "passed"
+        },
+        {
+          "name": "test_prior_use_scan_read_error_cannot_declare_task_fresh",
+          "status": "passed"
+        },
+        {
+          "name": "test_prior_use_scan_returns_exact_ids_not_ripgrep_help",
+          "status": "passed"
+        },
+        {
+          "name": "test_prior_use_scan_works_without_external_commands",
+          "status": "passed"
+        },
+        {
+          "name": "test_score_fails_shape_mismatch_closed",
+          "status": "passed"
+        },
+        {
+          "name": "test_selector_excludes_prior_ids_and_never_needs_test_output",
+          "status": "passed"
+        },
+        {
+          "name": "test_selector_rejects_nonunique_training_winner",
+          "status": "passed"
+        },
+        {
+          "name": "test_three_frozen_rules_have_expected_behavior",
+          "status": "passed"
+        },
+        {
+          "name": "test_unique_zero_error_winner_requires_exactly_one",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "native_completed": 196,
+      "native_fragments": 196,
+      "native_local_learn": 179,
+      "pending": 0,
+      "requests": 204,
+      "responses": 204,
+      "run_id": "run-work-recovery-gen9-durability-repair",
+      "valid": true
+    }
+  ]
+}
