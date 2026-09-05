@@ -1,0 +1,75 @@
+{
+  "actions": [
+    "Compared original and duplicate requests; only mutable snapshot metadata differed.",
+    "Reconstructed the deterministic cache exactly from a completed native journal and immutable response.",
+    "Preserved the duplicate request with explicit DEFER and failed duplicate journal.",
+    "Consumed the unchanged failed Execute response; created and answered the actual post-result Candidate request."
+  ],
+  "artifacts": [
+    "artifacts/unit-generation30-preflight-cache-recovery-v1-result.json",
+    "artifacts/unit-generation30-preflight-cache-recovery-v1-continuation.json",
+    ".continual/work-model/invocations/invoke-08094bcf99610e486c801e11/response.json"
+  ],
+  "component": "execute",
+  "decisions": [
+    "No experiment retry or replacement.",
+    "Keep the candidate inactive with REMAIN_CANDIDATE.",
+    "Include generated preflight caches and source observations in the next exact publication."
+  ],
+  "failures": [
+    "Inherited publication omitted the completed preflight cache.",
+    "The first resume created a duplicate pre-application request before consuming Execute; the duplicate is explicitly retained and suppressed."
+  ],
+  "observations": [
+    {
+      "native_completed": 197,
+      "native_fragments": 197,
+      "native_local_learn": 180,
+      "pending": 0,
+      "requests": 206,
+      "responses": 206,
+      "run_id": "run-work-recovery-gen9-durability-repair",
+      "valid": true
+    },
+    {
+      "claim_boundary": "Local native progression verified; protected CI, merge, remote readback and next resume still pending.",
+      "execute_consumed_once": true,
+      "execute_native_journal": "invoke-ffa5842478673c5c153a2c2d",
+      "execute_response_unchanged": true,
+      "native_integrity": {
+        "native_completed": 197,
+        "native_fragments": 197,
+        "native_local_learn": 180,
+        "pending": 0,
+        "requests": 206,
+        "responses": 206,
+        "run_id": "run-work-recovery-gen9-durability-repair",
+        "valid": true
+      },
+      "pending_native_response_consumption": true,
+      "post_result_decision": "REMAIN_CANDIDATE",
+      "post_result_invocation": "invoke-08094bcf99610e486c801e11",
+      "post_result_request_digest": "c439c42a1e17c25eca6e3b587a7ac5495f57968763446499c52dc668812c74f7",
+      "post_result_response_digest": "2dd4d8c6ff8fe85fdf88daa68862ee9e78ebaf2cb35682f314fed3a89efb7509",
+      "recorded_at": "2026-09-05T11:00:18.654391Z",
+      "run_id": "run-work-recovery-gen9-durability-repair",
+      "snapshot_phase": "unit_pending",
+      "snapshot_revision": 194
+    }
+  ],
+  "unknowns": [
+    "Remote publication, protected validation and the next native resume have not yet completed."
+  ],
+  "validation": [
+    {
+      "native_completed": 197,
+      "native_fragments": 197,
+      "native_local_learn": 180,
+      "pending": 0,
+      "requests": 206,
+      "responses": 206,
+      "run_id": "run-work-recovery-gen9-durability-repair",
+      "valid": true
+    }
+  ]
+}
