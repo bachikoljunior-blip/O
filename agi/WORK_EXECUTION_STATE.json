@@ -177,7 +177,7 @@
     "active_prompt": "prompts/execute.md",
     "agi_claim_supported": false,
     "blocker": null,
-    "checkpointed_at": "2026-09-05T20:41:20Z",
+    "checkpointed_at": "2026-09-05T21:16:30Z",
     "completed_effect_receipt": {
       "blob_sha": "0e1ffb0e8679ddc5c115bdb63e90ebe078128275",
       "ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-776522f2a0f94272af62435a.json"
@@ -262,10 +262,12 @@
       33954036360,
       33954036375,
       33956167234,
-      33956167235
+      33956167235,
+      33990722440,
+      33990722449
     ],
-    "current_main_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
-    "current_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
+    "current_main_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7",
+    "current_state_blob_sha": "ea8041b5f3a0575246cd104afc200dc0b2efdb29",
     "exact_completed_native_invocation_id": "invoke-776522f2a0f94272af62435a",
     "exact_completed_request_digest": "951e295c00ee08cd7a9c4eca08f3fb10992fcd2088c80d639c6d0a6abec8a029",
     "exact_completed_response_blob_sha": "ce8646624a93405360b8205bdb98f079432f370d",
@@ -366,16 +368,15 @@
     },
     "lease_generation": 33,
     "native_phase": "unit_pending",
-    "next_action": "Open protected PR and verify unchanged exact-head CI.",
-    "next_tool": "github_create_pull_request",
+    "next_action": "Prepare and record a fresh Work source observation, then resume revision204 to freeze Execute.",
+    "next_tool": "continual_work_source_observation_prepare",
     "next_tool_action": "Publish branch work/recovery-gen31-consume-candidate-source-observation-v1, await protected tests, merge unchanged head, exact-readback, then refresh source receipt and run work-resume.",
     "no_partial_result_claimed": true,
     "pending_component": "task_evaluate",
     "pull_request": {
-      "base_sha": "e552a5027e2deb174d24210fc0472985374a5f13",
-      "head_sha": "909172b3ef1cce0c6eb9a5e7efedca66bba7358e",
-      "merge_sha": "be4d7ab826a9fc92ed50ecec2a1c4fe2e72d4d16",
-      "number": 502
+      "number": 524,
+      "head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+      "merge_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7"
     },
     "resume_required": true,
     "schema_version": 1,
@@ -384,8 +385,8 @@
     "snapshot_revision": 197,
     "termination": null,
     "upper_objective_achieved": false,
-    "pending_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
-    "working_branch": "work/g33-candidate-consume-execute-preflight-repair-v1"
+    "pending_head_sha": null,
+    "working_branch": null
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -1326,10 +1327,10 @@
     "workflow_id": 335420036,
     "workflow_run": 32717303596
   },
-  "continuation": "Open protected PR from exact head 454919df, require directive plus four pytest shards and aggregate success at that unchanged head, merge and exact-read back main, phase-2 bind revision204, then record a fresh Work source observation and freeze Execute exactly once.",
+  "continuation": "Record a fresh authoritative Work-state observation for main f7ba870e and verified state, then resume revision204 to freeze the unique Execute request exactly once; publish and answer that frozen request by performing the bounded second-upstream clean-room repair-transfer trial.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "branch_exact_readback_verified_pending_pull_request",
+    "status": "remote_main_readback_verified",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
@@ -1358,13 +1359,13 @@
     "snapshot_revision": 204,
     "snapshot_phase": "unit_pending",
     "snapshot_blob_sha": "857ab85b88f88bc57b22af25e4a1cb5a80cd2ad6",
-    "snapshot_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
-    "snapshot_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
-    "source_main_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
-    "source_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
+    "snapshot_branch": "main",
+    "snapshot_head_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7",
+    "source_main_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7",
+    "source_state_blob_sha": "ea8041b5f3a0575246cd104afc200dc0b2efdb29",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@9804de132770b7596b97a6a1ce1697bdecbd4140/agi/WORK_EXECUTION_STATE.json",
     "verified_remote_readback": true,
-    "verified_at": "2026-09-05T20:41:20Z"
+    "verified_at": "2026-09-05T21:16:30Z"
   },
   "continuation_source": "repository_latest_main_only",
   "continuity_correction": {
@@ -1477,10 +1478,10 @@
     "status": "active"
   },
   "current_blockers": [],
-  "durability_status": "branch_exact_readback_verified_pending_pull_request",
+  "durability_status": "remote_main_readback_verified",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "branch_exact_readback_verified_pending_pull_request",
+    "status": "remote_main_readback_verified",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
@@ -1509,26 +1510,49 @@
     "snapshot_revision": 204,
     "snapshot_phase": "unit_pending",
     "snapshot_blob_sha": "857ab85b88f88bc57b22af25e4a1cb5a80cd2ad6",
-    "snapshot_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
-    "snapshot_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
-    "source_main_sha": "4dcd40e1d0aac527ec07b0e5305f60f8025a40d7",
-    "source_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
+    "snapshot_branch": "main",
+    "snapshot_head_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7",
+    "source_main_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7",
+    "source_state_blob_sha": "ea8041b5f3a0575246cd104afc200dc0b2efdb29",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@9804de132770b7596b97a6a1ce1697bdecbd4140/agi/WORK_EXECUTION_STATE.json",
     "verified_remote_readback": true,
-    "verified_at": "2026-09-05T20:41:20Z"
+    "verified_at": "2026-09-05T21:16:30Z"
   },
   "exact_head_ci_observation": {
-    "aggregate_job_id": 100542530304,
-    "all_success": true,
-    "directive_run_id": 33719574677,
-    "exact_head_sha": "fcc0d5d928923d67bcb5995c5dab934606b602fe",
-    "protected_test_run_id": 33719574678,
-    "shard_job_ids": [
-      100535764962,
-      100535765217,
-      100535765114,
-      100535765214
-    ]
+    "repository_full_name": "bachikoljunior-blip/O",
+    "exact_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+    "directive_workflow_run_id": 33990722449,
+    "directive_conclusion": "success",
+    "test_workflow_run_id": 33990722440,
+    "test_conclusion": "success",
+    "required_jobs": [
+      {
+        "id": 101372342539,
+        "name": "pytest shard 0 of 4",
+        "conclusion": "success"
+      },
+      {
+        "id": 101372342623,
+        "name": "pytest shard 1 of 4",
+        "conclusion": "success"
+      },
+      {
+        "id": 101372342633,
+        "name": "pytest shard 3 of 4",
+        "conclusion": "success"
+      },
+      {
+        "id": 101372342758,
+        "name": "pytest shard 2 of 4",
+        "conclusion": "success"
+      },
+      {
+        "id": 101375849353,
+        "name": "test",
+        "conclusion": "success"
+      }
+    ],
+    "observed_at": "2026-09-05T21:16:30Z"
   },
   "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
   "execution_route_review": {
@@ -22000,7 +22024,7 @@
     "successor_substantive_progress_at": "2026-09-05T09:56:51.073Z",
     "successor_workspace_identifier": "d96c6d9cad22"
   },
-  "heartbeat_at": "2026-09-05T20:41:20Z",
+  "heartbeat_at": "2026-09-05T21:16:30Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -22873,9 +22897,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Phase-1 state CAS 4dcd40e1/f8d6c328 succeeded; isolated branch head 454919df exact-read back all ten lifecycle blobs for Candidate consumption, revision204, Work/CI observations, and repaired Execute preflight.",
-  "last_activity_at": "2026-09-05T20:41:20Z",
-  "last_checked_at": "2026-09-05T20:41:20Z",
+  "last_action": "Merged PR #524 at unchanged exact head 454919df after directive run 33990722449 and test run 33990722440 (four shards plus aggregate) all succeeded; exact-read back all ten lifecycle blobs on main f7ba870e.",
+  "last_activity_at": "2026-09-05T21:16:30Z",
+  "last_checked_at": "2026-09-05T21:16:30Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
     "message": "Candidate Evaluate response was consumed exactly once and native revision advanced to 197; Task Evaluate freeze then failed closed because no fresh authoritative Work source observation matched the generation31 state.",
@@ -22893,10 +22917,10 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-05T20:41:20Z",
+  "last_progress_at": "2026-09-05T21:16:30Z",
   "last_verified_effect": {
     "schema_version": 1,
-    "status": "generation33_candidate_consume_branch_exact_readback_verified_pending_pr",
+    "status": "generation33_candidate_consume_pr524_main_exact_readback_verified",
     "recorded_at": "2026-09-05T20:36:30Z",
     "authority": {
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -22936,7 +22960,28 @@
     "phase1_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
     "publication_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
     "publication_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
-    "all_published_blobs_exact_readback": true
+    "all_published_blobs_exact_readback": true,
+    "pull_request": {
+      "number": 524,
+      "base_sha": "8f5d3cb69300138499566ecffdc02b94adf8b5be",
+      "head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+      "merge_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7"
+    },
+    "exact_head_ci": {
+      "directive_run_id": 33990722449,
+      "test_run_id": 33990722440,
+      "shard_job_ids": [
+        101372342539,
+        101372342623,
+        101372342633,
+        101372342758
+      ],
+      "aggregate_job_id": 101375849353,
+      "all_success": true
+    },
+    "source_main_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7",
+    "source_state_blob_sha": "ea8041b5f3a0575246cd104afc200dc0b2efdb29",
+    "verified_at": "2026-09-05T21:16:30Z"
   },
   "latest_integrated_source": {
     "additional_pull_requests": [
@@ -23010,7 +23055,7 @@
     "test_run_id": 33961213133,
     "tree_sha": "0123aee7f467b5304658c66ddc8a3204af5678a2"
   },
-  "merge_sha": "41ca882d40c6b341692f11246fa3577d252298dc",
+  "merge_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7",
   "merge_tree_sha": "102a1357c643efd8cb391ff9fcdf2e19081f9087",
   "missing_publication_response_repair": {
     "branch": "work/recovery-gen11-missing-publication-response-v1",
@@ -23447,7 +23492,7 @@
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
   "pending_consolidate_work_invocation_id": null,
-  "pending_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+  "pending_head_sha": null,
   "pending_learn_native_invocation_id": null,
   "pending_learn_request_blob_sha": null,
   "pending_learn_request_digest": null,
@@ -23678,7 +23723,12 @@
     "idempotency_key": "o-work-g33:68fc8111:candidate-consume-rev204:publish:v1",
     "recorded_at": "2026-09-05T20:41:20Z"
   },
-  "pull_request": 504,
+  "pull_request": {
+    "number": 524,
+    "head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+    "base_sha": "8f5d3cb69300138499566ecffdc02b94adf8b5be",
+    "merge_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7"
+  },
   "readback_of_commit_sha": "b6d8baf098e90266acf4e667c6dcde088f6c7d76",
   "reason": "Generation 32 had no same-owner main, PR-head, workflow, or native progress for more than 900 seconds after PR515 exact-head CI completed successfully at 2026-09-05T14:49:00.9306368Z; a final fresh remote recheck at 2026-09-05T15:13:30.488Z remained unchanged.",
   "recent_main_integration": {
@@ -24634,20 +24684,38 @@
     "status": "merged_main_durable_and_revision24_acknowledged"
   },
   "scheduled_slot_integrity": {
-    "blob_sha": "5946767eaa39f16cf65057182cc9a57a8fb5e680",
-    "commit_sha": "230e5d81cbb65e7ed1bcf6e0f180c0242e488c57",
-    "exact_readback": true,
+    "intended_slot": "2026-09-05T21:12:00Z",
+    "actual_start": "2026-09-05T15:47:13Z",
+    "start_delay_seconds": 0,
+    "previous_slot_coverage": {
+      "intended_slot": "2026-09-05T20:12:00Z",
+      "receipt_blob_sha": "6bae5398a0a7097e403bf1d7d73825c04b2253f2"
+    },
     "gap_classification": "same_authoritative_invocation_overlap",
-    "intended_slot": "2026-09-05T01:12:00Z",
-    "path": "automation_control/receipts/o_work_monitor_recovery/20260905T0112Z-gen29-same-invocation-overlap-pr493-bound.json"
+    "repair_action": "none_required",
+    "task_enabled": true,
+    "task_schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
+    "task_timezone": "Asia/Tokyo",
+    "task_readback_at": "2026-09-05T21:13:10Z",
+    "receipt_path": "automation_control/receipts/o_work_monitor_recovery/20260905T2112Z-same-invocation-overlap-gen33-pr524.json",
+    "receipt_blob_sha": "41b018542e93658ad0ab8ffbd549391cae6b6f25"
   },
   "scheduled_slot_integrity_receipt": {
-    "blob_sha": "5946767eaa39f16cf65057182cc9a57a8fb5e680",
-    "commit_sha": "230e5d81cbb65e7ed1bcf6e0f180c0242e488c57",
-    "exact_readback": true,
+    "intended_slot": "2026-09-05T21:12:00Z",
+    "actual_start": "2026-09-05T15:47:13Z",
+    "start_delay_seconds": 0,
+    "previous_slot_coverage": {
+      "intended_slot": "2026-09-05T20:12:00Z",
+      "receipt_blob_sha": "6bae5398a0a7097e403bf1d7d73825c04b2253f2"
+    },
     "gap_classification": "same_authoritative_invocation_overlap",
-    "intended_slot": "2026-09-05T01:12:00Z",
-    "path": "automation_control/receipts/o_work_monitor_recovery/20260905T0112Z-gen29-same-invocation-overlap-pr493-bound.json"
+    "repair_action": "none_required",
+    "task_enabled": true,
+    "task_schedule": "BEGIN:VEVENT\nDTSTART:20260827T211200\nRRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=12;BYSECOND=0\nEND:VEVENT",
+    "task_timezone": "Asia/Tokyo",
+    "task_readback_at": "2026-09-05T21:13:10Z",
+    "receipt_path": "automation_control/receipts/o_work_monitor_recovery/20260905T2112Z-same-invocation-overlap-gen33-pr524.json",
+    "receipt_blob_sha": "41b018542e93658ad0ab8ffbd549391cae6b6f25"
   },
   "schema_version": 1,
   "selector_evidence_correction": {
@@ -25145,7 +25213,7 @@
   },
   "generation33_candidate_consume_execute_preflight_repair_v1": {
     "schema_version": 1,
-    "status": "generation33_candidate_consume_branch_exact_readback_verified_pending_pr",
+    "status": "generation33_candidate_consume_pr524_main_exact_readback_verified",
     "recorded_at": "2026-09-05T20:36:30Z",
     "authority": {
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -25185,6 +25253,27 @@
     "phase1_state_blob_sha": "f8d6c3284ea481810844c06c3b155de48f745fc5",
     "publication_branch": "work/g33-candidate-consume-execute-preflight-repair-v1",
     "publication_head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
-    "all_published_blobs_exact_readback": true
+    "all_published_blobs_exact_readback": true,
+    "pull_request": {
+      "number": 524,
+      "base_sha": "8f5d3cb69300138499566ecffdc02b94adf8b5be",
+      "head_sha": "454919df60177d14e4261e4cdd7c828b800e2004",
+      "merge_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7"
+    },
+    "exact_head_ci": {
+      "directive_run_id": 33990722449,
+      "test_run_id": 33990722440,
+      "shard_job_ids": [
+        101372342539,
+        101372342623,
+        101372342633,
+        101372342758
+      ],
+      "aggregate_job_id": 101375849353,
+      "all_success": true
+    },
+    "source_main_sha": "f7ba870ef90d7f9c9bcb67f1aa22ae1aee1314a7",
+    "source_state_blob_sha": "ea8041b5f3a0575246cd104afc200dc0b2efdb29",
+    "verified_at": "2026-09-05T21:16:30Z"
   }
 }
