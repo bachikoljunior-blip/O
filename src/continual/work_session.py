@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import posixpath
 import re
@@ -45,6 +46,7 @@ _SECRET_TEXT = re.compile(
     re.IGNORECASE,
 )
 _GIT_BLOB_SHA = re.compile(r"^[0-9a-f]{40}$")
+_CANONICAL_JSON_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _MAX_EVIDENCE_BINDING_DEPTH = 32
 _MAX_EVIDENCE_BINDING_NODES = 4096
 _MAX_EVIDENCE_BINDINGS = 256
@@ -158,6 +160,8 @@ def _git_blob_sha(root: Path, declared_path: str, *, field: str) -> str:
 def verify_declared_repository_blob_bindings(
     root: Path,
     output: Mapping[str, Any],
+    *,
+    verify_canonical_json: bool = False,
 ) -> list[dict[str, str]]:
     """Verify explicit response path/blob declarations from repository bytes.
 
@@ -165,12 +169,21 @@ def verify_declared_repository_blob_bindings(
     ``path`` plus ``git_blob_sha`` or ``blob_sha``, or a named
     ``<label>_git_blob_sha`` plus ``<label>_path``/``<label>_ref`` in the same
     object.  Other strings and prose are not interpreted as evidence.
+
+    New submissions also check explicit ``sha256_canonical_json`` claims. Such
+    claims require a same-object path/blob binding, so native consumption can
+    recheck the exact bytes already validated at submission. Historical frozen
+    responses retain the original blob-only contract and may need separate
+    corrections; reading them does not certify auxiliary canonical claims.
+    Canonical JSON uses Store.stable_digest: sorted compact UTF-8 JSON without
+    ASCII escaping.
     """
 
     root = root.resolve()
     stack: list[tuple[Any, str, int]] = [(output, "output", 0)]
     node_count = 0
     declarations: list[tuple[str, Any, Any]] = []
+    canonical_declarations: list[tuple[str, Any, Any]] = []
 
     while stack:
         value, json_path, depth = stack.pop()
@@ -182,6 +195,14 @@ def verify_declared_repository_blob_bindings(
         if isinstance(value, Mapping):
             path_value = value.get("path")
             paired_keys = [key for key in ("git_blob_sha", "blob_sha") if key in value]
+            if verify_canonical_json and "sha256_canonical_json" in value:
+                if path_value is None or not paired_keys:
+                    raise WorkSessionError(
+                        f"canonical JSON digest requires a same-object path/blob binding at {json_path}"
+                    )
+                canonical_declarations.append(
+                    (f"{json_path}.sha256_canonical_json", path_value, value["sha256_canonical_json"])
+                )
             if path_value is not None and paired_keys:
                 for key in paired_keys:
                     declarations.append((f"{json_path}.{key}", path_value, value[key]))
@@ -241,6 +262,10 @@ def verify_declared_repository_blob_bindings(
                 )
             seen[declared_path] = declared_sha
 
+    for field, _, declared_sha in canonical_declarations:
+        if not isinstance(declared_sha, str) or not _CANONICAL_JSON_SHA256.fullmatch(declared_sha):
+            raise WorkSessionError(f"canonical JSON digest is not full lowercase hex at {field}")
+
     verified: list[dict[str, str]] = []
     for field, declared_path, declared_sha in declarations:
         _normalized_repository_file(root, declared_path, field=field)
@@ -250,6 +275,20 @@ def verify_declared_repository_blob_bindings(
         verified.append(
             {"field": field, "path": declared_path, "git_blob_sha": actual_sha}
         )
+    for field, declared_path, declared_sha in canonical_declarations:
+        artifact = _normalized_repository_file(root, declared_path, field=field)
+        try:
+            data = artifact.read_bytes()
+            value = json.loads(data.decode("utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            raise WorkSessionError(f"canonical JSON evidence is malformed at {field}") from exc
+        # Bind both identities to the same bytes, including if the file changed
+        # after the earlier Git check but before this JSON read.
+        actual_blob = hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest()
+        if actual_blob != seen[declared_path]:
+            raise WorkSessionError(f"evidence blob identity mismatch at {field}")
+        if Store.stable_digest(value, length=64) != declared_sha:
+            raise WorkSessionError(f"canonical JSON digest mismatch at {field}")
     return verified
 
 
@@ -997,7 +1036,7 @@ def submit_work_response(
         else None
     )
     validate_component_output(component, public_output, evaluator_mode=evaluator_mode)
-    verify_declared_repository_blob_bindings(root, public_output)
+    verify_declared_repository_blob_bindings(root, public_output, verify_canonical_json=True)
     response = {
         "schema_version": 1,
         "invocation_id": invocation_id,
