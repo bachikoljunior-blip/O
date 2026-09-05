@@ -1,5 +1,5 @@
 {
-  "acquisition_phase": "phase1_expected_blob_cas_committed_pending_remote_readback",
+  "acquisition_phase": "phase2_finalized_pending_exact_remote_readback_validation",
   "active_component": "candidate_evaluate",
   "active_prompt": "prompts/execute.md",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
@@ -30,12 +30,14 @@
   },
   "authorization_validation": {
     "authorized": false,
-    "reason": "phase1 acquisition committed; remote readback and phase2 finalization are still required",
+    "reason": "phase1 acquisition commit/blob read back exactly; phase2 finalization committed and final remote readback validation is pending",
     "observed_blob_sha": "b4488f812050fd2dab23bd9aae2cbf5fe2a10302",
     "latest_user_input_revision_during_authorization": 47,
     "acknowledged_revision_during_authorization": 47,
     "implementation": "src/agi/work_mode_monitor.py#authorize_work_mode_recovery",
-    "validated_at": null
+    "validated_at": null,
+    "acquisition_commit_sha": "f6c084bc0ef49bbcd548340cc44826fdfc5ded73",
+    "acquisition_blob_sha": "fd0b2c46a66af763f45a64466d5e6676d9cf617e"
   },
   "behavioral_source_renewal_integration": {
     "authorized_at": "2026-08-24T04:56:21.012Z",
@@ -1650,7 +1652,7 @@
   "finalization_blob_sha": null,
   "finalization_commit_sha": null,
   "finalization_readback_verified": false,
-  "finalize_expected_blob_sha": null,
+  "finalize_expected_blob_sha": "fd0b2c46a66af763f45a64466d5e6676d9cf617e",
   "generation23_payload_publication_hold": {
     "cause_guard_merge_sha": "e6a9b8f1bbe5887035019362f7dc0a7f4d6c991c",
     "continuation_invocation_id": "invoke-748f38dc8ef56693dba2f7b7",
@@ -21966,7 +21968,7 @@
     "successor_substantive_progress_at": "2026-09-05T09:56:51.073Z",
     "successor_workspace_identifier": "d96c6d9cad22"
   },
-  "heartbeat_at": "2026-09-05T13:11:55.529331Z",
+  "heartbeat_at": "2026-09-05T13:14:28.331021Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -22840,8 +22842,8 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Acquire generation31 through phase1 state-only expected-blob CAS after exact stop proof.",
-  "last_activity_at": "2026-09-05T13:11:55.529331Z",
-  "last_checked_at": "2026-09-05T13:11:55.529331Z",
+  "last_activity_at": "2026-09-05T13:14:28.331021Z",
+  "last_checked_at": "2026-09-05T13:14:28.331021Z",
   "last_error": {
     "at": "2026-09-05T04:41:57.276Z",
     "message": "continuation snapshot phase mismatch",
@@ -23241,9 +23243,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Remote-readback phase1, finalize two-phase CAS, validate authorization, and immediately consume the preserved Candidate Evaluate response exactly once.",
-  "next_tool": "github_remote_readback_then_state_only_phase2_cas_then_work_resume",
-  "next_tool_action": "Verify the phase1 commit/blob on remote main, finalize generation31 authorization, then run continual work-resume without recreating or resubmitting invoke-a7467dc870b7e35ee3388a4c.",
+  "next_action": "Read back this finalization commit/blob, validate authorize_work_mode_recovery exactly, then immediately consume the preserved Candidate Evaluate response once.",
+  "next_tool": "authorize_work_mode_recovery_then_work_resume",
+  "next_tool_action": "After exact phase2 remote readback, run continual work-resume on run-work-recovery-gen9-durability-repair without recreating or resubmitting invoke-a7467dc870b7e35ee3388a4c.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -23901,7 +23903,7 @@
     "updated_at": "2026-08-26T13:55:34.467Z"
   },
   "pull_request": 504,
-  "readback_of_commit_sha": null,
+  "readback_of_commit_sha": "f6c084bc0ef49bbcd548340cc44826fdfc5ded73",
   "reason": "Generation 30 crossed the persisted 900-second stop-proof threshold after its relevant exact-head workflow completed, with no subsequent same-owner repository, PR, CI, or native progress; its exact immutable Candidate Evaluate response remains submitted and unconsumed. Generation 31 is acquired only to consume that response once and continue the unchanged native lifecycle.",
   "recent_main_integration": {
     "claim_boundary": "Execution-unit artifact integrity repair and duplicate suppression only; the original answered Candidate invocation remains authoritative and unconsumed; Candidate activation, upper objective, user completion, and AGI remain false.",
@@ -24304,8 +24306,8 @@
   "response_exists_on_authoritative_remote": true,
   "response_repeated": false,
   "response_submitted_exactly_once": false,
-  "result_blob_sha": null,
-  "result_commit_sha": null,
+  "result_blob_sha": "fd0b2c46a66af763f45a64466d5e6676d9cf617e",
+  "result_commit_sha": "f6c084bc0ef49bbcd548340cc44826fdfc5ded73",
   "result_publication_policy": {
     "destination": "main",
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z",
@@ -25128,7 +25130,7 @@
   },
   "user_level_objective_met": false,
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "verified_remote_readback": false,
+  "verified_remote_readback": true,
   "work_status": "running",
   "working_branch": "main",
   "selector_prior_occurrence_history_observation": {
