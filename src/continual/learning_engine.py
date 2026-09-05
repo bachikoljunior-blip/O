@@ -304,14 +304,16 @@ class LearningEnabledEngine(Engine):
             enriched["verified_learned_tools"] = list(self._verified_tool_catalog())
         if component == "execute":
             unit = enriched.get("execution_unit")
+            call = unit.get("learned_tool_call") if isinstance(unit, Mapping) else None
+            if call is not None:
+                if not isinstance(call, Mapping):
+                    raise LearnedToolError("learned_tool_call must be an object")
+                # Mechanical dispatch checks descriptors and re-verifies the
+                # registry itself; semantic prompt enrichment is unused here.
+                return self._mechanical_learned_tool_call(run_id, enriched, call)
             scope = unit.get("scope") if isinstance(unit, Mapping) else None
             if isinstance(scope, str) and scope.strip():
                 enriched["verified_learned_tools"] = list(
                     self._scope_tool_descriptors(scope).values()
                 )
-            call = unit.get("learned_tool_call") if isinstance(unit, Mapping) else None
-            if call is not None:
-                if not isinstance(call, Mapping):
-                    raise LearnedToolError("learned_tool_call must be an object")
-                return self._mechanical_learned_tool_call(run_id, enriched, call)
         return super()._invoke(run_id, component, enriched)
