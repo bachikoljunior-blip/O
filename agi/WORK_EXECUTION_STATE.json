@@ -1,5 +1,5 @@
 {
-  "acquisition_phase": "verified_two_phase_remote_readback",
+  "acquisition_phase": "phase1_expected_blob_cas_committed_pending_remote_readback",
   "active_component": "candidate_evaluate",
   "active_prompt": "prompts/execute.md",
   "active_run_id": "run-work-recovery-gen9-durability-repair",
@@ -29,17 +29,13 @@
     "user_direction_revision": 35
   },
   "authorization_validation": {
-    "acknowledged_revision_during_authorization": 31,
-    "acquisition_blob_sha": "f2639a1ca0f5a05c3db694bb2cc0525f1d0a80a2",
-    "acquisition_commit_sha": "51686d434b6025a9c78e1b8b076f81d29bef7d04",
-    "authorized": true,
-    "finalization_blob_sha": "e26f474b788bf3387ae60804ef97a9f6fbcff0e0",
-    "finalization_commit_sha": "652463b726af191874627ae48e226a6f892fc856",
+    "authorized": false,
+    "reason": "phase1 acquisition committed; remote readback and phase2 finalization are still required",
+    "observed_blob_sha": "b4488f812050fd2dab23bd9aae2cbf5fe2a10302",
+    "latest_user_input_revision_during_authorization": 47,
+    "acknowledged_revision_during_authorization": 47,
     "implementation": "src/agi/work_mode_monitor.py#authorize_work_mode_recovery",
-    "latest_user_input_revision_during_authorization": 31,
-    "observed_blob_sha": "499cad127d71529cfe6d35e3ede5bc9b2f995f1d",
-    "reason": "exact generation+1 lease and two-phase remote readback were verified",
-    "validated_at": "2026-08-28T12:30:42.265Z"
+    "validated_at": null
   },
   "behavioral_source_renewal_integration": {
     "authorized_at": "2026-08-24T04:56:21.012Z",
@@ -1523,7 +1519,7 @@
       100535765214
     ]
   },
-  "execution_id": "work-recovery-20260905T094940Z-ae2fd192aee54c9485ba9966c722d918",
+  "execution_id": "work-recovery-20260905T131155Z-5132636cef4c85b3dbd4c072e94faac3",
   "execution_route_review": {
     "all_content_blobs_exact_readback": true,
     "base_branch": "main",
@@ -1592,7 +1588,7 @@
     "test_run_id": 33963560093
   },
   "execution_surface_status": "available",
-  "expected_blob_sha": "bad506c1ed79834bf85746750aa869fa282617c0",
+  "expected_blob_sha": "b4488f812050fd2dab23bd9aae2cbf5fe2a10302",
   "explicit_failure_consolidation_repair": {
     "all_content_blobs_exact_readback": true,
     "directive_run_id": 33963274274,
@@ -1650,11 +1646,11 @@
     "independent_production_evidence_observed": false,
     "strict_gate_passed": false
   },
-  "fence_token": "work-recovery-fence-v30-5fd803408a4f9aa9e85115328de3d2079b82df3479a34139006de41bb914c140",
-  "finalization_blob_sha": "375be03f774f12fa3f31223c31314e17527fe653",
-  "finalization_commit_sha": "6505818545ea451bb55af01b752f0ae22936d6d5",
-  "finalization_readback_verified": true,
-  "finalize_expected_blob_sha": "695f4b377aedbb461f325798972db17e9bcfcddb",
+  "fence_token": "work-recovery-fence-v31-ed639c6fe32f3dade1f5c9b5ea111c5deb5fd94657bb346bc48da32bb3e5ebc4",
+  "finalization_blob_sha": null,
+  "finalization_commit_sha": null,
+  "finalization_readback_verified": false,
+  "finalize_expected_blob_sha": null,
   "generation23_payload_publication_hold": {
     "cause_guard_merge_sha": "e6a9b8f1bbe5887035019362f7dc0a7f4d6c991c",
     "continuation_invocation_id": "invoke-748f38dc8ef56693dba2f7b7",
@@ -21970,7 +21966,7 @@
     "successor_substantive_progress_at": "2026-09-05T09:56:51.073Z",
     "successor_workspace_identifier": "d96c6d9cad22"
   },
-  "heartbeat_at": "2026-09-05T12:43:39.328902Z",
+  "heartbeat_at": "2026-09-05T13:11:55.529331Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -22843,9 +22839,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Persist and bind the exact answered rotate-180 Root continuation after eliminating the missing pending-ID stop cause.",
-  "last_activity_at": "2026-09-05T12:43:39.328902Z",
-  "last_checked_at": "2026-09-05T10:11:46.613Z",
+  "last_action": "Acquire generation31 through phase1 state-only expected-blob CAS after exact stop proof.",
+  "last_activity_at": "2026-09-05T13:11:55.529331Z",
+  "last_checked_at": "2026-09-05T13:11:55.529331Z",
   "last_error": {
     "at": "2026-09-05T04:41:57.276Z",
     "message": "continuation snapshot phase mismatch",
@@ -22987,7 +22983,7 @@
     "logical_source_reset_used": true,
     "fresh_independent_execution": false
   },
-  "lease_generation": 30,
+  "lease_generation": 31,
   "lease_renewal": {
     "expected_blob_sha": "4cfcffe49290f53879863d2ac9029944782c3535",
     "readback_blob_sha": "0874dd0673e2311cd4ae11bd18177d4ea004c600",
@@ -23245,9 +23241,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Record fresh Work and exact-head CI observations, consume candidate_evaluate invoke-a7467dc870b7e35ee3388a4c once, then continue the ordinary native lifecycle and next falsifiable work without a handover or milestone exit.",
-  "next_tool": "github_fetch_workflow_run_jobs",
-  "next_tool_action": "Continue the same physical generation30 execution. Check exact PR504 head c051bdfacd51aa91b21743522fc264cc46e456ef: protected test run33959917575 and successful directive run33959917574. After all four shards and aggregate succeed and the head remains unchanged, expected-head merge and verify every published blob on main, acknowledge inbox46, rebind current causal/source proof, consume preserved Execute invoke-5789b4199c170ebb04b4df70 once, then continue Task Evaluate/Candidate/Consolidate/Learn/Root and another falsifiable unit. Handover, CI, merge, reports and individual units are not exit conditions.",
+  "next_action": "Remote-readback phase1, finalize two-phase CAS, validate authorization, and immediately consume the preserved Candidate Evaluate response exactly once.",
+  "next_tool": "github_remote_readback_then_state_only_phase2_cas_then_work_resume",
+  "next_tool_action": "Verify the phase1 commit/blob on remote main, finalize generation31 authorization, then run continual work-resume without recreating or resubmitting invoke-a7467dc870b7e35ee3388a4c.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -23522,17 +23518,15 @@
   "pending_task_evaluate_work_invocation_id": null,
   "pending_work_invocation_id": "invoke-a7467dc870b7e35ee3388a4c",
   "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-a7467dc870b7e35ee3388a4c/request.json",
-  "phase2_readback_verified": true,
+  "phase2_readback_verified": false,
   "post_acquisition_progress_contract": {
-    "concrete_effect_selected": "Renew mandatory source receipts against exact remote main revision 92 and state blob 499cad1, freeze and answer Execute exactly once for the selected recursive-context retrieval ablation, validate and publish its substantive result, then continue to the next safe effect.",
+    "generation": 31,
+    "observed_at": "2026-09-05T13:11:55.529331Z",
+    "concrete_effect_selected": "Immediately consume existing Candidate Evaluate response invoke-a7467dc870b7e35ee3388a4c exactly once with work-resume, verify snapshot revision advancement and freeze the unique Task Evaluate request, then continue further native lifecycle work.",
     "effect_attempted": false,
-    "generation": 29,
     "native_request_created": false,
-    "new_exact_blocker_persisted": false,
-    "new_exact_blocker_reached": false,
-    "observed_at": "2026-08-28T12:27:59.401Z",
-    "progress_contract_result": "pending_substantive_effect",
-    "state_only_success_claimed": false
+    "state_only_success_claimed": false,
+    "progress_contract_result": "pending_two_phase_authorization_then_substantive_native_effect"
   },
   "postmerge_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -23664,7 +23658,7 @@
     "responses_before": 151,
     "status": "failed_closed_no_matching_generation_7_work_receipt"
   },
-  "predecessor_execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+  "predecessor_execution_id": "work-recovery-20260905T094940Z-ae2fd192aee54c9485ba9966c722d918",
   "primary_native_run": {
     "answered_invocations": [
       "invoke-9296e4697f286f75ec0e9f9a (Entry)",
@@ -23907,8 +23901,8 @@
     "updated_at": "2026-08-26T13:55:34.467Z"
   },
   "pull_request": 504,
-  "readback_of_commit_sha": "11ad70bdd7aa974f4f7d2cd70e8a2cf87ebd864f",
-  "reason": "Candidate preflight launch run 33409343474 failed before response submission because status was continue while mandatory Work source observation requires running; status repaired by expected-blob CAS and the exact frozen Candidate request remains unanswered.",
+  "readback_of_commit_sha": null,
+  "reason": "Generation 30 crossed the persisted 900-second stop-proof threshold after its relevant exact-head workflow completed, with no subsequent same-owner repository, PR, CI, or native progress; its exact immutable Candidate Evaluate response remains submitted and unconsumed. Generation 31 is acquired only to consume that response once and continue the unchanged native lifecycle.",
   "recent_main_integration": {
     "claim_boundary": "Execution-unit artifact integrity repair and duplicate suppression only; the original answered Candidate invocation remains authoritative and unconsumed; Candidate activation, upper objective, user completion, and AGI remain false.",
     "exact_head_ci_result": "success",
@@ -23997,14 +23991,24 @@
     "workaround_attempted": false
   },
   "recovery_observation": {
-    "latest_inbox_revision": 45,
-    "observed_at": "2026-09-05T09:49:40.316Z",
-    "observed_state_blob_sha": "bad506c1ed79834bf85746750aa869fa282617c0",
-    "ordinary_watchdog_stop_proof_claimed": false,
+    "observed_at": "2026-09-05T13:11:55.529331Z",
+    "observed_main_sha": "52970ff61f928ef7ba55e28bb11359cb2b46b870",
+    "observed_state_blob_sha": "b4488f812050fd2dab23bd9aae2cbf5fe2a10302",
+    "predecessor_execution_id": "work-recovery-20260905T094940Z-ae2fd192aee54c9485ba9966c722d918",
+    "predecessor_generation": 30,
+    "predecessor_heartbeat_at": "2026-09-05T12:43:39.328902Z",
+    "predecessor_last_progress_at": "2026-09-05T12:43:39.328902Z",
+    "predecessor_status": "running",
     "persisted_heartbeat_stale": true,
-    "predecessor_fresh_pr_activity_observed": true,
-    "predecessor_process_claimed_stopped": false,
-    "transfer_basis": "explicit_user_requested_handover"
+    "heartbeat_age_exceeded_seconds": 900,
+    "relevant_workflow_completed": true,
+    "relevant_workflow_run_id": 33965733511,
+    "relevant_workflow_conclusion": "success",
+    "no_same_owner_progress_after_completed_workflow_for_threshold": true,
+    "matching_open_active_pull_request_absent": true,
+    "latest_user_input_revision": 47,
+    "ordinary_watchdog_stop_proof_claimed": true,
+    "recovery_reason": "The authoritative generation30 process stopped at the verified checkpoint boundary after binding the preflight response and before consuming it; stale heartbeat is corroborated by completed exact-head CI, no later owner progress, and an unchanged immutable pending-response frontier."
   },
   "refire": {
     "attempt_id": "work-recovery-20260826T213331747Z-e52ebacf244e3612dc86f26b692dac27",
@@ -24300,8 +24304,8 @@
   "response_exists_on_authoritative_remote": true,
   "response_repeated": false,
   "response_submitted_exactly_once": false,
-  "result_blob_sha": "695f4b377aedbb461f325798972db17e9bcfcddb",
-  "result_commit_sha": "11ad70bdd7aa974f4f7d2cd70e8a2cf87ebd864f",
+  "result_blob_sha": null,
+  "result_commit_sha": null,
   "result_publication_policy": {
     "destination": "main",
     "direct_user_instruction_recorded_at": "2026-08-23T08:02:24.518Z",
@@ -24972,9 +24976,10 @@
   "started_at": "2026-09-05T09:49:40.316Z",
   "status": "running",
   "stop_cause": {
-    "cause": "The same PR 453 state bind overwrote state.owner_kind with work_recovery; the compiled primary policy permits only work_primary or work_recovery_automation, so the focused recurrence test still failed after mode repair.",
-    "eliminated": true,
-    "validation": "Restore the prior authoritative work_recovery_automation value under two-phase expected-blob CAS, retain generation/fence/frozen Candidate identities, and rerun the exact focused test before replacing the failed lifecycle PR."
+    "cause": "The generation30 physical executor ended after the exact preflight checkpoint was durably bound, before work-resume consumed the already-submitted Candidate Evaluate response.",
+    "eliminated": false,
+    "repair": "Acquire generation31 by exact two-phase CAS, validate its new fence by remote readback, then invoke work-resume immediately against the preserved Run without recreating or resubmitting the response.",
+    "validation": "work-verify and work-checkpoint-verify pass on current main; post-acquisition validation requires native revision advancement, response consumption, and a fresh next-component request."
   },
   "strategy_path": "agi/WORK_STRATEGY.json",
   "superseded_execute_closure": {
@@ -25123,8 +25128,8 @@
   },
   "user_level_objective_met": false,
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "verified_remote_readback": true,
-  "work_status": "publication_pending_ci",
+  "verified_remote_readback": false,
+  "work_status": "running",
   "working_branch": "main",
   "selector_prior_occurrence_history_observation": {
     "recorded_at": "2026-09-05T12:32:09.937Z",
