@@ -1,0 +1,434 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-09-05T10:59:03.342308Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-08094bcf99610e486c801e11",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "actual_result": {
+      "agi_claim_supported": false,
+      "candidate": {
+        "activation": false,
+        "candidate_id": "candidate-agi-benchmark-suite-v1",
+        "production_routing": false,
+        "reason": "A failed frozen event supplies no activation evidence."
+      },
+      "component": "execute",
+      "concrete_failure_cause": "selector_prior_use_scan_failed_open: rg -h was interpreted as help output, preventing extraction and rejection of the known prior task id 1cf80156.",
+      "evidence": {
+        "causal_order": {
+          "git_blob_sha": "de18d5a147659648d28a0eca3ce0b7b0ae914ab3",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-causal-order.json"
+        },
+        "identity_baseline": {
+          "git_blob_sha": "904b8348c10fa90dae991ab812836295b8e3eeb2",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-identity-baseline.json"
+        },
+        "precommit": {
+          "git_blob_sha": "cfe6b63d7756ab3703488a0b06e23163432bbb66",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-precommit.json",
+          "sha256_canonical_json": "bae4668d89a6083e3cb37ca06a18422d007f07ff770ea50cd153f8b9a26124b2"
+        },
+        "result": {
+          "git_blob_sha": "a773f696c62428217e2b6b5088091950cd564c0e",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-result.json",
+          "sha256_canonical_json": "3e5309afa9a8df7d6cfc64a86df6e212d8631212a1df5df5c7b4f8f947fdf8c0"
+        },
+        "selected_prediction": {
+          "git_blob_sha": "5f1b333410eac1a883b01bb010b5507452ba81ad",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-selected-prediction.json"
+        },
+        "selector_correction": {
+          "git_blob_sha": "4a49ce139ba74e9febcbc47ef413666ccae049a1",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-selector-correction.json",
+          "sha256_canonical_json": "2d1a4748639579ec1156086d1d3d10eb2d0d220b265aa6aa5748493f21e5c3ae"
+        },
+        "training_scores": {
+          "git_blob_sha": "7b1c0502fbb48aec1e64a36db6847013138c1ef6",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-training-scores.json"
+        }
+      },
+      "frozen_event_disposition": {
+        "held_out_reveal_repeated": false,
+        "prediction_replaced": false,
+        "reason": "The task identity, rule set, selector, and prediction were frozen before reveal. Discovering a selection-predicate defect after reveal invalidates this event and requires FAIL, not substitution, tuning, or retry.",
+        "replacement_task_selected": false,
+        "selector_retried": false
+      },
+      "provisional_scoring": {
+        "identity_baseline_exact_cells": "0/24",
+        "selected_rule_exact_cells": "24/24",
+        "usable_as_unit_success_evidence": false
+      },
+      "provisional_selected_rule": "nonzero_bounding_box_v1",
+      "repair": {
+        "code_change": "Replaced the ambiguous ripgrep short option with explicit --no-filename in the prior-task exclusion scan.",
+        "recurrence_test": "Added a subprocess-level known-positive regression test that places task id 1cf80156 in a temporary prior artifact and requires the scanner to return exactly that id.",
+        "validation": "109 focused tests passed; compileall succeeded; all generated JSON artifacts parsed successfully."
+      },
+      "selected_task_id": "1cf80156",
+      "status": "completed_fail_closed",
+      "summary": "The frozen three-rule selector event is a bounded unit FAIL. The provisional nonzero-bounding-box prediction for ARC task 1cf80156 matched the held-out answer exactly (24/24 cells; identity 0/24), but the answer-excluding prior-use scan invoked ripgrep with ambiguous short option -h. In the installed ripgrep, -h emits help rather than suppressing filenames, so the selector failed open and admitted a task already present in prior O artifacts.",
+      "task_completion_verdict": "FAIL",
+      "unit_id": "unit-generation29-external-arc-three-rule-selector-v1",
+      "upper_objective_achieved": false,
+      "user_level_objective_achieved": false,
+      "verdict": "FAIL"
+    },
+    "candidate": {
+      "applicability": [
+        "AGI research planning",
+        "AGI capability evaluation",
+        "Claims that a system has become more generally capable"
+      ],
+      "candidate_id": "candidate-agi-benchmark-suite-v1",
+      "conflicts_with": [],
+      "contradictory_evidence": [],
+      "depends_on": [],
+      "expected_scope": "agi/capability-evaluation",
+      "incompatible_with": [],
+      "non_applicability": [
+        "Ordinary unrelated software tasks"
+      ],
+      "prompt_mode": "overlay",
+      "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+      "rejected_reasons": [],
+      "scope_states": {
+        "agi/capability-evaluation": "NEED_MORE_EVIDENCE",
+        "global": "untested"
+      },
+      "source_refs": [
+        ".continual/runs/run-prod-agi-20260816-1609/local-learn/0002-execute.json",
+        ".continual/runs/run-prod-agi-20260816-1609/local-learn/0003-task_evaluate.json"
+      ],
+      "status": "candidate",
+      "supporting_evidence": [
+        {
+          "episode_id": "episode-prod-agi-20260816-1609",
+          "finding": "The prior run produced structural progress but lacked behavioral cross-domain evidence."
+        },
+        {
+          "at": "2026-08-24T02:20:39.752193Z",
+          "evidence": [
+            "29 focused tests passed",
+            "live request b3197d3be9f6906a623fc5885017d3c310bddd98b71d37658cadd0113a0bd6a9 was frozen before the child"
+          ],
+          "scope": "agi/capability-evaluation"
+        },
+        {
+          "at": "2026-08-24T02:25:00.699729Z",
+          "evidence": [
+            "invoke-061603bcb6a9566e1ea02873 has one immutable bound public response",
+            "response schedules a separate deterministic finalizer"
+          ],
+          "scope": "agi/capability-evaluation"
+        }
+      ],
+      "target_component": "execute",
+      "tested_with": [],
+      "what_it_changes": "Before further AGI completion claims, build and run representative cross-domain benchmarks whose evidence maps to the six AGI criteria."
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "execute",
+        "evidence_needed": [
+          "a pre-reveal manifest binding source commit/blob identities, license, excluded prior task IDs, selector code/digest, selected task ID, the three immutable rule implementations, identity baseline, scorer, holder/reveal order, and idempotency key",
+          "training-pair scores for all three frozen hypotheses with an explicit fail-closed uniqueness check; ties or no zero-error hypothesis must produce a bounded FAIL without rule modification",
+          "an identity-baseline prediction and one selected-rule held-out prediction frozen before any held-out output access",
+          "a causal-order receipt proving selection and prediction preceded reveal, plus exact blob/digest readback for the frozen prediction",
+          "post-reveal exact-cell and exact-grid scores, deterministic replay, and source before/after head, object-count, and status digests proving zero upstream writes",
+          "negative controls for changed source commit, changed selector, prior-task reuse, changed hypothesis implementation, non-unique training winner, leaked held-out cells, holder mismatch, and duplicate replay",
+          "focused tests plus protected four-shard repository CI and aggregate, expected-head merge, and exact remote blob readback for every published result"
+        ],
+        "expected_outputs": [
+          "one immutable pre-reveal selector/hypothesis manifest for unit-generation29-external-arc-three-rule-selector-v1",
+          "one training-rule score table and uniqueness verdict over exactly the three frozen hypotheses",
+          "one identity baseline and one pre-reveal selected-rule prediction artifact",
+          "one reveal/score/replay result with exact causal and digest bindings and zero-upstream-write audit",
+          "a bounded unit verdict that separately preserves task_completion_verdict=FAIL, user_level_verdict=FAIL, upper_objective_verdict=FAIL, and agi_achieved=false regardless of the unit outcome",
+          "the normal independent Task Evaluate, post-result Candidate Evaluate, Consolidate Episode, Learn, exact-head publication/state binding, and return-to-Root continuation"
+        ],
+        "failure_conditions": [
+          "the selector reads or depends on the held-out output, selects a previously used task, or changes after the task identity is known",
+          "zero or multiple hypotheses achieve zero training error, or any hypothesis implementation is modified, parameterized, or supplemented after precommit",
+          "reveal occurs before exact prediction readback, a source/task/holder/prediction digest mismatches, or any held-out cell leaks into selection or prediction",
+          "the selected prediction is not exact, does not strictly beat the identity baseline, replay diverges, a duplicate effect is accepted, or the upstream source changes",
+          "a synthetic fixture, hand-picked replacement after failure, unrecorded retry, or prior unit result is substituted for this exact live unit",
+          "the result activates a Candidate, changes provider/production routing, or claims broad ARC capability, task completion, user completion, upper-objective completion, or AGI"
+        ],
+        "goal": "Evaluate one bounded, precommitted ARC rule-selection decision rather than another fixed-rule replay: on one previously unused public ARC task, score exactly three already evidenced hypotheses (matrix_transpose_v1, matrix_rotate_180_v1, and nonzero_bounding_box_v1) against training demonstrations, require a unique zero-training-error winner, freeze that winner and its held-out test prediction before revealing the held-out output, then deterministically score and replay the exact effect.",
+        "inputs": [
+          "the revision-192 root_pending snapshot and this immutable Root request",
+          "the exact merged transpose-family, nonzero-bounding-box, and rotate-180 mechanisms and their prior bounded evidence, treated as fixed hypotheses rather than capability proof",
+          "fchollet/ARC-AGI at the already recorded immutable public source commit under its recorded license",
+          "a deterministic answer-excluding selector that excludes every task ID used by the three prior ARC units and commits the selected task before reading its held-out output",
+          "the selected task's training demonstrations and test input, with the held-out test output unavailable until the exact prediction blob is durably read back"
+        ],
+        "parent_continuation": "After Execute, independently Task Evaluate only this exact selector event and its causal/evidence boundary; then run post-result Candidate Evaluate, Consolidate Episode, and Learn. Publish through unchanged exact-head CI and expected-head merge with remote readback, bind the next frozen continuation, return to Root, and select a materially different safe unit while the authoritative user objective and AGI remain open.",
+        "scope": "Exactly one previously unused ARC task selected without its held-out output, exactly the three named frozen hypotheses, one identity baseline, one held-out prediction, and one reveal/score. Source access is read-only. Do not add a fourth rule, tune a rule after task selection, reuse any prior unit's selected task, mutate upstream data, activate a Candidate, route production traffic, or widen a bounded unit result into task, user, upper-objective, or AGI completion.",
+        "success_conditions": [
+          "the task and all three rule identities are committed before held-out output access, and the task was not used by any prior ARC unit",
+          "exactly one frozen hypothesis has zero error on every training demonstration; the chosen hypothesis is not edited or replaced after selection",
+          "the held-out prediction is durably exact-read back before reveal, and reveal bytes match the committed source/task identity",
+          "the selected-rule held-out prediction is exact and strictly improves on the frozen identity baseline",
+          "all eight negative controls fail closed, duplicate replay is rejected, deterministic replay matches, and upstream source digests remain unchanged",
+          "focused and protected exact-head validation succeeds and the claim remains limited to this one three-rule selection event"
+        ],
+        "unit_id": "unit-generation29-external-arc-three-rule-selector-v1"
+      },
+      "snapshot": {
+        "continuation_stack": [
+          {
+            "continuation": "Task Evaluate, Consolidate Episode, and Learn this reconciliation; publish through unchanged exact-head CI; then return to Root and select a materially different behavioral or independent-evidence unit rather than rerunning this measurement.",
+            "parent_unit_id": "unit-455ecaedec5dd37d0793f60e",
+            "result_ref": "artifacts/unit-455ecaedec5dd37d0793f60e-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact six-response protocol and bounded judgments, then Consolidate, Learn, and return to Root. Publish only through unchanged exact-head CI and expected-head merge, and continue to a materially different safe executable unit rather than stopping on this bounded result.",
+            "parent_unit_id": "unit-3d61e557b2542d07c83fa354",
+            "result_ref": "artifacts/unit-3d61e557b2542d07c83fa354-result.json"
+          },
+          {
+            "continuation": "After independent Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, Learn, return to Root, and select a materially different safe unit while the upper objective remains unmet.",
+            "parent_unit_id": "unit-generation29-clean-g1-heldout-scientific-forecast-v1",
+            "result_ref": "artifacts/unit-generation29-clean-g1-heldout-scientific-forecast-v1-result.json"
+          },
+          {
+            "continuation": "After independent Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, Learn, return to Root, and select a materially different safe executable unit while the upper objective remains unmet.",
+            "parent_unit_id": "unit-generation29-blind-holder-heldout-protocol-repair-v1",
+            "result_ref": "artifacts/unit-generation29-blind-holder-heldout-protocol-repair-v1-result.json"
+          },
+          {
+            "continuation": "After independent Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, Learn, publish through protected exact-head CI and expected-head merge with remote readback, return to Root, and continue toward the unchanged upper objective while AGI and user-level completion remain false.",
+            "parent_unit_id": "unit-generation29-postcommit-clean-g1-independent-live-forecast-v1",
+            "result_ref": "artifacts/unit-generation29-postcommit-clean-g1-independent-live-forecast-v1-result.json"
+          },
+          {
+            "continuation": "After Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, and Learn; publish through protected exact-head CI and expected-head merge with readback; return to Root and continue materially different safe work while AGI and user completion remain false.",
+            "parent_unit_id": "unit-generation29-cross-clock-resumption-counterfactual-v1",
+            "result_ref": "artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1-result.json"
+          },
+          {
+            "continuation": "Independently Task Evaluate the exact selection, provenance, contamination exclusions, baseline failure, minimal patch, focused repair, official tests, and replay receipt; then continue the unchanged Candidate, Consolidate, Learn, Root lifecycle.",
+            "parent_unit_id": "unit-generation29-external-upstream-regression-repair-v1",
+            "result_ref": "artifacts/unit-generation29-external-upstream-regression-repair-v1-result.json"
+          },
+          {
+            "continuation": "Independently Task Evaluate the exact frozen evidence and recurrence guard, then continue the unchanged lifecycle.",
+            "parent_unit_id": "unit-generation29-cross-repository-repair-transfer-v1",
+            "result_ref": "artifacts/unit-generation29-cross-repository-repair-transfer-v1-result.json"
+          },
+          {
+            "continuation": "Independently Task Evaluate the exact frozen selector ordering, source/blob identity, normalization, every divergence, threshold results, deterministic queries, both corruption controls, replay digest, zero-upstream-write audit, protected exact-head CI and merge readback; then continue post-result Candidate Evaluate, Consolidate Episode, Learn, Root, and materially different safe work while the upper objective remains unmet.",
+            "parent_unit_id": "unit-generation29-cross-source-data-reconciliation-v1",
+            "result_ref": "artifacts/unit-generation29-cross-source-data-reconciliation-v1-result.json"
+          },
+          {
+            "continuation": "Independently Task Evaluate the exact bounded result, then run post-result Candidate Evaluate, Consolidate Episode, Learn, return to Root, and select materially different safe work while the upper objective remains unmet.",
+            "parent_unit_id": "unit-generation29-external-formal-proof-synthesis-v1",
+            "result_ref": "artifacts/unit-generation29-external-formal-proof-synthesis-v1-result.json"
+          },
+          {
+            "continuation": "Independently Task Evaluate the merged mechanism and all controls. Then run post-result Candidate Evaluate, Consolidate Episode, Learn, return to Root, and continue materially different safe work while AGI and user-level completion remain false.",
+            "parent_unit_id": "unit-generation29-matched-evidence-acquisition-loop-v1",
+            "result_ref": "artifacts/unit-generation29-matched-evidence-acquisition-loop-v1-result.json"
+          }
+        ],
+        "created_at": "2026-08-24T21:08:07.556157Z",
+        "current_component": "execute",
+        "current_unit": "unit-generation29-external-arc-three-rule-selector-v1",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+          "runner": "python-engine-v2"
+        },
+        "episode_id": "episode-work-recovery-gen9-durability-repair",
+        "error_count": 48,
+        "last_error": {
+          "at": "2026-09-05T07:56:40.040757Z",
+          "message": "Context Kernel failed closed: decision-relevant CI source observation failed: no matching fresh CI source observation receipt",
+          "phase": "unit_pending",
+          "type": "WorkSessionError"
+        },
+        "last_evaluation": {
+          "agi_claim_supported": false,
+          "candidate_activation": false,
+          "claim_boundary": "PASS applies only to the immutable two-task rotate-180 unit and its declared controls. It does not establish cross-family generalization, broad continual learning, production readiness, autonomous self-improvement, Candidate activation, AGI, upper-objective completion, user-level completion, task completion, or monitor completion.",
+          "continuation": "Run post-result Candidate Evaluate, Consolidate Episode, and Learn; return to Root and select materially different safe work while the upper objective remains open.",
+          "evaluated_goal": "Independently evaluate the exact generation-29 external ARC rotate-180 transfer unit separately from the unchanged original task, user-level objective, and AGI goal.",
+          "evidence": [
+            {
+              "finding": "The source is fchollet/ARC-AGI commit 399030444e0ab0cc8b4e199870fb20b863846f34 under Apache-2.0. The answer-excluding deterministic selector found exactly two eligible tasks, 3c9b0459 and 6150a2bd, while explicitly excluding the earlier transpose-family tasks.",
+              "source": "artifacts/unit-generation29-external-arc-rotate180-transfer-v1-precommit.json"
+            },
+            {
+              "finding": "The same frozen identity baseline produced 3/9 exact cells for task A and 1/9 for task B; neither baseline grid was exact.",
+              "source": "artifacts/unit-generation29-external-arc-rotate180-transfer-v1-baseline-predictions.json"
+            },
+            {
+              "finding": "The learning record is limited to matrix_rotate_180_v1 from task A and is bound to the holder/reveal chronology before task-B output availability.",
+              "source": "artifacts/unit-generation29-external-arc-rotate180-transfer-v1-learning-record.json"
+            },
+            {
+              "finding": "The adapted task-B prediction is frozen from the task-A learning record before scoring and has the expected 3x3 shape.",
+              "source": "artifacts/unit-generation29-external-arc-rotate180-transfer-v1-adapted-task-b-prediction.json"
+            },
+            {
+              "finding": "Deterministic recomputation gives baseline task A 3/9, baseline task B 1/9, and adapted task B 9/9 with exact-grid true and strict improvement true.",
+              "source": "artifacts/unit-generation29-external-arc-rotate180-transfer-v1-result.json"
+            },
+            {
+              "finding": "Changed selector, changed source commit, changed task identity, family mismatch, mismatched holder commitment, leaked answer cells, and duplicate replay all fail closed. Replay digest 0f3f02c50500f288958889304a6ba0241e0b89d47922fa0e700d9b54ce2d27d9 accepted the first effect and rejected the duplicate.",
+              "source": "artifacts/unit-generation29-external-arc-rotate180-transfer-v1-result.json"
+            },
+            {
+              "finding": "The ARC source before/after head, object-count digest, status digest, and status-line count are identical, recording zero upstream writes.",
+              "source": "artifacts/unit-generation29-external-arc-rotate180-transfer-v1-result.json"
+            },
+            {
+              "finding": "The Execute response is bound to request digest 4e90c3d389356eaddb1e1024597846ee94ff11b3e9c41d31b4a10aa0b81c9040 and reports the same scores, seven controls, focused validation, source identity, bounded PASS, Candidate inactivity, and false upper/user/AGI conclusions.",
+              "source": ".continual/work-model/invocations/invoke-5f733e34d09059ff3e98a869/response.json"
+            },
+            {
+              "finding": "The decision-relevant protected workflow run 33587996147 at exact head ba0cd78295ea26debccd62c7ad0a7ba0ab590c70 completed successfully in all four pytest shards and the aggregate test job; the connector receipt digest is 69d8b55e072a5d259a0fc21ec3785d75a8c77c82bd7f6575765a0a322d50fde2.",
+              "source": "protected exact-head workflow observation ci-run-770f5beeee5e4e3541230229"
+            }
+          ],
+          "global_activation_authorized": false,
+          "negative_evidence": [
+            "The selector yielded only two tasks from one matrix-rotate-180 family; no evidence covers additional ARC transformation families or unseen capability classes.",
+            "The learned adaptation is one fixed rotate-180 rule, so the result does not establish open-ended rule induction, durable retention, autonomous goal pursuit, or continual self-improvement.",
+            "The serving model identity remains unverified and the evaluator remains within the project execution boundary.",
+            "No independent external evaluation establishes AGI, production reliability, broad robustness, autonomy, or user-level completion.",
+            "Protected repository CI validates the frozen implementation and artifacts but cannot widen the two-task empirical claim."
+          ],
+          "quantitative_findings": {
+            "adapted_task_b_accuracy": 1.0,
+            "adapted_task_b_exact_cells": 9,
+            "adapted_task_b_exact_grid": true,
+            "adapted_task_b_total_cells": 9,
+            "baseline_task_a_accuracy": 0.3333333333333333,
+            "baseline_task_a_exact_cells": 3,
+            "baseline_task_a_total_cells": 9,
+            "baseline_task_b_accuracy": 0.1111111111111111,
+            "baseline_task_b_exact_cells": 1,
+            "baseline_task_b_total_cells": 9,
+            "candidate_activations": 0,
+            "declared_negative_controls_passed": 7,
+            "duplicate_replays_accepted": 0,
+            "focused_tests_passed": 5,
+            "independent_agi_evaluations": 0,
+            "selected_task_count": 2,
+            "selector_candidate_count": 2,
+            "upstream_writes": 0
+          },
+          "repair_information": {
+            "bounded_unit": "No repair is required for the exact two-task rotate-180 unit under its declared scope.",
+            "claim_boundary": "Keep Candidate activation and production routing false; preserve separate unit, task, user, upper-objective, and AGI verdicts.",
+            "next": "Continue the frozen post-result Candidate Evaluate, Consolidate Episode, Learn, and Root sequence, then choose a materially different safe executable unit while AGI and the unchanged user objective remain open.",
+            "recurrence": "Recheck source/license/task/blob/selector/family/holder identities, pre-reveal ordering, absence of task-B leakage, deterministic scores, all seven negative controls, replay suppression, zero upstream writes, exact-head CI, expected-head merge, and remote blob readback."
+          },
+          "task_completion_verdict": "FAIL",
+          "unit_completion_verdict": "PASS",
+          "unit_id": "unit-generation29-external-arc-rotate180-transfer-v1",
+          "unit_scope": "Exactly two deterministically selected public ARC tasks, 3c9b0459 as task A and 6150a2bd as task B, in one matrix-rotate-180 family, using a frozen identity baseline and one matrix_rotate_180_v1 rule learned from task A before task-B output reveal.",
+          "unit_verdict": "PASS",
+          "unit_verdict_reason": "The frozen evidence establishes the declared bounded result: the identity baselines were inexact, the task-A-only rotate-180 rule produced a task-B prediction before task-B output reveal, that prediction was exact at 9/9 cells, all seven declared negative controls failed closed, replay admitted the first effect and rejected the duplicate, independent recomputation and focused tests passed, and the upstream source remained unchanged.",
+          "unmet_conditions": [
+            "Complete post-result Candidate Evaluate, Consolidate Episode, Learn, and Root without widening the bounded PASS.",
+            "Select materially different safe evidence units spanning transformation families, transfer settings, robustness, autonomy, and continual-learning behavior.",
+            "Obtain strict independent external evidence sufficient for the AGI evidence gate before any AGI, upper-objective, task, or user-level PASS."
+          ],
+          "upper_objective_verdict": "FAIL",
+          "user_level_verdict": "FAIL",
+          "verdict": "FAIL",
+          "verdict_reason": "A PASS for two selected tasks from one rotate-180 family and one fixed learned rule is not evidence of generalized ARC capability, broad continual learning, robust autonomy, production reliability, AGI, or satisfaction of the unchanged user objective. The original task therefore remains FAIL/open even though this exact unit passes."
+        },
+        "last_result_ref": "artifacts/unit-07743b08a2f5e1b63b9f91f7-result.json",
+        "phase": "unit_pending",
+        "produced_candidates": [],
+        "revision": 194,
+        "run_id": "run-work-recovery-gen9-durability-repair",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "PASS",
+        "updated_at": "2026-09-05T07:56:40.040893Z"
+      }
+    },
+    "mode": "post-result",
+    "pre_application": {
+      "activation": false,
+      "active_version": "prompts/execute.md",
+      "agi_claim_supported": false,
+      "applicability": "Directly applicable as a one-call claim-boundary and evidence-quality overlay because the upcoming Execute unit is an AGI capability-evaluation experiment. It requires a held-out causal boundary, objective scoring, explicit negative evidence, and mapping of one narrow selector event away from any broad AGI conclusion.",
+      "baseline_need": "Keep prompts/execute.md and the Root-selected unit contract unchanged. The active baseline controls task selection, the exact three immutable hypotheses, pre-reveal prediction, fail-closed uniqueness, source immutability, replay suppression, and exact publication. The Candidate may only reinforce held-out evidence and broad-claim separation; it may not add rules, change the selector, replace the selected task, promote itself, or alter production routing.",
+      "candidate_id": "candidate-agi-benchmark-suite-v1",
+      "candidate_version": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+      "conflicts": [],
+      "cost_dimensions": {
+        "external": "No paid provider dispatch, upstream write, Candidate promotion, production route, or independent-evidence claim is authorized.",
+        "failure_risk": "Task leakage, ambiguity, post-selection tuning, duplicate effect, source mutation, or claim widening requires fail-closed rollback.",
+        "latency": "One bounded prompt overlay; all empirical work and protected validation were already required by the Root contract.",
+        "quality": "Improves explicit separation between one objective held-out selector result and the six broad AGI criteria without changing the experiment.",
+        "token": "Limited to the exact task, three hypotheses, causal evidence, controls, and verdict boundaries.",
+        "tool": "No extra external effect is authorized; use only read-only ARC source access, local deterministic artifacts/tests, and the existing protected O publication path."
+      },
+      "decision": "TRIAL_CANDIDATE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "the immutable ARC source commit and license, answer-excluding deterministic task selector, exclusion list for all previously used ARC tasks, selected task id, task blob, and zero-upstream-write before/after identities",
+        "byte-identical implementations and digests for matrix_transpose_v1, matrix_rotate_180_v1, and nonzero_bounding_box_v1, with no fourth hypothesis or post-selection tuning",
+        "training scores for exactly the three hypotheses and a fail-closed proof that exactly one has zero error before held-out output access",
+        "identity-baseline and selected-rule held-out predictions frozen and exact-read back before reveal, followed by independent exact-cell and exact-grid scoring",
+        "causal-order and holder receipts, deterministic replay, duplicate-effect rejection, and all eight declared corruption/leakage controls",
+        "focused tests, protected exact-head four-shard CI and aggregate, expected-head merge, exact remote blob readback, and separate unit, task, user, upper-objective, Candidate, production, and AGI verdicts"
+      ],
+      "exact_scope": "unit-generation29-external-arc-three-rule-selector-v1/execute; one precommitted public ARC task and exactly three frozen rule hypotheses",
+      "expected_scope": "agi/capability-evaluation",
+      "global_activation_authorized": false,
+      "mode": "pre-application",
+      "production_routing": false,
+      "reason": "candidate-agi-benchmark-suite-v1 targets Execute work in agi/capability-evaluation and is relevant to this held-out ARC selector, but its scope state is NEED_MORE_EVIDENCE rather than VERIFIED_FOR_SCOPE. One bounded overlay trial is therefore appropriate while activation remains false. candidate-workspace-campaign-v1 is not applicable because this is one frozen event rather than a multi-run workspace campaign and its dependency is unverified. The recursive-retrieval, campaign-authoring, live-provider, stage-isolation, request-status, GitHub Models, and repository-context-hygiene Candidates do not change this exact semantic unit.",
+      "regression_checks": [
+        "the task is previously unused and selected without held-out output bytes",
+        "the three rule implementations, selector, scorer, holder, source commit, and idempotency key remain frozen after precommit",
+        "zero or multiple zero-training-error hypotheses fail the unit without adding, editing, or tuning a rule",
+        "prediction precedes reveal and any digest, holder, source, chronology, or leakage mismatch fails before scoring or durable effect",
+        "the first exact effect is admitted at most once, duplicate replay is rejected, and upstream source state remains unchanged",
+        "a bounded unit PASS cannot imply general ARC competence, breadth, transfer beyond this event, continual self-improvement, production readiness, task or user completion, upper-objective completion, or AGI"
+      ],
+      "rollback": "If the overlay widens the hypothesis set, changes task selection, weakens pre-reveal isolation, admits ambiguity, suppresses negative evidence, alters the active Execute contract, or widens any claim, discard the overlay outcome for this scope. Retain the active Execute baseline, freeze no replacement task or response, activate no Candidate, route nothing to production, and publish only a bounded fail-closed diagnostic when safe.",
+      "status": "candidate",
+      "task_completion_verdict": "FAIL",
+      "upper_objective_achieved": false,
+      "user_level_objective_achieved": false
+    },
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "target_component": "execute"
+  },
+  "payload_digest": "26635ae05ac2f3ad5d4c9d2aab6d324750dd35fec3ec7e7a706413dbb35799a7",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "c439c42a1e17c25eca6e3b587a7ac5495f57968763446499c52dc668812c74f7",
+  "run_id": "run-work-recovery-gen9-durability-repair",
+  "schema_version": 1
+}

@@ -1,12 +1,110 @@
 {
   "attempt": 1,
+  "completed_at": "2026-09-05T10:59:03.340412Z",
   "component": "execute",
+  "fragment_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-ffa5842478673c5c153a2c2d-execute.json",
   "invocation_id": "invoke-ffa5842478673c5c153a2c2d",
+  "output": {
+    "fragment": {
+      "agi_claim_supported": false,
+      "candidate_activation": false,
+      "component": "execute",
+      "failure": "selector_prior_use_scan_failed_open",
+      "next_boundary": "Return to the O lifecycle with this unit's negative evidence and select a new safe effect without replaying this Work invocation or this revealed ARC task.",
+      "production_routing": false,
+      "provisional_prediction_admissible": false,
+      "provisional_prediction_exact": true,
+      "recurrence_repair_validated": true,
+      "replacement_task_selected": false,
+      "selected_task_id": "1cf80156",
+      "selector_retried": false,
+      "task_completion_verdict": "FAIL",
+      "unit_id": "unit-generation29-external-arc-three-rule-selector-v1",
+      "upper_objective_achieved": false,
+      "user_level_objective_achieved": false,
+      "verdict": "FAIL"
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observations": [
+        "Do not use ambiguous short CLI flags in exclusion, authorization, or safety predicates; pin the explicit long option whose behavior is required.",
+        "Regression tests for subprocess-backed exclusion logic must assert the real stdout against a known-positive prior identifier, not only mock the command or test an empty corpus.",
+        "When a frozen held-out event reveals a post-reveal selection-predicate defect, preserve the chronology and publish a bounded FAIL; do not repair the event by retrying, replacing the task, or reusing the revealed answer."
+      ]
+    },
+    "result": {
+      "agi_claim_supported": false,
+      "candidate": {
+        "activation": false,
+        "candidate_id": "candidate-agi-benchmark-suite-v1",
+        "production_routing": false,
+        "reason": "A failed frozen event supplies no activation evidence."
+      },
+      "component": "execute",
+      "concrete_failure_cause": "selector_prior_use_scan_failed_open: rg -h was interpreted as help output, preventing extraction and rejection of the known prior task id 1cf80156.",
+      "evidence": {
+        "causal_order": {
+          "git_blob_sha": "de18d5a147659648d28a0eca3ce0b7b0ae914ab3",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-causal-order.json"
+        },
+        "identity_baseline": {
+          "git_blob_sha": "904b8348c10fa90dae991ab812836295b8e3eeb2",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-identity-baseline.json"
+        },
+        "precommit": {
+          "git_blob_sha": "cfe6b63d7756ab3703488a0b06e23163432bbb66",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-precommit.json",
+          "sha256_canonical_json": "bae4668d89a6083e3cb37ca06a18422d007f07ff770ea50cd153f8b9a26124b2"
+        },
+        "result": {
+          "git_blob_sha": "a773f696c62428217e2b6b5088091950cd564c0e",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-result.json",
+          "sha256_canonical_json": "3e5309afa9a8df7d6cfc64a86df6e212d8631212a1df5df5c7b4f8f947fdf8c0"
+        },
+        "selected_prediction": {
+          "git_blob_sha": "5f1b333410eac1a883b01bb010b5507452ba81ad",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-selected-prediction.json"
+        },
+        "selector_correction": {
+          "git_blob_sha": "4a49ce139ba74e9febcbc47ef413666ccae049a1",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-selector-correction.json",
+          "sha256_canonical_json": "2d1a4748639579ec1156086d1d3d10eb2d0d220b265aa6aa5748493f21e5c3ae"
+        },
+        "training_scores": {
+          "git_blob_sha": "7b1c0502fbb48aec1e64a36db6847013138c1ef6",
+          "path": "artifacts/unit-generation29-external-arc-three-rule-selector-v1-training-scores.json"
+        }
+      },
+      "frozen_event_disposition": {
+        "held_out_reveal_repeated": false,
+        "prediction_replaced": false,
+        "reason": "The task identity, rule set, selector, and prediction were frozen before reveal. Discovering a selection-predicate defect after reveal invalidates this event and requires FAIL, not substitution, tuning, or retry.",
+        "replacement_task_selected": false,
+        "selector_retried": false
+      },
+      "provisional_scoring": {
+        "identity_baseline_exact_cells": "0/24",
+        "selected_rule_exact_cells": "24/24",
+        "usable_as_unit_success_evidence": false
+      },
+      "provisional_selected_rule": "nonzero_bounding_box_v1",
+      "repair": {
+        "code_change": "Replaced the ambiguous ripgrep short option with explicit --no-filename in the prior-task exclusion scan.",
+        "recurrence_test": "Added a subprocess-level known-positive regression test that places task id 1cf80156 in a temporary prior artifact and requires the scanner to return exactly that id.",
+        "validation": "109 focused tests passed; compileall succeeded; all generated JSON artifacts parsed successfully."
+      },
+      "selected_task_id": "1cf80156",
+      "status": "completed_fail_closed",
+      "summary": "The frozen three-rule selector event is a bounded unit FAIL. The provisional nonzero-bounding-box prediction for ARC task 1cf80156 matched the held-out answer exactly (24/24 cells; identity 0/24), but the answer-excluding prior-use scan invoked ripgrep with ambiguous short option -h. In the installed ripgrep, -h emits help rather than suppressing filenames, so the selector failed open and admitted a task already present in prior O artifacts.",
+      "task_completion_verdict": "FAIL",
+      "unit_id": "unit-generation29-external-arc-three-rule-selector-v1",
+      "upper_objective_achieved": false,
+      "user_level_objective_achieved": false,
+      "verdict": "FAIL"
+    }
+  },
   "payload_digest": "f382d49a82f61f7b49e818d5",
   "prompt_path": ".continual/runs/run-work-recovery-gen9-durability-repair/effective-prompts/execute-candidate-agi-benchmark-suite-v1-3f6291e6b82d89c7731f5198.md",
-  "started_at": null,
-  "status": "awaiting_work_model",
-  "work_invocation_id": "invoke-5789b4199c170ebb04b4df70",
-  "work_request_digest": "afd481c8d0e9ff233e6051874c8a3b418bc8983e4e8e89363a9021d077e4bf33",
-  "work_request_ref": ".continual/work-model/invocations/invoke-5789b4199c170ebb04b4df70/request.json"
+  "status": "complete"
 }
