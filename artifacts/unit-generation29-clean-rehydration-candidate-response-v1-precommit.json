@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "unit_id": "unit-generation29-clean-rehydration-candidate-response-v1",
+  "recorded_at": "2026-09-05T04:00:00Z",
+  "authority": {
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "run_id": "run-work-recovery-gen9-durability-repair"
+  },
+  "source": {
+    "main_sha": "ad80525ab99e532ce2fe1a9aafb7f019dde46b77",
+    "state_blob_sha": "b505ac8443143c9dd89c2986f3f0a98cbf32a2ec",
+    "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+    "snapshot_blob_sha": "b31dd4034c5b7b59fa8faa52393928f6c87da336",
+    "snapshot_revision": 190,
+    "snapshot_phase": "unit_pending"
+  },
+  "candidate_evaluate_response": {
+    "work_invocation_id": "invoke-b718286bb7670423712866a9",
+    "native_invocation_id": "invoke-93fb96436b4eeab766785a7b",
+    "request_digest": "a896b3be7e7825bb121b5a7d271eaa67cdeb5911b1a98d889f9a9528db567672",
+    "request_blob_sha": "844d81073c9e7884ae75083f1e2b1f42b2a5461b",
+    "native_blob_sha": "1e011207f9168d43a239652a52cc30db0a0ed252",
+    "response_digest": "de9d9008ed3c50d09dfd0d094695e2c2d03ae5dcf2ba7320ee271428fdc4c684",
+    "output_digest": "77cba047f3970984ce6eeeb4daf1719540ef569dbcc7972f1dc4ff988ba264bd",
+    "response_blob_sha": "799166d4c84df82b45937882894f2d30c5f8b820",
+    "received_at": "2026-09-05T03:58:37.364494Z",
+    "decision": "REMAIN_CANDIDATE",
+    "response_submitted_exactly_once": true,
+    "native_response_consumed": false
+  },
+  "decision_boundary": {
+    "exact_scope": "generation29/clean-remote-main-continuation-rehydration-v1",
+    "candidate_activation": false,
+    "global_activation": false,
+    "production_routing": false,
+    "task_completion_verdict": "FAIL",
+    "user_level_verdict": "FAIL",
+    "upper_objective_verdict": "FAIL",
+    "agi_achieved": false,
+    "reason": "The exact one-call trial passed, but no separate deterministic protected-baseline gate recomputed active-versus-Candidate measurements or persisted VERIFIED_FOR_SCOPE."
+  },
+  "publication": {
+    "response_path": ".continual/work-model/invocations/invoke-b718286bb7670423712866a9/response.json",
+    "response_blob_sha": "799166d4c84df82b45937882894f2d30c5f8b820",
+    "required_checks": "unchanged exact-head directive and protected shard-plus-aggregate validation",
+    "expected_head_merge_required": true,
+    "exact_remote_blob_readback_required": true
+  },
+  "invariants": {
+    "request_recreated": false,
+    "response_repeated": false,
+    "candidate_activation": false,
+    "production_routing": false,
+    "upper_objective_achieved": false,
+    "user_level_objective_achieved": false,
+    "agi_achieved": false,
+    "resume_required": true
+  },
+  "idempotency_key": "o-work-gen29:ad80525a:publish-candidate-response-invoke-b718286b:v1",
+  "next_action": "Publish the exact immutable Candidate response, validate protected exact-head CI, merge with expected-head enforcement, bind by two-phase state CAS and exact readback, record a fresh Work source observation, then consume this response exactly once and freeze Task Evaluate."
+}
