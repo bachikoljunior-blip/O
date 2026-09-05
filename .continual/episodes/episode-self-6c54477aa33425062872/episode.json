@@ -1,0 +1,90 @@
+{
+  "actions": [
+    "Read the exact failed CI job and reproduced its stale revision assumption.",
+    "Separated checked-in queue invariant validation from controlled behavior fixtures.",
+    "Verified nonzero revision increment, idempotent replay, stale-writer rejection without byte changes, and deadline/closed-status boundaries."
+  ],
+  "candidate_refs": [],
+  "claim_tier": "internal_development",
+  "claims": [
+    "Four local fixture tests pass. This is test maintenance and does not establish model capability or AGI."
+  ],
+  "context": {
+    "boundary": "development",
+    "boundary_satisfied": true,
+    "decision": {
+      "boundary": "development",
+      "fresh_execution_required": false,
+      "independent_execution_required": false,
+      "logical_reset_required": false,
+      "mode": "reuse_current_context",
+      "persist_before_switch": false,
+      "reason_codes": [
+        "no_contamination_signal"
+      ]
+    },
+    "fresh_execution_used": false,
+    "independent_execution_used": false,
+    "logical_reset_used": false,
+    "physical_fresh_context_fixed_requirement": false,
+    "repository_latest_main_is_durable_state": true,
+    "risk_signals": []
+  },
+  "decisions": [
+    "Preserve the old failed head and its evidence.",
+    "Keep production queue CAS and validation unchanged.",
+    "Require full protected CI for the corrected PR head."
+  ],
+  "episode_id": "episode-self-6c54477aa33425062872",
+  "evidence_refs": [
+    ".continual/evidence/self-application/self-application-6c54477aa33425062872.json",
+    "artifacts/unit-generation30-queue-test-fixture-repair-v1-result.json",
+    "tests/test_user_request_queue.py"
+  ],
+  "execution_id": "development-g30-queue-test-fixture-repair-v1",
+  "executor": {
+    "binding": "current_chatgpt_work_session",
+    "model_identity": "chatgpt-work-model-unverified",
+    "model_verified": false
+  },
+  "external_claim_admissible": false,
+  "failures": [
+    "CI at head 17ff373835c7e0461df12ba5502ed08cdfe676dc failed because a behavior test expected live revision 0 after legitimate revision 1 publication."
+  ],
+  "mode": "task-chat-model-self-application",
+  "objective": "Keep queue tests valid when actual operational revisions and deadlines advance.",
+  "observations": [
+    {
+      "status": "passed",
+      "test": "test_checked_in_queue_is_non_blocking_secret_free_and_finitely_reevaluated"
+    },
+    {
+      "status": "passed",
+      "test": "test_due_requests_include_deadline_and_exclude_closed_requests"
+    },
+    {
+      "status": "passed",
+      "test": "test_enqueue_is_revision_bound_atomic_and_idempotent"
+    },
+    {
+      "status": "passed",
+      "test": "test_queue_rejects_secret_bearing_fields_and_duplicate_ids"
+    }
+  ],
+  "outcome": "completed",
+  "results": [
+    "artifacts/unit-generation30-queue-test-fixture-repair-v1-result.json",
+    "tests/test_user_request_queue.py"
+  ],
+  "schema_version": 1,
+  "source_run_id": "run-self-6c54477aa33425062872",
+  "success_conditions": [],
+  "task": "Continue the inherited O execution and its whole-execution review.",
+  "task_verdict": "UNCERTAIN",
+  "unknowns": [
+    "Full protected CI has not completed for the corrected head."
+  ],
+  "unresolved": [
+    "Publish the correction, require exact-head CI and merge readback, and continue the primary execution."
+  ]
+}
