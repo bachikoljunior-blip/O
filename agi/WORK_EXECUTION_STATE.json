@@ -176,9 +176,9 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T19:22:43.289Z",
-    "current_main_sha": "0cac77908d60d568811d8068af495890f7e3ae5d",
-    "current_state_blob_sha": "02fd555e49956ec1f602f502efb98602ea5a9452",
+    "checkpointed_at": "2026-09-06T19:26:27.961Z",
+    "current_main_sha": "b5aea65b5c43295e3503e903d0ee4d9d3d71b706",
+    "current_state_blob_sha": "e4f38fe2660dc750179f0be7235f22af1bd7cb0d",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "consolidate_frozen_locally",
+      "status": "consolidation_answered_once_publication_pending",
       "work_invocation_id": "invoke-be6df66de90619ee76da939e",
       "native_invocation_id": "invoke-b245ec386e0714fe751460d1",
       "frozen_at": "2026-09-06T19:21:52.926363Z",
@@ -202,21 +202,97 @@
       "request_blob_sha": "a3b87829acb1c7eba98c89933e2bf1300795f1a2",
       "snapshot_revision": 223,
       "snapshot_phase": "consolidate_pending",
-      "response_submitted": false,
+      "response_submitted": true,
       "request_recreated": false,
       "preflight": "USE_ACTIVE",
       "prior_episode_blob_sha": "5c9caa5185d4dc052c40798e45f36a015e922295",
       "idempotency_key": "o-work-g33:68fc8111:planning223-consolidate-be6df66d:v1",
-      "next_action": "Consolidate exact planning lifecycle and immutable prior episode references, preserving verdicts and unknowns; submit once then publish before consume."
+      "next_action": "Consolidate exact planning lifecycle and immutable prior episode references, preserving verdicts and unknowns; submit once then publish before consume.",
+      "response_consumed": false,
+      "response_received_at": "2026-09-06T19:24:19.979285Z",
+      "response_digest": "02ec447b439ae32307b0541eade32492854c7dbadc4fab3a9983ade7945a47b9",
+      "output_digest": "643cf968d3cc592bd5d5fc204454a239766fb5f8d2f04c5b8e66295e51895b5a",
+      "files": [
+        {
+          "bytes": 132212,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "47500e1c987f1337f4d0d5302d6ad62e6a8d9ee0"
+        },
+        {
+          "bytes": 509829,
+          "path": ".continual/work-model/invocations/invoke-be6df66de90619ee76da939e/request.json",
+          "sha": "a3b87829acb1c7eba98c89933e2bf1300795f1a2"
+        },
+        {
+          "bytes": 18849,
+          "path": ".continual/work-model/invocations/invoke-be6df66de90619ee76da939e/response.json",
+          "sha": "9552dd82ce1fc5bbe6ce2822a027cc5d5f9f924c"
+        },
+        {
+          "bytes": 995,
+          "path": "artifacts/unit-generation33-planning223-consolidation-count-correction-v1.json",
+          "sha": "dfc5d3cabd8530f5eb4edbb217b1f7642e50ce1c"
+        },
+        {
+          "bytes": 17678,
+          "path": "artifacts/unit-generation33-planning223-consolidation-v1.json",
+          "sha": "e6f005646d9fd9e28f079bd14598ab4042704981"
+        },
+        {
+          "bytes": 2782,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-a5df9bdca0068ab10acb3be9/receipt.json",
+          "sha": "74e1ba68c595a029b90f337b02a7a61c8ad1e27f"
+        },
+        {
+          "bytes": 1538,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-a5df9bdca0068ab10acb3be9/request.json",
+          "sha": "459871aa2507fdc0f799c0ddfeffc4ba9e6765df"
+        },
+        {
+          "bytes": 523,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b245ec386e0714fe751460d1.json",
+          "sha": "023fe7140d8e32d7590d7874b921222727f30870"
+        },
+        {
+          "bytes": 400,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-16d71f225841bde749e516b4.json",
+          "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
+        },
+        {
+          "bytes": 1415,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-5d345a6883a9c657b47e4110/receipt.json",
+          "sha": "89478413be4d9524ccf7d403f7fe2c3e9451c171"
+        },
+        {
+          "bytes": 1385,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-5d345a6883a9c657b47e4110/request.json",
+          "sha": "31fc54981847f19581aeab6f85ad05f510c5b3d4"
+        }
+      ],
+      "append_only_correction": {
+        "correct_count": 7,
+        "field": "result.prior_history.scope_note",
+        "impact": "Descriptive inspected-fragment count only. No missing eighth fragment, change to six trials, verdict, Candidate state, authority or evidence scope. Frozen response remains unchanged; this append-only correction must accompany consolidation and Post-task Learn.",
+        "original_count": 8,
+        "record_type": "immutable_response_factual_correction",
+        "request_recreated": false,
+        "response_digest": "02ec447b439ae32307b0541eade32492854c7dbadc4fab3a9983ade7945a47b9",
+        "response_ref": ".continual/work-model/invocations/invoke-be6df66de90619ee76da939e/response.json",
+        "response_resubmitted": false,
+        "schema_version": 1,
+        "upper_objective_achieved": false,
+        "verification": "Exact frozen request payload.fragments filtered case-insensitively for planning|sokoban contains seven entries. All seven were inspected. Total supplied fragment count216 remains correct.",
+        "verified_at": "2026-09-06T19:24:54.266Z"
+      }
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_ci_run_ids": [],
     "pending_ci_scope": "PR552 all exact-head checks successful.",
-    "exact_frontier": "Consolidate request frozen locally; prior Episode and native223 unchanged.",
-    "next_action": "Consolidate exact planning lifecycle and immutable prior episode references, preserving verdicts and unknowns; submit once then publish before consume.",
-    "next_tool": "exec_command",
-    "next_tool_action": "Consolidate exact planning lifecycle and immutable prior episode references, preserving verdicts and unknowns; submit once then publish before consume.",
+    "exact_frontier": "Consolidation answered once locally; canonical Episode unchanged pending publication and consume.",
+    "next_action": "Publish exact Consolidate request/response and count correction; verify CI and main readback before once-only consume.",
+    "next_tool": "github_create_blob",
+    "next_tool_action": "Publish exact Consolidate request/response and count correction; verify CI and main readback before once-only consume.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -1473,7 +1549,7 @@
     "test_run_id": 33963560093
   },
   "execution_surface_status": "available",
-  "expected_blob_sha": "02fd555e49956ec1f602f502efb98602ea5a9452",
+  "expected_blob_sha": "e4f38fe2660dc750179f0be7235f22af1bd7cb0d",
   "explicit_failure_consolidation_repair": {
     "all_content_blobs_exact_readback": true,
     "directive_run_id": 33963274274,
@@ -22383,7 +22459,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T19:22:43.289Z",
+  "heartbeat_at": "2026-09-06T19:26:27.961Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23256,9 +23332,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Frozen exact Consolidate request; inspected eight relevant planning fragments, native result and prior Episode.",
-  "last_activity_at": "2026-09-06T19:22:43.289Z",
-  "last_checked_at": "2026-09-06T19:22:43.289Z",
+  "last_action": "Submitted exact Consolidate response once; append-only correction records seven inspected planning fragments, not eight.",
+  "last_activity_at": "2026-09-06T19:26:27.961Z",
+  "last_checked_at": "2026-09-06T19:26:27.961Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
     "message": "Candidate Evaluate response was consumed exactly once and native revision advanced to 197; Task Evaluate freeze then failed closed because no fresh authoritative Work source observation matched the generation31 state.",
@@ -23276,7 +23352,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T19:22:43.289Z",
+  "last_progress_at": "2026-09-06T19:26:27.961Z",
   "last_verified_effect": {
     "status": "remote_main_readback_verified",
     "observed_at": "2026-09-06T14:21:29.855Z",
@@ -23729,8 +23805,8 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Consolidate exact planning lifecycle and immutable prior episode references, preserving verdicts and unknowns; submit once then publish before consume.",
-  "next_tool": "exec_command",
+  "next_action": "Publish exact Consolidate request/response and count correction; verify CI and main readback before once-only consume.",
+  "next_tool": "github_create_blob",
   "next_tool_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
@@ -29312,5 +29388,98 @@
     "prior_episode_blob_sha": "5c9caa5185d4dc052c40798e45f36a015e922295",
     "idempotency_key": "o-work-g33:68fc8111:planning223-consolidate-be6df66d:v1",
     "next_action": "Consolidate exact planning lifecycle and immutable prior episode references, preserving verdicts and unknowns; submit once then publish before consume."
+  },
+  "planning223_consolidate_response_v1": {
+    "status": "consolidation_answered_once_publication_pending",
+    "work_invocation_id": "invoke-be6df66de90619ee76da939e",
+    "native_invocation_id": "invoke-b245ec386e0714fe751460d1",
+    "frozen_at": "2026-09-06T19:21:52.926363Z",
+    "request_digest": "d5dfbd974e46f8c176ef2dc4549869a947261529775aa9c4901bcbe0fc1c55fa",
+    "payload_digest": "bc2f24cdcae260a66e87ceeb1ebdcabe907b8ceb9710736f532b4e13b684d8b9",
+    "request_blob_sha": "a3b87829acb1c7eba98c89933e2bf1300795f1a2",
+    "snapshot_revision": 223,
+    "snapshot_phase": "consolidate_pending",
+    "response_submitted": true,
+    "request_recreated": false,
+    "preflight": "USE_ACTIVE",
+    "prior_episode_blob_sha": "5c9caa5185d4dc052c40798e45f36a015e922295",
+    "idempotency_key": "o-work-g33:68fc8111:planning223-consolidate-be6df66d:v1",
+    "next_action": "Consolidate exact planning lifecycle and immutable prior episode references, preserving verdicts and unknowns; submit once then publish before consume.",
+    "response_consumed": false,
+    "response_received_at": "2026-09-06T19:24:19.979285Z",
+    "response_digest": "02ec447b439ae32307b0541eade32492854c7dbadc4fab3a9983ade7945a47b9",
+    "output_digest": "643cf968d3cc592bd5d5fc204454a239766fb5f8d2f04c5b8e66295e51895b5a",
+    "files": [
+      {
+        "bytes": 132212,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "47500e1c987f1337f4d0d5302d6ad62e6a8d9ee0"
+      },
+      {
+        "bytes": 509829,
+        "path": ".continual/work-model/invocations/invoke-be6df66de90619ee76da939e/request.json",
+        "sha": "a3b87829acb1c7eba98c89933e2bf1300795f1a2"
+      },
+      {
+        "bytes": 18849,
+        "path": ".continual/work-model/invocations/invoke-be6df66de90619ee76da939e/response.json",
+        "sha": "9552dd82ce1fc5bbe6ce2822a027cc5d5f9f924c"
+      },
+      {
+        "bytes": 995,
+        "path": "artifacts/unit-generation33-planning223-consolidation-count-correction-v1.json",
+        "sha": "dfc5d3cabd8530f5eb4edbb217b1f7642e50ce1c"
+      },
+      {
+        "bytes": 17678,
+        "path": "artifacts/unit-generation33-planning223-consolidation-v1.json",
+        "sha": "e6f005646d9fd9e28f079bd14598ab4042704981"
+      },
+      {
+        "bytes": 2782,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-a5df9bdca0068ab10acb3be9/receipt.json",
+        "sha": "74e1ba68c595a029b90f337b02a7a61c8ad1e27f"
+      },
+      {
+        "bytes": 1538,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-a5df9bdca0068ab10acb3be9/request.json",
+        "sha": "459871aa2507fdc0f799c0ddfeffc4ba9e6765df"
+      },
+      {
+        "bytes": 523,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b245ec386e0714fe751460d1.json",
+        "sha": "023fe7140d8e32d7590d7874b921222727f30870"
+      },
+      {
+        "bytes": 400,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-16d71f225841bde749e516b4.json",
+        "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
+      },
+      {
+        "bytes": 1415,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-5d345a6883a9c657b47e4110/receipt.json",
+        "sha": "89478413be4d9524ccf7d403f7fe2c3e9451c171"
+      },
+      {
+        "bytes": 1385,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-5d345a6883a9c657b47e4110/request.json",
+        "sha": "31fc54981847f19581aeab6f85ad05f510c5b3d4"
+      }
+    ],
+    "append_only_correction": {
+      "correct_count": 7,
+      "field": "result.prior_history.scope_note",
+      "impact": "Descriptive inspected-fragment count only. No missing eighth fragment, change to six trials, verdict, Candidate state, authority or evidence scope. Frozen response remains unchanged; this append-only correction must accompany consolidation and Post-task Learn.",
+      "original_count": 8,
+      "record_type": "immutable_response_factual_correction",
+      "request_recreated": false,
+      "response_digest": "02ec447b439ae32307b0541eade32492854c7dbadc4fab3a9983ade7945a47b9",
+      "response_ref": ".continual/work-model/invocations/invoke-be6df66de90619ee76da939e/response.json",
+      "response_resubmitted": false,
+      "schema_version": 1,
+      "upper_objective_achieved": false,
+      "verification": "Exact frozen request payload.fragments filtered case-insensitively for planning|sokoban contains seven entries. All seven were inspected. Total supplied fragment count216 remains correct.",
+      "verified_at": "2026-09-06T19:24:54.266Z"
+    }
   }
 }
