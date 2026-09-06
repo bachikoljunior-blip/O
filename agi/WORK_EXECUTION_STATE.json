@@ -176,24 +176,24 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T11:57:56.590Z",
-    "current_main_sha": "1358fc6512c6362b70637112cc11513674a67145",
-    "current_state_blob_sha": "d48252d921a8ea34c54cd906b23201abca5a00e6",
+    "checkpointed_at": "2026-09-06T12:27:13.439Z",
+    "current_main_sha": "5a907cfa6a71f8246f2d1c3ed1076c3866118028",
+    "current_state_blob_sha": "b9ac14394c0d9acbc4a75df3f7fd3461c06ef4d4",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
-    "frozen_invocation_id": "invoke-93f26f5a66478299e9a7b899",
-    "frozen_request_digest": "278f40c4f70704266b75981e3da69069f4caae1661d371f2985ecc0cc14e9931",
-    "exact_pending_work_invocation_id": "invoke-93f26f5a66478299e9a7b899",
-    "exact_pending_native_invocation_id": "invoke-639e233b7fcb3197ceef9666",
-    "snapshot_revision": 213,
-    "snapshot_phase": "post_task_learn_pending",
-    "snapshot_blob_sha": "3eb1e9da072ab229d703b0b288f5bdb66a9dd981",
+    "frozen_invocation_id": null,
+    "frozen_request_digest": null,
+    "exact_pending_work_invocation_id": null,
+    "exact_pending_native_invocation_id": null,
+    "snapshot_revision": 215,
+    "snapshot_phase": "root_pending",
+    "snapshot_blob_sha": "38404aad561f6e0edf297343e189479ecc9569de",
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "pull_request_pending_exact_head_ci",
+      "status": "remote_main_readback_verified",
       "observed_at": "2026-09-06T11:57:04.246Z",
       "consumed_at": "2026-09-06T11:56:30.219096Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -235,19 +235,46 @@
       "idempotency_key": "o-work-g33:68fc8111:learn-93f26f5a:consume-r215:v1",
       "pull_request": 541,
       "head_sha": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
-      "branch": "work/g33-native215-learn-v1"
+      "branch": "work/g33-native215-learn-v1",
+      "merge_sha": "5a907cfa6a71f8246f2d1c3ed1076c3866118028",
+      "readback": [
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/post-task-learn.json",
+          "sha": "30a3b2e03a936c843818d2494676f40591a7ec4a"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "293976679c9eb11882d0d17a0d374c62aba9cbf3"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-639e233b7fcb3197ceef9666.json",
+          "sha": "db6c221093af6e3cd0fdc5c8a1979ca7cbc281a9"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+          "sha": "38404aad561f6e0edf297343e189479ecc9569de"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-639e233b7fcb3197ceef9666-learn.json",
+          "sha": "9a6028779f3b8cf9a577194fc76f17a494e4da0e"
+        }
+      ],
+      "verified_at": "2026-09-06T12:27:13.439Z",
+      "ci_all_success": true
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [
-      34031707562,
-      34031707461
-    ],
-    "pending_ci_scope": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
-    "exact_frontier": "Native215 post-task learning on PR541, authoritative main pending update; do not consume prior Learn again.",
-    "next_action": "Query accepted PR541 exact-head CI; on all-success merge expected head and verify5 main blobs, bind Root pending, then prepare fresh Root observations.",
-    "next_tool": "github_fetch_commit_workflow_runs",
-    "next_tool_action": "Query accepted PR541 exact-head CI; on all-success merge expected head and verify5 main blobs, bind Root pending, then prepare fresh Root observations.",
+    "pending_ci_run_ids": [],
+    "pending_ci_scope": "PR541 all required jobs and directive succeeded.",
+    "exact_frontier": "Native215 root_pending and post-task Learn on main; no awaiting native request. Do not repeat completed Learn.",
+    "next_action": "Prepare fresh Work and PR541 CI observations, freeze Root from main native215, then select and execute materially different safe work under unchanged objective.",
+    "next_tool": "work-source-observation-prepare",
+    "next_tool_action": "Prepare fresh Work and PR541 CI observations, freeze Root from main native215, then select and execute materially different safe work under unchanged objective.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -257,13 +284,11 @@
     "blocker": null,
     "upper_objective_achieved": false,
     "agi_claim_supported": false,
-    "pending_response_digest": "18d9a1a4e501c3e1995e97ccb32843943aff9c2252909003d9d0e55c717b9247",
-    "pending_response_blob_sha": "68c4c01eee46611570b235aa3a14a786232631a5",
-    "pending_pull_requests": [
-      541
-    ],
-    "frozen_invocation_durability": "remote_main_exact_readback_verified",
-    "frozen_payload_digest": "324d54a68b232a0f5a8033fd30d661ed4c5ab65a76c648557c6b403099224355"
+    "pending_response_digest": null,
+    "pending_response_blob_sha": null,
+    "pending_pull_requests": [],
+    "frozen_invocation_durability": "No pending Work request; prior Learn immutable.",
+    "frozen_payload_digest": null
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -707,35 +732,35 @@
     "test_workflow_run_id": 33526496374
   },
   "ci_source_observation_policy": {
-    "exact_head_sha": "39a69de4ac9f80b4317336b0df31dd4d559f94cf",
+    "exact_head_sha": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
     "executor_binding": "current_chatgpt_work_session",
     "max_age_seconds": 7200,
     "repository_full_name": "bachikoljunior-blip/O",
     "required": true,
     "required_jobs": [
       {
-        "id": 101478408168,
-        "name": "pytest shard 1 of 4"
-      },
-      {
-        "id": 101478408192,
-        "name": "pytest shard 0 of 4"
-      },
-      {
-        "id": 101478408206,
-        "name": "pytest shard 3 of 4"
-      },
-      {
-        "id": 101478408212,
+        "id": 101482311042,
         "name": "pytest shard 2 of 4"
       },
       {
-        "id": 101481725104,
+        "id": 101482311114,
+        "name": "pytest shard 3 of 4"
+      },
+      {
+        "id": 101482311145,
+        "name": "pytest shard 0 of 4"
+      },
+      {
+        "id": 101482311182,
+        "name": "pytest shard 1 of 4"
+      },
+      {
+        "id": 101485996183,
         "name": "test"
       }
     ],
     "workflow_id": 335420036,
-    "workflow_run_id": 34030281445
+    "workflow_run_id": 34031707562
   },
   "clean_g1_research_feed_cursor": {
     "blob_sha": "b3780c12f1aeb02a1e36a5da976ee99dc2ba72b9",
@@ -1210,38 +1235,38 @@
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
     "lease_generation": 33,
-    "native_phase": "post_task_learn_pending",
-    "pending_component": "learn",
-    "pending_native_invocation_blob_sha": "6466837cdba3060934f47b90c63a937508208798",
-    "pending_native_invocation_id": "invoke-639e233b7fcb3197ceef9666",
-    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-639e233b7fcb3197ceef9666.json",
-    "pending_output_digest": "154d0d4ba51d676a19eb70814333df5394fad8cfebc5d1cc0885534d671ef4b1",
-    "pending_request_blob_sha": "2f39c8a15b3f19a566b56457c68b9b0eca2d99a8",
-    "pending_request_digest": "278f40c4f70704266b75981e3da69069f4caae1661d371f2985ecc0cc14e9931",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/request.json",
-    "pending_response_blob_sha": "68c4c01eee46611570b235aa3a14a786232631a5",
-    "pending_response_digest": "18d9a1a4e501c3e1995e97ccb32843943aff9c2252909003d9d0e55c717b9247",
-    "pending_response_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/response.json",
-    "pending_work_invocation_id": "invoke-93f26f5a66478299e9a7b899",
-    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/request.json",
+    "native_phase": "root_pending",
+    "pending_component": null,
+    "pending_native_invocation_blob_sha": null,
+    "pending_native_invocation_id": null,
+    "pending_native_invocation_ref": null,
+    "pending_output_digest": null,
+    "pending_request_blob_sha": null,
+    "pending_request_digest": null,
+    "pending_request_ref": null,
+    "pending_response_blob_sha": null,
+    "pending_response_digest": null,
+    "pending_response_ref": null,
+    "pending_work_invocation_id": null,
+    "pending_work_invocation_ref": null,
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@d593e0eb81863dc99ae2b60ba5ba2ce335bad6a2/agi/WORK_EXECUTION_STATE.json",
     "request_recreated": false,
-    "response_consumed": false,
+    "response_consumed": true,
     "response_replayed": false,
     "response_submitted": true,
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "schema_version": 1,
-    "snapshot_blob_sha": "3eb1e9da072ab229d703b0b288f5bdb66a9dd981",
+    "snapshot_blob_sha": "38404aad561f6e0edf297343e189479ecc9569de",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "a4e166cba96e4570c5947588207bc97c03237fc0",
-    "snapshot_phase": "post_task_learn_pending",
-    "snapshot_revision": 213,
-    "source_main_sha": "a4e166cba96e4570c5947588207bc97c03237fc0",
-    "source_state_blob_sha": "7ef19db97356877caac7e202f2197e01cc1a3c50",
+    "snapshot_head_sha": "5a907cfa6a71f8246f2d1c3ed1076c3866118028",
+    "snapshot_phase": "root_pending",
+    "snapshot_revision": 215,
+    "source_main_sha": "5a907cfa6a71f8246f2d1c3ed1076c3866118028",
+    "source_state_blob_sha": "b9ac14394c0d9acbc4a75df3f7fd3461c06ef4d4",
     "status": "remote_main_readback_verified",
-    "target_component": "learn",
-    "verified_at": "2026-09-06T11:55:18.218Z",
+    "target_component": "root",
+    "verified_at": "2026-09-06T12:27:13.439Z",
     "verified_remote_readback": true
   },
   "continuation_source": "repository_latest_main_only",
@@ -1361,38 +1386,38 @@
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
     "lease_generation": 33,
-    "native_phase": "post_task_learn_pending",
-    "pending_component": "learn",
-    "pending_native_invocation_blob_sha": "6466837cdba3060934f47b90c63a937508208798",
-    "pending_native_invocation_id": "invoke-639e233b7fcb3197ceef9666",
-    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-639e233b7fcb3197ceef9666.json",
-    "pending_output_digest": "154d0d4ba51d676a19eb70814333df5394fad8cfebc5d1cc0885534d671ef4b1",
-    "pending_request_blob_sha": "2f39c8a15b3f19a566b56457c68b9b0eca2d99a8",
-    "pending_request_digest": "278f40c4f70704266b75981e3da69069f4caae1661d371f2985ecc0cc14e9931",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/request.json",
-    "pending_response_blob_sha": "68c4c01eee46611570b235aa3a14a786232631a5",
-    "pending_response_digest": "18d9a1a4e501c3e1995e97ccb32843943aff9c2252909003d9d0e55c717b9247",
-    "pending_response_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/response.json",
-    "pending_work_invocation_id": "invoke-93f26f5a66478299e9a7b899",
-    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/request.json",
+    "native_phase": "root_pending",
+    "pending_component": null,
+    "pending_native_invocation_blob_sha": null,
+    "pending_native_invocation_id": null,
+    "pending_native_invocation_ref": null,
+    "pending_output_digest": null,
+    "pending_request_blob_sha": null,
+    "pending_request_digest": null,
+    "pending_request_ref": null,
+    "pending_response_blob_sha": null,
+    "pending_response_digest": null,
+    "pending_response_ref": null,
+    "pending_work_invocation_id": null,
+    "pending_work_invocation_ref": null,
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@d593e0eb81863dc99ae2b60ba5ba2ce335bad6a2/agi/WORK_EXECUTION_STATE.json",
     "request_recreated": false,
-    "response_consumed": false,
+    "response_consumed": true,
     "response_replayed": false,
     "response_submitted": true,
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "schema_version": 1,
-    "snapshot_blob_sha": "3eb1e9da072ab229d703b0b288f5bdb66a9dd981",
+    "snapshot_blob_sha": "38404aad561f6e0edf297343e189479ecc9569de",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "a4e166cba96e4570c5947588207bc97c03237fc0",
-    "snapshot_phase": "post_task_learn_pending",
-    "snapshot_revision": 213,
-    "source_main_sha": "a4e166cba96e4570c5947588207bc97c03237fc0",
-    "source_state_blob_sha": "7ef19db97356877caac7e202f2197e01cc1a3c50",
+    "snapshot_head_sha": "5a907cfa6a71f8246f2d1c3ed1076c3866118028",
+    "snapshot_phase": "root_pending",
+    "snapshot_revision": 215,
+    "source_main_sha": "5a907cfa6a71f8246f2d1c3ed1076c3866118028",
+    "source_state_blob_sha": "b9ac14394c0d9acbc4a75df3f7fd3461c06ef4d4",
     "status": "remote_main_readback_verified",
-    "target_component": "learn",
-    "verified_at": "2026-09-06T11:55:18.218Z",
+    "target_component": "root",
+    "verified_at": "2026-09-06T12:27:13.439Z",
     "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
@@ -22410,7 +22435,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T11:57:56.590Z",
+  "heartbeat_at": "2026-09-06T12:27:13.439Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23283,7 +23308,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Published5 native215 learning effects in PR541; protected CI running, no duplicate Learn consume.",
+  "last_action": "PR541 merged after all protected CI success and5/5 exact main readback; Learn213 consumed once to native215 Root pending.",
   "last_activity_at": "2026-09-06T11:15:52.375Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
@@ -23303,7 +23328,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T11:57:04.246Z",
+  "last_progress_at": "2026-09-06T12:27:13.439Z",
   "last_verified_effect": {
     "agi_achieved": false,
     "all_published_blobs_exact_readback": true,
@@ -23570,7 +23595,7 @@
     "role": "insurance_only",
     "stale_or_interrupted_action": "classify_then_require_fenced_cas_readback"
   },
-  "native_phase": "post_task_learn_pending",
+  "native_phase": "root_pending",
   "negative_evidence_scope_audit_checkpoint": {
     "blob_manifest_sha256": "a21d714701f56e3dd2075e777eae6038b3af94acd2285aaba3568ea380fb578e",
     "branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
@@ -23641,8 +23666,8 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Query accepted PR541 exact-head CI; on all-success merge expected head and verify5 main blobs, bind Root pending, then prepare fresh Root observations.",
-  "next_tool": "work-resume --max-steps 1",
+  "next_action": "Prepare fresh Work and PR541 CI observations, freeze Root from main native215, then select and execute materially different safe work under unchanged objective.",
+  "next_tool": "work-source-observation-prepare",
   "next_tool_action": "Prepare fresh Work and PR539 CI observations, freeze post-task Learn from native213, answer once using canonical Episode then return to Root for materially different safe work.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
@@ -23888,36 +23913,36 @@
   "pending_candidate_request_blob_sha": null,
   "pending_candidate_request_digest": null,
   "pending_candidate_work_invocation_id": null,
-  "pending_component": "learn",
+  "pending_component": null,
   "pending_consolidate_native_invocation_id": null,
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
   "pending_consolidate_work_invocation_id": null,
-  "pending_head_sha": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
-  "pending_learn_native_invocation_id": "invoke-639e233b7fcb3197ceef9666",
-  "pending_learn_request_blob_sha": "2f39c8a15b3f19a566b56457c68b9b0eca2d99a8",
-  "pending_learn_request_digest": "278f40c4f70704266b75981e3da69069f4caae1661d371f2985ecc0cc14e9931",
-  "pending_learn_work_invocation_id": "invoke-93f26f5a66478299e9a7b899",
-  "pending_native_invocation_blob_sha": "6466837cdba3060934f47b90c63a937508208798",
-  "pending_native_invocation_id": "invoke-639e233b7fcb3197ceef9666",
-  "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-639e233b7fcb3197ceef9666.json",
-  "pending_output_digest": "154d0d4ba51d676a19eb70814333df5394fad8cfebc5d1cc0885534d671ef4b1",
+  "pending_head_sha": null,
+  "pending_learn_native_invocation_id": null,
+  "pending_learn_request_blob_sha": null,
+  "pending_learn_request_digest": null,
+  "pending_learn_work_invocation_id": null,
+  "pending_native_invocation_blob_sha": null,
+  "pending_native_invocation_id": null,
+  "pending_native_invocation_ref": null,
+  "pending_output_digest": null,
   "pending_preflight_blob_sha": null,
   "pending_preflight_ref": null,
-  "pending_pull_request": 541,
-  "pending_request_blob_sha": "2f39c8a15b3f19a566b56457c68b9b0eca2d99a8",
-  "pending_request_digest": "278f40c4f70704266b75981e3da69069f4caae1661d371f2985ecc0cc14e9931",
-  "pending_request_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/request.json",
-  "pending_response_blob_sha": "68c4c01eee46611570b235aa3a14a786232631a5",
-  "pending_response_digest": "18d9a1a4e501c3e1995e97ccb32843943aff9c2252909003d9d0e55c717b9247",
-  "pending_response_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/response.json",
+  "pending_pull_request": null,
+  "pending_request_blob_sha": null,
+  "pending_request_digest": null,
+  "pending_request_ref": null,
+  "pending_response_blob_sha": null,
+  "pending_response_digest": null,
+  "pending_response_ref": null,
   "pending_task_evaluate_native_invocation_id": null,
   "pending_task_evaluate_request_blob_sha": null,
   "pending_task_evaluate_request_digest": null,
   "pending_task_evaluate_request_ref": null,
   "pending_task_evaluate_work_invocation_id": null,
-  "pending_work_invocation_id": "invoke-93f26f5a66478299e9a7b899",
-  "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/request.json",
+  "pending_work_invocation_id": null,
+  "pending_work_invocation_ref": null,
   "phase2_readback_verified": true,
   "post_acquisition_progress_contract": {
     "concrete_effect_selected": "Validate the two-phase generation33 fence, merge PR515 at unchanged head, exact-readback the repaired native records, run work verification, bind a fresh Work source observation, and resume the unique Task Evaluate freeze without replaying Candidate.",
@@ -25242,10 +25267,10 @@
     "same_prior_record_at_both_commits": true,
     "selector_precommit_publication_sha": "6b16b03d00ab2db7af9e3121aee356b9f87f42dc"
   },
-  "snapshot_blob_sha": "3eb1e9da072ab229d703b0b288f5bdb66a9dd981",
-  "snapshot_phase": "post_task_learn_pending",
+  "snapshot_blob_sha": "38404aad561f6e0edf297343e189479ecc9569de",
+  "snapshot_phase": "root_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-  "snapshot_revision": 213,
+  "snapshot_revision": 215,
   "source_main_sha": "24b3f66639d1bbe242847afacb440f8ab3584527",
   "source_state_blob_sha": "f68ef79e3d0e8d5dbd5c49df330c622ec5defae1",
   "stale_after_seconds": 900,
@@ -25394,7 +25419,7 @@
     "status": "merged_main_durable",
     "superseding_inbox_revision": 21
   },
-  "target_component": "learn",
+  "target_component": "root",
   "termination": null,
   "test_progress": {
     "conclusion": "success",
@@ -26695,7 +26720,7 @@
     "ci_all_success": true
   },
   "twisted_10635_learn213_consume_v1": {
-    "status": "pull_request_pending_exact_head_ci",
+    "status": "remote_main_readback_verified",
     "observed_at": "2026-09-06T11:57:04.246Z",
     "consumed_at": "2026-09-06T11:56:30.219096Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -26737,6 +26762,36 @@
     "idempotency_key": "o-work-g33:68fc8111:learn-93f26f5a:consume-r215:v1",
     "pull_request": 541,
     "head_sha": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
-    "branch": "work/g33-native215-learn-v1"
+    "branch": "work/g33-native215-learn-v1",
+    "merge_sha": "5a907cfa6a71f8246f2d1c3ed1076c3866118028",
+    "readback": [
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/post-task-learn.json",
+        "sha": "30a3b2e03a936c843818d2494676f40591a7ec4a"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "293976679c9eb11882d0d17a0d374c62aba9cbf3"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-639e233b7fcb3197ceef9666.json",
+        "sha": "db6c221093af6e3cd0fdc5c8a1979ca7cbc281a9"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "sha": "38404aad561f6e0edf297343e189479ecc9569de"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-639e233b7fcb3197ceef9666-learn.json",
+        "sha": "9a6028779f3b8cf9a577194fc76f17a494e4da0e"
+      }
+    ],
+    "verified_at": "2026-09-06T12:27:13.439Z",
+    "ci_all_success": true
   }
 }
