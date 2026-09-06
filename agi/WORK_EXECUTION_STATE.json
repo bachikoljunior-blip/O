@@ -176,9 +176,9 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T06:51:41.751Z",
-    "current_main_sha": "d259c3a14c7460d18eb5ab245f42fca6ed58a43e",
-    "current_state_blob_sha": "5a34fcd121933d79d6ecae3298ea857ac4d82720",
+    "checkpointed_at": "2026-09-06T06:58:46.927Z",
+    "current_main_sha": "e9761a2cde803d2fabcf99a3aad505c1dc0382ab",
+    "current_state_blob_sha": "f9c0308dd9ae2854a300cedd6521eec27d35960c",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -193,22 +193,18 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "pull_request": 530,
-      "merge_sha": "d259c3a14c7460d18eb5ab245f42fca6ed58a43e",
-      "six_exact_blob_readbacks": true,
-      "work_response_digest": "3e4701cb0ed6f51b65c665a316e96f2ddc95344c7f73376a20eb0fd116f33d97"
+      "pull_request": 531,
+      "merge_sha": "e9761a2cde803d2fabcf99a3aad505c1dc0382ab",
+      "two_exact_blob_readbacks": true
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [
-      34016519127,
-      34016519131
-    ],
+    "pending_ci_run_ids": [],
     "pending_ci_scope": "Inbox revision48 push only; not a distinct primary execution.",
-    "exact_frontier": "PR530 merged and all six result/response blobs match remote main. Frozen Execute response is now durable, not consumed. Await PR531 exact-head CI/readback for the two recovered historical artifacts; then native archive and continuity validation precede exactly-once consume into Task Evaluate.",
-    "next_action": "Recheck the already-running PR531 exact head; merge after green CI and exact-readback both files, rehydrate latest main without overwriting unknown work, validate inbox48 continuity, and work-resume max-steps1 to consume only the current frozen Execute response.",
-    "next_tool": "github_fetch_commit_workflow_runs",
-    "next_tool_action": "Query PR531 head438ed3b7 and test run34016519127; never re-answer the durable Execute or restart any experiment.",
+    "exact_frontier": "PR530 response and PR531 historical artifact repair durable on main. Rehydrate and validate before consuming the single frozen Execute response exactly once.",
+    "next_action": "Rehydrate latest main; work-verify, work-checkpoint-verify, continuity preflight; work-resume existing run with max-steps 1.",
+    "next_tool": "exec_command",
+    "next_tool_action": "Rehydrate and validate the authoritative main; consume only after all guards pass.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -220,12 +216,7 @@
     "agi_claim_supported": false,
     "pending_response_digest": "3e4701cb0ed6f51b65c665a316e96f2ddc95344c7f73376a20eb0fd116f33d97",
     "pending_response_blob_sha": "a04f246e69f798588530da860325ac96babeb657",
-    "pending_pull_requests": [
-      {
-        "number": 531,
-        "head_sha": "438ed3b76e7ec089f980b9e2ffc4c8631c5e0adb"
-      }
-    ]
+    "pending_pull_requests": []
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -22372,7 +22363,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T06:51:41.751Z",
+  "heartbeat_at": "2026-09-06T06:58:46.927Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23246,7 +23237,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Merged validated PR529; five blob readbacks restore the exact pending execution unit and activate input48 session consolidation.",
-  "last_activity_at": "2026-09-06T06:51:41.751Z",
+  "last_activity_at": "2026-09-06T06:58:46.927Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
@@ -23265,7 +23256,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T06:51:41.751Z",
+  "last_progress_at": "2026-09-06T06:58:46.927Z",
   "last_verified_effect": {
     "agi_achieved": false,
     "all_published_blobs_exact_readback": true,
@@ -23590,9 +23581,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Recheck the already-running PR531 exact head; merge after green CI and exact-readback both files, rehydrate latest main without overwriting unknown work, validate inbox48 continuity, and work-resume max-steps1 to consume only the current frozen Execute response.",
+  "next_action": "Rehydrate latest main; work-verify, work-checkpoint-verify, continuity preflight; work-resume existing run with max-steps 1.",
   "next_tool": "exec_command",
-  "next_tool_action": "Revalidate raw-log byte identity and inspect the frozen target process/descriptor lifecycle; no new native response until the precommitted trial is evaluated.",
+  "next_tool_action": "Rehydrate and validate the authoritative main; consume only after all guards pass.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -25650,7 +25641,7 @@
     "verified_at": "2026-09-06T06:51:41.751Z"
   },
   "historical_native_artifact_recovery_v48": {
-    "status": "pr531_exact_head_ci_pending",
+    "status": "merged_exact_readback_verified",
     "recorded_at": "2026-09-06T06:26:37.558Z",
     "source_journal_blob_sha": "74f8833e7cd4b971f2555dc8315ea6f421861a6f",
     "native_invocation_id": "invoke-d700a466a87a9b5acd0db08e",
@@ -25690,6 +25681,10 @@
         "sha": "39d1b74e9e0cc77e5866432afa4e2a2bd9a5e1bc",
         "type": "blob"
       }
-    ]
+    ],
+    "merge_sha": "e9761a2cde803d2fabcf99a3aad505c1dc0382ab",
+    "exact_readback_verified": true,
+    "verified_at": "2026-09-06T06:58:46.927Z",
+    "ci_aggregate_job_id": 101444686966
   }
 }
