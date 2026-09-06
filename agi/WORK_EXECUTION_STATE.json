@@ -176,9 +176,9 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T18:51:46.158Z",
-    "current_main_sha": "0d5e5e3ad579ba931c086cc5df3383393e450ac9",
-    "current_state_blob_sha": "a276d8195493bcd1c324869f518c859f4e8a4d35",
+    "checkpointed_at": "2026-09-06T18:52:20.246Z",
+    "current_main_sha": "6ef626d61d7cfeb00b44280d13a96d14a4727dda",
+    "current_state_blob_sha": "111b1e4a97fb74f3f7bc9d2096e444af655a9028",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "post_candidate_consumed_once_native223_publication_pending",
+      "status": "exact_head_ci_pending",
       "work_invocation_id": "invoke-e7b06457b7ad2f99cc396d2e",
       "native_invocation_id": "invoke-ea794e42ed02423db3f84ad2",
       "completed_at": "2026-09-06T18:50:26.336639Z",
@@ -277,16 +277,25 @@
       "task_completion_verdict": "FAIL",
       "upper_objective_achieved": false,
       "solver_replayed": false,
-      "idempotency_key": "o-work-g33:68fc8111:planning223-native:v1"
+      "idempotency_key": "o-work-g33:68fc8111:planning223-native:v1",
+      "pr": 554,
+      "head_sha": "a80b4faa54a40bab4392034de4dc2627226f17aa",
+      "workflow_run_ids": [
+        34053069056,
+        34053069106
+      ]
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [],
+    "pending_ci_run_ids": [
+      34053069056,
+      34053069106
+    ],
     "pending_ci_scope": "PR552 all exact-head checks successful.",
-    "exact_frontier": "Native223 consolidate_pending local publication pending; no next semantic request frozen.",
-    "next_action": "Publish native223 snapshot/result/candidate lifecycle via exact-head CI; read back and bind before freezing Consolidate.",
-    "next_tool": "github_create_blob",
-    "next_tool_action": "Publish native223 snapshot/result/candidate lifecycle via exact-head CI; read back and bind before freezing Consolidate.",
+    "exact_frontier": "Native223 local result pending PR554 exact-head checks and main readback.",
+    "next_action": "Query accepted PR554 exact-head CI, merge/read back 13 artifacts, bind native223 then freeze exact Consolidate.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_tool_action": "Query accepted PR554 exact-head CI, merge/read back 13 artifacts, bind native223 then freeze exact Consolidate.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -298,7 +307,9 @@
     "agi_claim_supported": false,
     "pending_response_digest": "d59a490153c944d97e58d3ee82e0a97727a2f85a9b3772ba9b674051fbc276c3",
     "pending_response_blob_sha": "09daeaa95bfdde52d35ea0ea9c00d7a9e75b022c",
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      554
+    ],
     "frozen_invocation_durability": "Exact request/response/preflight/native journal verified on main.",
     "frozen_payload_digest": "4f656a3e4cd9195faa6a4d4bfbce4f67896dcfb4b0550e16ffe4decdd5945778"
   },
@@ -1543,7 +1554,7 @@
     "test_run_id": 33963560093
   },
   "execution_surface_status": "available",
-  "expected_blob_sha": "a276d8195493bcd1c324869f518c859f4e8a4d35",
+  "expected_blob_sha": "111b1e4a97fb74f3f7bc9d2096e444af655a9028",
   "explicit_failure_consolidation_repair": {
     "all_content_blobs_exact_readback": true,
     "directive_run_id": 33963274274,
@@ -22453,7 +22464,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T18:51:46.158Z",
+  "heartbeat_at": "2026-09-06T18:52:20.246Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23326,9 +23337,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Consumed post-result Candidate once; native223 consolidate_pending and exact scoped REMAIN_CANDIDATE persisted locally.",
-  "last_activity_at": "2026-09-06T18:51:46.158Z",
-  "last_checked_at": "2026-09-06T18:51:46.158Z",
+  "last_action": "PR554 native223 artifacts submitted; protected checks pending.",
+  "last_activity_at": "2026-09-06T18:52:20.246Z",
+  "last_checked_at": "2026-09-06T18:52:20.246Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
     "message": "Candidate Evaluate response was consumed exactly once and native revision advanced to 197; Task Evaluate freeze then failed closed because no fresh authoritative Work source observation matched the generation31 state.",
@@ -23346,7 +23357,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T18:51:46.158Z",
+  "last_progress_at": "2026-09-06T18:52:20.246Z",
   "last_verified_effect": {
     "status": "remote_main_readback_verified",
     "observed_at": "2026-09-06T14:21:29.855Z",
@@ -23799,8 +23810,8 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Publish native223 snapshot/result/candidate lifecycle via exact-head CI; read back and bind before freezing Consolidate.",
-  "next_tool": "github_create_blob",
+  "next_action": "Query accepted PR554 exact-head CI, merge/read back 13 artifacts, bind native223 then freeze exact Consolidate.",
+  "next_tool": "github_fetch_commit_workflow_runs",
   "next_tool_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
@@ -29182,7 +29193,7 @@
     }
   },
   "planning223_native_consume_v1": {
-    "status": "post_candidate_consumed_once_native223_publication_pending",
+    "status": "exact_head_ci_pending",
     "work_invocation_id": "invoke-e7b06457b7ad2f99cc396d2e",
     "native_invocation_id": "invoke-ea794e42ed02423db3f84ad2",
     "completed_at": "2026-09-06T18:50:26.336639Z",
@@ -29266,6 +29277,12 @@
     "task_completion_verdict": "FAIL",
     "upper_objective_achieved": false,
     "solver_replayed": false,
-    "idempotency_key": "o-work-g33:68fc8111:planning223-native:v1"
+    "idempotency_key": "o-work-g33:68fc8111:planning223-native:v1",
+    "pr": 554,
+    "head_sha": "a80b4faa54a40bab4392034de4dc2627226f17aa",
+    "workflow_run_ids": [
+      34053069056,
+      34053069106
+    ]
   }
 }
