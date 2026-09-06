@@ -176,9 +176,9 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T12:29:49.757Z",
-    "current_main_sha": "b8d5c8be7a2dad80b08e597e681a6eafba5d99a7",
-    "current_state_blob_sha": "cc7fd26e789e4ea7f0ecc6972128538f22fbb1b0",
+    "checkpointed_at": "2026-09-06T12:33:17.108Z",
+    "current_main_sha": "ea9d270eac7ee9d21e11182ee3f1ef9acb908e19",
+    "current_state_blob_sha": "65afdc70ff108a30f47cb2fcc867b689903b340b",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "local_frozen_pending_publication",
+      "status": "local_answered_pending_publication",
       "observed_at": "2026-09-06T12:29:49.757Z",
       "frozen_at": "2026-09-06T12:29:05.307205Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -208,18 +208,63 @@
       "snapshot_revision": 215,
       "source_main_sha": "b8d5c8be7a2dad80b08e597e681a6eafba5d99a7",
       "request_recreated": false,
-      "response_submitted": false,
+      "response_submitted": true,
       "response_consumed": false,
-      "idempotency_key": "o-work-g33:68fc8111:root-b3c2ede8:r215:v1"
+      "idempotency_key": "o-work-g33:68fc8111:root-b3c2ede8:r215:v1",
+      "response_digest": "0cee6d7bd81ee44c5aa04f7e61c15bce8a27daeebec8c534e3dd3bbf42f3db30",
+      "response_blob_sha": "cd48a49799d1634d2cb3815c81bc38c387cd40a4",
+      "output_digest": "377b29286034faf633f59efbda0bc02b509c4c9529bc948bae2c2d3cbbca3547",
+      "files": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "19e82339cfbbbfbcf9b3693101f23b8f937dde62"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-b3c2ede84b2ed891affa5fb5/request.json",
+          "sha": "b0788ee796f5802b0b21eaf0b253374317370bc9"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-b3c2ede84b2ed891affa5fb5/response.json",
+          "sha": "cd48a49799d1634d2cb3815c81bc38c387cd40a4"
+        },
+        {
+          "path": "artifacts/unit-generation33-root215-planning-selection-v1.json",
+          "sha": "028b6f606add342f33840d2bf3f17cc7cc414bd0"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-ac78b8d78cb0c251d92e84e7.json",
+          "sha": "e91b5d87c1ddecc8069d42215afb4a5986092dbf"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-b51bf4a7bbd103e3faa21479.json",
+          "sha": "2e71b2658901b5021e133e52e6e51397da022b8e"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-3da2d892554a80bce8fc5501/request.json",
+          "sha": "1020f23531c14789d6240580a66ded59a0cf3132"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-3da2d892554a80bce8fc5501/receipt.json",
+          "sha": "6e3b121c551e87ca36047fda22e542062d8c1d10"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-e342663a4bd16bec5bd929f2/request.json",
+          "sha": "2b4d87dcc4edfcfd6adda78c8f51373d65043cdc"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-e342663a4bd16bec5bd929f2/receipt.json",
+          "sha": "aa96574faa783066d13a08ec70c9d0e2ba3d8a0c"
+        }
+      ]
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_ci_run_ids": [],
     "pending_ci_scope": "PR541 all required jobs and directive succeeded.",
     "exact_frontier": "Root215 request frozen locally, no response; main native215 remains authoritative until publication.",
-    "next_action": "Use immutable Root215 request and latest persistent strategy to select one materially different safe falsifiable unit; publish once-only answer.",
-    "next_tool": "read immutable Root215 decision manifest",
-    "next_tool_action": "Use immutable Root215 request and latest persistent strategy to select one materially different safe falsifiable unit; publish once-only answer.",
+    "next_action": "Publish10 Root215 artifacts, require exact-head CI/readback, consume once to selected Execute/Candidate frontier.",
+    "next_tool": "github_create_blob/tree/commit/branch/pull_request",
+    "next_tool_action": "Publish10 Root215 artifacts, require exact-head CI/readback, consume once to selected Execute/Candidate frontier.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -229,8 +274,8 @@
     "blocker": null,
     "upper_objective_achieved": false,
     "agi_claim_supported": false,
-    "pending_response_digest": null,
-    "pending_response_blob_sha": null,
+    "pending_response_digest": "0cee6d7bd81ee44c5aa04f7e61c15bce8a27daeebec8c534e3dd3bbf42f3db30",
+    "pending_response_blob_sha": "cd48a49799d1634d2cb3815c81bc38c387cd40a4",
     "pending_pull_requests": [],
     "frozen_invocation_durability": "local_only_pending_publication",
     "frozen_payload_digest": "7b163c56c9a6a05fb1430434de75d2b4f0bf590c15b04f3caa5ebb66b6787a48"
@@ -717,8 +762,9 @@
     "item_count": 22,
     "legacy_cursor_is_distinct": true,
     "path": "research_index_clean_g1/O_FEED.json",
-    "polled_at": "2026-08-26T13:55:34.467Z",
-    "repository": "bachikoljunior-blip/note"
+    "polled_at": "2026-09-06T12:27:45Z",
+    "repository": "bachikoljunior-blip/note",
+    "latest_poll_status": "unchanged_revision10_blob_and_digest; no additional Work invocation or new admission"
   },
   "completed_candidate": {
     "activation_authorized": false,
@@ -22380,7 +22426,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T12:29:49.757Z",
+  "heartbeat_at": "2026-09-06T12:33:17.108Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23253,7 +23299,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Frozen Root215 once after native learning main readback and fresh source/CI observations.",
+  "last_action": "Answered Root215 once, selecting a prospectively locked external Sokoban planning-method comparison without claiming trial outcomes.",
   "last_activity_at": "2026-09-06T11:15:52.375Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
@@ -23273,7 +23319,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T12:29:49.757Z",
+  "last_progress_at": "2026-09-06T12:33:17.108Z",
   "last_verified_effect": {
     "agi_achieved": false,
     "all_published_blobs_exact_readback": true,
@@ -23611,7 +23657,7 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Use immutable Root215 request and latest persistent strategy to select one materially different safe falsifiable unit; publish once-only answer.",
+  "next_action": "Publish10 Root215 artifacts, require exact-head CI/readback, consume once to selected Execute/Candidate frontier.",
   "next_tool": "work-source-observation-prepare",
   "next_tool_action": "Prepare fresh Work and PR539 CI observations, freeze post-task Learn from native213, answer once using canonical Episode then return to Root for materially different safe work.",
   "no_response_on_authoritative_remote": false,
@@ -26740,7 +26786,7 @@
     "ci_all_success": true
   },
   "root215_freeze_v1": {
-    "status": "local_frozen_pending_publication",
+    "status": "local_answered_pending_publication",
     "observed_at": "2026-09-06T12:29:49.757Z",
     "frozen_at": "2026-09-06T12:29:05.307205Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -26755,8 +26801,53 @@
     "snapshot_revision": 215,
     "source_main_sha": "b8d5c8be7a2dad80b08e597e681a6eafba5d99a7",
     "request_recreated": false,
-    "response_submitted": false,
+    "response_submitted": true,
     "response_consumed": false,
-    "idempotency_key": "o-work-g33:68fc8111:root-b3c2ede8:r215:v1"
+    "idempotency_key": "o-work-g33:68fc8111:root-b3c2ede8:r215:v1",
+    "response_digest": "0cee6d7bd81ee44c5aa04f7e61c15bce8a27daeebec8c534e3dd3bbf42f3db30",
+    "response_blob_sha": "cd48a49799d1634d2cb3815c81bc38c387cd40a4",
+    "output_digest": "377b29286034faf633f59efbda0bc02b509c4c9529bc948bae2c2d3cbbca3547",
+    "files": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "19e82339cfbbbfbcf9b3693101f23b8f937dde62"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-b3c2ede84b2ed891affa5fb5/request.json",
+        "sha": "b0788ee796f5802b0b21eaf0b253374317370bc9"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-b3c2ede84b2ed891affa5fb5/response.json",
+        "sha": "cd48a49799d1634d2cb3815c81bc38c387cd40a4"
+      },
+      {
+        "path": "artifacts/unit-generation33-root215-planning-selection-v1.json",
+        "sha": "028b6f606add342f33840d2bf3f17cc7cc414bd0"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-ac78b8d78cb0c251d92e84e7.json",
+        "sha": "e91b5d87c1ddecc8069d42215afb4a5986092dbf"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-b51bf4a7bbd103e3faa21479.json",
+        "sha": "2e71b2658901b5021e133e52e6e51397da022b8e"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-3da2d892554a80bce8fc5501/request.json",
+        "sha": "1020f23531c14789d6240580a66ded59a0cf3132"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-3da2d892554a80bce8fc5501/receipt.json",
+        "sha": "6e3b121c551e87ca36047fda22e542062d8c1d10"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-e342663a4bd16bec5bd929f2/request.json",
+        "sha": "2b4d87dcc4edfcfd6adda78c8f51373d65043cdc"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-e342663a4bd16bec5bd929f2/receipt.json",
+        "sha": "aa96574faa783066d13a08ec70c9d0e2ba3d8a0c"
+      }
+    ]
   }
 }
