@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T06:58:46.927Z",
+    "checkpointed_at": "2026-09-06T07:02:42.811Z",
     "current_main_sha": "e9761a2cde803d2fabcf99a3aad505c1dc0382ab",
     "current_state_blob_sha": "f9c0308dd9ae2854a300cedd6521eec27d35960c",
     "goal_revision": 118,
@@ -193,18 +193,68 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "pull_request": 531,
-      "merge_sha": "e9761a2cde803d2fabcf99a3aad505c1dc0382ab",
-      "two_exact_blob_readbacks": true
+      "status": "consumed_locally_publication_pending",
+      "observed_at": "2026-09-06T07:02:42.811Z",
+      "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
+      "lease_generation": 33,
+      "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
+      "work_invocation_id": "invoke-e33e9343f6c1e4613ce6355d",
+      "native_invocation_id": "invoke-9ccb4315cb23b5d7651d0145",
+      "response_digest": "3e4701cb0ed6f51b65c665a316e96f2ddc95344c7f73376a20eb0fd116f33d97",
+      "response_consumed_exactly_once": true,
+      "prior_snapshot_revision": 205,
+      "local_snapshot_revision": 207,
+      "next_unit": "unit-generation33-twisted-10635-task-evaluate-v1",
+      "next_component": "task_evaluate",
+      "work_verify": {
+        "valid": true,
+        "requests": 212,
+        "responses": 212,
+        "native_completed": 204,
+        "native_fragments": 204,
+        "native_local_learn": 187
+      },
+      "files": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "734356bbf241b44ca45b9d8f2bdfebd455d35454"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ccb4315cb23b5d7651d0145.json",
+          "sha": "96e2f3664b959a275bc5503bdaa46cc3e9036442"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+          "sha": "e1aef31eb8c1e36359613271180df22ecd4acf3d"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-5a8606c9fecb3b01b0abdd6d-result.json",
+          "sha": "991a99ff807097bc69328af622a726b669e32bb4"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/execution-units/unit-generation33-twisted-10635-task-evaluate-v1.json",
+          "sha": "24cacbc21d745b9f06fbab6bb0d477cc3d6bce7b"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-9ccb4315cb23b5d7651d0145-execute.json",
+          "sha": "6c72b2d64c6a0d231812a698446ae3d81edf2289"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-9ccb4315cb23b5d7651d0145-execute.json",
+          "sha": "9e58cc5a3873a38f87990e703ede05657aa3b134"
+        }
+      ],
+      "idempotency_key": "o-work-g33:68fc8111:consume-e33e9343:revision207:v1",
+      "reconsume_forbidden": true
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_ci_run_ids": [],
     "pending_ci_scope": "Inbox revision48 push only; not a distinct primary execution.",
-    "exact_frontier": "PR530 response and PR531 historical artifact repair durable on main. Rehydrate and validate before consuming the single frozen Execute response exactly once.",
-    "next_action": "Rehydrate latest main; work-verify, work-checkpoint-verify, continuity preflight; work-resume existing run with max-steps 1.",
-    "next_tool": "exec_command",
-    "next_tool_action": "Rehydrate and validate the authoritative main; consume only after all guards pass.",
+    "exact_frontier": "Execute response consumed once locally; snapshot207 and seven native effect files require publication. Remote native snapshot still205. Do not consume again; publish retained exact files, query existing publication before any retry.",
+    "next_action": "Publish seven exact native effects through protected CI; verify remote blobs before binding snapshot207 and freezing Task Evaluate.",
+    "next_tool": "github_create_blob",
+    "next_tool_action": "Create exact seven native effect blobs, fenced branch and PR; preserve original immutable request and response.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -22363,7 +22413,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T06:58:46.927Z",
+  "heartbeat_at": "2026-09-06T07:02:42.811Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23237,7 +23287,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Merged validated PR529; five blob readbacks restore the exact pending execution unit and activate input48 session consolidation.",
-  "last_activity_at": "2026-09-06T06:58:46.927Z",
+  "last_activity_at": "2026-09-06T07:02:42.811Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
@@ -23256,7 +23306,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T06:58:46.927Z",
+  "last_progress_at": "2026-09-06T07:02:42.811Z",
   "last_verified_effect": {
     "agi_achieved": false,
     "all_published_blobs_exact_readback": true,
@@ -23581,7 +23631,7 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Rehydrate latest main; work-verify, work-checkpoint-verify, continuity preflight; work-resume existing run with max-steps 1.",
+  "next_action": "Publish seven exact native effects through protected CI; verify remote blobs before binding snapshot207 and freezing Task Evaluate.",
   "next_tool": "exec_command",
   "next_tool_action": "Rehydrate and validate the authoritative main; consume only after all guards pass.",
   "no_response_on_authoritative_remote": false,
@@ -25686,5 +25736,60 @@
     "exact_readback_verified": true,
     "verified_at": "2026-09-06T06:58:46.927Z",
     "ci_aggregate_job_id": 101444686966
+  },
+  "twisted_10635_execute_native_consume_v1": {
+    "status": "consumed_locally_publication_pending",
+    "observed_at": "2026-09-06T07:02:42.811Z",
+    "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
+    "lease_generation": 33,
+    "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
+    "work_invocation_id": "invoke-e33e9343f6c1e4613ce6355d",
+    "native_invocation_id": "invoke-9ccb4315cb23b5d7651d0145",
+    "response_digest": "3e4701cb0ed6f51b65c665a316e96f2ddc95344c7f73376a20eb0fd116f33d97",
+    "response_consumed_exactly_once": true,
+    "prior_snapshot_revision": 205,
+    "local_snapshot_revision": 207,
+    "next_unit": "unit-generation33-twisted-10635-task-evaluate-v1",
+    "next_component": "task_evaluate",
+    "work_verify": {
+      "valid": true,
+      "requests": 212,
+      "responses": 212,
+      "native_completed": 204,
+      "native_fragments": 204,
+      "native_local_learn": 187
+    },
+    "files": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "734356bbf241b44ca45b9d8f2bdfebd455d35454"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ccb4315cb23b5d7651d0145.json",
+        "sha": "96e2f3664b959a275bc5503bdaa46cc3e9036442"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "sha": "e1aef31eb8c1e36359613271180df22ecd4acf3d"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-5a8606c9fecb3b01b0abdd6d-result.json",
+        "sha": "991a99ff807097bc69328af622a726b669e32bb4"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/execution-units/unit-generation33-twisted-10635-task-evaluate-v1.json",
+        "sha": "24cacbc21d745b9f06fbab6bb0d477cc3d6bce7b"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-9ccb4315cb23b5d7651d0145-execute.json",
+        "sha": "6c72b2d64c6a0d231812a698446ae3d81edf2289"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-9ccb4315cb23b5d7651d0145-execute.json",
+        "sha": "9e58cc5a3873a38f87990e703ede05657aa3b134"
+      }
+    ],
+    "idempotency_key": "o-work-g33:68fc8111:consume-e33e9343:revision207:v1",
+    "reconsume_forbidden": true
   }
 }
