@@ -176,9 +176,9 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T06:26:37.558Z",
-    "current_main_sha": "d41017ec1d6917e65be81a614420b90069842677",
-    "current_state_blob_sha": "22980633d981fe0f264e8eb64646bedfcbd01918",
+    "checkpointed_at": "2026-09-06T06:28:27.324Z",
+    "current_main_sha": "908e20147b3ac18c23b57d93aedf076410c084dd",
+    "current_state_blob_sha": "0dec94453c228872f79b7de17d704d1f0b52e7fc",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -201,13 +201,15 @@
     "pending_launch_ids": [],
     "pending_ci_run_ids": [
       34016303596,
-      34016303597
+      34016303597,
+      34016519127,
+      34016519131
     ],
     "pending_ci_scope": "Inbox revision48 push only; not a distinct primary execution.",
     "exact_frontier": "One validated local response to the unchanged frozen Execute was submitted at06:19:52Z. Publish the exact response a04f246e plus five public diagnostic/result artifacts; native consumption has not occurred.",
     "next_action": "Complete PR530 exact-head CI/readback; publish the two source-journal-bound missing historical artifacts with explicitly unknown original environment, then verify the full native archive before consuming the existing Execute response once.",
-    "next_tool": "github_create_blob",
-    "next_tool_action": "Publish two recovery artifacts on precommitted isolated branch and validate exact head; preserve PR530 head and response.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_tool_action": "Bounded in-session rechecks of the two accepted exact-head workflows. Never create duplicate PRs, re-answer the immutable response, or replay experiments. On green heads, verify authority then merge/readback and resume the exact response once.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -218,7 +220,17 @@
     "upper_objective_achieved": false,
     "agi_claim_supported": false,
     "pending_response_digest": "3e4701cb0ed6f51b65c665a316e96f2ddc95344c7f73376a20eb0fd116f33d97",
-    "pending_response_blob_sha": "a04f246e69f798588530da860325ac96babeb657"
+    "pending_response_blob_sha": "a04f246e69f798588530da860325ac96babeb657",
+    "pending_pull_requests": [
+      {
+        "number": 530,
+        "head_sha": "9a736d8a8acbb770d96383f6d37567d3020d52e3"
+      },
+      {
+        "number": 531,
+        "head_sha": "438ed3b76e7ec089f980b9e2ffc4c8631c5e0adb"
+      }
+    ]
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -22365,7 +22377,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T06:26:37.558Z",
+  "heartbeat_at": "2026-09-06T06:28:27.324Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23239,7 +23251,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Merged validated PR529; five blob readbacks restore the exact pending execution unit and activate input48 session consolidation.",
-  "last_activity_at": "2026-09-06T06:26:37.558Z",
+  "last_activity_at": "2026-09-06T06:28:27.324Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
@@ -23583,7 +23595,7 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Complete PR530 exact-head CI/readback; publish the two source-journal-bound missing historical artifacts with explicitly unknown original environment, then verify the full native archive before consuming the existing Execute response once.",
+  "next_action": "Bounded in-session rechecks of the two accepted exact-head workflows. Never create duplicate PRs, re-answer the immutable response, or replay experiments. On green heads, verify authority then merge/readback and resume the exact response once.",
   "next_tool": "exec_command",
   "next_tool_action": "Revalidate raw-log byte identity and inspect the frozen target process/descriptor lifecycle; no new native response until the precommitted trial is evaluated.",
   "no_response_on_authoritative_remote": false,
@@ -25447,7 +25459,23 @@
       "local baseline log transcription differed from retained raw log"
     ],
     "repair": "Canonical checkpoint fields now derive from exact pending continuation. Historical evidence objects remain unchanged. Baseline log copy now matches source SHA256 534aa65fc018f99602a8ac6fe1cc911069af506edd77d104d93f43ee03d84b22.",
-    "no_agi_completion_claim": true
+    "no_agi_completion_claim": true,
+    "live_continuity_preflight": {
+      "verified_at": "2026-09-06T06:27:44Z",
+      "policy_revision": 48,
+      "resume_authorized": true,
+      "exact_snapshot_revision": 205,
+      "proof_source_main_sha": "accb787275f315bd444b0d0158d2bea896d878a6",
+      "request_unchanged": true
+    },
+    "historical_archive_verification_local": {
+      "valid": true,
+      "requests": 212,
+      "responses": 212,
+      "native_fragments": 203,
+      "native_local_learn": 186,
+      "original_missing_fragment_environment_unknown": true
+    }
   },
   "session_consolidation_publication_v48": {
     "status": "merged_exact_readback",
@@ -25622,7 +25650,7 @@
     ]
   },
   "historical_native_artifact_recovery_v48": {
-    "status": "precommitted",
+    "status": "pr531_exact_head_ci_pending",
     "recorded_at": "2026-09-06T06:26:37.558Z",
     "source_journal_blob_sha": "74f8833e7cd4b971f2555dc8315ea6f421861a6f",
     "native_invocation_id": "invoke-d700a466a87a9b5acd0db08e",
@@ -25642,6 +25670,26 @@
     },
     "branch": "work/g33-restore-completed-evaluation-artifacts-v48",
     "idempotency_key": "o-work-g33:68fc8111:restore-d700-native-artifacts:v1",
-    "frozen_request_recreated": false
+    "frozen_request_recreated": false,
+    "pull_request": 531,
+    "head_sha": "438ed3b76e7ec089f980b9e2ffc4c8631c5e0adb",
+    "ci_run_ids": [
+      34016519127,
+      34016519131
+    ],
+    "blobs": [
+      {
+        "mode": "100644",
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-d700a466a87a9b5acd0db08e-task_evaluate.json",
+        "sha": "79678f18e2648ebf25e05ae2f4ef0e8f5ffeff8d",
+        "type": "blob"
+      },
+      {
+        "mode": "100644",
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-d700a466a87a9b5acd0db08e-task_evaluate.json",
+        "sha": "39d1b74e9e0cc77e5866432afa4e2a2bd9a5e1bc",
+        "type": "blob"
+      }
+    ]
   }
 }
