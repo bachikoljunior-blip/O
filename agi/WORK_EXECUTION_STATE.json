@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T10:18:08.412Z",
+    "checkpointed_at": "2026-09-06T10:21:46.862Z",
     "current_main_sha": "d7f3611bad4531e99ba129573f364720c0d40776",
     "current_state_blob_sha": "cf5fb9d7269877418c6042c4f7bb8ca698fcd28e",
     "goal_revision": 118,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "local_consolidation_request_frozen",
+      "status": "consolidation_response_once_publication_pending",
       "observed_at": "2026-09-06T10:18:08.412Z",
       "frozen_at": "2026-09-06T10:17:22.979555Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -208,18 +208,64 @@
       "snapshot_revision": 211,
       "source_main_sha": "7f63a3de6d29dcdf30935b88aab75a23e2a6c39c",
       "request_recreated": false,
-      "response_submitted": false,
+      "response_submitted": true,
       "response_consumed": false,
-      "idempotency_key": "o-work-g33:68fc8111:consolidate-016b92fd:r211:v1"
+      "idempotency_key": "o-work-g33:68fc8111:consolidate-016b92fd:r211:v1",
+      "response_digest": "d3f1afd0936ae86dbb48f59f1c84e9821d459e39783516fc251cca2b7a11a617",
+      "response_blob_sha": "10d89dc138489ee0b5c5d9cdbd72cf2703e4e62e",
+      "output_digest": "6b7401765332c94ff1bbcdc3d935da71bfdc084c5e53677289763121f7bccd2a",
+      "files": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "dd6144bda95f97e5a6632d4a7be549400690a9fb"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-016b92fdd070fef95d803f41/request.json",
+          "sha": "59b0a34af5cf9f37db3ae4698aab82d739cea2d6"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-016b92fdd070fef95d803f41/response.json",
+          "sha": "10d89dc138489ee0b5c5d9cdbd72cf2703e4e62e"
+        },
+        {
+          "path": "artifacts/unit-generation33-consolidate211-output-v1.json",
+          "sha": "14fced8e530a4f3bb17c635ca133732382c1a254"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-3fb7b729ffbb2a0bcd44e430.json",
+          "sha": "c4ddbc7172e00799a06572edb66781d0ad0d51ad"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-f3e0605da85f5f0436f4547d.json",
+          "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-dc88800ed00d525404df7d45/request.json",
+          "sha": "d244dea928d9737b328c86827efc0949beac5987"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-dc88800ed00d525404df7d45/receipt.json",
+          "sha": "6996b15c11db6552ccac49ca5569a64147cef5ee"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-a09446817fb78d54a2fd274e/request.json",
+          "sha": "f1d3bca52c6e863f7fffa90b8406663ba2eb601d"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-a09446817fb78d54a2fd274e/receipt.json",
+          "sha": "b8af225034ba672a3ba4facbf75b1e76a336cd82"
+        }
+      ],
+      "prior_episode_preserved_by_immutable_ref": true
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_ci_run_ids": [],
     "pending_ci_scope": "PR534 all required jobs succeeded.",
-    "exact_frontier": "Consolidation request frozen locally; not yet answered. Preserve snapshot211 and immutable request.",
+    "exact_frontier": "Consolidation answered once locally; canonical Episode has not yet been overwritten or claimed durable. Ten files awaiting publication.",
     "next_action": "Prepare fresh Work and PR537 CI observations, freeze canonical consolidation from native211, answer once retaining exact non-success evidence then proceed to post-task Learn.",
-    "next_tool": "work-submit",
-    "next_tool_action": "Answer exact consolidation request once, retain prior Episode by immutable source reference and preserve exact negative evidence.",
+    "next_tool": "github_create_blob",
+    "next_tool_action": "Publish exact ten consolidation request/response/evidence files, verify CI/readback before consuming.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -22379,7 +22425,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T10:18:08.412Z",
+  "heartbeat_at": "2026-09-06T10:21:46.862Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23252,8 +23298,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Canonical consolidation request uniquely frozen with fresh source/CI receipts.",
-  "last_activity_at": "2026-09-06T10:18:08.412Z",
+  "last_action": "Canonical consolidation response submitted once with prior Episode provenance and exact non-success evidence; native consume pending.",
+  "last_activity_at": "2026-09-06T10:21:46.862Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
@@ -23272,7 +23318,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T10:18:08.412Z",
+  "last_progress_at": "2026-09-06T10:21:46.862Z",
   "last_verified_effect": {
     "agi_achieved": false,
     "all_published_blobs_exact_readback": true,
@@ -23598,8 +23644,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Prepare fresh Work and PR537 CI observations, freeze canonical consolidation from native211, answer once retaining exact non-success evidence then proceed to post-task Learn.",
-  "next_tool": "work-submit",
-  "next_tool_action": "Answer exact consolidation request once, retain prior Episode by immutable source reference and preserve exact negative evidence.",
+  "next_tool": "github_create_blob",
+  "next_tool_action": "Publish exact ten consolidation request/response/evidence files, verify CI/readback before consuming.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -26322,7 +26368,7 @@
     "ci_all_success": true
   },
   "twisted_10635_consolidate211_freeze_v1": {
-    "status": "local_consolidation_request_frozen",
+    "status": "consolidation_response_once_publication_pending",
     "observed_at": "2026-09-06T10:18:08.412Z",
     "frozen_at": "2026-09-06T10:17:22.979555Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -26337,8 +26383,54 @@
     "snapshot_revision": 211,
     "source_main_sha": "7f63a3de6d29dcdf30935b88aab75a23e2a6c39c",
     "request_recreated": false,
-    "response_submitted": false,
+    "response_submitted": true,
     "response_consumed": false,
-    "idempotency_key": "o-work-g33:68fc8111:consolidate-016b92fd:r211:v1"
+    "idempotency_key": "o-work-g33:68fc8111:consolidate-016b92fd:r211:v1",
+    "response_digest": "d3f1afd0936ae86dbb48f59f1c84e9821d459e39783516fc251cca2b7a11a617",
+    "response_blob_sha": "10d89dc138489ee0b5c5d9cdbd72cf2703e4e62e",
+    "output_digest": "6b7401765332c94ff1bbcdc3d935da71bfdc084c5e53677289763121f7bccd2a",
+    "files": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "dd6144bda95f97e5a6632d4a7be549400690a9fb"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-016b92fdd070fef95d803f41/request.json",
+        "sha": "59b0a34af5cf9f37db3ae4698aab82d739cea2d6"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-016b92fdd070fef95d803f41/response.json",
+        "sha": "10d89dc138489ee0b5c5d9cdbd72cf2703e4e62e"
+      },
+      {
+        "path": "artifacts/unit-generation33-consolidate211-output-v1.json",
+        "sha": "14fced8e530a4f3bb17c635ca133732382c1a254"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-3fb7b729ffbb2a0bcd44e430.json",
+        "sha": "c4ddbc7172e00799a06572edb66781d0ad0d51ad"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-f3e0605da85f5f0436f4547d.json",
+        "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-dc88800ed00d525404df7d45/request.json",
+        "sha": "d244dea928d9737b328c86827efc0949beac5987"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-dc88800ed00d525404df7d45/receipt.json",
+        "sha": "6996b15c11db6552ccac49ca5569a64147cef5ee"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-a09446817fb78d54a2fd274e/request.json",
+        "sha": "f1d3bca52c6e863f7fffa90b8406663ba2eb601d"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-a09446817fb78d54a2fd274e/receipt.json",
+        "sha": "b8af225034ba672a3ba4facbf75b1e76a336cd82"
+      }
+    ],
+    "prior_episode_preserved_by_immutable_ref": true
   }
 }
