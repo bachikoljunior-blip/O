@@ -175,11 +175,11 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "active_component": "execute_target_protocol_precommit_phase1_cas",
+    "active_component": "execute_target_protocol_precommit_branch_head_exact_readback",
     "active_prompt": "prompts/execute.md",
     "agi_claim_supported": false,
     "blocker": null,
-    "checkpointed_at": "2026-09-06T01:22:30Z",
+    "checkpointed_at": "2026-09-06T01:24:30Z",
     "completed_effect_receipt": {
       "ref": "automation_control/receipts/o_work_monitor_recovery/20260906T0112Z-same-invocation-overlap-gen33-target-protocol.json",
       "repository": "bachikoljunior-blip/note",
@@ -270,14 +270,14 @@
       33990722440,
       33990722449
     ],
-    "current_main_sha": "69cac918ada043c0eb6f7b181df4ece69d18cb3b",
-    "current_state_blob_sha": "d4c82b70d0d46737461cef1a08842b9c0338649d",
+    "current_main_sha": "51838ea4a3b22f097dd16ce218ae40e032ded2c4",
+    "current_state_blob_sha": "30dc8e517ab91ebfb2256e4f1f7aa4d2323211d0",
     "exact_completed_native_invocation_id": "invoke-776522f2a0f94272af62435a",
     "exact_completed_request_digest": "951e295c00ee08cd7a9c4eca08f3fb10992fcd2088c80d639c6d0a6abec8a029",
     "exact_completed_response_blob_sha": "ce8646624a93405360b8205bdb98f079432f370d",
     "exact_completed_response_digest": "0a43595b7c2cf39bb66718e8c011c3104813eda7bc7e92ac55143f1e92cd2f8f",
     "exact_completed_work_invocation_id": "invoke-a7467dc870b7e35ee3388a4c",
-    "exact_frontier": "Publish and exact-read back the immutable twisted/twisted#10635 target/protocol precommit, adapted reproducer, and fresh Work source observation before dependency setup, baseline, implementation inspection, or solution work.",
+    "exact_frontier": "Bind exact target-protocol branch head 2b178ef5 and its four exact-readback blobs into protected state before opening PR and before any baseline or solution work.",
     "exact_pending_native_invocation_id": "invoke-9ccb4315cb23b5d7651d0145",
     "exact_pending_request_blob_sha": "96a03e5debfb4511fb2d2f4705cde47e6a0dad35",
     "exact_pending_request_digest": "b49e95f323781c59d479864d65e4d454cbb14a55753e2778b798a8162b4dd5c3",
@@ -288,7 +288,7 @@
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
     "goal_revision": 118,
-    "idempotency_key": "o-work-g33:68fc8111:twisted-10635-target-protocol-pr527:phase1:v1",
+    "idempotency_key": "o-work-g33:68fc8111:twisted-10635-target-protocol-pr527:bind-head:v1",
     "inbox_blob_sha": "0972d6f37eb73f7a9dd83fec27a5f6c3fc255e2e",
     "inbox_revision": 41,
     "last_verified_effect": {
@@ -372,9 +372,9 @@
     },
     "lease_generation": 33,
     "native_phase": "unit_pending",
-    "next_action": "CAS phase1 state from exact main 69cac918/state d4c82b70, publish target protocol artifacts on a dedicated branch, bind exact branch head by second state CAS, require exact-head CI, merge, exact-read back, then run the frozen baseline.",
+    "next_action": "CAS exact branch head into state, open protected PR, require exact-head CI, merge and exact-read back, then record fresh post-merge source observation and run baseline.",
     "next_tool": "github_update_file",
-    "next_tool_action": "Update agi/WORK_EXECUTION_STATE.json on main with expected blob d4c82b70d0d46737461cef1a08842b9c0338649d.",
+    "next_tool_action": "Update agi/WORK_EXECUTION_STATE.json on main with expected blob 30dc8e517ab91ebfb2256e4f1f7aa4d2323211d0.",
     "no_partial_result_claimed": true,
     "pending_component": "execute",
     "pull_request": {
@@ -389,7 +389,7 @@
     "snapshot_revision": 197,
     "termination": null,
     "upper_objective_achieved": false,
-    "pending_head_sha": null,
+    "pending_head_sha": "2b178ef5fbca7681c26e2bf185fe27bdfc713fba",
     "working_branch": "work/g33-twisted-10635-target-protocol-precommit-v1"
   },
   "checkpoint_integrity_publication_precommit": {
@@ -25465,10 +25465,21 @@
     "baseline_started": false,
     "solution_work_started": false,
     "upstream_write_permitted": false,
-    "phase": "phase1_cas_pending",
+    "phase": "phase2_cas_pending",
     "idempotency_key": "o-work-g33:68fc8111:twisted-10635-target-protocol-pr527:v1",
     "resume_required": true,
     "upper_objective_achieved": false,
-    "agi_achieved": false
+    "agi_achieved": false,
+    "phase1_commit_sha": "51838ea4a3b22f097dd16ce218ae40e032ded2c4",
+    "phase1_state_blob_sha": "30dc8e517ab91ebfb2256e4f1f7aa4d2323211d0",
+    "branch": "work/g33-twisted-10635-target-protocol-precommit-v1",
+    "branch_head_sha": "2b178ef5fbca7681c26e2bf185fe27bdfc713fba",
+    "all_published_blobs_exact_readback": true,
+    "published_blobs": {
+      "artifacts/unit-generation33-twisted-10635-target-protocol-precommit-v1.json": "90952774cb074c3c0186cba06e534cea6f022658",
+      "artifacts/unit-generation33-twisted-10635-reproducer.py": "91199e632970720134ff581f364e8405520791c1",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-02670e58dcc8d7ed4edea1b7/request.json": "0e86600bf8f8dd88fe695216b459b84bdcbab210",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-02670e58dcc8d7ed4edea1b7/receipt.json": "600d53743e312c4640c199277d9555eb428f1bcf"
+    }
   }
 }
