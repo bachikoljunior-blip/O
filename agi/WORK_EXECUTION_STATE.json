@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T10:47:17.308Z",
+    "checkpointed_at": "2026-09-06T10:48:05.254Z",
     "current_main_sha": "fc242e554afad7bd42b6097d66d505040a7999b6",
     "current_state_blob_sha": "dfa41ee1af95a68f1340d917af8c740ce538cea9",
     "goal_revision": 118,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "local_consolidation_consumed_native213_publication_pending",
+      "status": "pr539_exact_head_ci_pending",
       "observed_at": "2026-09-06T10:47:17.308Z",
       "consumed_at": "2026-09-06T10:46:21.132497Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -234,16 +234,22 @@
           "sha": "c92516ead1da38b5bd87cf907fa6a940efc225a0"
         }
       ],
-      "idempotency_key": "o-work-g33:68fc8111:consolidate-016b92fd:consume-r213:v1"
+      "idempotency_key": "o-work-g33:68fc8111:consolidate-016b92fd:consume-r213:v1",
+      "pull_request": 539,
+      "head_sha": "5f943276997805ca9873a0fca5123a2b2e81d407",
+      "branch": "work/g33-native213-episode-v1"
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [],
+    "pending_ci_run_ids": [
+      34028406002,
+      34028406025
+    ],
     "pending_ci_scope": "PR534 all required jobs succeeded.",
     "exact_frontier": "Consolidation consumed once locally, Episode persisted with prior history reference, native213 post_task_learn_pending. Remote binding remains prepublication; never replay.",
     "next_action": "Verify continuation then consume saved consolidation response once; persist canonical Episode and post-task Learn frontier through protected publication.",
-    "next_tool": "github_create_blob",
-    "next_tool_action": "Publish six canonical Episode/native213 effects through protected CI and readback, bind post-task Learn then freeze it without replay.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_tool_action": "Query accepted PR539 exact-head CI; merge/readback six Episode/native213 files then bind post-task Learn. Do not repeat consolidation consume.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -255,7 +261,12 @@
     "agi_claim_supported": false,
     "pending_response_digest": "d3f1afd0936ae86dbb48f59f1c84e9821d459e39783516fc251cca2b7a11a617",
     "pending_response_blob_sha": "10d89dc138489ee0b5c5d9cdbd72cf2703e4e62e",
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      {
+        "number": 539,
+        "head_sha": "5f943276997805ca9873a0fca5123a2b2e81d407"
+      }
+    ],
     "frozen_invocation_durability": "main; ten exact blob readbacks"
   },
   "checkpoint_integrity_publication_precommit": {
@@ -23622,8 +23633,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Verify continuation then consume saved consolidation response once; persist canonical Episode and post-task Learn frontier through protected publication.",
-  "next_tool": "github_create_blob",
-  "next_tool_action": "Publish six canonical Episode/native213 effects through protected CI and readback, bind post-task Learn then freeze it without replay.",
+  "next_tool": "github_fetch_commit_workflow_runs",
+  "next_tool_action": "Query accepted PR539 exact-head CI; merge/readback six Episode/native213 files then bind post-task Learn. Do not repeat consolidation consume.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -23873,7 +23884,7 @@
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
   "pending_consolidate_work_invocation_id": null,
-  "pending_head_sha": null,
+  "pending_head_sha": "5f943276997805ca9873a0fca5123a2b2e81d407",
   "pending_learn_native_invocation_id": null,
   "pending_learn_request_blob_sha": null,
   "pending_learn_request_digest": null,
@@ -23884,7 +23895,7 @@
   "pending_output_digest": "6b7401765332c94ff1bbcdc3d935da71bfdc084c5e53677289763121f7bccd2a",
   "pending_preflight_blob_sha": null,
   "pending_preflight_ref": null,
-  "pending_pull_request": null,
+  "pending_pull_request": 539,
   "pending_request_blob_sha": "59b0a34af5cf9f37db3ae4698aab82d739cea2d6",
   "pending_request_digest": "0bad899696e76e393193aa5933dddc34a3619e3aada6bbbf7e8e0219e5a5fda7",
   "pending_request_ref": ".continual/work-model/invocations/invoke-016b92fdd070fef95d803f41/request.json",
@@ -26470,7 +26481,7 @@
     "ci_all_success": true
   },
   "twisted_10635_consolidate211_consume_v1": {
-    "status": "local_consolidation_consumed_native213_publication_pending",
+    "status": "pr539_exact_head_ci_pending",
     "observed_at": "2026-09-06T10:47:17.308Z",
     "consumed_at": "2026-09-06T10:46:21.132497Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -26511,6 +26522,9 @@
         "sha": "c92516ead1da38b5bd87cf907fa6a940efc225a0"
       }
     ],
-    "idempotency_key": "o-work-g33:68fc8111:consolidate-016b92fd:consume-r213:v1"
+    "idempotency_key": "o-work-g33:68fc8111:consolidate-016b92fd:consume-r213:v1",
+    "pull_request": 539,
+    "head_sha": "5f943276997805ca9873a0fca5123a2b2e81d407",
+    "branch": "work/g33-native213-episode-v1"
   }
 }
