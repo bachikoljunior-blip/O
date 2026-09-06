@@ -176,9 +176,9 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T11:57:04.246Z",
-    "current_main_sha": "28317c7f42dfa258d5667eee14f3a0e5af3ebccd",
-    "current_state_blob_sha": "9efa5edf693c7df20070ca39cc798d981160e061",
+    "checkpointed_at": "2026-09-06T11:57:56.590Z",
+    "current_main_sha": "1358fc6512c6362b70637112cc11513674a67145",
+    "current_state_blob_sha": "d48252d921a8ea34c54cd906b23201abca5a00e6",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "local_consumed_pending_publication",
+      "status": "pull_request_pending_exact_head_ci",
       "observed_at": "2026-09-06T11:57:04.246Z",
       "consumed_at": "2026-09-06T11:56:30.219096Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -232,16 +232,22 @@
           "sha": "9a6028779f3b8cf9a577194fc76f17a494e4da0e"
         }
       ],
-      "idempotency_key": "o-work-g33:68fc8111:learn-93f26f5a:consume-r215:v1"
+      "idempotency_key": "o-work-g33:68fc8111:learn-93f26f5a:consume-r215:v1",
+      "pull_request": 541,
+      "head_sha": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
+      "branch": "work/g33-native215-learn-v1"
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [],
-    "pending_ci_scope": "PR540 all5 required jobs and directive succeeded.",
-    "exact_frontier": "Native215 Root pending locally; authoritative main213 answered Learn retained until publication. Do not consume again.",
-    "next_action": "Publish5 native215 learning effects with full exact-head CI; read back main then bind Root pending and continue with materially different safe unit.",
-    "next_tool": "github_create_blob/tree/commit/branch/pull_request",
-    "next_tool_action": "Publish5 native215 learning effects with full exact-head CI; read back main then bind Root pending and continue with materially different safe unit.",
+    "pending_ci_run_ids": [
+      34031707562,
+      34031707461
+    ],
+    "pending_ci_scope": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
+    "exact_frontier": "Native215 post-task learning on PR541, authoritative main pending update; do not consume prior Learn again.",
+    "next_action": "Query accepted PR541 exact-head CI; on all-success merge expected head and verify5 main blobs, bind Root pending, then prepare fresh Root observations.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_tool_action": "Query accepted PR541 exact-head CI; on all-success merge expected head and verify5 main blobs, bind Root pending, then prepare fresh Root observations.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -253,7 +259,9 @@
     "agi_claim_supported": false,
     "pending_response_digest": "18d9a1a4e501c3e1995e97ccb32843943aff9c2252909003d9d0e55c717b9247",
     "pending_response_blob_sha": "68c4c01eee46611570b235aa3a14a786232631a5",
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      541
+    ],
     "frozen_invocation_durability": "remote_main_exact_readback_verified",
     "frozen_payload_digest": "324d54a68b232a0f5a8033fd30d661ed4c5ab65a76c648557c6b403099224355"
   },
@@ -22402,7 +22410,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T11:57:04.246Z",
+  "heartbeat_at": "2026-09-06T11:57:56.590Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23275,7 +23283,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Consumed immutable Learn response exactly once to native215 Root pending; no Local Learn created for Learn, no Candidate produced.",
+  "last_action": "Published5 native215 learning effects in PR541; protected CI running, no duplicate Learn consume.",
   "last_activity_at": "2026-09-06T11:15:52.375Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
@@ -23633,7 +23641,7 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Publish5 native215 learning effects with full exact-head CI; read back main then bind Root pending and continue with materially different safe unit.",
+  "next_action": "Query accepted PR541 exact-head CI; on all-success merge expected head and verify5 main blobs, bind Root pending, then prepare fresh Root observations.",
   "next_tool": "work-resume --max-steps 1",
   "next_tool_action": "Prepare fresh Work and PR539 CI observations, freeze post-task Learn from native213, answer once using canonical Episode then return to Root for materially different safe work.",
   "no_response_on_authoritative_remote": false,
@@ -23885,7 +23893,7 @@
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
   "pending_consolidate_work_invocation_id": null,
-  "pending_head_sha": null,
+  "pending_head_sha": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
   "pending_learn_native_invocation_id": "invoke-639e233b7fcb3197ceef9666",
   "pending_learn_request_blob_sha": "2f39c8a15b3f19a566b56457c68b9b0eca2d99a8",
   "pending_learn_request_digest": "278f40c4f70704266b75981e3da69069f4caae1661d371f2985ecc0cc14e9931",
@@ -23896,7 +23904,7 @@
   "pending_output_digest": "154d0d4ba51d676a19eb70814333df5394fad8cfebc5d1cc0885534d671ef4b1",
   "pending_preflight_blob_sha": null,
   "pending_preflight_ref": null,
-  "pending_pull_request": null,
+  "pending_pull_request": 541,
   "pending_request_blob_sha": "2f39c8a15b3f19a566b56457c68b9b0eca2d99a8",
   "pending_request_digest": "278f40c4f70704266b75981e3da69069f4caae1661d371f2985ecc0cc14e9931",
   "pending_request_ref": ".continual/work-model/invocations/invoke-93f26f5a66478299e9a7b899/request.json",
@@ -26687,7 +26695,7 @@
     "ci_all_success": true
   },
   "twisted_10635_learn213_consume_v1": {
-    "status": "local_consumed_pending_publication",
+    "status": "pull_request_pending_exact_head_ci",
     "observed_at": "2026-09-06T11:57:04.246Z",
     "consumed_at": "2026-09-06T11:56:30.219096Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -26726,6 +26734,9 @@
         "sha": "9a6028779f3b8cf9a577194fc76f17a494e4da0e"
       }
     ],
-    "idempotency_key": "o-work-g33:68fc8111:learn-93f26f5a:consume-r215:v1"
+    "idempotency_key": "o-work-g33:68fc8111:learn-93f26f5a:consume-r215:v1",
+    "pull_request": 541,
+    "head_sha": "7a4934f8ef9d88388feb59172a3b92ba0d7325a8",
+    "branch": "work/g33-native215-learn-v1"
   }
 }
