@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "record_type": "external_upstream_repair_baseline_result",
+  "recorded_at": "2026-09-06T03:24:30Z",
+  "authority": {
+    "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
+    "lease_generation": 33,
+    "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72"
+  },
+  "frozen_execute": {
+    "work_invocation_id": "invoke-e33e9343f6c1e4613ce6355d",
+    "request_digest": "b49e95f323781c59d479864d65e4d454cbb14a55753e2778b798a8162b4dd5c3"
+  },
+  "target": {
+    "repository": "twisted/twisted",
+    "issue_number": 10635,
+    "exact_commit_sha": "9e9922df02ab8a57d4efb3af6756c7bc3353cd8c"
+  },
+  "precommit": {
+    "path": "artifacts/unit-generation33-twisted-10635-target-protocol-precommit-v1.json",
+    "blob_sha": "90952774cb074c3c0186cba06e534cea6f022658",
+    "merged_pull_request": 527,
+    "merge_sha": "b51e12a0b0085ad3b240641d57e4df76b687b017"
+  },
+  "historical_source_observation": {
+    "observation_id": "work-state-75a26d0bcfd44514c047ba62",
+    "source_commit_sha": "67ae7fb5bf67ccdcbdeeab630e2ea58470e176d5",
+    "source_state_blob_sha": "d50446070fb0d6435ed2eb8062065796d1d000a2",
+    "request_digest": "3a9e22db7d3bb8622d347adc3bff25950b5984b60835c5c2897adf67a7f6f057",
+    "receipt_digest": "e2f6153fc4fbedd2e071446f9371108d5de2348e4590fef06bf944fb4694c006",
+    "merged_pull_request": 528,
+    "merge_sha": "10ba061d33c2c06b2e6f157a9cb612fbdf6b5304",
+    "observed_at": "2026-09-06T01:53:05Z",
+    "max_age_seconds": 300,
+    "fresh_at_baseline_start": false,
+    "claim_scope": "Historical source binding only. The observation was older than its 300-second bound at baseline start; it is not evidence of a fresh dispatch-time observation."
+  },
+  "environment": {
+    "venv": "external-trials/g33-twisted-10635/venv",
+    "editable_version": "26.4.0.post0",
+    "pip_check": "No broken requirements found.",
+    "twisted_import": "TWISTED_IMPORT_OK",
+    "dependency_setup_succeeded": true,
+    "setup_stop_cause_eliminated": true
+  },
+  "baseline": {
+    "command": "timeout 300s ../venv/bin/python ../../../artifacts/unit-generation33-twisted-10635-reproducer.py",
+    "started_at": "2026-09-06T02:32:58Z",
+    "sigterm_at": "2026-09-06T02:37:58Z",
+    "timeout_seconds": 300,
+    "timeout_triggered": true,
+    "expected_timeout_wrapper_exit_code": 124,
+    "observed_exit_code": null,
+    "exit_code_limit": "The original tool process is no longer queryable; 124 is the expected timeout code, not an observed code. The log directly records SIGTERM at the 300-second boundary.",
+    "input_sha256": "42a882c7d33402436d6598f594b3271a147ec02c18519ccf00af5e00c098d677",
+    "raw_log_path": "artifacts/unit-generation33-twisted-10635-baseline-v1.log",
+    "source_raw_log_sha256": "534aa65fc018f99602a8ac6fe1cc911069af506edd77d104d93f43ee03d84b22",
+    "observed_pipeline_output": "twisted issue 10635 deterministic input\\n",
+    "completion_marker_before_timeout": false,
+    "completion_marker_after_sigterm": true,
+    "reactor_not_running_after_sigterm": true
+  },
+  "classification": "EVALUABLE",
+  "bug_reproduced": true,
+  "publication_reconciliation": {
+    "source_receipt_repository": "bachikoljunior-blip/note",
+    "source_receipt_path": "automation_control/receipts/o_work_monitor_recovery/20260906T0412Z-same-invocation-overlap-gen33-baseline-evidence.json",
+    "source_receipt_blob_sha": "14e9ba6c33496900d10df552c38802ceeb974406",
+    "raw_log_sha256_matches_prior_durable_receipt": true,
+    "local_transcription_error_detected": true,
+    "local_transcription_corrected_before_publication": true,
+    "published_log_must_equal_source_bytes": true,
+    "full_trial_pass_claimed": false,
+    "source_inspection_audit": {
+      "before_original_baseline": "No implementation source opened as recorded by original trial.",
+      "after_baseline_before_this_publication": [
+        "docs/development/ai-policy.rst",
+        "src/twisted/internet/test/test_process.py lines1-150 (test harness and imports only)"
+      ],
+      "existing_solution_accessed": false,
+      "minimal_source_patch_started": false
+    }
+  },
+  "causal_reason": "At the exact frozen commit the process topology emitted the expected data but did not terminate during the full 300-second window. REPRODUCER_COMPLETED appeared only after timeout delivered SIGTERM, matching the issue's process-termination defect.",
+  "target_substitution_permitted": false,
+  "baseline_replayed": false,
+  "implementation_source_opened": false,
+  "solution_work_started": false,
+  "upstream_write_permitted": false,
+  "upper_objective_achieved": false,
+  "agi_achieved": false,
+  "idempotency_key": "o-work-g33:68fc8111:twisted-10635:baseline:v1"
+}
