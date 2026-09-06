@@ -176,9 +176,9 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T17:44:53.714Z",
-    "current_main_sha": "b2d147178d978678a82c82a1372e7a11ab47e1fe",
-    "current_state_blob_sha": "12c8f5a5f309014dc9631bd33617451a9c17aff5",
+    "checkpointed_at": "2026-09-06T17:46:02.019Z",
+    "current_main_sha": "e20423c28a05eba2e17891dfe22742ab02ec7b7e",
+    "current_state_blob_sha": "aa4f49f1c6c15ae9ed75bc2755a8358f6cb46be2",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "evaluation_answered_once_locally_publication_pending",
+      "status": "protected_publication_ci_pending",
       "candidate_work_invocation_id": "invoke-6276375bb8cfdf706ff48272",
       "candidate_native_invocation_id": "invoke-7de987f5b63fb728b4c5e955",
       "candidate_consumed_at": "2026-09-06T17:35:20.044111Z",
@@ -287,20 +287,29 @@
       ],
       "solver_rerun": false,
       "independent_evaluation_claimed": false,
-      "upper_objective_achieved": false
+      "upper_objective_achieved": false,
+      "pr": 552,
+      "head_sha": "526706e5ba634d14c80f3de9766656aefdaa3cd4",
+      "workflow_run_ids": [
+        34049603543,
+        34049603624
+      ]
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [],
+    "pending_ci_run_ids": [
+      34049603543,
+      34049603624
+    ],
     "pending_ci_scope": "PR551 exact Candidate preflight request/response, no solver replay.",
-    "exact_frontier": "Task Evaluate answered once locally; prior remote Candidate frontier remains authoritative until publication/readback.",
-    "next_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
-    "next_tool": "github_create_blob",
-    "next_tool_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
+    "exact_frontier": "PR552 exact frozen Task Evaluate and six-trial audit awaiting CI; no replay or consume until main readback.",
+    "next_action": "Wait and verify PR552 exact-head CI, merge only on success, read back all 14 artifacts, bind exact continuation and consume once.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_tool_action": "Wait and verify PR552 exact-head CI, merge only on success, read back all 14 artifacts, bind exact continuation and consume once.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
-    "idempotency_key": "o-work-g33:68fc8111:planning221-eval-3c0ee390:v1",
+    "idempotency_key": "o-work-g33:68fc8111:planning221-eval-3c0ee390:pr552:v1",
     "resume_required": true,
     "termination": null,
     "blocker": null,
@@ -308,7 +317,9 @@
     "agi_claim_supported": false,
     "pending_response_digest": "3f1cb9aa8e0936d0e272b434c2ca6f8543ec690de93e6221edd69e52e85a01f4",
     "pending_response_blob_sha": "b2b8c0836b25b76eab211f2c13d66970bea7d5e2",
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      552
+    ],
     "frozen_invocation_durability": "Exact frozen request and response are local and hash-bound pending protected publication.",
     "frozen_payload_digest": "0922e1e5090f17de49f42876118accc66dee20f5f9e44a7bce5d1c2853686d54"
   },
@@ -1553,7 +1564,7 @@
     "test_run_id": 33963560093
   },
   "execution_surface_status": "available",
-  "expected_blob_sha": "12c8f5a5f309014dc9631bd33617451a9c17aff5",
+  "expected_blob_sha": "aa4f49f1c6c15ae9ed75bc2755a8358f6cb46be2",
   "explicit_failure_consolidation_repair": {
     "all_content_blobs_exact_readback": true,
     "directive_run_id": 33963274274,
@@ -22463,7 +22474,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T17:44:53.714Z",
+  "heartbeat_at": "2026-09-06T17:46:02.019Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23336,9 +23347,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Completed read-only six-trial audit and submitted frozen Task Evaluate response once; publication pending.",
-  "last_activity_at": "2026-09-06T17:44:53.714Z",
-  "last_checked_at": "2026-09-06T17:44:53.714Z",
+  "last_action": "Published exact planning evaluation artifacts to PR552; exact-head CI queued.",
+  "last_activity_at": "2026-09-06T17:46:02.019Z",
+  "last_checked_at": "2026-09-06T17:46:02.019Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
     "message": "Candidate Evaluate response was consumed exactly once and native revision advanced to 197; Task Evaluate freeze then failed closed because no fresh authoritative Work source observation matched the generation31 state.",
@@ -23356,7 +23367,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T17:44:53.714Z",
+  "last_progress_at": "2026-09-06T17:46:02.019Z",
   "last_verified_effect": {
     "status": "remote_main_readback_verified",
     "observed_at": "2026-09-06T14:21:29.855Z",
@@ -23809,8 +23820,8 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
-  "next_tool": "github_create_blob",
+  "next_action": "Wait and verify PR552 exact-head CI, merge only on success, read back all 14 artifacts, bind exact continuation and consume once.",
+  "next_tool": "github_fetch_commit_workflow_runs",
   "next_tool_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
@@ -28797,7 +28808,7 @@
     "next_action": "Audit immutable planning source/code/precommit and six saved trial receipts without solver rerun; answer frozen Task Evaluate exactly once, retain same-session and walking-cost limitations."
   },
   "planning221_evaluation_response_v1": {
-    "status": "evaluation_answered_once_locally_publication_pending",
+    "status": "protected_publication_ci_pending",
     "candidate_work_invocation_id": "invoke-6276375bb8cfdf706ff48272",
     "candidate_native_invocation_id": "invoke-7de987f5b63fb728b4c5e955",
     "candidate_consumed_at": "2026-09-06T17:35:20.044111Z",
@@ -28891,6 +28902,12 @@
     ],
     "solver_rerun": false,
     "independent_evaluation_claimed": false,
-    "upper_objective_achieved": false
+    "upper_objective_achieved": false,
+    "pr": 552,
+    "head_sha": "526706e5ba634d14c80f3de9766656aefdaa3cd4",
+    "workflow_run_ids": [
+      34049603543,
+      34049603624
+    ]
   }
 }
