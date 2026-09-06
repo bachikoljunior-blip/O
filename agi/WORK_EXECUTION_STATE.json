@@ -176,9 +176,9 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T17:36:08.768Z",
-    "current_main_sha": "47fe207e053e7cb36fe7b848a07e2317ada21f51",
-    "current_state_blob_sha": "656e246f1962cd80504dc9b72002183e65b0de8b",
+    "checkpointed_at": "2026-09-06T17:44:53.714Z",
+    "current_main_sha": "b2d147178d978678a82c82a1372e7a11ab47e1fe",
+    "current_state_blob_sha": "12c8f5a5f309014dc9631bd33617451a9c17aff5",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "candidate_consumed_once_evaluation_frozen_locally",
+      "status": "evaluation_answered_once_locally_publication_pending",
       "candidate_work_invocation_id": "invoke-6276375bb8cfdf706ff48272",
       "candidate_native_invocation_id": "invoke-7de987f5b63fb728b4c5e955",
       "candidate_consumed_at": "2026-09-06T17:35:20.044111Z",
@@ -205,19 +205,98 @@
       "request_blob_sha": "3d1a61fa28172e3e990ebd98eb39a232f8ba0a7f",
       "decision_manifest_digest": "895147a4774940f56cdcb5caf0cb70cfb78fd93d94a4039bb422b2dea3861f80",
       "request_recreated": false,
-      "response_submitted": false,
+      "response_submitted": true,
       "snapshot_revision": 221,
       "idempotency_key": "o-work-g33:68fc8111:planning221-eval-3c0ee390:v1",
-      "next_action": "Audit immutable planning source/code/precommit and six saved trial receipts without solver rerun; answer frozen Task Evaluate exactly once, retain same-session and walking-cost limitations."
+      "next_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
+      "response_consumed": false,
+      "response_received_at": "2026-09-06T17:38:29.833516Z",
+      "response_digest": "4381d37321c5c893e0f355e06b37126e31447d0eaa4181402f4b8dac38f0b773",
+      "output_digest": "10171ea0b5242afb9b91248809874c8d526a5798bf7ea0811fc626b17306863e",
+      "files": [
+        {
+          "bytes": 130886,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "b64c22b016c51d302c940f72802da303415053ec"
+        },
+        {
+          "bytes": 5810,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-7de987f5b63fb728b4c5e955.json",
+          "sha": "08e501631aa63b153664e915b6be589ee8c6f485"
+        },
+        {
+          "bytes": 185571,
+          "path": ".continual/work-model/invocations/invoke-3c0ee390cfc82349399d12c5/request.json",
+          "sha": "3d1a61fa28172e3e990ebd98eb39a232f8ba0a7f"
+        },
+        {
+          "bytes": 16968,
+          "path": ".continual/work-model/invocations/invoke-3c0ee390cfc82349399d12c5/response.json",
+          "sha": "13a4e3f4aabb786b3b6c70d779c32306b94b99e0"
+        },
+        {
+          "bytes": 3920,
+          "path": "artifacts/unit-generation33-planning221-readonly-audit-v1.json",
+          "sha": "89e198a9eedc89ac343c7c3c4f59fdf870cb4e44"
+        },
+        {
+          "bytes": 15775,
+          "path": "artifacts/unit-generation33-planning221-task-evaluate-output-v1.json",
+          "sha": "6afe246b600a7b6ad229c19f0372c16162957c0e"
+        },
+        {
+          "bytes": 2782,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-67ab9619887348d69536064d/receipt.json",
+          "sha": "8ca0eb19fcdcfdcc27445207e158eb0bd60f412a"
+        },
+        {
+          "bytes": 1538,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-67ab9619887348d69536064d/request.json",
+          "sha": "9e53abedce57bbf895a0c20bbcef4d583807f9b0"
+        },
+        {
+          "bytes": 1822,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-7de987f5b63fb728b4c5e955-candidate_evaluate.json",
+          "sha": "f913fd46da5ad9786f6d47f986ac1aa944e52203"
+        },
+        {
+          "bytes": 643,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-a5a16f5a0bdbcc91f3bd2364.json",
+          "sha": "975ab6ec7ac9a45d4565805530bbdc703d396a9a"
+        },
+        {
+          "bytes": 156,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-7de987f5b63fb728b4c5e955-candidate_evaluate.json",
+          "sha": "cc35596bdc84a84c3f91c2b4f9cd37ef04b8913b"
+        },
+        {
+          "bytes": 5202,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-task_evaluate-bfb5707090ddd4fcb09bb408.json",
+          "sha": "bd9d86111b13dba542ec37d2b46b771256934f09"
+        },
+        {
+          "bytes": 1415,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-573bac76d33323cfbf8a2126/receipt.json",
+          "sha": "0700dc11e408f12f546ea3d1afb2226b9135cc02"
+        },
+        {
+          "bytes": 1385,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-573bac76d33323cfbf8a2126/request.json",
+          "sha": "8838ef365fee4707b2aaccbc18193433ab57f9c8"
+        }
+      ],
+      "solver_rerun": false,
+      "independent_evaluation_claimed": false,
+      "upper_objective_achieved": false
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_ci_run_ids": [],
     "pending_ci_scope": "PR551 exact Candidate preflight request/response, no solver replay.",
-    "exact_frontier": "Planning221 Task Evaluate frozen, no evaluation response yet; audit saved evidence without solver replay.",
-    "next_action": "Audit immutable planning source/code/precommit and six saved trial receipts without solver rerun; answer frozen Task Evaluate exactly once, retain same-session and walking-cost limitations.",
-    "next_tool": "exec_command",
-    "next_tool_action": "Audit immutable planning source/code/precommit and six saved trial receipts without solver rerun; answer frozen Task Evaluate exactly once, retain same-session and walking-cost limitations.",
+    "exact_frontier": "Task Evaluate answered once locally; prior remote Candidate frontier remains authoritative until publication/readback.",
+    "next_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
+    "next_tool": "github_create_blob",
+    "next_tool_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -230,7 +309,7 @@
     "pending_response_digest": "3f1cb9aa8e0936d0e272b434c2ca6f8543ec690de93e6221edd69e52e85a01f4",
     "pending_response_blob_sha": "b2b8c0836b25b76eab211f2c13d66970bea7d5e2",
     "pending_pull_requests": [],
-    "frozen_invocation_durability": "Exact Task Evaluate request frozen locally, awaiting protected publication; prior Candidate response remains durable.",
+    "frozen_invocation_durability": "Exact frozen request and response are local and hash-bound pending protected publication.",
     "frozen_payload_digest": "0922e1e5090f17de49f42876118accc66dee20f5f9e44a7bce5d1c2853686d54"
   },
   "checkpoint_integrity_publication_precommit": {
@@ -1474,7 +1553,7 @@
     "test_run_id": 33963560093
   },
   "execution_surface_status": "available",
-  "expected_blob_sha": "656e246f1962cd80504dc9b72002183e65b0de8b",
+  "expected_blob_sha": "12c8f5a5f309014dc9631bd33617451a9c17aff5",
   "explicit_failure_consolidation_repair": {
     "all_content_blobs_exact_readback": true,
     "directive_run_id": 33963274274,
@@ -22384,7 +22463,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T17:36:08.768Z",
+  "heartbeat_at": "2026-09-06T17:44:53.714Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23257,9 +23336,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Candidate response consumed once; exact planning Task Evaluate request frozen with scoped overlay.",
-  "last_activity_at": "2026-09-06T17:36:08.768Z",
-  "last_checked_at": "2026-09-06T17:36:08.768Z",
+  "last_action": "Completed read-only six-trial audit and submitted frozen Task Evaluate response once; publication pending.",
+  "last_activity_at": "2026-09-06T17:44:53.714Z",
+  "last_checked_at": "2026-09-06T17:44:53.714Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
     "message": "Candidate Evaluate response was consumed exactly once and native revision advanced to 197; Task Evaluate freeze then failed closed because no fresh authoritative Work source observation matched the generation31 state.",
@@ -23277,7 +23356,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T17:36:08.768Z",
+  "last_progress_at": "2026-09-06T17:44:53.714Z",
   "last_verified_effect": {
     "status": "remote_main_readback_verified",
     "observed_at": "2026-09-06T14:21:29.855Z",
@@ -23730,9 +23809,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Audit immutable planning source/code/precommit and six saved trial receipts without solver rerun; answer frozen Task Evaluate exactly once, retain same-session and walking-cost limitations.",
-  "next_tool": "exec_command",
-  "next_tool_action": "Audit immutable planning source/code/precommit and six saved trial receipts without solver rerun; answer frozen Task Evaluate exactly once, retain same-session and walking-cost limitations.",
+  "next_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
+  "next_tool": "github_create_blob",
+  "next_tool_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -28716,5 +28795,102 @@
     "snapshot_revision": 221,
     "idempotency_key": "o-work-g33:68fc8111:planning221-eval-3c0ee390:v1",
     "next_action": "Audit immutable planning source/code/precommit and six saved trial receipts without solver rerun; answer frozen Task Evaluate exactly once, retain same-session and walking-cost limitations."
+  },
+  "planning221_evaluation_response_v1": {
+    "status": "evaluation_answered_once_locally_publication_pending",
+    "candidate_work_invocation_id": "invoke-6276375bb8cfdf706ff48272",
+    "candidate_native_invocation_id": "invoke-7de987f5b63fb728b4c5e955",
+    "candidate_consumed_at": "2026-09-06T17:35:20.044111Z",
+    "work_invocation_id": "invoke-3c0ee390cfc82349399d12c5",
+    "native_invocation_id": "invoke-a5a16f5a0bdbcc91f3bd2364",
+    "frozen_at": "2026-09-06T17:35:20.289531Z",
+    "request_digest": "f2ae29ff2a110e995b753e999f53ab34d11d36ed42db61d6dc2e4a7f0f8f9e5c",
+    "payload_digest": "0922e1e5090f17de49f42876118accc66dee20f5f9e44a7bce5d1c2853686d54",
+    "request_blob_sha": "3d1a61fa28172e3e990ebd98eb39a232f8ba0a7f",
+    "decision_manifest_digest": "895147a4774940f56cdcb5caf0cb70cfb78fd93d94a4039bb422b2dea3861f80",
+    "request_recreated": false,
+    "response_submitted": true,
+    "snapshot_revision": 221,
+    "idempotency_key": "o-work-g33:68fc8111:planning221-eval-3c0ee390:v1",
+    "next_action": "Publish exact Candidate consume and planning Task Evaluate request/response/audit artifacts; verify exact-head CI and main readback before native consume.",
+    "response_consumed": false,
+    "response_received_at": "2026-09-06T17:38:29.833516Z",
+    "response_digest": "4381d37321c5c893e0f355e06b37126e31447d0eaa4181402f4b8dac38f0b773",
+    "output_digest": "10171ea0b5242afb9b91248809874c8d526a5798bf7ea0811fc626b17306863e",
+    "files": [
+      {
+        "bytes": 130886,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "b64c22b016c51d302c940f72802da303415053ec"
+      },
+      {
+        "bytes": 5810,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-7de987f5b63fb728b4c5e955.json",
+        "sha": "08e501631aa63b153664e915b6be589ee8c6f485"
+      },
+      {
+        "bytes": 185571,
+        "path": ".continual/work-model/invocations/invoke-3c0ee390cfc82349399d12c5/request.json",
+        "sha": "3d1a61fa28172e3e990ebd98eb39a232f8ba0a7f"
+      },
+      {
+        "bytes": 16968,
+        "path": ".continual/work-model/invocations/invoke-3c0ee390cfc82349399d12c5/response.json",
+        "sha": "13a4e3f4aabb786b3b6c70d779c32306b94b99e0"
+      },
+      {
+        "bytes": 3920,
+        "path": "artifacts/unit-generation33-planning221-readonly-audit-v1.json",
+        "sha": "89e198a9eedc89ac343c7c3c4f59fdf870cb4e44"
+      },
+      {
+        "bytes": 15775,
+        "path": "artifacts/unit-generation33-planning221-task-evaluate-output-v1.json",
+        "sha": "6afe246b600a7b6ad229c19f0372c16162957c0e"
+      },
+      {
+        "bytes": 2782,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-67ab9619887348d69536064d/receipt.json",
+        "sha": "8ca0eb19fcdcfdcc27445207e158eb0bd60f412a"
+      },
+      {
+        "bytes": 1538,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-67ab9619887348d69536064d/request.json",
+        "sha": "9e53abedce57bbf895a0c20bbcef4d583807f9b0"
+      },
+      {
+        "bytes": 1822,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-7de987f5b63fb728b4c5e955-candidate_evaluate.json",
+        "sha": "f913fd46da5ad9786f6d47f986ac1aa944e52203"
+      },
+      {
+        "bytes": 643,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-a5a16f5a0bdbcc91f3bd2364.json",
+        "sha": "975ab6ec7ac9a45d4565805530bbdc703d396a9a"
+      },
+      {
+        "bytes": 156,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-7de987f5b63fb728b4c5e955-candidate_evaluate.json",
+        "sha": "cc35596bdc84a84c3f91c2b4f9cd37ef04b8913b"
+      },
+      {
+        "bytes": 5202,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-task_evaluate-bfb5707090ddd4fcb09bb408.json",
+        "sha": "bd9d86111b13dba542ec37d2b46b771256934f09"
+      },
+      {
+        "bytes": 1415,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-573bac76d33323cfbf8a2126/receipt.json",
+        "sha": "0700dc11e408f12f546ea3d1afb2226b9135cc02"
+      },
+      {
+        "bytes": 1385,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-573bac76d33323cfbf8a2126/request.json",
+        "sha": "8838ef365fee4707b2aaccbc18193433ab57f9c8"
+      }
+    ],
+    "solver_rerun": false,
+    "independent_evaluation_claimed": false,
+    "upper_objective_achieved": false
   }
 }
