@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T09:53:58.261Z",
+    "checkpointed_at": "2026-09-06T09:54:43.818Z",
     "current_main_sha": "c495e04048c32090445db8ba6feb788ce0c61de8",
     "current_state_blob_sha": "828c49d3644c3ba9889ef45349dd45612c58d3a5",
     "goal_revision": 118,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "local_root_consumed_native211_publication_pending",
+      "status": "pr537_exact_head_ci_pending",
       "observed_at": "2026-09-06T09:53:58.261Z",
       "consumed_at": "2026-09-06T09:52:59.593379Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -233,16 +233,22 @@
           "sha": "dc6d0ddfa13ee4c90a8861fd848cede363fc9cdf"
         }
       ],
-      "idempotency_key": "o-work-g33:68fc8111:root-fa90813b:consume-r211:v1"
+      "idempotency_key": "o-work-g33:68fc8111:root-fa90813b:consume-r211:v1",
+      "pull_request": 537,
+      "head_sha": "e1c9a787a775cd7aaf0cc58fbda4563a51e96276",
+      "branch": "work/g33-native211-consolidation-v1"
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [],
+    "pending_ci_run_ids": [
+      34025946054,
+      34025946041
+    ],
     "pending_ci_scope": "PR534 all required jobs succeeded.",
     "exact_frontier": "Root consumed once locally to native211 consolidate_pending; remote exact_continuation remains prepublication Root. Do not replay.",
     "next_action": "Verify current continuation then consume saved Root response once; preserve resulting consolidation unit and native effects through protected publication.",
-    "next_tool": "github_create_blob",
-    "next_tool_action": "Publish six native211 effects under protected CI and exact readback, then bind and freeze consolidation; never repeat Root consume.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_tool_action": "Query accepted PR537 exact-head CI; merge/readback six native211 effects, bind then freeze consolidation. No duplicate Root consume.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -254,7 +260,12 @@
     "agi_claim_supported": false,
     "pending_response_digest": "6d05fd5d09ecb672eaace780d60d8917968acf87275f67cd0527b7d215db18d4",
     "pending_response_blob_sha": "ee5af03d03ef469b423af00a886925a7b7639d17",
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      {
+        "number": 537,
+        "head_sha": "e1c9a787a775cd7aaf0cc58fbda4563a51e96276"
+      }
+    ],
     "frozen_invocation_durability": "main; ten exact blob readbacks"
   },
   "checkpoint_integrity_publication_precommit": {
@@ -23621,8 +23632,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Verify current continuation then consume saved Root response once; preserve resulting consolidation unit and native effects through protected publication.",
-  "next_tool": "github_create_blob",
-  "next_tool_action": "Publish six native211 effects under protected CI and exact readback, then bind and freeze consolidation; never repeat Root consume.",
+  "next_tool": "github_fetch_commit_workflow_runs",
+  "next_tool_action": "Query accepted PR537 exact-head CI; merge/readback six native211 effects, bind then freeze consolidation. No duplicate Root consume.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -23872,7 +23883,7 @@
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
   "pending_consolidate_work_invocation_id": null,
-  "pending_head_sha": null,
+  "pending_head_sha": "e1c9a787a775cd7aaf0cc58fbda4563a51e96276",
   "pending_learn_native_invocation_id": null,
   "pending_learn_request_blob_sha": null,
   "pending_learn_request_digest": null,
@@ -23883,7 +23894,7 @@
   "pending_output_digest": "67b2975e8b0bea7803a4c15401f2c03a0a602018fd963950c0f29028fb584959",
   "pending_preflight_blob_sha": null,
   "pending_preflight_ref": null,
-  "pending_pull_request": null,
+  "pending_pull_request": 537,
   "pending_request_blob_sha": "45c7f459acdb4102ea7855f4a2d04cc22592b71c",
   "pending_request_digest": "702167207ff54f7cffa9d8aced82a588b1c50eae5f8a3e00d3d6efd608058ecc",
   "pending_request_ref": ".continual/work-model/invocations/invoke-fa90813bab477862e5410d99/request.json",
@@ -26264,7 +26275,7 @@
     "ci_all_success": true
   },
   "twisted_10635_root209_consume_v1": {
-    "status": "local_root_consumed_native211_publication_pending",
+    "status": "pr537_exact_head_ci_pending",
     "observed_at": "2026-09-06T09:53:58.261Z",
     "consumed_at": "2026-09-06T09:52:59.593379Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -26304,6 +26315,9 @@
         "sha": "dc6d0ddfa13ee4c90a8861fd848cede363fc9cdf"
       }
     ],
-    "idempotency_key": "o-work-g33:68fc8111:root-fa90813b:consume-r211:v1"
+    "idempotency_key": "o-work-g33:68fc8111:root-fa90813b:consume-r211:v1",
+    "pull_request": 537,
+    "head_sha": "e1c9a787a775cd7aaf0cc58fbda4563a51e96276",
+    "branch": "work/g33-native211-consolidation-v1"
   }
 }
