@@ -176,15 +176,15 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T08:15:17.188Z",
+    "checkpointed_at": "2026-09-06T08:16:33.836Z",
     "current_main_sha": "90d9dd9c6a3b28829763d204316f9e593bceee50",
     "current_state_blob_sha": "5923bf7998ea90c0a546759cdb7283e06249fe05",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
-    "frozen_invocation_id": "invoke-203fb559b4880f6c5666a9f4",
-    "frozen_request_digest": "4c9b71c3f93d282c8e83bea6842774c8a3a85d84c30c02b0b570bbd44b2c9b26",
+    "frozen_invocation_id": "invoke-c16fe24158cfdfc3dfff356a",
+    "frozen_request_digest": "eb8ebf1c76d69353f59729634f5869cfa4021aa84f3fbc04ee8de78835451b4f",
     "exact_pending_work_invocation_id": "invoke-203fb559b4880f6c5666a9f4",
     "exact_pending_native_invocation_id": "invoke-551e1ce1f6c6871597c8f0c1",
     "snapshot_revision": 207,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "task_evaluate_answered_publication_pending",
+      "status": "pr534_exact_head_ci_pending",
       "observed_at": "2026-09-06T08:10:32.947Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
       "lease_generation": 33,
@@ -284,16 +284,22 @@
         "native_completed": 205,
         "native_fragments": 205,
         "native_local_learn": 188
-      }
+      },
+      "pull_request": 534,
+      "head_sha": "103918337cf14147f863b943e5a58af00135af2a",
+      "branch": "work/g33-twisted-task-evaluate-response-v1"
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [],
+    "pending_ci_run_ids": [
+      34021353625,
+      34021353672
+    ],
     "pending_ci_scope": "Inbox revision48 push only; not a distinct primary execution.",
     "exact_frontier": "Task Evaluate answered once with original objective FAIL, evaluation-unit UNCERTAIN because fresh independence is unmet, trial NOT_EVALUABLE. Thirteen completed-candidate/successor/evidence files await publication; Task Evaluate response not consumed.",
     "next_action": "Publish exact thirteen files, keep existing frozen request/response immutable, verify protected CI and readback before consumption. The next Root must explicitly consolidate the non-success.",
-    "next_tool": "github_create_blob",
-    "next_tool_action": "Publish one fenced branch and PR for Task Evaluate response plus completed candidate and source receipts.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_tool_action": "Recheck PR534 exact-head CI; no duplicate candidate consume, Task Evaluate answer or publication.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -305,7 +311,13 @@
     "agi_claim_supported": false,
     "pending_response_digest": "bbd9210cf57176ff44ba571a17913a9b464e58c2a10080f96cf0963798a66bff",
     "pending_response_blob_sha": "f8f5779f522bf59ed886567df5c6eeb9352aefbc",
-    "pending_pull_requests": []
+    "pending_pull_requests": [
+      {
+        "number": 534,
+        "head_sha": "103918337cf14147f863b943e5a58af00135af2a"
+      }
+    ],
+    "frozen_invocation_durability": "PR534 branch; exact_continuation still describes pre-merge main pending candidate"
   },
   "checkpoint_integrity_publication_precommit": {
     "all_reviewed_blobs_match": true,
@@ -22452,7 +22464,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T08:15:17.188Z",
+  "heartbeat_at": "2026-09-06T08:16:33.836Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23326,7 +23338,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Merged validated PR529; five blob readbacks restore the exact pending execution unit and activate input48 session consolidation.",
-  "last_activity_at": "2026-09-06T08:15:17.188Z",
+  "last_activity_at": "2026-09-06T08:16:33.836Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
@@ -25930,7 +25942,7 @@
     "ci_aggregate_job_id": 101453112841
   },
   "twisted_10635_task_evaluate_native_freeze_v1": {
-    "status": "task_evaluate_answered_publication_pending",
+    "status": "pr534_exact_head_ci_pending",
     "observed_at": "2026-09-06T08:10:32.947Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -26021,6 +26033,9 @@
       "native_completed": 205,
       "native_fragments": 205,
       "native_local_learn": 188
-    }
+    },
+    "pull_request": 534,
+    "head_sha": "103918337cf14147f863b943e5a58af00135af2a",
+    "branch": "work/g33-twisted-task-evaluate-response-v1"
   }
 }
