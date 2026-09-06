@@ -176,24 +176,24 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T13:41:04.045Z",
-    "current_main_sha": "2b36a058ceb4a76dbebcac3faac212fa1d5a3d3e",
-    "current_state_blob_sha": "2d0cc3efad5d3d23886d68d9a8c4be074787cb62",
+    "checkpointed_at": "2026-09-06T14:08:34.078Z",
+    "current_main_sha": "61b8291197ac96d9a4c6d1e5d92bbbd33e7e6f6e",
+    "current_state_blob_sha": "f8df35048991bb5af715e6875acc6f8e35f5214a",
     "goal_revision": 118,
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
     "frozen_invocation_id": "invoke-12d8b25c299b3e3a34e68ea7",
     "frozen_request_digest": "a15221f0c827522d6a93d49b00c46de8df40bc50095aea0843a7727aca9d601c",
-    "exact_pending_work_invocation_id": null,
-    "exact_pending_native_invocation_id": null,
+    "exact_pending_work_invocation_id": "invoke-12d8b25c299b3e3a34e68ea7",
+    "exact_pending_native_invocation_id": "invoke-eb6afa2631439abb913c7229",
     "snapshot_revision": 217,
     "snapshot_phase": "unit_pending",
     "snapshot_blob_sha": "fba9bc85286de5738db8782efcdee79bae1df266",
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "published_pr544_ci_pending",
+      "status": "remote_main_readback_verified",
       "frozen_at": "2026-09-06T13:37:03.632586Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
       "lease_generation": 33,
@@ -254,18 +254,65 @@
       "ci_run_ids": [
         34036804429,
         34036804393
-      ]
+      ],
+      "merge_sha": "61b8291197ac96d9a4c6d1e5d92bbbd33e7e6f6e",
+      "readback": [
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "6693370473a5b7b82d5468c5fba7f5364b2af844"
+        },
+        {
+          "match": true,
+          "path": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/request.json",
+          "sha": "e5a9c0dbf758c11a4c7860d14bcd2dc51f3a397c"
+        },
+        {
+          "match": true,
+          "path": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/response.json",
+          "sha": "794525335bfbf5df632bba9d9893e1e8a082c7b6"
+        },
+        {
+          "match": true,
+          "path": "artifacts/unit-generation33-planning217-candidate-output-v1.json",
+          "sha": "fde873dad55a45db72652cfffe800a42db931f36"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-d77e3a9dd0d498d434bf1f0d/receipt.json",
+          "sha": "fa88546a8fb26707b227ef64293d1143d13fbe7d"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-d77e3a9dd0d498d434bf1f0d/request.json",
+          "sha": "fb77fae011017dd12e7eeb382ce683b7162a7e4b"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-eb6afa2631439abb913c7229.json",
+          "sha": "02a2a1b456b581b1f16341a9204040ec69e50b53"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-cf0dca741a9d423b232658e9/receipt.json",
+          "sha": "d1ac6daaeb333001a0e9dedaf2975f47bd43dce6"
+        },
+        {
+          "match": true,
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-cf0dca741a9d423b232658e9/request.json",
+          "sha": "ee149bdc60c5fb398ca53ed5792cf5bbadc254d5"
+        }
+      ],
+      "verified_at": "2026-09-06T14:08:34.078Z",
+      "ci_all_success": true
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_ci_run_ids": [
-      34036804429,
-      34036804393
-    ],
+    "pending_ci_run_ids": [],
     "pending_ci_scope": "PR544 exact head checks pending; no duplicate launch.",
-    "exact_frontier": "Candidate217 response published PR544 pending CI; do not consume before main artifact readback.",
-    "next_action": "Recheck accepted exact-head PR544 workflows; merge only all-success and read back nine artifacts before consuming.",
-    "next_tool": "github_fetch_commit_workflow_runs",
+    "exact_frontier": "Candidate217 awaiting once-only consume on main; then planning Execute remains actionable.",
+    "next_action": "Rehydrate current main, record fresh source and PR544 CI observations, validate exact continuation, consume Candidate once and preserve frozen Execute.",
+    "next_tool": "work-source-observation-prepare",
     "next_tool_action": "Prepare fresh Work and PR543 CI observations, enter immediate Candidate preflight for selected Execute, preserve every frozen request and then execute prospectively locked planning comparison.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
@@ -276,12 +323,10 @@
     "blocker": null,
     "upper_objective_achieved": false,
     "agi_claim_supported": false,
-    "pending_response_digest": null,
-    "pending_response_blob_sha": null,
-    "pending_pull_requests": [
-      544
-    ],
-    "frozen_invocation_durability": "Local frozen request pending protected artifact publication; exact_continuation remains remote native217.",
+    "pending_response_digest": "ae6e3b73e509a6b1af758fdbd68873b5850df4f1a02eb6e2a10e1331dd4610ed",
+    "pending_response_blob_sha": "794525335bfbf5df632bba9d9893e1e8a082c7b6",
+    "pending_pull_requests": [],
+    "frozen_invocation_durability": "PR544 main nine blob readbacks verified.",
     "frozen_payload_digest": "d686d979a640619e78ec7477638c239985c4880022a2024a70796b6db79c03bc"
   },
   "checkpoint_integrity_publication_precommit": {
@@ -726,35 +771,35 @@
     "test_workflow_run_id": 33526496374
   },
   "ci_source_observation_policy": {
-    "exact_head_sha": "3a20a72aeb499ab6d17b3bb546b1576157c5bf82",
+    "exact_head_sha": "d089033087c820d64b7f4943e2dcf606c65ca400",
     "executor_binding": "current_chatgpt_work_session",
     "max_age_seconds": 7200,
     "repository_full_name": "bachikoljunior-blip/O",
     "required": true,
     "required_jobs": [
       {
-        "id": 101490775482,
-        "name": "pytest shard 0 of 4"
-      },
-      {
-        "id": 101490775579,
+        "id": 101496250877,
         "name": "pytest shard 1 of 4"
       },
       {
-        "id": 101490775580,
+        "id": 101496250968,
+        "name": "pytest shard 0 of 4"
+      },
+      {
+        "id": 101496250990,
         "name": "pytest shard 2 of 4"
       },
       {
-        "id": 101490775592,
+        "id": 101496251048,
         "name": "pytest shard 3 of 4"
       },
       {
-        "id": 101494567698,
+        "id": 101499746690,
         "name": "test"
       }
     ],
     "workflow_id": 335420036,
-    "workflow_run_id": 34034790961
+    "workflow_run_id": 34036804429
   },
   "clean_g1_research_feed_cursor": {
     "blob_sha": "b3780c12f1aeb02a1e36a5da976ee99dc2ba72b9",
@@ -1232,22 +1277,22 @@
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
     "lease_generation": 33,
     "native_phase": "unit_pending",
-    "pending_component": null,
-    "pending_native_invocation_blob_sha": null,
-    "pending_native_invocation_id": null,
-    "pending_native_invocation_ref": null,
-    "pending_output_digest": null,
-    "pending_request_blob_sha": null,
-    "pending_request_digest": null,
-    "pending_request_ref": null,
-    "pending_response_blob_sha": null,
-    "pending_response_digest": null,
-    "pending_response_ref": null,
-    "pending_work_invocation_id": null,
-    "pending_work_invocation_ref": null,
+    "pending_component": "candidate_evaluate",
+    "pending_native_invocation_blob_sha": "02a2a1b456b581b1f16341a9204040ec69e50b53",
+    "pending_native_invocation_id": "invoke-eb6afa2631439abb913c7229",
+    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-eb6afa2631439abb913c7229.json",
+    "pending_output_digest": "3f7cfbc81affabd0846c7b55c4a7cc253ccba4a5339beb5be82b743282544f63",
+    "pending_request_blob_sha": "e5a9c0dbf758c11a4c7860d14bcd2dc51f3a397c",
+    "pending_request_digest": "a15221f0c827522d6a93d49b00c46de8df40bc50095aea0843a7727aca9d601c",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/request.json",
+    "pending_response_blob_sha": "794525335bfbf5df632bba9d9893e1e8a082c7b6",
+    "pending_response_digest": "ae6e3b73e509a6b1af758fdbd68873b5850df4f1a02eb6e2a10e1331dd4610ed",
+    "pending_response_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/response.json",
+    "pending_work_invocation_id": "invoke-12d8b25c299b3e3a34e68ea7",
+    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/request.json",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@d593e0eb81863dc99ae2b60ba5ba2ce335bad6a2/agi/WORK_EXECUTION_STATE.json",
     "request_recreated": false,
-    "response_consumed": true,
+    "response_consumed": false,
     "response_replayed": false,
     "response_submitted": true,
     "resume_required": true,
@@ -1255,14 +1300,14 @@
     "schema_version": 1,
     "snapshot_blob_sha": "fba9bc85286de5738db8782efcdee79bae1df266",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "e3a9b6c3f92c15384dda885f1605d8f16a52bffd",
+    "snapshot_head_sha": "61b8291197ac96d9a4c6d1e5d92bbbd33e7e6f6e",
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 217,
-    "source_main_sha": "e3a9b6c3f92c15384dda885f1605d8f16a52bffd",
-    "source_state_blob_sha": "478554a48b1612e9278c19266cbb363c5bf8ccb5",
+    "source_main_sha": "61b8291197ac96d9a4c6d1e5d92bbbd33e7e6f6e",
+    "source_state_blob_sha": "f8df35048991bb5af715e6875acc6f8e35f5214a",
     "status": "remote_main_readback_verified",
     "target_component": "execute",
-    "verified_at": "2026-09-06T13:30:22.204Z",
+    "verified_at": "2026-09-06T14:08:34.078Z",
     "verified_remote_readback": true
   },
   "continuation_source": "repository_latest_main_only",
@@ -1383,22 +1428,22 @@
     "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72",
     "lease_generation": 33,
     "native_phase": "unit_pending",
-    "pending_component": null,
-    "pending_native_invocation_blob_sha": null,
-    "pending_native_invocation_id": null,
-    "pending_native_invocation_ref": null,
-    "pending_output_digest": null,
-    "pending_request_blob_sha": null,
-    "pending_request_digest": null,
-    "pending_request_ref": null,
-    "pending_response_blob_sha": null,
-    "pending_response_digest": null,
-    "pending_response_ref": null,
-    "pending_work_invocation_id": null,
-    "pending_work_invocation_ref": null,
+    "pending_component": "candidate_evaluate",
+    "pending_native_invocation_blob_sha": "02a2a1b456b581b1f16341a9204040ec69e50b53",
+    "pending_native_invocation_id": "invoke-eb6afa2631439abb913c7229",
+    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-eb6afa2631439abb913c7229.json",
+    "pending_output_digest": "3f7cfbc81affabd0846c7b55c4a7cc253ccba4a5339beb5be82b743282544f63",
+    "pending_request_blob_sha": "e5a9c0dbf758c11a4c7860d14bcd2dc51f3a397c",
+    "pending_request_digest": "a15221f0c827522d6a93d49b00c46de8df40bc50095aea0843a7727aca9d601c",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/request.json",
+    "pending_response_blob_sha": "794525335bfbf5df632bba9d9893e1e8a082c7b6",
+    "pending_response_digest": "ae6e3b73e509a6b1af758fdbd68873b5850df4f1a02eb6e2a10e1331dd4610ed",
+    "pending_response_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/response.json",
+    "pending_work_invocation_id": "invoke-12d8b25c299b3e3a34e68ea7",
+    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/request.json",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@d593e0eb81863dc99ae2b60ba5ba2ce335bad6a2/agi/WORK_EXECUTION_STATE.json",
     "request_recreated": false,
-    "response_consumed": true,
+    "response_consumed": false,
     "response_replayed": false,
     "response_submitted": true,
     "resume_required": true,
@@ -1406,14 +1451,14 @@
     "schema_version": 1,
     "snapshot_blob_sha": "fba9bc85286de5738db8782efcdee79bae1df266",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "e3a9b6c3f92c15384dda885f1605d8f16a52bffd",
+    "snapshot_head_sha": "61b8291197ac96d9a4c6d1e5d92bbbd33e7e6f6e",
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 217,
-    "source_main_sha": "e3a9b6c3f92c15384dda885f1605d8f16a52bffd",
-    "source_state_blob_sha": "478554a48b1612e9278c19266cbb363c5bf8ccb5",
+    "source_main_sha": "61b8291197ac96d9a4c6d1e5d92bbbd33e7e6f6e",
+    "source_state_blob_sha": "f8df35048991bb5af715e6875acc6f8e35f5214a",
     "status": "remote_main_readback_verified",
     "target_component": "execute",
-    "verified_at": "2026-09-06T13:30:22.204Z",
+    "verified_at": "2026-09-06T14:08:34.078Z",
     "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
@@ -22431,7 +22476,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T13:41:04.045Z",
+  "heartbeat_at": "2026-09-06T14:08:34.078Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23305,7 +23350,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "PR543 merged after protected all-success CI and6/6 main readback; native217 contains selected planning comparison.",
-  "last_activity_at": "2026-09-06T13:41:04.045Z",
+  "last_activity_at": "2026-09-06T14:08:34.078Z",
   "last_checked_at": "2026-09-06T13:37:46.401Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
@@ -23324,7 +23369,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T13:30:22.204Z",
+  "last_progress_at": "2026-09-06T14:08:34.078Z",
   "last_verified_effect": {
     "agi_achieved": false,
     "all_published_blobs_exact_readback": true,
@@ -23662,7 +23707,7 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Recheck accepted exact-head PR544 workflows; merge only all-success and read back nine artifacts before consuming.",
+  "next_action": "Rehydrate current main, record fresh source and PR544 CI observations, validate exact continuation, consume Candidate once and preserve frozen Execute.",
   "next_tool": "work-source-observation-prepare",
   "next_tool_action": "Prepare fresh Work and PR539 CI observations, freeze post-task Learn from native213, answer once using canonical Episode then return to Root for materially different safe work.",
   "no_response_on_authoritative_remote": false,
@@ -23909,7 +23954,7 @@
   "pending_candidate_request_blob_sha": null,
   "pending_candidate_request_digest": null,
   "pending_candidate_work_invocation_id": null,
-  "pending_component": null,
+  "pending_component": "candidate_evaluate",
   "pending_consolidate_native_invocation_id": null,
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
@@ -23919,26 +23964,26 @@
   "pending_learn_request_blob_sha": null,
   "pending_learn_request_digest": null,
   "pending_learn_work_invocation_id": null,
-  "pending_native_invocation_blob_sha": null,
-  "pending_native_invocation_id": null,
-  "pending_native_invocation_ref": null,
-  "pending_output_digest": null,
+  "pending_native_invocation_blob_sha": "02a2a1b456b581b1f16341a9204040ec69e50b53",
+  "pending_native_invocation_id": "invoke-eb6afa2631439abb913c7229",
+  "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-eb6afa2631439abb913c7229.json",
+  "pending_output_digest": "3f7cfbc81affabd0846c7b55c4a7cc253ccba4a5339beb5be82b743282544f63",
   "pending_preflight_blob_sha": null,
   "pending_preflight_ref": null,
   "pending_pull_request": null,
-  "pending_request_blob_sha": null,
-  "pending_request_digest": null,
-  "pending_request_ref": null,
-  "pending_response_blob_sha": null,
-  "pending_response_digest": null,
-  "pending_response_ref": null,
+  "pending_request_blob_sha": "e5a9c0dbf758c11a4c7860d14bcd2dc51f3a397c",
+  "pending_request_digest": "a15221f0c827522d6a93d49b00c46de8df40bc50095aea0843a7727aca9d601c",
+  "pending_request_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/request.json",
+  "pending_response_blob_sha": "794525335bfbf5df632bba9d9893e1e8a082c7b6",
+  "pending_response_digest": "ae6e3b73e509a6b1af758fdbd68873b5850df4f1a02eb6e2a10e1331dd4610ed",
+  "pending_response_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/response.json",
   "pending_task_evaluate_native_invocation_id": null,
   "pending_task_evaluate_request_blob_sha": null,
   "pending_task_evaluate_request_digest": null,
   "pending_task_evaluate_request_ref": null,
   "pending_task_evaluate_work_invocation_id": null,
-  "pending_work_invocation_id": null,
-  "pending_work_invocation_ref": null,
+  "pending_work_invocation_id": "invoke-12d8b25c299b3e3a34e68ea7",
+  "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/request.json",
   "phase2_readback_verified": true,
   "post_acquisition_progress_contract": {
     "concrete_effect_selected": "Validate the two-phase generation33 fence, merge PR515 at unchanged head, exact-readback the repaired native records, run work verification, bind a fresh Work source observation, and resume the unique Task Evaluate freeze without replaying Candidate.",
@@ -24113,8 +24158,8 @@
     ],
     "executor_binding": "current_chatgpt_work_session",
     "model_identity": "chatgpt-work-model-unverified",
-    "note": "Canonical Episode and native213 verified on main; freeze post-task Learn without replaying consolidation.",
-    "pending_invocation": null,
+    "note": "Candidate217 response main verified; consume once, then preserve next Execute request.",
+    "pending_invocation": "invoke-12d8b25c299b3e3a34e68ea7",
     "run_id": "run-work-recovery-gen9-durability-repair"
   },
   "primary_run_contract": {
@@ -26997,7 +27042,7 @@
     "ci_all_success": true
   },
   "planning217_candidate_freeze_v1": {
-    "status": "published_pr544_ci_pending",
+    "status": "remote_main_readback_verified",
     "frozen_at": "2026-09-06T13:37:03.632586Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
     "lease_generation": 33,
@@ -27058,6 +27103,56 @@
     "ci_run_ids": [
       34036804429,
       34036804393
-    ]
+    ],
+    "merge_sha": "61b8291197ac96d9a4c6d1e5d92bbbd33e7e6f6e",
+    "readback": [
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "6693370473a5b7b82d5468c5fba7f5364b2af844"
+      },
+      {
+        "match": true,
+        "path": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/request.json",
+        "sha": "e5a9c0dbf758c11a4c7860d14bcd2dc51f3a397c"
+      },
+      {
+        "match": true,
+        "path": ".continual/work-model/invocations/invoke-12d8b25c299b3e3a34e68ea7/response.json",
+        "sha": "794525335bfbf5df632bba9d9893e1e8a082c7b6"
+      },
+      {
+        "match": true,
+        "path": "artifacts/unit-generation33-planning217-candidate-output-v1.json",
+        "sha": "fde873dad55a45db72652cfffe800a42db931f36"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-d77e3a9dd0d498d434bf1f0d/receipt.json",
+        "sha": "fa88546a8fb26707b227ef64293d1143d13fbe7d"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-d77e3a9dd0d498d434bf1f0d/request.json",
+        "sha": "fb77fae011017dd12e7eeb382ce683b7162a7e4b"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-eb6afa2631439abb913c7229.json",
+        "sha": "02a2a1b456b581b1f16341a9204040ec69e50b53"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-cf0dca741a9d423b232658e9/receipt.json",
+        "sha": "d1ac6daaeb333001a0e9dedaf2975f47bd43dce6"
+      },
+      {
+        "match": true,
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-cf0dca741a9d423b232658e9/request.json",
+        "sha": "ee149bdc60c5fb398ca53ed5792cf5bbadc254d5"
+      }
+    ],
+    "verified_at": "2026-09-06T14:08:34.078Z",
+    "ci_all_success": true
   }
 }
