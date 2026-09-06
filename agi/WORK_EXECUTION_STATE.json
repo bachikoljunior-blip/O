@@ -176,7 +176,7 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-06T09:26:21.330Z",
+    "checkpointed_at": "2026-09-06T09:28:26.573Z",
     "current_main_sha": "ee287dad5a04f74d913a606733a40ec51c4f9821",
     "current_state_blob_sha": "721b292ab45b945fbfdd258156281ae0fae08c15",
     "goal_revision": 118,
@@ -193,7 +193,7 @@
     "inbox_revision": 48,
     "inbox_blob_sha": "66f9472646e02f99e5a7bac5822731b84b3668d0",
     "completed_effect_receipt": {
-      "status": "local_root_request_frozen",
+      "status": "root_response_once_publication_pending",
       "observed_at": "2026-09-06T09:26:21.330Z",
       "frozen_at": "2026-09-06T09:25:03.944747Z",
       "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -208,18 +208,65 @@
       "snapshot_revision": 209,
       "source_main_sha": "76f61b9ff72fb1ec3b9c9865b6dd6520fcadc037",
       "request_recreated": false,
-      "response_submitted": false,
+      "response_submitted": true,
       "response_consumed": false,
-      "idempotency_key": "o-work-g33:68fc8111:root-fa90813b:r209:v1"
+      "idempotency_key": "o-work-g33:68fc8111:root-fa90813b:r209:v1",
+      "response_digest": "6d05fd5d09ecb672eaace780d60d8917968acf87275f67cd0527b7d215db18d4",
+      "response_blob_sha": "ee5af03d03ef469b423af00a886925a7b7639d17",
+      "output_digest": "67b2975e8b0bea7803a4c15401f2c03a0a602018fd963950c0f29028fb584959",
+      "files": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "d34edcaed3b0b28f48195b6307d4e37f8189c63d"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-fa90813bab477862e5410d99/request.json",
+          "sha": "45c7f459acdb4102ea7855f4a2d04cc22592b71c"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-fa90813bab477862e5410d99/response.json",
+          "sha": "ee5af03d03ef469b423af00a886925a7b7639d17"
+        },
+        {
+          "path": "artifacts/unit-generation33-root209-consolidation-selection-v1.json",
+          "sha": "89224b131f4d463598557fa8e1622d90a04b0fcd"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-e49c5f97b66a54d240ca77bb.json",
+          "sha": "8dfcb4f818a81fed30276c04e1bd7f9c0bc7ec9f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-536868dd8152c02979cea44c.json",
+          "sha": "2e71b2658901b5021e133e52e6e51397da022b8e"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-37c32a03b38f5134c7afdaa5/request.json",
+          "sha": "aaf0bf0430a99b3feee5446f51fb8f4bb4c4f296"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-37c32a03b38f5134c7afdaa5/receipt.json",
+          "sha": "8f444402a9625e5b2aaf3df5c958bbe839937225"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1eeaff9b72060979a7d8ed23/request.json",
+          "sha": "aa260796b0a55b77a4b61c75efa58fa33700dcda"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1eeaff9b72060979a7d8ed23/receipt.json",
+          "sha": "604f618744220bbadc2a529e64e4498e46520391"
+        }
+      ],
+      "selected_component": "consolidate_episode",
+      "selected_unit": "unit-generation33-twisted-10635-negative-consolidation-v1"
     },
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_ci_run_ids": [],
     "pending_ci_scope": "PR534 all required jobs succeeded.",
-    "exact_frontier": "Unique Root request frozen locally, not answered, snapshot209 durable on main. Never refreeze.",
+    "exact_frontier": "Root answered once locally; immutable request/response pending publication, no native consume.",
     "next_action": "Prepare fresh authoritative Work and exact PR535 CI observations; freeze the unique Root request from snapshot209; select explicit consolidation of the negative Twisted evaluation without experiment replay.",
-    "next_tool": "work-submit",
-    "next_tool_action": "Answer immutable Root request once selecting explicit non-success consolidation, then publish request/response and native freeze before consume.",
+    "next_tool": "github_create_blob",
+    "next_tool_action": "Publish ten Root freeze/response/evidence files through protected CI and exact readback before consuming.",
     "baseline_replay_forbidden": true,
     "baseline_process_exit_code": null,
     "baseline_process_query": "Unknown process id 64027; no exit code inferred.",
@@ -22379,7 +22426,7 @@
     "source_state_blob_sha": "834442824843b99d2d19a3f60b2eb3c321976a57",
     "user_input_revision": 47
   },
-  "heartbeat_at": "2026-09-06T09:26:21.330Z",
+  "heartbeat_at": "2026-09-06T09:28:26.573Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -23252,8 +23299,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Unique Root request frozen from verified snapshot209 with fresh connector evidence; answer pending.",
-  "last_activity_at": "2026-09-06T09:26:21.330Z",
+  "last_action": "Root answered once: canonical consolidation of exact Twisted non-success selected, no native consume yet.",
+  "last_activity_at": "2026-09-06T09:28:26.573Z",
   "last_checked_at": "2026-09-06T06:14:40.290Z",
   "last_error": {
     "at": "2026-09-05T13:19:03.790722Z",
@@ -23272,7 +23319,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-06T09:26:21.330Z",
+  "last_progress_at": "2026-09-06T09:28:26.573Z",
   "last_verified_effect": {
     "agi_achieved": false,
     "all_published_blobs_exact_readback": true,
@@ -23598,8 +23645,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Prepare fresh authoritative Work and exact PR535 CI observations; freeze the unique Root request from snapshot209; select explicit consolidation of the negative Twisted evaluation without experiment replay.",
-  "next_tool": "work-submit",
-  "next_tool_action": "Answer immutable Root request once selecting explicit non-success consolidation, then publish request/response and native freeze before consume.",
+  "next_tool": "github_create_blob",
+  "next_tool_action": "Publish ten Root freeze/response/evidence files through protected CI and exact readback before consuming.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -26116,7 +26163,7 @@
     "ci_all_success": true
   },
   "twisted_10635_root209_freeze_v1": {
-    "status": "local_root_request_frozen",
+    "status": "root_response_once_publication_pending",
     "observed_at": "2026-09-06T09:26:21.330Z",
     "frozen_at": "2026-09-06T09:25:03.944747Z",
     "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
@@ -26131,8 +26178,55 @@
     "snapshot_revision": 209,
     "source_main_sha": "76f61b9ff72fb1ec3b9c9865b6dd6520fcadc037",
     "request_recreated": false,
-    "response_submitted": false,
+    "response_submitted": true,
     "response_consumed": false,
-    "idempotency_key": "o-work-g33:68fc8111:root-fa90813b:r209:v1"
+    "idempotency_key": "o-work-g33:68fc8111:root-fa90813b:r209:v1",
+    "response_digest": "6d05fd5d09ecb672eaace780d60d8917968acf87275f67cd0527b7d215db18d4",
+    "response_blob_sha": "ee5af03d03ef469b423af00a886925a7b7639d17",
+    "output_digest": "67b2975e8b0bea7803a4c15401f2c03a0a602018fd963950c0f29028fb584959",
+    "files": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "d34edcaed3b0b28f48195b6307d4e37f8189c63d"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-fa90813bab477862e5410d99/request.json",
+        "sha": "45c7f459acdb4102ea7855f4a2d04cc22592b71c"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-fa90813bab477862e5410d99/response.json",
+        "sha": "ee5af03d03ef469b423af00a886925a7b7639d17"
+      },
+      {
+        "path": "artifacts/unit-generation33-root209-consolidation-selection-v1.json",
+        "sha": "89224b131f4d463598557fa8e1622d90a04b0fcd"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-e49c5f97b66a54d240ca77bb.json",
+        "sha": "8dfcb4f818a81fed30276c04e1bd7f9c0bc7ec9f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-536868dd8152c02979cea44c.json",
+        "sha": "2e71b2658901b5021e133e52e6e51397da022b8e"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-37c32a03b38f5134c7afdaa5/request.json",
+        "sha": "aaf0bf0430a99b3feee5446f51fb8f4bb4c4f296"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-37c32a03b38f5134c7afdaa5/receipt.json",
+        "sha": "8f444402a9625e5b2aaf3df5c958bbe839937225"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1eeaff9b72060979a7d8ed23/request.json",
+        "sha": "aa260796b0a55b77a4b61c75efa58fa33700dcda"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1eeaff9b72060979a7d8ed23/receipt.json",
+        "sha": "604f618744220bbadc2a529e64e4498e46520391"
+      }
+    ],
+    "selected_component": "consolidate_episode",
+    "selected_unit": "unit-generation33-twisted-10635-negative-consolidation-v1"
   }
 }
