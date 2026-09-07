@@ -1,0 +1,219 @@
+{
+  "result": {
+    "component": "execute",
+    "unit_id": "unit-generation34-historical-evidence-regression-v1",
+    "scope": "continual/historical-evidence-representation-regression-v1",
+    "verdict": "PASS",
+    "unit_verdict": "PASS",
+    "unit_verdict_scope": "Three precommitted synthetic deterministic representation pairs only",
+    "task_status": "open",
+    "executed_at": "2026-09-07T16:02:04.652772+00:00",
+    "source_main_sha": "bdceb721564cb35cc28675ff2fa3c49a28576cf7",
+    "decision_manifest_digest": "0e901795728ebacf3cd5e1417d0c567c1c827c74f6950cc3714aa84946856946",
+    "protocol_kind": "deterministic_representation_regression_not_prompt_comparison",
+    "measurement": {
+      "first_attempt": 1,
+      "started_at": "2026-09-07T16:02:04.540623+00:00",
+      "finished_at": "2026-09-07T16:02:04.652772+00:00",
+      "wall_seconds": 0.11202074600441847,
+      "actual_process_exit_code": 0,
+      "tool_chunk_id": "bd1c9b",
+      "command": "PYTHONPATH=src timeout 300 python artifacts/g34-history253-regression.py --protocol artifacts/g34-history253-protocol.json --receipt artifacts/g34-history253-measurement-receipt.json",
+      "pairs": 3,
+      "conditions": [
+        {
+          "case_id": "current_binding_control",
+          "condition_id": "valid_current_accept",
+          "finished_at": "2026-09-07T16:02:04.606222+00:00",
+          "observations": {
+            "prior_bytes_unchanged": true,
+            "verified_current_declarations": 1
+          },
+          "started_at": "2026-09-07T16:02:04.603287+00:00",
+          "verdict": "PASS"
+        },
+        {
+          "case_id": "current_binding_control",
+          "condition_id": "wrong_canonical_reject",
+          "finished_at": "2026-09-07T16:02:04.611426+00:00",
+          "observations": {
+            "expected_rejection": "WorkSessionError: canonical JSON digest mismatch at output.current.sha256_canonical_json"
+          },
+          "started_at": "2026-09-07T16:02:04.606228+00:00",
+          "verdict": "PASS"
+        },
+        {
+          "case_id": "historical_snapshot_drift",
+          "condition_id": "stale_embedded_reject",
+          "finished_at": "2026-09-07T16:02:04.626880+00:00",
+          "observations": {
+            "expected_rejection": "WorkSessionError: evidence blob identity mismatch at output.prior_history.evidence_refs[0].git_blob_sha"
+          },
+          "started_at": "2026-09-07T16:02:04.623169+00:00",
+          "verdict": "PASS"
+        },
+        {
+          "case_id": "historical_snapshot_drift",
+          "condition_id": "immutable_history_preserve",
+          "finished_at": "2026-09-07T16:02:04.637660+00:00",
+          "observations": {
+            "complete_prior_bytes_equal": true,
+            "complete_prior_json_equal": true,
+            "current_declarations_verified": 1,
+            "historical_lookup": "separate explicit git verifier",
+            "historical_ref": {
+              "commit": "aef38ed74f94728d1374f5984e1f556d9c92628f",
+              "file": "episode.json",
+              "historical_blob": "52842123fae028fc227c28d62b67079582775578"
+            },
+            "negative_unknown_time_retained": true
+          },
+          "started_at": "2026-09-07T16:02:04.626888+00:00",
+          "verdict": "PASS"
+        },
+        {
+          "case_id": "historical_provenance_corruption",
+          "condition_id": "wrong_history_blob_reject",
+          "finished_at": "2026-09-07T16:02:04.640080+00:00",
+          "observations": {
+            "changed_field": "historical_blob",
+            "expected_rejection": "AssertionError: historical blob identity mismatch",
+            "verifier": "separate explicit git verifier; not current validator"
+          },
+          "started_at": "2026-09-07T16:02:04.637676+00:00",
+          "verdict": "PASS"
+        },
+        {
+          "case_id": "historical_provenance_corruption",
+          "condition_id": "valid_history_control",
+          "finished_at": "2026-09-07T16:02:04.649659+00:00",
+          "observations": {
+            "complete_prior_bytes_equal": true,
+            "complete_prior_json_equal": true,
+            "current_declarations_verified": 1,
+            "historical_lookup": "separate explicit git verifier",
+            "historical_ref": {
+              "commit": "aef38ed74f94728d1374f5984e1f556d9c92628f",
+              "file": "episode.json",
+              "historical_blob": "52842123fae028fc227c28d62b67079582775578"
+            },
+            "negative_unknown_time_retained": true
+          },
+          "started_at": "2026-09-07T16:02:04.640091+00:00",
+          "verdict": "PASS"
+        }
+      ],
+      "validator_unchanged": true,
+      "production_validator_sha256": "d9c69e9e270b22b22ad2835eb4a77e46bb8ade31a3105751e6188d6f25dca255",
+      "script_sha256": "50807b93541181555724c5011da2f56edb2a902e9c621f4489bee997ed95ea75",
+      "protocol_sha256": "5cafc04b92e0acc1a88c12df47c9c3dac8ae09617e4e4bbbd74f28e5485afa17"
+    },
+    "precommit_proof": {
+      "precommitted_at": "2026-09-07T15:29:59.178Z",
+      "pr": 592,
+      "head": "2d53e2541c5c0a2db4c97067e39444b24b3be207",
+      "merge_sha": "41971f74a8e1bc3bc4ce35edd2bf4cc879e511c0",
+      "main_readback_verified": true,
+      "ci_runs": [
+        {
+          "id": 34138717461,
+          "workflow_id": 342801498,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 34138717415,
+          "workflow_id": 335420036,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "measurement_began_after_main_readback": true,
+      "ci_claim_scope": "Pre-run repository integration tests; this harness was measured locally only after merge."
+    },
+    "evidence_bindings": [
+      {
+        "path": "artifacts/g34-history253-regression.py",
+        "git_blob_sha": "d182d15c5cb119be4b2f76c6ca6575c36519579d"
+      },
+      {
+        "path": "artifacts/g34-history253-protocol.json",
+        "git_blob_sha": "f16298a2960831fb2e02fd08ef5bd3f3d863fd7b",
+        "sha256_canonical_json": "006cf0c8675372fc3106c67e672448e11d200120732560a39964ee969087fed5"
+      },
+      {
+        "path": "artifacts/g34-history253-measurement-receipt.json",
+        "git_blob_sha": "4bfc71a8173118b0639311015bd60bb68d36108c",
+        "sha256_canonical_json": "03afc3fd47e5b5d2df683e4707020d1bfddd426a0ac58b73cc2534bfd0be5951"
+      },
+      {
+        "path": "src/continual/work_session.py",
+        "git_blob_sha": "de8f1a9bbc4af26cdf185ca70afb2ae52ed76be3"
+      }
+    ],
+    "interpretation": [
+      "Correct current Git blob and canonical digest accepted; zero64 canonical corruption rejected with exact mismatch.",
+      "Embedding a prior Episode containing an old mutable snapshot binding rejected after only that snapshot advanced.",
+      "Explicit separate historical commit/path/blob lookup preserved full synthetic prior Episode bytes/JSON, observation time, negative outcome and unknowns, while current binding validation stayed enabled.",
+      "Changing only asserted historical blob to zero40 rejected by the separate verifier; unchanged valid historical control passed."
+    ],
+    "negative_and_unknowns": [
+      "No baseline-versus-overlay semantic model comparison occurred; historical-reference Candidate remains inactive/NEED_MORE_EVIDENCE.",
+      "Historical resolution is implemented explicitly in this bounded harness, not by the production current-byte validator.",
+      "Synthetic historical commits existed only in the isolated temporary fixture and were resolved during the run. They are not production repository commits or remotely retrievable evidence; full prior Episode bytes and exact construction protocol are retained in the receipt.",
+      "The selected corruption was wrong historical blob; nonexistent-commit behavior was not separately measured.",
+      "Same task-chat operator authored and ran these fixtures; no independent or held-out evaluator boundary was satisfied.",
+      "No software-repair, broad transfer, live-provider, production or AGI capability result follows from these six representation checks."
+    ],
+    "limits_observed": {
+      "new_measurement_files": 3,
+      "provider_calls": 0,
+      "upstream_writes": 0,
+      "production_validator_edits": 0,
+      "protected_prompt_edits": 0,
+      "production_history_edits": 0,
+      "extra_primary_executors": 0,
+      "candidate_activations": 0
+    },
+    "candidate_status": {
+      "candidate_id": "candidate-consolidation-historical-evidence-reference-v1",
+      "status": "candidate",
+      "scope_state": "NEED_MORE_EVIDENCE",
+      "prompt_efficacy_tested": false
+    },
+    "continuation": "Publish this exact first-run receipt and immutable Execute response with exact-head CI/main readback; consume once and return to Root for Task Evaluate on these fixed observations, then required Consolidate/Learn and next safe falsifiable unit. Do not rerun this protocol to manufacture improvement or replay the completed public selector.",
+    "upper_objective_achieved": false,
+    "user_level_objective_achieved": false,
+    "agi_claim_supported": false
+  },
+  "local_learn": {
+    "decision": "NO_CHANGE",
+    "candidates": [],
+    "observations": [
+      "The first fixed six-condition run passed without modifying current validation or dropping negative/unknown historical content.",
+      "Explicit historical lookup and current-byte validation must remain distinct in evidence claims.",
+      "These deterministic controls support representation feasibility only; no new scoped Candidate activation is justified."
+    ],
+    "next_action": "Retain exact first run and seek Task Evaluate before any broader semantic comparison."
+  },
+  "fragment": {
+    "component": "execute",
+    "unit_id": "unit-generation34-historical-evidence-regression-v1",
+    "observed_at": "2026-09-07T16:03:29.907Z",
+    "actions": [
+      "Verified PR592 pre-run protocol/code/request main blobs and exact-head CI.",
+      "Ran one exclusive-receipt, three-pair/six-condition synthetic fixture with known exit0.",
+      "Read back all six condition results, exact errors, code digests and unchanged tracked source."
+    ],
+    "observations": [
+      "Six conditions PASS in 0.11202074600441847 seconds; expected corruptions rejected.",
+      "Complete synthetic prior evidence retained; current validator unchanged."
+    ],
+    "failures": [],
+    "unknowns": [
+      "Prompt-overlay efficacy and independent/production capability remain untested.",
+      "Historical commit resolution proved during temporary fixture lifetime, not remote persistence of those synthetic Git objects."
+    ],
+    "claim_boundary": "Internal deterministic representation evidence only; AGI unmet."
+  }
+}
