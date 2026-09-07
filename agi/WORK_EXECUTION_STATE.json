@@ -173,14 +173,14 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-07T23:25:57.533Z",
+    "checkpointed_at": "2026-09-07T23:41:12.513Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "goal_revision": 118,
-    "current_head_sha": "40fc83778cf7d781f9a3342a3571d9aadaba19d8",
-    "current_main_sha": "40fc83778cf7d781f9a3342a3571d9aadaba19d8",
-    "current_state_blob_sha": "f98fc31072c9433473a0bdad15546f948720d6b9",
+    "current_head_sha": "98de39dd79bc89849da5381ac0edb452b998045b",
+    "current_main_sha": "98de39dd79bc89849da5381ac0edb452b998045b",
+    "current_state_blob_sha": "17c89fd796061b2d2daeea59a8fe81802ae5ed0e",
     "frozen_invocation_id": "invoke-49d02026ef7076044a6ef760",
     "frozen_request_digest": "be406ea51d301fc090532df9bed67a083663d4a62813c4f1fd94a5bafbbe1e52",
     "frozen_payload_digest": "eb4f2fb71d46c495d0410b329ca9d506ed454f5f9a79b789adfe56c5650afee9",
@@ -607,16 +607,26 @@
       "verified_remote_readback": true,
       "resume_required": true
     },
-    "pending_ci_run_ids": [],
-    "pending_job_ids": [],
+    "pending_ci_run_ids": [
+      34170702031,
+      34170701995
+    ],
+    "pending_job_ids": [
+      101890297811,
+      101890297926,
+      101890297934,
+      101890297976
+    ],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
-    "pending_response_digest": null,
+    "pending_pull_requests": [
+      605
+    ],
+    "pending_response_digest": "9fa3a609f3ca63e89e3904e979201c99d2432c315dd4668d2ef938d4f174d0e3",
     "idempotency_key": "o-work-g34:81acbf6d:candidate259-consume-consolidate259-freeze:v1",
-    "exact_frontier": "Candidate259 response was consumed exactly once and all eleven successor artifacts are exact on main; Consolidate259 request is frozen, durable, unanswered, and must be answered exactly once.",
-    "next_tool": "exec_command",
-    "next_action": "Rehydrate fresh main, record fresh Work and CI source observations, validate continuity/checkpoint integrity, and answer the frozen Consolidate259 request exactly once.",
-    "next_tool_action": "Rehydrate fresh main, record fresh Work and CI source observations, validate continuity/checkpoint integrity, and answer the frozen Consolidate259 request exactly once.",
+    "exact_frontier": "Consolidate259 response is accepted exactly once and exact on PR605 head ba912c0fdab436a83bc6a60fd5e438946a447d2d; directive passed and four pytest shards are running; response is not yet main-durable and must not be consumed.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_action": "Continue bounded query of the existing PR605 exact-head workflow without rerun; merge only when directive and all five required test jobs succeed, then exact-read back all six blobs before native consume.",
+    "next_tool_action": "Continue bounded query of the existing PR605 exact-head workflow without rerun; merge only when directive and all five required test jobs succeed, then exact-read back all six blobs before native consume.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -30509,7 +30519,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-07T23:25:57.533Z",
+  "heartbeat_at": "2026-09-07T23:41:12.513Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -31429,9 +31439,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Merged PR604 after exact-head directive and all five test jobs succeeded; verified all eleven Candidate259 consume and Consolidate259 freeze artifacts on main and rebound the frozen continuation to Consolidate259.",
-  "last_activity_at": "2026-09-07T23:25:57.533Z",
-  "last_checked_at": "2026-09-07T23:25:57.533Z",
+  "last_action": "Accepted Consolidate259 response exactly once, exact-read back six PR605 branch blobs, and continued the existing exact-head CI run without rerun.",
+  "last_activity_at": "2026-09-07T23:41:12.513Z",
+  "last_checked_at": "2026-09-07T23:41:12.513Z",
   "last_error": null,
   "last_native_publication": {
     "all_content_blobs_exact_readback": true,
@@ -37804,5 +37814,66 @@
     "verified_at": "2026-09-07T23:25:57.533Z",
     "verified_remote_readback": true,
     "resume_required": true
+  },
+  "generation34_pr605_ci_wait": {
+    "schema_version": 1,
+    "classification": "exact_head_ci_running",
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "lease_generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:pr605-ci-wait:v1",
+    "pull_request": 605,
+    "head_sha": "ba912c0fdab436a83bc6a60fd5e438946a447d2d",
+    "runs": [
+      {
+        "id": 34170702031,
+        "name": "directive-source-preflight",
+        "workflow_id": 342801498,
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 34170701995,
+        "name": "test",
+        "workflow_id": 335420036,
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ],
+    "jobs": [
+      {
+        "id": 101890297811,
+        "name": "pytest shard 0 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 101890297926,
+        "name": "pytest shard 1 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 101890297934,
+        "name": "pytest shard 3 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 101890297976,
+        "name": "pytest shard 2 of 4",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ],
+    "response_digest": "9fa3a609f3ca63e89e3904e979201c99d2432c315dd4668d2ef938d4f174d0e3",
+    "output_digest": "c9611235ba661a64dffa28623fce521a039ba022520cc95227ec78330a0d6d8a",
+    "response_blob_sha": "a22b2481ced89343f3b3d6d1c7ee378da77247c6",
+    "branch_readback_verified": true,
+    "relaunch_attempted": false,
+    "stop_established": false,
+    "resume_required": true,
+    "upper_objective_achieved": false,
+    "observed_at": "2026-09-07T23:41:12.513Z"
   }
 }
