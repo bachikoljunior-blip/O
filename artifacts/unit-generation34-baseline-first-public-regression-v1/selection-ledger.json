@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-07T08:11:00.515Z",
+  "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+  "generation": 34,
+  "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+  "work_invocation_id": "invoke-ab18054106a14fd4e80e2eb4",
+  "request_digest": "b435f23da282aecd5757283b9e4d502e02633959a5774fc634c1be0fc22e1145",
+  "payload_digest": "14b17eefd9414ee145e9d68fa9e7a5980dd83e81d9c1c4c6abd9e85b46572844",
+  "idempotency_key": "o-work-g34:81acbf6d:execute241-selector:v1",
+  "source_main_sha": "105dac52615b35e5b8f70e6542fa412d14f9f453",
+  "pre_observation_publication": {
+    "root_pr": 574,
+    "root_merge_sha": "7e62c1d5653f02aa0cc5fb2a575293fe6fced125",
+    "native_pr": 575,
+    "execute_request_pr": 577,
+    "execute_request_merge_sha": "1980b852265533736b9e1e4dc223a1b3a1d44c7d",
+    "request_blob_sha": "ebb633063f58d9ead0623874a34801f38a9188f7"
+  },
+  "selector": {
+    "candidate_order": "Concatenate search items in repository order, deduplicate repository/number, inspect at most first three distinct candidates. Stop enumeration once three candidates exist. Select first eligible candidate before any repair edit.",
+    "contamination": "Read issue body and source needed to reproduce; do not intentionally inspect linked fixing PRs, patch solutions, or issue comments before the repair trial. Public source and same-session evaluator mean this is not hidden or independent evidence; disclose accidental solution exposure and exclude affected candidate.",
+    "disqualify": "Security exploitation, credentials, access bypass, unavailable dependencies, indeterminate baseline exit, non-reproduction, flaky or network-dependent checks, or explicit already-known repair solution. Persist exact reason and move only to the next of the pre-enumerated candidates before selection; after target lock no replacement.",
+    "eligible": [
+      "Public bug report has explicit expected behavior and a small deterministic local Python reproduction convertible to an assertion without secrets, external service, paid resource or unusual hardware.",
+      "The exact default-branch source can be acquired through an available authorized surface; repository license and relevant instructions are read.",
+      "Issue/target is not an earlier tested O unit, old Twisted10635, Boxoban/planning replay, self-created bug or known already-fixed example.",
+      "Unmodified source reproduces the stated expected-behavior failure with an actual non-timeout exit code, and at least one neighboring healthy upstream test/control passes."
+    ],
+    "max_issue_candidates": 3,
+    "max_search_requests": 3,
+    "query_template": "repo:{repository} is:issue is:open label:bug created:>=2026-01-01",
+    "repository_order": [
+      "pallets/click",
+      "python-attrs/attrs",
+      "dateutil/dateutil"
+    ],
+    "search_order": "GitHub issue search sort=created order=asc per_page=3; at most one first-page query per listed repository in listed order; no alternate labels or date ranges."
+  },
+  "searches": [
+    {
+      "repository": "pallets/click",
+      "query": "repo:pallets/click is:issue is:open label:bug created:>=2026-01-01",
+      "url": "https://api.github.com/search/issues?q=repo%3Apallets%2Fclick%20is%3Aissue%20is%3Aopen%20label%3Abug%20created%3A%3E%3D2026-01-01&sort=created&order=asc&per_page=3",
+      "started_at": "2026-09-07T08:10:02.295Z",
+      "ended_at": "2026-09-07T08:10:02.632Z",
+      "isError": false,
+      "response_ref": "search-1.json",
+      "total_count": 0,
+      "incomplete_results": false
+    },
+    {
+      "repository": "python-attrs/attrs",
+      "query": "repo:python-attrs/attrs is:issue is:open label:bug created:>=2026-01-01",
+      "url": "https://api.github.com/search/issues?q=repo%3Apython-attrs%2Fattrs%20is%3Aissue%20is%3Aopen%20label%3Abug%20created%3A%3E%3D2026-01-01&sort=created&order=asc&per_page=3",
+      "started_at": "2026-09-07T08:10:12.940Z",
+      "ended_at": "2026-09-07T08:10:13.282Z",
+      "isError": false,
+      "response_ref": "search-2.json",
+      "total_count": 0,
+      "incomplete_results": false
+    },
+    {
+      "repository": "dateutil/dateutil",
+      "query": "repo:dateutil/dateutil is:issue is:open label:bug created:>=2026-01-01",
+      "url": "https://api.github.com/search/issues?q=repo%3Adateutil%2Fdateutil%20is%3Aissue%20is%3Aopen%20label%3Abug%20created%3A%3E%3D2026-01-01&sort=created&order=asc&per_page=3",
+      "started_at": "2026-09-07T08:10:22.528Z",
+      "ended_at": "2026-09-07T08:10:22.964Z",
+      "isError": false,
+      "response_ref": "search-3.json",
+      "total_count": 1,
+      "incomplete_results": false
+    }
+  ],
+  "candidate_order": [
+    {
+      "repository": "dateutil/dateutil",
+      "number": 1472
+    }
+  ],
+  "candidate_eligibility": [
+    {
+      "repository": "dateutil/dateutil",
+      "number": 1472,
+      "url": "https://github.com/dateutil/dateutil/issues/1472",
+      "title": "Issue with Python 3.15 alpha 7 and build of docs",
+      "created_at": "2026-03-23T12:52:25Z",
+      "updated_at": "2026-03-25T11:21:34Z",
+      "observed_at": "2026-09-07T08:10:22.964Z",
+      "state": "open",
+      "decision": "EXCLUDED",
+      "reason_codes": [
+        "issue_body_exposes_explicit_workaround",
+        "no_small_deterministic_reproduction_in_report"
+      ],
+      "reason": "The automatically returned issue body names a specific docs/conf.py region and reports that removing it makes the documentation build work. This is an explicit repair/workaround direction encountered before trial; exclude under the frozen contamination/disqualification rule rather than claim an uninformed repair. The report describes Python 3.15 alpha 7 OOM during a documentation build, without a small deterministic local assertion reproduction.",
+      "contamination": {
+        "solution_direction_exposure": true,
+        "source": "issue body returned by fixed issue search",
+        "linked_source_opened": false,
+        "issue_comments_opened": false,
+        "fixing_pr_or_patch_opened": false
+      },
+      "upstream_source_acquired": false,
+      "license_or_instructions_read": false,
+      "baseline_attempted": false,
+      "baseline_exit_code": null,
+      "healthy_control_attempted": false,
+      "patch_attempted": false
+    }
+  ],
+  "search_request_count": 3,
+  "candidate_count": 1,
+  "reproduction_attempt_count": 0,
+  "target_locked": false,
+  "target": null,
+  "repair_iterations": 0,
+  "upstream_source_files_changed": 0,
+  "outcome": "NOT_EVALUABLE",
+  "reason": "No eligible candidate remained among the exact fixed search results; zero baseline or repair tests were performed.",
+  "scope_limitations": [
+    "Search zero means no match for these exact qualifiers at these observations, not absence of bugs in either repository.",
+    "Exclusion is not a verified claim that the workaround is correct or issue is fixed.",
+    "No baseline exit, source commit, repair diff, test PASS, independent evaluation or capability improvement exists for this trial."
+  ],
+  "upper_objective_achieved": false,
+  "agi_claim_supported": false
+}
