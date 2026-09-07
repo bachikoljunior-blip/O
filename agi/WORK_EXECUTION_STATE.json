@@ -121,7 +121,7 @@
   },
   "blockers": [],
   "branch": "work-g34-candidate257-response",
-  "branch_head_sha": "a7a7b93eab1c0d3bddcc03a001b2d743e9effdfd",
+  "branch_head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
   "branch_head_tree_sha": null,
   "candidate_trial_selected": {
     "activation_authorized": false,
@@ -173,75 +173,393 @@
   },
   "checkpoint": {
     "blocker": null,
-    "checkpointed_at": "2026-09-07T19:26:34.436Z",
+    "checkpointed_at": "2026-09-07T19:35:13.386Z",
     "completed_effect_receipt": {
-      "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
-      "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "generation": 34,
-      "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-preflight-phase-repair:v1",
-      "measurement_repeated": false,
-      "repair_action": "Set only the authoritative native phase bindings to unit_pending, preserving the exact pending Candidate257 request, accepted response, digests, generation and fence.",
-      "repaired_at": "2026-09-07T19:26:34.436Z",
-      "request_recreated": false,
-      "response_consumed": false,
-      "response_repeated": false,
-      "resume_required": true,
       "schema_version": 1,
-      "snapshot_phase": "unit_pending",
-      "snapshot_revision": 257,
-      "source_main_sha": "3cf676974b683703dc960c0ab55f96735185362d",
-      "source_state_blob_sha": "f4af26bba88bad5449a0377a6806817ec63ec2be",
-      "status": "repaired_pending_second_recurrence_check",
-      "stop_cause": "exact_continuation.native_phase retained candidate_evaluate_pending while the immutable revision-257 run snapshot phase is unit_pending; continuity preflight correctly rejected the mismatch.",
-      "upper_objective_achieved": false,
-      "recurrence_first_result": "phase mismatch eliminated; next check exposed stale continuation_durability status",
-      "second_stop_cause": "continuation_durability retained branch_readback_verified_ci_pending although the frozen request, native journal and snapshot were already exact-readback at immutable main commit b0d330e9fa37103a804c9657a99eb4f898fb893d.",
-      "second_repair_action": "Bind continuation_durability to the immutable snapshot head and its already-verified request/native/snapshot blobs; preserve all invocation, response, generation and fence identities."
+      "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+      "generation": 34,
+      "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+      "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-task257-freeze:v1",
+      "unit_id": "unit-generation34-history253-task-evaluate-v1",
+      "consumed_component": "candidate_evaluate",
+      "consumed_work_invocation_id": "invoke-de3ef634c5636430b68d3339",
+      "consumed_native_invocation_id": "invoke-b4d735ea49b82dc42b1afd04",
+      "consumed_response_digest": "ad611f2d36d874f9d02d95ec8f0a1466cb89d2e04a36d898f15e96e545402cd7",
+      "consumed_output_digest": "8e45d880c0829214d8e8145a852397b03ff24bbacb5641cefa0412402491cb26",
+      "decision": "USE_ACTIVE",
+      "candidate_activated": false,
+      "response_consumed_once": true,
+      "response_replayed": false,
+      "measurement_repeated": false,
+      "request_recreated": false,
+      "pending_component": "task_evaluate",
+      "pending_work_invocation_id": "invoke-831c4b0d76e2012987dc1f0a",
+      "pending_native_invocation_id": "invoke-9ff24ffd974e5e95bf3d46a3",
+      "pending_request_digest": "16622ce9a38408f5f3ccf0efa5786a3724016cee4c59d458cf59a11a2d73c6c3",
+      "pending_payload_digest": "1d1443d27efefb8c411e149f1feec78d137a8ad511fe9bac84f06880fe32bbff",
+      "pending_request_blob_sha": "ed3abc6f6da37110022161af714de5cf79b45974",
+      "pending_native_invocation_blob_sha": "418f4b44a4309a07245c62956b67d8d52d07c793",
+      "source_main_sha": "c33255b99609fecf8e944749de2f2496d3f0747c",
+      "source_state_blob_sha": "9602377f99d0c2eaddaed7657a03ce5ab4059394",
+      "files": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "70dfbf54e3f3c2cb8a65942054f77981469daf37"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+          "sha": "b37111c9aaa6015efc3210ed5e7e547e38988a64"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
+          "sha": "97deb392179ad2bed0d48d21ffce0efcf80f4121"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+          "sha": "418f4b44a4309a07245c62956b67d8d52d07c793"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+          "sha": "57f1016340129f32c264f2ffd2ef4318059e7fb5"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+          "sha": "ed3abc6f6da37110022161af714de5cf79b45974"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/request.json",
+          "sha": "a589279abdec4de2face89dc02d7b41ddfd8be31"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/receipt.json",
+          "sha": "2af5d1c1ba21d22a69da113ada1504e713da0dd8"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/request.json",
+          "sha": "e7c3dfec90de2706f7350a042e4422c9db59dc65"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/receipt.json",
+          "sha": "ec1efb032d64c45a61df3f00cc63ef6ddc53e6d5"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/request.json",
+          "sha": "47f94bc29873bea1111053076e82ee8ab79bfe6d"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/receipt.json",
+          "sha": "0fabfa39afb54664c6c71c48450c911abce77011"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/request.json",
+          "sha": "167be26fc7870a0d9fb89f198cffd35f41c9059f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/receipt.json",
+          "sha": "0a265251fedaad7b4747821ca2f78486b6316323"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/request.json",
+          "sha": "74bb887b269a398faec273cf4d2e27941db14f93"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/receipt.json",
+          "sha": "b435714a38b96528bdc028c1ecc7ddc08d27e86f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/request.json",
+          "sha": "7c624e4bfd4f5d9433c0cbdc26db5712cb40d0d6"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/receipt.json",
+          "sha": "a95eb45d22c3ad7b3568ee6d0b9329421fce63cc"
+        }
+      ],
+      "branch_readback": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "70dfbf54e3f3c2cb8a65942054f77981469daf37"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+          "sha": "b37111c9aaa6015efc3210ed5e7e547e38988a64"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
+          "sha": "97deb392179ad2bed0d48d21ffce0efcf80f4121"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+          "sha": "418f4b44a4309a07245c62956b67d8d52d07c793"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+          "sha": "57f1016340129f32c264f2ffd2ef4318059e7fb5"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+          "sha": "ed3abc6f6da37110022161af714de5cf79b45974"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/request.json",
+          "sha": "a589279abdec4de2face89dc02d7b41ddfd8be31"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/receipt.json",
+          "sha": "2af5d1c1ba21d22a69da113ada1504e713da0dd8"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/request.json",
+          "sha": "e7c3dfec90de2706f7350a042e4422c9db59dc65"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/receipt.json",
+          "sha": "ec1efb032d64c45a61df3f00cc63ef6ddc53e6d5"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/request.json",
+          "sha": "47f94bc29873bea1111053076e82ee8ab79bfe6d"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/receipt.json",
+          "sha": "0fabfa39afb54664c6c71c48450c911abce77011"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/request.json",
+          "sha": "167be26fc7870a0d9fb89f198cffd35f41c9059f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/receipt.json",
+          "sha": "0a265251fedaad7b4747821ca2f78486b6316323"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/request.json",
+          "sha": "74bb887b269a398faec273cf4d2e27941db14f93"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/receipt.json",
+          "sha": "b435714a38b96528bdc028c1ecc7ddc08d27e86f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/request.json",
+          "sha": "7c624e4bfd4f5d9433c0cbdc26db5712cb40d0d6"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/receipt.json",
+          "sha": "a95eb45d22c3ad7b3568ee6d0b9329421fce63cc"
+        }
+      ],
+      "head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
+      "pr": 599,
+      "status": "branch_readback_verified_ci_pending",
+      "verified_at": "2026-09-07T19:35:13.386Z",
+      "resume_required": true,
+      "upper_objective_achieved": false
     },
-    "current_head_sha": "a7a7b93eab1c0d3bddcc03a001b2d743e9effdfd",
-    "current_main_sha": "4101786e38296feb6fc2cbf7b2b9a1c40ab437f0",
-    "current_state_blob_sha": "93b80d2d164656fa8c93b587c65c3c1f18ab8dae",
-    "exact_frontier": "Candidate257 response remains accepted once and main-readback verified. Snapshot phase is repaired; continuation durability is now rebound to the immutable request/snapshot main head. Response unconsumed; measurement not replayed.",
+    "current_head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
+    "current_main_sha": "c33255b99609fecf8e944749de2f2496d3f0747c",
+    "current_state_blob_sha": "9602377f99d0c2eaddaed7657a03ce5ab4059394",
+    "exact_frontier": "Candidate257 consumed exactly once; Task257 frozen on branch and all 18 files exact-readback. PR599 exact CI pending. Six-condition measurement not replayed.",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-    "frozen_invocation_id": "invoke-de3ef634c5636430b68d3339",
-    "frozen_payload_digest": "fbb1f1553a3746ec3e6ce06a21df4b41ba2326f92505172aec1f003da25ae803",
-    "frozen_request_digest": "11210411a579c12dbe0c1a7d1e517cad61d9cada27315100f35dd09a914e9ccc",
+    "frozen_invocation_id": "invoke-831c4b0d76e2012987dc1f0a",
+    "frozen_payload_digest": "1d1443d27efefb8c411e149f1feec78d137a8ad511fe9bac84f06880fe32bbff",
+    "frozen_request_digest": "16622ce9a38408f5f3ccf0efa5786a3724016cee4c59d458cf59a11a2d73c6c3",
     "goal_revision": 118,
-    "idempotency_key": "o-work-g34:81acbf6d:candidate257-response:v1",
+    "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-task257-freeze:v1",
     "last_verified_effect": {
-      "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
-      "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "generation": 34,
-      "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-preflight-phase-repair:v1",
-      "measurement_repeated": false,
-      "repair_action": "Set only the authoritative native phase bindings to unit_pending, preserving the exact pending Candidate257 request, accepted response, digests, generation and fence.",
-      "repaired_at": "2026-09-07T19:26:34.436Z",
-      "request_recreated": false,
-      "response_consumed": false,
-      "response_repeated": false,
-      "resume_required": true,
       "schema_version": 1,
-      "snapshot_phase": "unit_pending",
-      "snapshot_revision": 257,
-      "source_main_sha": "3cf676974b683703dc960c0ab55f96735185362d",
-      "source_state_blob_sha": "f4af26bba88bad5449a0377a6806817ec63ec2be",
-      "status": "repaired_pending_second_recurrence_check",
-      "stop_cause": "exact_continuation.native_phase retained candidate_evaluate_pending while the immutable revision-257 run snapshot phase is unit_pending; continuity preflight correctly rejected the mismatch.",
-      "upper_objective_achieved": false,
-      "recurrence_first_result": "phase mismatch eliminated; next check exposed stale continuation_durability status",
-      "second_stop_cause": "continuation_durability retained branch_readback_verified_ci_pending although the frozen request, native journal and snapshot were already exact-readback at immutable main commit b0d330e9fa37103a804c9657a99eb4f898fb893d.",
-      "second_repair_action": "Bind continuation_durability to the immutable snapshot head and its already-verified request/native/snapshot blobs; preserve all invocation, response, generation and fence identities."
+      "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+      "generation": 34,
+      "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+      "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-task257-freeze:v1",
+      "unit_id": "unit-generation34-history253-task-evaluate-v1",
+      "consumed_component": "candidate_evaluate",
+      "consumed_work_invocation_id": "invoke-de3ef634c5636430b68d3339",
+      "consumed_native_invocation_id": "invoke-b4d735ea49b82dc42b1afd04",
+      "consumed_response_digest": "ad611f2d36d874f9d02d95ec8f0a1466cb89d2e04a36d898f15e96e545402cd7",
+      "consumed_output_digest": "8e45d880c0829214d8e8145a852397b03ff24bbacb5641cefa0412402491cb26",
+      "decision": "USE_ACTIVE",
+      "candidate_activated": false,
+      "response_consumed_once": true,
+      "response_replayed": false,
+      "measurement_repeated": false,
+      "request_recreated": false,
+      "pending_component": "task_evaluate",
+      "pending_work_invocation_id": "invoke-831c4b0d76e2012987dc1f0a",
+      "pending_native_invocation_id": "invoke-9ff24ffd974e5e95bf3d46a3",
+      "pending_request_digest": "16622ce9a38408f5f3ccf0efa5786a3724016cee4c59d458cf59a11a2d73c6c3",
+      "pending_payload_digest": "1d1443d27efefb8c411e149f1feec78d137a8ad511fe9bac84f06880fe32bbff",
+      "pending_request_blob_sha": "ed3abc6f6da37110022161af714de5cf79b45974",
+      "pending_native_invocation_blob_sha": "418f4b44a4309a07245c62956b67d8d52d07c793",
+      "source_main_sha": "c33255b99609fecf8e944749de2f2496d3f0747c",
+      "source_state_blob_sha": "9602377f99d0c2eaddaed7657a03ce5ab4059394",
+      "files": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "70dfbf54e3f3c2cb8a65942054f77981469daf37"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+          "sha": "b37111c9aaa6015efc3210ed5e7e547e38988a64"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
+          "sha": "97deb392179ad2bed0d48d21ffce0efcf80f4121"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+          "sha": "418f4b44a4309a07245c62956b67d8d52d07c793"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+          "sha": "57f1016340129f32c264f2ffd2ef4318059e7fb5"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+          "sha": "ed3abc6f6da37110022161af714de5cf79b45974"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/request.json",
+          "sha": "a589279abdec4de2face89dc02d7b41ddfd8be31"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/receipt.json",
+          "sha": "2af5d1c1ba21d22a69da113ada1504e713da0dd8"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/request.json",
+          "sha": "e7c3dfec90de2706f7350a042e4422c9db59dc65"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/receipt.json",
+          "sha": "ec1efb032d64c45a61df3f00cc63ef6ddc53e6d5"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/request.json",
+          "sha": "47f94bc29873bea1111053076e82ee8ab79bfe6d"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/receipt.json",
+          "sha": "0fabfa39afb54664c6c71c48450c911abce77011"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/request.json",
+          "sha": "167be26fc7870a0d9fb89f198cffd35f41c9059f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/receipt.json",
+          "sha": "0a265251fedaad7b4747821ca2f78486b6316323"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/request.json",
+          "sha": "74bb887b269a398faec273cf4d2e27941db14f93"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/receipt.json",
+          "sha": "b435714a38b96528bdc028c1ecc7ddc08d27e86f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/request.json",
+          "sha": "7c624e4bfd4f5d9433c0cbdc26db5712cb40d0d6"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/receipt.json",
+          "sha": "a95eb45d22c3ad7b3568ee6d0b9329421fce63cc"
+        }
+      ],
+      "branch_readback": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "70dfbf54e3f3c2cb8a65942054f77981469daf37"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+          "sha": "b37111c9aaa6015efc3210ed5e7e547e38988a64"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
+          "sha": "97deb392179ad2bed0d48d21ffce0efcf80f4121"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+          "sha": "418f4b44a4309a07245c62956b67d8d52d07c793"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+          "sha": "57f1016340129f32c264f2ffd2ef4318059e7fb5"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+          "sha": "ed3abc6f6da37110022161af714de5cf79b45974"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/request.json",
+          "sha": "a589279abdec4de2face89dc02d7b41ddfd8be31"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/receipt.json",
+          "sha": "2af5d1c1ba21d22a69da113ada1504e713da0dd8"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/request.json",
+          "sha": "e7c3dfec90de2706f7350a042e4422c9db59dc65"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/receipt.json",
+          "sha": "ec1efb032d64c45a61df3f00cc63ef6ddc53e6d5"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/request.json",
+          "sha": "47f94bc29873bea1111053076e82ee8ab79bfe6d"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/receipt.json",
+          "sha": "0fabfa39afb54664c6c71c48450c911abce77011"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/request.json",
+          "sha": "167be26fc7870a0d9fb89f198cffd35f41c9059f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/receipt.json",
+          "sha": "0a265251fedaad7b4747821ca2f78486b6316323"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/request.json",
+          "sha": "74bb887b269a398faec273cf4d2e27941db14f93"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/receipt.json",
+          "sha": "b435714a38b96528bdc028c1ecc7ddc08d27e86f"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/request.json",
+          "sha": "7c624e4bfd4f5d9433c0cbdc26db5712cb40d0d6"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/receipt.json",
+          "sha": "a95eb45d22c3ad7b3568ee6d0b9329421fce63cc"
+        }
+      ],
+      "head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
+      "pr": 599,
+      "status": "branch_readback_verified_ci_pending",
+      "verified_at": "2026-09-07T19:35:13.386Z",
+      "resume_required": true,
+      "upper_objective_achieved": false
     },
     "lease_generation": 34,
-    "next_action": "Refresh latest main, regenerate source observations, rerun continuity preflight, then consume Candidate257 exactly once.",
-    "next_tool": "exec_command",
-    "next_tool_action": "Refresh latest main, regenerate source observations, rerun continuity preflight, then consume Candidate257 exactly once.",
+    "next_action": "Wait/query exact PR599 CI, expected-head merge and main readback, then bind Task257 continuation remote-main durable and audit saved evidence without rerunning the measurement.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_tool_action": "Wait/query exact PR599 CI, expected-head merge and main readback, then bind Task257 continuation remote-main durable and audit saved evidence without rerunning the measurement.",
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
-    "pending_response_digest": "ad611f2d36d874f9d02d95ec8f0a1466cb89d2e04a36d898f15e96e545402cd7",
+    "pending_pull_requests": [
+      599
+    ],
+    "pending_response_digest": null,
     "resume_required": true,
     "schema_version": 1,
     "snapshot_blob_sha": "9efa79ee2b3324218d87955856f5cca20cfe204f",
@@ -1393,27 +1711,27 @@
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "lease_generation": 34,
     "native_phase": "unit_pending",
-    "pending_component": "candidate_evaluate",
-    "pending_native_invocation_blob_sha": "966052dffa09de7708e7caa8f0e47985e0b0d384",
-    "pending_native_invocation_id": "invoke-b4d735ea49b82dc42b1afd04",
-    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
-    "pending_output_digest": "8e45d880c0829214d8e8145a852397b03ff24bbacb5641cefa0412402491cb26",
-    "pending_payload_digest": "fbb1f1553a3746ec3e6ce06a21df4b41ba2326f92505172aec1f003da25ae803",
+    "pending_component": "task_evaluate",
+    "pending_native_invocation_blob_sha": "418f4b44a4309a07245c62956b67d8d52d07c793",
+    "pending_native_invocation_id": "invoke-9ff24ffd974e5e95bf3d46a3",
+    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+    "pending_output_digest": null,
+    "pending_payload_digest": "1d1443d27efefb8c411e149f1feec78d137a8ad511fe9bac84f06880fe32bbff",
     "pending_preflight_blob_sha": null,
     "pending_preflight_ref": null,
-    "pending_request_blob_sha": "122745c4aaa322c4d596dda066eb4362fcb982a6",
-    "pending_request_digest": "11210411a579c12dbe0c1a7d1e517cad61d9cada27315100f35dd09a914e9ccc",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-de3ef634c5636430b68d3339/request.json",
-    "pending_response_blob_sha": "5155e2ed1745be06f8ae3d3ce06e18b7cf79c82d",
-    "pending_response_digest": "ad611f2d36d874f9d02d95ec8f0a1466cb89d2e04a36d898f15e96e545402cd7",
-    "pending_response_ref": ".continual/work-model/invocations/invoke-de3ef634c5636430b68d3339/response.json",
-    "pending_work_invocation_id": "invoke-de3ef634c5636430b68d3339",
-    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-de3ef634c5636430b68d3339/request.json",
+    "pending_request_blob_sha": "ed3abc6f6da37110022161af714de5cf79b45974",
+    "pending_request_digest": "16622ce9a38408f5f3ccf0efa5786a3724016cee4c59d458cf59a11a2d73c6c3",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+    "pending_response_blob_sha": null,
+    "pending_response_digest": null,
+    "pending_response_ref": null,
+    "pending_work_invocation_id": "invoke-831c4b0d76e2012987dc1f0a",
+    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@e9cb5b720d77a458acb8951ac4ca2fade47a1720/agi/WORK_EXECUTION_STATE.json",
     "request_recreated": false,
     "response_consumed": false,
     "response_replayed": false,
-    "response_submitted": true,
+    "response_submitted": false,
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "schema_version": 1,
@@ -1422,12 +1740,12 @@
     "snapshot_head_sha": "b0d330e9fa37103a804c9657a99eb4f898fb893d",
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 257,
-    "source_main_sha": "bfae35154b121a2f16dd71d63c19486e0fea8c7d",
-    "source_state_blob_sha": "0d1662f6c647b97d20848d829fe4f03ccaf30e4a",
-    "status": "remote_main_readback_verified",
-    "target_component": "candidate_evaluate",
-    "verified_at": "2026-09-07T19:19:51.672Z",
-    "verified_remote_readback": true
+    "source_main_sha": "c33255b99609fecf8e944749de2f2496d3f0747c",
+    "source_state_blob_sha": "9602377f99d0c2eaddaed7657a03ce5ab4059394",
+    "status": "branch_readback_verified_ci_pending",
+    "target_component": "task_evaluate",
+    "verified_at": "2026-09-07T19:35:13.386Z",
+    "verified_remote_readback": false
   },
   "exact_head_ci_observation": {
     "ci_restarted": false,
@@ -22446,6 +22764,7 @@
     "generation": 34,
     "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-preflight-phase-repair:v1",
     "measurement_repeated": false,
+    "recurrence_first_result": "phase mismatch eliminated; next check exposed stale continuation_durability status",
     "repair_action": "Set only the authoritative native phase bindings to unit_pending, preserving the exact pending Candidate257 request, accepted response, digests, generation and fence.",
     "repaired_at": "2026-09-07T19:26:34.436Z",
     "request_recreated": false,
@@ -22453,16 +22772,15 @@
     "response_repeated": false,
     "resume_required": true,
     "schema_version": 1,
+    "second_repair_action": "Bind continuation_durability to the immutable snapshot head and its already-verified request/native/snapshot blobs; preserve all invocation, response, generation and fence identities.",
+    "second_stop_cause": "continuation_durability retained branch_readback_verified_ci_pending although the frozen request, native journal and snapshot were already exact-readback at immutable main commit b0d330e9fa37103a804c9657a99eb4f898fb893d.",
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 257,
     "source_main_sha": "3cf676974b683703dc960c0ab55f96735185362d",
     "source_state_blob_sha": "f4af26bba88bad5449a0377a6806817ec63ec2be",
     "status": "repaired_pending_second_recurrence_check",
     "stop_cause": "exact_continuation.native_phase retained candidate_evaluate_pending while the immutable revision-257 run snapshot phase is unit_pending; continuity preflight correctly rejected the mismatch.",
-    "upper_objective_achieved": false,
-    "recurrence_first_result": "phase mismatch eliminated; next check exposed stale continuation_durability status",
-    "second_stop_cause": "continuation_durability retained branch_readback_verified_ci_pending although the frozen request, native journal and snapshot were already exact-readback at immutable main commit b0d330e9fa37103a804c9657a99eb4f898fb893d.",
-    "second_repair_action": "Bind continuation_durability to the immutable snapshot head and its already-verified request/native/snapshot blobs; preserve all invocation, response, generation and fence identities."
+    "upper_objective_achieved": false
   },
   "generation34_candidate257_freeze_v1": {
     "branch_readback": [
@@ -22706,7 +23024,7 @@
     "request_digest": "11210411a579c12dbe0c1a7d1e517cad61d9cada27315100f35dd09a914e9ccc",
     "request_recreated": false,
     "response_accepted_at": "2026-09-07T18:51:49.412383Z",
-    "response_consumed": false,
+    "response_consumed": true,
     "response_digest": "ad611f2d36d874f9d02d95ec8f0a1466cb89d2e04a36d898f15e96e545402cd7",
     "response_repeated": false,
     "response_submitted_once": true,
@@ -22714,11 +23032,15 @@
     "schema_version": 1,
     "source_main_sha": "bfae35154b121a2f16dd71d63c19486e0fea8c7d",
     "source_state_blob_sha": "0d1662f6c647b97d20848d829fe4f03ccaf30e4a",
-    "status": "main_readback_verified",
+    "status": "consumed_branch_readback_verified_ci_pending",
     "unit_id": "unit-generation34-history253-task-evaluate-v1",
     "upper_objective_achieved": false,
     "verified_at": "2026-09-07T19:19:51.672Z",
-    "work_invocation_id": "invoke-de3ef634c5636430b68d3339"
+    "work_invocation_id": "invoke-de3ef634c5636430b68d3339",
+    "consumed_at": "2026-09-07T19:28:42.140476Z",
+    "consume_native_invocation_id": "invoke-b4d735ea49b82dc42b1afd04",
+    "consume_head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
+    "consume_pr": 599
   },
   "generation34_consolidate235_consume_v1": {
     "consumed_at": "2026-09-07T04:25:10.206144Z",
@@ -29152,7 +29474,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-07T19:26:34.436Z",
+  "heartbeat_at": "2026-09-07T19:35:13.386Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -30072,9 +30394,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Bind continuation_durability to the immutable snapshot head and its already-verified request/native/snapshot blobs; preserve all invocation, response, generation and fence identities.",
-  "last_activity_at": "2026-09-07T19:26:34.436Z",
-  "last_checked_at": "2026-09-07T19:26:34.436Z",
+  "last_action": "Consumed Candidate257 exactly once and branch-readback verified the frozen Task257 request plus native/source trail on PR599.",
+  "last_activity_at": "2026-09-07T19:35:13.386Z",
+  "last_checked_at": "2026-09-07T19:35:13.386Z",
   "last_error": null,
   "last_native_publication": {
     "all_content_blobs_exact_readback": true,
@@ -30087,30 +30409,188 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-07T19:26:34.436Z",
+  "last_progress_at": "2026-09-07T19:35:13.386Z",
   "last_verified_effect": {
-    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
-    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-    "generation": 34,
-    "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-preflight-phase-repair:v1",
-    "measurement_repeated": false,
-    "repair_action": "Set only the authoritative native phase bindings to unit_pending, preserving the exact pending Candidate257 request, accepted response, digests, generation and fence.",
-    "repaired_at": "2026-09-07T19:26:34.436Z",
-    "request_recreated": false,
-    "response_consumed": false,
-    "response_repeated": false,
-    "resume_required": true,
     "schema_version": 1,
-    "snapshot_phase": "unit_pending",
-    "snapshot_revision": 257,
-    "source_main_sha": "3cf676974b683703dc960c0ab55f96735185362d",
-    "source_state_blob_sha": "f4af26bba88bad5449a0377a6806817ec63ec2be",
-    "status": "repaired_pending_second_recurrence_check",
-    "stop_cause": "exact_continuation.native_phase retained candidate_evaluate_pending while the immutable revision-257 run snapshot phase is unit_pending; continuity preflight correctly rejected the mismatch.",
-    "upper_objective_achieved": false,
-    "recurrence_first_result": "phase mismatch eliminated; next check exposed stale continuation_durability status",
-    "second_stop_cause": "continuation_durability retained branch_readback_verified_ci_pending although the frozen request, native journal and snapshot were already exact-readback at immutable main commit b0d330e9fa37103a804c9657a99eb4f898fb893d.",
-    "second_repair_action": "Bind continuation_durability to the immutable snapshot head and its already-verified request/native/snapshot blobs; preserve all invocation, response, generation and fence identities."
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-task257-freeze:v1",
+    "unit_id": "unit-generation34-history253-task-evaluate-v1",
+    "consumed_component": "candidate_evaluate",
+    "consumed_work_invocation_id": "invoke-de3ef634c5636430b68d3339",
+    "consumed_native_invocation_id": "invoke-b4d735ea49b82dc42b1afd04",
+    "consumed_response_digest": "ad611f2d36d874f9d02d95ec8f0a1466cb89d2e04a36d898f15e96e545402cd7",
+    "consumed_output_digest": "8e45d880c0829214d8e8145a852397b03ff24bbacb5641cefa0412402491cb26",
+    "decision": "USE_ACTIVE",
+    "candidate_activated": false,
+    "response_consumed_once": true,
+    "response_replayed": false,
+    "measurement_repeated": false,
+    "request_recreated": false,
+    "pending_component": "task_evaluate",
+    "pending_work_invocation_id": "invoke-831c4b0d76e2012987dc1f0a",
+    "pending_native_invocation_id": "invoke-9ff24ffd974e5e95bf3d46a3",
+    "pending_request_digest": "16622ce9a38408f5f3ccf0efa5786a3724016cee4c59d458cf59a11a2d73c6c3",
+    "pending_payload_digest": "1d1443d27efefb8c411e149f1feec78d137a8ad511fe9bac84f06880fe32bbff",
+    "pending_request_blob_sha": "ed3abc6f6da37110022161af714de5cf79b45974",
+    "pending_native_invocation_blob_sha": "418f4b44a4309a07245c62956b67d8d52d07c793",
+    "source_main_sha": "c33255b99609fecf8e944749de2f2496d3f0747c",
+    "source_state_blob_sha": "9602377f99d0c2eaddaed7657a03ce5ab4059394",
+    "files": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "70dfbf54e3f3c2cb8a65942054f77981469daf37"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+        "sha": "b37111c9aaa6015efc3210ed5e7e547e38988a64"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
+        "sha": "97deb392179ad2bed0d48d21ffce0efcf80f4121"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+        "sha": "418f4b44a4309a07245c62956b67d8d52d07c793"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+        "sha": "57f1016340129f32c264f2ffd2ef4318059e7fb5"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+        "sha": "ed3abc6f6da37110022161af714de5cf79b45974"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/request.json",
+        "sha": "a589279abdec4de2face89dc02d7b41ddfd8be31"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/receipt.json",
+        "sha": "2af5d1c1ba21d22a69da113ada1504e713da0dd8"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/request.json",
+        "sha": "e7c3dfec90de2706f7350a042e4422c9db59dc65"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/receipt.json",
+        "sha": "ec1efb032d64c45a61df3f00cc63ef6ddc53e6d5"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/request.json",
+        "sha": "47f94bc29873bea1111053076e82ee8ab79bfe6d"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/receipt.json",
+        "sha": "0fabfa39afb54664c6c71c48450c911abce77011"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/request.json",
+        "sha": "167be26fc7870a0d9fb89f198cffd35f41c9059f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/receipt.json",
+        "sha": "0a265251fedaad7b4747821ca2f78486b6316323"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/request.json",
+        "sha": "74bb887b269a398faec273cf4d2e27941db14f93"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/receipt.json",
+        "sha": "b435714a38b96528bdc028c1ecc7ddc08d27e86f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/request.json",
+        "sha": "7c624e4bfd4f5d9433c0cbdc26db5712cb40d0d6"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/receipt.json",
+        "sha": "a95eb45d22c3ad7b3568ee6d0b9329421fce63cc"
+      }
+    ],
+    "branch_readback": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "70dfbf54e3f3c2cb8a65942054f77981469daf37"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+        "sha": "b37111c9aaa6015efc3210ed5e7e547e38988a64"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
+        "sha": "97deb392179ad2bed0d48d21ffce0efcf80f4121"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+        "sha": "418f4b44a4309a07245c62956b67d8d52d07c793"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+        "sha": "57f1016340129f32c264f2ffd2ef4318059e7fb5"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+        "sha": "ed3abc6f6da37110022161af714de5cf79b45974"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/request.json",
+        "sha": "a589279abdec4de2face89dc02d7b41ddfd8be31"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/receipt.json",
+        "sha": "2af5d1c1ba21d22a69da113ada1504e713da0dd8"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/request.json",
+        "sha": "e7c3dfec90de2706f7350a042e4422c9db59dc65"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/receipt.json",
+        "sha": "ec1efb032d64c45a61df3f00cc63ef6ddc53e6d5"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/request.json",
+        "sha": "47f94bc29873bea1111053076e82ee8ab79bfe6d"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/receipt.json",
+        "sha": "0fabfa39afb54664c6c71c48450c911abce77011"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/request.json",
+        "sha": "167be26fc7870a0d9fb89f198cffd35f41c9059f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/receipt.json",
+        "sha": "0a265251fedaad7b4747821ca2f78486b6316323"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/request.json",
+        "sha": "74bb887b269a398faec273cf4d2e27941db14f93"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/receipt.json",
+        "sha": "b435714a38b96528bdc028c1ecc7ddc08d27e86f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/request.json",
+        "sha": "7c624e4bfd4f5d9433c0cbdc26db5712cb40d0d6"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/receipt.json",
+        "sha": "a95eb45d22c3ad7b3568ee6d0b9329421fce63cc"
+      }
+    ],
+    "head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
+    "pr": 599,
+    "status": "branch_readback_verified_ci_pending",
+    "verified_at": "2026-09-07T19:35:13.386Z",
+    "resume_required": true,
+    "upper_objective_achieved": false
   },
   "latest_integrated_source": {
     "additional_pull_requests": [
@@ -30357,7 +30837,7 @@
     "role": "insurance_only",
     "stale_or_interrupted_action": "classify_then_require_fenced_cas_readback"
   },
-  "native_phase": "unit_pending",
+  "native_phase": "task_evaluate_pending",
   "negative_evidence_scope_audit_checkpoint": {
     "blob_manifest_sha256": "a21d714701f56e3dd2075e777eae6038b3af94acd2285aaba3568ea380fb578e",
     "branch": "work/recovery-gen9-negative-evidence-scope-audit-v1",
@@ -30428,9 +30908,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Refresh latest main, regenerate source observations, rerun continuity preflight, then consume Candidate257 exactly once.",
-  "next_tool": "exec_command",
-  "next_tool_action": "Refresh latest main, regenerate source observations, rerun continuity preflight, then consume Candidate257 exactly once.",
+  "next_action": "Wait/query exact PR599 CI, expected-head merge and main readback, then bind Task257 continuation remote-main durable and audit saved evidence without rerunning the measurement.",
+  "next_tool": "github_fetch_commit_workflow_runs",
+  "next_tool_action": "Wait/query exact PR599 CI, expected-head merge and main readback, then bind Task257 continuation remote-main durable and audit saved evidence without rerunning the measurement.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -30675,37 +31155,37 @@
   "pending_candidate_request_blob_sha": "122745c4aaa322c4d596dda066eb4362fcb982a6",
   "pending_candidate_request_digest": "11210411a579c12dbe0c1a7d1e517cad61d9cada27315100f35dd09a914e9ccc",
   "pending_candidate_work_invocation_id": "invoke-de3ef634c5636430b68d3339",
-  "pending_component": "candidate_evaluate",
+  "pending_component": "task_evaluate",
   "pending_consolidate_native_invocation_id": null,
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
   "pending_consolidate_work_invocation_id": null,
-  "pending_head_sha": "a7a7b93eab1c0d3bddcc03a001b2d743e9effdfd",
+  "pending_head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
   "pending_learn_native_invocation_id": null,
   "pending_learn_request_blob_sha": null,
   "pending_learn_request_digest": null,
   "pending_learn_work_invocation_id": null,
-  "pending_native_invocation_blob_sha": "966052dffa09de7708e7caa8f0e47985e0b0d384",
-  "pending_native_invocation_id": "invoke-b4d735ea49b82dc42b1afd04",
-  "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
-  "pending_output_digest": "8e45d880c0829214d8e8145a852397b03ff24bbacb5641cefa0412402491cb26",
-  "pending_payload_digest": "fbb1f1553a3746ec3e6ce06a21df4b41ba2326f92505172aec1f003da25ae803",
+  "pending_native_invocation_blob_sha": "418f4b44a4309a07245c62956b67d8d52d07c793",
+  "pending_native_invocation_id": "invoke-9ff24ffd974e5e95bf3d46a3",
+  "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+  "pending_output_digest": null,
+  "pending_payload_digest": "1d1443d27efefb8c411e149f1feec78d137a8ad511fe9bac84f06880fe32bbff",
   "pending_preflight_blob_sha": null,
   "pending_preflight_ref": null,
-  "pending_pull_request": 598,
-  "pending_request_blob_sha": "122745c4aaa322c4d596dda066eb4362fcb982a6",
-  "pending_request_digest": "11210411a579c12dbe0c1a7d1e517cad61d9cada27315100f35dd09a914e9ccc",
-  "pending_request_ref": ".continual/work-model/invocations/invoke-de3ef634c5636430b68d3339/request.json",
-  "pending_response_blob_sha": "5155e2ed1745be06f8ae3d3ce06e18b7cf79c82d",
-  "pending_response_digest": "ad611f2d36d874f9d02d95ec8f0a1466cb89d2e04a36d898f15e96e545402cd7",
-  "pending_response_ref": ".continual/work-model/invocations/invoke-de3ef634c5636430b68d3339/response.json",
+  "pending_pull_request": 599,
+  "pending_request_blob_sha": "ed3abc6f6da37110022161af714de5cf79b45974",
+  "pending_request_digest": "16622ce9a38408f5f3ccf0efa5786a3724016cee4c59d458cf59a11a2d73c6c3",
+  "pending_request_ref": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+  "pending_response_blob_sha": null,
+  "pending_response_digest": null,
+  "pending_response_ref": null,
   "pending_task_evaluate_native_invocation_id": null,
   "pending_task_evaluate_request_blob_sha": null,
   "pending_task_evaluate_request_digest": null,
   "pending_task_evaluate_request_ref": null,
   "pending_task_evaluate_work_invocation_id": null,
-  "pending_work_invocation_id": "invoke-de3ef634c5636430b68d3339",
-  "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-de3ef634c5636430b68d3339/request.json",
+  "pending_work_invocation_id": "invoke-831c4b0d76e2012987dc1f0a",
+  "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
   "phase2_readback_verified": true,
   "planning217_candidate_consume_execute_freeze_v1": {
     "candidate_native_invocation_id": "invoke-eb6afa2631439abb913c7229",
@@ -33537,8 +34017,8 @@
   "response_exists_on_authoritative_remote": false,
   "response_repeated": false,
   "response_replayed": false,
-  "response_submitted": true,
-  "response_submitted_exactly_once": true,
+  "response_submitted": false,
+  "response_submitted_exactly_once": false,
   "result_blob_sha": "df74f0cc433d2878301ffd95f5aebe581c25c536",
   "result_commit_sha": "e219b332edef3c9f108824fa877b81aedabe1a85",
   "result_publication_policy": {
@@ -34831,7 +35311,7 @@
     "status": "merged_main_durable",
     "superseding_inbox_revision": 21
   },
-  "target_component": "candidate_evaluate",
+  "target_component": "task_evaluate",
   "termination": null,
   "test_progress": {
     "conclusion": "success",
@@ -36021,5 +36501,187 @@
   "verified_at": "2026-09-07T18:54:44.369Z",
   "verified_remote_readback": false,
   "work_status": "executing",
-  "working_branch": null
+  "working_branch": "work-g34-task257-freeze",
+  "generation34_candidate257_consume_task257_freeze_v1": {
+    "schema_version": 1,
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:candidate257-consume-task257-freeze:v1",
+    "unit_id": "unit-generation34-history253-task-evaluate-v1",
+    "consumed_component": "candidate_evaluate",
+    "consumed_work_invocation_id": "invoke-de3ef634c5636430b68d3339",
+    "consumed_native_invocation_id": "invoke-b4d735ea49b82dc42b1afd04",
+    "consumed_response_digest": "ad611f2d36d874f9d02d95ec8f0a1466cb89d2e04a36d898f15e96e545402cd7",
+    "consumed_output_digest": "8e45d880c0829214d8e8145a852397b03ff24bbacb5641cefa0412402491cb26",
+    "decision": "USE_ACTIVE",
+    "candidate_activated": false,
+    "response_consumed_once": true,
+    "response_replayed": false,
+    "measurement_repeated": false,
+    "request_recreated": false,
+    "pending_component": "task_evaluate",
+    "pending_work_invocation_id": "invoke-831c4b0d76e2012987dc1f0a",
+    "pending_native_invocation_id": "invoke-9ff24ffd974e5e95bf3d46a3",
+    "pending_request_digest": "16622ce9a38408f5f3ccf0efa5786a3724016cee4c59d458cf59a11a2d73c6c3",
+    "pending_payload_digest": "1d1443d27efefb8c411e149f1feec78d137a8ad511fe9bac84f06880fe32bbff",
+    "pending_request_blob_sha": "ed3abc6f6da37110022161af714de5cf79b45974",
+    "pending_native_invocation_blob_sha": "418f4b44a4309a07245c62956b67d8d52d07c793",
+    "source_main_sha": "c33255b99609fecf8e944749de2f2496d3f0747c",
+    "source_state_blob_sha": "9602377f99d0c2eaddaed7657a03ce5ab4059394",
+    "files": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "70dfbf54e3f3c2cb8a65942054f77981469daf37"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+        "sha": "b37111c9aaa6015efc3210ed5e7e547e38988a64"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
+        "sha": "97deb392179ad2bed0d48d21ffce0efcf80f4121"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+        "sha": "418f4b44a4309a07245c62956b67d8d52d07c793"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+        "sha": "57f1016340129f32c264f2ffd2ef4318059e7fb5"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+        "sha": "ed3abc6f6da37110022161af714de5cf79b45974"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/request.json",
+        "sha": "a589279abdec4de2face89dc02d7b41ddfd8be31"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/receipt.json",
+        "sha": "2af5d1c1ba21d22a69da113ada1504e713da0dd8"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/request.json",
+        "sha": "e7c3dfec90de2706f7350a042e4422c9db59dc65"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/receipt.json",
+        "sha": "ec1efb032d64c45a61df3f00cc63ef6ddc53e6d5"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/request.json",
+        "sha": "47f94bc29873bea1111053076e82ee8ab79bfe6d"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/receipt.json",
+        "sha": "0fabfa39afb54664c6c71c48450c911abce77011"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/request.json",
+        "sha": "167be26fc7870a0d9fb89f198cffd35f41c9059f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/receipt.json",
+        "sha": "0a265251fedaad7b4747821ca2f78486b6316323"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/request.json",
+        "sha": "74bb887b269a398faec273cf4d2e27941db14f93"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/receipt.json",
+        "sha": "b435714a38b96528bdc028c1ecc7ddc08d27e86f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/request.json",
+        "sha": "7c624e4bfd4f5d9433c0cbdc26db5712cb40d0d6"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/receipt.json",
+        "sha": "a95eb45d22c3ad7b3568ee6d0b9329421fce63cc"
+      }
+    ],
+    "branch_readback": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "70dfbf54e3f3c2cb8a65942054f77981469daf37"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+        "sha": "b37111c9aaa6015efc3210ed5e7e547e38988a64"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-b4d735ea49b82dc42b1afd04.json",
+        "sha": "97deb392179ad2bed0d48d21ffce0efcf80f4121"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9ff24ffd974e5e95bf3d46a3.json",
+        "sha": "418f4b44a4309a07245c62956b67d8d52d07c793"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b4d735ea49b82dc42b1afd04-candidate_evaluate.json",
+        "sha": "57f1016340129f32c264f2ffd2ef4318059e7fb5"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-831c4b0d76e2012987dc1f0a/request.json",
+        "sha": "ed3abc6f6da37110022161af714de5cf79b45974"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/request.json",
+        "sha": "a589279abdec4de2face89dc02d7b41ddfd8be31"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3866da8e82133db028a91010/receipt.json",
+        "sha": "2af5d1c1ba21d22a69da113ada1504e713da0dd8"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/request.json",
+        "sha": "e7c3dfec90de2706f7350a042e4422c9db59dc65"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-1461e5bab78e1af514191ef3/receipt.json",
+        "sha": "ec1efb032d64c45a61df3f00cc63ef6ddc53e6d5"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/request.json",
+        "sha": "47f94bc29873bea1111053076e82ee8ab79bfe6d"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9ac1b4c8e0b8a8c3a0ec4f60/receipt.json",
+        "sha": "0fabfa39afb54664c6c71c48450c911abce77011"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/request.json",
+        "sha": "167be26fc7870a0d9fb89f198cffd35f41c9059f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1a356c7e4f2dbb2b5548c1e8/receipt.json",
+        "sha": "0a265251fedaad7b4747821ca2f78486b6316323"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/request.json",
+        "sha": "74bb887b269a398faec273cf4d2e27941db14f93"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-93cb5fd7f7f700ec4a0c5692/receipt.json",
+        "sha": "b435714a38b96528bdc028c1ecc7ddc08d27e86f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/request.json",
+        "sha": "7c624e4bfd4f5d9433c0cbdc26db5712cb40d0d6"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-4abcb01d3b3a531d4c6f58b9/receipt.json",
+        "sha": "a95eb45d22c3ad7b3568ee6d0b9329421fce63cc"
+      }
+    ],
+    "head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
+    "pr": 599,
+    "status": "branch_readback_verified_ci_pending",
+    "verified_at": "2026-09-07T19:35:13.386Z",
+    "resume_required": true,
+    "upper_objective_achieved": false
+  }
 }
