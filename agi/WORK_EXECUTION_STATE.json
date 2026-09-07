@@ -172,162 +172,95 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-07T12:13:11.320Z",
+    "checkpointed_at": "2026-09-07T12:16:34.737Z",
     "completed_effect_receipt": {
+      "consumed_at": "2026-09-07T12:14:41.532760Z",
+      "episode_equal": true,
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "files": [
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-          "sha": "da3a9bf4a1bdbcc6f3afd6e13034f63bf31df4bd"
-        },
-        {
-          "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/request.json",
-          "sha": "f79667fe14b87f590cd38a34b0a19e890743900f"
-        },
-        {
-          "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/response.json",
-          "sha": "5605f9364bb062bfff67af065c5e13275bd135fb"
-        },
-        {
-          "path": "artifacts/g34-consolidate247-history-binding-repair-v1.json",
-          "sha": "eaa959ed0f4e0b36759e2742731f3191a8d37d45"
-        },
-        {
-          "path": "artifacts/g34-selector247-consolidation-v1.json",
-          "sha": "2fccd389503a9f315b68dc8998eac9904414a2ad"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/receipt.json",
-          "sha": "d41ab08de4d2bf7ca1428a2bb14fae4ac1cec5a6"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/request.json",
-          "sha": "bc15871193aa88847510abcec4dd7c9a5af02b9f"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
-          "sha": "6dc29a584379b88cdcd8a5aaa7139af8fc45907f"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-cc85d91456302ff85c4fabbf.json",
-          "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/receipt.json",
-          "sha": "a3ef50363b9ff84046d45cde6e5a363bd52de27e"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/request.json",
-          "sha": "4acf25b2adb0fe14846da9b55b35230b040739b2"
-        }
-      ],
-      "frozen_at": "2026-09-07T11:45:09.854733Z",
       "generation": 34,
-      "head_sha": "f7d8589699df99579cd243c186c211a42b8ffacd",
-      "idempotency_key": "o-work-g34:81acbf6d:consolidate247-response:v1",
-      "manifest_digest": "7bd6bd5b02ccc41a1d7e690115dfde886e975bfb205038203a8bdd0345a1aeb8",
+      "idempotency_key": "o-work-g34:81acbf6d:consolidate247-consume-native249:v1",
+      "local_preflight": {
+        "checkpoint_integrity": {
+          "issues": [],
+          "valid": true
+        },
+        "continuity": "passed"
+      },
+      "matching_completed_events": 1,
       "native_invocation_id": "invoke-03359c0d6c802a82797fadd6",
-      "new_fragments": 8,
+      "next_action": "Publish canonical Episode and native249 post_task_learn_pending; then Learn and Root.",
       "original_repair_outcome": "NOT_EVALUABLE",
       "output_digest": "65ec920094d389c2d46a705f72d57e58182023847b424f610bbda3558122ec8a",
-      "payload_digest": "d93f5a0007799f24baa6cb36a3645a1704af75f922385a8866665484c05b9a08",
-      "pr": 585,
-      "repair": {
-        "cause": "Embedded historical episode included old mutable snapshot binding interpreted by unchanged validator as current path/blob assertion.",
-        "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
-        "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-        "generation": 34,
-        "idempotency_key": "o-work-g34:81acbf6d:consolidate247-history-reference-repair:v1",
-        "initial_error": "WorkSessionError: evidence blob identity mismatch at output.result.prior_history.prior_episode_snapshot.evidence_refs[10].git_blob_sha",
-        "manifest_digest": "7bd6bd5b02ccc41a1d7e690115dfde886e975bfb205038203a8bdd0345a1aeb8",
-        "payload_digest": "d93f5a0007799f24baa6cb36a3645a1704af75f922385a8866665484c05b9a08",
-        "primary_restarted": false,
-        "record_type": "response_validation_repair",
-        "repair": "Preserve complete prior episode by immutable commit/blob locator; remove embedded old current-path assertions from new output, retain historical scope summary.",
-        "request_digest": "7e1d2bc5854a9be13428ffb773c3e9ad1e9dffc7bd57598ddc920a70975b5f44",
-        "request_recreated": false,
-        "response_written_on_failed_attempt": false,
-        "schema_version": 1,
-        "upper_objective_achieved": false,
-        "validation": {
-          "all_current_bindings_valid": true,
-          "historical_content_equal": true,
-          "immutable_prior_blob": "393209c2d3a669787d00d01ed6870431d17ec0ad",
-          "response_not_written": true,
-          "sequence_count": 8
-        },
-        "validation_exit_code": 0,
-        "validator_changed": false,
-        "verified_at": "2026-09-07T11:50:28.992Z",
-        "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6"
-      },
+      "output_equal": true,
       "request_digest": "7e1d2bc5854a9be13428ffb773c3e9ad1e9dffc7bd57598ddc920a70975b5f44",
-      "response_accepted_at": "2026-09-07T11:50:30.051971Z",
-      "response_consumed": false,
+      "request_recreated": false,
+      "response_consumed_once": true,
       "response_digest": "1d08d7c0005eda36c51f546faa235a5a3226c3b1a4ec3df7a95feb06384a3c32",
-      "response_submitted_once": true,
+      "response_repeated": false,
       "resume_required": true,
       "schema_version": 1,
-      "status": "main_readback_verified_pending_native_consume",
-      "total_fragments": 231,
-      "unit_verdict": "PASS",
+      "snapshot_phase": "post_task_learn_pending",
+      "snapshot_revision": 249,
+      "source_main_sha": "f859f1dffc31b78aef8286f76a6bb16552a6b2e0",
+      "status": "branch_readback_verified_ci_pending",
       "upper_objective_achieved": false,
       "verdict": "FAIL",
-      "verified_at": "2026-09-07T12:13:11.320Z",
       "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6",
-      "merge_sha": "eb5aad211e37f46734d90feb2dd20937b8eff7eb",
-      "main_readback": [
+      "pr": 586,
+      "head_sha": "7030e85597c3bf27122383a6917837f33155652a",
+      "files": [
+        {
+          "path": ".continual/episodes/episode-work-recovery-gen9-durability-repair/episode.json",
+          "sha": "1d2375912ab357e44073c80950c772c298589e3a"
+        },
         {
           "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-          "sha": "da3a9bf4a1bdbcc6f3afd6e13034f63bf31df4bd"
-        },
-        {
-          "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/request.json",
-          "sha": "f79667fe14b87f590cd38a34b0a19e890743900f"
-        },
-        {
-          "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/response.json",
-          "sha": "5605f9364bb062bfff67af065c5e13275bd135fb"
-        },
-        {
-          "path": "artifacts/g34-consolidate247-history-binding-repair-v1.json",
-          "sha": "eaa959ed0f4e0b36759e2742731f3191a8d37d45"
-        },
-        {
-          "path": "artifacts/g34-selector247-consolidation-v1.json",
-          "sha": "2fccd389503a9f315b68dc8998eac9904414a2ad"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/receipt.json",
-          "sha": "d41ab08de4d2bf7ca1428a2bb14fae4ac1cec5a6"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/request.json",
-          "sha": "bc15871193aa88847510abcec4dd7c9a5af02b9f"
+          "sha": "a78c1293415903bbaa8dcd3c988b9e070c83290b"
         },
         {
           "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
-          "sha": "6dc29a584379b88cdcd8a5aaa7139af8fc45907f"
+          "sha": "c9fa46b6da475ed42875012d60a65247652c4106"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-cc85d91456302ff85c4fabbf.json",
-          "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+          "sha": "382341104491ccd90f04dc0641479e307fba217d"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/receipt.json",
-          "sha": "a3ef50363b9ff84046d45cde6e5a363bd52de27e"
+          "path": "artifacts/g34-consolidate247-consume-native249-v1.json",
+          "sha": "485ceb0995ebf129041dbc6ba690d512576f31b1"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/request.json",
-          "sha": "4acf25b2adb0fe14846da9b55b35230b040739b2"
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-c7fffae2b9393b254088f427/receipt.json",
+          "sha": "fce31889f3a25675dcdef310b1c32c32dac4dd5e"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-c7fffae2b9393b254088f427/request.json",
+          "sha": "a2c42d2f07a361a467195bede4d4a368ffbce2ce"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-03359c0d6c802a82797fadd6-consolidate_episode.json",
+          "sha": "451a43bff59201f63cace7cd0ab2491852e5332b"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-03359c0d6c802a82797fadd6-consolidate_episode.json",
+          "sha": "004a43b7d2b809ddb43e8d4ca8bdb980ab03466b"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-194ab467631c6a1b2bd9882b/receipt.json",
+          "sha": "9d4e65794a86c824700300809e25cdef2e156123"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-194ab467631c6a1b2bd9882b/request.json",
+          "sha": "8cafa34f93fd7527f8c0613a51622b7b92c8168d"
         }
-      ]
+      ],
+      "verified_at": "2026-09-07T12:16:34.737Z"
     },
-    "current_head_sha": "f7d8589699df99579cd243c186c211a42b8ffacd",
-    "current_main_sha": "eb5aad211e37f46734d90feb2dd20937b8eff7eb",
-    "current_state_blob_sha": "b4aea169711692505c62d54184c436e1ab04930a",
-    "exact_frontier": "Consolidate247 frozen request and one accepted response verified on main; representation repair validated, native consume not yet performed.",
+    "current_head_sha": "7030e85597c3bf27122383a6917837f33155652a",
+    "current_main_sha": "f859f1dffc31b78aef8286f76a6bb16552a6b2e0",
+    "current_state_blob_sha": "f4545a776ddbaf2487571a93906eaae213a6507b",
+    "exact_frontier": "Consolidate247 consumed exactly once locally, canonical Episode equals output result, native249 post_task_learn_pending and eleven branch blobs verified PR586. Remote native247 until merge; do not consume again.",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "frozen_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6",
@@ -336,164 +269,102 @@
     "goal_revision": 118,
     "idempotency_key": "o-work-g34:81acbf6d:consolidate247-response:v1",
     "last_verified_effect": {
+      "consumed_at": "2026-09-07T12:14:41.532760Z",
+      "episode_equal": true,
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "files": [
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-          "sha": "da3a9bf4a1bdbcc6f3afd6e13034f63bf31df4bd"
-        },
-        {
-          "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/request.json",
-          "sha": "f79667fe14b87f590cd38a34b0a19e890743900f"
-        },
-        {
-          "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/response.json",
-          "sha": "5605f9364bb062bfff67af065c5e13275bd135fb"
-        },
-        {
-          "path": "artifacts/g34-consolidate247-history-binding-repair-v1.json",
-          "sha": "eaa959ed0f4e0b36759e2742731f3191a8d37d45"
-        },
-        {
-          "path": "artifacts/g34-selector247-consolidation-v1.json",
-          "sha": "2fccd389503a9f315b68dc8998eac9904414a2ad"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/receipt.json",
-          "sha": "d41ab08de4d2bf7ca1428a2bb14fae4ac1cec5a6"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/request.json",
-          "sha": "bc15871193aa88847510abcec4dd7c9a5af02b9f"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
-          "sha": "6dc29a584379b88cdcd8a5aaa7139af8fc45907f"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-cc85d91456302ff85c4fabbf.json",
-          "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/receipt.json",
-          "sha": "a3ef50363b9ff84046d45cde6e5a363bd52de27e"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/request.json",
-          "sha": "4acf25b2adb0fe14846da9b55b35230b040739b2"
-        }
-      ],
-      "frozen_at": "2026-09-07T11:45:09.854733Z",
       "generation": 34,
-      "head_sha": "f7d8589699df99579cd243c186c211a42b8ffacd",
-      "idempotency_key": "o-work-g34:81acbf6d:consolidate247-response:v1",
-      "manifest_digest": "7bd6bd5b02ccc41a1d7e690115dfde886e975bfb205038203a8bdd0345a1aeb8",
+      "idempotency_key": "o-work-g34:81acbf6d:consolidate247-consume-native249:v1",
+      "local_preflight": {
+        "checkpoint_integrity": {
+          "issues": [],
+          "valid": true
+        },
+        "continuity": "passed"
+      },
+      "matching_completed_events": 1,
       "native_invocation_id": "invoke-03359c0d6c802a82797fadd6",
-      "new_fragments": 8,
+      "next_action": "Publish canonical Episode and native249 post_task_learn_pending; then Learn and Root.",
       "original_repair_outcome": "NOT_EVALUABLE",
       "output_digest": "65ec920094d389c2d46a705f72d57e58182023847b424f610bbda3558122ec8a",
-      "payload_digest": "d93f5a0007799f24baa6cb36a3645a1704af75f922385a8866665484c05b9a08",
-      "pr": 585,
-      "repair": {
-        "cause": "Embedded historical episode included old mutable snapshot binding interpreted by unchanged validator as current path/blob assertion.",
-        "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
-        "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-        "generation": 34,
-        "idempotency_key": "o-work-g34:81acbf6d:consolidate247-history-reference-repair:v1",
-        "initial_error": "WorkSessionError: evidence blob identity mismatch at output.result.prior_history.prior_episode_snapshot.evidence_refs[10].git_blob_sha",
-        "manifest_digest": "7bd6bd5b02ccc41a1d7e690115dfde886e975bfb205038203a8bdd0345a1aeb8",
-        "payload_digest": "d93f5a0007799f24baa6cb36a3645a1704af75f922385a8866665484c05b9a08",
-        "primary_restarted": false,
-        "record_type": "response_validation_repair",
-        "repair": "Preserve complete prior episode by immutable commit/blob locator; remove embedded old current-path assertions from new output, retain historical scope summary.",
-        "request_digest": "7e1d2bc5854a9be13428ffb773c3e9ad1e9dffc7bd57598ddc920a70975b5f44",
-        "request_recreated": false,
-        "response_written_on_failed_attempt": false,
-        "schema_version": 1,
-        "upper_objective_achieved": false,
-        "validation": {
-          "all_current_bindings_valid": true,
-          "historical_content_equal": true,
-          "immutable_prior_blob": "393209c2d3a669787d00d01ed6870431d17ec0ad",
-          "response_not_written": true,
-          "sequence_count": 8
-        },
-        "validation_exit_code": 0,
-        "validator_changed": false,
-        "verified_at": "2026-09-07T11:50:28.992Z",
-        "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6"
-      },
+      "output_equal": true,
       "request_digest": "7e1d2bc5854a9be13428ffb773c3e9ad1e9dffc7bd57598ddc920a70975b5f44",
-      "response_accepted_at": "2026-09-07T11:50:30.051971Z",
-      "response_consumed": false,
+      "request_recreated": false,
+      "response_consumed_once": true,
       "response_digest": "1d08d7c0005eda36c51f546faa235a5a3226c3b1a4ec3df7a95feb06384a3c32",
-      "response_submitted_once": true,
+      "response_repeated": false,
       "resume_required": true,
       "schema_version": 1,
-      "status": "main_readback_verified_pending_native_consume",
-      "total_fragments": 231,
-      "unit_verdict": "PASS",
+      "snapshot_phase": "post_task_learn_pending",
+      "snapshot_revision": 249,
+      "source_main_sha": "f859f1dffc31b78aef8286f76a6bb16552a6b2e0",
+      "status": "branch_readback_verified_ci_pending",
       "upper_objective_achieved": false,
       "verdict": "FAIL",
-      "verified_at": "2026-09-07T12:13:11.320Z",
       "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6",
-      "merge_sha": "eb5aad211e37f46734d90feb2dd20937b8eff7eb",
-      "main_readback": [
+      "pr": 586,
+      "head_sha": "7030e85597c3bf27122383a6917837f33155652a",
+      "files": [
+        {
+          "path": ".continual/episodes/episode-work-recovery-gen9-durability-repair/episode.json",
+          "sha": "1d2375912ab357e44073c80950c772c298589e3a"
+        },
         {
           "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-          "sha": "da3a9bf4a1bdbcc6f3afd6e13034f63bf31df4bd"
-        },
-        {
-          "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/request.json",
-          "sha": "f79667fe14b87f590cd38a34b0a19e890743900f"
-        },
-        {
-          "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/response.json",
-          "sha": "5605f9364bb062bfff67af065c5e13275bd135fb"
-        },
-        {
-          "path": "artifacts/g34-consolidate247-history-binding-repair-v1.json",
-          "sha": "eaa959ed0f4e0b36759e2742731f3191a8d37d45"
-        },
-        {
-          "path": "artifacts/g34-selector247-consolidation-v1.json",
-          "sha": "2fccd389503a9f315b68dc8998eac9904414a2ad"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/receipt.json",
-          "sha": "d41ab08de4d2bf7ca1428a2bb14fae4ac1cec5a6"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/request.json",
-          "sha": "bc15871193aa88847510abcec4dd7c9a5af02b9f"
+          "sha": "a78c1293415903bbaa8dcd3c988b9e070c83290b"
         },
         {
           "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
-          "sha": "6dc29a584379b88cdcd8a5aaa7139af8fc45907f"
+          "sha": "c9fa46b6da475ed42875012d60a65247652c4106"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-cc85d91456302ff85c4fabbf.json",
-          "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+          "sha": "382341104491ccd90f04dc0641479e307fba217d"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/receipt.json",
-          "sha": "a3ef50363b9ff84046d45cde6e5a363bd52de27e"
+          "path": "artifacts/g34-consolidate247-consume-native249-v1.json",
+          "sha": "485ceb0995ebf129041dbc6ba690d512576f31b1"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/request.json",
-          "sha": "4acf25b2adb0fe14846da9b55b35230b040739b2"
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-c7fffae2b9393b254088f427/receipt.json",
+          "sha": "fce31889f3a25675dcdef310b1c32c32dac4dd5e"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-c7fffae2b9393b254088f427/request.json",
+          "sha": "a2c42d2f07a361a467195bede4d4a368ffbce2ce"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-03359c0d6c802a82797fadd6-consolidate_episode.json",
+          "sha": "451a43bff59201f63cace7cd0ab2491852e5332b"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-03359c0d6c802a82797fadd6-consolidate_episode.json",
+          "sha": "004a43b7d2b809ddb43e8d4ca8bdb980ab03466b"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-194ab467631c6a1b2bd9882b/receipt.json",
+          "sha": "9d4e65794a86c824700300809e25cdef2e156123"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-194ab467631c6a1b2bd9882b/request.json",
+          "sha": "8cafa34f93fd7527f8c0613a51622b7b92c8168d"
         }
-      ]
+      ],
+      "verified_at": "2026-09-07T12:16:34.737Z"
     },
     "lease_generation": 34,
-    "next_action": "Fresh main and source/CI preflight; consume exact Consolidate247 once, verify canonical Episode/native249 and publish; then Learn and next Root.",
-    "next_tool": "work-source-observation-prepare and ci-source-observation-prepare",
-    "next_tool_action": "Fresh main and source/CI preflight; consume exact Consolidate247 once, verify canonical Episode/native249 and publish; then Learn and next Root.",
-    "pending_ci_run_ids": [],
+    "next_action": "Query PR586 exact-head CI, merge successes/read back eleven files; bind native249 then freeze and execute Learn, publish/consume, continue next Root.",
+    "next_tool": "github_fetch_commit_workflow_runs exact PR586 head",
+    "next_tool_action": "Query PR586 exact-head CI, merge successes/read back eleven files; bind native249 then freeze and execute Learn, publish/consume, continue next Root.",
+    "pending_ci_run_ids": [
+      34120938051,
+      34120938062
+    ],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      586
+    ],
     "pending_response_digest": "1d08d7c0005eda36c51f546faa235a5a3226c3b1a4ec3df7a95feb06384a3c32",
     "resume_required": true,
     "schema_version": 1,
@@ -22649,7 +22520,54 @@
     "generation": 34,
     "head_sha": "f7d8589699df99579cd243c186c211a42b8ffacd",
     "idempotency_key": "o-work-g34:81acbf6d:consolidate247-response:v1",
+    "main_readback": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "da3a9bf4a1bdbcc6f3afd6e13034f63bf31df4bd"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/request.json",
+        "sha": "f79667fe14b87f590cd38a34b0a19e890743900f"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/response.json",
+        "sha": "5605f9364bb062bfff67af065c5e13275bd135fb"
+      },
+      {
+        "path": "artifacts/g34-consolidate247-history-binding-repair-v1.json",
+        "sha": "eaa959ed0f4e0b36759e2742731f3191a8d37d45"
+      },
+      {
+        "path": "artifacts/g34-selector247-consolidation-v1.json",
+        "sha": "2fccd389503a9f315b68dc8998eac9904414a2ad"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/receipt.json",
+        "sha": "d41ab08de4d2bf7ca1428a2bb14fae4ac1cec5a6"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/request.json",
+        "sha": "bc15871193aa88847510abcec4dd7c9a5af02b9f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
+        "sha": "6dc29a584379b88cdcd8a5aaa7139af8fc45907f"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-cc85d91456302ff85c4fabbf.json",
+        "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/receipt.json",
+        "sha": "a3ef50363b9ff84046d45cde6e5a363bd52de27e"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/request.json",
+        "sha": "4acf25b2adb0fe14846da9b55b35230b040739b2"
+      }
+    ],
     "manifest_digest": "7bd6bd5b02ccc41a1d7e690115dfde886e975bfb205038203a8bdd0345a1aeb8",
+    "merge_sha": "eb5aad211e37f46734d90feb2dd20937b8eff7eb",
     "native_invocation_id": "invoke-03359c0d6c802a82797fadd6",
     "new_fragments": 8,
     "original_repair_outcome": "NOT_EVALUABLE",
@@ -22698,54 +22616,7 @@
     "upper_objective_achieved": false,
     "verdict": "FAIL",
     "verified_at": "2026-09-07T12:13:11.320Z",
-    "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6",
-    "merge_sha": "eb5aad211e37f46734d90feb2dd20937b8eff7eb",
-    "main_readback": [
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-        "sha": "da3a9bf4a1bdbcc6f3afd6e13034f63bf31df4bd"
-      },
-      {
-        "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/request.json",
-        "sha": "f79667fe14b87f590cd38a34b0a19e890743900f"
-      },
-      {
-        "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/response.json",
-        "sha": "5605f9364bb062bfff67af065c5e13275bd135fb"
-      },
-      {
-        "path": "artifacts/g34-consolidate247-history-binding-repair-v1.json",
-        "sha": "eaa959ed0f4e0b36759e2742731f3191a8d37d45"
-      },
-      {
-        "path": "artifacts/g34-selector247-consolidation-v1.json",
-        "sha": "2fccd389503a9f315b68dc8998eac9904414a2ad"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/receipt.json",
-        "sha": "d41ab08de4d2bf7ca1428a2bb14fae4ac1cec5a6"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/request.json",
-        "sha": "bc15871193aa88847510abcec4dd7c9a5af02b9f"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
-        "sha": "6dc29a584379b88cdcd8a5aaa7139af8fc45907f"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-cc85d91456302ff85c4fabbf.json",
-        "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/receipt.json",
-        "sha": "a3ef50363b9ff84046d45cde6e5a363bd52de27e"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/request.json",
-        "sha": "4acf25b2adb0fe14846da9b55b35230b040739b2"
-      }
-    ]
+    "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6"
   },
   "generation34_consolidate_consume_v1": {
     "ci": {
@@ -27001,7 +26872,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-07T12:13:11.320Z",
+  "heartbeat_at": "2026-09-07T12:16:34.737Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -27941,157 +27812,90 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-07T12:13:11.320Z",
+  "last_progress_at": "2026-09-07T12:16:34.737Z",
   "last_verified_effect": {
+    "consumed_at": "2026-09-07T12:14:41.532760Z",
+    "episode_equal": true,
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-    "files": [
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-        "sha": "da3a9bf4a1bdbcc6f3afd6e13034f63bf31df4bd"
-      },
-      {
-        "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/request.json",
-        "sha": "f79667fe14b87f590cd38a34b0a19e890743900f"
-      },
-      {
-        "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/response.json",
-        "sha": "5605f9364bb062bfff67af065c5e13275bd135fb"
-      },
-      {
-        "path": "artifacts/g34-consolidate247-history-binding-repair-v1.json",
-        "sha": "eaa959ed0f4e0b36759e2742731f3191a8d37d45"
-      },
-      {
-        "path": "artifacts/g34-selector247-consolidation-v1.json",
-        "sha": "2fccd389503a9f315b68dc8998eac9904414a2ad"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/receipt.json",
-        "sha": "d41ab08de4d2bf7ca1428a2bb14fae4ac1cec5a6"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/request.json",
-        "sha": "bc15871193aa88847510abcec4dd7c9a5af02b9f"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
-        "sha": "6dc29a584379b88cdcd8a5aaa7139af8fc45907f"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-cc85d91456302ff85c4fabbf.json",
-        "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/receipt.json",
-        "sha": "a3ef50363b9ff84046d45cde6e5a363bd52de27e"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/request.json",
-        "sha": "4acf25b2adb0fe14846da9b55b35230b040739b2"
-      }
-    ],
-    "frozen_at": "2026-09-07T11:45:09.854733Z",
     "generation": 34,
-    "head_sha": "f7d8589699df99579cd243c186c211a42b8ffacd",
-    "idempotency_key": "o-work-g34:81acbf6d:consolidate247-response:v1",
-    "manifest_digest": "7bd6bd5b02ccc41a1d7e690115dfde886e975bfb205038203a8bdd0345a1aeb8",
+    "idempotency_key": "o-work-g34:81acbf6d:consolidate247-consume-native249:v1",
+    "local_preflight": {
+      "checkpoint_integrity": {
+        "issues": [],
+        "valid": true
+      },
+      "continuity": "passed"
+    },
+    "matching_completed_events": 1,
     "native_invocation_id": "invoke-03359c0d6c802a82797fadd6",
-    "new_fragments": 8,
+    "next_action": "Publish canonical Episode and native249 post_task_learn_pending; then Learn and Root.",
     "original_repair_outcome": "NOT_EVALUABLE",
     "output_digest": "65ec920094d389c2d46a705f72d57e58182023847b424f610bbda3558122ec8a",
-    "payload_digest": "d93f5a0007799f24baa6cb36a3645a1704af75f922385a8866665484c05b9a08",
-    "pr": 585,
-    "repair": {
-      "cause": "Embedded historical episode included old mutable snapshot binding interpreted by unchanged validator as current path/blob assertion.",
-      "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
-      "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "generation": 34,
-      "idempotency_key": "o-work-g34:81acbf6d:consolidate247-history-reference-repair:v1",
-      "initial_error": "WorkSessionError: evidence blob identity mismatch at output.result.prior_history.prior_episode_snapshot.evidence_refs[10].git_blob_sha",
-      "manifest_digest": "7bd6bd5b02ccc41a1d7e690115dfde886e975bfb205038203a8bdd0345a1aeb8",
-      "payload_digest": "d93f5a0007799f24baa6cb36a3645a1704af75f922385a8866665484c05b9a08",
-      "primary_restarted": false,
-      "record_type": "response_validation_repair",
-      "repair": "Preserve complete prior episode by immutable commit/blob locator; remove embedded old current-path assertions from new output, retain historical scope summary.",
-      "request_digest": "7e1d2bc5854a9be13428ffb773c3e9ad1e9dffc7bd57598ddc920a70975b5f44",
-      "request_recreated": false,
-      "response_written_on_failed_attempt": false,
-      "schema_version": 1,
-      "upper_objective_achieved": false,
-      "validation": {
-        "all_current_bindings_valid": true,
-        "historical_content_equal": true,
-        "immutable_prior_blob": "393209c2d3a669787d00d01ed6870431d17ec0ad",
-        "response_not_written": true,
-        "sequence_count": 8
-      },
-      "validation_exit_code": 0,
-      "validator_changed": false,
-      "verified_at": "2026-09-07T11:50:28.992Z",
-      "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6"
-    },
+    "output_equal": true,
     "request_digest": "7e1d2bc5854a9be13428ffb773c3e9ad1e9dffc7bd57598ddc920a70975b5f44",
-    "response_accepted_at": "2026-09-07T11:50:30.051971Z",
-    "response_consumed": false,
+    "request_recreated": false,
+    "response_consumed_once": true,
     "response_digest": "1d08d7c0005eda36c51f546faa235a5a3226c3b1a4ec3df7a95feb06384a3c32",
-    "response_submitted_once": true,
+    "response_repeated": false,
     "resume_required": true,
     "schema_version": 1,
-    "status": "main_readback_verified_pending_native_consume",
-    "total_fragments": 231,
-    "unit_verdict": "PASS",
+    "snapshot_phase": "post_task_learn_pending",
+    "snapshot_revision": 249,
+    "source_main_sha": "f859f1dffc31b78aef8286f76a6bb16552a6b2e0",
+    "status": "branch_readback_verified_ci_pending",
     "upper_objective_achieved": false,
     "verdict": "FAIL",
-    "verified_at": "2026-09-07T12:13:11.320Z",
     "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6",
-    "merge_sha": "eb5aad211e37f46734d90feb2dd20937b8eff7eb",
-    "main_readback": [
+    "pr": 586,
+    "head_sha": "7030e85597c3bf27122383a6917837f33155652a",
+    "files": [
+      {
+        "path": ".continual/episodes/episode-work-recovery-gen9-durability-repair/episode.json",
+        "sha": "1d2375912ab357e44073c80950c772c298589e3a"
+      },
       {
         "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-        "sha": "da3a9bf4a1bdbcc6f3afd6e13034f63bf31df4bd"
-      },
-      {
-        "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/request.json",
-        "sha": "f79667fe14b87f590cd38a34b0a19e890743900f"
-      },
-      {
-        "path": ".continual/work-model/invocations/invoke-e27eb3f0083c8c414af0c6f6/response.json",
-        "sha": "5605f9364bb062bfff67af065c5e13275bd135fb"
-      },
-      {
-        "path": "artifacts/g34-consolidate247-history-binding-repair-v1.json",
-        "sha": "eaa959ed0f4e0b36759e2742731f3191a8d37d45"
-      },
-      {
-        "path": "artifacts/g34-selector247-consolidation-v1.json",
-        "sha": "2fccd389503a9f315b68dc8998eac9904414a2ad"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/receipt.json",
-        "sha": "d41ab08de4d2bf7ca1428a2bb14fae4ac1cec5a6"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-9862f4a0819cb805ce1dc0ea/request.json",
-        "sha": "bc15871193aa88847510abcec4dd7c9a5af02b9f"
+        "sha": "a78c1293415903bbaa8dcd3c988b9e070c83290b"
       },
       {
         "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
-        "sha": "6dc29a584379b88cdcd8a5aaa7139af8fc45907f"
+        "sha": "c9fa46b6da475ed42875012d60a65247652c4106"
       },
       {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-consolidate_episode-cc85d91456302ff85c4fabbf.json",
-        "sha": "f97b2294c165bf76c5123c2117e7c264927c4c09"
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "sha": "382341104491ccd90f04dc0641479e307fba217d"
       },
       {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/receipt.json",
-        "sha": "a3ef50363b9ff84046d45cde6e5a363bd52de27e"
+        "path": "artifacts/g34-consolidate247-consume-native249-v1.json",
+        "sha": "485ceb0995ebf129041dbc6ba690d512576f31b1"
       },
       {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-58e7c7a31a4c684815a0a550/request.json",
-        "sha": "4acf25b2adb0fe14846da9b55b35230b040739b2"
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-c7fffae2b9393b254088f427/receipt.json",
+        "sha": "fce31889f3a25675dcdef310b1c32c32dac4dd5e"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-c7fffae2b9393b254088f427/request.json",
+        "sha": "a2c42d2f07a361a467195bede4d4a368ffbce2ce"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-03359c0d6c802a82797fadd6-consolidate_episode.json",
+        "sha": "451a43bff59201f63cace7cd0ab2491852e5332b"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-03359c0d6c802a82797fadd6-consolidate_episode.json",
+        "sha": "004a43b7d2b809ddb43e8d4ca8bdb980ab03466b"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-194ab467631c6a1b2bd9882b/receipt.json",
+        "sha": "9d4e65794a86c824700300809e25cdef2e156123"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-194ab467631c6a1b2bd9882b/request.json",
+        "sha": "8cafa34f93fd7527f8c0613a51622b7b92c8168d"
       }
-    ]
+    ],
+    "verified_at": "2026-09-07T12:16:34.737Z"
   },
   "latest_integrated_source": {
     "additional_pull_requests": [
@@ -28409,9 +28213,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Fresh main and source/CI preflight; consume exact Consolidate247 once, verify canonical Episode/native249 and publish; then Learn and next Root.",
-  "next_tool": "work-source-observation-prepare and ci-source-observation-prepare",
-  "next_tool_action": "Fresh main and source/CI preflight; consume exact Consolidate247 once, verify canonical Episode/native249 and publish; then Learn and next Root.",
+  "next_action": "Query PR586 exact-head CI, merge successes/read back eleven files; bind native249 then freeze and execute Learn, publish/consume, continue next Root.",
+  "next_tool": "github_fetch_commit_workflow_runs exact PR586 head",
+  "next_tool_action": "Query PR586 exact-head CI, merge successes/read back eleven files; bind native249 then freeze and execute Learn, publish/consume, continue next Root.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -34002,5 +33806,89 @@
   "verified_at": "2026-09-07T12:13:11.320Z",
   "verified_remote_readback": true,
   "work_status": "executing",
-  "working_branch": null
+  "working_branch": null,
+  "generation34_consolidate247_consume_v1": {
+    "consumed_at": "2026-09-07T12:14:41.532760Z",
+    "episode_equal": true,
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "generation": 34,
+    "idempotency_key": "o-work-g34:81acbf6d:consolidate247-consume-native249:v1",
+    "local_preflight": {
+      "checkpoint_integrity": {
+        "issues": [],
+        "valid": true
+      },
+      "continuity": "passed"
+    },
+    "matching_completed_events": 1,
+    "native_invocation_id": "invoke-03359c0d6c802a82797fadd6",
+    "next_action": "Publish canonical Episode and native249 post_task_learn_pending; then Learn and Root.",
+    "original_repair_outcome": "NOT_EVALUABLE",
+    "output_digest": "65ec920094d389c2d46a705f72d57e58182023847b424f610bbda3558122ec8a",
+    "output_equal": true,
+    "request_digest": "7e1d2bc5854a9be13428ffb773c3e9ad1e9dffc7bd57598ddc920a70975b5f44",
+    "request_recreated": false,
+    "response_consumed_once": true,
+    "response_digest": "1d08d7c0005eda36c51f546faa235a5a3226c3b1a4ec3df7a95feb06384a3c32",
+    "response_repeated": false,
+    "resume_required": true,
+    "schema_version": 1,
+    "snapshot_phase": "post_task_learn_pending",
+    "snapshot_revision": 249,
+    "source_main_sha": "f859f1dffc31b78aef8286f76a6bb16552a6b2e0",
+    "status": "branch_readback_verified_ci_pending",
+    "upper_objective_achieved": false,
+    "verdict": "FAIL",
+    "work_invocation_id": "invoke-e27eb3f0083c8c414af0c6f6",
+    "pr": 586,
+    "head_sha": "7030e85597c3bf27122383a6917837f33155652a",
+    "files": [
+      {
+        "path": ".continual/episodes/episode-work-recovery-gen9-durability-repair/episode.json",
+        "sha": "1d2375912ab357e44073c80950c772c298589e3a"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "a78c1293415903bbaa8dcd3c988b9e070c83290b"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-03359c0d6c802a82797fadd6.json",
+        "sha": "c9fa46b6da475ed42875012d60a65247652c4106"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "sha": "382341104491ccd90f04dc0641479e307fba217d"
+      },
+      {
+        "path": "artifacts/g34-consolidate247-consume-native249-v1.json",
+        "sha": "485ceb0995ebf129041dbc6ba690d512576f31b1"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-c7fffae2b9393b254088f427/receipt.json",
+        "sha": "fce31889f3a25675dcdef310b1c32c32dac4dd5e"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-c7fffae2b9393b254088f427/request.json",
+        "sha": "a2c42d2f07a361a467195bede4d4a368ffbce2ce"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-03359c0d6c802a82797fadd6-consolidate_episode.json",
+        "sha": "451a43bff59201f63cace7cd0ab2491852e5332b"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-03359c0d6c802a82797fadd6-consolidate_episode.json",
+        "sha": "004a43b7d2b809ddb43e8d4ca8bdb980ab03466b"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-194ab467631c6a1b2bd9882b/receipt.json",
+        "sha": "9d4e65794a86c824700300809e25cdef2e156123"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-194ab467631c6a1b2bd9882b/request.json",
+        "sha": "8cafa34f93fd7527f8c0613a51622b7b92c8168d"
+      }
+    ],
+    "verified_at": "2026-09-07T12:16:34.737Z"
+  }
 }
