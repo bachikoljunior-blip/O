@@ -1,0 +1,79 @@
+{
+  "observed_at": "2026-09-07T00:00:37.137Z",
+  "scope": "This conversation's currently exposed registry only; not account-wide absence proof.",
+  "selection": "Exposed tool names matching __work_, __model_, __provider_, __run_, __task_, or GitHub fetch/workflow families; manual semantic review excludes unrelated media/Sites tools.",
+  "tools": [
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nDownload a GitHub Actions workflow artifact ZIP archive. GitHub serves this endpoint through a temporary redirect; the underlying client follows that redirect before returning a reusable file reference for the ZIP bytes. Docs: https://docs.github.com/en/rest/actions/artifacts?apiVersion=2022-11-28#download-an-artifact. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_download_workflow_artifact"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch approved public GitHub repository resources and repository files. Supports repositories, directories, code and issue search, and blob or raw file URLs. Pull requests, issues, commits, branches, workflow runs, releases, Git data, commit statuses, and rulesets include their collections and subresources via GET only, including branch-protection and ruleset reads. The active connection's repository permissions still apply. Managed GitHub App installation connections exclude administration access, so they cannot read branch-protection endpoints that require that permission. Unlisted API endpoints and non-public-GitHub hosts are rejected. Sensitive endpoint families, such as user, organization, and secrets APIs, are not supported. Contents URLs without a ref use the repository's default branch. JSON responses are returned unchanged; oversized or non-UTF-8 responses are rejected, so binary downloads are not supported. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch blob content by SHA from the given repository. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_blob"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch a commit with its metadata, diff, and canonical URL. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_commit"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch GitHub Actions workflow runs associated with a commit SHA. This wrapper currently filters to pull-request-triggered runs and returns the first page only. Docs: https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-repository. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_commit_workflow_runs"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch file content by repository path, using the default branch when ref is omitted. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_file"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch a GitHub issue. You must populate exactly one of `repository_full_name`, `repository_id`, or `repository_url` to select the issue's repository. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_issue"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch comments for a GitHub issue across all pages. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_issue_comments"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch a pull request with its diff, metadata, and optionally comments. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_pr"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch a merged PR discussion timeline. The returned list combines issue comments, inline review comments, and review submissions into one normalized array. Docs: https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28 Docs: https://docs.github.com/en/rest/pulls/comments?apiVersion=2022-11-28 Docs: https://docs.github.com/en/rest/pulls/reviews?apiVersion=2022-11-28. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_pr_comments"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch the patch for one validated changed file in an accessible pull request. Call `list_pr_changed_filenames` first, then pass an exact returned path. A valid pull request that does not contain the path returns `patch=null`. A 404 means GitHub could not resolve the repository or pull request; do not retry other paths. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_pr_file_patch"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch the patch for a GitHub pull request across all changed-file pages. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_pr_patch"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch decoded logs for a GitHub Actions workflow job. GitHub serves this endpoint through a temporary redirect; the underlying client follows that redirect before decoding the bytes. Docs: https://docs.github.com/en/rest/actions/workflow-jobs?apiVersion=2022-11-28#download-job-logs-for-a-workflow-run-job. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_workflow_job_logs"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch steps for a GitHub Actions workflow job. Returns only step summaries, not the full job payload. Docs: https://docs.github.com/en/rest/actions/workflow-jobs?apiVersion=2022-11-28#get-a-job-for-a-workflow-run. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_workflow_job_steps"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch artifacts for a GitHub Actions workflow run. This wrapper returns the first page only. Docs: https://docs.github.com/en/rest/actions/artifacts?apiVersion=2022-11-28#list-workflow-run-artifacts. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_workflow_run_artifacts"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nFetch jobs for a GitHub Actions workflow run. This wrapper returns the latest attempt's jobs from the first page only. Docs: https://docs.github.com/en/rest/actions/workflow-jobs?apiVersion=2022-11-28#list-jobs-for-a-workflow-run. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_fetch_workflow_run_jobs"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nRe-run all failed jobs in a GitHub Actions workflow run. Use this to retry only the failed jobs from a workflow run, instead of starting a full new attempt for successful jobs too. The linked GitHub app or token must have GitHub Actions write permission for the repository. Docs: https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#re-run-failed-jobs-from-a-workflow-run. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_rerun_failed_workflow_run_jobs"
+    },
+    {
+      "description": "Access repositories, issues, and pull requests. Required for some features such as Codex\n\nRe-run one GitHub Actions workflow job. Use this when a specific failed or cancelled job should be retried without re-running every failed job in the workflow run. The linked GitHub app or token must have GitHub Actions write permission for the repository. Docs: https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#re-run-a-job-from-a-workflow-run. This tool is part of plugin `GitHub`.",
+      "name": "mcp__codex_apps__github_rerun_workflow_job"
+    }
+  ]
+}
