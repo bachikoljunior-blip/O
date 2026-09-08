@@ -173,247 +173,143 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-08T18:15:00Z",
+    "checkpointed_at": "2026-09-08T19:26:45.810555Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "goal_revision": 118,
-    "current_head_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
-    "current_main_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
-    "current_state_blob_sha": "6026b491aecde402f7b5bd9ce4cf2cca12970876",
+    "current_head_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+    "current_main_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+    "current_state_blob_sha": "650b007fa97a530cecc06efd5c52d62507b691d8",
     "frozen_invocation_id": null,
     "frozen_request_digest": null,
     "frozen_payload_digest": null,
     "pending_response_digest": null,
-    "snapshot_blob_sha": "61da4a003d96468055a90985de9cb634fe9d4684",
-    "snapshot_revision": 270,
+    "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+    "snapshot_revision": 271,
     "snapshot_phase": "unit_pending",
-    "completed_effect_receipt_ref": "generation34_candidate270_consume_source_block_v1",
+    "completed_effect_receipt_ref": "generation34_candidate271_heartbeat_repair_v1",
     "completed_effect_receipt": {
       "schema_version": 1,
-      "classification": "candidate_response_consumed_once_execute_preflight_source_observation_blocked",
+      "classification": "execute_preflight_heartbeat_staleness_repair",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "idempotency_key": "o-work-g34:81acbf6d:candidate270-consume:2c58b6c3:v1",
-      "source_main_sha": "656fbf26b4891adf2600b0fbb4052bf5aab1cc9d",
-      "source_state_blob_sha": "6026b491aecde402f7b5bd9ce4cf2cca12970876",
+      "idempotency_key": "o-work-g34:81acbf6d:snapshot271-heartbeat-repair:v1",
       "run_id": "run-work-recovery-gen9-durability-repair",
-      "work_invocation_id": "invoke-254ab73b925e81ca60709184",
-      "native_invocation_id": "invoke-917c09c021d1612aa59ff4c4",
-      "request_digest": "760849a6e63abc5f750ee4d6b6cb8efe65552d12ab046cc27bc87209156d913d",
-      "response_digest": "2c58b6c3561d7e356b22bb7b8482192c4f84678df2e807efa8b4215a1434b9df",
-      "output_digest": "8aa103778827bb0bf0053f5d367161f98866672a7d6940a7fbfc21ad7755127c",
-      "snapshot_revision": 270,
+      "snapshot_revision": 271,
       "snapshot_phase": "unit_pending",
       "current_unit_id": "unit-generation34-production-history-resolution-audit-v1",
       "target_component": "execute",
-      "candidate_decision": "NOT_APPLICABLE",
-      "candidate_activation_authorized": false,
-      "candidate_response_consumed": true,
-      "execute_request_frozen": false,
+      "source_main_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+      "source_state_blob_sha": "650b007fa97a530cecc06efd5c52d62507b691d8",
       "stop_cause": {
-        "type": "missing_fresh_authoritative_work_source_observation",
-        "message": "Context Kernel failed closed: authoritative Work source observation failed: mandatory Work source lacks a matching fresh authoritative observation",
-        "location": "Execute semantic preflight after Candidate response consumption",
-        "mutation_boundary": "Candidate native invocation completed exactly once; no Execute Work request was created or submitted."
+        "type": "stale_decision_context_work_heartbeat",
+        "message": "Context Kernel failed closed: decision context Work heartbeat is stale",
+        "established_by": "Execute semantic preflight after exact Work/CI observations and checkpoint verification",
+        "mutation_boundary": "No Execute Work request was created or submitted."
       },
       "repair": {
-        "action": "Precommit and record exact Work and CI source observations under the unchanged generation/fence, publish and bind them, then retry the Execute freeze without recreating Candidate work.",
+        "action": "Refresh only the unchanged generation34 owner heartbeat through expected-blob CAS, exact-readback it, then precommit a new exact Work source observation for that state.",
         "validated": false
       },
-      "files": [
+      "completed_effects": [
         {
+          "kind": "snapshot271_event",
           "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-          "sha": "f55eff5575da5c189a8af8c43c2b10b5ab97dd5b"
+          "sha": "2f6ad3cf4393439efaedef989b63ad76f370ac46",
+          "commit": "7cd2934a750120eae34d78ca5dd967b39b7a5f9e"
         },
         {
+          "kind": "snapshot271",
           "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-          "sha": "61da4a003d96468055a90985de9cb634fe9d4684"
+          "sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+          "commit": "387810cd783fe61da51385c2ff137c34427a5bb1"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-917c09c021d1612aa59ff4c4.json",
-          "sha": "4ed7ada4466cda2c3cf8151d38410ae1d6fb170c"
+          "kind": "execution_unit_repair",
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/execution-units/unit-generation34-production-history-resolution-audit-v1.json",
+          "sha": "c992cb1ec688a54905943f479965d1c0c17108b3",
+          "commit": "3436d71da2cc85cd2a228d1887b61eb6390bb3d4"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-917c09c021d1612aa59ff4c4-candidate_evaluate.json",
-          "sha": "257fffc87d507c69911d242021076a31c24e4ca3"
+          "kind": "work_source_receipt",
+          "sha": "6284aa3e0fb9d4dc1f2264365b5a949bb324074d",
+          "commit": "206148419f0334966cfebe25cc326f1ee7c2c75e"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-917c09c021d1612aa59ff4c4-candidate_evaluate.json",
-          "sha": "c36feca43cc3bd89f33cfc6abad7178e5e46dab9"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-execute-4b0cf55e05ebbe1b45318a68.json",
-          "sha": "de091bdd54fe40b83a4ea2a8b732cd2ed14dde2a"
-        },
-        {
-          "path": "artifacts/g34-candidate270-consume-source-block-v1.json",
-          "sha": "18c3064f91002b623591a944d2dbdb1de8cf7d1c"
+          "kind": "ci_source_receipt",
+          "sha": "97c4defaf52b691ce42572ee9dad721958be931b",
+          "commit": "6f022e25314fee7940455f8fd26393a148f0d28c"
         }
       ],
       "request_recreated": false,
-      "response_submitted": true,
-      "response_consumed": true,
       "response_replayed": false,
-      "branch": "work-g34-candidate270-consume-source-block",
-      "head_sha": "7c6c5e7910db8cbba70e4ba6cdf56d8b176aef12",
-      "pull_request": 616,
-      "merge_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
-      "workflow_runs": {
-        "directive_source_preflight": {
-          "run_id": 34198084951,
-          "conclusion": "success"
-        },
-        "test": {
-          "run_id": 34198085109,
-          "conclusion": "success"
-        }
-      },
-      "required_jobs": [
-        {
-          "job_id": 101970247010,
-          "name": "pytest shard 0 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 101970247183,
-          "name": "pytest shard 1 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 101970247199,
-          "name": "pytest shard 2 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 101970247194,
-          "name": "pytest shard 3 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 101977607339,
-          "name": "test",
-          "conclusion": "success"
-        }
-      ],
-      "main_readback_verified": true,
-      "observed_at": "2026-09-08T07:07:42Z",
+      "execute_request_frozen": false,
       "resume_required": true,
+      "observed_at": "2026-09-08T19:26:45.810555Z",
       "upper_objective_achieved": false,
       "agi_claim_supported": false
     },
     "last_verified_effect": {
       "schema_version": 1,
-      "classification": "candidate_response_consumed_once_execute_preflight_source_observation_blocked",
+      "classification": "execute_preflight_heartbeat_staleness_repair",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "idempotency_key": "o-work-g34:81acbf6d:candidate270-consume:2c58b6c3:v1",
-      "source_main_sha": "656fbf26b4891adf2600b0fbb4052bf5aab1cc9d",
-      "source_state_blob_sha": "6026b491aecde402f7b5bd9ce4cf2cca12970876",
+      "idempotency_key": "o-work-g34:81acbf6d:snapshot271-heartbeat-repair:v1",
       "run_id": "run-work-recovery-gen9-durability-repair",
-      "work_invocation_id": "invoke-254ab73b925e81ca60709184",
-      "native_invocation_id": "invoke-917c09c021d1612aa59ff4c4",
-      "request_digest": "760849a6e63abc5f750ee4d6b6cb8efe65552d12ab046cc27bc87209156d913d",
-      "response_digest": "2c58b6c3561d7e356b22bb7b8482192c4f84678df2e807efa8b4215a1434b9df",
-      "output_digest": "8aa103778827bb0bf0053f5d367161f98866672a7d6940a7fbfc21ad7755127c",
-      "snapshot_revision": 270,
+      "snapshot_revision": 271,
       "snapshot_phase": "unit_pending",
       "current_unit_id": "unit-generation34-production-history-resolution-audit-v1",
       "target_component": "execute",
-      "candidate_decision": "NOT_APPLICABLE",
-      "candidate_activation_authorized": false,
-      "candidate_response_consumed": true,
-      "execute_request_frozen": false,
+      "source_main_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+      "source_state_blob_sha": "650b007fa97a530cecc06efd5c52d62507b691d8",
       "stop_cause": {
-        "type": "missing_fresh_authoritative_work_source_observation",
-        "message": "Context Kernel failed closed: authoritative Work source observation failed: mandatory Work source lacks a matching fresh authoritative observation",
-        "location": "Execute semantic preflight after Candidate response consumption",
-        "mutation_boundary": "Candidate native invocation completed exactly once; no Execute Work request was created or submitted."
+        "type": "stale_decision_context_work_heartbeat",
+        "message": "Context Kernel failed closed: decision context Work heartbeat is stale",
+        "established_by": "Execute semantic preflight after exact Work/CI observations and checkpoint verification",
+        "mutation_boundary": "No Execute Work request was created or submitted."
       },
       "repair": {
-        "action": "Precommit and record exact Work and CI source observations under the unchanged generation/fence, publish and bind them, then retry the Execute freeze without recreating Candidate work.",
+        "action": "Refresh only the unchanged generation34 owner heartbeat through expected-blob CAS, exact-readback it, then precommit a new exact Work source observation for that state.",
         "validated": false
       },
-      "files": [
+      "completed_effects": [
         {
+          "kind": "snapshot271_event",
           "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-          "sha": "f55eff5575da5c189a8af8c43c2b10b5ab97dd5b"
+          "sha": "2f6ad3cf4393439efaedef989b63ad76f370ac46",
+          "commit": "7cd2934a750120eae34d78ca5dd967b39b7a5f9e"
         },
         {
+          "kind": "snapshot271",
           "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-          "sha": "61da4a003d96468055a90985de9cb634fe9d4684"
+          "sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+          "commit": "387810cd783fe61da51385c2ff137c34427a5bb1"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-917c09c021d1612aa59ff4c4.json",
-          "sha": "4ed7ada4466cda2c3cf8151d38410ae1d6fb170c"
+          "kind": "execution_unit_repair",
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/execution-units/unit-generation34-production-history-resolution-audit-v1.json",
+          "sha": "c992cb1ec688a54905943f479965d1c0c17108b3",
+          "commit": "3436d71da2cc85cd2a228d1887b61eb6390bb3d4"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-917c09c021d1612aa59ff4c4-candidate_evaluate.json",
-          "sha": "257fffc87d507c69911d242021076a31c24e4ca3"
+          "kind": "work_source_receipt",
+          "sha": "6284aa3e0fb9d4dc1f2264365b5a949bb324074d",
+          "commit": "206148419f0334966cfebe25cc326f1ee7c2c75e"
         },
         {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-917c09c021d1612aa59ff4c4-candidate_evaluate.json",
-          "sha": "c36feca43cc3bd89f33cfc6abad7178e5e46dab9"
-        },
-        {
-          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-execute-4b0cf55e05ebbe1b45318a68.json",
-          "sha": "de091bdd54fe40b83a4ea2a8b732cd2ed14dde2a"
-        },
-        {
-          "path": "artifacts/g34-candidate270-consume-source-block-v1.json",
-          "sha": "18c3064f91002b623591a944d2dbdb1de8cf7d1c"
+          "kind": "ci_source_receipt",
+          "sha": "97c4defaf52b691ce42572ee9dad721958be931b",
+          "commit": "6f022e25314fee7940455f8fd26393a148f0d28c"
         }
       ],
       "request_recreated": false,
-      "response_submitted": true,
-      "response_consumed": true,
       "response_replayed": false,
-      "branch": "work-g34-candidate270-consume-source-block",
-      "head_sha": "7c6c5e7910db8cbba70e4ba6cdf56d8b176aef12",
-      "pull_request": 616,
-      "merge_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
-      "workflow_runs": {
-        "directive_source_preflight": {
-          "run_id": 34198084951,
-          "conclusion": "success"
-        },
-        "test": {
-          "run_id": 34198085109,
-          "conclusion": "success"
-        }
-      },
-      "required_jobs": [
-        {
-          "job_id": 101970247010,
-          "name": "pytest shard 0 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 101970247183,
-          "name": "pytest shard 1 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 101970247199,
-          "name": "pytest shard 2 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 101970247194,
-          "name": "pytest shard 3 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 101977607339,
-          "name": "test",
-          "conclusion": "success"
-        }
-      ],
-      "main_readback_verified": true,
-      "observed_at": "2026-09-08T07:07:42Z",
+      "execute_request_frozen": false,
       "resume_required": true,
+      "observed_at": "2026-09-08T19:26:45.810555Z",
       "upper_objective_achieved": false,
       "agi_claim_supported": false
     },
@@ -421,16 +317,16 @@
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_pull_requests": [],
-    "idempotency_key": "o-work-g34:81acbf6d:candidate270-state-bind:1bc22102:v1",
-    "exact_frontier": "Candidate response consumed exactly once at snapshot270. Execute request was not created because source freshness failed closed. PR616 CI/merge/readback is durable; exact Work and CI observation repair is next.",
+    "idempotency_key": "o-work-g34:81acbf6d:snapshot271-heartbeat-state-cas:v1",
+    "exact_frontier": "Snapshot271 records the fail-closed stale-heartbeat preflight. Required source receipts and execution unit are durable; refresh this unchanged owner heartbeat, observe it exactly, then retry Execute freeze.",
     "next_tool": "exec_command",
-    "next_action": "Prepare and publish exact Work and CI source-observation requests for main 1bc22102/state 6026b491; record connector readbacks, publish receipts, verify them, then retry work-resume --max-steps 1 to freeze Execute without recreating Candidate work.",
-    "next_tool_action": "Prepare and publish exact Work and CI source-observation requests for main 1bc22102/state 6026b491; record connector readbacks, publish receipts, verify them, then retry work-resume --max-steps 1 to freeze Execute without recreating Candidate work.",
+    "next_action": "Precommit and record one exact Work source observation for the refreshed heartbeat state, then immediately retry work-resume --max-steps 1 to freeze Execute.",
+    "next_tool_action": "Precommit and record one exact Work source observation for the refreshed heartbeat state, then immediately retry work-resume --max-steps 1 to freeze Execute.",
     "blocker": {
-      "type": "missing_fresh_authoritative_work_source_observation",
-      "message": "Context Kernel failed closed: authoritative Work source observation failed: mandatory Work source lacks a matching fresh authoritative observation",
-      "location": "Execute semantic preflight after Candidate response consumption",
-      "mutation_boundary": "Candidate native invocation completed exactly once; no Execute Work request was created or submitted."
+      "type": "stale_decision_context_work_heartbeat",
+      "message": "Context Kernel failed closed: decision context Work heartbeat is stale",
+      "established_by": "Execute semantic preflight after exact Work/CI observations and checkpoint verification",
+      "mutation_boundary": "No Execute Work request was created or submitted."
     },
     "termination": null,
     "resume_required": true,
@@ -1608,7 +1504,7 @@
   "durability_status": "remote_main_readback_verified",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "source_observation_repair_required",
+    "status": "heartbeat_refreshed_source_observation_required",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -1642,14 +1538,14 @@
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
-    "snapshot_blob_sha": "61da4a003d96468055a90985de9cb634fe9d4684",
-    "snapshot_revision": 270,
+    "snapshot_head_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+    "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+    "snapshot_revision": 271,
     "snapshot_phase": "unit_pending",
-    "source_main_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
-    "source_state_blob_sha": "6026b491aecde402f7b5bd9ce4cf2cca12970876",
+    "source_main_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+    "source_state_blob_sha": "650b007fa97a530cecc06efd5c52d62507b691d8",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@656fbf26b4891adf2600b0fbb4052bf5aab1cc9d/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": "2026-09-08T18:15:00Z",
+    "verified_at": "2026-09-08T19:26:45.810555Z",
     "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
@@ -30327,7 +30223,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-08T06:58:00Z",
+  "heartbeat_at": "2026-09-08T19:26:45.810555Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -31247,10 +31143,10 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Consumed Candidate269 response exactly once; Execute preflight then failed closed before request creation because the mandatory Work source observation was stale. PR616 CI and merge/readback verified the transition.",
-  "last_activity_at": "2026-09-08T02:10:20.000Z",
-  "last_checked_at": "2026-09-08T02:10:20.000Z",
-  "last_error": "Context Kernel failed closed: authoritative Work source observation failed: mandatory Work source lacks a matching fresh authoritative observation",
+  "last_action": "Exact Work/CI observations and the missing execution unit were restored and verified; Execute then failed closed only because the decision-context Work heartbeat was stale.",
+  "last_activity_at": "2026-09-08T19:26:45.810555Z",
+  "last_checked_at": "2026-09-08T19:26:45.810555Z",
+  "last_error": "Context Kernel failed closed: decision context Work heartbeat is stale",
   "last_native_publication": {
     "all_content_blobs_exact_readback": true,
     "ci_run_id": 33965733511,
@@ -31265,115 +31161,63 @@
   "last_progress_at": "2026-09-08T02:10:20.000Z",
   "last_verified_effect": {
     "schema_version": 1,
-    "classification": "candidate_response_consumed_once_execute_preflight_source_observation_blocked",
+    "classification": "execute_preflight_heartbeat_staleness_repair",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-    "idempotency_key": "o-work-g34:81acbf6d:candidate270-consume:2c58b6c3:v1",
-    "source_main_sha": "656fbf26b4891adf2600b0fbb4052bf5aab1cc9d",
-    "source_state_blob_sha": "6026b491aecde402f7b5bd9ce4cf2cca12970876",
+    "idempotency_key": "o-work-g34:81acbf6d:snapshot271-heartbeat-repair:v1",
     "run_id": "run-work-recovery-gen9-durability-repair",
-    "work_invocation_id": "invoke-254ab73b925e81ca60709184",
-    "native_invocation_id": "invoke-917c09c021d1612aa59ff4c4",
-    "request_digest": "760849a6e63abc5f750ee4d6b6cb8efe65552d12ab046cc27bc87209156d913d",
-    "response_digest": "2c58b6c3561d7e356b22bb7b8482192c4f84678df2e807efa8b4215a1434b9df",
-    "output_digest": "8aa103778827bb0bf0053f5d367161f98866672a7d6940a7fbfc21ad7755127c",
-    "snapshot_revision": 270,
+    "snapshot_revision": 271,
     "snapshot_phase": "unit_pending",
     "current_unit_id": "unit-generation34-production-history-resolution-audit-v1",
     "target_component": "execute",
-    "candidate_decision": "NOT_APPLICABLE",
-    "candidate_activation_authorized": false,
-    "candidate_response_consumed": true,
-    "execute_request_frozen": false,
+    "source_main_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+    "source_state_blob_sha": "650b007fa97a530cecc06efd5c52d62507b691d8",
     "stop_cause": {
-      "type": "missing_fresh_authoritative_work_source_observation",
-      "message": "Context Kernel failed closed: authoritative Work source observation failed: mandatory Work source lacks a matching fresh authoritative observation",
-      "location": "Execute semantic preflight after Candidate response consumption",
-      "mutation_boundary": "Candidate native invocation completed exactly once; no Execute Work request was created or submitted."
+      "type": "stale_decision_context_work_heartbeat",
+      "message": "Context Kernel failed closed: decision context Work heartbeat is stale",
+      "established_by": "Execute semantic preflight after exact Work/CI observations and checkpoint verification",
+      "mutation_boundary": "No Execute Work request was created or submitted."
     },
     "repair": {
-      "action": "Precommit and record exact Work and CI source observations under the unchanged generation/fence, publish and bind them, then retry the Execute freeze without recreating Candidate work.",
+      "action": "Refresh only the unchanged generation34 owner heartbeat through expected-blob CAS, exact-readback it, then precommit a new exact Work source observation for that state.",
       "validated": false
     },
-    "files": [
+    "completed_effects": [
       {
+        "kind": "snapshot271_event",
         "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
-        "sha": "f55eff5575da5c189a8af8c43c2b10b5ab97dd5b"
+        "sha": "2f6ad3cf4393439efaedef989b63ad76f370ac46",
+        "commit": "7cd2934a750120eae34d78ca5dd967b39b7a5f9e"
       },
       {
+        "kind": "snapshot271",
         "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-        "sha": "61da4a003d96468055a90985de9cb634fe9d4684"
+        "sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+        "commit": "387810cd783fe61da51385c2ff137c34427a5bb1"
       },
       {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-917c09c021d1612aa59ff4c4.json",
-        "sha": "4ed7ada4466cda2c3cf8151d38410ae1d6fb170c"
+        "kind": "execution_unit_repair",
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/execution-units/unit-generation34-production-history-resolution-audit-v1.json",
+        "sha": "c992cb1ec688a54905943f479965d1c0c17108b3",
+        "commit": "3436d71da2cc85cd2a228d1887b61eb6390bb3d4"
       },
       {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-917c09c021d1612aa59ff4c4-candidate_evaluate.json",
-        "sha": "257fffc87d507c69911d242021076a31c24e4ca3"
+        "kind": "work_source_receipt",
+        "sha": "6284aa3e0fb9d4dc1f2264365b5a949bb324074d",
+        "commit": "206148419f0334966cfebe25cc326f1ee7c2c75e"
       },
       {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-917c09c021d1612aa59ff4c4-candidate_evaluate.json",
-        "sha": "c36feca43cc3bd89f33cfc6abad7178e5e46dab9"
-      },
-      {
-        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-execute-4b0cf55e05ebbe1b45318a68.json",
-        "sha": "de091bdd54fe40b83a4ea2a8b732cd2ed14dde2a"
-      },
-      {
-        "path": "artifacts/g34-candidate270-consume-source-block-v1.json",
-        "sha": "18c3064f91002b623591a944d2dbdb1de8cf7d1c"
+        "kind": "ci_source_receipt",
+        "sha": "97c4defaf52b691ce42572ee9dad721958be931b",
+        "commit": "6f022e25314fee7940455f8fd26393a148f0d28c"
       }
     ],
     "request_recreated": false,
-    "response_submitted": true,
-    "response_consumed": true,
     "response_replayed": false,
-    "branch": "work-g34-candidate270-consume-source-block",
-    "head_sha": "7c6c5e7910db8cbba70e4ba6cdf56d8b176aef12",
-    "pull_request": 616,
-    "merge_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
-    "workflow_runs": {
-      "directive_source_preflight": {
-        "run_id": 34198084951,
-        "conclusion": "success"
-      },
-      "test": {
-        "run_id": 34198085109,
-        "conclusion": "success"
-      }
-    },
-    "required_jobs": [
-      {
-        "job_id": 101970247010,
-        "name": "pytest shard 0 of 4",
-        "conclusion": "success"
-      },
-      {
-        "job_id": 101970247183,
-        "name": "pytest shard 1 of 4",
-        "conclusion": "success"
-      },
-      {
-        "job_id": 101970247199,
-        "name": "pytest shard 2 of 4",
-        "conclusion": "success"
-      },
-      {
-        "job_id": 101970247194,
-        "name": "pytest shard 3 of 4",
-        "conclusion": "success"
-      },
-      {
-        "job_id": 101977607339,
-        "name": "test",
-        "conclusion": "success"
-      }
-    ],
-    "main_readback_verified": true,
-    "observed_at": "2026-09-08T07:07:42Z",
+    "execute_request_frozen": false,
     "resume_required": true,
+    "observed_at": "2026-09-08T19:26:45.810555Z",
     "upper_objective_achieved": false,
     "agi_claim_supported": false
   },
@@ -31693,9 +31537,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Prepare and publish exact Work and CI source-observation requests for main 1bc22102/state 6026b491; record connector readbacks, publish receipts, verify them, then retry work-resume --max-steps 1 to freeze Execute without recreating Candidate work.",
+  "next_action": "Precommit and record one exact Work source observation for the refreshed heartbeat state, then immediately retry work-resume --max-steps 1 to freeze Execute.",
   "next_tool": "exec_command",
-  "next_tool_action": "Prepare and publish exact Work and CI source-observation requests for main 1bc22102/state 6026b491; record connector readbacks, publish receipts, verify them, then retry work-resume --max-steps 1 to freeze Execute without recreating Candidate work.",
+  "next_tool_action": "Precommit and record one exact Work source observation for the refreshed heartbeat state, then immediately retry work-resume --max-steps 1 to freeze Execute.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -35930,14 +35774,14 @@
     "status": "merged_exact_readback",
     "verified_at": "2026-09-06T06:14:40.290Z"
   },
-  "snapshot_blob_sha": "61da4a003d96468055a90985de9cb634fe9d4684",
+  "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
   "snapshot_branch": "main",
-  "snapshot_head_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
+  "snapshot_head_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
   "snapshot_phase": "unit_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
-  "snapshot_revision": 270,
-  "source_main_sha": "1bc22102e51464c8bd68e32d9fb3063a18eb5a1d",
-  "source_state_blob_sha": "6026b491aecde402f7b5bd9ce4cf2cca12970876",
+  "snapshot_revision": 271,
+  "source_main_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+  "source_state_blob_sha": "650b007fa97a530cecc06efd5c52d62507b691d8",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "authorized_at": "2026-09-06T20:25:57.811Z",
@@ -35994,10 +35838,10 @@
   },
   "status": "running",
   "stop_cause": {
-    "type": "missing_fresh_authoritative_work_source_observation",
-    "message": "Context Kernel failed closed: authoritative Work source observation failed: mandatory Work source lacks a matching fresh authoritative observation",
-    "location": "Execute semantic preflight after Candidate response consumption",
-    "mutation_boundary": "Candidate native invocation completed exactly once; no Execute Work request was created or submitted."
+    "type": "stale_decision_context_work_heartbeat",
+    "message": "Context Kernel failed closed: decision context Work heartbeat is stale",
+    "established_by": "Execute semantic preflight after exact Work/CI observations and checkpoint verification",
+    "mutation_boundary": "No Execute Work request was created or submitted."
   },
   "stop_cause_elimination_v33": {
     "cause": "Generation32 stopped after PR515 exact-head CI and before merge/native resume.",
@@ -39107,6 +38951,68 @@
     "main_readback_verified": true,
     "observed_at": "2026-09-08T07:07:42Z",
     "resume_required": true,
+    "upper_objective_achieved": false,
+    "agi_claim_supported": false
+  },
+  "generation34_candidate271_heartbeat_repair_v1": {
+    "schema_version": 1,
+    "classification": "execute_preflight_heartbeat_staleness_repair",
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "lease_generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:snapshot271-heartbeat-repair:v1",
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "snapshot_revision": 271,
+    "snapshot_phase": "unit_pending",
+    "current_unit_id": "unit-generation34-production-history-resolution-audit-v1",
+    "target_component": "execute",
+    "source_main_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+    "source_state_blob_sha": "650b007fa97a530cecc06efd5c52d62507b691d8",
+    "stop_cause": {
+      "type": "stale_decision_context_work_heartbeat",
+      "message": "Context Kernel failed closed: decision context Work heartbeat is stale",
+      "established_by": "Execute semantic preflight after exact Work/CI observations and checkpoint verification",
+      "mutation_boundary": "No Execute Work request was created or submitted."
+    },
+    "repair": {
+      "action": "Refresh only the unchanged generation34 owner heartbeat through expected-blob CAS, exact-readback it, then precommit a new exact Work source observation for that state.",
+      "validated": false
+    },
+    "completed_effects": [
+      {
+        "kind": "snapshot271_event",
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "2f6ad3cf4393439efaedef989b63ad76f370ac46",
+        "commit": "7cd2934a750120eae34d78ca5dd967b39b7a5f9e"
+      },
+      {
+        "kind": "snapshot271",
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+        "commit": "387810cd783fe61da51385c2ff137c34427a5bb1"
+      },
+      {
+        "kind": "execution_unit_repair",
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/execution-units/unit-generation34-production-history-resolution-audit-v1.json",
+        "sha": "c992cb1ec688a54905943f479965d1c0c17108b3",
+        "commit": "3436d71da2cc85cd2a228d1887b61eb6390bb3d4"
+      },
+      {
+        "kind": "work_source_receipt",
+        "sha": "6284aa3e0fb9d4dc1f2264365b5a949bb324074d",
+        "commit": "206148419f0334966cfebe25cc326f1ee7c2c75e"
+      },
+      {
+        "kind": "ci_source_receipt",
+        "sha": "97c4defaf52b691ce42572ee9dad721958be931b",
+        "commit": "6f022e25314fee7940455f8fd26393a148f0d28c"
+      }
+    ],
+    "request_recreated": false,
+    "response_replayed": false,
+    "execute_request_frozen": false,
+    "resume_required": true,
+    "observed_at": "2026-09-08T19:26:45.810555Z",
     "upper_objective_achieved": false,
     "agi_claim_supported": false
   }
