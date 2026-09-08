@@ -173,14 +173,14 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-08T00:28:35.165Z",
+    "checkpointed_at": "2026-09-08T00:51:30.000Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "goal_revision": 118,
-    "current_head_sha": "08e703179aa7bc39228eb35aac136a58c876b66e",
-    "current_main_sha": "08e703179aa7bc39228eb35aac136a58c876b66e",
-    "current_state_blob_sha": "8e24802b62d066dfd18f4dcc126cd448a505ea71",
+    "current_head_sha": "070ac4950620c49762a8b86ac68a7db6406c50f5",
+    "current_main_sha": "070ac4950620c49762a8b86ac68a7db6406c50f5",
+    "current_state_blob_sha": "3774da19c9d9591400aa734dc38e6259c239f124",
     "frozen_invocation_id": "invoke-49d02026ef7076044a6ef760",
     "frozen_request_digest": "be406ea51d301fc090532df9bed67a083663d4a62813c4f1fd94a5bafbbe1e52",
     "frozen_payload_digest": "eb4f2fb71d46c495d0410b329ca9d506ed454f5f9a79b789adfe56c5650afee9",
@@ -188,6 +188,7 @@
     "snapshot_blob_sha": "3f104f917820e053dd97f46a431aa4f7cb6086f4",
     "snapshot_revision": 259,
     "snapshot_phase": "consolidate_pending",
+    "completed_effect_receipt_ref": "generation34_pr606_merge_v1",
     "completed_effect_receipt": {
       "schema_version": 1,
       "classification": "stop_cause_repair_exact_head_ci_pending",
@@ -377,14 +378,12 @@
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [
-      606
-    ],
-    "idempotency_key": "o-work-g34:81acbf6d:bound-target-resume-repair:v1",
-    "exact_frontier": "PR606 contains the validated recurrence repair and exact missing native artifacts; Consolidate259 remains the sole authoritative accepted response and is unconsumed.",
-    "next_tool": "github_fetch_commit_workflow_runs",
-    "next_action": "Wait for PR606 exact-head directive and all five test jobs without rerun; merge/readback only on success, then reconstruct fresh main and consume the existing Consolidate259 response exactly once.",
-    "next_tool_action": "Wait for PR606 exact-head directive and all five test jobs without rerun; merge/readback only on success, then reconstruct fresh main and consume the existing Consolidate259 response exactly once.",
+    "pending_pull_requests": [],
+    "idempotency_key": "o-work-g34:81acbf6d:bound-target-resume-repair:merged:v1",
+    "exact_frontier": "PR606 repair is merged and exact-readback verified on main; Consolidate259 remains the sole authoritative accepted response and is unconsumed.",
+    "next_tool": "work-checkpoint-verify",
+    "next_action": "Reconstruct fresh main, verify checkpoint and Work journals, then consume the existing Consolidate259 response exactly once with the repaired engine.",
+    "next_tool_action": "Reconstruct fresh main, verify checkpoint and Work journals, then consume the existing Consolidate259 response exactly once with the repaired engine.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -30277,7 +30276,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-08T00:28:35.165Z",
+  "heartbeat_at": "2026-09-08T00:51:30.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -31197,9 +31196,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Implemented and locally validated the bound-target resume repair; PR606 exact-head CI is pending before the exact Consolidate259 response may be consumed.",
-  "last_activity_at": "2026-09-08T00:28:35.165Z",
-  "last_checked_at": "2026-09-08T00:28:35.165Z",
+  "last_action": "Merged and exact-readback verified PR606 after all exact-head CI passed; the existing Consolidate259 response remains the sole unconsumed continuation.",
+  "last_activity_at": "2026-09-08T00:51:30.000Z",
+  "last_checked_at": "2026-09-08T00:51:30.000Z",
   "last_error": null,
   "last_native_publication": {
     "all_content_blobs_exact_readback": true,
@@ -31212,7 +31211,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-08T00:28:35.165Z",
+  "last_progress_at": "2026-09-08T00:51:30.000Z",
   "last_verified_effect": {
     "schema_version": 1,
     "classification": "stop_cause_repair_exact_head_ci_pending",
@@ -37694,9 +37693,7 @@
     "verified_remote_readback": true,
     "resume_required": true
   },
-  "pending_pull_requests": [
-    606
-  ],
+  "pending_pull_requests": [],
   "pending_ci_run_ids": [],
   "pending_job_ids": [],
   "generation34_consolidate259_continuation_source_repair_v1": {
@@ -37812,5 +37809,50 @@
     "resume_required": true,
     "upper_objective_achieved": false,
     "observed_at": "2026-09-08T00:28:35.165Z"
+  },
+  "generation34_pr606_merge_v1": {
+    "schema_version": 1,
+    "classification": "stop_cause_repaired_ci_validated_merged_main_readback_verified",
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "lease_generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:bound-target-resume-repair:merged:v1",
+    "stop_cause": "Engine._invoke rebuilt Candidate preflight context before resuming an already frozen and answered target native journal; the preflight's own new fragment changed the aggregate payload and could mint a second Work request.",
+    "repair": "Resume the single answered target binding from its immutable Work request before any preflight reconstruction; fail closed on ambiguous or mismatched bindings.",
+    "discarded_ephemeral_request": "invoke-d585722113143b48a296da19",
+    "discarded_ephemeral_native_invocation": "invoke-0e8a7d4eae9a9494d6bd0424",
+    "discard_reason": "Generated only in an unpublished disposable worktree by the failed recurrence probe; never submitted, published, or authorized as the exact continuation.",
+    "branch": "work-g34-bound-target-resume-repair",
+    "head_sha": "8d69abfaf8f6e7ca889011a4ba1553c031f79a4c",
+    "pull_request": 606,
+    "merge_sha": "070ac4950620c49762a8b86ac68a7db6406c50f5",
+    "workflow_runs": {
+      "directive-source-preflight": {"run_id": 34173414467, "conclusion": "success"},
+      "test": {"run_id": 34173414445, "conclusion": "success"}
+    },
+    "test_jobs": [
+      {"job_id": 101898005150, "name": "pytest shard 0 of 4", "conclusion": "success"},
+      {"job_id": 101898005221, "name": "pytest shard 1 of 4", "conclusion": "success"},
+      {"job_id": 101898005291, "name": "pytest shard 2 of 4", "conclusion": "success"},
+      {"job_id": 101898005247, "name": "pytest shard 3 of 4", "conclusion": "success"},
+      {"job_id": 101902341042, "name": "test", "conclusion": "success"}
+    ],
+    "main_readback": [
+      {"path": "src/continual/engine.py", "sha": "67debc25a532a86a5a7e8780bbb792a651a0acb7"},
+      {"path": "tests/test_work_session_bridge.py", "sha": "9d4715633e83eb6e7827de31be577e91ab7c021e"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-9ff24ffd974e5e95bf3d46a3-task_evaluate.json", "sha": "f0ceb415dd79690a8101b9362f6ea1b19dcc3fdf"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-9ff24ffd974e5e95bf3d46a3-task_evaluate.json", "sha": "283af3b1be253f88ebf2cf4555c2f042b9ee3daa"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-b245ec386e0714fe751460d1-consolidate_episode.json", "sha": "8b808b60d91624a96104eb4e35f45b7ab81cc46b"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-b245ec386e0714fe751460d1-consolidate_episode.json", "sha": "7660b288328c157379a62f89e6f6bb2a2e3afa4e"}
+    ],
+    "exact_continuation_preserved": true,
+    "response_digest": "9fa3a609f3ca63e89e3904e979201c99d2432c315dd4668d2ef938d4f174d0e3",
+    "response_consumed": false,
+    "relaunch_attempted": false,
+    "stop_established": true,
+    "repair_validated": true,
+    "resume_required": true,
+    "upper_objective_achieved": false,
+    "observed_at": "2026-09-08T00:51:30.000Z"
   }
 }
