@@ -173,14 +173,14 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-08T05:20:30.000Z",
+    "checkpointed_at": "2026-09-08T05:23:30.000Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "goal_revision": 118,
-    "current_head_sha": "bec8f8284d9ca1086f81489c6a2c463c0226b4cf",
-    "current_main_sha": "bec8f8284d9ca1086f81489c6a2c463c0226b4cf",
-    "current_state_blob_sha": "4a213a7905065046081c2d28dc4b7be3e11ed0fb",
+    "current_head_sha": "c4f966410c11856dd9136f692e0152ea3a848810",
+    "current_main_sha": "c4f966410c11856dd9136f692e0152ea3a848810",
+    "current_state_blob_sha": "ea82ae96adbed8d97d77aa77da9c51223f26d0e9",
     "frozen_invocation_id": "invoke-2f428a2d4dfade036ca45d2b",
     "frozen_request_digest": "5b3a83f008c5ad53fb45b43bf0b3c8018b5fab8d3479dd268ee17c3f829cd943",
     "frozen_payload_digest": "4ca0c764cd1da196a524363908a3fe3b878b56b64c30748b8a46f9d653aaabb1",
@@ -191,7 +191,7 @@
     "completed_effect_receipt_ref": "generation34_root267_consume_preflight_repair_v1",
     "completed_effect_receipt": {
       "schema_version": 1,
-      "classification": "continuation_phase_alignment_repair_pending_cas",
+      "classification": "continuation_durability_alignment_repair_pending_cas",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -209,11 +209,16 @@
       "snapshot_phase": "root_pending",
       "response_consumed": false,
       "resume_required": true,
-      "observed_at": "2026-09-08T05:20:30.000Z"
+      "observed_at": "2026-09-08T05:23:30.000Z",
+      "second_failure": "ContinuityPreflightError: continuation is not remote-main durable",
+      "expanded_cause": "The first repair aligned native_phase but copied the pending-consume status into continuation_durability and advanced source_main_sha beyond the immutable snapshot publication commit. Preflight requires durability status=remote_main_readback_verified and source_main_sha=snapshot_head_sha.",
+      "expanded_repair": "Restore both exact/durability status to remote_main_readback_verified and bind source_main_sha to immutable snapshot head d82d647a while preserving all response digests and response_consumed=false.",
+      "mutation_before_second_failure": false,
+      "repair_validation": "work-checkpoint-verify valid before retry; source code predicate inspected exactly"
     },
     "last_verified_effect": {
       "schema_version": 1,
-      "classification": "continuation_phase_alignment_repair_pending_cas",
+      "classification": "continuation_durability_alignment_repair_pending_cas",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -231,17 +236,22 @@
       "snapshot_phase": "root_pending",
       "response_consumed": false,
       "resume_required": true,
-      "observed_at": "2026-09-08T05:20:30.000Z"
+      "observed_at": "2026-09-08T05:23:30.000Z",
+      "second_failure": "ContinuityPreflightError: continuation is not remote-main durable",
+      "expanded_cause": "The first repair aligned native_phase but copied the pending-consume status into continuation_durability and advanced source_main_sha beyond the immutable snapshot publication commit. Preflight requires durability status=remote_main_readback_verified and source_main_sha=snapshot_head_sha.",
+      "expanded_repair": "Restore both exact/durability status to remote_main_readback_verified and bind source_main_sha to immutable snapshot head d82d647a while preserving all response digests and response_consumed=false.",
+      "mutation_before_second_failure": false,
+      "repair_validation": "work-checkpoint-verify valid before retry; source code predicate inspected exactly"
     },
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_pull_requests": [],
     "idempotency_key": "o-work-g34:81acbf6d:root267-consume-preflight-phase-repair:v1",
-    "exact_frontier": "The first Root consume attempt failed closed before mutation because state native_phase was advanced before snapshot consumption. The exact repair restores native_phase=root_pending while preserving the already-verified pending response.",
+    "exact_frontier": "Two preflight-only failures made no lifecycle mutation. Exact and durability proofs are now aligned to immutable snapshot267/main d82d647a with status remote_main_readback_verified; the already-published Root response remains unconsumed.",
     "next_tool": "exec_command",
-    "next_action": "CAS/read back the phase-alignment repair, validate work-checkpoint-verify, then retry the same bound work-resume exactly once.",
-    "next_tool_action": "CAS/read back the phase-alignment repair, validate work-checkpoint-verify, then retry the same bound work-resume exactly once.",
+    "next_action": "CAS/read back the corrected durability proof, rerun work-checkpoint-verify, then retry the exact bound work-resume once.",
+    "next_tool_action": "CAS/read back the corrected durability proof, rerun work-checkpoint-verify, then retry the exact bound work-resume once.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -1186,7 +1196,7 @@
   "continuation": "Prepare fresh Work and PR539 CI observations, freeze post-task Learn from native213, answer once using canonical Episode then return to Root for materially different safe work.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "remote_main_readback_verified_pending_native_consume",
+    "status": "remote_main_readback_verified",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -1220,10 +1230,10 @@
     "snapshot_blob_sha": "fc87ad62956bb8434a819fe01511ccc9ee650b20",
     "snapshot_revision": 267,
     "snapshot_phase": "root_pending",
-    "source_main_sha": "bec8f8284d9ca1086f81489c6a2c463c0226b4cf",
-    "source_state_blob_sha": "4a213a7905065046081c2d28dc4b7be3e11ed0fb",
-    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@bec8f8284d9ca1086f81489c6a2c463c0226b4cf/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": "2026-09-08T05:20:30.000Z",
+    "source_main_sha": "d82d647a5d30aeebce9ae26741127a5104ddaa36",
+    "source_state_blob_sha": "ba4d78af703adc07d4cd4007499ebc497e1fdd7d",
+    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@5a1a809d1b3f4eef949402c39f5a013bccb1482d/agi/WORK_EXECUTION_STATE.json",
+    "verified_at": "2026-09-08T05:23:30.000Z",
     "verified_remote_readback": true
   },
   "continuation_source": {
@@ -1419,7 +1429,7 @@
   "durability_status": "remote_main_readback_verified",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "remote_main_readback_verified_pending_native_consume",
+    "status": "remote_main_readback_verified",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -1453,10 +1463,10 @@
     "snapshot_blob_sha": "fc87ad62956bb8434a819fe01511ccc9ee650b20",
     "snapshot_revision": 267,
     "snapshot_phase": "root_pending",
-    "source_main_sha": "bec8f8284d9ca1086f81489c6a2c463c0226b4cf",
-    "source_state_blob_sha": "4a213a7905065046081c2d28dc4b7be3e11ed0fb",
-    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@bec8f8284d9ca1086f81489c6a2c463c0226b4cf/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": "2026-09-08T05:20:30.000Z",
+    "source_main_sha": "d82d647a5d30aeebce9ae26741127a5104ddaa36",
+    "source_state_blob_sha": "ba4d78af703adc07d4cd4007499ebc497e1fdd7d",
+    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@5a1a809d1b3f4eef949402c39f5a013bccb1482d/agi/WORK_EXECUTION_STATE.json",
+    "verified_at": "2026-09-08T05:23:30.000Z",
     "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
@@ -30134,7 +30144,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-08T05:20:30.000Z",
+  "heartbeat_at": "2026-09-08T05:23:30.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -37073,7 +37083,7 @@
   },
   "user_level_objective_met": false,
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "verified_at": "2026-09-08T05:20:30.000Z",
+  "verified_at": "2026-09-08T05:23:30.000Z",
   "verified_remote_readback": false,
   "work_status": "executing",
   "working_branch": "main",
@@ -38462,7 +38472,7 @@
   },
   "generation34_root267_consume_preflight_repair_v1": {
     "schema_version": 1,
-    "classification": "continuation_phase_alignment_repair_pending_cas",
+    "classification": "continuation_durability_alignment_repair_pending_cas",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -38480,6 +38490,11 @@
     "snapshot_phase": "root_pending",
     "response_consumed": false,
     "resume_required": true,
-    "observed_at": "2026-09-08T05:20:30.000Z"
+    "observed_at": "2026-09-08T05:23:30.000Z",
+    "second_failure": "ContinuityPreflightError: continuation is not remote-main durable",
+    "expanded_cause": "The first repair aligned native_phase but copied the pending-consume status into continuation_durability and advanced source_main_sha beyond the immutable snapshot publication commit. Preflight requires durability status=remote_main_readback_verified and source_main_sha=snapshot_head_sha.",
+    "expanded_repair": "Restore both exact/durability status to remote_main_readback_verified and bind source_main_sha to immutable snapshot head d82d647a while preserving all response digests and response_consumed=false.",
+    "mutation_before_second_failure": false,
+    "repair_validation": "work-checkpoint-verify valid before retry; source code predicate inspected exactly"
   }
 }
