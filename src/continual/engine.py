@@ -541,6 +541,97 @@ class Engine:
         )
         return output, invocation_id
 
+    def _resume_answered_bound_component(
+        self,
+        run_id: str,
+        component: str,
+    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]] | None:
+        """Consume one answered native binding before rebuilding its preflight.
+
+        A Candidate preflight can itself add a fragment before the target Work
+        call is answered.  Recomputing the target payload on the next resume can
+        therefore change the preflight identity and freeze a second Candidate
+        request.  The awaiting native journal and its immutable Work request are
+        the authority for an already-frozen target.
+        """
+
+        rd = self.store.run_dir(run_id)
+        answered: list[tuple[Path, dict[str, Any], dict[str, Any]]] = []
+        for journal_path in sorted((rd / "invocations").glob("*.json")):
+            journal = self.store.read_json(journal_path, None)
+            if not isinstance(journal, dict):
+                continue
+            if (
+                journal.get("status") != "awaiting_work_model"
+                or journal.get("component") != component
+            ):
+                continue
+            work_id = journal.get("work_invocation_id")
+            request_ref = journal.get("work_request_ref")
+            if not isinstance(work_id, str) or not isinstance(request_ref, str):
+                continue
+            request_path = (self.root / request_ref).resolve()
+            expected_path = (
+                self.root
+                / ".continual"
+                / "work-model"
+                / "invocations"
+                / work_id
+                / "request.json"
+            ).resolve()
+            if request_path != expected_path or not (request_path.parent / "response.json").is_file():
+                continue
+            request = self.store.read_json(request_path, None)
+            if not isinstance(request, dict):
+                continue
+            answered.append((journal_path, journal, request))
+
+        if not answered:
+            return None
+        if len(answered) != 1:
+            raise RuntimeError(
+                f"multiple answered awaiting native bindings for {component}"
+            )
+
+        journal_path, journal, request = answered[0]
+        if (
+            request.get("run_id") != run_id
+            or request.get("component") != component
+            or request.get("invocation_id") != journal.get("work_invocation_id")
+            or request.get("request_digest") != journal.get("work_request_digest")
+            or request.get("prompt_path") != journal.get("prompt_path")
+        ):
+            raise RuntimeError(f"bound Work request identity mismatch: {journal_path.name}")
+        frozen = request.get("payload")
+        if not isinstance(frozen, dict):
+            raise RuntimeError(f"bound Work request payload is malformed: {journal_path.name}")
+        call_payload = deepcopy(frozen)
+        call_payload.pop("decision_context", None)
+        native_id = "invoke-" + self.store.stable_digest(
+            {
+                "component": component,
+                "prompt": journal["prompt_path"],
+                "payload": call_payload,
+            }
+        )
+        if native_id != journal.get("invocation_id") or journal_path.stem != native_id:
+            raise RuntimeError(f"bound native payload identity mismatch: {journal_path.name}")
+
+        selection_result = call_payload.get("preflight_selection")
+        if not isinstance(selection_result, dict):
+            raise RuntimeError(f"bound preflight selection is malformed: {journal_path.name}")
+        original_payload = deepcopy(call_payload)
+        original_payload.pop("preflight_selection", None)
+        original_payload.pop("active_component_path", None)
+        original_payload.pop("candidate", None)
+        output, _ = self._call_component_direct(
+            run_id,
+            component,
+            call_payload,
+            prompt_path=journal["prompt_path"],
+        )
+        return output, original_payload, {"result": selection_result}
+
     def _save_component_output(
         self,
         run_id: str,
@@ -749,6 +840,17 @@ class Engine:
     def _invoke(self, run_id: str, component: str, payload: dict[str, Any]) -> dict[str, Any]:
         if component not in SEMANTIC_COMPONENTS:
             raise ValueError(f"unknown semantic component: {component}")
+        resumed = self._resume_answered_bound_component(run_id, component)
+        if resumed is not None:
+            output, frozen_payload, selection = resumed
+            self._postflight(
+                run_id,
+                component,
+                frozen_payload,
+                selection,
+                output.get("result", {}),
+            )
+            return output
         selection = self._preflight(run_id, component, payload)
         selected = self._selected_candidate(selection, component)
         prompt_path = self._effective_prompt_path(run_id, component, selected)

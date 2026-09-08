@@ -37,6 +37,12 @@ def _output(component: str, request: dict) -> dict:
         result = {"status": "completed", "artifacts": ["work-bridge"]}
     elif component == "task_evaluate":
         result = {"verdict": "PASS", "evidence": ["bounded Work bridge completed"]}
+    elif component == "candidate_evaluate":
+        result = {
+            "decision": "USE_ACTIVE",
+            "scope": "bounded-resume-regression",
+            "reason": "Keep the active prompt for this exact call.",
+        }
     elif component == "consolidate_episode":
         result = {"outcome": "PASS", "summary": "all semantic components were externalized"}
     elif component == "learn":
@@ -143,6 +149,74 @@ def test_engine_resume_consumes_the_native_bound_request(
     resumed = session.resume(run_id, max_steps=1)
     assert resumed["snapshot"]["phase"] == "root_pending"
     assert resumed["snapshot"]["error_count"] == 0
+
+
+def test_consolidate_resume_consumes_bound_target_before_rebuilding_preflight(
+    tmp_path: Path,
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-work-consolidate-bound-resume"
+    candidate_id = "candidate-consolidate-resume-test"
+    candidate_dir = root / ".continual" / "candidates" / candidate_id
+    candidate_dir.mkdir(parents=True)
+    candidate = {
+        "candidate_id": candidate_id,
+        "target_component": "consolidate_episode",
+        "expected_scope": "bounded-resume-regression",
+        "status": "candidate",
+        "prompt_mode": "overlay",
+        "scope_states": {"bounded-resume-regression": "NEED_MORE_EVIDENCE"},
+        "depends_on": [],
+        "conflicts_with": [],
+    }
+    (candidate_dir / "candidate.json").write_text(
+        json.dumps(candidate, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    (candidate_dir.parent / "index.json").write_text(
+        json.dumps({"schema_version": 2, "candidates": [candidate]}, sort_keys=True)
+        + "\n",
+        encoding="utf-8",
+    )
+    session = WorkSession(root, model_identity="bound-resume-model")
+
+    def pending(component: str) -> dict:
+        for _ in range(3):
+            resumed = session.resume(run_id, max_steps=1)
+            matches = [
+                item for item in resumed["pending"] if item["component"] == component
+            ]
+            if matches:
+                assert len(matches) == 1
+                return matches[0]
+        raise AssertionError(f"no pending {component} request")
+
+    entry = session.start("reach one bounded consolidation", run_id=run_id)["pending"][0]
+    submit_work_response(root, entry["invocation_id"], _output("entry", entry), executor_binding="current_chatgpt_work_session", model_identity="bound-resume-model")
+    root_request = pending("root")
+    submit_work_response(root, root_request["invocation_id"], _output("root", root_request), executor_binding="current_chatgpt_work_session", model_identity="bound-resume-model")
+    session.resume(run_id, max_steps=1)
+    execute = pending("execute")
+    submit_work_response(root, execute["invocation_id"], _output("execute", execute), executor_binding="current_chatgpt_work_session", model_identity="bound-resume-model")
+    session.resume(run_id, max_steps=1)
+    second_root = pending("root")
+    submit_work_response(root, second_root["invocation_id"], _output("root", second_root), executor_binding="current_chatgpt_work_session", model_identity="bound-resume-model")
+    session.resume(run_id, max_steps=1)
+    task = pending("task_evaluate")
+    submit_work_response(root, task["invocation_id"], _output("task_evaluate", task), executor_binding="current_chatgpt_work_session", model_identity="bound-resume-model")
+    session.resume(run_id, max_steps=1)
+
+    preflight = pending("candidate_evaluate")
+    submit_work_response(root, preflight["invocation_id"], _output("candidate_evaluate", preflight), executor_binding="current_chatgpt_work_session", model_identity="bound-resume-model")
+    consolidate = pending("consolidate_episode")
+    submit_work_response(root, consolidate["invocation_id"], _output("consolidate_episode", consolidate), executor_binding="current_chatgpt_work_session", model_identity="bound-resume-model")
+    request_count = verify_work_invocations(root, run_id=run_id)["requests"]
+
+    resumed = session.resume(run_id, max_steps=1)
+    assert resumed["snapshot"]["phase"] == "post_task_learn_pending"
+    assert verify_work_invocations(root, run_id=run_id)["requests"] == request_count
+    assert not [
+        item for item in resumed["pending"] if item["component"] == "candidate_evaluate"
+    ]
 
 
 def test_work_resume_rejects_identity_mismatch_before_any_native_mutation(
