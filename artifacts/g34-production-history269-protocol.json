@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "kind": "production_remote_history_resolution_audit_not_prompt_comparison",
+  "attempt": 1,
+  "precommitted_at": "2026-09-08T19:36:07.473513Z",
+  "unit_id": "unit-generation34-production-history-resolution-audit-v1",
+  "execution_binding": {
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "lease_generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:production-history269-audit-attempt1:v1",
+    "work_invocation_id": "invoke-d2a2249945259bcd9dbd1382",
+    "native_invocation_id": "invoke-a466dbba330278ea029cab25",
+    "request_digest": "9ef91db30b074e3d1fab4a75de74bbcacfdc0cb3d35d5104876356c39ad87aa4",
+    "payload_digest": "834b739903b3e9fabd0821ca1333e48bf1cbd9cb0ea17841a772ce933fe61152"
+  },
+  "source_main_sha": "9d47c666b40f83bc0a56dda852dd9312adab248c",
+  "historical_cases": [
+    {
+      "id": "historical_snapshot_9a43b2",
+      "commit_sha": "9a43b2197796987c0b868660f34eb9c6053ae8bf",
+      "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+      "expected_blob_sha": "2c4e9a65de0be6aa86a3e86377a4257f2e52778d",
+      "expected_raw_sha256": "c890745194ecc58eafe8c2b41c81a5b6e2ba7f9f8195c32a9a5be2b7685eeda7",
+      "expected_source_main_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8"
+    },
+    {
+      "id": "historical_snapshot_acbc3a",
+      "commit_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+      "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+      "expected_blob_sha": "fc87ad62956bb8434a819fe01511ccc9ee650b20",
+      "expected_raw_sha256": "2d00c6277943a4acef35e35a51a57be2b366f4f3d7a836b5f8f5b30d230f1d80",
+      "expected_source_main_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8"
+    },
+    {
+      "id": "historical_work_state_2517c1",
+      "commit_sha": "2517c16810a9327c45a5b61d1b54897e999511cf",
+      "path": "agi/WORK_EXECUTION_STATE.json",
+      "expected_blob_sha": "8d09665d820c86cc3586992f97e58da0c7eeeb8e",
+      "expected_raw_sha256": "7be716e48bb4710c4cc8d56d1f25ca7ad06b2adc251c818a37cfb62f8352077b",
+      "expected_source_main_blob_sha": "8fab43406368f538d8740f6acdc84108122399b1"
+    }
+  ],
+  "nonresolving_commit_sha": "1111111111111111111111111111111111111111",
+  "current_validation_control": {
+    "validator": "continual.work_session.verified_work_request",
+    "work_invocation_id": "invoke-d2a2249945259bcd9dbd1382",
+    "request_digest": "9ef91db30b074e3d1fab4a75de74bbcacfdc0cb3d35d5104876356c39ad87aa4",
+    "valid_expected": "accepted",
+    "malformed_control": "change only request_digest to 64 zeroes in an isolated temporary copy",
+    "malformed_expected": "WorkSessionError tampered Work request"
+  },
+  "script": {
+    "path": "artifacts/g34-production-history269-audit.py",
+    "sha256": "a5a5db9bd76cbb44f24d02d0388baac87594f9c821a5a6969aa500794eb35cf3"
+  },
+  "ordered_commands": [
+    "git rev-parse <historical_commit>:<path>",
+    "git cat-file blob <historical_commit>:<path>",
+    "git rev-parse <source_main_sha>:<path>",
+    "git cat-file -e 1111111111111111111111111111111111111111^{commit}",
+    "continual.work_session.verified_work_request(valid current request)",
+    "continual.work_session.verified_work_request(isolated request with zero64 request_digest)"
+  ],
+  "rubric": "PASS only if all three fixed historical cases resolve to their exact blob and raw SHA256, each is reported separately from its fixed current-main identity, the nonresolving commit returns nonzero, the unchanged validator accepts the valid current request and rejects the zero64 request digest, wall time is below 300 seconds, and no case is replaced or retried.",
+  "limits": {
+    "historical_positive_cases_max": 3,
+    "nonresolving_negative_controls": 1,
+    "new_files_max": 3,
+    "provider_calls": 0,
+    "protected_prompt_or_validator_edits": 0,
+    "source_history_rewrites": 0,
+    "upstream_writes_before_publication": 0,
+    "wall_seconds_max": 300
+  },
+  "claim_boundary": "This audit measures only exact resolvability of three prospectively fixed public production-history objects plus one explicit nonresolving control and unchanged current request-digest validation. It does not test a Candidate overlay, semantic efficacy, independent evaluation, generalized capability, AGI, or user-level completion."
+}
