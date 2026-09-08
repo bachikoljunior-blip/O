@@ -173,14 +173,14 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-08T04:14:00.000Z",
+    "checkpointed_at": "2026-09-08T04:43:30.000Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "goal_revision": 118,
-    "current_head_sha": "739afa075084191ce201e72095e757e56eed9325",
-    "current_main_sha": "739afa075084191ce201e72095e757e56eed9325",
-    "current_state_blob_sha": "40a97194f8d333722d35cefa05a73a7195d3b1ec",
+    "current_head_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+    "current_main_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+    "current_state_blob_sha": "a07506e6d0ba78ec72fd4091cd1462c6efa730ed",
     "frozen_invocation_id": "invoke-2f428a2d4dfade036ca45d2b",
     "frozen_request_digest": "5b3a83f008c5ad53fb45b43bf0b3c8018b5fab8d3479dd268ee17c3f829cd943",
     "frozen_payload_digest": "4ca0c764cd1da196a524363908a3fe3b878b56b64c30748b8a46f9d653aaabb1",
@@ -191,7 +191,7 @@
     "completed_effect_receipt_ref": "generation34_root267_freeze_v1",
     "completed_effect_receipt": {
       "schema_version": 1,
-      "classification": "root_request_frozen_branch_readback_verified_ci_pending",
+      "classification": "root_request_frozen_main_verified",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -258,11 +258,89 @@
       "resume_required": true,
       "upper_objective_achieved": false,
       "agi_claim_supported": false,
-      "observed_at": "2026-09-08T04:14:00.000Z"
+      "observed_at": "2026-09-08T04:43:30.000Z",
+      "merge_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+      "workflow_runs": {
+        "directive_source_preflight": {
+          "run_id": 34186235487,
+          "conclusion": "success"
+        },
+        "test": {
+          "run_id": 34186235472,
+          "conclusion": "success"
+        }
+      },
+      "required_jobs": [
+        {
+          "job_id": 101935006719,
+          "name": "pytest shard 0 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 101935006750,
+          "name": "pytest shard 1 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 101935006925,
+          "name": "pytest shard 2 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 101935006556,
+          "name": "pytest shard 3 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 101939902951,
+          "name": "test",
+          "conclusion": "success"
+        }
+      ],
+      "main_readback": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "b61a64a70081ece08c7ac02486aad224a529ddc6"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+          "sha": "fc87ad62956bb8434a819fe01511ccc9ee650b20"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-d9e1b402a3a1330d0fb8addf.json",
+          "sha": "c5b3ff1e5cac519f1dc2cec575ac78cc364d70c6"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-2f428a2d4dfade036ca45d2b/request.json",
+          "sha": "58a0b6ecf12d440506f0e2634dd403c9d926d7bd"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-0c94ec2d54d26c1f4afc4b6f/request.json",
+          "sha": "2de93ae0470122f7eec3b610e8ae0e628d77a527"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-0c94ec2d54d26c1f4afc4b6f/receipt.json",
+          "sha": "b9b5b2447e863edac141aa6eea6a81c6feb87b84"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-242a3c4ad8a7f24a4cb82ee6/request.json",
+          "sha": "08fc299be4a41a98b2843f0d7432953049e2cee8"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-242a3c4ad8a7f24a4cb82ee6/receipt.json",
+          "sha": "d22b81b6a53d98cdfca960186f4d122f9625add8"
+        },
+        {
+          "path": "artifacts/g34-root267-freeze-v1.json",
+          "sha": "4fe8b85f7c2d9c21dfe2b902a3335390c2d12359"
+        }
+      ],
+      "main_readback_verified": true,
+      "state_bind_expected_blob_sha": "a07506e6d0ba78ec72fd4091cd1462c6efa730ed"
     },
     "last_verified_effect": {
       "schema_version": 1,
-      "classification": "root_request_frozen_branch_readback_verified_ci_pending",
+      "classification": "root_request_frozen_main_verified",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -329,19 +407,95 @@
       "resume_required": true,
       "upper_objective_achieved": false,
       "agi_claim_supported": false,
-      "observed_at": "2026-09-08T04:14:00.000Z"
+      "observed_at": "2026-09-08T04:43:30.000Z",
+      "merge_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+      "workflow_runs": {
+        "directive_source_preflight": {
+          "run_id": 34186235487,
+          "conclusion": "success"
+        },
+        "test": {
+          "run_id": 34186235472,
+          "conclusion": "success"
+        }
+      },
+      "required_jobs": [
+        {
+          "job_id": 101935006719,
+          "name": "pytest shard 0 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 101935006750,
+          "name": "pytest shard 1 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 101935006925,
+          "name": "pytest shard 2 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 101935006556,
+          "name": "pytest shard 3 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 101939902951,
+          "name": "test",
+          "conclusion": "success"
+        }
+      ],
+      "main_readback": [
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+          "sha": "b61a64a70081ece08c7ac02486aad224a529ddc6"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+          "sha": "fc87ad62956bb8434a819fe01511ccc9ee650b20"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-d9e1b402a3a1330d0fb8addf.json",
+          "sha": "c5b3ff1e5cac519f1dc2cec575ac78cc364d70c6"
+        },
+        {
+          "path": ".continual/work-model/invocations/invoke-2f428a2d4dfade036ca45d2b/request.json",
+          "sha": "58a0b6ecf12d440506f0e2634dd403c9d926d7bd"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-0c94ec2d54d26c1f4afc4b6f/request.json",
+          "sha": "2de93ae0470122f7eec3b610e8ae0e628d77a527"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-0c94ec2d54d26c1f4afc4b6f/receipt.json",
+          "sha": "b9b5b2447e863edac141aa6eea6a81c6feb87b84"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-242a3c4ad8a7f24a4cb82ee6/request.json",
+          "sha": "08fc299be4a41a98b2843f0d7432953049e2cee8"
+        },
+        {
+          "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-242a3c4ad8a7f24a4cb82ee6/receipt.json",
+          "sha": "d22b81b6a53d98cdfca960186f4d122f9625add8"
+        },
+        {
+          "path": "artifacts/g34-root267-freeze-v1.json",
+          "sha": "4fe8b85f7c2d9c21dfe2b902a3335390c2d12359"
+        }
+      ],
+      "main_readback_verified": true,
+      "state_bind_expected_blob_sha": "a07506e6d0ba78ec72fd4091cd1462c6efa730ed"
     },
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [
-      611
-    ],
+    "pending_pull_requests": [],
     "idempotency_key": "o-work-g34:81acbf6d:root267-freeze:5b3a83f0:v1",
-    "exact_frontier": "The unique Root request invoke-2f428a2d4dfade036ca45d2b is frozen locally after fresh exact Work and CI observation receipts; PR611 exact head c79275a0 publishes nine immutable files and all branch blobs match; protected CI is pending.",
+    "exact_frontier": "The unique Root request invoke-2f428a2d4dfade036ca45d2b is durably frozen on main at snapshot267 after PR611 exact-head CI and all nine blobs read back exactly; its response has not been submitted.",
     "next_tool": "exec_command",
-    "next_action": "Require unchanged PR611 exact-head CI, merge/read back and bind the frozen Root request, then submit its response exactly once and continue.",
-    "next_tool_action": "Require unchanged PR611 exact-head CI, merge/read back and bind the frozen Root request, then submit its response exactly once and continue.",
+    "next_action": "Submit the bound Root response exactly once, publish and bind its response lifecycle files, then consume it exactly once and continue the selected Execute unit.",
+    "next_tool_action": "Submit the bound Root response exactly once, publish and bind its response lifecycle files, then consume it exactly once and continue the selected Execute unit.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -1293,16 +1447,16 @@
     "current_unit_id": null,
     "native_phase": "root_pending",
     "target_component": "root",
-    "pending_component": null,
-    "pending_work_invocation_id": null,
-    "pending_work_invocation_ref": null,
-    "pending_native_invocation_id": null,
-    "pending_native_invocation_ref": null,
-    "pending_native_invocation_blob_sha": null,
-    "pending_request_digest": null,
-    "pending_request_ref": null,
-    "pending_request_blob_sha": null,
-    "pending_payload_digest": null,
+    "pending_component": "root",
+    "pending_work_invocation_id": "invoke-2f428a2d4dfade036ca45d2b",
+    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-2f428a2d4dfade036ca45d2b/request.json",
+    "pending_native_invocation_id": "invoke-d9e1b402a3a1330d0fb8addf",
+    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-d9e1b402a3a1330d0fb8addf.json",
+    "pending_native_invocation_blob_sha": "c5b3ff1e5cac519f1dc2cec575ac78cc364d70c6",
+    "pending_request_digest": "5b3a83f008c5ad53fb45b43bf0b3c8018b5fab8d3479dd268ee17c3f829cd943",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-2f428a2d4dfade036ca45d2b/request.json",
+    "pending_request_blob_sha": "58a0b6ecf12d440506f0e2634dd403c9d926d7bd",
+    "pending_payload_digest": "4ca0c764cd1da196a524363908a3fe3b878b56b64c30748b8a46f9d653aaabb1",
     "pending_output_digest": null,
     "pending_response_digest": null,
     "pending_response_ref": null,
@@ -1311,19 +1465,19 @@
     "pending_preflight_blob_sha": null,
     "request_recreated": false,
     "response_submitted": false,
-    "response_consumed": true,
+    "response_consumed": false,
     "response_replayed": false,
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "9a43b2197796987c0b868660f34eb9c6053ae8bf",
-    "snapshot_blob_sha": "2c4e9a65de0be6aa86a3e86377a4257f2e52778d",
-    "snapshot_revision": 266,
+    "snapshot_head_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+    "snapshot_blob_sha": "fc87ad62956bb8434a819fe01511ccc9ee650b20",
+    "snapshot_revision": 267,
     "snapshot_phase": "root_pending",
-    "source_main_sha": "9a43b2197796987c0b868660f34eb9c6053ae8bf",
-    "source_state_blob_sha": "52f0ffdcf6d28581d4ff5c6927cd794a96f063bf",
-    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@3cdc95523203e759fe936ca353f2c16cbe7ccf6e/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": "2026-09-08T04:02:00.000Z",
+    "source_main_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+    "source_state_blob_sha": "a07506e6d0ba78ec72fd4091cd1462c6efa730ed",
+    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@095c972eeb7b3651e73f8177a207fdadfdc7d133/agi/WORK_EXECUTION_STATE.json",
+    "verified_at": "2026-09-08T04:43:30.000Z",
     "verified_remote_readback": true
   },
   "continuation_source": {
@@ -1526,16 +1680,16 @@
     "current_unit_id": null,
     "native_phase": "root_pending",
     "target_component": "root",
-    "pending_component": null,
-    "pending_work_invocation_id": null,
-    "pending_work_invocation_ref": null,
-    "pending_native_invocation_id": null,
-    "pending_native_invocation_ref": null,
-    "pending_native_invocation_blob_sha": null,
-    "pending_request_digest": null,
-    "pending_request_ref": null,
-    "pending_request_blob_sha": null,
-    "pending_payload_digest": null,
+    "pending_component": "root",
+    "pending_work_invocation_id": "invoke-2f428a2d4dfade036ca45d2b",
+    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-2f428a2d4dfade036ca45d2b/request.json",
+    "pending_native_invocation_id": "invoke-d9e1b402a3a1330d0fb8addf",
+    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-d9e1b402a3a1330d0fb8addf.json",
+    "pending_native_invocation_blob_sha": "c5b3ff1e5cac519f1dc2cec575ac78cc364d70c6",
+    "pending_request_digest": "5b3a83f008c5ad53fb45b43bf0b3c8018b5fab8d3479dd268ee17c3f829cd943",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-2f428a2d4dfade036ca45d2b/request.json",
+    "pending_request_blob_sha": "58a0b6ecf12d440506f0e2634dd403c9d926d7bd",
+    "pending_payload_digest": "4ca0c764cd1da196a524363908a3fe3b878b56b64c30748b8a46f9d653aaabb1",
     "pending_output_digest": null,
     "pending_response_digest": null,
     "pending_response_ref": null,
@@ -1544,19 +1698,19 @@
     "pending_preflight_blob_sha": null,
     "request_recreated": false,
     "response_submitted": false,
-    "response_consumed": true,
+    "response_consumed": false,
     "response_replayed": false,
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "9a43b2197796987c0b868660f34eb9c6053ae8bf",
-    "snapshot_blob_sha": "2c4e9a65de0be6aa86a3e86377a4257f2e52778d",
-    "snapshot_revision": 266,
+    "snapshot_head_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+    "snapshot_blob_sha": "fc87ad62956bb8434a819fe01511ccc9ee650b20",
+    "snapshot_revision": 267,
     "snapshot_phase": "root_pending",
-    "source_main_sha": "9a43b2197796987c0b868660f34eb9c6053ae8bf",
-    "source_state_blob_sha": "52f0ffdcf6d28581d4ff5c6927cd794a96f063bf",
-    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@3cdc95523203e759fe936ca353f2c16cbe7ccf6e/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": "2026-09-08T04:02:00.000Z",
+    "source_main_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+    "source_state_blob_sha": "a07506e6d0ba78ec72fd4091cd1462c6efa730ed",
+    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@095c972eeb7b3651e73f8177a207fdadfdc7d133/agi/WORK_EXECUTION_STATE.json",
+    "verified_at": "2026-09-08T04:43:30.000Z",
     "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
@@ -30234,7 +30388,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-08T04:02:00.000Z",
+  "heartbeat_at": "2026-09-08T04:43:30.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -37173,7 +37327,7 @@
   },
   "user_level_objective_met": false,
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
-  "verified_at": "2026-09-08T04:02:00.000Z",
+  "verified_at": "2026-09-08T04:43:30.000Z",
   "verified_remote_readback": false,
   "work_status": "executing",
   "working_branch": "main",
@@ -37651,9 +37805,7 @@
     "verified_remote_readback": true,
     "resume_required": true
   },
-  "pending_pull_requests": [
-    611
-  ],
+  "pending_pull_requests": [],
   "pending_ci_run_ids": [],
   "pending_job_ids": [],
   "generation34_consolidate259_continuation_source_repair_v1": {
@@ -38325,7 +38477,7 @@
   },
   "generation34_root267_freeze_v1": {
     "schema_version": 1,
-    "classification": "root_request_frozen_branch_readback_verified_ci_pending",
+    "classification": "root_request_frozen_main_verified",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -38392,6 +38544,84 @@
     "resume_required": true,
     "upper_objective_achieved": false,
     "agi_claim_supported": false,
-    "observed_at": "2026-09-08T04:14:00.000Z"
+    "observed_at": "2026-09-08T04:43:30.000Z",
+    "merge_sha": "acbc3aff21f15cbc8563959342733c746c51a7ec",
+    "workflow_runs": {
+      "directive_source_preflight": {
+        "run_id": 34186235487,
+        "conclusion": "success"
+      },
+      "test": {
+        "run_id": 34186235472,
+        "conclusion": "success"
+      }
+    },
+    "required_jobs": [
+      {
+        "job_id": 101935006719,
+        "name": "pytest shard 0 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 101935006750,
+        "name": "pytest shard 1 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 101935006925,
+        "name": "pytest shard 2 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 101935006556,
+        "name": "pytest shard 3 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 101939902951,
+        "name": "test",
+        "conclusion": "success"
+      }
+    ],
+    "main_readback": [
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl",
+        "sha": "b61a64a70081ece08c7ac02486aad224a529ddc6"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "sha": "fc87ad62956bb8434a819fe01511ccc9ee650b20"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-d9e1b402a3a1330d0fb8addf.json",
+        "sha": "c5b3ff1e5cac519f1dc2cec575ac78cc364d70c6"
+      },
+      {
+        "path": ".continual/work-model/invocations/invoke-2f428a2d4dfade036ca45d2b/request.json",
+        "sha": "58a0b6ecf12d440506f0e2634dd403c9d926d7bd"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-0c94ec2d54d26c1f4afc4b6f/request.json",
+        "sha": "2de93ae0470122f7eec3b610e8ae0e628d77a527"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-0c94ec2d54d26c1f4afc4b6f/receipt.json",
+        "sha": "b9b5b2447e863edac141aa6eea6a81c6feb87b84"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-242a3c4ad8a7f24a4cb82ee6/request.json",
+        "sha": "08fc299be4a41a98b2843f0d7432953049e2cee8"
+      },
+      {
+        "path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-242a3c4ad8a7f24a4cb82ee6/receipt.json",
+        "sha": "d22b81b6a53d98cdfca960186f4d122f9625add8"
+      },
+      {
+        "path": "artifacts/g34-root267-freeze-v1.json",
+        "sha": "4fe8b85f7c2d9c21dfe2b902a3335390c2d12359"
+      }
+    ],
+    "main_readback_verified": true,
+    "state_bind_expected_blob_sha": "a07506e6d0ba78ec72fd4091cd1462c6efa730ed"
   }
 }
