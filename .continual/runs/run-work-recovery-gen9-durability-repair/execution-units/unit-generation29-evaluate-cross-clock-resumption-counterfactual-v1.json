@@ -1,0 +1,45 @@
+{
+  "component": "task_evaluate",
+  "evidence_needed": [
+    "protocol and generated precommitted-manifest digest identity",
+    "three protected traces rejecting before effects, preserving the exact request, repairing only the scenario cause, and resuming exactly once",
+    "three fail-open traces changing only one guard and exhibiting the precommitted stale-context, stale-write/divergent-successor, or inbox-bypass behavior",
+    "zero protected stale commits, duplicates, fence changes, inbox bypasses, stale-context actions, and live-authority mutations",
+    "byte-stable replay digests, guard-to-prevented-behavior mapping, focused tests, protected exact-head CI, expected-head merge, and remote readback"
+  ],
+  "expected_outputs": [
+    "separate bounded-unit and upper-objective verdicts",
+    "independent findings for every protected and fail-open scenario",
+    "explicit negative evidence, failure repair instructions, and narrow claim boundary"
+  ],
+  "failure_conditions": [
+    "any protected stale or duplicate effect, request recreation, multiple successor, or live-authority mutation",
+    "any control changes multiple guards, misses its expected bad behavior, or writes live authority",
+    "protocol/result digest mismatch, nondeterministic replay, publication mismatch, or widened claim"
+  ],
+  "goal": "Independently adjudicate the exact three-scenario protected-versus-fail-open cross-clock resumption benchmark, including precommitment, exact-request preservation, concrete repairs, exactly-once responses and successors, deterministic replay, informative one-guard controls, and zero live-authority mutation.",
+  "inputs": [
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/bounded-result.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/guard-to-prevented-behavior.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/moved_authoritative_binding-fail_open-trace.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/moved_authoritative_binding-protected-trace.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/newer_inbox_at_dispatch-fail_open-trace.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/newer_inbox_at_dispatch-protected-trace.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/precommitted-manifest.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/replay-verification.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/stale_work_heartbeat-fail_open-trace.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/stale_work_heartbeat-protected-trace.json",
+    "agi/CROSS_CLOCK_RESUMPTION_BENCHMARK.json",
+    "src/agi/cross_clock_resumption_benchmark.py",
+    "tests/test_cross_clock_resumption_benchmark.py"
+  ],
+  "parent_continuation": "After Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, and Learn; publish through protected exact-head CI and expected-head merge with readback; return to Root and continue materially different safe work while AGI and user completion remain false.",
+  "scope": "Only the frozen synthetic cross-clock resumption protocol and ten generated artifacts; no live generation-29 authority mutation, Candidate or route change, generalized capability, AGI, or completion claim.",
+  "success_conditions": [
+    "all protected traces match their precommitment and reject before effect",
+    "exact request identity is preserved and each repair yields one response and one successor",
+    "each fail-open control is single-guard and informative",
+    "all replays are byte-stable and no trace mutates live authority"
+  ],
+  "unit_id": "unit-generation29-evaluate-cross-clock-resumption-counterfactual-v1"
+}

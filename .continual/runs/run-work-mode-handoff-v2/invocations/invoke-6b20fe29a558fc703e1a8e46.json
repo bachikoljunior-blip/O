@@ -1,0 +1,50 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-22T11:46:51.619337Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-6b20fe29a558fc703e1a8e46-candidate_evaluate.json",
+  "invocation_id": "invoke-6b20fe29a558fc703e1a8e46",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/candidates/candidate-self-application-context-hygiene-v1"
+      ],
+      "observations": [
+        "Only the repository-development context-hygiene Candidate is relevant.",
+        "It remains unverified for this scope."
+      ],
+      "purpose": "Evaluate candidates immediately before the durable Work migration unit.",
+      "unresolved": [
+        "Protected regression and exact-head evidence are not yet available."
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "reason": "No deterministic protected-baseline comparison supports Candidate activation."
+    },
+    "result": {
+      "applicable_candidate_id": "candidate-self-application-context-hygiene-v1",
+      "conflicts": [],
+      "decision": "USE_ACTIVE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "Parseable Work migration state",
+        "A native O Run and immutable Work invocation records",
+        "Local regression results",
+        "Exact-head CI after publication"
+      ],
+      "reason": "The self-application context-hygiene Candidate is relevant to durable repository migration, but it is not verified for this exact Work-mode state transition. Use the active Execute prompt and retain the Candidate without promotion.",
+      "regression_checks": [
+        "Fresh owner suppresses duplicate recovery",
+        "Stale status never directly authorizes mutation",
+        "Strict external AGI claim remains false"
+      ],
+      "rollback": "Keep the legacy Chat watchdog records as historical evidence while making the new Work files authoritative; revert the migration commit if exact-head checks fail.",
+      "scope": "agi/repository-development"
+    }
+  },
+  "payload_digest": "6f20ea68b112b159ef934a1c",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

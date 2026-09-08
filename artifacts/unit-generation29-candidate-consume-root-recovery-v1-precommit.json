@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "unit_id": "unit-generation29-candidate-consume-root-recovery-v1",
+  "recorded_at": "2026-09-05T04:52:00Z",
+  "authority": {
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "run_id": "run-work-recovery-gen9-durability-repair"
+  },
+  "source": {
+    "main_sha": "265a582f83e86f04e0f1f40c80586de0a7783eab",
+    "state_blob_sha": "750f2ea0b4e8e48faf40d0e83573c9e507d344fb",
+    "snapshot_prior_blob_sha": "b31dd4034c5b7b59fa8faa52393928f6c87da336",
+    "snapshot_prior_revision": 190,
+    "snapshot_prior_phase": "unit_pending"
+  },
+  "completed_candidate_evaluate": {
+    "work_invocation_id": "invoke-b718286bb7670423712866a9",
+    "native_invocation_id": "invoke-93fb96436b4eeab766785a7b",
+    "request_digest": "a896b3be7e7825bb121b5a7d271eaa67cdeb5911b1a98d889f9a9528db567672",
+    "response_digest": "de9d9008ed3c50d09dfd0d094695e2c2d03ae5dcf2ba7320ee271428fdc4c684",
+    "response_blob_sha": "799166d4c84df82b45937882894f2d30c5f8b820",
+    "decision": "REMAIN_CANDIDATE",
+    "completed_at": "2026-09-05T04:48:58.068252Z",
+    "response_consumed_exactly_once": true,
+    "response_resubmitted": false,
+    "candidate_activation": false,
+    "production_routing": false
+  },
+  "resulting_frontier": {
+    "snapshot_blob_sha": "34c9fff0556f463c1be03f1a6b4dea37dbbfb0e7",
+    "snapshot_revision": 192,
+    "snapshot_phase": "root_pending",
+    "current_component": "execute",
+    "current_unit": "unit-07743b08a2f5e1b63b9f91f7",
+    "last_result_ref": "artifacts/unit-07743b08a2f5e1b63b9f91f7-result.json",
+    "pending_work_request_count": 0,
+    "resume_required": true,
+    "next_component": "root"
+  },
+  "stop_cause_and_repair": {
+    "first_stop_cause": "PR497 state projected pending_native_consume as the immutable snapshot phase; continuity preflight rejected the mismatch.",
+    "first_repair": "Two-phase CAS restored native_phase=unit_pending while retaining durability_status=pending_native_consume; exact readback succeeded at state blob 750f2ea0b4e8e48faf40d0e83573c9e507d344fb.",
+    "second_stop_cause": "The local connector-derived main commit lacked exact Git commit/tree objects required by source-commit blob validation.",
+    "second_repair": "Reconstructed the exact signed merge object, exact state-commit chain, and exact minimal Git tree path objects; request, snapshot, and native blobs then matched the immutable source commit.",
+    "third_stop_cause": "After exact Candidate consumption, the next Root decision context lacked a fresh receipt for required protected run 33587996147.",
+    "third_repair": "Recorded connector-observed exact run and all five required successful jobs in CI receipt 94e06ddd39a3c934eeec52a191dca945b0789048a268ac5a720305551fa057c1.",
+    "response_consumed_before_third_stop": true,
+    "no_duplicate_resume_or_response": true
+  },
+  "published_files": {
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-07743b08a2f5e1b63b9f91f7-result.json": "3d164b3a648744ba03e97fe2c89951fbe4d53058",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/candidate-trials/invoke-93fb96436b4eeab766785a7b.json": "4e70a151c04b8222b1c8c66e4c6f9a618d2fcae1",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3fc947a6778a4e4dd83e08c1/request.json": "ab4e3770701ecf047a30056f7439b3038f065e83",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-3fc947a6778a4e4dd83e08c1/receipt.json": "54c22e99730b50023b91f5bf6dfc7ccc52ba8210",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl": "a97d2b47cc4b9776d66543c2b2bba9d111e16aab",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-93fb96436b4eeab766785a7b-candidate_evaluate.json": "7105600961cdc652661d157d1c54e2ff3c64d7a7",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-93fb96436b4eeab766785a7b.json": "cc864d0bb8de630e5d16c050e7ef8c927df409c7",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-93fb96436b4eeab766785a7b-candidate_evaluate.json": "c280d3d93860ff426040cb5a530cd2c4a766d574",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-afdd5762364ec4959ecae219.json": "2e71b2658901b5021e133e52e6e51397da022b8e",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json": "34c9fff0556f463c1be03f1a6b4dea37dbbfb0e7",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-41b566ab9a8b383171166612/request.json": "db3b3f7e619d5cdfbfa438752fc58e76f68f22ac",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-41b566ab9a8b383171166612/receipt.json": "116f51e4881b24e9092dc2c2aec792f6602e96cf"
+  },
+  "observations": {
+    "work_source_request_digest": "f8d2b05126656713391c226ff9175bdc9291c6dc5ad80a393e63883deba279cd",
+    "work_source_receipt_digest": "c38d1571634a070ebd180564fa5dad62661875ccbfd32395ec8c276974d56886",
+    "ci_source_request_digest": "be55ef531a0a9f409bbf81fbba6b423eee3b122c6077662ae91c440804b084fd",
+    "ci_source_receipt_digest": "94e06ddd39a3c934eeec52a191dca945b0789048a268ac5a720305551fa057c1"
+  },
+  "invariants": {
+    "request_recreated": false,
+    "response_repeated": false,
+    "candidate_activation": false,
+    "production_routing": false,
+    "upper_objective_achieved": false,
+    "user_level_objective_achieved": false,
+    "agi_achieved": false,
+    "resume_required": true
+  },
+  "idempotency_key": "o-work-gen29:265a582f:consume-candidate-root-recovery:v1",
+  "next_action": "Publish this exact consumed frontier and repaired observations, validate protected exact-head CI, merge only at unchanged head, bind snapshot revision 192 and root_pending through two-phase state CAS and exact readback, record a fresh Work source observation, then resume Root without replaying the Candidate response."
+}

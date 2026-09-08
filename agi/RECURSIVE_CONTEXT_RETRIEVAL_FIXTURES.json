@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "experiment_id": "recursive-context-retrieval-ablation-v1",
+  "base_commit": "523f17119b5e32e0526c235bc52bb3db626fafa9",
+  "decision_at": "2026-08-28T12:45:00Z",
+  "max_depth": 2,
+  "fixtures": [
+    {
+      "fixture_id": "missing-transitive-dependency",
+      "situation": "Dispatch a safe O effect with the exact source-observation contract available.",
+      "entry_source_ids": [
+        "work-strategy"
+      ],
+      "required_source_ids": [
+        "work-strategy",
+        "context-kernel-architecture",
+        "work-source-observation-contract"
+      ],
+      "authority_bindings": {
+        "strategy": "o-work-strategy",
+        "architecture": "o-context-kernel",
+        "receipt-contract": "o-work-source-observation",
+        "diagnostic": "o-scientist-baseline"
+      },
+      "active_invalidations": [],
+      "sources": [
+        {
+          "source_id": "work-strategy",
+          "repository_path": "agi/WORK_STRATEGY.json",
+          "content_sha256": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b",
+          "summary": "Current O work selection and context policy.",
+          "dependency_ids": [
+            "context-kernel-architecture"
+          ],
+          "authority_scope": "strategy",
+          "authority_id": "o-work-strategy",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "strategy-revision-change"
+          ]
+        },
+        {
+          "source_id": "context-kernel-architecture",
+          "repository_path": "agi/CONTEXT_KERNEL_ARCHITECTURE.md",
+          "content_sha256": "b5b33bfe8eae940aa4a1001fd7ead18840d9d81c6896fa6231cfc9e6dc254bcb",
+          "summary": "Architecture that explains mandatory source receipt boundaries.",
+          "dependency_ids": [
+            "work-source-observation-contract"
+          ],
+          "authority_scope": "architecture",
+          "authority_id": "o-context-kernel",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "context-kernel-architecture-change"
+          ]
+        },
+        {
+          "source_id": "work-source-observation-contract",
+          "repository_path": "src/continual/work_source_observation.py",
+          "content_sha256": "ddfaf829b4920ed0949d61f7c84de0cc246b776f8649bc58afc401dd5401d515",
+          "summary": "Exact precommit, receipt, freshness, and authority validation contract.",
+          "dependency_ids": [],
+          "authority_scope": "receipt-contract",
+          "authority_id": "o-work-source-observation",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "receipt-contract-change"
+          ]
+        },
+        {
+          "source_id": "unrelated-scientist-baseline",
+          "repository_path": "agi/SCIENTIST_AGENT_BASELINE.json",
+          "content_sha256": "9d0fd528507e6c2c3333fedd4de5b65a67f5dea416a3f68daa28e99d62d94278",
+          "summary": "Unrelated diagnostic baseline that must remain unmaterialized.",
+          "dependency_ids": [],
+          "authority_scope": "diagnostic",
+          "authority_id": "o-scientist-baseline",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "scientist-baseline-change"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture_id": "stale-competing-source",
+      "situation": "Select exact-head CI evidence without admitting an expired competing observation.",
+      "entry_source_ids": [
+        "context-kernel"
+      ],
+      "required_source_ids": [
+        "context-kernel",
+        "observation-ledger",
+        "fresh-ci-observation-contract"
+      ],
+      "authority_bindings": {
+        "kernel": "o-context-kernel-runtime",
+        "observation-ledger": "o-observation-ledger",
+        "ci-contract": "o-ci-source-observation"
+      },
+      "active_invalidations": [],
+      "sources": [
+        {
+          "source_id": "context-kernel",
+          "repository_path": "src/continual/context_kernel.py",
+          "content_sha256": "1eee8748667a072b479caba871495b21bde096813d5f397c763f36f74cac31f2",
+          "summary": "Current mandatory-source Context Kernel implementation.",
+          "dependency_ids": [
+            "observation-ledger"
+          ],
+          "authority_scope": "kernel",
+          "authority_id": "o-context-kernel-runtime",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "context-kernel-runtime-change"
+          ]
+        },
+        {
+          "source_id": "observation-ledger",
+          "repository_path": "agi/CONTEXT_OBSERVATION_LEDGER.json",
+          "content_sha256": "085c5043d81ee8efd300004ee30392e0cae7d60bc4747504ac35e32cbe6e7764",
+          "summary": "Ledger that routes to current and competing CI observations.",
+          "dependency_ids": [
+            "fresh-ci-observation-contract",
+            "stale-ci-observation"
+          ],
+          "authority_scope": "observation-ledger",
+          "authority_id": "o-observation-ledger",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "observation-ledger-change"
+          ]
+        },
+        {
+          "source_id": "fresh-ci-observation-contract",
+          "repository_path": "src/continual/ci_source_observation.py",
+          "content_sha256": "205194b6f0e6d5d1ce19aeff1c4db3477d05e725d0d0750611d6c436a34eb62b",
+          "summary": "Fresh exact-head CI observation contract.",
+          "dependency_ids": [],
+          "authority_scope": "ci-contract",
+          "authority_id": "o-ci-source-observation",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "ci-source-contract-change"
+          ]
+        },
+        {
+          "source_id": "stale-ci-observation",
+          "repository_path": "agi/WORK_MODE_HANDOFF.json",
+          "content_sha256": "dc6f1d88075e2bc7194ac59dcfbac6a60263272785f232d8d1e1c13a88fd26e3",
+          "summary": "Expired competing CI context retained only as negative evidence.",
+          "dependency_ids": [],
+          "authority_scope": "ci-contract",
+          "authority_id": "o-ci-source-observation",
+          "observed_at": "2026-08-26T12:00:00Z",
+          "valid_until": "2026-08-27T12:00:00Z",
+          "invalidates_on": [
+            "handoff-revision-change"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture_id": "authority-conflicting-source",
+      "situation": "Recover the authoritative Work state while rejecting a fresh legacy control-plane competitor.",
+      "entry_source_ids": [
+        "work-mode-contract"
+      ],
+      "required_source_ids": [
+        "work-mode-contract",
+        "continuous-authorization",
+        "authoritative-monitor-state"
+      ],
+      "authority_bindings": {
+        "work-mode": "o-work-mode",
+        "authorization": "o-continuous-authorization",
+        "work-state": "o-work-mode-monitor"
+      },
+      "active_invalidations": [],
+      "sources": [
+        {
+          "source_id": "work-mode-contract",
+          "repository_path": "agi/WORK_MODE.md",
+          "content_sha256": "d2cff7165ebbb1a485af74dd7e903708b14a9277395d65288a1818b236bc85f8",
+          "summary": "Current Work-mode execution and claim contract.",
+          "dependency_ids": [
+            "continuous-authorization"
+          ],
+          "authority_scope": "work-mode",
+          "authority_id": "o-work-mode",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "work-mode-contract-change"
+          ]
+        },
+        {
+          "source_id": "continuous-authorization",
+          "repository_path": "agi/CONTINUOUS_EXECUTION_AUTHORIZATION.json",
+          "content_sha256": "a1a4d34642e8fe3d3bc4de86ed6650d5a5a5a9582bf8809b85341acd50f83b79",
+          "summary": "Authorization record that exposes current and legacy state candidates.",
+          "dependency_ids": [
+            "authoritative-monitor-state",
+            "legacy-autonomy-state"
+          ],
+          "authority_scope": "authorization",
+          "authority_id": "o-continuous-authorization",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "authorization-revision-change"
+          ]
+        },
+        {
+          "source_id": "authoritative-monitor-state",
+          "repository_path": "agi/WORK_MODE_MONITOR.json",
+          "content_sha256": "990761dda08a569528cd43fffb9f054e12441da192314a08c4b9edd1ab51f8c2",
+          "summary": "Authoritative current Work monitoring and recovery contract.",
+          "dependency_ids": [],
+          "authority_scope": "work-state",
+          "authority_id": "o-work-mode-monitor",
+          "observed_at": "2026-08-28T12:41:53Z",
+          "valid_until": "2026-08-29T12:41:53Z",
+          "invalidates_on": [
+            "work-monitor-contract-change",
+            "fence-change"
+          ]
+        },
+        {
+          "source_id": "legacy-autonomy-state",
+          "repository_path": "agi/AUTONOMY_STATE.json",
+          "content_sha256": "15fdcae2b23cc06b7dfc65aea97328e0de0665d3ab171d791755f49f57345d39",
+          "summary": "Fresh but non-authoritative legacy control-plane state.",
+          "dependency_ids": [],
+          "authority_scope": "work-state",
+          "authority_id": "legacy-autonomy-state",
+          "observed_at": "2026-08-28T12:00:00Z",
+          "valid_until": "2026-08-29T12:00:00Z",
+          "invalidates_on": [
+            "autonomy-state-change"
+          ]
+        }
+      ]
+    }
+  ]
+}

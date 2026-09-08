@@ -1,0 +1,68 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-23T13:25:21.392404Z",
+  "component": "root",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-01b150be63cc4ba045153320-root.json",
+  "invocation_id": "invoke-01b150be63cc4ba045153320",
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        "agi/USER_INPUT_INBOX.json blob 6d360fba463dee47ac777a378dab2ccfe5ad05c3",
+        "agi/WORK_EXECUTION_STATE.json blob 1bbc4bcefddec9c6f6b35ff129af32bc26acf7f8",
+        ".continual/work-model/invocations/invoke-344455ae7a59ec86e4fa5d20/request.json",
+        "agi/CONTEXT_ROUTING_EXPERIMENT.json"
+      ],
+      "observations": [
+        "The latest inbox is append-only revision 15 and adds no ownership supersede; revision 14 still makes generation 5 the sole primary/main integrator.",
+        "The current Root payload demonstrates the defect directly: facts refreshed by the outer executor are absent from O's immutable decision payload unless manually narrated.",
+        "Existing immutable Work requests already provide a replay-safe attachment point for a decision-context manifest.",
+        "Existing recursive routing can later select optional branches, but zero admissible routing observations mean it cannot be trusted to carry mandatory lease, user-direction, or effect-revocation context yet.",
+        "External sources must remain authoritative for their own facts; O must own the observation ledger, source clock, decision projection, and invalidation rules that determine what may affect a decision."
+      ],
+      "purpose": "Ingest revision 15 at the first safe Root and select the smallest architectural slice that makes context omission observable and enforceable inside O.",
+      "unresolved": [
+        "the minimal source schema that is sufficient without becoming a second raw-data store",
+        "the exact stale/invalidation boundary for each source kind",
+        "extension from Root audit/control to all semantic components and effect dispatch",
+        "behavioral evidence that the selected context changes outcomes rather than only improving traceability"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Revision 15 exposes a structural control-plane gap, not a prompt-length problem. Full raw-context internalization would duplicate authorities, stale silently, increase secret and overload risk, and weaken replay. The higher-value falsifiable design is an O-owned manifest/event control plane over authoritative source references and receipts, with mandatory control context separated from recursively routed optional content."
+    },
+    "result": {
+      "component": "execute",
+      "evidence_needed": [
+        "a canonical DecisionContextManifest with source kind, authoritative locator, revision or digest, observation time, mandatory/optional role, inclusion or exclusion reason, dependency binding, and a stable manifest digest",
+        "Root request freezing that always binds the effective user-input inbox, current single-writer lease identity/fence, current strategy, and native run snapshot without copying every raw external payload into the prompt",
+        "fail-closed tests for a missing mandatory source, revision/digest disagreement, and malformed lease/inbox control metadata",
+        "replay tests showing one frozen pending request is byte/digest stable after a source advances and the next safe Root receives a different manifest/source clock",
+        "behavioral tests showing an outside-only user constraint cannot silently influence O until represented by an ingested O source reference, and once ingested it is mandatory in the Root decision manifest",
+        "focused regression, compileall, JSON validation, work-verify, exact diff review, then isolated exact-head CI before any main merge"
+      ],
+      "expected_outputs": [
+        "a small Context Kernel module and Root-only Work bridge integration with no global raw-context copy",
+        "an immutable request field containing the manifest plus digest and explicit included/excluded source decisions",
+        "tests that distinguish source authority, O-owned decision context, replay stability, freshness, and next-boundary invalidation",
+        "a durable architecture decision: O is the decision-control authority; GitHub, CI, providers, and other systems remain authoritative raw sources accessed through observation receipts; the outer session is an executor rather than an untracked context authority",
+        "negative evidence and rollback guidance if the manifest cannot close the omission/staleness gap without breaking replay or single-writer safety"
+      ],
+      "goal": "Implement the first O-owned Context Kernel vertical slice: freeze a deterministic, provenance-bound DecisionContextManifest into each newly created Root Work request, fail closed when mandatory control sources are missing or internally inconsistent, and prove that an already-frozen pending request remains replay-stable while the next Root observes changed source revisions.",
+      "inputs": [
+        "inbox revision 15 and blob 6d360fba463dee47ac777a378dab2ccfe5ad05c3, which directs O-centered context management and explicitly asks for comparison with alternatives",
+        "WORK_EXECUTION_STATE blob 1bbc4bcefddec9c6f6b35ff129af32bc26acf7f8 with generation 5, the current fence, acknowledged revision 14, and a fresh same-owner heartbeat",
+        "current Root request invoke-344455ae7a59ec86e4fa5d20, whose payload contains run state but no inbox revision, lease/source clock, inclusion/exclusion ledger, freshness, or invalidation dependencies",
+        "src/continual/work_session.py and the immutable Work request/response journal",
+        "the checked-in recursive context-routing experiment, retained as optional branch-selection machinery rather than a substitute for mandatory control context"
+      ],
+      "parent_continuation": "After Execute, run Task Evaluate on omission, staleness, replay, and fail-closed behavior; consolidate and learn. If the Root-only slice passes, publish it through an isolated exact-head PR and then expand manifests to Execute/effect authorization and inbox-to-O event ingestion rather than declaring the context problem solved.",
+      "scope": "context-kernel/root-decision-manifest-v1"
+    }
+  },
+  "payload_digest": "3c134785b121e766c08665f4",
+  "prompt_path": "prompts/root.md",
+  "status": "complete"
+}

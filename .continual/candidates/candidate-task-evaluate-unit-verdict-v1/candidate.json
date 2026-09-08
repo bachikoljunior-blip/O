@@ -1,0 +1,87 @@
+{
+  "applicability": [],
+  "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+  "conflicts_with": [],
+  "contradictory_evidence": [],
+  "depends_on": [],
+  "expected_scope": "continual/incremental-task-evaluation",
+  "incompatible_with": [],
+  "non_applicability": [],
+  "prompt_content": "Evaluate the original task goal without weakening it and return its verdict in `verdict`. When the current bounded execution unit has a separately falsifiable completion condition, also return `unit_verdict` as PASS, FAIL, or UNCERTAIN with evidence and reason. A passing unit never implies the original task passed. Preserve negative evidence and the strict external claim boundary.",
+  "prompt_mode": "overlay",
+  "prompt_path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+  "rejected_reasons": [],
+  "risk": "An overlay could overproduce unit PASS; regression must require explicit bounded success conditions and preserve original verdict independence.",
+  "scope_states": {
+    "agi/backlog-integration": "NEED_MORE_EVIDENCE",
+    "agi/behavioral-evidence/generation33-external-sokoban-planning-comparison-v1": "REMAIN_CANDIDATE",
+    "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1": "PROPOSE_ACTIVATION",
+    "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+    "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+    "agi/evidence-scope/negative-evidence-ledger-audit-v1": "REMAIN_CANDIDATE",
+    "continual/incremental-task-evaluation": "PROPOSE_ACTIVATION",
+    "continual/incremental-task-evaluation/matched-evidence-acquisition-loop-v1": "PROPOSE_ACTIVATION"
+  },
+  "source_refs": [
+    ".continual/runs/run-work-mode-handoff-v2/local-learn/invoke-b0f22bb1837173b8140ab7ec-consolidate_episode.json"
+  ],
+  "status": "candidate",
+  "supersedes": [],
+  "supporting_evidence": [
+    "run-work-mode-handoff-v2 unit-f67e779cf0b2194e4e3e6542",
+    "PR 256 exact-head CI 32591220738",
+    "main 976efad5fe0f2d1348ba97e5ba67d6253d331958",
+    {
+      "at": "2026-08-23T05:11:03.809201Z",
+      "evidence": [
+        "Trial output: dual verdicts present and non-conflated (verdict FAIL / unit_verdict PASS), each with independent evidence provenance",
+        "Deviation adjudication placed inside unit_verdict_reason as the overlay intends, not absorbed into the task verdict",
+        "Claim boundary text preserved: PASS unit_verdict explicitly marked as not AGI evidence"
+      ],
+      "scope": "agi/backlog-integration"
+    },
+    {
+      "at": "2026-08-24T02:32:14.903716Z",
+      "evidence": [
+        "actual result contains verdict FAIL, user_level_verdict FAIL, unit_verdict PASS, and agi_claim_supported false",
+        "actual result preserves six explicit negative-evidence items and four unmet conditions",
+        "claim boundary states internal, non-heldout, non-independent, non-breadth, non-AGI, and non-completion",
+        "global_activation_authorized remains false"
+      ],
+      "scope": "continual/incremental-task-evaluation"
+    },
+    {
+      "at": "2026-08-24T17:32:20.212520Z",
+      "evidence": [
+        "unit_verdict PASS is supported by four exact score-1.0 replay-stable receipts",
+        "mechanism_verdict remains INSUFFICIENT_EVIDENCE because research-unit-b/c are absent",
+        "user_level_verdict and task completion remain FAIL",
+        "negative evidence remains limited to research-unit-a exact tested conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1"
+    },
+    {
+      "at": "2026-08-24T17:51:27.425678Z",
+      "evidence": [
+        "unit_verdict PASS is supported by four exact score-1.0 replay/cross-binding verified receipts",
+        "mechanism_verdict remains INSUFFICIENT_EVIDENCE because research-unit-c is absent",
+        "user_level_verdict and task completion remain FAIL",
+        "negative evidence remains limited to research-unit-b exact tested conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1"
+    },
+    {
+      "at": "2026-08-24T18:11:07.788154Z",
+      "evidence": [
+        "unit PASS is supported by twelve score-1.0 replay-verified attempts",
+        "mechanism REJECT_MECHANISM follows the frozen median rule because invocation cost worsened",
+        "user-level and task completion remain FAIL",
+        "negative evidence remains limited to the exact tested candidate/configuration/conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1"
+    }
+  ],
+  "target_component": "task_evaluate",
+  "tested_with": [],
+  "what_it_changes": "Require separate original-goal and bounded-unit verdicts when their outcomes differ."
+}

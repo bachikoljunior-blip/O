@@ -1,0 +1,56 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-23T11:20:44.142095Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-822833a03303ff3ebba5d252-candidate_evaluate.json",
+  "invocation_id": "invoke-822833a03303ff3ebba5d252",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        "agi/CONTEXT_ROUTING_EXPERIMENT.json",
+        ".continual/candidates/index.json",
+        "src/agi/context_routing_experiment.py"
+      ],
+      "observations": [
+        "No indexed Candidate has the exact measurement scope.",
+        "The current session authored the hidden labels and therefore cannot supply uncontaminated held-out selection evidence."
+      ],
+      "purpose": "Protect the exact held-out selection variable from unrelated Candidate overlays and author contamination.",
+      "unresolved": [
+        "a genuinely blinded selector execution is not currently available"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "A frozen scorer does not make the same harness-author session a held-out selector; author-label exposure must remain explicit contamination evidence."
+    },
+    "result": {
+      "baseline_need": "Keep all Candidates inactive. The same session authored and saw the hidden labels, so it cannot provide uncontaminated held-out selection evidence; a plan produced here must be retained only as contaminated diagnostic evidence or omitted, never promoted to a measured PASS.",
+      "candidate_id": null,
+      "conflicts": [],
+      "decision": "NOT_APPLICABLE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "whether a selector that did not author or view hidden labels is actually available",
+        "a protocol-digest-bound selection plan produced from only the public packet",
+        "two exact mechanical replays per case if and only if the selector boundary is uncontaminated",
+        "explicit contamination and threshold failures when the boundary cannot be satisfied"
+      ],
+      "reason": "No indexed Execute Candidate targets the exact frozen summary-only selection-plan measurement. Applying the context-hygiene, capability-benchmark, campaign, or live-provider overlays would change the selection context or add unrelated behavior and invalidate the precommitted comparison.",
+      "regression_checks": [
+        "no full content or hidden labels exposed before plan freeze",
+        "no post-output relabeling or protocol change",
+        "no Candidate overlay changes the measured variable",
+        "no global activation",
+        "user-level verdict remains FAIL and AGI claim remains false"
+      ],
+      "rollback": "Return INSUFFICIENT_EVIDENCE, retain the frozen harness and inactive router, and require a genuinely blinded selector execution before any scoped adoption decision.",
+      "scope": "context/recursive-skill-routing-heldout-measurement-v1"
+    }
+  },
+  "payload_digest": "805bf5eefa301a73bf7e8fce",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

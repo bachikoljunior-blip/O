@@ -1,0 +1,37 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "a precommitted manifest binding scenarios/configurations/expected outcomes/digests and forbidding live-authority writes",
+    "deterministic protected and control traces through attempted dispatch, rejection or failure, repair, exact request preservation, resume, and successor freeze",
+    "counters for submissions, completions, successors, stale commits, duplicates, fence changes, and inbox bypasses",
+    "focused and protected exact-head CI, expected-head merge, and readback"
+  ],
+  "expected_outputs": [
+    "a versioned three-scenario/two-configuration benchmark and synthetic fixture builders",
+    "deterministic per-scenario traces, counters, rejection/repair reasons, and replay digests",
+    "an aggregate mapping each guard to the concrete stale or duplicate behavior it prevents",
+    "focused tests proving byte-stable replay, unique successor after repair, no stale writer, no duplicate response, and no live-authority mutation"
+  ],
+  "failure_conditions": [
+    "any fixture writes live authority or consumes the frozen Root/successor outside this exact workflow",
+    "protected execution accepts stale heartbeat/blob/fence/inbox and emits a successor or effect",
+    "repair recreates identity, duplicates an effect, or yields multiple successors",
+    "the control is non-informative, the prior forecast is rerun/upgraded, claims broaden, or validation/publication controls fail"
+  ],
+  "goal": "Run one bounded protected-versus-fail-open resumption benchmark across three isolated interruptions: stale Work heartbeat before successor freeze, moved authoritative state/main binding, and a newer inbox revision at dispatch. Prove that protected O rejects stale authority, preserves the exact request, repairs the concrete cause, and resumes exactly once without stale-writer or duplicate effects.",
+  "inputs": [
+    "revision118 frozen Root context plus verified stale-heartbeat failure/repair runs 33382998357 and 33383852840",
+    "Context Kernel freshness, immutable Work journal, CAS/fence, inbox binding, continuation verifier, and idempotency machinery",
+    "synthetic stale-heartbeat, moved-state-blob, and newer-inbox fixtures",
+    "an isolated fail-open control disabling only the scenario guard"
+  ],
+  "parent_continuation": "After Execute, Task Evaluate only these three protected-versus-control traces, exactly-once counters, and live-authority non-mutation proof. Then Consolidate Episode and Learn, publish through exact-head CI and expected-head merge with readback, return to Root, and choose a materially different safe unit while AGI and user completion remain false.",
+  "scope": "Synthetic repository checkpoint copies only; no live generation-29 authority mutation inside the benchmark, no repeat of the unavailable forecast, no Candidate/routing change, and no AGI or completion claim.",
+  "success_conditions": [
+    "stale-heartbeat protection fails before successor freeze and heartbeat-only repair yields exactly one response and successor",
+    "moved-state protection rejects stale CAS/fence while fail-open exhibits the precommitted stale-write or divergent-successor outcome",
+    "newer-inbox protection delays dispatch until safe-boundary ingestion while fail-open exhibits the stale-context action",
+    "all protected traces have zero duplicates or unauthorized authority changes, deterministic replay, protected CI, expected-head merge, and exact readback"
+  ],
+  "unit_id": "unit-generation29-cross-clock-resumption-counterfactual-v1"
+}

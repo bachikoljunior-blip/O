@@ -1,0 +1,215 @@
+{
+  "attempt": 1,
+  "candidate_activated": false,
+  "claim_scope": "synthetic deterministic representation feasibility only",
+  "conditions": [
+    {
+      "case_id": "current_binding_control",
+      "condition_id": "valid_current_accept",
+      "finished_at": "2026-09-07T16:02:04.606222+00:00",
+      "observations": {
+        "prior_bytes_unchanged": true,
+        "verified_current_declarations": 1
+      },
+      "started_at": "2026-09-07T16:02:04.603287+00:00",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "current_binding_control",
+      "condition_id": "wrong_canonical_reject",
+      "finished_at": "2026-09-07T16:02:04.611426+00:00",
+      "observations": {
+        "expected_rejection": "WorkSessionError: canonical JSON digest mismatch at output.current.sha256_canonical_json"
+      },
+      "started_at": "2026-09-07T16:02:04.606228+00:00",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "historical_snapshot_drift",
+      "condition_id": "stale_embedded_reject",
+      "finished_at": "2026-09-07T16:02:04.626880+00:00",
+      "observations": {
+        "expected_rejection": "WorkSessionError: evidence blob identity mismatch at output.prior_history.evidence_refs[0].git_blob_sha"
+      },
+      "started_at": "2026-09-07T16:02:04.623169+00:00",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "historical_snapshot_drift",
+      "condition_id": "immutable_history_preserve",
+      "finished_at": "2026-09-07T16:02:04.637660+00:00",
+      "observations": {
+        "complete_prior_bytes_equal": true,
+        "complete_prior_json_equal": true,
+        "current_declarations_verified": 1,
+        "historical_lookup": "separate explicit git verifier",
+        "historical_ref": {
+          "commit": "aef38ed74f94728d1374f5984e1f556d9c92628f",
+          "file": "episode.json",
+          "historical_blob": "52842123fae028fc227c28d62b67079582775578"
+        },
+        "negative_unknown_time_retained": true
+      },
+      "started_at": "2026-09-07T16:02:04.626888+00:00",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "historical_provenance_corruption",
+      "condition_id": "wrong_history_blob_reject",
+      "finished_at": "2026-09-07T16:02:04.640080+00:00",
+      "observations": {
+        "changed_field": "historical_blob",
+        "expected_rejection": "AssertionError: historical blob identity mismatch",
+        "verifier": "separate explicit git verifier; not current validator"
+      },
+      "started_at": "2026-09-07T16:02:04.637676+00:00",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "historical_provenance_corruption",
+      "condition_id": "valid_history_control",
+      "finished_at": "2026-09-07T16:02:04.649659+00:00",
+      "observations": {
+        "complete_prior_bytes_equal": true,
+        "complete_prior_json_equal": true,
+        "current_declarations_verified": 1,
+        "historical_lookup": "separate explicit git verifier",
+        "historical_ref": {
+          "commit": "aef38ed74f94728d1374f5984e1f556d9c92628f",
+          "file": "episode.json",
+          "historical_blob": "52842123fae028fc227c28d62b67079582775578"
+        },
+        "negative_unknown_time_retained": true
+      },
+      "started_at": "2026-09-07T16:02:04.640091+00:00",
+      "verdict": "PASS"
+    }
+  ],
+  "exit_code_to_return": 0,
+  "finished_at": "2026-09-07T16:02:04.652772+00:00",
+  "independent_evaluation": false,
+  "prompt_overlay_efficacy_tested": false,
+  "protocol_sha256": "5cafc04b92e0acc1a88c12df47c9c3dac8ae09617e4e4bbbd74f28e5485afa17",
+  "schema_version": 1,
+  "script_sha256": "50807b93541181555724c5011da2f56edb2a902e9c621f4489bee997ed95ea75",
+  "started_at": "2026-09-07T16:02:04.540623+00:00",
+  "synthetic_history": {
+    "advanced_commit": "45c07bb2a9cf29a41c4672cfa8ab4c1c0ff2f75b",
+    "changed_paths": [
+      "snapshot.json"
+    ],
+    "git_calls": [
+      {
+        "argv": [
+          "init",
+          "-q"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "add",
+          "current.json",
+          "snapshot.json",
+          "episode.json"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "commit",
+          "-q",
+          "-m",
+          "fixed synthetic historical evidence"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "add",
+          "snapshot.json"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "commit",
+          "-q",
+          "-m",
+          "advance only synthetic snapshot"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "diff",
+          "--name-only",
+          "aef38ed74f94728d1374f5984e1f556d9c92628f",
+          "HEAD"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "rev-parse",
+          "--verify",
+          "aef38ed74f94728d1374f5984e1f556d9c92628f:episode.json"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "show",
+          "aef38ed74f94728d1374f5984e1f556d9c92628f:episode.json"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "rev-parse",
+          "--verify",
+          "aef38ed74f94728d1374f5984e1f556d9c92628f:episode.json"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "rev-parse",
+          "--verify",
+          "aef38ed74f94728d1374f5984e1f556d9c92628f:episode.json"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "show",
+          "aef38ed74f94728d1374f5984e1f556d9c92628f:episode.json"
+        ],
+        "exit_code": 0
+      },
+      {
+        "argv": [
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "historical_commit": "aef38ed74f94728d1374f5984e1f556d9c92628f",
+    "historical_episode_blob": "52842123fae028fc227c28d62b67079582775578",
+    "prior_episode_utf8": "{\n  \"episode_id\": \"synthetic-historical-negative-v1\",\n  \"evidence_refs\": [\n    {\n      \"git_blob_sha\": \"3b7a854164503d4aca5abcbad1b91037d3aee22a\",\n      \"path\": \"snapshot.json\"\n    }\n  ],\n  \"negative_findings\": [\n    \"Synthetic repair did not establish correctness.\"\n  ],\n  \"observed_at\": \"2001-01-01T00:00:00Z\",\n  \"scope\": \"synthetic fixture only\",\n  \"unknowns\": [\n    \"No independent evaluation; outcome beyond this fixture unknown.\"\n  ],\n  \"upper_objective_achieved\": false,\n  \"verdict\": \"FAIL\"\n}\n",
+    "temporary_repository_removed_after_run": true
+  },
+  "unit_id": "unit-generation34-historical-evidence-regression-v1",
+  "upper_objective_achieved": false,
+  "validator_unchanged": true,
+  "verdict": "PASS",
+  "wall_seconds": 0.11202074600441847
+}

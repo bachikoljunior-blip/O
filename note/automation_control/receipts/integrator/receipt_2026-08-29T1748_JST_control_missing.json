@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "role": "integrator",
+  "observed_at": "2026-08-29T17:48:00+09:00",
+  "bootstrap": {
+    "required_first_read": "note/automation_control/DESIRED_STATE.json",
+    "observed_main_head_before_role_local_write": "b43414fef51a719001c8e6fe2bdf85f980b37c48",
+    "first_read_result": "404_NOT_FOUND",
+    "automation_control_directory_observed_entries": [
+      "receipts/"
+    ],
+    "current_role_config_resolved": false,
+    "enabled_desired_resolved": false,
+    "bootstrap_valid": false
+  },
+  "execution_evidence": {
+    "semantic_work_started": false,
+    "downstream_integration_started": false,
+    "candidate_reads_used_for_semantics": 0,
+    "index_mutations": 0,
+    "active_wave_mutations": 0,
+    "o_feed_mutations": 0,
+    "exploration_feedback_mutations": 0,
+    "desired_state_edited": false,
+    "clean_candidate_boundaries_preserved": true,
+    "downstream_semantic_direction_leaked_to_exploration": false
+  },
+  "revision_evidence": {
+    "control_revision": "UNAVAILABLE",
+    "integrator_config_revision": "UNAVAILABLE"
+  },
+  "termination": {
+    "status": "BLOCKED_CONTROL_MISSING",
+    "kind": "HARD_CONTROL_BLOCK",
+    "reason": "The authoritative bootstrap file is absent at the active main head, so enabled_desired and the current integrator role configuration cannot be established safely. Semantic/downstream integration therefore remains fail-closed."
+  },
+  "automation_action": {
+    "automation_id": "6a8d2b85b4c881919ee438cddab06eb2",
+    "action_planned": "disable_due_to_hard_control_block"
+  },
+  "exact_continuation": "If explicitly resumed in the future, read note/automation_control/DESIRED_STATE.json first from the then-current active head. Proceed only if that authoritative file exists and the current integrator role configuration can be resolved. Do not reconstruct control from historical commits, O semantics, other-worker state, downstream state, legacy semantics, or prior-run summaries."
+}

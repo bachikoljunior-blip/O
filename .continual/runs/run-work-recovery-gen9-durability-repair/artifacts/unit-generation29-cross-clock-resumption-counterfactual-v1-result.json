@@ -1,0 +1,133 @@
+{
+  "agi_claim_supported": false,
+  "artifact_count": 10,
+  "artifacts": {
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/bounded-result.json": "bf42bb91811665e4b70945bc4693d6b258b79aa7",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/guard-to-prevented-behavior.json": "437b5c6c58b843988449ffd1a2b98c2af6083584",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/moved_authoritative_binding-fail_open-trace.json": "d08ede68bab629d0025af1236a66991aa7c8ed5d",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/moved_authoritative_binding-protected-trace.json": "3cb5760943dc424bb8543240e20551301cbae7b7",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/newer_inbox_at_dispatch-fail_open-trace.json": "a269e2128161891eda2509ee89145b2763f9ba75",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/newer_inbox_at_dispatch-protected-trace.json": "31f9d554ac91329d664454d8495bf8645806671f",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/precommitted-manifest.json": "5d84df4fdcdc90793c044d546094d26fcef67e20",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/replay-verification.json": "3971e83e1878f35c6d6e3940a5c7279cef0e62c8",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/stale_work_heartbeat-fail_open-trace.json": "2b8d0245cd12c7232fc2564d974853c1657e9cb4",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/stale_work_heartbeat-protected-trace.json": "f155daf5b3d896352ade0f870fc53114ce07a3ca"
+  },
+  "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+  "candidate_activation": false,
+  "candidate_preflight_decision": "BASELINE_FIRST",
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "bounded_continuity_control_only": true,
+    "candidate_activation": false,
+    "provider_or_production_route_change": false,
+    "upper_objective_achieved": false,
+    "user_level_objective_met": false
+  },
+  "continuation": "After Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, and Learn; publish through protected exact-head CI and expected-head merge with readback; return to Root and continue materially different safe work while AGI and user completion remain false.",
+  "control_summary": {
+    "all_informative": true,
+    "live_authority_mutations": 0,
+    "scenario_count": 3
+  },
+  "guard_to_prevented_behavior": {
+    "moved_authoritative_binding": {
+      "guard": "main_state_blob_and_fence_binding",
+      "prevented_behavior": "stale_commit_and_divergent_successor"
+    },
+    "newer_inbox_at_dispatch": {
+      "guard": "inbox_revision_safe_boundary",
+      "prevented_behavior": "dispatch_before_newer_inbox_ingestion"
+    },
+    "stale_work_heartbeat": {
+      "guard": "work_heartbeat_freshness",
+      "prevented_behavior": "dispatch_with_stale_heartbeat"
+    }
+  },
+  "implementation": [
+    "agi/CROSS_CLOCK_RESUMPTION_BENCHMARK.json",
+    "src/agi/cross_clock_resumption_benchmark.py",
+    "tests/test_cross_clock_resumption_benchmark.py"
+  ],
+  "live_authority_mutations": 0,
+  "negative_evidence": [
+    "The benchmark contains only three synthetic repository-checkpoint scenarios and cannot establish production reliability or general capability.",
+    "Fail-open traces are counterfactual controls, not authorized production behavior.",
+    "No independent external evaluator or live route evaluated this bounded unit.",
+    "Protected exact-head merge and remote readback remain pending at Execute-response time.",
+    "No evidence in this unit establishes AGI, the upper objective, or user-level completion."
+  ],
+  "next_execution_unit": {
+    "component": "task_evaluate",
+    "evidence_needed": [
+      "protocol and generated precommitted-manifest digest identity",
+      "three protected traces rejecting before effects, preserving the exact request, repairing only the scenario cause, and resuming exactly once",
+      "three fail-open traces changing only one guard and exhibiting the precommitted stale-context, stale-write/divergent-successor, or inbox-bypass behavior",
+      "zero protected stale commits, duplicates, fence changes, inbox bypasses, stale-context actions, and live-authority mutations",
+      "byte-stable replay digests, guard-to-prevented-behavior mapping, focused tests, protected exact-head CI, expected-head merge, and remote readback"
+    ],
+    "expected_outputs": [
+      "separate bounded-unit and upper-objective verdicts",
+      "independent findings for every protected and fail-open scenario",
+      "explicit negative evidence, failure repair instructions, and narrow claim boundary"
+    ],
+    "failure_conditions": [
+      "any protected stale or duplicate effect, request recreation, multiple successor, or live-authority mutation",
+      "any control changes multiple guards, misses its expected bad behavior, or writes live authority",
+      "protocol/result digest mismatch, nondeterministic replay, publication mismatch, or widened claim"
+    ],
+    "goal": "Independently adjudicate the exact three-scenario protected-versus-fail-open cross-clock resumption benchmark, including precommitment, exact-request preservation, concrete repairs, exactly-once responses and successors, deterministic replay, informative one-guard controls, and zero live-authority mutation.",
+    "inputs": [
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/bounded-result.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/guard-to-prevented-behavior.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/moved_authoritative_binding-fail_open-trace.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/moved_authoritative_binding-protected-trace.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/newer_inbox_at_dispatch-fail_open-trace.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/newer_inbox_at_dispatch-protected-trace.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/precommitted-manifest.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/replay-verification.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/stale_work_heartbeat-fail_open-trace.json",
+      ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-generation29-cross-clock-resumption-counterfactual-v1/stale_work_heartbeat-protected-trace.json",
+      "agi/CROSS_CLOCK_RESUMPTION_BENCHMARK.json",
+      "src/agi/cross_clock_resumption_benchmark.py",
+      "tests/test_cross_clock_resumption_benchmark.py"
+    ],
+    "parent_continuation": "After Task Evaluate, run post-result Candidate Evaluate, Consolidate Episode, and Learn; publish through protected exact-head CI and expected-head merge with readback; return to Root and continue materially different safe work while AGI and user completion remain false.",
+    "scope": "Only the frozen synthetic cross-clock resumption protocol and ten generated artifacts; no live generation-29 authority mutation, Candidate or route change, generalized capability, AGI, or completion claim.",
+    "success_conditions": [
+      "all protected traces match their precommitment and reject before effect",
+      "exact request identity is preserved and each repair yields one response and one successor",
+      "each fail-open control is single-guard and informative",
+      "all replays are byte-stable and no trace mutates live authority"
+    ],
+    "unit_id": "unit-generation29-evaluate-cross-clock-resumption-counterfactual-v1"
+  },
+  "production_route_changed": false,
+  "protected_summary": {
+    "all_rejected_before_effect": true,
+    "all_replays_verified": true,
+    "all_request_identities_preserved": true,
+    "bad_counter_totals": {
+      "divergent_successors": 0,
+      "duplicate_responses": 0,
+      "duplicate_successors": 0,
+      "fence_changes": 0,
+      "inbox_bypasses": 0,
+      "live_authority_mutations": 0,
+      "stale_commits": 0,
+      "stale_context_actions": 0
+    },
+    "scenario_count": 3,
+    "total_responses": 3,
+    "total_successors": 3
+  },
+  "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+  "provider_route_changed": false,
+  "reason": "All three protected synthetic interruption scenarios rejected stale authority before effects, preserved the exact request, repaired only the concrete cause, and resumed exactly once. Each single-guard fail-open control exhibited its precommitted bad behavior, all replays were byte-stable, and no trace wrote live authority.",
+  "result_digest": "bdd6a0597d148dfe3950dd6ff49a3d8e9ab5921122275bd692a7e79167ab72a2",
+  "status": "PASS",
+  "unit_id": "unit-generation29-cross-clock-resumption-counterfactual-v1",
+  "upper_objective_achieved": false,
+  "user_level_objective_met": false,
+  "verdict": "BOUNDED_UNIT_PASS"
+}

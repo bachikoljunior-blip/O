@@ -1,0 +1,34 @@
+{
+  "role": "evaluation",
+  "observed_at": "2026-08-30T05:31:31+09:00",
+  "repository": "bachikoljunior-blip/O",
+  "observed_main_sha_before_receipt": "4600478443395f5af84cefa4e81909873c9e19d0",
+  "required_control_path": "note/automation_control/DESIRED_STATE.json",
+  "control_read_result": {
+    "status": "NOT_FOUND",
+    "http_status": 404,
+    "directory_readback": "note/automation_control contains receipts only"
+  },
+  "termination": "HARD_CONTROL_STOP",
+  "phase1_status": "UNKNOWN_NOT_ASSERTED",
+  "semantic_work_performed": false,
+  "new_acceptance_claims": 0,
+  "clean_exploration_preserved": true,
+  "desired_state_edited": false,
+  "own_state_observation": {
+    "prior_receipt": "note/automation_control/receipts/evaluation/receipt_2026-08-30T0433_JST_automation_disabled_control_missing.json",
+    "prior_receipt_blob_sha": "83942f103a3002654a41c105bd97bb21ae3de16a",
+    "prior_recorded_scheduler_state": "disabled",
+    "current_scheduler_pre_stop_readback": "enabled",
+    "classification": "scheduler_state_regression_after_prior_control-missing stop"
+  },
+  "automation_action": {
+    "title": "Evaluation Methods Scan",
+    "id": "6a8d29561654819194263ae93ef6cc3e",
+    "requested": "disable",
+    "result": "SUCCESS",
+    "is_enabled_readback": false
+  },
+  "exact_continuation": "Do not perform evaluation semantic work while the required control is absent. A future explicit restart must first restore note/automation_control/DESIRED_STATE.json; on the first restarted invocation, read that path before any other repository semantic input and execute only the then-current evaluation role config.",
+  "receipt_basis": "authoritative control absence plus own evaluation receipt state and scheduler readback only"
+}

@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "record_type": "generation29_external_relational_query_pre_access_manifest",
+  "status": "frozen_before_schema_or_data_access",
+  "created_at": "2026-09-02T04:25:01.084Z",
+  "authority": {
+    "repository": "bachikoljunior-blip/O",
+    "source_main_sha": "1e727b79937a7da6d9d9236da6b0d9f0842b9235",
+    "source_state_blob_sha": "3af9cfd03eea3c069cbc133c03199b222ff7530e",
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "inbox_revision": 38,
+    "inbox_blob_sha": "34423c2dd71d95c55769f501fe1701ea0088fb32"
+  },
+  "frozen_invocation": {
+    "component": "execute",
+    "work_invocation_id": "invoke-1f60ea1b0640d22db760389a",
+    "work_request_blob_sha": "a8906c50b4b4894e1873681c32dcab98a20bd125",
+    "work_request_digest": "926303f72ca4efb52e8b80c8b6a7c82540cd04b0bc368fb0492b1649f07e79d7",
+    "native_invocation_id": "invoke-87e26ab01e3f6279e8b40936",
+    "native_blob_sha": "13e8fbeb16dce9d011e4136e5a886ebc11b29a1c",
+    "snapshot_revision": 142,
+    "snapshot_blob_sha": "bfbf425115e1629ed27bdc1c20a3bdab19dd3bfc",
+    "request_recreated": false,
+    "response_exists_on_authoritative_main": false
+  },
+  "candidate_decision": {
+    "decision": "BASELINE_FIRST",
+    "candidate_activation": false,
+    "candidate_response_digest": "198c2af16a859c1993e4475cfc0bdc3e3236713b5a1e575b99c6e0a46d343737"
+  },
+  "source": {
+    "repository": "lerocha/chinook-database",
+    "commit_sha": "7f67772503d71ba90f19283c38e93923addb43fa",
+    "commit_url": "https://github.com/lerocha/chinook-database/commit/7f67772503d71ba90f19283c38e93923addb43fa",
+    "license": {
+      "path": "LICENSE.md",
+      "blob_sha": "7487a9edc2d42e50d7a38ab1fbdba33ac63230f7",
+      "classification": "MIT"
+    },
+    "database": {
+      "path": "ChinookDatabase/DataSources/Chinook_Sqlite.sqlite",
+      "blob_sha": "f385c2651f80914c3b93c62431b0b000465a921b",
+      "format": "SQLite",
+      "content_or_schema_inspected_before_manifest": false,
+      "metadata_resolution_only": true
+    },
+    "default_branch_at_resolution": "master"
+  },
+  "task": {
+    "text": "For every genre present in the frozen Chinook SQLite fixture, return the artist with the greatest invoiced line-item revenue during calendar year 2012. Revenue is SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) over invoice lines joined through Invoice, Track, Album, Artist, and Genre. Use the half-open invoice-date interval [2012-01-01T00:00:00, 2013-01-01T00:00:00). Within each genre, break equal-revenue ties by the smallest ArtistId. Return exactly GenreId, GenreName, ArtistId, ArtistName, Revenue, ordered by GenreId ascending.",
+    "allowed_tables": [
+      "Genre",
+      "Track",
+      "Album",
+      "Artist",
+      "InvoiceLine",
+      "Invoice"
+    ],
+    "forbidden_tables_and_sources": "Every table not explicitly allowed; repository example queries, solution-bearing files, discussions, issues, pull requests, later commits, prior Run answers, external query services, and web answers.",
+    "time_bound": {
+      "column": "Invoice.InvoiceDate",
+      "lower_inclusive": "2012-01-01T00:00:00",
+      "upper_exclusive": "2013-01-01T00:00:00"
+    },
+    "revenue_definition": "SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) for invoiced line items only; no invoice total, tax, or non-invoiced proxy.",
+    "grouping": "one winner per GenreId among artists with positive in-scope invoiced line-item revenue",
+    "tie_break": "minimum ArtistId among artists tied for maximum exact revenue within GenreId",
+    "output_schema": [
+      {
+        "name": "GenreId",
+        "type": "integer"
+      },
+      {
+        "name": "GenreName",
+        "type": "text"
+      },
+      {
+        "name": "ArtistId",
+        "type": "integer"
+      },
+      {
+        "name": "ArtistName",
+        "type": "text"
+      },
+      {
+        "name": "Revenue",
+        "type": "exact decimal rendered to two fractional digits"
+      }
+    ],
+    "output_order": [
+      "GenreId ASC"
+    ]
+  },
+  "execution_contract": {
+    "candidate_sql_statements": 1,
+    "read_only": true,
+    "sqlite_extensions": false,
+    "network_during_query": false,
+    "schema_access_authorized_only_after": "This manifest is protected by exact-head CI, expected-head merge, and exact main blob readback.",
+    "candidate_generation_context": "Only this manifest plus schema facts obtained after durable manifest readback; no data rows or answer-bearing artifacts before the candidate SQL is frozen.",
+    "oracle": "Independent Python sqlite3 row iteration over allowed base-table rows, with aggregation and tie-breaking implemented in Python and not by translating or reusing the candidate SQL.",
+    "controls": [
+      {
+        "id": "wrong-year",
+        "mutation": "Use [2011-01-01, 2012-01-01) instead of the frozen 2012 interval.",
+        "required_result": "ordered result must differ from the oracle"
+      },
+      {
+        "id": "broken-join-or-tie",
+        "mutation": "Use an intentionally broken artist/album join or reverse the ArtistId tie-break.",
+        "required_result": "ordered result must differ from the oracle"
+      }
+    ],
+    "replay": "Recreate a clean working copy from the exact database blob and require identical query, oracle, controls, ordered rows, and digests.",
+    "zero_upstream_writes": true
+  },
+  "budgets": {
+    "wall_clock_seconds": 300,
+    "sqlite_query_seconds": 30,
+    "oracle_seconds": 60,
+    "max_fixture_bytes": 5000000,
+    "max_output_rows": 100,
+    "max_sql_bytes": 10000,
+    "paid_cost_usd": 0
+  },
+  "success_rules": [
+    "exact repository commit, license blob, database blob, task, schema scope, time bound, revenue rule, tie-break, output schema, and budgets remain unchanged",
+    "one read-only deterministic SQL query succeeds",
+    "candidate rows equal the independent Python oracle row-for-row after canonical decimal rendering",
+    "wrong-year and broken-join-or-tie controls both diverge from the oracle",
+    "clean immutable replay is identical",
+    "fixture bytes remain identical and upstream writes remain zero"
+  ],
+  "failure_rules": [
+    "missing or mismatched immutable identity",
+    "contamination or pre-manifest schema/data inspection",
+    "schema mismatch",
+    "candidate query failure or scope violation",
+    "candidate/oracle divergence",
+    "either corruption control is accepted",
+    "replay or fixture digest drift",
+    "unverifiable provenance"
+  ],
+  "claim_boundary": "A SOLVED result applies only to this single frozen fixture, task, query, oracle, and control chain. It does not establish generalized data reasoning, production readiness, Candidate activation, AGI, upper-objective achievement, user-level completion, or monitor completion.",
+  "idempotency_key": "o-work-gen29:invoke-1f60ea1b0640d22db760389a:relational-query-preaccess-manifest:7f677725:f385c265:v1",
+  "next_action": "Publish and exact-read this manifest before any schema or data access; then inspect only the allowed schema, freeze one SQL query, execute it read-only, build the independent row-iteration oracle, run both controls and clean replay, and persist bounded evidence."
+}

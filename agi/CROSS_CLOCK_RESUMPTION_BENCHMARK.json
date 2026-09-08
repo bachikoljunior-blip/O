@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+  "frozen_before_execution": true,
+  "fixture_policy": {
+    "isolated_repository_checkpoint_copies_only": true,
+    "live_authority_writes_allowed": false,
+    "single_guard_disabled_per_control": true,
+    "external_effects_allowed": false
+  },
+  "request_identity": {
+    "invocation_id": "fixture-request-cross-clock-v1",
+    "request_digest": "sha256:fixture-request-cross-clock-v1",
+    "idempotency_key": "cross-clock-resumption-v1:fixture-request"
+  },
+  "scenarios": [
+    {
+      "scenario_id": "stale_work_heartbeat",
+      "guard": "work_heartbeat_freshness",
+      "protected_rejection_reason": "decision_context_work_heartbeat_stale",
+      "protected_repair": "refresh_heartbeat_only",
+      "live_authority_write_allowed": false
+    },
+    {
+      "scenario_id": "moved_authoritative_binding",
+      "guard": "main_state_blob_and_fence_binding",
+      "protected_rejection_reason": "expected_main_state_blob_or_fence_mismatch",
+      "protected_repair": "reread_main_state_blob_and_fence",
+      "live_authority_write_allowed": false
+    },
+    {
+      "scenario_id": "newer_inbox_at_dispatch",
+      "guard": "inbox_revision_safe_boundary",
+      "protected_rejection_reason": "newer_inbox_requires_safe_boundary_ingestion",
+      "protected_repair": "ingest_newer_inbox_at_safe_boundary",
+      "live_authority_write_allowed": false
+    }
+  ],
+  "configurations": [
+    {
+      "configuration_id": "protected",
+      "disabled_guards": []
+    },
+    {
+      "configuration_id": "fail_open",
+      "disabled_guard_policy": "disable_only_the_current_scenario_guard"
+    }
+  ],
+  "expected_outcomes": {
+    "stale_work_heartbeat": {
+      "protected": {
+        "verdict": "PASS",
+        "counters": {
+          "submissions": 1,
+          "dispatch_attempts": 2,
+          "rejections": 1,
+          "repairs": 1,
+          "request_preservation_checks": 1,
+          "completions": 1,
+          "successors": 1,
+          "stale_commits": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "divergent_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "stale_context_actions": 0,
+          "live_authority_mutations": 0
+        }
+      },
+      "fail_open": {
+        "verdict": "CONTROL_EFFECT_OBSERVED",
+        "counters": {
+          "submissions": 1,
+          "dispatch_attempts": 1,
+          "rejections": 0,
+          "repairs": 0,
+          "request_preservation_checks": 0,
+          "completions": 1,
+          "successors": 1,
+          "stale_commits": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "divergent_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "stale_context_actions": 1,
+          "live_authority_mutations": 0
+        }
+      }
+    },
+    "moved_authoritative_binding": {
+      "protected": {
+        "verdict": "PASS",
+        "counters": {
+          "submissions": 1,
+          "dispatch_attempts": 2,
+          "rejections": 1,
+          "repairs": 1,
+          "request_preservation_checks": 1,
+          "completions": 1,
+          "successors": 1,
+          "stale_commits": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "divergent_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "stale_context_actions": 0,
+          "live_authority_mutations": 0
+        }
+      },
+      "fail_open": {
+        "verdict": "CONTROL_EFFECT_OBSERVED",
+        "counters": {
+          "submissions": 1,
+          "dispatch_attempts": 1,
+          "rejections": 0,
+          "repairs": 0,
+          "request_preservation_checks": 0,
+          "completions": 1,
+          "successors": 1,
+          "stale_commits": 1,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "divergent_successors": 1,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "stale_context_actions": 0,
+          "live_authority_mutations": 0
+        }
+      }
+    },
+    "newer_inbox_at_dispatch": {
+      "protected": {
+        "verdict": "PASS",
+        "counters": {
+          "submissions": 1,
+          "dispatch_attempts": 2,
+          "rejections": 1,
+          "repairs": 1,
+          "request_preservation_checks": 1,
+          "completions": 1,
+          "successors": 1,
+          "stale_commits": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "divergent_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "stale_context_actions": 0,
+          "live_authority_mutations": 0
+        }
+      },
+      "fail_open": {
+        "verdict": "CONTROL_EFFECT_OBSERVED",
+        "counters": {
+          "submissions": 1,
+          "dispatch_attempts": 1,
+          "rejections": 0,
+          "repairs": 0,
+          "request_preservation_checks": 0,
+          "completions": 1,
+          "successors": 1,
+          "stale_commits": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "divergent_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 1,
+          "stale_context_actions": 1,
+          "live_authority_mutations": 0
+        }
+      }
+    }
+  },
+  "claim_boundary": {
+    "bounded_continuity_control_only": true,
+    "candidate_activation": false,
+    "provider_or_production_route_change": false,
+    "agi_claim_supported": false,
+    "upper_objective_achieved": false,
+    "user_level_objective_met": false
+  }
+}

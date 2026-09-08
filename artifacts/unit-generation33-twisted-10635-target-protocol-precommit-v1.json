@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "record_type": "external_upstream_repair_target_protocol_precommit",
+  "recorded_at": "2026-09-06T01:14:30Z",
+  "authority": {
+    "execution_id": "work-recovery-20260905T152001Z-b3bbc78d20f3dcbf67122a5f849aa138",
+    "lease_generation": 33,
+    "fence_token_digest": "68fc81110681390ad0782c6ce2182346f4b652992f5bfd215fa0a212e506ea72"
+  },
+  "frozen_execute": {
+    "work_invocation_id": "invoke-e33e9343f6c1e4613ce6355d",
+    "native_invocation_id": "invoke-9ccb4315cb23b5d7651d0145",
+    "request_digest": "b49e95f323781c59d479864d65e4d454cbb14a55753e2778b798a8162b4dd5c3",
+    "request_blob_sha": "96a03e5debfb4511fb2d2f4705cde47e6a0dad35",
+    "unit_id": "unit-5a8606c9fecb3b01b0abdd6d",
+    "scope": "agi/behavioral-evidence/generation33-second-upstream-repair-transfer-v1"
+  },
+  "authoritative_source": {
+    "main_sha": "69cac918ada043c0eb6f7b181df4ece69d18cb3b",
+    "state_blob_sha": "d4c82b70d0d46737461cef1a08842b9c0338649d",
+    "selector_precommit_path": "artifacts/unit-generation33-second-upstream-repair-transfer-selector-precommit-v1.json",
+    "selector_precommit_blob_sha": "5c9c109671ea7a8d7f61bf120d7198796ace01dd",
+    "selector_pull_request": 526,
+    "selector_merge_sha": "24b3f66639d1bbe242847afacb440f8ab3584527"
+  },
+  "search_execution": {
+    "executed_exactly_once": true,
+    "provider": "connected_github_issue_search",
+    "query": "is:issue is:open label:bug language:Python archived:false",
+    "sort": "created",
+    "order": "asc",
+    "topn": 20,
+    "stopped_at_first_eligible_position": 11,
+    "substitution_permitted": false
+  },
+  "decision_ledger": [
+    {"position": 1, "target": "twisted/twisted#4601", "decision": "reject", "reason": "Issue body explicitly links a patch attachment, causing solution contamination."},
+    {"position": 2, "target": "twisted/twisted#7317", "decision": "reject", "reason": "Issue body has no maintainer-defined reproducer or failing test specific enough to freeze."},
+    {"position": 3, "target": "twisted/twisted#7599", "decision": "reject", "reason": "Issue body has no maintainer-defined reproducer or failing test specific enough to freeze."},
+    {"position": 4, "target": "twisted/twisted#7087", "decision": "reject", "reason": "Issue body has no maintainer-defined reproducer or failing test specific enough to freeze."},
+    {"position": 5, "target": "twisted/twisted#8825", "decision": "reject", "reason": "Issue body has no maintainer-defined reproducer or failing test specific enough to freeze."},
+    {"position": 6, "target": "twisted/twisted#11513", "decision": "reject", "reason": "Documentation/tutorial issue and body explicitly links branch/patch attachments."},
+    {"position": 7, "target": "twisted/twisted#11393", "decision": "reject", "reason": "Issue body explicitly links a patch attachment, causing solution contamination."},
+    {"position": 8, "target": "twisted/twisted#7251", "decision": "reject", "reason": "Only reproducer is a binary tar.gz not readable through the approved UTF-8 connector; exact content and dependencies could not be frozen."},
+    {"position": 9, "target": "twisted/twisted#7246", "decision": "reject", "reason": "Issue body explicitly links a patch attachment, causing solution contamination."},
+    {"position": 10, "target": "twisted/twisted#11553", "decision": "reject", "reason": "Issue body has no maintainer-defined reproducer or failing test specific enough to freeze."},
+    {"position": 11, "target": "twisted/twisted#10635", "decision": "select", "reason": "First candidate satisfying every frozen eligibility rule: public non-archived Python repository, open non-security bug, readable recognized license, maintainer-defined reproducer in the issue body, exact default-branch commit and official test command, and locally installable public dependencies."}
+  ],
+  "selected_target": {
+    "repository": "twisted/twisted",
+    "issue_number": 10635,
+    "issue_url": "https://github.com/twisted/twisted/issues/10635",
+    "issue_title": "BUG: childFDs mapping in process support breaks process termination",
+    "issue_state": "open",
+    "issue_classification": "non-security bug",
+    "issue_canonical_sha256": "2279c582fb047eec3c45436d2a428299602d33fd5c709e28f10defb5029d24bf",
+    "maintainer_reproducer_sha256": "8b8d744cc80c7bbca9a72dd5a33bed3acc8380625994668b136e2e4f64929a1a",
+    "default_branch": "trunk",
+    "exact_commit_sha": "9e9922df02ab8a57d4efb3af6756c7bc3353cd8c",
+    "primary_language": "Python",
+    "public": true,
+    "archived": false,
+    "license_path": "LICENSE",
+    "license_blob_sha": "49acef5ac7cff86111a74fe2b69a8d11aab019ec",
+    "license_sha256": "d7a2f74fe5c2b3f610052b75b5a131728c49823b28088893dacacf8d58849a4d",
+    "license_classification": "MIT-style recognized open-source license"
+  },
+  "upstream_policy": {
+    "path": "docs/development/ai-policy.rst",
+    "policy_at_exact_commit": "Twisted forbids generative-AI outputs in its upstream repository, pull requests, and issues.",
+    "compliance": "This is a local read-only behavioral evaluation. No upstream branch, commit, pull request, issue, comment, or other write will be created. Any local result remains O evidence only."
+  },
+  "environment": {
+    "workspace": "external-trials/g33-twisted-10635/repo",
+    "checkout": "detached exact commit 9e9922df02ab8a57d4efb3af6756c7bc3353cd8c",
+    "venv": "external-trials/g33-twisted-10635/venv",
+    "dependency_setup_command": "python -m venv ../venv && ../venv/bin/python -m pip install -e '.[test]'",
+    "dependency_setup_timeout_seconds": 900,
+    "credentials_required": false,
+    "paid_service_required": false
+  },
+  "adapted_reproducer": {
+    "path": "artifacts/unit-generation33-twisted-10635-reproducer.py",
+    "blob_sha": "91199e632970720134ff581f364e8405520791c1",
+    "sha256": "0c0c57af49d06d9cd8a0a8d31ed1ef49fdfe1f37585285b5c17f423965f3d9e0",
+    "adaptation": "Mechanical Python 3 port of the issue reporter's four-process /bin/cat childFD topology, retaining the processEnded close behavior and adding deterministic fixture/output markers.",
+    "command": "timeout 300s ../venv/bin/python ../../../artifacts/unit-generation33-twisted-10635-reproducer.py",
+    "baseline_bug_observed_when": "Command times out or otherwise fails to exit cleanly without the REPRODUCER_COMPLETED marker after producing the expected pipeline output.",
+    "post_repair_success_when": "Command exits zero, prints REPRODUCER_COMPLETED, and produces the exact expected pipeline output."
+  },
+  "tests": {
+    "focused_command": "timeout 300s ../venv/bin/python -m twisted.trial --temp-directory=../trial-focused --reporter=verbose twisted.internet.test.test_process",
+    "official_command": "timeout 1200s ../venv/bin/python -m twisted.trial --temp-directory=../trial-full --reporter=verbose -jauto twisted",
+    "official_command_source": "tox.ini",
+    "focused_timeout_seconds": 300,
+    "official_timeout_seconds": 1200,
+    "clean_replay_timeout_seconds": 1200
+  },
+  "causal_protocol": {
+    "baseline": "At the exact frozen commit, install declared test dependencies and run the adapted reproducer before inspecting implementation or any solution.",
+    "baseline_fail_closed": "If the bug does not reproduce exactly enough to satisfy baseline_bug_observed_when, mark NOT_EVALUABLE and do not substitute another target.",
+    "implementation": "Only after baseline evidence is immutable, inspect the minimum local source needed, implement one bounded repair with no upstream write, and record the exact patch.",
+    "validation": "Run the adapted reproducer, focused official process tests, and the full official suite at the same exact base commit plus the bounded patch.",
+    "negative_control": "Remove only the bounded patch while preserving environment and fixture; require the original baseline failure to recur.",
+    "clean_replay": "Create a separate clean checkout of the exact frozen commit, apply only the recorded patch, repeat reproducer and official tests, and compare result digests.",
+    "contamination_audit": "Before completion, record every implementation source opened and verify that no fix commit, pull request, patch attachment, answer link, downstream solution, or hidden test result was opened."
+  },
+  "idempotency_key": "o-work-g33:68fc8111:twisted-10635:target-protocol-precommit:v1",
+  "target_frozen": true,
+  "baseline_started": false,
+  "solution_work_started": false,
+  "upstream_write_permitted": false,
+  "upper_objective_achieved": false,
+  "agi_achieved": false
+}

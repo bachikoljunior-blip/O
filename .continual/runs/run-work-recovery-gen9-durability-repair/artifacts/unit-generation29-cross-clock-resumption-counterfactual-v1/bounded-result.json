@@ -1,0 +1,562 @@
+{
+  "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "bounded_continuity_control_only": true,
+    "candidate_activation": false,
+    "provider_or_production_route_change": false,
+    "upper_objective_achieved": false,
+    "user_level_objective_met": false
+  },
+  "control_summary": {
+    "all_informative": true,
+    "live_authority_mutations": 0,
+    "scenario_count": 3
+  },
+  "guard_to_prevented_behavior": {
+    "moved_authoritative_binding": {
+      "guard": "main_state_blob_and_fence_binding",
+      "prevented_behavior": "stale_commit_and_divergent_successor"
+    },
+    "newer_inbox_at_dispatch": {
+      "guard": "inbox_revision_safe_boundary",
+      "prevented_behavior": "dispatch_before_newer_inbox_ingestion"
+    },
+    "stale_work_heartbeat": {
+      "guard": "work_heartbeat_freshness",
+      "prevented_behavior": "dispatch_with_stale_heartbeat"
+    }
+  },
+  "observations": [
+    {
+      "configuration_id": "protected",
+      "observation": {
+        "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+        "claim_boundary": {
+          "agi_claim_supported": false,
+          "bounded_continuity_control_only": true,
+          "candidate_activation": false,
+          "provider_or_production_route_change": false,
+          "upper_objective_achieved": false,
+          "user_level_objective_met": false
+        },
+        "configuration_id": "protected",
+        "counters": {
+          "completions": 1,
+          "dispatch_attempts": 2,
+          "divergent_successors": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "live_authority_mutations": 0,
+          "rejections": 1,
+          "repairs": 1,
+          "request_preservation_checks": 1,
+          "stale_commits": 0,
+          "stale_context_actions": 0,
+          "submissions": 1,
+          "successors": 1
+        },
+        "disabled_guards": [],
+        "guard": "main_state_blob_and_fence_binding",
+        "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+        "replay_digest": "d5de1e302b3e535bdc8b2639db60b50dc4b889a2aed6f1ff8ab47ab85d94fb5c",
+        "request_digest_after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_digest_before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_identity_preserved": true,
+        "scenario_id": "moved_authoritative_binding",
+        "schema_version": 1,
+        "trace": [
+          {
+            "event": "fixture_bound",
+            "live_authority": false,
+            "request_digest": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "sequence": 1
+          },
+          {
+            "configuration": "protected",
+            "event": "dispatch_attempt",
+            "guard": "main_state_blob_and_fence_binding",
+            "sequence": 2
+          },
+          {
+            "before_effect": true,
+            "event": "dispatch_rejected",
+            "reason": "expected_main_state_blob_or_fence_mismatch",
+            "response_committed": false,
+            "sequence": 3,
+            "successor_frozen": false
+          },
+          {
+            "event": "concrete_stop_cause_repaired",
+            "repair": "reread_main_state_blob_and_fence",
+            "sequence": 4
+          },
+          {
+            "after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "event": "exact_request_preserved",
+            "sequence": 5
+          },
+          {
+            "event": "dispatch_resumed",
+            "same_request": true,
+            "sequence": 6
+          },
+          {
+            "event": "response_committed",
+            "idempotency_key": "cross-clock-resumption-v1:fixture-request",
+            "sequence": 7
+          },
+          {
+            "event": "successor_frozen",
+            "sequence": 8,
+            "successor_id": "successor-moved_authoritative_binding-1"
+          }
+        ],
+        "verdict": "PASS"
+      },
+      "replay_verified": true,
+      "scenario_id": "moved_authoritative_binding"
+    },
+    {
+      "configuration_id": "fail_open",
+      "observation": {
+        "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+        "claim_boundary": {
+          "agi_claim_supported": false,
+          "bounded_continuity_control_only": true,
+          "candidate_activation": false,
+          "provider_or_production_route_change": false,
+          "upper_objective_achieved": false,
+          "user_level_objective_met": false
+        },
+        "configuration_id": "fail_open",
+        "counters": {
+          "completions": 1,
+          "dispatch_attempts": 1,
+          "divergent_successors": 1,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "live_authority_mutations": 0,
+          "rejections": 0,
+          "repairs": 0,
+          "request_preservation_checks": 0,
+          "stale_commits": 1,
+          "stale_context_actions": 0,
+          "submissions": 1,
+          "successors": 1
+        },
+        "disabled_guards": [
+          "main_state_blob_and_fence_binding"
+        ],
+        "guard": "main_state_blob_and_fence_binding",
+        "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+        "replay_digest": "f6b32702cf62436f4072d4ff07b8ed7b24b5d4956f9a1fff6024ed8300acc09b",
+        "request_digest_after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_digest_before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_identity_preserved": true,
+        "scenario_id": "moved_authoritative_binding",
+        "schema_version": 1,
+        "trace": [
+          {
+            "event": "fixture_bound",
+            "live_authority": false,
+            "request_digest": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "sequence": 1
+          },
+          {
+            "configuration": "fail_open",
+            "event": "dispatch_attempt",
+            "guard": "main_state_blob_and_fence_binding",
+            "sequence": 2
+          },
+          {
+            "disabled_guard": "main_state_blob_and_fence_binding",
+            "event": "scenario_guard_disabled",
+            "sequence": 3
+          },
+          {
+            "effect": "stale_commit_and_divergent_successor",
+            "event": "counterfactual_effect_observed",
+            "live_authority": false,
+            "sequence": 4,
+            "simulated": true
+          },
+          {
+            "event": "simulated_response_and_successor",
+            "external_effect_applied": false,
+            "sequence": 5
+          }
+        ],
+        "verdict": "CONTROL_EFFECT_OBSERVED"
+      },
+      "replay_verified": true,
+      "scenario_id": "moved_authoritative_binding"
+    },
+    {
+      "configuration_id": "protected",
+      "observation": {
+        "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+        "claim_boundary": {
+          "agi_claim_supported": false,
+          "bounded_continuity_control_only": true,
+          "candidate_activation": false,
+          "provider_or_production_route_change": false,
+          "upper_objective_achieved": false,
+          "user_level_objective_met": false
+        },
+        "configuration_id": "protected",
+        "counters": {
+          "completions": 1,
+          "dispatch_attempts": 2,
+          "divergent_successors": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "live_authority_mutations": 0,
+          "rejections": 1,
+          "repairs": 1,
+          "request_preservation_checks": 1,
+          "stale_commits": 0,
+          "stale_context_actions": 0,
+          "submissions": 1,
+          "successors": 1
+        },
+        "disabled_guards": [],
+        "guard": "inbox_revision_safe_boundary",
+        "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+        "replay_digest": "b4f6d72d48dfc1891ea8d10f417664bcd974a94ab90202f9366840d3952ad574",
+        "request_digest_after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_digest_before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_identity_preserved": true,
+        "scenario_id": "newer_inbox_at_dispatch",
+        "schema_version": 1,
+        "trace": [
+          {
+            "event": "fixture_bound",
+            "live_authority": false,
+            "request_digest": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "sequence": 1
+          },
+          {
+            "configuration": "protected",
+            "event": "dispatch_attempt",
+            "guard": "inbox_revision_safe_boundary",
+            "sequence": 2
+          },
+          {
+            "before_effect": true,
+            "event": "dispatch_rejected",
+            "reason": "newer_inbox_requires_safe_boundary_ingestion",
+            "response_committed": false,
+            "sequence": 3,
+            "successor_frozen": false
+          },
+          {
+            "event": "concrete_stop_cause_repaired",
+            "repair": "ingest_newer_inbox_at_safe_boundary",
+            "sequence": 4
+          },
+          {
+            "after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "event": "exact_request_preserved",
+            "sequence": 5
+          },
+          {
+            "event": "dispatch_resumed",
+            "same_request": true,
+            "sequence": 6
+          },
+          {
+            "event": "response_committed",
+            "idempotency_key": "cross-clock-resumption-v1:fixture-request",
+            "sequence": 7
+          },
+          {
+            "event": "successor_frozen",
+            "sequence": 8,
+            "successor_id": "successor-newer_inbox_at_dispatch-1"
+          }
+        ],
+        "verdict": "PASS"
+      },
+      "replay_verified": true,
+      "scenario_id": "newer_inbox_at_dispatch"
+    },
+    {
+      "configuration_id": "fail_open",
+      "observation": {
+        "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+        "claim_boundary": {
+          "agi_claim_supported": false,
+          "bounded_continuity_control_only": true,
+          "candidate_activation": false,
+          "provider_or_production_route_change": false,
+          "upper_objective_achieved": false,
+          "user_level_objective_met": false
+        },
+        "configuration_id": "fail_open",
+        "counters": {
+          "completions": 1,
+          "dispatch_attempts": 1,
+          "divergent_successors": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 1,
+          "live_authority_mutations": 0,
+          "rejections": 0,
+          "repairs": 0,
+          "request_preservation_checks": 0,
+          "stale_commits": 0,
+          "stale_context_actions": 1,
+          "submissions": 1,
+          "successors": 1
+        },
+        "disabled_guards": [
+          "inbox_revision_safe_boundary"
+        ],
+        "guard": "inbox_revision_safe_boundary",
+        "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+        "replay_digest": "729b0541c771d07c228fece9d5d4b4cbd4afe63b3f386d360e3b295263c42235",
+        "request_digest_after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_digest_before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_identity_preserved": true,
+        "scenario_id": "newer_inbox_at_dispatch",
+        "schema_version": 1,
+        "trace": [
+          {
+            "event": "fixture_bound",
+            "live_authority": false,
+            "request_digest": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "sequence": 1
+          },
+          {
+            "configuration": "fail_open",
+            "event": "dispatch_attempt",
+            "guard": "inbox_revision_safe_boundary",
+            "sequence": 2
+          },
+          {
+            "disabled_guard": "inbox_revision_safe_boundary",
+            "event": "scenario_guard_disabled",
+            "sequence": 3
+          },
+          {
+            "effect": "dispatch_before_newer_inbox_ingestion",
+            "event": "counterfactual_effect_observed",
+            "live_authority": false,
+            "sequence": 4,
+            "simulated": true
+          },
+          {
+            "event": "simulated_response_and_successor",
+            "external_effect_applied": false,
+            "sequence": 5
+          }
+        ],
+        "verdict": "CONTROL_EFFECT_OBSERVED"
+      },
+      "replay_verified": true,
+      "scenario_id": "newer_inbox_at_dispatch"
+    },
+    {
+      "configuration_id": "protected",
+      "observation": {
+        "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+        "claim_boundary": {
+          "agi_claim_supported": false,
+          "bounded_continuity_control_only": true,
+          "candidate_activation": false,
+          "provider_or_production_route_change": false,
+          "upper_objective_achieved": false,
+          "user_level_objective_met": false
+        },
+        "configuration_id": "protected",
+        "counters": {
+          "completions": 1,
+          "dispatch_attempts": 2,
+          "divergent_successors": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "live_authority_mutations": 0,
+          "rejections": 1,
+          "repairs": 1,
+          "request_preservation_checks": 1,
+          "stale_commits": 0,
+          "stale_context_actions": 0,
+          "submissions": 1,
+          "successors": 1
+        },
+        "disabled_guards": [],
+        "guard": "work_heartbeat_freshness",
+        "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+        "replay_digest": "f66e07756b43b6ddb83675784e5aebeee2b7c08812deba4c9cc2f06919d3e54b",
+        "request_digest_after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_digest_before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_identity_preserved": true,
+        "scenario_id": "stale_work_heartbeat",
+        "schema_version": 1,
+        "trace": [
+          {
+            "event": "fixture_bound",
+            "live_authority": false,
+            "request_digest": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "sequence": 1
+          },
+          {
+            "configuration": "protected",
+            "event": "dispatch_attempt",
+            "guard": "work_heartbeat_freshness",
+            "sequence": 2
+          },
+          {
+            "before_effect": true,
+            "event": "dispatch_rejected",
+            "reason": "decision_context_work_heartbeat_stale",
+            "response_committed": false,
+            "sequence": 3,
+            "successor_frozen": false
+          },
+          {
+            "event": "concrete_stop_cause_repaired",
+            "repair": "refresh_heartbeat_only",
+            "sequence": 4
+          },
+          {
+            "after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "event": "exact_request_preserved",
+            "sequence": 5
+          },
+          {
+            "event": "dispatch_resumed",
+            "same_request": true,
+            "sequence": 6
+          },
+          {
+            "event": "response_committed",
+            "idempotency_key": "cross-clock-resumption-v1:fixture-request",
+            "sequence": 7
+          },
+          {
+            "event": "successor_frozen",
+            "sequence": 8,
+            "successor_id": "successor-stale_work_heartbeat-1"
+          }
+        ],
+        "verdict": "PASS"
+      },
+      "replay_verified": true,
+      "scenario_id": "stale_work_heartbeat"
+    },
+    {
+      "configuration_id": "fail_open",
+      "observation": {
+        "benchmark_id": "generation29-cross-clock-resumption-counterfactual-v1",
+        "claim_boundary": {
+          "agi_claim_supported": false,
+          "bounded_continuity_control_only": true,
+          "candidate_activation": false,
+          "provider_or_production_route_change": false,
+          "upper_objective_achieved": false,
+          "user_level_objective_met": false
+        },
+        "configuration_id": "fail_open",
+        "counters": {
+          "completions": 1,
+          "dispatch_attempts": 1,
+          "divergent_successors": 0,
+          "duplicate_responses": 0,
+          "duplicate_successors": 0,
+          "fence_changes": 0,
+          "inbox_bypasses": 0,
+          "live_authority_mutations": 0,
+          "rejections": 0,
+          "repairs": 0,
+          "request_preservation_checks": 0,
+          "stale_commits": 0,
+          "stale_context_actions": 1,
+          "submissions": 1,
+          "successors": 1
+        },
+        "disabled_guards": [
+          "work_heartbeat_freshness"
+        ],
+        "guard": "work_heartbeat_freshness",
+        "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+        "replay_digest": "409c15b72d50daecd9593f34dc10771de9ad5755da12070179cbb14b7639b1cb",
+        "request_digest_after": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_digest_before": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+        "request_identity_preserved": true,
+        "scenario_id": "stale_work_heartbeat",
+        "schema_version": 1,
+        "trace": [
+          {
+            "event": "fixture_bound",
+            "live_authority": false,
+            "request_digest": "2b46806dc165c7d9a3085bf0c3ee40a9709dadbbd9e467e81e9a50ccb6c82551",
+            "sequence": 1
+          },
+          {
+            "configuration": "fail_open",
+            "event": "dispatch_attempt",
+            "guard": "work_heartbeat_freshness",
+            "sequence": 2
+          },
+          {
+            "disabled_guard": "work_heartbeat_freshness",
+            "event": "scenario_guard_disabled",
+            "sequence": 3
+          },
+          {
+            "effect": "dispatch_with_stale_heartbeat",
+            "event": "counterfactual_effect_observed",
+            "live_authority": false,
+            "sequence": 4,
+            "simulated": true
+          },
+          {
+            "event": "simulated_response_and_successor",
+            "external_effect_applied": false,
+            "sequence": 5
+          }
+        ],
+        "verdict": "CONTROL_EFFECT_OBSERVED"
+      },
+      "replay_verified": true,
+      "scenario_id": "stale_work_heartbeat"
+    }
+  ],
+  "protected_summary": {
+    "all_rejected_before_effect": true,
+    "all_replays_verified": true,
+    "all_request_identities_preserved": true,
+    "bad_counter_totals": {
+      "divergent_successors": 0,
+      "duplicate_responses": 0,
+      "duplicate_successors": 0,
+      "fence_changes": 0,
+      "inbox_bypasses": 0,
+      "live_authority_mutations": 0,
+      "stale_commits": 0,
+      "stale_context_actions": 0
+    },
+    "scenario_count": 3,
+    "total_responses": 3,
+    "total_successors": 3
+  },
+  "protocol_digest": "36d63d10d3173741ccf57e679f95848f83511e50ae6f90ff7f47164e3a4dd687",
+  "record_type": "cross_clock_resumption_benchmark_result",
+  "result_digest": "bdd6a0597d148dfe3950dd6ff49a3d8e9ab5921122275bd692a7e79167ab72a2",
+  "schema_version": 1,
+  "status": "PASS"
+}

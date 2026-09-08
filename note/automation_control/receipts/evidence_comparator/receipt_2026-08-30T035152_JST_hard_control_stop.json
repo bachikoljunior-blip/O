@@ -1,0 +1,39 @@
+{
+  "schema": "automation_control_receipt_v1",
+  "role": "evidence_comparator",
+  "observed_at": "2026-08-30T03:51:52+09:00",
+  "repository": "bachikoljunior-blip/O",
+  "branch": "main",
+  "bootstrap": {
+    "required_first_read": "note/automation_control/DESIRED_STATE.json",
+    "result": "404_not_found_default_and_exact_head",
+    "directory_confirmation": "note/automation_control contains receipts only on current main",
+    "main_sha_before_receipt_write": "d221c6058a0de55db6117a535fa68c67748f8e37",
+    "enabled_desired": "unknown_unreadable",
+    "role_config": "not_executed",
+    "protocol_deviation": "Repository discovery search preceded the first control fetch because repository identity was not present in the invocation text. After repository identification, the required DESIRED_STATE read was the first repository-specific semantic read. No semantic evidence evaluation or repository mutation occurred before the DESIRED_STATE fetch attempt."
+  },
+  "execution": {
+    "status": "hard_stop_control_missing",
+    "downstream_evidence_evaluation_performed": false,
+    "judgments_written_to_exploration": false,
+    "judgments_written_to_feedback": false,
+    "desired_state_edited": false,
+    "evidence_latest_updated": false,
+    "next_candidate": null,
+    "reason": "Authoritative note/automation_control/DESIRED_STATE.json is absent on current main and at exact head d221c6058a0de55db6117a535fa68c67748f8e37, so enabled_desired and the current evidence_comparator role configuration cannot be established without inventing control semantics."
+  },
+  "physical_state": {
+    "automation_id": "6a8d394b73488191a44b7236604d6cf1",
+    "observed_enabled_before_termination": true,
+    "observed_enabled_after_termination": false,
+    "prior_role_receipt": "note/automation_control/receipts/evidence_comparator/receipt_2026-08-30T025115_JST_hard_control_stop.json",
+    "classification": "control_missing_recurred_after_external_reenable_or_reconciliation"
+  },
+  "termination": {
+    "fully_blocked": true,
+    "automation_disabled": true,
+    "reason": "Recurring evidence_comparator cannot safely execute while the required authoritative bootstrap control is missing."
+  },
+  "exact_continuation": "A future user or control-plane action must restore authoritative note/automation_control/DESIRED_STATE.json on active main and explicitly re-enable the Evidence Strength Comparator automation before semantic evidence evaluation can resume. First semantic action on any resumed run remains reading DESIRED_STATE.json."
+}

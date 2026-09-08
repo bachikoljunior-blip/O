@@ -1,0 +1,73 @@
+{
+  "claim_boundary": "This manifest is a request for independently controlled production evaluation. It is not an attestation, a production result, or AGI evidence. A claim remains blocked until the external ledger passes provenance audit, the strict two-group quorum is met for every criterion, each signed attestation reports the same observed runtime-system manifest bound by the request, and the conservative core evaluation policy passes with no unresolved blocking production failures.",
+  "core_evaluation_policy": {
+    "disallow_unresolved_production_failures": true,
+    "min_distinct_domains_per_criterion": 2,
+    "min_distinct_independent_attestors_per_criterion": 1,
+    "min_distinct_runs_per_criterion": 2,
+    "min_distinct_tasks_per_criterion": 3,
+    "min_independent_successes_per_criterion": 1,
+    "min_successes_per_criterion": 3,
+    "require_production_tier": true,
+    "require_verified_independent_attestation": true
+  },
+  "external_quorum": {
+    "bridge_attestor_must_be_third_identity": true,
+    "distinct_public_keys_required": true,
+    "min_independent_groups_per_criterion": 2,
+    "producer_may_not_be_evaluator": true
+  },
+  "handoff": {
+    "evaluator_must_supply": [
+      "independently controlled verifier identity and Ed25519 public key registration",
+      "independently frozen hidden-suite id/version/hash",
+      "fresh suite-bound challenge",
+      "raw evaluation artifacts and result digests",
+      "signed production attestations with preserved failures",
+      "signed attestation metadata observed_system_manifest_sha256 identifying the runtime manifest actually observed during evaluation"
+    ],
+    "repository_must_not_supply": [
+      "evaluator private key",
+      "hidden task answers",
+      "bridge trust secret",
+      "fabricated production results"
+    ]
+  },
+  "provenance_protocol": {
+    "allowed_source_kinds": [
+      "external_test",
+      "independent_reproduction",
+      "human_audit"
+    ],
+    "bridge_secret_out_of_band_required": true,
+    "challenge_bound_to_suite_sha256": true,
+    "external_ledger_audit_required": true,
+    "fresh_challenge_issued_before_evaluation": true,
+    "heldout_disclosure_history_required": true,
+    "hidden_suite_frozen_before_run": true,
+    "raw_artifact_sha256_required": true,
+    "result_sha256_required": true,
+    "runtime_system_manifest_required": true,
+    "schema_version": 1,
+    "signature_algorithm": "ed25519",
+    "signed_observed_system_manifest_required": true
+  },
+  "request_kind": "strict-independent-agi-evaluation-request",
+  "request_sha256": "2583352beea7765617606ed39985a0f7e79c45d0256982b7ad4eb4063586505d",
+  "required_criteria": [
+    "breadth",
+    "transfer",
+    "autonomy",
+    "continual_learning",
+    "self_improvement",
+    "robustness"
+  ],
+  "schema_version": 1,
+  "subject": {
+    "artifact_sha256": "797a0550bada9a7453efd6cb9c4e353be3ea36a3a8dce109df560750d38bd78d",
+    "commit_sha": "f5f983604f8b7f4bb6ca4e8fc8f2523f7b88239f",
+    "producer_id": "o-work-recovery-v3",
+    "repository": "bachikoljunior-blip/O",
+    "system_manifest_sha256": "aca8070052a24366c544fd1788dc4a705f42f878acc9d10b82b5a14063516735"
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "actions": [
+    "Read the scheduler and failure-transition tests from a clean main worktree.",
+    "Reproduced skipped post-task Learn in an isolated no-live-model fixture.",
+    "Changed only mechanical dispatch of an explicitly chosen consolidation component.",
+    "Verified two new negative-outcome lifecycle regressions and three existing PASS/FAIL/UNCERTAIN controls."
+  ],
+  "admissible_for_agi_claim": false,
+  "artifacts": [
+    "artifacts/unit-generation30-explicit-failure-consolidation-v1-result.json",
+    "src/continual/engine.py",
+    "tests/test_root_selected_failure_consolidation.py"
+  ],
+  "candidate_ids": [],
+  "claim_boundary": "This task-chat self-application record is internal development evidence only. It cannot establish AGI or evaluator independence.",
+  "claims": [
+    "The local regression is repaired; full integration is still unverified. This is internal lifecycle behavior, not AGI or completion evidence."
+  ],
+  "context": {
+    "boundary": "development",
+    "boundary_satisfied": true,
+    "decision": {
+      "boundary": "development",
+      "fresh_execution_required": false,
+      "independent_execution_required": false,
+      "logical_reset_required": false,
+      "mode": "reuse_current_context",
+      "persist_before_switch": false,
+      "reason_codes": [
+        "no_contamination_signal"
+      ]
+    },
+    "fresh_execution_used": false,
+    "independent_execution_used": false,
+    "logical_reset_used": false,
+    "physical_fresh_context_fixed_requirement": false,
+    "repository_latest_main_is_durable_state": true,
+    "risk_signals": []
+  },
+  "decisions": [
+    "Leave consolidation choice with Root and preserve failed task/unit verdicts.",
+    "Do not change active prompts, workflows or the current frozen primary response.",
+    "Keep adoption pending full protected CI."
+  ],
+  "episode_id": "episode-self-f5f1cc4bfa72701ca3e6",
+  "evidence_id": "self-application-f5f1cc4bfa72701ca3e6",
+  "evidence_tier": "internal_development",
+  "execution_id": "development-g30-explicit-failure-consolidation-v1",
+  "failures": [
+    "Before the fix, explicit consolidation returned to Root without canonical episode persistence or post-task Learn."
+  ],
+  "kind": "self_application_repository_development",
+  "observations": [
+    {
+      "direct_regression_tests": [
+        {
+          "status": "passed",
+          "test": "test_root_selected_failed_unit_consolidates_and_learns"
+        },
+        {
+          "status": "passed",
+          "test": "test_root_selected_uncertain_unit_consolidates_and_learns"
+        }
+      ],
+      "existing_controls": [
+        {
+          "existing_control_verdict": "FAIL",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "UNCERTAIN",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "PASS",
+          "status": "passed"
+        }
+      ],
+      "live_model_calls": 0,
+      "primary_work_mutated": false,
+      "validation_scope": "Explicit Root consolidation preserves FAIL/UNCERTAIN, writes the episode, runs post-task Learn and returns to Root; full protected CI still required."
+    }
+  ],
+  "payload_digest": "6716da3201872eddcad212c28bde600b0173402e0bc64e3dae5b6178b1157888",
+  "producer": {
+    "binding": "current_chatgpt_work_session",
+    "model_identity": "chatgpt-work-model-unverified",
+    "model_verified": false
+  },
+  "recorded_at": "2026-09-05T11:24:35.949732Z",
+  "repository": {},
+  "request_digest": "1d6a78c70d35da90b4e7e9f2c193c6485a2a1eac3e5eb1ccf156bcbdefda6da6",
+  "run_id": "run-self-f5f1cc4bfa72701ca3e6",
+  "schema_version": 1,
+  "strict_external_gate_unchanged": true,
+  "unknowns": [
+    "The full protected suite has not yet completed at the proposed head."
+  ],
+  "validation": [
+    {
+      "baseline_failure_reproduced": true,
+      "claim_boundary": "Isolated no-live-model regression fixture; no primary Work mutation.",
+      "traceback": "Traceback (most recent call last):\n  File \"<stdin>\", line 7, in <module>\n  File \"/workspace/scratch/d96c6d9cad22/O/tests/test_root_selected_failure_consolidation.py\", line 65, in test_root_selected_failed_unit_consolidates_and_learns\n    _assert_failed_episode_is_learned(runtime_repo, 'FAIL')\n  File \"/workspace/scratch/d96c6d9cad22/O/tests/test_root_selected_failure_consolidation.py\", line 49, in _assert_failed_episode_is_learned\n    assert model.calls == ['entry', 'root', 'execute', 'root', 'task_evaluate', 'root', 'consolidate_episode', 'learn']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+      "type": "AssertionError"
+    },
+    {
+      "direct_regression_tests": [
+        {
+          "status": "passed",
+          "test": "test_root_selected_failed_unit_consolidates_and_learns"
+        },
+        {
+          "status": "passed",
+          "test": "test_root_selected_uncertain_unit_consolidates_and_learns"
+        }
+      ],
+      "existing_controls": [
+        {
+          "existing_control_verdict": "FAIL",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "UNCERTAIN",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "PASS",
+          "status": "passed"
+        }
+      ],
+      "live_model_calls": 0,
+      "primary_work_mutated": false,
+      "validation_scope": "Explicit Root consolidation preserves FAIL/UNCERTAIN, writes the episode, runs post-task Learn and returns to Root; full protected CI still required."
+    }
+  ]
+}

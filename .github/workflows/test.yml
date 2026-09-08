@@ -1,0 +1,60 @@
+name: test
+
+on:
+  push:
+    branches: [main, 'agent/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest-shard:
+    name: pytest shard ${{ matrix.shard }} of 4
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e '.[test]'
+      - run: pytest -q
+        env:
+          PYTEST_SHARD_TOTAL: 4
+          PYTEST_SHARD_INDEX: ${{ matrix.shard }}
+
+  test:
+    needs: pytest-shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The external-evaluator handoff is intentionally bound to an exact
+          # earlier subject commit.  A depth-1 PR merge checkout cannot
+          # reconstruct that immutable archive, so CI must retain the commit
+          # object it is asserting against.
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e '.[test]'
+      - run: python -m compileall -q src
+      - run: agi-benchmark validate-suite
+      - run: agi-benchmark validate-workspace-suite
+      - run: agi-benchmark validate-heldout-suite
+      - run: agi-longhorizon validate-protocol
+      - run: agi-benchmark run-reference --output /tmp/core-reference.json
+      - run: agi-benchmark run-workspace-reference --output /tmp/workspace-reference.json
+      - run: agi-benchmark run-heldout-reference --output /tmp/heldout-reference.json
+      - run: agi-longhorizon run-reference --output-dir /tmp/longhorizon-reference
+      - run: agi-benchmark run-campaign-reference --runs 2 --output-dir /tmp/reference-campaign

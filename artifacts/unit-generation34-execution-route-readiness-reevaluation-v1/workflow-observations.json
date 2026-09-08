@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "selector": {
+    "catalog": [
+      {
+        "name": "directive-source-preflight.yml",
+        "path": ".github/workflows/directive-source-preflight.yml",
+        "sha": "fff6ee5de5f3a24e5451feea1b4d580c235a8526"
+      },
+      {
+        "name": "gen29-candidate-behavioral-preflight-response-v1.yml",
+        "path": ".github/workflows/gen29-candidate-behavioral-preflight-response-v1.yml",
+        "sha": "e94774b68782967b60b43e4c292b021868574ef8"
+      },
+      {
+        "name": "gen29-candidate-preflight-response-v1.yml",
+        "path": ".github/workflows/gen29-candidate-preflight-response-v1.yml",
+        "sha": "98be97bd2c79dec5330ef8ce2011cb1ed2ec0a1c"
+      },
+      {
+        "name": "gen29-consolidate-response-v1.yml",
+        "path": ".github/workflows/gen29-consolidate-response-v1.yml",
+        "sha": "75ee7865a9c88fd9f9199e7669d5932c52688c6b"
+      },
+      {
+        "name": "gen29-learn-response-v1.yml",
+        "path": ".github/workflows/gen29-learn-response-v1.yml",
+        "sha": "a32746a5f138d15aae1b9f7d4c96e36e484f06c6"
+      },
+      {
+        "name": "gen29-post-task-candidate-response-v1.yml",
+        "path": ".github/workflows/gen29-post-task-candidate-response-v1.yml",
+        "sha": "5da94a91c34cd6461a4fc5d90a7848c3e34fc0b2"
+      },
+      {
+        "name": "gen29-root-freeze-v1.yml",
+        "path": ".github/workflows/gen29-root-freeze-v1.yml",
+        "sha": "bff48538d80c8a71d1f65b126eb6398f0ebd4008"
+      },
+      {
+        "name": "gen29-root-response-behavioral-effect-v1.yml",
+        "path": ".github/workflows/gen29-root-response-behavioral-effect-v1.yml",
+        "sha": "59698671d6ab2f05b26be899f5619e37f6375ac3"
+      },
+      {
+        "name": "gen29-root-response-task-evaluate-v1.yml",
+        "path": ".github/workflows/gen29-root-response-task-evaluate-v1.yml",
+        "sha": "2e8b90f69a5af5f52bbfcff06e84aa844a47fdc6"
+      },
+      {
+        "name": "gen29-task-evaluate-response-v1.yml",
+        "path": ".github/workflows/gen29-task-evaluate-response-v1.yml",
+        "sha": "8a46d88e2e46bab34dccbd1c0e172d2403c7ff7a"
+      },
+      {
+        "name": "live-agi-development.yml",
+        "path": ".github/workflows/live-agi-development.yml",
+        "sha": "f27eab755efdf77045b8006ce967d0b18d801bd3"
+      },
+      {
+        "name": "live-agi-request.yml",
+        "path": ".github/workflows/live-agi-request.yml",
+        "sha": "79befb0544f251c91d83779728017da37a35e182"
+      },
+      {
+        "name": "materialize-verified-capabilities.yml",
+        "path": ".github/workflows/materialize-verified-capabilities.yml",
+        "sha": "f4d65cf82ab0624d22f653e0843a1441afb978b2"
+      },
+      {
+        "name": "test.yml",
+        "path": ".github/workflows/test.yml",
+        "sha": "aeda5423db91f9bfe2dd74cbda56d3da64c6897e"
+      }
+    ],
+    "matching": [
+      {
+        "name": "live-agi-development.yml",
+        "path": ".github/workflows/live-agi-development.yml",
+        "sha": "f27eab755efdf77045b8006ce967d0b18d801bd3"
+      },
+      {
+        "name": "live-agi-request.yml",
+        "path": ".github/workflows/live-agi-request.yml",
+        "sha": "79befb0544f251c91d83779728017da37a35e182"
+      }
+    ],
+    "observed_at": "2026-09-07T00:01:23.145Z",
+    "selected": [
+      {
+        "name": "live-agi-development.yml",
+        "path": ".github/workflows/live-agi-development.yml",
+        "sha": "f27eab755efdf77045b8006ce967d0b18d801bd3"
+      },
+      {
+        "name": "live-agi-request.yml",
+        "path": ".github/workflows/live-agi-request.yml",
+        "sha": "79befb0544f251c91d83779728017da37a35e182"
+      }
+    ],
+    "source_ref": "224915a7dd04e40f56edee408ddeeb02f4e0ca9b"
+  },
+  "observations": [
+    {
+      "definition": "name: live-agi-development\n\non:\n  workflow_dispatch:\n    inputs:\n      provider:\n        description: Live model provider; auto prefers OpenAI when its repository secret is configured\n        required: true\n        default: auto\n        type: choice\n        options:\n          - auto\n          - openai\n          - copilot\n      openai_model:\n        description: OpenAI API model alias or snapshot\n        required: true\n        default: gpt-5\n        type: string\n      copilot_model:\n        description: GitHub Copilot model identifier\n        required: true\n        default: gpt-5.4\n        type: string\n      runs:\n        description: Number of repeated campaign runs\n        required: true\n        default: '2'\n        type: string\n\npermissions:\n  contents: read\n  copilot-requests: write\n\nconcurrency:\n  group: live-agi-development\n  cancel-in-progress: false\n\njobs:\n  campaign:\n    runs-on: ubuntu-latest\n    timeout-minutes: 90\n    env:\n      OPENAI_MODEL: ${{ inputs.openai_model }}\n      COPILOT_MODEL: ${{ inputs.copilot_model }}\n    steps:\n      - uses: actions/checkout@v5\n      - uses: actions/setup-python@v6\n        with:\n          python-version: '3.11'\n          cache: pip\n      - run: python -m pip install -e '.[test]'\n      - name: Resolve bounded live provider\n        id: provider\n        shell: bash\n        env:\n          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}\n        run: |\n          set -euo pipefail\n          case \"${{ inputs.runs }}\" in\n            1|2|3|4|5) ;;\n            *) echo \"runs must be an integer from 1 through 5\" >&2; exit 2 ;;\n          esac\n          requested=\"${{ inputs.provider }}\"\n          case \"${requested}\" in\n            auto)\n              if [[ -n \"${OPENAI_API_KEY:-}\" ]]; then\n                resolved=openai\n              else\n                resolved=copilot\n              fi\n              ;;\n            openai)\n              if [[ -z \"${OPENAI_API_KEY:-}\" ]]; then\n                echo \"provider=openai requires OPENAI_API_KEY repository secret.\" >&2\n                exit 1\n              fi\n              resolved=openai\n              ;;\n            copilot) resolved=copilot ;;\n            *) echo \"unsupported provider: ${requested}\" >&2; exit 2 ;;\n          esac\n          echo \"provider=${resolved}\" >> \"${GITHUB_OUTPUT}\"\n      - name: Install Copilot SDK only for Copilot trial\n        if: steps.provider.outputs.provider == 'copilot'\n        run: python -m pip install 'github-copilot-sdk>=1.0.8,<2'\n      - name: Run OpenAI repeated capability campaign\n        if: steps.provider.outputs.provider == 'openai'\n        shell: bash\n        env:\n          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}\n        run: |\n          set -euo pipefail\n          campaign_id=\"openai-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}\"\n          output_dir=\".continual/evidence/campaigns/${campaign_id}\"\n          mkdir -p \"${output_dir}\"\n          campaign_status=0\n          longhorizon_status=0\n          set +e\n          agi-benchmark run-campaign-openai \\\n            --model \"${OPENAI_MODEL}\" \\\n            --runs \"${{ inputs.runs }}\" \\\n            --campaign-id \"${campaign_id}\" \\\n            --output-dir \"${output_dir}\"\n          campaign_status=$?\n          agi-longhorizon run-openai \\\n            --model \"${OPENAI_MODEL}\" \\\n            --instances 3 \\\n            --output-dir \"${output_dir}/longhorizon\"\n          longhorizon_status=$?\n          set -e\n          printf '{\"campaign_exit_code\":%d,\"longhorizon_exit_code\":%d}\\n' \\\n            \"${campaign_status}\" \"${longhorizon_status}\" \\\n            > \"${output_dir}/request-stage-status.json\"\n          if (( campaign_status != 0 || longhorizon_status != 0 )); then\n            echo \"OpenAI live development failed: campaign=${campaign_status} longhorizon=${longhorizon_status}\" >&2\n            exit 1\n          fi\n      - name: Run Copilot SDK repeated capability and retention campaign\n        if: steps.provider.outputs.provider == 'copilot'\n        shell: bash\n        env:\n          GITHUB_TOKEN: ${{ github.token }}\n        run: |\n          set -euo pipefail\n          campaign_id=\"copilot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}\"\n          output_dir=\".continual/evidence/campaigns/${campaign_id}\"\n          mkdir -p \"${output_dir}\"\n          campaign_status=0\n          longhorizon_status=0\n          set +e\n          agi-copilot run-campaign \\\n            --model \"${COPILOT_MODEL}\" \\\n            --runs \"${{ inputs.runs }}\" \\\n            --campaign-id \"${campaign_id}\" \\\n            --output-dir \"${output_dir}\"\n          campaign_status=$?\n          agi-copilot run-longhorizon \\\n            --model \"${COPILOT_MODEL}\" \\\n            --instances 3 \\\n            --output-dir \"${output_dir}/longhorizon\"\n          longhorizon_status=$?\n          set -e\n          printf '{\"campaign_exit_code\":%d,\"longhorizon_exit_code\":%d}\\n' \\\n            \"${campaign_status}\" \"${longhorizon_status}\" \\\n            > \"${output_dir}/request-stage-status.json\"\n          if (( campaign_status != 0 || longhorizon_status != 0 )); then\n            echo \"Copilot live development failed: campaign=${campaign_status} longhorizon=${longhorizon_status}\" >&2\n            exit 1\n          fi\n      - uses: actions/upload-artifact@v4\n        if: always()\n        with:\n          name: live-agi-development-${{ github.run_id }}-${{ github.run_attempt }}\n          path: .continual/evidence/campaigns/\n          if-no-files-found: warn\n          retention-days: 90\n",
+      "metadata": {
+        "reason": "HTTPError: 400: GitHub Fetch URL is not an allowed public GitHub repository or search endpoint. (Response: None)",
+        "status": "unknown"
+      },
+      "observed_at": "2026-09-07T00:02:25.923Z",
+      "path": ".github/workflows/live-agi-development.yml",
+      "recent_runs": {
+        "reason": "HTTPError: 400: GitHub Fetch URL is not an allowed public GitHub repository or search endpoint. (Response: None)",
+        "runs": [],
+        "status": "unknown",
+        "zero_runs_claim": false
+      },
+      "ref": "224915a7dd04e40f56edee408ddeeb02f4e0ca9b",
+      "sha": "f27eab755efdf77045b8006ce967d0b18d801bd3"
+    },
+    {
+      "definition": "name: live-agi-request\n\non:\n  push:\n    branches:\n      - 'agi/live-campaign-*'\n    paths:\n      - 'agi/LIVE_CAMPAIGN_REQUEST.json'\n\npermissions:\n  contents: read\n  statuses: write\n  copilot-requests: write\n\nconcurrency:\n  group: live-agi-request-${{ github.ref }}\n  cancel-in-progress: false\n\njobs:\n  campaign:\n    if: github.actor == github.repository_owner\n    runs-on: ubuntu-latest\n    timeout-minutes: 60\n    steps:\n      - uses: actions/checkout@v5\n      - uses: actions/setup-python@v6\n        with:\n          python-version: '3.11'\n          cache: pip\n      - run: python -m pip install -e '.[test]'\n      - name: Validate bounded request\n        id: request\n        shell: bash\n        run: |\n          set -euo pipefail\n          python - <<'PY' >> \"${GITHUB_OUTPUT}\"\n          import json\n          import re\n          from pathlib import Path\n\n          from agi.sandbox_protocol import MIN_REPEATED_INSTANCES\n\n          path = Path('agi/LIVE_CAMPAIGN_REQUEST.json')\n          value = json.loads(path.read_text(encoding='utf-8'))\n          if not isinstance(value, dict) or value.get('schema_version') != 1:\n              raise SystemExit('request must be a schema_version=1 object')\n          allowed = {'schema_version', 'provider', 'model', 'runs', 'longhorizon_instances', 'purpose'}\n          unknown = sorted(set(value) - allowed)\n          if unknown:\n              raise SystemExit('unknown request keys: ' + ', '.join(unknown))\n          provider = value.get('provider')\n          if provider not in {'auto', 'openai', 'copilot'}:\n              raise SystemExit('provider must be one of: auto, openai, copilot')\n          model = value.get('model')\n          if not isinstance(model, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/-]{0,79}', model):\n              raise SystemExit('model must be a bounded public identifier')\n          runs = value.get('runs')\n          instances = value.get('longhorizon_instances')\n          if not isinstance(runs, int) or isinstance(runs, bool) or not 1 <= runs <= 3:\n              raise SystemExit('runs must be an integer from 1 through 3')\n          if (\n              not isinstance(instances, int)\n              or isinstance(instances, bool)\n              or not MIN_REPEATED_INSTANCES <= instances <= 3\n          ):\n              raise SystemExit(\n                  f'longhorizon_instances must be an integer from {MIN_REPEATED_INSTANCES} through 3'\n              )\n          purpose = value.get('purpose', '')\n          if not isinstance(purpose, str) or len(purpose) > 300:\n              raise SystemExit('purpose must be a string of at most 300 characters')\n          print(f'provider={provider}')\n          print(f'model={model}')\n          print(f'runs={runs}')\n          print(f'instances={instances}')\n          PY\n      - name: Publish pending request status\n        env:\n          GITHUB_TOKEN: ${{ github.token }}\n        run: python -m agi.live_request_status pending\n      - name: Resolve bounded live provider\n        id: provider\n        shell: bash\n        env:\n          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}\n          REQUESTED_PROVIDER: ${{ steps.request.outputs.provider }}\n        run: |\n          set -euo pipefail\n          case \"${REQUESTED_PROVIDER}\" in\n            auto)\n              if [[ -n \"${OPENAI_API_KEY:-}\" ]]; then\n                resolved=openai\n              else\n                resolved=copilot\n              fi\n              ;;\n            openai)\n              if [[ -z \"${OPENAI_API_KEY:-}\" ]]; then\n                echo \"provider=openai requires OPENAI_API_KEY repository secret.\" >&2\n                exit 1\n              fi\n              resolved=openai\n              ;;\n            copilot) resolved=copilot ;;\n            *) echo \"unsupported provider after validation: ${REQUESTED_PROVIDER}\" >&2; exit 2 ;;\n          esac\n          echo \"provider=${resolved}\" >> \"${GITHUB_OUTPUT}\"\n      - name: Install Copilot SDK only for Copilot request\n        if: steps.provider.outputs.provider == 'copilot'\n        run: python -m pip install 'github-copilot-sdk>=1.0.8,<2'\n      - name: Run bounded OpenAI capability and retention request\n        if: steps.provider.outputs.provider == 'openai'\n        shell: bash\n        env:\n          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}\n          MODEL: ${{ steps.request.outputs.model }}\n          RUNS: ${{ steps.request.outputs.runs }}\n          INSTANCES: ${{ steps.request.outputs.instances }}\n        run: |\n          set -euo pipefail\n          campaign_id=\"openai-request-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}\"\n          output_dir=\".continual/evidence/campaigns/${campaign_id}\"\n          mkdir -p \"${output_dir}\"\n          campaign_status=0\n          longhorizon_status=0\n          set +e\n          agi-benchmark run-campaign-openai \\\n            --model \"${MODEL}\" \\\n            --runs \"${RUNS}\" \\\n            --campaign-id \"${campaign_id}\" \\\n            --output-dir \"${output_dir}\"\n          campaign_status=$?\n          agi-longhorizon run-openai \\\n            --model \"${MODEL}\" \\\n            --instances \"${INSTANCES}\" \\\n            --output-dir \"${output_dir}/longhorizon\"\n          longhorizon_status=$?\n          set -e\n          printf '{\"campaign_exit_code\":%d,\"longhorizon_exit_code\":%d}\\n' \\\n            \"${campaign_status}\" \"${longhorizon_status}\" \\\n            > \"${output_dir}/request-stage-status.json\"\n          if (( campaign_status != 0 || longhorizon_status != 0 )); then\n            echo \"bounded OpenAI live request failed: campaign=${campaign_status} longhorizon=${longhorizon_status}\" >&2\n            exit 1\n          fi\n      - name: Run bounded Copilot capability and retention request\n        if: steps.provider.outputs.provider == 'copilot'\n        shell: bash\n        env:\n          GITHUB_TOKEN: ${{ github.token }}\n          MODEL: ${{ steps.request.outputs.model }}\n          RUNS: ${{ steps.request.outputs.runs }}\n          INSTANCES: ${{ steps.request.outputs.instances }}\n        run: |\n          set -euo pipefail\n          campaign_id=\"copilot-request-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}\"\n          output_dir=\".continual/evidence/campaigns/${campaign_id}\"\n          mkdir -p \"${output_dir}\"\n          campaign_status=0\n          longhorizon_status=0\n          set +e\n          agi-copilot run-campaign \\\n            --model \"${MODEL}\" \\\n            --runs \"${RUNS}\" \\\n            --campaign-id \"${campaign_id}\" \\\n            --output-dir \"${output_dir}\"\n          campaign_status=$?\n          agi-copilot run-longhorizon \\\n            --model \"${MODEL}\" \\\n            --instances \"${INSTANCES}\" \\\n            --output-dir \"${output_dir}/longhorizon\"\n          longhorizon_status=$?\n          set -e\n          printf '{\"campaign_exit_code\":%d,\"longhorizon_exit_code\":%d}\\n' \\\n            \"${campaign_status}\" \"${longhorizon_status}\" \\\n            > \"${output_dir}/request-stage-status.json\"\n          if (( campaign_status != 0 || longhorizon_status != 0 )); then\n            echo \"bounded Copilot live request failed: campaign=${campaign_status} longhorizon=${longhorizon_status}\" >&2\n            exit 1\n          fi\n      - uses: actions/upload-artifact@v4\n        if: always()\n        with:\n          name: live-agi-request-${{ github.run_id }}-${{ github.run_attempt }}\n          path: .continual/evidence/campaigns/\n          if-no-files-found: warn\n          retention-days: 30\n      - name: Publish final request status\n        if: always()\n        env:\n          GITHUB_TOKEN: ${{ github.token }}\n          JOB_STATUS: ${{ job.status }}\n        run: python -m agi.live_request_status final --job-status \"${JOB_STATUS}\"\n",
+      "metadata": {
+        "reason": "Not attempted after explicit endpoint-family rejection; no bypass.",
+        "status": "unknown"
+      },
+      "observed_at": "2026-09-07T00:02:25.923Z",
+      "path": ".github/workflows/live-agi-request.yml",
+      "recent_runs": {
+        "reason": "Not attempted after explicit endpoint-family rejection; no bypass.",
+        "runs": [],
+        "status": "unknown",
+        "zero_runs_claim": false
+      },
+      "ref": "224915a7dd04e40f56edee408ddeeb02f4e0ca9b",
+      "sha": "79befb0544f251c91d83779728017da37a35e182"
+    }
+  ]
+}

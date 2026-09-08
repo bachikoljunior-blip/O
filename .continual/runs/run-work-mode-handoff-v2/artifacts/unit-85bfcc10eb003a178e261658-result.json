@@ -1,0 +1,68 @@
+{
+  "artifacts": [
+    "agi/SCIENTIST_AGENT_BASELINE.json",
+    "src/agi/scientist_agent_baseline.py",
+    "tests/test_scientist_agent_baseline.py"
+  ],
+  "claim_boundary": "The comparison and tests are internal development evidence. They do not support AGI or user-level completion.",
+  "comparison_verdict": {
+    "candidate_mechanism": "bounded_stage_checkpoint_inheritance",
+    "falsifier": "Reject after three matched units if median invocations or wall time do not improve, replay selection is unstable, or protected regressions or side-effect failures worsen.",
+    "prediction": "Three sandboxed sibling hypotheses with one deterministic scorer may reduce median invocations or wall time per retained capability compared with O's single lineage.",
+    "reason": "The baseline demonstrates broader parallel hypothesis search and best-checkpoint inheritance, while O demonstrates stronger single-writer, immutable-replay, protected-regression, and claim boundaries. Unmatched tasks, several-hour and provider/GPU cost, manual filtering, and a one-of-three workshop result prevent an adoption claim.",
+    "rollback": "Keep the experiment behind an inactive scoped Candidate and retain the single-lineage path.",
+    "verdict": "EXPERIMENT_REQUIRED"
+  },
+  "continuation": "After Task Evaluate, consolidate and learn. If the bounded unit passes, Root should select the smallest sandboxed matched experiment for checkpoint inheritance; main remains single-writer and implementation remains inactive until evidence supports it.",
+  "external_evidence": [
+    {
+      "finding": "The reported workflow grows hypothesis archives, executes four tree-search stages, passes best checkpoints forward, records experimental notes, and uses a five-review ensemble plus meta-review. One of three workshop submissions received external blind-review scores 6, 7, and 6; authors manually filtered outputs before submission and report substantial remaining failures.",
+      "source": "https://www.nature.com/articles/s41586-026-10265-5"
+    },
+    {
+      "finding": "The official implementation exposes bounded parallel tree-search workers, steps, debug depth, multiple root drafts, structured ideas, and persisted experiment logs; it warns that template-free exploration can have lower success and must run sandboxed.",
+      "source": "https://github.com/SakanaAI/AI-Scientist-v2"
+    },
+    {
+      "finding": "The system report describes an end-to-end hypothesis, experiment, analysis, and manuscript loop managed by progressive agentic tree search.",
+      "source": "https://arxiv.org/abs/2504.08066"
+    }
+  ],
+  "negative_evidence": [
+    "No matched O experiment has yet measured the predicted advantage.",
+    "AI Scientist-v2 success is not O success and is not evidence that O or this model is AGI.",
+    "No implementation of parallel checkpoint inheritance is authorized by the comparison artifact."
+  ],
+  "next_execution_unit": {
+    "component": "task_evaluate",
+    "expected_outputs": [
+      "original-goal verdict",
+      "bounded-unit verdict",
+      "negative evidence",
+      "next matched-experiment unit"
+    ],
+    "goal": "Evaluate whether the scientist-agent baseline unit met its frozen evidence and fail-closed no-speculative-adoption conditions while preserving the user-level objective as unmet.",
+    "inputs": [
+      "agi/SCIENTIST_AGENT_BASELINE.json",
+      "14-test focused result",
+      "primary-source URLs",
+      "current native Run evidence"
+    ],
+    "scope": "agi/scientist-agent-external-baseline-comparison"
+  },
+  "o_evidence": [
+    "src/continual/engine.py",
+    "src/continual/store.py",
+    "src/continual/candidate_regression.py",
+    "agi/WORK_STRATEGY.json",
+    "agi/WORK_EXECUTION_STATE.json"
+  ],
+  "status": "EXPERIMENT_REQUIRED",
+  "summary": "Compared The AI Scientist-v2 with O under the frozen six-dimension rubric and produced a fail-closed machine-readable artifact plus validator. The narrowest plausible missing mechanism is bounded best-checkpoint stage inheritance, but its expected-time advantage for O is unmeasured, so no behavior change is authorized.",
+  "unit_id": "unit-85bfcc10eb003a178e261658",
+  "validation": [
+    "14 focused scientist-baseline and Work-bridge tests passed in 1.34 seconds",
+    "compileall passed for src/agi/scientist_agent_baseline.py",
+    "git diff --check passed"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "artifacts": [
+    "src/continual/work_checkpoint_integrity.py",
+    "src/continual/work_session.py",
+    "src/continual/cli.py",
+    "tests/test_work_checkpoint_integrity.py",
+    "tests/test_work_mode_monitor.py"
+  ],
+  "negative_evidence": [
+    "The rejection applies only to generation-8 state commit 1a2373dd243f85ec60e4fe74f92a6fef0b946e69 evaluated against the checked repository records and exact validator configuration.",
+    "It does not establish a failure of other checkpoints, other recovery mechanisms, untested components, or any scientist-agent family.",
+    "Local tests and the current-state valid control are internal engineering evidence, not AGI or independent production evidence."
+  ],
+  "observations": [
+    "The checked generation-9 state is accepted with a verified run snapshot and completed Entry invocation.",
+    "The exact generation-8 state at commit 1a2373dd243f85ec60e4fe74f92a6fef0b946e69 is rejected with PENDING_WORK_REQUEST_INVALID for invoke-37609d6e1890c250c8ada58b and COMPLETED_WORK_INVOCATION_INVALID for the missing response of invoke-3e7b66bfc42ae092653c4668.",
+    "The validator does not create, modify, answer, or reconstruct either orphan invocation.",
+    "A valid pending request is accepted without requiring a response, while its native journal must exactly bind the Work invocation and request reference.",
+    "State, snapshot, claim, request, response, digest, executor/model, run, native status, and native-to-Work mismatches produce machine-readable issue codes."
+  ],
+  "remaining": [
+    "Task Evaluate the exact implementation and local evidence.",
+    "Publish the implementation plus native lifecycle records from an isolated branch, require unchanged exact-head CI, merge with expected-head protection, and read back reviewed blobs before claiming integration."
+  ],
+  "rollback": "Revert only the validator, public pending-request verifier, CLI, tests, and their native lifecycle records; leave generation-9 authority and both orphan invocations untouched.",
+  "scope": "work-checkpoint-integrity/continuation-and-claimed-answer-verifier-v1",
+  "status": "implemented_locally_publication_pending",
+  "summary": "Added a read-only structured checkpoint-integrity validator and CLI that verify the run snapshot, pending Work/native bindings, completed Work invocation, and every bounded answered-invocation claim using the existing immutable request/response digest, binding, public-output, component-contract, and DecisionContext checks.",
+  "unit_id": "unit-ed0ffc4ab0d4d5cbede05040",
+  "validation": {
+    "compileall": "passed for changed Python modules",
+    "current_checkpoint_control": "valid",
+    "diff_check": "passed",
+    "focused_and_protected_tests": "116 passed",
+    "generation8_discrepancy_control": "rejected with the two exact expected missing-record issue classes",
+    "test_command": "PYTHONPATH=src pytest -q tests/test_work_checkpoint_integrity.py tests/test_work_session_bridge.py tests/test_work_source_observation.py tests/test_ci_source_observation.py tests/test_work_mode_monitor.py tests/test_context_kernel.py"
+  }
+}

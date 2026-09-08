@@ -1,0 +1,85 @@
+{
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-281be56e6a0f970128e9b79b",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "root",
+      "evidence_refs": [
+        ".continual/runs/run-claude-primary-continuation-20260823/artifacts/post-task-learn.json",
+        "agi/WORK_EXECUTION_STATE.json"
+      ],
+      "observations": [
+        "Selected the deterministic-selection repair as the single next unit: it unblocks reproducible end-to-end evidence for every campaign stacked on the recursive frontier",
+        "Registered candidate-stable-semantics-commitment (engine-assigned id) via local_learn.candidates after the Learn-phase proposal used a key the registrar does not parse",
+        "CLI binding hardening deliberately deferred as the subsequent smaller unit; orphaned request invoke-32c679e1 remains documented and unanswered"
+      ],
+      "purpose": "Select the next capability unit after the first complete primary cycle",
+      "unresolved": [
+        "Preflight candidate evaluation for the deterministic-selection execute unit",
+        "Whether commitment-consuming persisted evidence anywhere pins the OLD history_digest values (must be checked during the unit before changing the derivation)"
+      ]
+    },
+    "local_learn": {
+      "candidates": [
+        {
+          "applicability": [
+            "Execute units that create or modify campaign schedules, commitments, salts, or selection orderings under src/agi/",
+            "Repair units for existing non-deterministic selection paths"
+          ],
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/campaign-authoring",
+          "non_applicability": [
+            "Integration/merge units with no schedule or commitment authorship",
+            "Evaluation, consolidation, and Learn components",
+            "Audit-only digests never consumed by selection or truncation"
+          ],
+          "prompt_content": "When an execution unit authors or modifies a precommitted schedule, history commitment, salt, or any ordering that later selects targets or truncates search, derive that value only from stable behavior semantics: program descriptors, support examples, domains, and digest-ranked schedule content. Never fold whole run reports, engine run ids, trial-ledger bytes, timestamps, or other per-process values into such a commitment; a reproducibility check (two fresh processes, identical seed and tree, identical selection) is part of the unit's evidence. The compliant in-repo pattern is evidence_derived_target_synthesis.py; the violation pattern to avoid is folding a full evidence report digest into a selection salt.",
+          "prompt_mode": "overlay",
+          "risk": "An over-broad reading could forbid legitimate audit digests or force sorting costs onto hot paths; the rule binds only values consumed by selection, ordering, or truncation, and the reproducibility check bounds trial cost to one duplicate process run per authored commitment.",
+          "source_refs": [
+            ".continual/runs/run-claude-primary-continuation-20260823/artifacts/post-task-learn.json"
+          ],
+          "supersedes": [],
+          "supporting_evidence": [
+            "Live divergence: two identical-seed, identical-tree runs selected different recursive targets (sub- vs mul-wrap), recorded in episode-claude-primary-continuation-20260823 and merged PR 245's corrected body",
+            "Verified mechanism: evidence_frontier_iterated_expansion.py:399 digests a report embedding uuid4 fresh_engine_run_ids (src/continual/store.py:26-27) and timestamp-tainted trial bytes; recursive_evidence_frontier_growth.py:61,72 folds that digest into history_digest consumed by rotation, salting, and ordering ahead of a first-two-unsupported scan",
+            "Compliant in-repo contrast: evidence_derived_target_synthesis.py:45-70",
+            "Downstream cost evidence: PR 245's end-to-end test permanently excludes the recursive member (fix 553b46b, merged dfdbca2, run 32611394647)"
+          ],
+          "target_component": "execute",
+          "what_it_changes": "Adds a binding rule for execute units that author selection commitments: salts and orderings must be functions of stable behavior semantics only, with a two-process reproducibility check as required evidence."
+        }
+      ],
+      "decision": "PROPOSE_CANDIDATE",
+      "observation": "This registration re-submits, under the key the engine parses, the candidate the post-task Learn response proposed under a non-parsed key (proposed_candidates); the Learn record at artifacts/post-task-learn.json remains the immutable origin of the proposal. Duplicate check re-confirmed against the current index: no existing or rejected candidate covers commitment/salt determinism."
+    },
+    "result": {
+      "component": "execute",
+      "expected_outputs": [
+        "A PR whose delta makes two identical-seed, identical-tree processes select the identical recursive (target, control) pair, proven by a new regression test executing the selection in two subprocesses",
+        "Corrected docstrings replacing the superseded hash-seed attribution with the verified per-process entropy mechanism",
+        "Green fresh full exact-head CI on the PR head, unchanged head at merge; any red root-caused only at its demonstrated boundary",
+        "No behavioral weakening of the recursive campaign's fail-closed controls, candidate immutability, or claim boundary"
+      ],
+      "goal": "Make recursive-frontier target selection deterministic by binding the history commitment to stable behavior semantics: change _recursive_history_commitment (src/agi/recursive_evidence_frontier_growth.py:61,72) to derive its digest only from stable persisted behavior semantics (learned program descriptors, support examples, domains) instead of the whole iterated report digest, which embeds per-process entropy (uuid4 fresh_engine_run_ids and timestamp-tainted trial-snapshot bytes via evidence_frontier_iterated_expansion.py:399); correct the superseded hash-seed wording in the observed-schema module and test docstrings in the same change; add a regression test that computes the commitment twice in separate processes with identical seed and tree and asserts identical recursive target selection; validate the full recursive and observed-schema test files locally, then land the delta on an isolated branch via PR with green fresh full exact-head CI and unchanged head before merge.",
+      "inputs": [
+        "src/agi/recursive_evidence_frontier_growth.py",
+        "src/agi/evidence_frontier_iterated_expansion.py",
+        "src/agi/crossdomain_failure_derived_target.py (consumers of history_digest: _expand_support_inputs, _precommit_schedule)",
+        "src/agi/evidence_derived_target_synthesis.py:45-70 (compliant contrast pattern)",
+        "tests/test_observed_schema_extrapolation.py (docstring correction; diagnostic must stay green)",
+        "the adversarially verified sweep findings persisted in episode-claude-primary-continuation-20260823 and merged PR 245's corrected body"
+      ],
+      "rationale": "Expected-time ranking under agi/WORK_STRATEGY.json: every future campaign stacked on the recursive frontier currently inherits a per-run selection lottery, which already forced PR 245's end-to-end diagnostic to exclude the recursive member from assertions entirely and blocks reproducible end-to-end evidence for any successor capability (including a future return of the observed-schema family). Repairing the single verified leak point restores determinism for the whole chain at the cost of one bounded code unit with a mechanical proof, which dominates starting any new capability family on top of a non-reproducible prerequisite. The saturation assessment continues to bar new same-family retention probes, and the CLI binding hardening remains queued as the subsequent smaller unit.",
+      "scope": "agi/deterministic-selection"
+    }
+  },
+  "output_digest": "fc6729fcf003b0b3a4ba06be43cd767c381e128dfc7625df87c19b0b1fec488a",
+  "received_at": "2026-08-23T05:17:37.927383Z",
+  "request_digest": "c7ff0427f0f24dfd18726186cd34112ea5a03a5112b376040e85632c286693b0",
+  "response_digest": "df807a1030457440e89e4f77282368652c83745fe5dfe4d4c548a4d30e6a6a0f",
+  "schema_version": 1
+}

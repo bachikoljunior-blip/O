@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "evidence_id": "self-application-pr211-recovery-20260819-055716",
+  "execution_id": "o-agi-watchdog-recovery-20260819T055716JST",
+  "run_id": "run-self-applied-pr211-recovery-20260819-055716",
+  "episode_id": "episode-self-applied-pr211-recovery-20260819-055716",
+  "claim_tier": "internal_development",
+  "admissible_for_agi_claim": false,
+  "objective": "Continue unfinished AGI development from latest main only while preserving single-execution, exact-head validation, negative-evidence retention, and the strict independent external claim gate.",
+  "model": {
+    "required": "GPT-5.6 Pro",
+    "actual": "GPT-5.6 Sol",
+    "verified": true,
+    "verification_source": "platform runtime system identity"
+  },
+  "context_boundary": {
+    "logical_context_reset": true,
+    "prior_execution_chat_context_used": false,
+    "continuation_source": "repository_latest_main_only"
+  },
+  "validated_changes": [
+    {"pr": 211, "head_sha": "2d31154aa853eb3d65d454e0903f5d9d6beec404", "ci_run": 32180933796, "ci_conclusion": "success", "merge_sha": "ec2d7ccc7163ad829d12851d1947a655c37493c9"}
+  ],
+  "in_flight_validation": [
+    {"pr": 212, "head_sha": "8211d706e16d0508b6aa934d0200144858c9f6cf", "ci_run": 32185407560, "purpose": "fresh-main behavior-frontier validation"},
+    {"pr": 213, "head_sha": "fa402663255421ab76d67cadc9122f93fb666b2c", "ci_run": 32185888963, "purpose": "counterexample-driven single-round frontier expansion"},
+    {"pr": 214, "head_sha": "b1b8865d2752eb252772acdcd9123b21ae047258", "purpose": "two-round cumulative frontier growth and no-forgetting"}
+  ],
+  "negative_evidence_refs": [
+    "agi/HOURLY_EXECUTION_STATE.json",
+    "agi/CONTINUATION.json"
+  ],
+  "external_evidence_state": {
+    "evaluation_requests": 0,
+    "challenges": 0,
+    "disclosures": 0,
+    "attestations": 0,
+    "registered_verifiers": 0,
+    "agi_claim_supported": false
+  },
+  "unknowns": [
+    "Final exact-head CI outcomes for PR 212, PR 213, and PR 214 remain unresolved at this checkpoint.",
+    "Live Copilot semantic validation remains blocked by observed monthly quota exhaustion."
+  ],
+  "next_action": "Integrate only unchanged dependency heads that pass their required exact-head CI, reconstruct each stacked dependent PR on the resulting verified main, preserve any failures, then continue to the next evidence-driven falsifiable capability milestone.",
+  "claim_boundary": "Self-produced repository evidence can guide development and prove process invariants inside this repository, but it cannot establish independent evaluator operation, production isolation, or AGI."
+}

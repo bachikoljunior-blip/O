@@ -1,0 +1,180 @@
+name: gen29 validate recovered Root freeze v5
+
+on:
+  push:
+    branches:
+      - agent/recovery-gen29-root-freeze-v1
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gen29-root-freeze-recovery-v5
+  cancel-in-progress: false
+
+jobs:
+  recovery-validate:
+    if: ${{ contains(github.event.head_commit.message, '[native-root-recovery-v5]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install exact repository runtime
+        run: python -m pip install -e '.[test]'
+      - name: Validate exact recovered immutable Root lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import copy
+          import json
+          import subprocess
+          from pathlib import Path
+          from continual.store import Store
+          from continual.work_session import pending_work_invocations, verified_work_request, verify_work_invocations
+
+          root = Path('.').resolve()
+          base = 'e7ab41cd94627d8f647a39aa6eac1acc4ed32802'
+          run_id = 'run-work-recovery-gen9-durability-repair'
+          native_id = 'invoke-863ecdb0bbb9da518791d7b7'
+          work_id = 'invoke-91f2cb57cf0f69a5d9abfce6'
+          workflow_ref = '.github/workflows/gen29-root-freeze-v1.yml'
+          events_ref = f'.continual/runs/{run_id}/events.jsonl'
+          native_ref = f'.continual/runs/{run_id}/invocations/{native_id}.json'
+          request_ref = f'.continual/work-model/invocations/{work_id}/request.json'
+          receipt_ref = f'.continual/runs/{run_id}/recovery-receipts/gen29-native-root-freeze-recovered-from-job-99140671439-v1.json'
+          expected_paths = {
+              workflow_ref: 'A',
+              events_ref: 'M',
+              native_ref: 'A',
+              request_ref: 'A',
+              receipt_ref: 'A',
+          }
+          observed = {}
+          for line in subprocess.check_output(
+              ['git', 'diff', '--name-status', base, 'HEAD'], text=True
+          ).splitlines():
+              status, path = line.split('\t', 1)
+              observed[path] = status
+          if observed != expected_paths:
+              raise SystemExit('recovery delta mismatch: ' + json.dumps({
+                  'expected': expected_paths, 'observed': observed
+              }, sort_keys=True))
+
+          request = verified_work_request(root, work_id)
+          if request.get('component') != 'root':
+              raise SystemExit('recovered request is not Root')
+          if request.get('created_at') != '2026-08-29T18:50:46.512405Z':
+              raise SystemExit('recovered request created_at mismatch')
+          if request.get('request_digest') != '3d51e513c72a35bf00ce0b5353c6174e6dcac843133bd9df7b4d2526953d56fe':
+              raise SystemExit('recovered request digest mismatch')
+          if request.get('executor_binding') != 'current_chatgpt_work_session':
+              raise SystemExit('recovered request executor mismatch')
+          if request.get('model_identity') != 'chatgpt-work-model-unverified':
+              raise SystemExit('recovered request model mismatch')
+          manifest = request.get('payload', {}).get('decision_context', {})
+          if manifest.get('manifest_digest') != '38a59e23bce361626a6929c96652b81668f2086dc7ba62136deb8c43261a7347':
+              raise SystemExit('recovered request manifest mismatch')
+          clocks = manifest.get('source_clock', {})
+          if clocks.get('user_input_inbox', {}).get('version') != 'revision:35':
+              raise SystemExit('recovered request inbox clock mismatch')
+          if clocks.get('native_run_snapshot', {}).get('version') != 'revision:94':
+              raise SystemExit('recovered request snapshot clock mismatch')
+          if (root / request_ref).stat().st_size != 146195:
+              raise SystemExit('recovered request byte length mismatch')
+          if (root / request_ref).with_name('response.json').exists():
+              raise SystemExit('recovered Root request already has a response')
+
+          outer_payload = copy.deepcopy(request['payload'])
+          outer_payload.pop('decision_context', None)
+          store = Store(root)
+          recomputed_native = 'invoke-' + store.stable_digest({
+              'component': 'root',
+              'prompt': 'prompts/root.md',
+              'payload': outer_payload,
+          })
+          if recomputed_native != native_id:
+              raise SystemExit(f'native identity mismatch: {recomputed_native}')
+          if store.stable_digest(outer_payload) != '6afb53db635a4a21b08fd303':
+              raise SystemExit('native payload digest mismatch')
+
+          journal = json.loads((root / native_ref).read_text())
+          expected_journal = {
+              'attempt': 1,
+              'component': 'root',
+              'invocation_id': native_id,
+              'payload_digest': '6afb53db635a4a21b08fd303',
+              'prompt_path': 'prompts/root.md',
+              'started_at': '2026-08-29T18:50:46.512405Z',
+              'status': 'awaiting_work_model',
+              'work_invocation_id': work_id,
+              'work_request_digest': request['request_digest'],
+              'work_request_ref': request_ref,
+          }
+          if journal != expected_journal:
+              raise SystemExit('recovered native journal mismatch')
+
+          snapshot_ref = root / '.continual' / 'runs' / run_id / 'snapshot.json'
+          if subprocess.check_output(
+              ['git', 'hash-object', str(snapshot_ref)], text=True
+          ).strip() != 'f56208024a21be4d9061440998f3970253fe6c34':
+              raise SystemExit('snapshot blob changed')
+          snapshot = json.loads(snapshot_ref.read_text())
+          if snapshot.get('revision') != 94 or snapshot.get('phase') != 'root_pending':
+              raise SystemExit('snapshot is not revision94/root_pending')
+
+          base_events = subprocess.check_output(
+              ['git', 'show', f'{base}:{events_ref}'], text=True
+          )
+          expected_event = json.dumps({
+              'at': '2026-08-29T18:50:46.512405Z',
+              'component': 'root',
+              'invocation_id': native_id,
+              'run_id': run_id,
+              'type': 'work_model_pending',
+              'work_invocation_id': work_id,
+          }, ensure_ascii=False, sort_keys=True) + '\n'
+          if (root / events_ref).read_text() != base_events + expected_event:
+              raise SystemExit('events ledger is not one exact append')
+
+          pending = pending_work_invocations(root, run_id=run_id)
+          if len(pending) != 1 or pending[0].get('invocation_id') != work_id:
+              raise SystemExit('recovered request is not the unique pending Work item')
+          verified = verify_work_invocations(root, run_id=run_id)
+          expected_counts = {
+              'valid': True,
+              'requests': 86,
+              'responses': 85,
+              'pending': 1,
+              'native_completed': 79,
+              'native_fragments': 79,
+              'native_local_learn': 73,
+          }
+          for key, value in expected_counts.items():
+              if verified.get(key) != value:
+                  raise SystemExit(f'verification mismatch {key}: {verified.get(key)!r}')
+
+          receipt = json.loads((root / receipt_ref).read_text())
+          if receipt.get('idempotency_key') != 'o-work-gen29:root-revision94:recover-exact-invoke-91f2cb57cf0f69a5d9abfce6:v1':
+              raise SystemExit('recovery receipt idempotency mismatch')
+          if receipt.get('request_recreated') is not False or receipt.get('root_reinvoked') is not False:
+              raise SystemExit('recovery receipt incorrectly claims reinvocation')
+          print('RECOVERED_ROOT_FREEZE=' + json.dumps({
+              'native_invocation_id': native_id,
+              'work_invocation_id': work_id,
+              'request_digest': request['request_digest'],
+              'request_blob_sha': subprocess.check_output(
+                  ['git', 'hash-object', request_ref], text=True
+              ).strip(),
+              'verification': expected_counts,
+              'root_reinvoked': False,
+          }, sort_keys=True))
+          PY
+      - name: Run focused recovery regressions
+        run: python -m pytest -q tests/test_work_session_bridge.py tests/test_continuity_preflight.py

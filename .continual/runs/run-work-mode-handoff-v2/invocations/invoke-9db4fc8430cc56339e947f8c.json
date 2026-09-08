@@ -1,0 +1,50 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-23T06:22:11.127053Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-9db4fc8430cc56339e947f8c-candidate_evaluate.json",
+  "invocation_id": "invoke-9db4fc8430cc56339e947f8c",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json"
+      ],
+      "observations": [
+        "The candidate directly matches the required verdict separation and has no conflicts."
+      ],
+      "purpose": "Select a scoped dual-verdict trial for Task Evaluate.",
+      "unresolved": []
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "This is a useful discriminating repeat trial because the bounded cross-binding unit is complete while the external objective remains open."
+    },
+    "result": {
+      "baseline": "The active Task Evaluate contract remains authoritative; the overlay only requires a separate bounded unit verdict without changing the original goal.",
+      "conflicts": [],
+      "decision": "TRIAL_CANDIDATE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "original-goal verdict remains independent",
+        "bounded unit verdict maps each frozen condition to evidence",
+        "negative evidence and unmet conditions are retained",
+        "unit PASS is not relabeled as AGI proof"
+      ],
+      "reason": "This evaluation must distinguish a bounded implementation PASS from the still-unmet user-level objective. The overlay targets exactly that separation, has no dependency or conflict, and already has supporting non-conflation evidence while remaining reversible.",
+      "regression_checks": [
+        "no weakened original goal",
+        "no conflation of unit and task verdicts",
+        "explicit claim boundary",
+        "reversible scope-only trial"
+      ],
+      "rollback": "Reject the overlay for scope if it weakens the original verdict, omits negative evidence, or lets unit PASS imply task PASS.",
+      "scope": "continual/incremental-task-evaluation",
+      "selected_candidate_id": "candidate-task-evaluate-unit-verdict-v1"
+    }
+  },
+  "payload_digest": "84725fd7e7cf1790803295d1",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

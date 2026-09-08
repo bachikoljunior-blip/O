@@ -1,0 +1,90 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-26T23:56:11.758644Z",
+  "component": "task_evaluate",
+  "fragment_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-d3903ba6d47f966e7a6a1cbf-task_evaluate.json",
+  "invocation_id": "invoke-d3903ba6d47f966e7a6a1cbf",
+  "output": {
+    "fragment": {
+      "component": "task_evaluate",
+      "evidence_refs": [
+        "agi/evidence/generation22-revision28-recovery-audit.json",
+        "src/continual/recovery_audit.py",
+        "tests/test_recovery_audit.py",
+        ".continual/work-model/invocations/invoke-5a713c5572a06bf86fe66e20/response.json",
+        ".continual/work-model/invocations/invoke-be297a2f99b32897dfbc2906/request.json"
+      ],
+      "observations": [
+        "Every frozen unit success condition has direct durable or reproducible evidence.",
+        "The publication condition remains explicitly unmet.",
+        "The upper objective remains FAIL and agi_claim_supported remains false."
+      ],
+      "purpose": "Evaluate the bounded generation-22 causal recovery audit separately from the user-level objective.",
+      "unresolved": [
+        "Consolidate and Learn",
+        "exact-head publication and main readback",
+        "materially different follow-on work and the user-level objective"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observations": [
+        "The audit is discriminating because it rejects state-only repair and exact-source drift while accepting the checked current binding.",
+        "The two root causes are independently evidenced and neither is hidden by the successful resume.",
+        "A local unit PASS and an upper-level FAIL remain necessary until exact-head publication and substantially broader evidence exist."
+      ]
+    },
+    "result": {
+      "agi_claim_supported": false,
+      "claim_boundary": "PASS is limited to the exact generation-22 revision-28 causal recovery audit, its recorded source receipts, no-mutation validation, current guard implementation, and immutable native request/response records. It does not generalize to all recovery paths, external production capability, AGI, or completion of the user's objective.",
+      "evaluated_goal": "Evaluate whether the generation-22 recovery audit identified and eliminated the prior discretionary-stop mechanisms, reproduced from latest-main durable records, preserved native identity and no-mutation safety, and retained its bounded claim and publication scope.",
+      "evidence": [
+        {
+          "finding": "The checked artifact matched regenerated output exactly and bound main cdf150658f093964ffc1e5a7930c46f25666a929 plus exact CI head 955a4f028c442416b98b9ba9bf1a0456b10c6035.",
+          "source": "agi/evidence/generation22-revision28-recovery-audit.json and deterministic adapter replay"
+        },
+        {
+          "finding": "Resume without causal evidence raised ContinuityPreflightError and left the aggregate native record digest unchanged at da53ce4cd77da4f7724438662383097ce41284c231a366d4b23b45bd5ff7f4b4.",
+          "source": "production-continuation fail-closed validation"
+        },
+        {
+          "finding": "The positive preflight is bound to execution work-recovery-20260826T213331747Z-e52ebacf244e3612dc86f26b692dac27, generation 22, the exact fence digest, native run, executor, model, policy revision 28, and all three policy content digests.",
+          "source": "agi/WORK_EXECUTION_STATE.json#start_of_run_continuity_preflight"
+        },
+        {
+          "finding": "Root invoke-4f67668fbf0f833b6421d09e has a matching request/response digest pair and was followed by Candidate Evaluate and Execute progress without request recreation.",
+          "source": "immutable Work journal"
+        },
+        {
+          "finding": "32 tests passed; compileall, state/result JSON, exact audit reproduction, git diff check, and Work journal verification passed.",
+          "source": "focused protected validation"
+        }
+      ],
+      "negative_evidence": [
+        "The previous execution did stop on an agent-level approval-scope reinterpretation despite standing safe-work authorization.",
+        "Before PR 319, WorkSession.resume had no causal-remediation entry guard.",
+        "The bounded implementation, audit result, tests, and new lifecycle records have not yet passed their own isolated exact-head publication and remote main readback.",
+        "No evidence in this unit establishes broader recovery reliability, external production capability, AGI, or user-level completion."
+      ],
+      "repair_information": {
+        "do_not_do": "Do not treat the unit PASS as publication success, recreate any invocation, reuse the lost local 105-path candidate, weaken the causal guard, or enlarge the claim.",
+        "next": "Consolidate and Learn, then publish the reviewed implementation, audit artifact, tests, and exact lifecycle records through unchanged exact-head CI and expected-head merge with remote readback; continue safe work afterward."
+      },
+      "unit_verdict": "PASS",
+      "unit_verdict_reason": "The audit reproduces exactly from the recorded main and source receipts; it detects both the approval-scope reinterpretation and the missing native resume preflight; the guard rejects missing or state-only remediation before mutation; the positive record is bound to execution, generation, fence, run, executor, model, revision, and policy digests; the Root request has one matching response; the lost local candidate was not used; and the focused protected set passed 32 tests.",
+      "unmet_conditions": [
+        "Consolidate and Learn this Task Evaluate result.",
+        "Publish only the reviewed non-secret paths through isolated unchanged exact-head CI, expected-head merge, and exact remote readback.",
+        "Return to Root and continue materially different safe executable work.",
+        "The user's upper objective remains unmet."
+      ],
+      "user_level_verdict": "FAIL",
+      "verdict": "FAIL",
+      "verdict_reason": "The bounded local audit unit passes, but publication, main readback, remaining O lifecycle, follow-on work, and the user's upper objective remain incomplete. Internal audit, tests, and CI are not evidence that AGI or external production capability exists."
+    }
+  },
+  "payload_digest": "435c59d729d751cbca53a517",
+  "prompt_path": "prompts/task_evaluate.md",
+  "status": "complete"
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "role": "evaluation",
+  "observed_at": "2026-08-29T10:28:53+09:00",
+  "status": "BLOCKED_CONTROL_MISSING",
+  "clean_exploration": true,
+  "authoritative_control": {
+    "path": "note/automation_control/DESIRED_STATE.json",
+    "repository": "bachikoljunior-blip/O",
+    "ref": "8e4c4501062fa67409f33bad7a4deaa9b66f50c7",
+    "read_result": "404_NOT_FOUND",
+    "enabled_desired": "UNKNOWN",
+    "role_config": "UNAVAILABLE"
+  },
+  "execution": {
+    "semantic_work_started": false,
+    "checker_execution_count": 0,
+    "acceptance_execution_count": 0,
+    "new_acceptance_claims": 0,
+    "desired_state_edited": false
+  },
+  "frontier": [
+    "Restore or republish the current authoritative note/automation_control/DESIRED_STATE.json on the active default-branch state.",
+    "After restoration, bootstrap by reading that file before any evaluation semantic work and execute only the then-current evaluation role config."
+  ],
+  "exact_continuation": "Fetch note/automation_control/DESIRED_STATE.json from the current active default-branch head first. If it is absent, perform no semantic evaluation work and record only a role-local blocked receipt/checkpoint. If present and enabled_desired=false, perform the specified logical no-op plus receipt. If present and enabled_desired=true, execute only the current evaluation config under clean_exploration, without consulting O semantics, other-worker state, downstream state, or legacy semantics.",
+  "termination": {
+    "kind": "HARD_CONTROL_BLOCK",
+    "reason": "Required authoritative control file is absent at the current main head; enabled_desired and current role configuration cannot be established without violating the bootstrap contract."
+  }
+}
