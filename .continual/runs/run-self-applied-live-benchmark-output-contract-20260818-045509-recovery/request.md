@@ -1,1 +1,0 @@
-Continue O AGI development from latest main without duplicate execution; recover the stale live benchmark failure, preserve strict validation, and continue through the next fresh bounded genuine-model campaign.
