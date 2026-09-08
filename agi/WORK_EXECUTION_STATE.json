@@ -173,7 +173,7 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-08T02:01:35.000Z",
+    "checkpointed_at": "2026-09-08T02:10:20.000Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -188,7 +188,7 @@
     "snapshot_blob_sha": "a62b0045a258a8b14d6b2f4780f697e25c984688",
     "snapshot_revision": 261,
     "snapshot_phase": "post_task_learn_pending",
-    "completed_effect_receipt_ref": "generation34_learn261_preflight_source_refresh_v1",
+    "completed_effect_receipt_ref": "generation34_learn264_freeze_v1",
     "completed_effect_receipt": {
       "schema_version": 1,
       "classification": "stop_cause_repair_exact_head_ci_pending",
@@ -378,12 +378,12 @@
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
+    "pending_pull_requests": [608],
     "idempotency_key": "o-work-g34:81acbf6d:consolidate259-consume-native261:v1",
-    "exact_frontier": "Post-task Learn preflight remained request-free while exposing expired Work/CI source observations and then a stale heartbeat; exact connector observations were refreshed and generation34 heartbeat is renewed before one bounded retry.",
+    "exact_frontier": "The unique Learn264 request is frozen on PR608 head 2f68f0c5a2ce3bcdb4b3d1049db2e77272ace543 with all nine branch blobs read back exactly; response remains absent pending exact-head CI and main merge/readback.",
     "next_tool": "exec_command",
-    "next_action": "Exact-readback this heartbeat CAS, refresh the Work source observation against its new state blob, and retry freezing the unique Post-task Learn request once.",
-    "next_tool_action": "Exact-readback this heartbeat CAS, refresh the Work source observation against its new state blob, and retry freezing the unique Post-task Learn request once.",
+    "next_action": "Require unchanged PR608 exact-head directive and all five test jobs, then merge/readback and bind the exact Learn continuation before submitting one response.",
+    "next_tool_action": "Require unchanged PR608 exact-head directive and all five test jobs, then merge/readback and bind the exact Learn continuation before submitting one response.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -30276,7 +30276,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-08T02:01:35.000Z",
+  "heartbeat_at": "2026-09-08T02:10:20.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -31196,9 +31196,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Eliminated Learn preflight source-observation blockers through exact Work-state and CI connector readbacks; renewing the same generation34 heartbeat before retry.",
-  "last_activity_at": "2026-09-08T02:01:35.000Z",
-  "last_checked_at": "2026-09-08T02:01:35.000Z",
+  "last_action": "Froze one unique Post-task Learn request and published its request, native journal, source receipts, failure events, snapshot and checkpoint artifact on PR608 with exact branch readback.",
+  "last_activity_at": "2026-09-08T02:10:20.000Z",
+  "last_checked_at": "2026-09-08T02:10:20.000Z",
   "last_error": null,
   "last_native_publication": {
     "all_content_blobs_exact_readback": true,
@@ -31211,7 +31211,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-08T02:01:35.000Z",
+  "last_progress_at": "2026-09-08T02:10:20.000Z",
   "last_verified_effect": {
     "schema_version": 1,
     "classification": "stop_cause_repair_exact_head_ci_pending",
@@ -31621,9 +31621,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Exact-readback the heartbeat CAS, refresh the Work source observation against the new state blob, and retry freezing the unique Post-task Learn request once.",
-  "next_tool": "exec_command",
-  "next_tool_action": "Exact-readback the heartbeat CAS, refresh the Work source observation against the new state blob, and retry freezing the unique Post-task Learn request once.",
+  "next_action": "Require unchanged PR608 exact-head directive and all five test jobs, then merge/readback and bind the exact Learn continuation before submitting one response.",
+  "next_tool": "github_fetch_commit_workflow_runs",
+  "next_tool_action": "Require unchanged PR608 exact-head directive and all five test jobs, then merge/readback and bind the exact Learn continuation before submitting one response.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -37693,7 +37693,7 @@
     "verified_remote_readback": true,
     "resume_required": true
   },
-  "pending_pull_requests": [],
+  "pending_pull_requests": [608],
   "pending_ci_run_ids": [],
   "pending_job_ids": [],
   "generation34_consolidate259_continuation_source_repair_v1": {
@@ -37970,5 +37970,45 @@
     "resume_required": true,
     "upper_objective_achieved": false,
     "observed_at": "2026-09-08T02:01:35.000Z"
+  },
+  "generation34_learn264_freeze_v1": {
+    "schema_version": 1,
+    "classification": "post_task_learn_request_frozen_branch_readback_verified_ci_pending",
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "lease_generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:learn264-freeze:invoke-89428b6103d8a8c192310e13:v1",
+    "source_main_sha": "7897026c9770cd8e671a8456490b496aadac0ce5",
+    "source_state_blob_sha": "59296dbf3bea47e71846512e9a586a970dd69aed",
+    "branch": "work-g34-learn264-freeze",
+    "head_sha": "2f68f0c5a2ce3bcdb4b3d1049db2e77272ace543",
+    "pull_request": 608,
+    "work_invocation_id": "invoke-89428b6103d8a8c192310e13",
+    "native_invocation_id": "invoke-9b2f77a7d2b3040eb00dd127",
+    "component": "learn",
+    "request_digest": "b8087cc1dc07f2a67820fcc640c6b61924709168a7d9215420083cdcc1050bba",
+    "payload_digest": "6ec37cbdcadd83f185c410d78635fec43ddb0f5d5ea9556f9f3a154bff791dbe",
+    "prompt_digest": "ac0e9c6efa1c04d4b5e8ca2d8201e9243fbe88ab2baf0cf039dc6f445fbd2266",
+    "snapshot_revision": 264,
+    "snapshot_phase": "post_task_learn_pending",
+    "files": [
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl", "sha": "3c93dc7346c335af9962766a619434a1da42cdf3"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json", "sha": "e8f6ce46be27819122ad5742866595ec235e6e5e"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-9b2f77a7d2b3040eb00dd127.json", "sha": "b3a7124822737201bb60ff3897b6eb7d3921b3b5"},
+      {"path": ".continual/work-model/invocations/invoke-89428b6103d8a8c192310e13/request.json", "sha": "cc3b8c0b47465be9e4b5de184e5327a57051ff3d"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1f9a4ebff9819777c4100f16/request.json", "sha": "c0e1356f4fc68384b00ec0e8e2220a46a39db7f6"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/work-source-observations/work-state-1f9a4ebff9819777c4100f16/receipt.json", "sha": "1811b088a4ea7519780967a16f329ef059c0d89a"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-ad76b16819e3d6be252b3dd1/request.json", "sha": "7b4748343fedeb9623f6ecb9c098bf694ea27c8b"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/ci-source-observations/ci-run-ad76b16819e3d6be252b3dd1/receipt.json", "sha": "4b96cda60c195fad63a065169511de681dd1cef8"},
+      {"path": "artifacts/g34-learn264-freeze-v1.json", "sha": "1560f7047eaaec45f2ff03a31847b8e69075df48"}
+    ],
+    "work_verify": {"valid": true, "requests": 251, "responses": 250, "pending": 1, "native_completed": 242, "native_fragments": 242, "native_local_learn": 221},
+    "request_recreated": false,
+    "response_submitted": false,
+    "response_consumed": false,
+    "response_replayed": false,
+    "resume_required": true,
+    "upper_objective_achieved": false,
+    "observed_at": "2026-09-08T02:10:20.000Z"
   }
 }
