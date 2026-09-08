@@ -173,14 +173,14 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-08T21:36:08Z",
+    "checkpointed_at": "2026-09-08T21:46:32Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "goal_revision": 118,
-    "current_head_sha": "e34ab7ede75b9460c5e2368a00dd1752369eac8e",
-    "current_main_sha": "e34ab7ede75b9460c5e2368a00dd1752369eac8e",
-    "current_state_blob_sha": "6176312204ebc032a1b6620f02cf002a08706025",
+    "current_head_sha": "72c300e4c604e24a1f1c41ac643aadcde26b00ec",
+    "current_main_sha": "72c300e4c604e24a1f1c41ac643aadcde26b00ec",
+    "current_state_blob_sha": "94abfcf760fd9aca246f1a56d1f5362a87975b47",
     "frozen_invocation_id": "invoke-d2a2249945259bcd9dbd1382",
     "frozen_request_digest": "9ef91db30b074e3d1fab4a75de74bbcacfdc0cb3d35d5104876356c39ad87aa4",
     "frozen_payload_digest": "834b739903b3e9fabd0821ca1333e48bf1cbd9cb0ea17841a772ce933fe61152",
@@ -188,242 +188,88 @@
     "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
     "snapshot_revision": 271,
     "snapshot_phase": "unit_pending",
-    "completed_effect_receipt_ref": "generation34_execute271_response_v1",
+    "completed_effect_receipt_ref": "generation34_execute271_continuation_durability_repair_v1",
     "completed_effect_receipt": {
       "schema_version": 1,
-      "classification": "execute_response_main_readback_verified_native_consume_pending",
+      "classification": "continuation_durability_alignment_repair_pending_cas",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "idempotency_key": "o-work-g34:81acbf6d:execute271-response:c7074cff:v1",
-      "source_main_sha": "a54f94545e2c8661900221ab627e602251e24fc3",
-      "source_state_blob_sha": "9062541a377650610727b8584bdce2e809da0447",
-      "run_id": "run-work-recovery-gen9-durability-repair",
-      "snapshot_revision": 271,
-      "snapshot_phase": "unit_pending",
-      "unit_id": "unit-generation34-production-history-resolution-audit-v1",
+      "idempotency_key": "o-work-g34:81acbf6d:execute271-consume-durability-repair:c7074cff:v1",
+      "source_main_sha": "72c300e4c604e24a1f1c41ac643aadcde26b00ec",
+      "source_state_blob_sha": "94abfcf760fd9aca246f1a56d1f5362a87975b47",
+      "failed_command": "work-resume run-work-recovery-gen9-durability-repair --max-steps 1",
+      "failure": "ContinuityPreflightError: continuation durability main commit mismatch",
+      "cause": "continuation_durability still described the predecessor Candidate269 request, while exact_continuation.snapshot_head_sha pointed to pre-request commit 387810cd; neither could prove the Execute271 request/native journal at the required snapshot source commit.",
+      "mutation_before_failure": false,
+      "repair": "Bind exact_continuation.snapshot_head_sha and continuation_durability.source_main_sha to merge 2708f0a4, the reachable main commit that contains snapshot271 plus the exact Execute request and native journal, while preserving the immutable response and every request/response digest.",
+      "repair_evidence": {
+        "source_commit_sha": "2708f0a4b1347616a55aa3904b930a0dd00cb496",
+        "source_state_blob_sha": "5de9595ed4e5151b088539111cea8f6d44b337d7",
+        "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+        "request_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/request.json",
+        "request_blob_sha": "34358954b6b2af41601c7423ad613cecce28f413",
+        "native_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-a466dbba330278ea029cab25.json",
+        "native_blob_sha": "702e8ffad1c44c6bd0471b1de8d82141418ef5ad",
+        "source_commit_reachable_from_origin_main": true
+      },
       "work_invocation_id": "invoke-d2a2249945259bcd9dbd1382",
       "native_invocation_id": "invoke-a466dbba330278ea029cab25",
       "request_digest": "9ef91db30b074e3d1fab4a75de74bbcacfdc0cb3d35d5104876356c39ad87aa4",
-      "payload_digest": "834b739903b3e9fabd0821ca1333e48bf1cbd9cb0ea17841a772ce933fe61152",
       "response_digest": "c7074cff4dade8377dfb84b885da9b6223c17e26d450c1d0a1c28bb101b63c5c",
       "output_digest": "7a27ec675f20662934500c341cd81af8f50a17097e2b8bd94c0ec4a3f64c8f0a",
-      "response_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-      "response_blob_sha": "5af225f6aad69f4834f2bea3c08379d803057651",
-      "checkpoint_ref": "artifacts/g34-execute271-response-checkpoint-v1.json",
-      "checkpoint_blob_sha": "d79b3c42501bb3abc3d4450604a964834c38048e",
-      "response_received_at": "2026-09-08T21:01:34.276312Z",
-      "audit_attempt": 1,
-      "audit_verdict": "PASS",
-      "audit_receipt_blob_sha": "2f5d22464fb89b2a84693d0f0778fcca7799a32b",
-      "response_submitted": true,
-      "response_submitted_exactly_once": true,
       "response_consumed": false,
       "response_replayed": false,
       "request_recreated": false,
-      "protected_publication_pending": false,
       "resume_required": true,
-      "upper_objective_achieved": false,
-      "agi_claim_supported": false,
-      "observed_at": "2026-09-08T21:01:34.276312Z",
-      "status": "remote_main_readback_verified",
-      "branch": "work-g34-execute271-response",
-      "head_sha": "d61e2c26e39dea4c1905a4d6ec5753689c915665",
-      "pull_request": 623,
-      "merge_sha": "e34ab7ede75b9460c5e2368a00dd1752369eac8e",
-      "files": [
-        {
-          "path": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-          "sha": "5af225f6aad69f4834f2bea3c08379d803057651"
-        },
-        {
-          "path": "artifacts/g34-execute271-response-checkpoint-v1.json",
-          "sha": "d79b3c42501bb3abc3d4450604a964834c38048e"
-        },
-        {
-          "path": "agi/WORK_EXECUTION_STATE.json",
-          "sha": "6176312204ebc032a1b6620f02cf002a08706025"
-        }
-      ],
-      "branch_readback_verified": true,
-      "workflow_runs": {
-        "directive_source_preflight": {
-          "run_id": 34278685313,
-          "conclusion": "success"
-        },
-        "test": {
-          "run_id": 34278685325,
-          "conclusion": "success"
-        }
-      },
-      "required_jobs": [
-        {
-          "job_id": 102237907121,
-          "name": "pytest shard 0 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 102237907465,
-          "name": "pytest shard 1 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 102237907321,
-          "name": "pytest shard 2 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 102237907500,
-          "name": "pytest shard 3 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 102245823090,
-          "name": "test",
-          "conclusion": "success"
-        }
-      ],
-      "required_jobs_conclusion": "success",
-      "main_readback": [
-        {
-          "path": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-          "sha": "5af225f6aad69f4834f2bea3c08379d803057651"
-        },
-        {
-          "path": "artifacts/g34-execute271-response-checkpoint-v1.json",
-          "sha": "d79b3c42501bb3abc3d4450604a964834c38048e"
-        },
-        {
-          "path": "agi/WORK_EXECUTION_STATE.json",
-          "sha": "6176312204ebc032a1b6620f02cf002a08706025"
-        }
-      ],
-      "main_readback_verified": true,
-      "state_bind_expected_blob_sha": "6176312204ebc032a1b6620f02cf002a08706025",
-      "verified_at": "2026-09-08T21:36:08Z"
+      "observed_at": "2026-09-08T21:46:32Z"
     },
     "last_verified_effect": {
       "schema_version": 1,
-      "classification": "execute_response_main_readback_verified_native_consume_pending",
+      "classification": "continuation_durability_alignment_repair_pending_cas",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-      "idempotency_key": "o-work-g34:81acbf6d:execute271-response:c7074cff:v1",
-      "source_main_sha": "a54f94545e2c8661900221ab627e602251e24fc3",
-      "source_state_blob_sha": "9062541a377650610727b8584bdce2e809da0447",
-      "run_id": "run-work-recovery-gen9-durability-repair",
-      "snapshot_revision": 271,
-      "snapshot_phase": "unit_pending",
-      "unit_id": "unit-generation34-production-history-resolution-audit-v1",
+      "idempotency_key": "o-work-g34:81acbf6d:execute271-consume-durability-repair:c7074cff:v1",
+      "source_main_sha": "72c300e4c604e24a1f1c41ac643aadcde26b00ec",
+      "source_state_blob_sha": "94abfcf760fd9aca246f1a56d1f5362a87975b47",
+      "failed_command": "work-resume run-work-recovery-gen9-durability-repair --max-steps 1",
+      "failure": "ContinuityPreflightError: continuation durability main commit mismatch",
+      "cause": "continuation_durability still described the predecessor Candidate269 request, while exact_continuation.snapshot_head_sha pointed to pre-request commit 387810cd; neither could prove the Execute271 request/native journal at the required snapshot source commit.",
+      "mutation_before_failure": false,
+      "repair": "Bind exact_continuation.snapshot_head_sha and continuation_durability.source_main_sha to merge 2708f0a4, the reachable main commit that contains snapshot271 plus the exact Execute request and native journal, while preserving the immutable response and every request/response digest.",
+      "repair_evidence": {
+        "source_commit_sha": "2708f0a4b1347616a55aa3904b930a0dd00cb496",
+        "source_state_blob_sha": "5de9595ed4e5151b088539111cea8f6d44b337d7",
+        "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+        "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+        "request_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/request.json",
+        "request_blob_sha": "34358954b6b2af41601c7423ad613cecce28f413",
+        "native_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-a466dbba330278ea029cab25.json",
+        "native_blob_sha": "702e8ffad1c44c6bd0471b1de8d82141418ef5ad",
+        "source_commit_reachable_from_origin_main": true
+      },
       "work_invocation_id": "invoke-d2a2249945259bcd9dbd1382",
       "native_invocation_id": "invoke-a466dbba330278ea029cab25",
       "request_digest": "9ef91db30b074e3d1fab4a75de74bbcacfdc0cb3d35d5104876356c39ad87aa4",
-      "payload_digest": "834b739903b3e9fabd0821ca1333e48bf1cbd9cb0ea17841a772ce933fe61152",
       "response_digest": "c7074cff4dade8377dfb84b885da9b6223c17e26d450c1d0a1c28bb101b63c5c",
       "output_digest": "7a27ec675f20662934500c341cd81af8f50a17097e2b8bd94c0ec4a3f64c8f0a",
-      "response_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-      "response_blob_sha": "5af225f6aad69f4834f2bea3c08379d803057651",
-      "checkpoint_ref": "artifacts/g34-execute271-response-checkpoint-v1.json",
-      "checkpoint_blob_sha": "d79b3c42501bb3abc3d4450604a964834c38048e",
-      "response_received_at": "2026-09-08T21:01:34.276312Z",
-      "audit_attempt": 1,
-      "audit_verdict": "PASS",
-      "audit_receipt_blob_sha": "2f5d22464fb89b2a84693d0f0778fcca7799a32b",
-      "response_submitted": true,
-      "response_submitted_exactly_once": true,
       "response_consumed": false,
       "response_replayed": false,
       "request_recreated": false,
-      "protected_publication_pending": false,
       "resume_required": true,
-      "upper_objective_achieved": false,
-      "agi_claim_supported": false,
-      "observed_at": "2026-09-08T21:01:34.276312Z",
-      "status": "remote_main_readback_verified",
-      "branch": "work-g34-execute271-response",
-      "head_sha": "d61e2c26e39dea4c1905a4d6ec5753689c915665",
-      "pull_request": 623,
-      "merge_sha": "e34ab7ede75b9460c5e2368a00dd1752369eac8e",
-      "files": [
-        {
-          "path": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-          "sha": "5af225f6aad69f4834f2bea3c08379d803057651"
-        },
-        {
-          "path": "artifacts/g34-execute271-response-checkpoint-v1.json",
-          "sha": "d79b3c42501bb3abc3d4450604a964834c38048e"
-        },
-        {
-          "path": "agi/WORK_EXECUTION_STATE.json",
-          "sha": "6176312204ebc032a1b6620f02cf002a08706025"
-        }
-      ],
-      "branch_readback_verified": true,
-      "workflow_runs": {
-        "directive_source_preflight": {
-          "run_id": 34278685313,
-          "conclusion": "success"
-        },
-        "test": {
-          "run_id": 34278685325,
-          "conclusion": "success"
-        }
-      },
-      "required_jobs": [
-        {
-          "job_id": 102237907121,
-          "name": "pytest shard 0 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 102237907465,
-          "name": "pytest shard 1 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 102237907321,
-          "name": "pytest shard 2 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 102237907500,
-          "name": "pytest shard 3 of 4",
-          "conclusion": "success"
-        },
-        {
-          "job_id": 102245823090,
-          "name": "test",
-          "conclusion": "success"
-        }
-      ],
-      "required_jobs_conclusion": "success",
-      "main_readback": [
-        {
-          "path": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-          "sha": "5af225f6aad69f4834f2bea3c08379d803057651"
-        },
-        {
-          "path": "artifacts/g34-execute271-response-checkpoint-v1.json",
-          "sha": "d79b3c42501bb3abc3d4450604a964834c38048e"
-        },
-        {
-          "path": "agi/WORK_EXECUTION_STATE.json",
-          "sha": "6176312204ebc032a1b6620f02cf002a08706025"
-        }
-      ],
-      "main_readback_verified": true,
-      "state_bind_expected_blob_sha": "6176312204ebc032a1b6620f02cf002a08706025",
-      "verified_at": "2026-09-08T21:36:08Z"
+      "observed_at": "2026-09-08T21:46:32Z"
     },
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_pull_requests": [],
-    "idempotency_key": "o-work-g34:81acbf6d:execute271-response-main-readback:c7074cff:v1",
-    "exact_frontier": "The immutable Execute response is protected, merged, and exact-read back on main; it remains unconsumed. Renew the mandatory Work source observation if stale, then consume this response exactly once.",
-    "next_tool": "work source observation freshness check then work-resume",
-    "next_action": "Verify or renew the mandatory source observation against main e34ab7ed/state blob from this CAS, then consume invoke-d2a2249945259bcd9dbd1382 exactly once without replay.",
-    "next_tool_action": "Verify or renew the mandatory source observation against main e34ab7ed/state blob from this CAS, then consume invoke-d2a2249945259bcd9dbd1382 exactly once without replay.",
+    "idempotency_key": "o-work-g34:81acbf6d:execute271-consume-durability-repair:c7074cff:v1",
+    "exact_frontier": "Consume preflight found and failed closed on a stale predecessor durability proof. The local repair now binds snapshot271, Execute271 request, and its native journal to reachable main commit 2708f0a4; publish by expected-blob CAS, refresh source observation, and rerun preflight before consume.",
+    "next_tool": "expected-blob state CAS then source observation",
+    "next_action": "CAS this durability repair against state blob 94abfcf7, exact-readback, renew its mandatory source observation, then retry work-resume once.",
+    "next_tool_action": "CAS this durability repair against state blob 94abfcf7, exact-readback, renew its mandatory source observation, then retry work-resume once.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -1375,22 +1221,26 @@
     "current_unit_id": "unit-generation34-production-history-resolution-audit-v1",
     "native_phase": "unit_pending",
     "target_component": "execute",
-    "pending_component": "candidate_evaluate",
-    "pending_work_invocation_id": "invoke-254ab73b925e81ca60709184",
-    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-254ab73b925e81ca60709184/request.json",
-    "pending_native_invocation_id": "invoke-917c09c021d1612aa59ff4c4",
-    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-917c09c021d1612aa59ff4c4.json",
-    "pending_native_invocation_blob_sha": "5afe8fc4b4a9ce213da69a90afca6d039f771100",
-    "pending_request_digest": "760849a6e63abc5f750ee4d6b6cb8efe65552d12ab046cc27bc87209156d913d",
-    "pending_request_ref": ".continual/work-model/invocations/invoke-254ab73b925e81ca60709184/request.json",
-    "pending_request_blob_sha": "cf8e2a562faf201c093f2d82ab7720218ac50abd",
-    "pending_payload_digest": "1ce0ff60f1be23a26a087091966ccc1720565ce62774f67f3fd95284a867d4f8",
-    "pending_output_digest": "8aa103778827bb0bf0053f5d367161f98866672a7d6940a7fbfc21ad7755127c",
-    "pending_response_digest": "2c58b6c3561d7e356b22bb7b8482192c4f84678df2e807efa8b4215a1434b9df",
-    "pending_response_ref": ".continual/work-model/invocations/invoke-254ab73b925e81ca60709184/response.json",
-    "pending_response_blob_sha": "9389f2a2d2b4b7781b611a40f16105b00b5d4a62",
+    "pending_component": "execute",
+    "pending_work_invocation_id": "invoke-d2a2249945259bcd9dbd1382",
+    "pending_work_invocation_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/request.json",
+    "pending_native_invocation_id": "invoke-a466dbba330278ea029cab25",
+    "pending_native_invocation_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-a466dbba330278ea029cab25.json",
+    "pending_native_invocation_blob_sha": "702e8ffad1c44c6bd0471b1de8d82141418ef5ad",
+    "pending_request_digest": "9ef91db30b074e3d1fab4a75de74bbcacfdc0cb3d35d5104876356c39ad87aa4",
+    "pending_request_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/request.json",
+    "pending_request_blob_sha": "34358954b6b2af41601c7423ad613cecce28f413",
+    "pending_payload_digest": "834b739903b3e9fabd0821ca1333e48bf1cbd9cb0ea17841a772ce933fe61152",
+    "pending_output_digest": "7a27ec675f20662934500c341cd81af8f50a17097e2b8bd94c0ec4a3f64c8f0a",
+    "pending_response_digest": "c7074cff4dade8377dfb84b885da9b6223c17e26d450c1d0a1c28bb101b63c5c",
+    "pending_response_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
+    "pending_response_blob_sha": "5af225f6aad69f4834f2bea3c08379d803057651",
     "pending_preflight_ref": null,
     "pending_preflight_blob_sha": null,
+    "predecessor_work_invocation_id": "invoke-254ab73b925e81ca60709184",
+    "predecessor_native_invocation_id": "invoke-917c09c021d1612aa59ff4c4",
+    "predecessor_request_digest": "760849a6e63abc5f750ee4d6b6cb8efe65552d12ab046cc27bc87209156d913d",
+    "predecessor_response_digest": "2c58b6c3561d7e356b22bb7b8482192c4f84678df2e807efa8b4215a1434b9df",
     "request_recreated": false,
     "response_submitted": true,
     "response_consumed": false,
@@ -1398,14 +1248,14 @@
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "33a96e445ebdb483685877ac47015ffac890c510",
-    "snapshot_blob_sha": "53dd999d9d1bf734171ce4906dd6a386cea4daff",
-    "snapshot_revision": 269,
+    "snapshot_head_sha": "2708f0a4b1347616a55aa3904b930a0dd00cb496",
+    "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+    "snapshot_revision": 271,
     "snapshot_phase": "unit_pending",
-    "source_main_sha": "33a96e445ebdb483685877ac47015ffac890c510",
-    "source_state_blob_sha": "3c0ea57d95c075b82df63cb3d0bd1071a6960765",
-    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@2b0e50e0c60102aea46751a567f9ec9a66222ba3/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": "2026-09-08T06:58:00Z",
+    "source_main_sha": "2708f0a4b1347616a55aa3904b930a0dd00cb496",
+    "source_state_blob_sha": "5de9595ed4e5151b088539111cea8f6d44b337d7",
+    "predecessor_state_history_ref": "github://bachikoljunior-blip/O@656fbf26b4891adf2600b0fbb4052bf5aab1cc9d/agi/WORK_EXECUTION_STATE.json",
+    "verified_at": "2026-09-08T21:46:32Z",
     "verified_remote_readback": true
   },
   "continuation_source": {
@@ -1601,7 +1451,7 @@
   "durability_status": "remote_main_readback_verified",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "execute_response_main_readback_verified_native_consume_pending",
+    "status": "remote_main_readback_verified",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -1635,14 +1485,14 @@
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "387810cd783fe61da51385c2ff137c34427a5bb1",
+    "snapshot_head_sha": "2708f0a4b1347616a55aa3904b930a0dd00cb496",
     "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
     "snapshot_revision": 271,
     "snapshot_phase": "unit_pending",
-    "source_main_sha": "e34ab7ede75b9460c5e2368a00dd1752369eac8e",
-    "source_state_blob_sha": "6176312204ebc032a1b6620f02cf002a08706025",
+    "source_main_sha": "72c300e4c604e24a1f1c41ac643aadcde26b00ec",
+    "source_state_blob_sha": "94abfcf760fd9aca246f1a56d1f5362a87975b47",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@656fbf26b4891adf2600b0fbb4052bf5aab1cc9d/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": "2026-09-08T21:36:08Z",
+    "verified_at": "2026-09-08T21:46:32Z",
     "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
@@ -30320,7 +30170,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-08T21:36:08Z",
+  "heartbeat_at": "2026-09-08T21:46:32Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -31241,8 +31091,8 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Exact Work/CI observations and the missing execution unit were restored and verified; Execute then failed closed only because the decision-context Work heartbeat was stale.",
-  "last_activity_at": "2026-09-08T21:36:08Z",
-  "last_checked_at": "2026-09-08T21:36:08Z",
+  "last_activity_at": "2026-09-08T21:46:32Z",
+  "last_checked_at": "2026-09-08T21:46:32Z",
   "last_error": "Context Kernel failed closed: decision context Work heartbeat is stale",
   "last_native_publication": {
     "all_content_blobs_exact_readback": true,
@@ -31255,119 +31105,42 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-08T21:36:08Z",
+  "last_progress_at": "2026-09-08T21:46:32Z",
   "last_verified_effect": {
     "schema_version": 1,
-    "classification": "execute_response_main_readback_verified_native_consume_pending",
+    "classification": "continuation_durability_alignment_repair_pending_cas",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
-    "idempotency_key": "o-work-g34:81acbf6d:execute271-response:c7074cff:v1",
-    "source_main_sha": "a54f94545e2c8661900221ab627e602251e24fc3",
-    "source_state_blob_sha": "9062541a377650610727b8584bdce2e809da0447",
-    "run_id": "run-work-recovery-gen9-durability-repair",
-    "snapshot_revision": 271,
-    "snapshot_phase": "unit_pending",
-    "unit_id": "unit-generation34-production-history-resolution-audit-v1",
+    "idempotency_key": "o-work-g34:81acbf6d:execute271-consume-durability-repair:c7074cff:v1",
+    "source_main_sha": "72c300e4c604e24a1f1c41ac643aadcde26b00ec",
+    "source_state_blob_sha": "94abfcf760fd9aca246f1a56d1f5362a87975b47",
+    "failed_command": "work-resume run-work-recovery-gen9-durability-repair --max-steps 1",
+    "failure": "ContinuityPreflightError: continuation durability main commit mismatch",
+    "cause": "continuation_durability still described the predecessor Candidate269 request, while exact_continuation.snapshot_head_sha pointed to pre-request commit 387810cd; neither could prove the Execute271 request/native journal at the required snapshot source commit.",
+    "mutation_before_failure": false,
+    "repair": "Bind exact_continuation.snapshot_head_sha and continuation_durability.source_main_sha to merge 2708f0a4, the reachable main commit that contains snapshot271 plus the exact Execute request and native journal, while preserving the immutable response and every request/response digest.",
+    "repair_evidence": {
+      "source_commit_sha": "2708f0a4b1347616a55aa3904b930a0dd00cb496",
+      "source_state_blob_sha": "5de9595ed4e5151b088539111cea8f6d44b337d7",
+      "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+      "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+      "request_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/request.json",
+      "request_blob_sha": "34358954b6b2af41601c7423ad613cecce28f413",
+      "native_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-a466dbba330278ea029cab25.json",
+      "native_blob_sha": "702e8ffad1c44c6bd0471b1de8d82141418ef5ad",
+      "source_commit_reachable_from_origin_main": true
+    },
     "work_invocation_id": "invoke-d2a2249945259bcd9dbd1382",
     "native_invocation_id": "invoke-a466dbba330278ea029cab25",
     "request_digest": "9ef91db30b074e3d1fab4a75de74bbcacfdc0cb3d35d5104876356c39ad87aa4",
-    "payload_digest": "834b739903b3e9fabd0821ca1333e48bf1cbd9cb0ea17841a772ce933fe61152",
     "response_digest": "c7074cff4dade8377dfb84b885da9b6223c17e26d450c1d0a1c28bb101b63c5c",
     "output_digest": "7a27ec675f20662934500c341cd81af8f50a17097e2b8bd94c0ec4a3f64c8f0a",
-    "response_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-    "response_blob_sha": "5af225f6aad69f4834f2bea3c08379d803057651",
-    "checkpoint_ref": "artifacts/g34-execute271-response-checkpoint-v1.json",
-    "checkpoint_blob_sha": "d79b3c42501bb3abc3d4450604a964834c38048e",
-    "response_received_at": "2026-09-08T21:01:34.276312Z",
-    "audit_attempt": 1,
-    "audit_verdict": "PASS",
-    "audit_receipt_blob_sha": "2f5d22464fb89b2a84693d0f0778fcca7799a32b",
-    "response_submitted": true,
-    "response_submitted_exactly_once": true,
     "response_consumed": false,
     "response_replayed": false,
     "request_recreated": false,
-    "protected_publication_pending": false,
     "resume_required": true,
-    "upper_objective_achieved": false,
-    "agi_claim_supported": false,
-    "observed_at": "2026-09-08T21:01:34.276312Z",
-    "status": "remote_main_readback_verified",
-    "branch": "work-g34-execute271-response",
-    "head_sha": "d61e2c26e39dea4c1905a4d6ec5753689c915665",
-    "pull_request": 623,
-    "merge_sha": "e34ab7ede75b9460c5e2368a00dd1752369eac8e",
-    "files": [
-      {
-        "path": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-        "sha": "5af225f6aad69f4834f2bea3c08379d803057651"
-      },
-      {
-        "path": "artifacts/g34-execute271-response-checkpoint-v1.json",
-        "sha": "d79b3c42501bb3abc3d4450604a964834c38048e"
-      },
-      {
-        "path": "agi/WORK_EXECUTION_STATE.json",
-        "sha": "6176312204ebc032a1b6620f02cf002a08706025"
-      }
-    ],
-    "branch_readback_verified": true,
-    "workflow_runs": {
-      "directive_source_preflight": {
-        "run_id": 34278685313,
-        "conclusion": "success"
-      },
-      "test": {
-        "run_id": 34278685325,
-        "conclusion": "success"
-      }
-    },
-    "required_jobs": [
-      {
-        "job_id": 102237907121,
-        "name": "pytest shard 0 of 4",
-        "conclusion": "success"
-      },
-      {
-        "job_id": 102237907465,
-        "name": "pytest shard 1 of 4",
-        "conclusion": "success"
-      },
-      {
-        "job_id": 102237907321,
-        "name": "pytest shard 2 of 4",
-        "conclusion": "success"
-      },
-      {
-        "job_id": 102237907500,
-        "name": "pytest shard 3 of 4",
-        "conclusion": "success"
-      },
-      {
-        "job_id": 102245823090,
-        "name": "test",
-        "conclusion": "success"
-      }
-    ],
-    "required_jobs_conclusion": "success",
-    "main_readback": [
-      {
-        "path": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/response.json",
-        "sha": "5af225f6aad69f4834f2bea3c08379d803057651"
-      },
-      {
-        "path": "artifacts/g34-execute271-response-checkpoint-v1.json",
-        "sha": "d79b3c42501bb3abc3d4450604a964834c38048e"
-      },
-      {
-        "path": "agi/WORK_EXECUTION_STATE.json",
-        "sha": "6176312204ebc032a1b6620f02cf002a08706025"
-      }
-    ],
-    "main_readback_verified": true,
-    "state_bind_expected_blob_sha": "6176312204ebc032a1b6620f02cf002a08706025",
-    "verified_at": "2026-09-08T21:36:08Z"
+    "observed_at": "2026-09-08T21:46:32Z"
   },
   "latest_integrated_source": {
     "additional_pull_requests": [
@@ -31685,9 +31458,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Verify or renew the mandatory source observation against main e34ab7ed/state blob from this CAS, then consume invoke-d2a2249945259bcd9dbd1382 exactly once without replay.",
-  "next_tool": "work source observation freshness check then work-resume",
-  "next_tool_action": "Verify or renew the mandatory source observation against main e34ab7ed/state blob from this CAS, then consume invoke-d2a2249945259bcd9dbd1382 exactly once without replay.",
+  "next_action": "CAS this durability repair against state blob 94abfcf7, exact-readback, renew its mandatory source observation, then retry work-resume once.",
+  "next_tool": "expected-blob state CAS then source observation",
+  "next_tool_action": "CAS this durability repair against state blob 94abfcf7, exact-readback, renew its mandatory source observation, then retry work-resume once.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -39375,5 +39148,41 @@
     "main_readback_verified": true,
     "state_bind_expected_blob_sha": "6176312204ebc032a1b6620f02cf002a08706025",
     "verified_at": "2026-09-08T21:36:08Z"
+  },
+  "generation34_execute271_continuation_durability_repair_v1": {
+    "schema_version": 1,
+    "classification": "continuation_durability_alignment_repair_pending_cas",
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "lease_generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:execute271-consume-durability-repair:c7074cff:v1",
+    "source_main_sha": "72c300e4c604e24a1f1c41ac643aadcde26b00ec",
+    "source_state_blob_sha": "94abfcf760fd9aca246f1a56d1f5362a87975b47",
+    "failed_command": "work-resume run-work-recovery-gen9-durability-repair --max-steps 1",
+    "failure": "ContinuityPreflightError: continuation durability main commit mismatch",
+    "cause": "continuation_durability still described the predecessor Candidate269 request, while exact_continuation.snapshot_head_sha pointed to pre-request commit 387810cd; neither could prove the Execute271 request/native journal at the required snapshot source commit.",
+    "mutation_before_failure": false,
+    "repair": "Bind exact_continuation.snapshot_head_sha and continuation_durability.source_main_sha to merge 2708f0a4, the reachable main commit that contains snapshot271 plus the exact Execute request and native journal, while preserving the immutable response and every request/response digest.",
+    "repair_evidence": {
+      "source_commit_sha": "2708f0a4b1347616a55aa3904b930a0dd00cb496",
+      "source_state_blob_sha": "5de9595ed4e5151b088539111cea8f6d44b337d7",
+      "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
+      "snapshot_blob_sha": "5ad52b984d7d8bd12e8f626538a8270fea5f85d8",
+      "request_ref": ".continual/work-model/invocations/invoke-d2a2249945259bcd9dbd1382/request.json",
+      "request_blob_sha": "34358954b6b2af41601c7423ad613cecce28f413",
+      "native_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-a466dbba330278ea029cab25.json",
+      "native_blob_sha": "702e8ffad1c44c6bd0471b1de8d82141418ef5ad",
+      "source_commit_reachable_from_origin_main": true
+    },
+    "work_invocation_id": "invoke-d2a2249945259bcd9dbd1382",
+    "native_invocation_id": "invoke-a466dbba330278ea029cab25",
+    "request_digest": "9ef91db30b074e3d1fab4a75de74bbcacfdc0cb3d35d5104876356c39ad87aa4",
+    "response_digest": "c7074cff4dade8377dfb84b885da9b6223c17e26d450c1d0a1c28bb101b63c5c",
+    "output_digest": "7a27ec675f20662934500c341cd81af8f50a17097e2b8bd94c0ec4a3f64c8f0a",
+    "response_consumed": false,
+    "response_replayed": false,
+    "request_recreated": false,
+    "resume_required": true,
+    "observed_at": "2026-09-08T21:46:32Z"
   }
 }
