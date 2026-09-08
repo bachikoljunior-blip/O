@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "record_type": "o_primary_execution_checkpoint",
+  "status": "consolidate259_response_accepted_pending_protected_publication",
+  "recorded_at": "2026-09-07T23:36:00Z",
+  "execution": {
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "lease_generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "owner_kind": "work_recovery_automation",
+    "run_id": "run-work-recovery-gen9-durability-repair"
+  },
+  "source": {
+    "main_sha": "98de39dd79bc89849da5381ac0edb452b998045b",
+    "state_blob_sha": "17c89fd796061b2d2daeea59a8fe81802ae5ed0e",
+    "goal_revision": 118,
+    "snapshot_revision": 259,
+    "snapshot_phase": "consolidate_pending",
+    "snapshot_blob_sha": "3f104f917820e053dd97f46a431aa4f7cb6086f4"
+  },
+  "frozen_work": {
+    "component": "consolidate_episode",
+    "work_invocation_id": "invoke-49d02026ef7076044a6ef760",
+    "native_invocation_id": "invoke-4a50e45bf562040dada6698f",
+    "request_digest": "be406ea51d301fc090532df9bed67a083663d4a62813c4f1fd94a5bafbbe1e52",
+    "request_blob_sha": "ce5af4823cf0ec2533f17ce786b365b9b3442dd4",
+    "payload_digest": "eb4f2fb71d46c495d0410b329ca9d506ed454f5f9a79b789adfe56c5650afee9",
+    "response_digest": "9fa3a609f3ca63e89e3904e979201c99d2432c315dd4668d2ef938d4f174d0e3",
+    "output_digest": "c9611235ba661a64dffa28623fce521a039ba022520cc95227ec78330a0d6d8a",
+    "response_blob_sha": "a22b2481ced89343f3b3d6d1c7ee378da77247c6",
+    "response_submitted": true,
+    "response_consumed": false,
+    "response_replayed": false,
+    "request_recreated": false,
+    "executor_binding": "current_chatgpt_work_session",
+    "model_identity": "chatgpt-work-model-unverified",
+    "model_verified": false
+  },
+  "source_observations": [
+    {
+      "kind": "work_state",
+      "observation_id": "work-state-857335d73251db60bc10c637",
+      "request_digest": "5b5a514c9e236192b2bb9bbaab6c496c7b1132a1ae467ad5c1e23770bc732bd2",
+      "request_blob_sha": "f0975d072ea98b18f4bbd84e776a9db3da14160b",
+      "receipt_blob_sha": "f5a421192d391ad2c4fb12a2ae52eca93f6a88ae",
+      "source_commit_sha": "98de39dd79bc89849da5381ac0edb452b998045b",
+      "source_state_blob_sha": "17c89fd796061b2d2daeea59a8fe81802ae5ed0e",
+      "status": "succeeded"
+    },
+    {
+      "kind": "exact_head_ci",
+      "observation_id": "ci-run-bb48f7770f744f89b00c5e60",
+      "request_digest": "f975e21bc5a05fb4c54145459b1bbe6c6dbfe85d812e4a068cadf7d3dff208f0",
+      "request_blob_sha": "8b31a306b4540efb1b0e3137c7c4cdede41b6ec9",
+      "receipt_blob_sha": "a65080b479a54437a531de1562fb364923d92f2d",
+      "workflow_run_id": 34155979606,
+      "exact_head_sha": "b3f3870cc235b950ee8bf5075e3e3e93bdc3bace",
+      "required_job_ids": [101847780333, 101847780548, 101847780611, 101847780617, 101852831802],
+      "status": "succeeded"
+    }
+  ],
+  "validation": {
+    "response_contract": "accepted_by_work_submit",
+    "checkpoint_integrity": "valid",
+    "checkpoint_issues": [],
+    "pending_work_invocations": ["invoke-49d02026ef7076044a6ef760"],
+    "global_work_verify": {
+      "valid": false,
+      "known_issue": "completed native fragment is missing or malformed: invoke-9ff24ffd974e5e95bf3d46a3",
+      "scope": "pre-existing Task257 publication omission; current frozen request and accepted Consolidate259 response remain immutable"
+    }
+  },
+  "idempotency_key": "o-work-g34:81acbf6d:consolidate259-response:v1",
+  "last_verified_effect": "Candidate259 consumed exactly once and Consolidate259 frozen on main at 40fc83778cf7d781f9a3342a3571d9aadaba19d8; state continuation exact-readback at 98de39dd79bc89849da5381ac0edb452b998045b.",
+  "exact_frontier": "Consolidate259 response is accepted locally exactly once but is not yet protected by exact-head CI, merged, or exact-read back from main; do not consume before publication.",
+  "next_tool": "github_create_blob_tree_commit_branch_pull_request",
+  "next_action": "Publish only the two fresh source-observation request/receipt pairs, the immutable Consolidate259 response, and this checkpoint on an isolated branch; require exact-head directive and all five test jobs before expected-head merge and main readback.",
+  "pending_ci_run_ids": [],
+  "pending_job_ids": [],
+  "pending_launch_ids": [],
+  "resume_required": true,
+  "upper_objective_achieved": false,
+  "agi_claim_supported": false,
+  "termination": null,
+  "blocker": null
+}
