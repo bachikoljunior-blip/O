@@ -1,0 +1,53 @@
+{
+  "baseline": {
+    "baseline_failure_reproduced": true,
+    "claim_boundary": "Isolated no-live-model regression fixture; no primary Work mutation.",
+    "traceback": "Traceback (most recent call last):\n  File \"<stdin>\", line 7, in <module>\n  File \"/workspace/scratch/d96c6d9cad22/O/tests/test_root_selected_failure_consolidation.py\", line 65, in test_root_selected_failed_unit_consolidates_and_learns\n    _assert_failed_episode_is_learned(runtime_repo, 'FAIL')\n  File \"/workspace/scratch/d96c6d9cad22/O/tests/test_root_selected_failure_consolidation.py\", line 49, in _assert_failed_episode_is_learned\n    assert model.calls == ['entry', 'root', 'execute', 'root', 'task_evaluate', 'root', 'consolidate_episode', 'learn']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+    "type": "AssertionError"
+  },
+  "change": "Route an explicitly selected consolidate_episode component to the existing consolidate_pending phase. Keep the semantic decision in Root; do not automatically consolidate every failed evaluation or alter any verdict.",
+  "claim_boundary": {
+    "agi_achieved": false,
+    "candidate_activation": false,
+    "full_CI_passed": false,
+    "local_regression_reproduced_and_repaired": true,
+    "primary_frozen_response_changed": false
+  },
+  "next_action": "Require full protected exact-head CI and unchanged-head merge/readback before using this dispatcher change in the primary run.",
+  "problem": "Root may select consolidate_episode after FAIL/UNCERTAIN, but the generic unit_pending route only saved a run artifact and returned to Root. It did not persist the canonical episode or run post-task Learn.",
+  "proposed_engine_sha256": "98a2582ea383645783b4f1873faa3de7bdef21e78c5a0f377195f1d09db31c96",
+  "record_type": "mechanical_lifecycle_dispatch_repair",
+  "recorded_at": "2026-09-05T11:24:35.949732Z",
+  "schema_version": 1,
+  "source_engine_sha256": "583a7751c6842216559b2bbd7a7fed7b3b657ed291ab160831efc0d37b8b846a",
+  "source_main_commit": "eeb9e11d055bacef7e6085e0ed3bf382407dccc9",
+  "validation": {
+    "direct_regression_tests": [
+      {
+        "status": "passed",
+        "test": "test_root_selected_failed_unit_consolidates_and_learns"
+      },
+      {
+        "status": "passed",
+        "test": "test_root_selected_uncertain_unit_consolidates_and_learns"
+      }
+    ],
+    "existing_controls": [
+      {
+        "existing_control_verdict": "FAIL",
+        "status": "passed"
+      },
+      {
+        "existing_control_verdict": "UNCERTAIN",
+        "status": "passed"
+      },
+      {
+        "existing_control_verdict": "PASS",
+        "status": "passed"
+      }
+    ],
+    "live_model_calls": 0,
+    "primary_work_mutated": false,
+    "validation_scope": "Explicit Root consolidation preserves FAIL/UNCERTAIN, writes the episode, runs post-task Learn and returns to Root; full protected CI still required."
+  }
+}

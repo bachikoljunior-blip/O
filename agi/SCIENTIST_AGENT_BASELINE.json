@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-08-23",
+  "baseline": {
+    "system": "The AI Scientist-v2",
+    "version": "arXiv:2504.08066 and the 2026 Nature report",
+    "sources": [
+      {
+        "url": "https://arxiv.org/abs/2504.08066",
+        "evidence_class": "author_system_report",
+        "supports": [
+          "end-to-end hypothesis, experiment, analysis, and manuscript loop",
+          "progressive agentic tree search managed by an experiment-manager agent"
+        ]
+      },
+      {
+        "url": "https://github.com/SakanaAI/AI-Scientist-v2",
+        "evidence_class": "official_implementation",
+        "supports": [
+          "parallel best-first tree-search configuration",
+          "structured idea generation and persisted experiment logs"
+        ]
+      },
+      {
+        "url": "https://www.nature.com/articles/s41586-026-10265-5",
+        "evidence_class": "peer_reviewed_author_report",
+        "supports": [
+          "four-stage experimentation with best-checkpoint inheritance",
+          "five-review ensemble plus meta-review",
+          "one of three externally peer-reviewed workshop submissions scored 6, 7, and 6"
+        ]
+      }
+    ],
+    "demonstrated_result": {
+      "external_control": "Blind ICLR workshop reviewers were external to the generation loop; authors manually filtered outputs before submission but reported no human modification of the selected papers.",
+      "positive": "One of three submitted manuscripts exceeded the workshop's average human acceptance threshold with scores 6, 7, and 6.",
+      "negative": "Two submissions did not meet the bar; authors report lower template-free success rates, common implementation and citation failures, and no main-conference-level result."
+    }
+  },
+  "o_inventory": {
+    "hypothesis_generation": [
+      "src/continual/engine.py: Root selects exactly one falsifiable execution unit",
+      "agi/WORK_STRATEGY.json: method-family saturation and heterogeneous-search triggers"
+    ],
+    "experiment_execution": [
+      "src/continual/engine.py: Execute runs one frozen unit through immutable requests and responses",
+      "agi/WORK_EXECUTION_STATE.json: single-writer fencing serializes main integration"
+    ],
+    "mechanical_evaluation": [
+      "src/continual/engine.py: Task Evaluate preserves original and bounded-unit verdicts",
+      "src/continual/candidate_regression.py: scoped Candidate activation requires deterministic protected-baseline measurements"
+    ],
+    "result_inheritance": [
+      "src/continual/engine.py: Consolidate Episode and Learn persist Episodes and scoped Candidates",
+      "src/continual/store.py: atomic snapshots, immutable invocation records, and revision-checked continuation"
+    ]
+  },
+  "rubric": {
+    "hypothesis_generation": {
+      "baseline": "Iteratively grows an archive of research directions, generates experimental plans, and filters novelty with literature search.",
+      "o": "Root chooses one small falsifiable unit from durable state, with a strategy trigger for heterogeneous search but no generic multi-hypothesis archive or literature-novelty filter.",
+      "comparative_finding": "AI Scientist-v2 has broader explicit hypothesis generation; O has tighter unit falsifiability and safer change control. Breadth advantage is demonstrated externally, but its value for O is not measured."
+    },
+    "experiment_execution": {
+      "baseline": "Runs progressive best-first tree search with configurable parallel workers, bounded steps, and debug depth across investigation, tuning, agenda, and ablation stages.",
+      "o": "Executes one frozen semantic unit at a time; project-level parallel branches exist, but the native loop does not generically explore and score sibling experimental checkpoints.",
+      "comparative_finding": "The baseline has a demonstrated search-width mechanism missing from generic O execution; direct adoption is unsafe until resource cost and merge-conflict effects are measured."
+    },
+    "mechanical_evaluation": {
+      "baseline": "Uses an ensemble of five automated reviews plus a meta-review; the reviewer was compared with human conference decisions and reported 66% balanced accuracy on a post-cutoff set.",
+      "o": "Task Evaluate is produced by one identity-unverified Work model, while Candidate promotion separately uses deterministic protected-baseline regression and external claim evidence remains distinct.",
+      "comparative_finding": "The baseline offers evaluator diversity; O offers stronger fail-closed promotion and claim separation. Reviewer ensembling is not automatically better for code-level bounded units."
+    },
+    "result_inheritance": {
+      "baseline": "The best-performing checkpoint seeds each next experimental stage, while experiment notes feed later planning and manuscript generation.",
+      "o": "Episodes, results, continuations, and Candidates persist across cycles, but Root receives one lineage and lacks a generic mechanically scored best-checkpoint promotion among sibling hypotheses.",
+      "comparative_finding": "Best-checkpoint stage inheritance is the narrowest missing mechanism with a plausible expected-time advantage, but O has not measured that advantage."
+    },
+    "cost_and_latency": {
+      "baseline": "Official documentation estimates roughly 15-20 USD for an experiment run plus about 5 USD for writing, typically several hours, with GPU and model-provider dependencies.",
+      "o": "Repository units use existing Work and CI capacity with serialized main writes; costs are not normalized against the baseline.",
+      "comparative_finding": "No defensible quantitative elapsed-time or cost superiority can be inferred from unmatched workloads."
+    },
+    "failure_containment": {
+      "baseline": "Official documentation warns that LLM-authored code can install dangerous packages, access the network, or spawn unintended processes and recommends a sandbox.",
+      "o": "Fenced single-writer leases, immutable invocation journals, idempotency records, protected regression, and explicit negative evidence fail closed on repository side effects.",
+      "comparative_finding": "O currently has the stronger repository mutation boundary; any tree-search experiment must remain sandboxed and must not create multiple main writers."
+    }
+  },
+  "decision": {
+    "verdict": "EXPERIMENT_REQUIRED",
+    "reason": "AI Scientist-v2 demonstrates that staged best-checkpoint inheritance plus parallel experimental search can produce externally reviewed work, but unmatched tasks, manual pre-submission filtering, nontrivial cost, and a one-of-three workshop result do not establish an expected-time advantage for O.",
+    "candidate_mechanism": "bounded_stage_checkpoint_inheritance",
+    "minimal_reversible_experiment": "On three matched non-production research units, compare O's single-lineage Root selection with three sandboxed sibling hypotheses scored by the same deterministic task metric; carry only the best passing checkpoint into the next stage and keep main integration single-writer.",
+    "prediction": "If sibling exploration is useful, the checkpoint condition should lower median model invocations or wall time per retained capability without increasing protected regressions or external-side-effect failures.",
+    "falsifier": "Reject the mechanism if three matched units show no reduction in median invocations or wall time per retained capability, if the selected checkpoint is unstable under exact replay, or if any protected regression or side-effect invariant worsens.",
+    "rollback": "Keep the experiment behind an inactive scoped Candidate; delete the experimental sibling frontier and retain the baseline single-lineage path if the falsifier fires.",
+    "measured_advantage": "not_yet_measured",
+    "implementation_authorized": false
+  },
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "baseline_success_is_o_success": false,
+    "comparison_is_external_production_evidence": false
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "role": "evaluation",
+  "observed_at": "2026-08-30T00:34:23+09:00",
+  "bootstrap_path": "note/automation_control/DESIRED_STATE.json",
+  "bootstrap_result": "404_NOT_FOUND",
+  "status": "BLOCKED_CONTROL_MISSING",
+  "semantic_work_started": false,
+  "new_acceptance_claims": 0,
+  "clean_exploration_preserved": true,
+  "desired_state_edited": false,
+  "control_revision": null,
+  "config_revision": null,
+  "observed_main_sha_before_writes": "88f51b90600f8d67ede3a18c318503e3b29147eb",
+  "automation_id": "6a8d29561654819194263ae93ef6cc3e",
+  "automation_disabled": true,
+  "termination": "hard_control_stop",
+  "blocker": "The authoritative desired-state bootstrap file is missing, so enabled_desired and the current evaluation role config cannot be resolved safely.",
+  "frontier": [
+    "Restore note/automation_control/DESIRED_STATE.json as the authoritative control file.",
+    "Explicitly re-enable the evaluation automation only after control restoration if continued runs are desired.",
+    "On the next run, read DESIRED_STATE.json first; if enabled_desired=false, perform only logical no-op plus receipt; if true, execute only the current evaluation role config within clean_exploration boundaries."
+  ],
+  "exact_continuation": "After control restoration and explicit re-enable, bootstrap by reading note/automation_control/DESIRED_STATE.json first. Do not perform semantic evaluation work until enabled_desired and the current evaluation role config are resolved from that file."
+}

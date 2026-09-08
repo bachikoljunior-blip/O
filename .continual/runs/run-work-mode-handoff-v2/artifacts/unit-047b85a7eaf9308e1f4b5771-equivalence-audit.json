@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "audit_id": "ai-scientist-v2-positive-control-equivalence-audit-v1",
+  "unit_id": "unit-047b85a7eaf9308e1f4b5771",
+  "created_at": "2026-08-24T13:53:35.393Z",
+  "status": "COMPLETED",
+  "source_bindings": {
+    "scientist_agent_baseline": {
+      "path": "agi/SCIENTIST_AGENT_BASELINE.json",
+      "sha256": "9d0fd528507e6c2c3333fedd4de5b65a67f5dea416a3f68daa28e99d62d94278",
+      "matches_frozen_protocol_source": true
+    },
+    "context_method_comparison": {
+      "path": "agi/CONTEXT_METHOD_COMPARISON.json",
+      "sha256": "05243ff8506be9f50b3ad86268093b26ec3eba9003a4c3bafd54bbc9c774f4c9"
+    },
+    "user_directive_events": {
+      "path": "agi/USER_DIRECTIVE_EVENTS.json",
+      "sha256": "a3490199835eed763eb23bccddcb6ff27d6a79d7457dc37d96be035b452bffd3"
+    },
+    "work_strategy": {
+      "path": "agi/WORK_STRATEGY.json",
+      "sha256": "5c7acf3d4c54b2debdd279176b3c165b21a20bf94228c691f12a2619601a516c"
+    },
+    "equivalence_validator": {
+      "path": "src/agi/context_method_comparison.py",
+      "sha256": "004c894170355849ed66f1c2044e8a571a56e78a34d31b62f4598397c85e5119"
+    }
+  },
+  "frozen_contract": {
+    "protocol_digest": "92b15e3fa1780220006a068c0ce654bda893e1f307b5192b2dd439c895d94f16",
+    "protocol_status": "PRECOMMITTED",
+    "protocol_validation": "PASS",
+    "observation_count": 0,
+    "local_positive_control_status": "NOT_RUN",
+    "system": "The AI Scientist-v2",
+    "required_fidelity": "unmodified_or_fidelity_preserving",
+    "task_set_digest": "64573270e341883b983fbd65410c4700ecb4b241db58249bf8dbc0ffd56e2d70",
+    "budget_digest": "2601bdbcc74dc9c34451f81456812c6437b8329f4bd9f43cf226a2e74ad951df",
+    "model_executor_class": "same_demonstrated_baseline_or_documented_fidelity_equivalent_class",
+    "rubric_dimensions": [
+      "hypothesis_generation",
+      "experiment_execution",
+      "mechanical_evaluation",
+      "result_inheritance",
+      "cost_and_latency",
+      "failure_containment"
+    ]
+  },
+  "equivalence_matrix": [
+    {
+      "condition": "system",
+      "status": "SUPPORTED",
+      "evidence": "The baseline and frozen contract both name The AI Scientist-v2."
+    },
+    {
+      "condition": "source_artifact_id_and_locator",
+      "status": "SUPPORTED",
+      "evidence": "The contract binds scientist_agent_baseline and its frozen SHA-256 exactly matches the current baseline artifact."
+    },
+    {
+      "condition": "observed_at",
+      "status": "SUPPORTED",
+      "evidence": "The baseline records observed_at 2026-08-23 and names its paper, implementation, and peer-reviewed-report locators."
+    },
+    {
+      "condition": "configuration_id",
+      "status": "UNSUPPORTED",
+      "evidence": "The baseline names publications and an implementation repository but no immutable configuration identifier binding code revision, provider/model matrix, sandbox, stages, and reviewer configuration."
+    },
+    {
+      "condition": "established_pass_for_frozen_task_set",
+      "status": "NOT_COMPARABLE",
+      "evidence": "The baseline reports one externally reviewed workshop-threshold success among three submissions, but the frozen positive-control task set is a separate O comparison study and has no matched receipt."
+    },
+    {
+      "condition": "fidelity",
+      "status": "NOT_COMPARABLE",
+      "evidence": "The baseline describes the reported original system, but the missing immutable configuration prevents proving that it is identical or fidelity-equivalent to the frozen comparison conditions."
+    },
+    {
+      "condition": "rubric_dimensions",
+      "status": "SUPPORTED",
+      "evidence": "The baseline contains descriptive findings for all six named rubric dimensions; this supports dimension coverage only, not a matched PASS."
+    },
+    {
+      "condition": "task_set_digest",
+      "status": "UNSUPPORTED",
+      "evidence": "No baseline field or receipt binds the frozen task-set digest 64573270e341883b983fbd65410c4700ecb4b241db58249bf8dbc0ffd56e2d70."
+    },
+    {
+      "condition": "budget_digest",
+      "status": "UNSUPPORTED",
+      "evidence": "Author-reported approximate cost and duration do not bind the frozen budget digest 2601bdbcc74dc9c34451f81456812c6437b8329f4bd9f43cf226a2e74ad951df or its replay count and matched-arm limits."
+    },
+    {
+      "condition": "model_executor_class",
+      "status": "UNSUPPORTED",
+      "evidence": "The baseline does not prove the frozen model/executor-class identity or a documented equivalence mapping."
+    },
+    {
+      "condition": "result_digest",
+      "status": "UNSUPPORTED",
+      "evidence": "The artifact contains narrative demonstrated results but no canonical result digest for a receipt satisfying the frozen contract."
+    },
+    {
+      "condition": "complete_equivalence_basis",
+      "status": "UNSUPPORTED",
+      "evidence": "Because configuration, task, budget, executor, and matched-result bindings are absent, a truthful complete equivalence basis cannot be constructed."
+    }
+  ],
+  "adjudication": "INSUFFICIENT_EQUIVALENCE_EVIDENCE",
+  "equivalent_positive_control_evidence": null,
+  "validator_outcome": {
+    "protocol_validation": "PASS",
+    "reuse_validation": "NOT_RUN_NO_TRUTHFUL_COMPLETE_EVIDENCE_OBJECT",
+    "reason": "The validator requires exact fidelity, task-set, budget, model/executor, PASS-result, result-digest, configuration, and provenance bindings. Several are absent from the frozen baseline artifact, so emitting an object merely to make validation pass would fabricate equivalence."
+  },
+  "duplicate_reproduction_policy": {
+    "scheduled_by_this_audit": false,
+    "rule": "Do not repeat a positive control when equivalent original conditions are adequately proven. Here equivalence is not proven, but this audit alone does not schedule a reproduction.",
+    "later_control_required_only_for": "A later causal claim that must distinguish failure of the original method from loss introduced by an O adaptation or ablation under matched conditions.",
+    "independent_work_allowed": "Continue other falsifiable work and classify any result only within its named tested candidate, configuration, and conditions."
+  },
+  "negative_evidence_scope": {
+    "tested_target": "Existing agi/SCIENTIST_AGENT_BASELINE.json evidence versus the frozen agi/CONTEXT_METHOD_COMPARISON.json reuse contract",
+    "tested_configuration": "Static digest-bound provenance and schema audit; no scientist-agent system or O-adapted mechanism was executed",
+    "tested_conditions": "Current main source artifacts bound by the generation-7 Revision-20 semantic request",
+    "finding": "Reuse equivalence is not established for this artifact-to-contract comparison",
+    "evidence_against_original_method": false,
+    "evidence_against_scientist_agent_family": false,
+    "evidence_against_untested_mechanisms": false,
+    "adaptation_or_ablation_loss_established": false,
+    "original_baseline_reproduction_failure_established": false
+  },
+  "claim_boundary": "This is a bounded provenance-equivalence audit. It is not a behavioral experiment, a negative result about AI Scientist-v2, a scientist-agent-family conclusion, evidence about an untested mechanism, AGI evidence, or completion of the user's objective."
+}

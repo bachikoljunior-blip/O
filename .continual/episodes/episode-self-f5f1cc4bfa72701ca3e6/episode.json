@@ -1,0 +1,106 @@
+{
+  "actions": [
+    "Read the scheduler and failure-transition tests from a clean main worktree.",
+    "Reproduced skipped post-task Learn in an isolated no-live-model fixture.",
+    "Changed only mechanical dispatch of an explicitly chosen consolidation component.",
+    "Verified two new negative-outcome lifecycle regressions and three existing PASS/FAIL/UNCERTAIN controls."
+  ],
+  "candidate_refs": [],
+  "claim_tier": "internal_development",
+  "claims": [
+    "The local regression is repaired; full integration is still unverified. This is internal lifecycle behavior, not AGI or completion evidence."
+  ],
+  "context": {
+    "boundary": "development",
+    "boundary_satisfied": true,
+    "decision": {
+      "boundary": "development",
+      "fresh_execution_required": false,
+      "independent_execution_required": false,
+      "logical_reset_required": false,
+      "mode": "reuse_current_context",
+      "persist_before_switch": false,
+      "reason_codes": [
+        "no_contamination_signal"
+      ]
+    },
+    "fresh_execution_used": false,
+    "independent_execution_used": false,
+    "logical_reset_used": false,
+    "physical_fresh_context_fixed_requirement": false,
+    "repository_latest_main_is_durable_state": true,
+    "risk_signals": []
+  },
+  "decisions": [
+    "Leave consolidation choice with Root and preserve failed task/unit verdicts.",
+    "Do not change active prompts, workflows or the current frozen primary response.",
+    "Keep adoption pending full protected CI."
+  ],
+  "episode_id": "episode-self-f5f1cc4bfa72701ca3e6",
+  "evidence_refs": [
+    ".continual/evidence/self-application/self-application-f5f1cc4bfa72701ca3e6.json",
+    "artifacts/unit-generation30-explicit-failure-consolidation-v1-result.json",
+    "src/continual/engine.py",
+    "tests/test_root_selected_failure_consolidation.py"
+  ],
+  "execution_id": "development-g30-explicit-failure-consolidation-v1",
+  "executor": {
+    "binding": "current_chatgpt_work_session",
+    "model_identity": "chatgpt-work-model-unverified",
+    "model_verified": false
+  },
+  "external_claim_admissible": false,
+  "failures": [
+    "Before the fix, explicit consolidation returned to Root without canonical episode persistence or post-task Learn."
+  ],
+  "mode": "task-chat-model-self-application",
+  "objective": "Make an explicit Root consolidation choice enter the canonical episode and post-task learning lifecycle without upgrading a failed verdict.",
+  "observations": [
+    {
+      "direct_regression_tests": [
+        {
+          "status": "passed",
+          "test": "test_root_selected_failed_unit_consolidates_and_learns"
+        },
+        {
+          "status": "passed",
+          "test": "test_root_selected_uncertain_unit_consolidates_and_learns"
+        }
+      ],
+      "existing_controls": [
+        {
+          "existing_control_verdict": "FAIL",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "UNCERTAIN",
+          "status": "passed"
+        },
+        {
+          "existing_control_verdict": "PASS",
+          "status": "passed"
+        }
+      ],
+      "live_model_calls": 0,
+      "primary_work_mutated": false,
+      "validation_scope": "Explicit Root consolidation preserves FAIL/UNCERTAIN, writes the episode, runs post-task Learn and returns to Root; full protected CI still required."
+    }
+  ],
+  "outcome": "completed",
+  "results": [
+    "artifacts/unit-generation30-explicit-failure-consolidation-v1-result.json",
+    "src/continual/engine.py",
+    "tests/test_root_selected_failure_consolidation.py"
+  ],
+  "schema_version": 1,
+  "source_run_id": "run-self-f5f1cc4bfa72701ca3e6",
+  "success_conditions": [],
+  "task": "Continue the inherited O execution and retain learning from its failed experiment.",
+  "task_verdict": "UNCERTAIN",
+  "unknowns": [
+    "The full protected suite has not yet completed at the proposed head."
+  ],
+  "unresolved": [
+    "Require full protected exact-head CI and unchanged-head merge/readback before using this dispatcher change in the primary run."
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-86c970c4040fbcd5d30d4521",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/work-model/invocations/invoke-485a88b6d4687f7a3b0d623b/request.json",
+        ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md"
+      ],
+      "observations": [
+        "The exact upcoming component is execute in agi/repository-development.",
+        "The stale bound heartbeat is directly visible in the frozen Root request and exceeds its declared freshness window by more than two hours."
+      ],
+      "purpose": "Evaluate the context-hygiene candidate for the pre-freeze mandatory-source freshness unit.",
+      "unresolved": [
+        "Freshness of a local mandatory source does not prove that no newer authoritative remote revision exists."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "An immutable frozen request can itself expose a stale-context defect; candidate evaluation must preserve that witness while preventing only future request mutation."
+    },
+    "result": {
+      "applicability": "APPLICABLE: this execute unit changes O's own repository-development request context and was selected because the just-frozen Root request bound a Work lease source already older than stale_after_seconds. The candidate targets execute and its expected repository-development scope exactly matches.",
+      "baseline_needed": false,
+      "baseline_reason": "The frozen Root request itself is an immutable failure witness: request creation at 2026-08-23T20:03:19.374785Z bound heartbeat 2026-08-23T17:22:28.270Z with stale_after_seconds 900. The unit's atomic no-mutation tests supply the discriminating control.",
+      "candidate_id": "candidate-self-application-context-hygiene-v1",
+      "decision": "TRIAL_CANDIDATE",
+      "evidence_to_collect": [
+        "pre-freeze rejection for stale, future-skewed, non-running, malformed, and incomplete Work authority state before request or journal bytes change",
+        "fresh same-authority control passes without changing generation or fence",
+        "already-frozen replay remains immutable and is not revalidated against a later clock",
+        "focused and protected regressions plus exact-head CI, expected-head merge, and exact main readback"
+      ],
+      "reason": "Among the indexed execute candidates, only self-application context hygiene governs stale repository context and logical reset. Its overlay adds directly discriminating constraints without changing the selected implementation goal. The live-campaign and capability-evaluation candidates are out of scope, and no active-for-scope candidate covers request-freeze freshness.",
+      "regression_checks": [
+        "do not conflate local source freshness with proof that latest remote main was observed",
+        "do not mutate or invalidate existing frozen requests",
+        "do not alter single-writer authority, generation 6, fence identity, or inbox revision 15"
+      ],
+      "risk_dimensions": {
+        "failure_risk": "moderate if freshness is checked on replay or after mutation; tests must pin both boundaries",
+        "latency_tokens": "small bounded validator and focused tests",
+        "quality": "high upside because stale mandatory control state currently reaches semantic request freeze",
+        "tool_external_cost": "no new external runtime cost beyond normal exact-head publication gates"
+      },
+      "rollback": "Keep the candidate in candidate status. If the overlay causes replay invalidation or cannot preserve atomic no-mutation on rejection, retain the immutable manifest and dispatch-time verifier, record the contradiction, and repair under the active execute prompt.",
+      "scope": "agi/repository-development"
+    }
+  },
+  "output_digest": "87b3747cbf76275539abae822dd0a17572bb4e4e41cfcadb6dd229df4ecc2b5e",
+  "received_at": "2026-08-23T20:08:05.642472Z",
+  "request_digest": "7ed3db9bc8a03e1f3efa111b08ef13535b9693d4213b709f6b58073961029720",
+  "response_digest": "e54f3347ec5a77951476c1ea0518e30b1bbc8ebae5160aa4fad6d4a2f60d467d",
+  "schema_version": 1
+}

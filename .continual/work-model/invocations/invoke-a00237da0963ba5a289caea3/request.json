@@ -1,0 +1,353 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-24T16:12:10.566731Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-a00237da0963ba5a289caea3",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "NEED_MORE_EVIDENCE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-c6c462472386c57b124d",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/campaign-authoring",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-c6c462472386c57b124d/prompt.md",
+          "scope_states": {},
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/repository-development": "REMAIN_CANDIDATE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "schema_version": 2
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "execute",
+        "evidence_needed": [
+          "a clean isolated branch derived from the exact latest main without modifying another writer's branch",
+          "a closed changed-path allowlist containing exactly the readiness plan, implementation, and tests",
+          "the same 114 focused and adjacent tests plus repository exact-head CI on the unchanged branch head",
+          "fresh authority, main, PR head, mergeability, and required-job readback immediately before merge",
+          "expected-head-protected merge and exact remote blob readback for all three reviewed paths"
+        ],
+        "expected_outputs": [
+          "one isolated non-force branch and one PR for exactly three reviewed paths",
+          "a deterministic reviewed-blob manifest and exact head/tree identities",
+          "four successful pytest shards plus the dependent aggregate on the unchanged exact head",
+          "a merge commit whose three reviewed main blobs exactly match the tested head",
+          "a bounded publication verdict retaining zero observations, no activation, and user-level FAIL"
+        ],
+        "failure_conditions": [
+          "latest main, authority, inbox, branch head, tree, or reviewed path set changes without re-preparation",
+          "any required CI job fails, is cancelled, or belongs to a different head",
+          "the diff overlaps a foreign writer or includes an unreviewed path",
+          "mergeability is not conflict-free or expected-head protection rejects the merge",
+          "remote readback differs from the reviewed tested blobs"
+        ],
+        "goal": "Publish the validated checkpoint-inheritance measurement-readiness implementation from latest remote main through a new isolated branch, unchanged exact-head CI, expected-head merge, and exact three-path remote readback.",
+        "inputs": [
+          "latest remote main including generation-8 heartbeat commit b83c408a3f27094202de2e58c6578d65b4c6494d",
+          "agi/CHECKPOINT_INHERITANCE_MEASUREMENT_V2.json",
+          "src/agi/checkpoint_inheritance_experiment.py",
+          "tests/test_checkpoint_inheritance_experiment.py",
+          ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-15428593baa21431b4935253-result.json",
+          "fresh generation-8 Work and PR-295 CI source receipts"
+        ],
+        "negative_evidence_scope": "Any failure in this unit applies only to the exact three-path publication attempt under its observed main, head, CI, and authority conditions; it cannot be generalized to checkpoint inheritance behavior, an original method, the scientist-agent family, an O adaptation, or any untested mechanism.",
+        "parent_continuation": "After publication, Task Evaluate the exact integration, Consolidate Episode, and Learn. Then publish the bounded native lifecycle records separately if needed and return to Root before scheduling the first genuine matched task-arm measurement.",
+        "positive_control_policy": "The existing width-1 single_lineage arm remains the matched control for this exact O mechanism experiment. No duplicate AI Scientist positive-control reproduction is part of this publication or required by it.",
+        "rollback": "If any publication invariant fails, leave the current single_lineage runtime and HARNESS_READY baseline unchanged, keep the new readiness path unpublished or unmerged, preserve the failed evidence, and repair only on a new latest-main isolated branch without force-push.",
+        "scope": "agi/bounded-stage-checkpoint-inheritance/measurement-readiness-publication-v1",
+        "success_conditions": [
+          "the publication diff contains exactly the three precommitted paths and no state, inbox, strategy, prompt, Candidate authority, scratch response, or foreign-writer record",
+          "local validation and unchanged exact-head CI pass",
+          "generation-8 owner, execution, fence, running status, inbox revision 20, and exact PR head remain consistent at dispatch",
+          "GitHub accepts only the expected head and all three main blobs match exact readback after merge",
+          "the publication makes no behavioral advantage, original-method, scientist-family, adaptation-loss, untested-mechanism, AGI, or completion claim"
+        ],
+        "unit_id": "unit-e20d50a4ddc04efb95ba778f"
+      },
+      "snapshot": {
+        "continuation_stack": [
+          {
+            "continuation": "After Task Evaluate, consolidate and learn. If the bounded unit passes, Root should select the smallest sandboxed matched experiment for checkpoint inheritance; main remains single-writer and implementation remains inactive until evidence supports it.",
+            "parent_unit_id": "unit-85bfcc10eb003a178e261658",
+            "result_ref": "artifacts/unit-85bfcc10eb003a178e261658-result.json"
+          },
+          {
+            "continuation": "Publish the verified harness and this native boundary to main through exact-head CI. Then run only the frozen child measurement unit; if genuine comparable native measurements cannot be obtained, return INSUFFICIENT_EVIDENCE or REJECT_MECHANISM rather than fabricating observations.",
+            "parent_unit_id": "unit-7248d09ab66196abd19984f1",
+            "result_ref": "artifacts/unit-7248d09ab66196abd19984f1-result.json"
+          },
+          {
+            "continuation": "Resume only the frozen child selection-plan measurement. Do not modify case labels, graph contents, baselines, budgets, thresholds, or claim boundaries after viewing routing output. After Task Evaluate, consolidate, learn, and return to Root regardless of the bounded verdict.",
+            "parent_unit_id": "unit-b9e109e2f146deb1deb9f3ff",
+            "result_ref": "artifacts/unit-b9e109e2f146deb1deb9f3ff-result.json"
+          },
+          {
+            "continuation": "Task Evaluate must classify the bounded child without inventing observations. Consolidate and learn the contamination result, publish validated native records through exact-head CI, and return to Root.",
+            "parent_unit_id": "unit-7c74345c417a64e25fa80dd6",
+            "result_ref": "artifacts/unit-7c74345c417a64e25fa80dd6-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact integration evidence, then Consolidate Episode and Learn before returning to Root for the next falsifiable unit.",
+            "parent_unit_id": "unit-24e1807c3c65cd90d50be3eb",
+            "result_ref": "artifacts/unit-24e1807c3c65cd90d50be3eb-result.json"
+          },
+          {
+            "continuation": "Task Evaluate the exact PR 275 integration evidence, then Consolidate Episode and Learn. At the next Root boundary refresh the inbox, resolve revision 15, reconcile O's durable control state, and select the highest-information Context Kernel unit.",
+            "parent_unit_id": "unit-f06051defa0312907f5f28ab",
+            "result_ref": "artifacts/unit-f06051defa0312907f5f28ab-result.json"
+          },
+          {
+            "continuation": {
+              "next": "Consume the one child response, mechanically judge it in a separate Execute, and preserve the internal-only claim boundary.",
+              "parent_unit_id": "unit-7353e639723862d91ae4e0f1"
+            },
+            "parent_unit_id": "unit-7353e639723862d91ae4e0f1",
+            "result_ref": "artifacts/unit-7353e639723862d91ae4e0f1-result.json"
+          },
+          {
+            "continuation": {
+              "next": "Use only the deterministic outcome primitive to judge and persist this immutable response.",
+              "source_work_invocation_id": "invoke-061603bcb6a9566e1ea02873"
+            },
+            "parent_unit_id": "unit-2640beb7270bce5cc39e6d9d",
+            "result_ref": "artifacts/unit-2640beb7270bce5cc39e6d9d-result.json"
+          }
+        ],
+        "created_at": "2026-08-22T11:41:47.630118Z",
+        "current_component": "execute",
+        "current_unit": "unit-e20d50a4ddc04efb95ba778f",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+          "runner": "python-engine-v2"
+        },
+        "episode_id": "episode-work-mode-handoff-v2",
+        "error_count": 32,
+        "last_evaluation": {
+          "candidate_trial": {
+            "activation_authorized": false,
+            "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+            "outcome": "SUPPORTED_FOR_SCOPE",
+            "reason": "The overlay kept bounded unit PASS separate from user-level FAIL, retained all evidence limitations, and enforced Revision-20 scope without changing frozen criteria."
+          },
+          "claim_boundary": "This is a bounded internal durability PASS for the Revision-20 audit publication. It is not a scientist-agent behavioral result, an original-method or family-wide negative, evidence about untested mechanisms, proof of O-adaptation loss, independent production capability evidence, AGI evidence, or completion of the user's upper objective.",
+          "continuation": "Proceed through post-result Candidate Evaluate, Consolidate Episode, and Learn. Then refresh current main, inbox, and generation-8 authority before Root selects the next falsifiable unit; user-level FAIL remains in force.",
+          "evaluated_goal": "Evaluate the bounded Revision-20 equivalence-audit native publication while preserving the user's still-open upper objective and the exact causal scope of negative evidence.",
+          "evidence": [
+            {
+              "finding": "The Execute result records path-list digest 55a388aa572cb871d06792709ee55c6c1b441c64f0bdf0cb433d659956c03756, reviewed-blob manifest digest 502b8b092663fd4f97d07210ef2c8940f56078dffa857c8bd11592e50d373220, and a closed 80-path allowlist under only the two native-record prefixes.",
+              "source": ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-0212b6b9232f1f6a5fcd49a1-result.json"
+            },
+            {
+              "finding": "Exact head 7ad6ee206a65a3c83f193d866a01765baf4e6ab9 completed all four pytest shards and the dependent aggregate successfully.",
+              "source": "https://github.com/bachikoljunior-blip/O/actions/runs/32738203858"
+            },
+            {
+              "finding": "The pre-merge Work receipt bound generation 8, the sole execution and fence, running status, heartbeat, state commit 5122fb28414326586c3886b2cdc9c529412287c3, and blob 5f340fbc9288d4d0c144a02d074b26809141fca7.",
+              "source": ".continual/runs/run-work-mode-handoff-v2/work-source-observations/work-state-9d92aaaad76924b89e3572b6/receipt.json"
+            },
+            {
+              "finding": "The immutable CI receipt cross-bound the exact PR head, workflow, all required jobs, and successful conclusions before the merge side effect.",
+              "source": ".continual/runs/run-work-mode-handoff-v2/ci-source-observations/ci-run-7e6ccd23784a5218916a7ff1/receipt.json"
+            },
+            {
+              "finding": "GitHub accepted only the expected head and the post-merge audit matched all 80 reviewed path blobs with zero mismatches.",
+              "source": "https://github.com/bachikoljunior-blip/O/commit/08cefe0cab7a0858dc2359084fc2a9bcdb163a47"
+            },
+            {
+              "finding": "The published audit remains INSUFFICIENT_EQUIVALENCE_EVIDENCE for one named static artifact-to-contract comparison, with every broad-negative flag false and no duplicate positive-control reproduction scheduled.",
+              "source": ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-047b85a7eaf9308e1f4b5771-equivalence-audit.json"
+            }
+          ],
+          "global_activation_authorized": false,
+          "negative_evidence": [
+            "No scientist-agent system, original method, O adaptation, ablation, or untested mechanism was executed in this publication or its underlying static audit.",
+            "The missing equivalence bindings are evidence insufficiency for the named artifact and frozen contract only; they are not a behavioral negative.",
+            "Repository verification, CI, merge, and remote blob readback are internal engineering evidence, not independent production capability evidence.",
+            "The serving model identity remains externally unverified.",
+            "The user's real-world upper objective remains unmet."
+          ],
+          "negative_evidence_scope": {
+            "adaptation_or_ablation_loss_established": false,
+            "evidence_against_original_method": false,
+            "evidence_against_scientist_agent_family": false,
+            "evidence_against_untested_mechanisms": false,
+            "original_baseline_reproduction_failure_established": false,
+            "tested_candidate": "Existing agi/SCIENTIST_AGENT_BASELINE.json evidence",
+            "tested_conditions": "Generation-7 Revision-20 source bindings; no scientist-agent system or O-adapted mechanism executed",
+            "tested_configuration": "Static digest-bound provenance and schema audit against the frozen agi/CONTEXT_METHOD_COMPARISON.json reuse contract"
+          },
+          "positive_control_policy": "Do not require duplicate positive-control reproduction when an original control is already proven provenance-equivalent under the relevant task, budget, model/executor, configuration, and result bindings. This audit did not prove those bindings for the named artifact, but that insufficiency alone neither schedules reproduction nor establishes any method failure. A new matched control is required only before a later causal claim whose validity depends on distinguishing original-method behavior from O adaptation or ablation loss.",
+          "repair": {
+            "completed_unit": "Consolidate Episode and Learn the exact publication result and Revision-20 scope rule.",
+            "do_not_repair": "Do not broaden the static audit into a scientist-agent-family negative, infer adaptation loss, duplicate an adequately equivalent original positive control, activate either Candidate from publication evidence, or relabel internal CI as capability evidence.",
+            "next_falsifiable_unit": "At the next fresh Root boundary, select a small precommitted behavioral or provenance-equivalence unit that names the exact candidate, configuration, conditions, and causal question; reuse an already equivalent original control when adequate provenance exists."
+          },
+          "unit_subfinding": {
+            "reason": "Every frozen publication condition is supported: the exact delta was the closed 80-path native-record allowlist, local integrity checks passed, unchanged exact-head CI passed all required jobs, generation-8 authority and inbox revision 20 were verified, expected-head merge succeeded, and all 80 reviewed remote main blobs matched.",
+            "unit_id": "unit-ee7daa32b6ea49df70773453",
+            "verdict": "PASS"
+          },
+          "unit_verdict": "PASS",
+          "unmet_conditions": [
+            "No matched behavioral comparison has established performance for a named scientist-agent or O-adapted mechanism under exact conditions.",
+            "No independent real-world production capability evidence supports the upper objective.",
+            "The serving model and runtime identity remain externally unverified.",
+            "The user's actual upper objective has not been achieved or demonstrated."
+          ],
+          "user_level_verdict": "FAIL",
+          "verdict": "FAIL"
+        },
+        "last_result_ref": "artifacts/unit-15428593baa21431b4935253-result.json",
+        "phase": "unit_pending",
+        "produced_candidates": [],
+        "revision": 165,
+        "run_id": "run-work-mode-handoff-v2",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "PASS",
+        "updated_at": "2026-08-24T16:12:10.560550Z"
+      }
+    },
+    "mode": "pre-application",
+    "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
+    "run_id": "run-work-mode-handoff-v2",
+    "target_component": "execute"
+  },
+  "payload_digest": "b67535f8b58e846ccdb6a2a2eed66b6e7a4f3d8754e34dbd06d2e7c11ea53551",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "0bd1f47bac3ac3bee22ae843b675ca095abd6084b369a83914ebfd807110449f",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}

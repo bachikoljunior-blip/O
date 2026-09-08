@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "role": "bridge",
+  "observed_at": "2026-08-30T06:57:09+09:00",
+  "bootstrap_valid": false,
+  "required_control": "note/automation_control/DESIRED_STATE.json",
+  "required_control_fetch_result": "404_NOT_FOUND",
+  "required_control_fetch_attempts": 1,
+  "pre_control_repository_resolution_only": true,
+  "bootstrap_order_note": "Repository identity was resolved before the first direct DESIRED_STATE fetch because the invocation did not include the repository owner/name. The required control was then fetched directly and returned 404 before any bridge semantic work was started.",
+  "active_main_head_observed_before_receipt": "580a25fc61d3809bd25669b638a108de62dcdb70",
+  "active_main_head_message_observed": "integrator: record hard stop for missing control at 06:54 JST",
+  "semantic_bridge_work_started": false,
+  "clean_feed_read_or_mutated": false,
+  "o_semantic_state_read_or_mutated": false,
+  "desired_state_edited": false,
+  "other_repository_state_mutated": false,
+  "receipt_write_is_only_repository_mutation": true,
+  "termination": "BLOCKED_CONTROL_MISSING",
+  "phase1_objective_status": "OPEN_OR_UNASSESSABLE_UNDER_MISSING_CONTROL",
+  "scheduler_action": {
+    "task_title": "O Research Feed Bridge",
+    "task_id": "6a8d2b926a248191bf8cf841c89305af",
+    "enabled_before": true,
+    "action": "disable_current_recurring_bridge",
+    "result": "success",
+    "enabled_after": false,
+    "reason": "fully_blocked_by_persistent_missing_authoritative_control_per_automation_runtime"
+  },
+  "runtime_stop_requirement": "The automation runtime requires disabling a recurring task when fully blocked by a persistent non-transient missing required control. This scheduler mutation is external to repository semantic state and is not Phase-1 evidence or closure.",
+  "exact_continuation": "Restore note/automation_control/DESIRED_STATE.json on active main, then explicitly re-enable the existing O Research Feed Bridge automation. On resume, fetch DESIRED_STATE.json before any semantic artifact read, resolve and validate the current bridge role config and referenced control tuple, honor enabled_desired=false as logical no-op plus receipt, and only then resume clean-feed bridging at a safe existing boundary with revision/digest acknowledgement and CAS/readback safety."
+}

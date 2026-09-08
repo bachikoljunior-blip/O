@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "episode_id": "episode-self-applied-external-source-artifact-20260818-010834",
+  "source_run_id": "run-self-applied-external-source-artifact-20260818-010834",
+  "execution_id": "o-agi-watchdog-recovery-20260818T005019JST",
+  "mode": "task-chat-model-self-application",
+  "task": "Replace the opaque manual source-artifact hash step in the strict external evaluator handoff with a reproducible artifact derived from an exact Git commit.",
+  "objective": "Create and validate a deterministic tracked-source archive whose digest is directly bound into the strict evaluation request.",
+  "outcome": "completed",
+  "task_verdict": "PASS",
+  "claim_tier": "internal_development",
+  "external_claim_admissible": false,
+  "executor": {
+    "kind": "task_chat_model",
+    "model": "GPT-5.6 Sol",
+    "model_verified": true,
+    "verification_source": "platform runtime system identity",
+    "role": "O semantic execution, implementation, falsification, and validation stage"
+  },
+  "success_conditions": [
+    "The artifact is reconstructed from an exact canonical commit rather than the mutable working tree.",
+    "Dirty tracked changes and untracked files do not alter the artifact for the same commit.",
+    "A different commit changes the tracked-source artifact digest when the tree changes.",
+    "The strict evaluation request subject uses the reconstructed artifact digest and exact commit.",
+    "Tampered archive bytes fail validation.",
+    "The exact head passes full CI before merge."
+  ],
+  "actions": [
+    "Implemented `src/agi/external_source_artifact.py` and the `agi-external-artifact` CLI.",
+    "Added commit verification, tree identity, tar archive SHA-256/size metadata, and archive validation.",
+    "Added regression tests covering dirty/untracked invariance, commit sensitivity, request binding, tampering, canonical ids, and CLI create/validate round-trip.",
+    "Verified head a53a9f6ac41dcf2d9f5d6c6a3fbe2caaaa563a7d with CI run 32044318820 and merged PR 150 as 3ec632e2e7a9663a70bbd92c8d1d5a14a9a070d1."
+  ],
+  "decisions": [
+    "Use the immutable commit object as the source of truth for tracked source and explicitly exclude dirty/untracked working-tree state.",
+    "Keep source artifact creation separate from evaluator independence: the artifact and request are scaffolding, not production evidence.",
+    "Continue after merge toward tighter full-system subject binding and independent evaluation readiness."
+  ],
+  "observations": [
+    "The previous strict request accepted a caller-supplied artifact SHA-256; PR 150 now provides a mechanically derived path for tracked source.",
+    "Source identity alone does not freeze the external model/runtime identity, independent evaluator, hidden suite, or production result."
+  ],
+  "results": [
+    "PR #150",
+    "head a53a9f6ac41dcf2d9f5d6c6a3fbe2caaaa563a7d",
+    "CI run 32044318820",
+    "merge 3ec632e2e7a9663a70bbd92c8d1d5a14a9a070d1"
+  ],
+  "evidence_refs": [
+    ".continual/evidence/self-application/self-applied-external-source-artifact-20260818-010834.json",
+    "PR #150",
+    "CI run 32044318820",
+    "merge 3ec632e2e7a9663a70bbd92c8d1d5a14a9a070d1"
+  ],
+  "candidate_refs": [],
+  "claims": [
+    "Tracked source for an external handoff can now be deterministically bound to an exact Git commit and validated against its archive SHA-256.",
+    "AGI remains unverified because the strict independent production evidence gate has not passed."
+  ],
+  "failures": [],
+  "unknowns": [
+    "How to bind the externally executed model/runtime identity as tightly as the source artifact remains an open system-subject question.",
+    "Whether independent evaluators will complete the strict production protocol remains unknown."
+  ],
+  "unresolved": [
+    "Bind an explicit public runtime/system manifest to the strict evaluation request so external evidence identifies source plus the model/runtime under test.",
+    "Exercise longer genuine-model continual campaigns with fresh transfer/retention boundaries.",
+    "Obtain genuinely independent signed production evidence for every criterion and both required evaluator groups."
+  ],
+  "context": {
+    "boundary": "development",
+    "risk_signals": [],
+    "logical_reset_used": true,
+    "fresh_execution_used": false,
+    "independent_execution_used": false,
+    "boundary_satisfied": true,
+    "physical_fresh_context_fixed_requirement": false,
+    "repository_latest_main_is_durable_state": true,
+    "decision": {
+      "boundary": "development",
+      "mode": "reuse_current_context",
+      "logical_reset_required": false,
+      "fresh_execution_required": false,
+      "independent_execution_required": false,
+      "persist_before_switch": false,
+      "reason_codes": ["no_contamination_signal"]
+    }
+  }
+}

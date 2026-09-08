@@ -1,0 +1,47 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "observations": [
+      "The only indexed candidate targets Task Evaluate, has no dependencies or conflicts, and adds an explicit unit_verdict without weakening the original-task verdict.",
+      "The upcoming unit has a separately falsifiable three-fixture boundary, so a one-call scoped trial can preserve the upper-objective FAIL while independently adjudicating the bounded unit."
+    ],
+    "purpose": "pre-application scoped Task Evaluate candidate selection"
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "observation": "No new method proposal is warranted before actual Task Evaluate evidence and the mandatory post-result candidate review."
+  },
+  "result": {
+    "active_version": "prompts/task_evaluate.md",
+    "baseline_need": "Retain the active Task Evaluate contract as the baseline; the overlay may only add a separate unit_verdict and must not relax the original-task verdict or external claim boundary.",
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "candidate_version": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+    "conflicts": [],
+    "decision": "TRIAL_CANDIDATE",
+    "dependencies": [],
+    "evidence_to_collect": [
+      "exact original-task verdict and reason",
+      "separate PASS, FAIL, or UNCERTAIN unit_verdict with fixture-level evidence",
+      "negative evidence and unmet publication or lifecycle conditions",
+      "proof that the bounded unit result does not imply AGI, production readiness, or user-level completion",
+      "post-result comparison against the active prompt semantics"
+    ],
+    "expected_scope": "continual/incremental-task-evaluation",
+    "failure_risk": "Low and bounded: the overlay is additive, but any claim widening, verdict conflation, missing negative evidence, or skipped lifecycle check requires rejection for this scope.",
+    "latency_cost": "Negligible prompt-overlay overhead for one Task Evaluate call.",
+    "quality_goal": "Separate a falsifiable bounded-unit judgment from the unchanged upper-objective judgment while preserving all evidence and claim limits.",
+    "reason": "The candidate is directly applicable to this bounded Task Evaluate unit and already has multiple scoped PROPOSE_ACTIVATION findings, but it is not deterministically VERIFIED_FOR_SCOPE. A scoped trial followed by actual-result review is therefore the strongest authorized choice.",
+    "regression_checks": [
+      "verdict continues to evaluate the unchanged upper objective",
+      "unit_verdict evaluates only the exact three frozen fixtures and lifecycle evidence",
+      "PASS for the unit cannot imply original-task PASS",
+      "contradictory and negative evidence remain explicit",
+      "failure and repair information remains complete"
+    ],
+    "rollback": "If the trial omits either verdict, conflates their scopes, widens the claim, or weakens evidence requirements, discard the trial result and use the active Task Evaluate prompt for the same frozen unit without promoting the candidate.",
+    "scope": "generation25/recursive-context-retrieval-ablation-v1",
+    "token_cost": "Small bounded overlay cost.",
+    "tool_cost": "No additional tool or external-service call is authorized by the candidate selection itself."
+  }
+}

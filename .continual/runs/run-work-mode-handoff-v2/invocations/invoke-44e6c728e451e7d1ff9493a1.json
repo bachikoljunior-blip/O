@@ -1,0 +1,57 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-24T08:42:18.921579Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-44e6c728e451e7d1ff9493a1-candidate_evaluate.json",
+  "invocation_id": "invoke-44e6c728e451e7d1ff9493a1",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/candidates/index.json",
+        ".continual/runs/run-work-mode-handoff-v2/execution-units/unit-776776cd9e670bdce147a49d.json",
+        ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-d6cbe0a3154ed09edcc8e984-result.json"
+      ],
+      "observations": [
+        "candidate-task-evaluate-unit-verdict-v1 targets Task Evaluate, but it is only PROPOSE_ACTIVATION for other recorded scopes and has no VERIFIED_FOR_SCOPE evidence for control-plane/user-input-inbox-append-path-v1/evaluation.",
+        "The frozen baseline Task Evaluate already requires separate bounded and user-level verdicts, all negative evidence, and explicit non-inflation."
+      ],
+      "purpose": "Keep an unverified Task Evaluate overlay out of the exact control-plane publication verdict.",
+      "unresolved": [
+        "a deterministic protected-baseline activation gate for the Candidate's claimed scopes"
+      ]
+    },
+    "local_learn": {
+      "decision": "NO_CHANGE",
+      "observation": "A Candidate that duplicates an already-frozen dual-verdict requirement should not be trialed on a publication-integrity unit without an exact-scope baseline need or verified activation evidence."
+    },
+    "result": {
+      "baseline_need": "Use the frozen baseline Task Evaluate request and require bounded PASS/FAIL/UNCERTAIN, separate user-level FAIL, retained contradictions, rollback, and non-inflated claim boundary.",
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "conflicts": [],
+      "decision": "NOT_APPLICABLE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "entry and sequence preservation",
+        "revision-19 acknowledgement",
+        "pre-mutation validation and exactly one CAS",
+        "bounded exact readback and exact-only idempotency",
+        "unchanged exact-head CI, merge, and main byte readback",
+        "separate bounded and user-level verdicts"
+      ],
+      "mode": "pre-application",
+      "reason": "The Candidate is not VERIFIED_FOR_SCOPE for this control-plane evaluation, and the exact baseline request already makes bounded-unit and user-level verdict separation mandatory. Applying the overlay would add an unverified variable without collecting discriminating evidence.",
+      "regression_checks": [
+        "bounded engineering success cannot change user-level FAIL",
+        "negative evidence and unverified model identity remain visible",
+        "no positive-control, behavioral capability, AGI, or completion claim is inferred",
+        "a missing frozen success condition yields FAIL or UNCERTAIN rather than PASS"
+      ],
+      "rollback": "If the baseline evaluator couples bounded and user-level verdicts, reject its result and schedule a separately gated Candidate trial; do not reinterpret the publication evidence.",
+      "scope": "control-plane/user-input-inbox-append-path-v1/evaluation"
+    }
+  },
+  "payload_digest": "40159912208d83302669200f",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

@@ -1,0 +1,51 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-23T10:03:06.647755Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-f9827a261894ba8460315d40-candidate_evaluate.json",
+  "invocation_id": "invoke-f9827a261894ba8460315d40",
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        "candidate-task-evaluate-unit-verdict-v1",
+        "GitHub Actions run 32630847871",
+        "main 2257797b66ece744a3835f6f8ea72259d5ba2000"
+      ],
+      "observations": [
+        "The actual output met every pre-application regression check.",
+        "No contradictory evidence appeared in this trial.",
+        "No activation or protected prompt mutation was performed."
+      ],
+      "purpose": "Evaluate the dual-verdict candidate from actual CI-sharding Task Evaluate output.",
+      "unresolved": [
+        "separate deterministic activation gate",
+        "the user-level real-world AGI objective"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Repeated cross-unit evidence supports proposing scoped dual-verdict activation, while promotion remains a separate deterministic protected-baseline decision."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [],
+      "decision": "PROPOSE_ACTIVATION",
+      "reason": "The actual result preserved the original user-level FAIL and the bounded CI unit PASS as independent verdicts, tied the bounded verdict to exact-head evidence, retained timing and imbalance caveats, and explicitly denied any capability or AGI inference. This adds another discriminating supporting trial, but this evaluator does not activate the candidate.",
+      "required_activation_gate": "Recompute the deterministic protected-baseline matrix and persist VERIFIED_FOR_SCOPE before any scoped status change.",
+      "rollback": "Keep the candidate inactive if the deterministic gate detects weakened original verdicts, missing negative evidence, bounded-unit overclaim, or task/unit conflation.",
+      "scope": "continual/incremental-task-evaluation",
+      "supporting_evidence": [
+        "actual Task Evaluate verdict FAIL and unit_verdict PASS are non-conflated",
+        "the bounded PASS is bound to exact workflow, shard-count, latency, merge, and main-readback evidence",
+        "the user-level unmet conditions and truthful claim boundary remain explicit",
+        "shard imbalance, comparison limitations, repeat-run uncertainty, and rollback are preserved",
+        "prior trials on different units show the same separation behavior"
+      ]
+    }
+  },
+  "payload_digest": "88c55ac25027d0fd802c9af5",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "record_type": "heldout_scientific_forecast_withheld_outcome_commitment",
+  "trial_id": "gen29-clean-g1-crucible-provenance-export-v1",
+  "unit_id": "unit-generation29-clean-g1-heldout-scientific-forecast-v1",
+  "committed_at": "2026-08-30T14:27:10.146Z",
+  "authority": {
+    "execution_id": "work-recovery-20260828T122724304Z-b9f52bccaba0472923908d65b1fb59c3",
+    "lease_generation": 29,
+    "fence_token_digest": "c03cdd410193ed54352ee4fd5480cf5e4fccb77d5a1aca67809b7c3e4341890d",
+    "source_o_main_sha": "92bccc8061e334facba2b1a4916f1ec00d217bc1",
+    "source_state_blob_sha": "39bd0408927e803104ccf68e0557cb2c045a9a00",
+    "frozen_work_invocation_id": "invoke-614676a3cdc4f32ee316fa58",
+    "frozen_request_digest": "fd8b3e6d80101de8fbd1ed936ccd0276ab120cd8741dfe70099764000dee679d",
+    "frozen_snapshot_revision": 106
+  },
+  "clean_g1_provenance": {
+    "repository": "bachikoljunior-blip/note",
+    "path": "research_workers_clean_g1/scientist_agents/source_evidence/2026-08-30T2238JST_crucible_provenance_capture_export_audit.json",
+    "blob_sha": "84aba3588e5574580cb107c4e7e4bb6a727ab476",
+    "content_sha256": "34ad274e7ba975f065bae897409b273a4c6a458f9b65a547b20de630029011cf",
+    "observed_at": "2026-08-30T22:38:10+09:00",
+    "source_note_main_sha": "653950941584de88ce1dbcd2e6e0de0b016ab2f5",
+    "generation": "clean_g1",
+    "worker": "scientist_agents",
+    "revision105_root_snapshot_updated_at": "2026-08-30T12:25:58.775680Z",
+    "fresh_after_revision105_root": true,
+    "root_manifest_contained_record": false
+  },
+  "primary_source": {
+    "repository": "arghavan-b/crucible-harness",
+    "immutable_commit_sha": "437835ded412544fd294c2b910942208216e85b2",
+    "path": "crucible/benchmarks/provenance_capture.py",
+    "git_blob_sha": "30660760620ceb61c2cabb0d53c424482f50f40b",
+    "content_sha256": "92b9790c386b3e445c44677636355942961a493bb66acad84303128fbb6dc818",
+    "byte_count": 5692,
+    "first_retrieved_at": "2026-08-30T14:25:32.718Z",
+    "publication_identity": "GitHub public repository immutable commit and content-addressed blob"
+  },
+  "withheld_outcome": {
+    "source": "exact primary-source Python blob above",
+    "content_in_this_commitment": false,
+    "content_in_prediction_manifest": false,
+    "reveal_requires_second_independent_connector_read": true,
+    "label_space": [
+      "DURABLE_EXPORT_PRESENT",
+      "DURABLE_EXPORT_ABSENT"
+    ],
+    "deterministic_extraction_rule": {
+      "parser": "Python ast",
+      "scope": "entire exact source file",
+      "durable_sink_definitions": [
+        "Call to Path.write_text or Path.write_bytes",
+        "Call to built-in open with a literal mode containing w, a, or x",
+        "Call to json.dump, yaml.dump, or pickle.dump"
+      ],
+      "label_rule": "DURABLE_EXPORT_PRESENT iff at least one durable sink definition is found; otherwise DURABLE_EXPORT_ABSENT",
+      "next_experiment_rule": {
+        "DURABLE_EXPORT_PRESENT": "round_trip_replay_integrity_probe",
+        "DURABLE_EXPORT_ABSENT": "seeded_end_to_end_durable_export_probe"
+      }
+    }
+  },
+  "ordering_contract": {
+    "commitment_must_precede_prediction": true,
+    "prediction_must_precede_reveal": true,
+    "reveal_must_match_primary_git_blob_and_sha256": true
+  },
+  "secrets_present": false,
+  "resume_required": true,
+  "upper_objective_achieved": false,
+  "agi_claim_supported": false
+}

@@ -1,0 +1,47 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-1c8852ca06beb4ca5f6f1710",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/work-model/invocations/invoke-db09246b90d250f42cca472c/response.json",
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json"
+      ],
+      "observations": [
+        "The actual output met every pre-application regression check with no observed contradiction."
+      ],
+      "purpose": "Evaluate the dual-verdict Candidate from actual Task Evaluate output.",
+      "unresolved": [
+        "Separate deterministic activation gate has not yet run."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Repeated cross-unit evidence now supports proposing scoped activation, but the evaluator itself does not perform promotion."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [],
+      "decision": "PROPOSE_ACTIVATION",
+      "reason": "The actual result preserved original-goal FAIL and bounded unit PASS as independent verdicts, retained negative evidence and unmet conditions, and explicitly denied any AGI inference. Together with prior supporting trials, this supports a scoped activation proposal, subject to the separate deterministic protected-baseline gate.",
+      "required_activation_gate": "Recompute the protected baseline regression and persist VERIFIED_FOR_SCOPE before any scoped status change.",
+      "rollback": "Keep the Candidate inactive if the deterministic gate detects weakened original verdicts, missing negative evidence, or unit/task conflation.",
+      "scope": "continual/incremental-task-evaluation",
+      "supporting_evidence": [
+        "actual Task Evaluate verdict FAIL and unit_verdict PASS are non-conflated",
+        "bounded PASS is mapped to exact external and local evidence",
+        "original unmet conditions and claim boundary are preserved",
+        "prior supporting trials show the same behavior on different units"
+      ]
+    }
+  },
+  "output_digest": "b56d32c3c60b292c430b0faa4bbe18c743170e68652b8e1cad0c8cf630609535",
+  "received_at": "2026-08-23T06:23:15.078871Z",
+  "request_digest": "b59825e3cbdb7ad2c603bc5728153d9ea0626027f702a774d82eaa4a6b0f5d45",
+  "response_digest": "6afcededf5a1fbc3f1b3e4148641787e552c324d8ad63154441f2235e74f9237",
+  "schema_version": 1
+}

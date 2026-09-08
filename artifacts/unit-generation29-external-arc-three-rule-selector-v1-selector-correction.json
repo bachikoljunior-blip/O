@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "record_type": "external_arc_three_rule_selector_correction",
+  "recorded_at": "2026-09-05T09:34:00Z",
+  "unit_id": "unit-generation29-external-arc-three-rule-selector-v1",
+  "idempotency_key": "o-work-gen29:arc-three-rule-selector:39903044:v1",
+  "invalid_attempt": {
+    "selected_task_id": "1cf80156",
+    "selected_rule_id": "nonzero_bounding_box_v1",
+    "pre_correction_result_sha256": "591dacaec9a75d67308c8ed8567555761cfcf8d5cbce189fa899fc450c31e206",
+    "pre_correction_result_git_blob_sha": "ed421f7ff3131fd49e792f08f76ab1b55131d47f",
+    "heldout_output_revealed": true,
+    "selected_prediction_exact_grid": true,
+    "provisional_unit_verdict": "PASS",
+    "provisional_verdict_invalid": true
+  },
+  "concrete_cause": "The inherited prior-task scan invoked ripgrep with -h. In ripgrep 15.2.0, -h prints short help and exits successfully; it does not mean --no-filename. The scan therefore returned help text rather than matched task IDs and failed to exclude 1cf80156, whose exact ID already appears in the prior nonzero-bounding-box unit artifacts.",
+  "repair": {
+    "code_change": "Replace -h with the unambiguous --no-filename option in the three-rule selector prior-use scan.",
+    "recurrence_test": "A temporary repository containing 1cf80156 must produce exactly {1cf80156} from prior_task_ids.",
+    "same_unit_retry_performed": false,
+    "replacement_task_selected": false,
+    "heldout_output_revealed_again": false
+  },
+  "adjudication": {
+    "selector_valid": false,
+    "prior_task_reuse_control_passed": false,
+    "unit_verdict": "FAIL",
+    "unit_completion_verdict": "FAIL",
+    "task_completion_verdict": "FAIL",
+    "user_level_verdict": "FAIL",
+    "upper_objective_verdict": "FAIL",
+    "candidate_activation": false,
+    "production_routing": false,
+    "agi_achieved": false,
+    "reason": "The exact frozen selector event violated its own prior-ID exclusion predicate. Its exact heldout prediction cannot rescue the invalid causal selection, and changing the selector or selecting another task after reveal would violate the frozen unit."
+  },
+  "claim_boundary": "This is a fail-closed selector implementation finding and recurrence repair only. It is not a valid ARC selector PASS, Candidate activation, production evidence, task completion, user completion, upper-objective completion, or AGI evidence.",
+  "next_action": "Publish the invalid attempt, correction, repaired code, and recurrence test; answer the frozen Execute request with bounded FAIL; independently Task Evaluate it and continue the normal lifecycle without retrying this unit."
+}

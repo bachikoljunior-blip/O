@@ -1,0 +1,1 @@
+Repair Work checkpoint durability so an execution-state continuation cannot be reported as remotely durable when its referenced native request or claimed answered response is absent from the checked repository. Add a fail-closed validator and focused tests; keep Revision 20 negative-evidence scope and make no AGI claim.

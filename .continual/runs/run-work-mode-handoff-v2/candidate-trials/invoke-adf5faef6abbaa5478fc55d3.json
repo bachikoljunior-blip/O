@@ -1,0 +1,37 @@
+{
+  "fragment": {
+    "component": "candidate_evaluate",
+    "evidence_refs": [
+      ".continual/work-model/invocations/invoke-dbdfb259ca0b2bfea81cd27b/response.json",
+      "agi/SCIENTIST_AGENT_BASELINE.json",
+      ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json"
+    ],
+    "observations": [
+      "The actual output met each pre-application regression check without conflating comparison success with the user-level objective."
+    ],
+    "purpose": "Evaluate the dual-verdict Candidate from the scientist-agent comparison Task Evaluate output.",
+    "unresolved": [
+      "The deterministic activation gate has not run.",
+      "The matched checkpoint-inheritance experiment has not run."
+    ]
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "observation": "The scientist-agent comparison supplies a further independent dual-verdict trial; activation remains outside this evaluator."
+  },
+  "result": {
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "contradictory_evidence": [],
+    "decision": "PROPOSE_ACTIVATION",
+    "reason": "The actual result kept the upper-goal FAIL independent from the bounded comparison PASS, retained the unmeasured-advantage and no-AGI negative evidence, and did not authorize implementation. This is another scoped supporting trial, subject to the separate deterministic protected-baseline gate.",
+    "required_activation_gate": "Recompute the protected baseline regression and persist VERIFIED_FOR_SCOPE before any scoped status change.",
+    "rollback": "Keep the Candidate inactive if the deterministic gate detects weakened original verdicts, missing negative evidence, speculative adoption, or unit/task conflation.",
+    "scope": "continual/incremental-task-evaluation",
+    "supporting_evidence": [
+      "actual Task Evaluate verdict FAIL and unit_verdict PASS are non-conflated",
+      "EXPERIMENT_REQUIRED remains distinct from adoption authority",
+      "primary-source limitations, unmatched costs, and the claim boundary remain explicit"
+    ]
+  }
+}

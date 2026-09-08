@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "kind": "generation31_candidate_consume_publication_checkpoint",
+  "recorded_at": "2026-09-05T13:35:00Z",
+  "execution_id": "work-recovery-20260905T131155Z-5132636cef4c85b3dbd4c072e94faac3",
+  "lease_generation": 31,
+  "fence_token_digest": "a8db950bcf6ae467a84d65d1d1e336f7fcc81ac7ec584dd5a54f2184aa46f0d4",
+  "pull_request": 513,
+  "prior_head_sha": "49ac5e62c0c32c0f64fd6593cb1995a67c6d5a1e",
+  "snapshot_source_head_sha": "1716852ab0137415a69dcd14d1fbe76e3fafd3d8",
+  "snapshot_revision": 197,
+  "snapshot_blob_sha": "bfd5a0264cd1bef2345832e8c7bf55a84e607565",
+  "state_blob_sha": "a178b412a0d9e92d948fb87572c4707261abdb8e",
+  "completed_effect": {
+    "work_invocation_id": "invoke-a7467dc870b7e35ee3388a4c",
+    "native_invocation_id": "invoke-776522f2a0f94272af62435a",
+    "response_blob_sha": "ce8646624a93405360b8205bdb98f079432f370d",
+    "response_digest": "0a43595b7c2cf39bb66718e8c011c3104813eda7bc7e92ac55143f1e92cd2f8f",
+    "response_consumed_exactly_once": true,
+    "response_replayed": false,
+    "request_recreated": false
+  },
+  "stop_cause": {
+    "classification": "pull_request_workflow_registration_absent",
+    "observed_after_seconds": 648,
+    "exact_prior_head_workflow_run_count": 0,
+    "content_failure_observed": false
+  },
+  "repair_action": "Append an immutable publication checkpoint to the same pull request to emit exactly one synchronize event; do not alter native state, frozen request, or response.",
+  "recurrence_validation": {
+    "required_workflows": [
+      "directive-source-preflight",
+      "test"
+    ],
+    "exact_head_required": true,
+    "merge_method_required": "merge",
+    "preserve_snapshot_source_ancestry": true
+  },
+  "idempotency_key": "o-work-g31:pr513:49ac5e62:ci-registration-retrigger:v1",
+  "upper_objective_achieved": false,
+  "agi_achieved": false,
+  "resume_required": true,
+  "next_action": "Wait for exact-head protected workflows, repair any concrete failure, merge unchanged head with a merge commit, exact-readback, then bind a fresh source observation and freeze Task Evaluate."
+}

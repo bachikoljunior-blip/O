@@ -1,0 +1,59 @@
+{
+  "actions": [
+    "Read the exact failed CI job and reproduced its stale revision assumption.",
+    "Separated checked-in queue invariant validation from controlled behavior fixtures.",
+    "Verified nonzero revision increment, idempotent replay, stale-writer rejection without byte changes, and deadline/closed-status boundaries."
+  ],
+  "artifacts": [
+    "artifacts/unit-generation30-queue-test-fixture-repair-v1-result.json",
+    "tests/test_user_request_queue.py"
+  ],
+  "component": "execute",
+  "decisions": [
+    "Preserve the old failed head and its evidence.",
+    "Keep production queue CAS and validation unchanged.",
+    "Require full protected CI for the corrected PR head."
+  ],
+  "failures": [
+    "CI at head 17ff373835c7e0461df12ba5502ed08cdfe676dc failed because a behavior test expected live revision 0 after legitimate revision 1 publication."
+  ],
+  "observations": [
+    {
+      "status": "passed",
+      "test": "test_checked_in_queue_is_non_blocking_secret_free_and_finitely_reevaluated"
+    },
+    {
+      "status": "passed",
+      "test": "test_due_requests_include_deadline_and_exclude_closed_requests"
+    },
+    {
+      "status": "passed",
+      "test": "test_enqueue_is_revision_bound_atomic_and_idempotent"
+    },
+    {
+      "status": "passed",
+      "test": "test_queue_rejects_secret_bearing_fields_and_duplicate_ids"
+    }
+  ],
+  "unknowns": [
+    "Full protected CI has not completed for the corrected head."
+  ],
+  "validation": [
+    {
+      "status": "passed",
+      "test": "test_checked_in_queue_is_non_blocking_secret_free_and_finitely_reevaluated"
+    },
+    {
+      "status": "passed",
+      "test": "test_due_requests_include_deadline_and_exclude_closed_requests"
+    },
+    {
+      "status": "passed",
+      "test": "test_enqueue_is_revision_bound_atomic_and_idempotent"
+    },
+    {
+      "status": "passed",
+      "test": "test_queue_rejects_secret_bearing_fields_and_duplicate_ids"
+    }
+  ]
+}

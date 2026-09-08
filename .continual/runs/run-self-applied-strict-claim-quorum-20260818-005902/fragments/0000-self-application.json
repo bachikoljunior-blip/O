@@ -1,0 +1,24 @@
+{
+  "component": "execute",
+  "scope": "agi/repository-development",
+  "objective": "Harden the strict external AGI claim path so the user-facing CLI cannot lower the two-independent-group quorum.",
+  "actions": [
+    "Reviewed the strict external claim CLI after PR 146 request binding was merged.",
+    "Identified that --min-independent-groups-per-criterion accepted values below the repository strict default.",
+    "Changed the CLI to fail closed before evidence loading when the requested quorum is below two groups per criterion.",
+    "Added regression coverage and merged only after exact-head CI completed successfully."
+  ],
+  "observations": [
+    "The lower-level library still supports explicit non-default development policies for tests and research, but the production CLI no longer permits a weakened evaluator quorum.",
+    "No new external production evidence was created by this change."
+  ],
+  "validation": [
+    {"kind": "ci", "run_id": 32043824282, "conclusion": "success", "head_sha": "8dc4cebfe31f3689230b7d3b5071c63762f47438"},
+    {"kind": "merge", "merge_sha": "f17487cdd363c19a64fca86aadfc1d52ad0df19c"}
+  ],
+  "claims": [
+    "The strict claim CLI now rejects a quorum below two independent external evaluator groups per criterion before reading evidence.",
+    "This hardens the claim boundary but does not establish AGI."
+  ],
+  "external_claim_admissible": false
+}

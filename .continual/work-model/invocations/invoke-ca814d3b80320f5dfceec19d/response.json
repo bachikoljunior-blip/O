@@ -1,0 +1,59 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-ca814d3b80320f5dfceec19d",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/work-model/invocations/invoke-1838109dd4f4dc6bc3a8c019/response.json",
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json",
+        ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/receipt.json"
+      ],
+      "observations": [
+        "The actual Task Evaluate output returned unit_verdict PASS and original verdict FAIL independently.",
+        "It retained visible-rubric, unverified-model, project-operated judge/provider, one-task breadth, and unchanged-independent-evidence limitations.",
+        "It authorized no global activation and did not relabel the internal observation as AGI or completion."
+      ],
+      "purpose": "Assess the verdict-separation Candidate from actual behavioral-unit evaluation evidence.",
+      "unresolved": [
+        "deterministic protected-baseline regression required before scoped activation",
+        "publication and broader behavioral evidence"
+      ]
+    },
+    "local_learn": {
+      "candidates": [
+        "candidate-task-evaluate-unit-verdict-v1"
+      ],
+      "decision": "PROPOSE_ACTIVATION",
+      "observation": "The overlay again separated a bounded engineering PASS from an original-goal FAIL without dropping negative evidence; promotion still belongs to the protected deterministic gate."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [
+        "This is one scoped trial and does not itself satisfy the required protected-baseline regression gate."
+      ],
+      "decision": "PROPOSE_ACTIVATION",
+      "evidence": [
+        "actual result contains verdict FAIL, user_level_verdict FAIL, unit_verdict PASS, and agi_claim_supported false",
+        "actual result preserves six explicit negative-evidence items and four unmet conditions",
+        "claim boundary states internal, non-heldout, non-independent, non-breadth, non-AGI, and non-completion",
+        "global_activation_authorized remains false"
+      ],
+      "promotion_performed": false,
+      "reason": "Actual output exhibits the Candidate's intended non-conflated dual verdict and retained evidence boundary with no upward claim drift.",
+      "regression_required": [
+        "recompute protected baseline and Candidate measurements deterministically",
+        "verify no regression on FAIL, UNCERTAIN, and single-verdict tasks",
+        "persist VERIFIED_FOR_SCOPE evidence before any activation"
+      ],
+      "scope": "continual/incremental-task-evaluation"
+    }
+  },
+  "output_digest": "cba3f715ac890fa2601d88feb32bf5c61da7c3ad40c1fd0050495b5c7576f6d2",
+  "received_at": "2026-08-24T02:32:14.150328Z",
+  "request_digest": "7b5baf11199c3e2bd6eabcf8dba4f4452cb1d5b5d46395ad9b3c7f562a989119",
+  "response_digest": "fd634aae8950976d75830212134c8576662712058bf2609f526191b51edca3ee",
+  "schema_version": 1
+}

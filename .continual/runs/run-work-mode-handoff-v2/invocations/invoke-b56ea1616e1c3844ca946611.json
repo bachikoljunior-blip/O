@@ -1,0 +1,76 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-24T02:28:03.070432Z",
+  "component": "execute",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-b56ea1616e1c3844ca946611-execute.json",
+  "invocation_id": "invoke-b56ea1616e1c3844ca946611",
+  "output": {
+    "fragment": {
+      "component": "execute",
+      "evidence_refs": [
+        ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/behavioral-outcome-4272816b64c262f5e0126396/receipt.json",
+        ".continual/runs/run-work-mode-handoff-v2/behavioral-outcomes/ledger.json",
+        ".continual/work-model/invocations/invoke-061603bcb6a9566e1ea02873/response.json",
+        "tests/test_behavioral_outcome.py"
+      ],
+      "observations": [
+        "The deterministic exact-canonical-JSON judge returned PASS with score 1.0 for the one frozen Work response.",
+        "The receipt cross-binds the precommitted task and rubric to exactly one Work request, response, and output digest.",
+        "A second finalizer call produced byte-identical request, response, judgment, receipt, and ledger files.",
+        "The internal behavioral ledger contains exactly one observation; the independent external evidence ledger hash remained 888ab76fa17d910b7353664162b3d1cbccca476dbc12a5822866d122f482fbb9."
+      ],
+      "purpose": "Finalize the already-immutable child response as a replay-safe internal behavioral outcome receipt.",
+      "unresolved": [
+        "the task rubric was available in the child's public request context, so this is not held-out evidence",
+        "model identity remains externally unverified",
+        "one deterministic sandbox task does not establish breadth, independence, AGI, or user-level completion"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Separating response persistence from deterministic finalization prevents a response from rewriting its own score, but a future stronger measurement must physically hide the rubric from the child and use independent operation if it is to support broader claims."
+    },
+    "result": {
+      "claim_scope": "internal_provider_behavioral_outcome_not_independent_or_completion_evidence",
+      "independent_evidence_changed": false,
+      "internal_observation_count": 1,
+      "judgment": {
+        "judge_kind": "exact_canonical_json",
+        "passed": true,
+        "score": 1.0,
+        "success_threshold": 1.0
+      },
+      "ledger_digest": "42c3183983b9733b08c15a35c457192ca77860d427da847034d3416ccc31a41a",
+      "negative_evidence": [
+        "the rubric was visible in the same precommitted request file referenced by the child unit",
+        "the executor model identity is chatgpt-work-model-unverified",
+        "the provider and judge remain inside the project boundary",
+        "only one sandboxed deterministic task was observed"
+      ],
+      "provider_reinvoked": false,
+      "receipt_digest": "eb4b349977f87aca211da013b2ce06bacbfaa7cdb8e412d0b8a6ddeca8030eec",
+      "replay_byte_stable": true,
+      "source_work_invocation": {
+        "invocation_id": "invoke-061603bcb6a9566e1ea02873",
+        "output_digest": "db715651218722fd7e3be447f5e362a8e3589a0bd6549e690edf355a2abf2e37",
+        "request_digest": "7872be8f6d58cb09f18344251dae9294bed709df705d8887072da49aa4a14234",
+        "response_digest": "d818c9d6d7ed03f1e9111c9c7396523f934e3b08fecd90c23ee7f66daf03cd4a"
+      },
+      "tests": {
+        "passed": 47,
+        "scope": [
+          "behavioral_outcome",
+          "work_session_bridge",
+          "context_routing_rendezvous",
+          "ci_source_observation"
+        ]
+      },
+      "unit_verdict": "PASS",
+      "user_level_verdict": "FAIL"
+    }
+  },
+  "payload_digest": "98108c896d65b083a08e3435",
+  "prompt_path": "prompts/execute.md",
+  "status": "complete"
+}

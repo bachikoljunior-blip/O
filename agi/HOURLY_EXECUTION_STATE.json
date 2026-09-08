@@ -1,0 +1,71 @@
+{
+  "schema_version": 2,
+  "mode": "watchdog_repository_only_same_task_chat",
+  "timezone": "Asia/Tokyo",
+  "status": "running",
+  "lease_mode": "watchdog_continuation",
+  "scheduler_fired_at": "2026-08-21T08:06:56+09:00",
+  "time_budget_enabled": false,
+  "soft_stop": null,
+  "hard_stop": null,
+  "actual_started_at": "2026-08-21T08:06:56+09:00",
+  "started_at": "2026-08-21T08:06:56+09:00",
+  "heartbeat_at": "2026-08-21T08:06:56+09:00",
+  "last_progress_at": "2026-08-21T08:06:56+09:00",
+  "stale_after_seconds": 900,
+  "execution_id": "o-agi-watchdog-recovery-20260821T080656JST",
+  "session_id": "same-task-chat-watchdog-recovery-20260821T080656JST",
+  "active_run_id": "run-self-applied-post-release-recovery-20260821-080656",
+  "required_model": "GPT-5.6 Pro",
+  "actual_model": "GPT-5.6 Sol",
+  "model_verified": true,
+  "model_verification_source": "platform runtime system identity",
+  "logical_context_reset": true,
+  "prior_execution_chat_context_used": false,
+  "continuation_source": "repository_latest_main_only",
+  "repository_state_loaded": true,
+  "platform_context_exclusion_verified": false,
+  "latest_main_sha_at_start": "eab6631e281b1a7edd4056922ee46f1a225cb37d",
+  "current_work_unit": "Recovered the explicitly released prior lease from repository latest main only. Observed exact prior runs without duplication: PR230 CI 32422333224 cancelled (no semantic conclusion); PR244 CI 32422357396 success; PR238 CI 32422412770 success; PR245 diagnostic CI 32422513640 cancelled; PR246 CI 32422751076 success; PR247 stacked CI 32423188917 success. Because the prior release checkpoint advanced main after all those runs started, passing results are semantic evidence only. Reconstruct PR230 first on this recovery main and require fresh full exact-head CI; independently reconstruct passing PR238/244/246 deltas on this same verified base, with PR247 blocked until PR238 integrates.",
+  "observed_prior_runs": [
+    {"pr":230,"head_sha":"fc45794040bab2a7dcb40c907fe4316f3b11cf5a","ci_run":32422333224,"conclusion":"cancelled","merge_admissible":false},
+    {"pr":244,"head_sha":"e5c79bda697710296b8f4edf59424437ab901bba","ci_run":32422357396,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":238,"head_sha":"6928db9c62e73bee95f1e25f7c52e20124229185","ci_run":32422412770,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":245,"head_sha":"f73fc76539a4fbabc9886e7db4c0d85b47e22da0","ci_run":32422513640,"conclusion":"cancelled","merge_admissible":false},
+    {"pr":246,"head_sha":"3ad285f998c654000d3cfc6851ae61059c931225","ci_run":32422751076,"conclusion":"success","merge_admissible":false,"reason":"pre-recovery-main semantic evidence only"},
+    {"pr":247,"head_sha":"f82a3a5673c163bd2fb089e5dfc2d3cbd0ed90aa","ci_run":32423188917,"conclusion":"success","merge_admissible":false,"reason":"stacked on PR238 and pre-recovery-main"}
+  ],
+  "negative_evidence": [
+    {"pr":230,"head_sha":"315fd5c76ae2048f91f5b2aed7ae3cf66c07fbb7","ci_run":32330171761,"failure":"385 passed / 1 failed; reversed canonical numeric-character sequence target outside ordinary bounded synthesis"},
+    {"pr":240,"head_sha":"aeb2ce4bc538d432544f77bc0b84ca159c4b38f8","ci_run":32361932655,"failure":"386 passed / 1 failed; fewer than two derived behaviors for chars(reverse(to_string(numeric)))"},
+    {"pr":230,"head_sha":"e4a8bc612b2345a0ddd8fd7b2d1af3a7bc798f3b","ci_run":32367064061,"failure":"386 passed / 1 failed; reproduced optional-reverse derived-behavior boundary"},
+    {"pr":245,"head_sha":"d4ce9620444c6e0e2f7093471b146b7c1d04ab9f","ci_run":32413435844,"failure":"392 passed / 1 failed; direct end-to-end test constructed live ModelClient in ordinary CI without provider credentials; capability semantics unclassified"},
+    {"workflow_run":32094156066,"failure_class":"provider_resource_exhaustion","failure":"Copilot monthly quota exhaustion blocked live semantic validation; do not retrigger while blocked"}
+  ],
+  "recovered_released_lease": {
+    "execution_id": "o-agi-watchdog-recovery-20260821T065947JST",
+    "released_at": "2026-08-21T07:14:07+09:00",
+    "reason": "prior execution explicitly released after persisting exact in-flight work; recovery resumed idempotently from latest main only"
+  },
+  "self_application": {
+    "enabled": true,
+    "policy_path": "agi/SELF_APPLICATION.md",
+    "run_id": "run-self-applied-post-release-recovery-20260821-080656",
+    "checkpoint_persistence_pending": true,
+    "checkpoint_truthfulness": "native continual self-apply CLI has not been executed through this connector session; no native Run/Episode is claimed",
+    "external_claim_admissible": false
+  },
+  "external_evidence_state": {
+    "ledger_path": "evidence/external_ledger.json",
+    "evaluation_requests": 0,
+    "challenges": 0,
+    "disclosures": 0,
+    "attestations": 0,
+    "registered_verifiers": 0,
+    "coordination_issue": 222,
+    "coordination_issue_comments": 0,
+    "agi_claim_supported": false
+  },
+  "next_falsifiable_milestone": "Reconstruct preserved PR230 source/test blobs on the recovery latest main, require fresh full exact-head CI, and merge only an unchanged passing head. In parallel reconstruct the semantically passing PR238/244/246 deltas on the same verified recovery main and require fresh exact-head CI. PR247 remains blocked until PR238 integrates; PR245 remains blocked until PR230 integrates. Preserve any exact failure and repair only its demonstrated boundary.",
+  "rule": "A fresh running heartbeat suppresses duplicate work. Released or stale lease may be recovered from repository latest main only. Reports, commits, tests, CI, PRs, merges, milestones, and hourly boundaries never prove AGI. Internal evidence cannot satisfy the strict external AGI gate."
+}

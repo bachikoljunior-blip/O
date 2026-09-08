@@ -1,0 +1,56 @@
+{
+  "executor_binding": "current_claude_code_remote_session",
+  "invocation_id": "invoke-873fc6334095f762ed524e4a",
+  "model_identity": "claude-fable-5-session-configured-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json",
+        ".continual/candidates/index.json"
+      ],
+      "observations": [
+        "Exactly one candidate is indexed against task_evaluate: candidate-task-evaluate-unit-verdict-v1 (overlay, no dependencies or conflicts)",
+        "Its dual-verdict contract matches the unit's expected outputs one-to-one, making this the natural first trial instance"
+      ],
+      "purpose": "Pre-application evaluation for the backlog-integration task_evaluate unit",
+      "unresolved": []
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "First applicable-candidate match in this run; the pre-application contract's TRIAL_CANDIDATE path fit without prompt changes."
+    },
+    "result": {
+      "applicability": "APPLICABLE - target_component task_evaluate matches; no depends_on, no conflicts_with; candidate status is candidate with REMAIN_CANDIDATE in its own expected scope continual/incremental-task-evaluation, so this trial is scoped to the current unit only and confers no promotion",
+      "baseline_needed": false,
+      "baseline_reason": "The overlay strictly adds a field (unit_verdict) and a non-conflation rule to the active evaluation contract; the active-prompt behavior is recoverable from prior episodes' evaluation records, so a fresh baseline run would add cost without discriminating value.",
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "decision": "TRIAL_CANDIDATE",
+      "evidence_to_collect": [
+        "The task_evaluate response contains both verdict (original task goal, expected: not passed / still open) and unit_verdict (backlog-integration milestone) with evidence and reason",
+        "The PR 250 closed-not-merged deviation is explicitly adjudicated inside unit_verdict rather than silently absorbed",
+        "No weakening of the original goal or the external claim boundary appears in the evaluation text"
+      ],
+      "reason": "This is the first indexed candidate whose target shape exactly matches the upcoming component instance: the selected task_evaluate unit must adjudicate a bounded unit milestone (backlog integration, with a recorded deviation) separately from the open user-level end goal, and the candidate overlay prescribes precisely that dual structure - an original-goal verdict plus a separately falsifiable unit_verdict, with the explicit rule that a passing unit never implies the original task passed. Trialing it on this unit is low risk (evaluation-only component, no external side effects, no state mutation beyond the evaluation record) and collects the first discriminating evidence for this candidate.",
+      "regression_checks": [
+        "Evaluation must preserve negative evidence references exactly (red run 32607076987 and the closure record)",
+        "Evaluation must not mark the user-level end goal complete"
+      ],
+      "risk_dimensions": {
+        "failure_risk": "low - worst case is a malformed dual verdict, caught at post-result",
+        "latency_tokens": "negligible overlay size",
+        "quality": "upside - enforces milestone/end-goal separation this unit already requires",
+        "tool_external_cost": "none - no external calls in evaluation"
+      },
+      "rollback": "The candidate remains status candidate; scope_states unchanged by a pre-application trial. If the trial output conflates verdicts or weakens the goal, record FAIL evidence against the candidate at post-result and evaluate with the active prompt's contract instead.",
+      "scope": "agi/backlog-integration"
+    }
+  },
+  "output_digest": "15dd936384289ca249ea78555753c771b9e4cee5a6451b979052096b1d54964e",
+  "received_at": "2026-08-23T05:08:29.761733Z",
+  "request_digest": "3bb61fb150d5643737987bcf70ceb55cda265136aee8b6949c77661e8b9d7c9e",
+  "response_digest": "92fa3892a5e30a99464de591103453af52b253a1ed753f209e6b1f953b14633d",
+  "schema_version": 1
+}

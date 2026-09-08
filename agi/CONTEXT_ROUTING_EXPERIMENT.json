@@ -1,0 +1,727 @@
+{
+  "schema_version": 1,
+  "status": "HARNESS_READY",
+  "mechanism": "recursive_skill_context_routing_heldout_v1",
+  "frozen_before_routing": true,
+  "skill_graph": [
+    {
+      "skill_id": "root",
+      "content": "Root context: select only situation-relevant branches from lightweight child summaries.\n",
+      "content_sha256": "3d64707608e248dabd6aa50824de1f28fd6b5f0e4388a32ce21d67f72dabc9b8",
+      "children": [
+        {
+          "skill_id": "research",
+          "summary": "Falsifiable research, literature, experimental design, and evidence."
+        },
+        {
+          "skill_id": "engineering",
+          "summary": "Implementation, testing, and deployment engineering."
+        },
+        {
+          "skill_id": "governance",
+          "summary": "Safety, evidence, and claim-boundary controls."
+        },
+        {
+          "skill_id": "operations",
+          "summary": "Incident diagnosis, monitoring, rollback, and support."
+        },
+        {
+          "skill_id": "marketing",
+          "summary": "Promotion, audience growth, and campaign messaging."
+        },
+        {
+          "skill_id": "social",
+          "summary": "Social engagement and community content."
+        }
+      ]
+    },
+    {
+      "skill_id": "research",
+      "content": "Research context: frame falsifiable questions and preserve negative evidence.\n",
+      "content_sha256": "fcbede69025311d7758d1712cd66d81fc8932c5a1b8988d9f5317f345302868d",
+      "children": [
+        {
+          "skill_id": "experiment",
+          "summary": "Precommitted controls, metrics, and deterministic replay."
+        },
+        {
+          "skill_id": "literature",
+          "summary": "Prior-art and source synthesis."
+        },
+        {
+          "skill_id": "evidence",
+          "summary": "Evidence ledger and independent verification."
+        },
+        {
+          "skill_id": "biology",
+          "summary": "Wet-lab biology protocols and organism handling."
+        }
+      ]
+    },
+    {
+      "skill_id": "experiment",
+      "content": "Experiment context: freeze controls, metrics, and replay before observing outputs.\n",
+      "content_sha256": "dd5169c800d9314bb6f7054b18c2d896cf762a0f0ba5b0338efa1e06b813547b",
+      "children": [
+        {
+          "skill_id": "metrics",
+          "summary": "Mechanically computed success and failure metrics."
+        },
+        {
+          "skill_id": "controls",
+          "summary": "Negative controls, matched baselines, and contamination checks."
+        },
+        {
+          "skill_id": "replay",
+          "summary": "Exact deterministic replay and digest comparison."
+        }
+      ]
+    },
+    {
+      "skill_id": "metrics",
+      "content": "Metrics context: compute bounded ratios, recall, and explicit threshold failures.\n",
+      "content_sha256": "19495ad2f3791d1e7c8aa0576199c580c8d83a24d3b12d6bca6006b86eb6f03c",
+      "children": []
+    },
+    {
+      "skill_id": "controls",
+      "content": "Controls context: retain precommitted baselines and reject post-output relabeling.\n",
+      "content_sha256": "f44b44bd61b71fd883b6dee842c5582331f9d4cdafdc97847904c4212d13de4c",
+      "children": []
+    },
+    {
+      "skill_id": "replay",
+      "content": "Replay context: compare immutable inputs, traces, content digests, and outputs exactly.\n",
+      "content_sha256": "f39f659afbf0bd1ceb4f74768ea34119a8f74d4b598875c2f9540e188f870904",
+      "children": []
+    },
+    {
+      "skill_id": "literature",
+      "content": "Literature context: separate sourced prior art from hypotheses and internal claims.\n",
+      "content_sha256": "b60c3475c758cc17de32208763cb714edb882aa871a5ed171c4eba44a4e64a43",
+      "children": []
+    },
+    {
+      "skill_id": "engineering",
+      "content": "Engineering context: implement reversible changes behind explicit validation boundaries.\n",
+      "content_sha256": "f48adee453986c9d5d7be10939d149ee3cd51b3d10631c42c6673063052e4094",
+      "children": [
+        {
+          "skill_id": "implementation",
+          "summary": "Typed implementation and effect-boundary code."
+        },
+        {
+          "skill_id": "testing",
+          "summary": "Unit, integration, and replay validation."
+        },
+        {
+          "skill_id": "deployment",
+          "summary": "Production rollout and rollback mechanics."
+        },
+        {
+          "skill_id": "ui",
+          "summary": "User-interface presentation and styling."
+        }
+      ]
+    },
+    {
+      "skill_id": "implementation",
+      "content": "Implementation context: keep behavior typed, scoped, reversible, and fail closed.\n",
+      "content_sha256": "d9490ad24a2d6388cc20c4631aa551822369677e9e786f2c7033664e6eb738c4",
+      "children": [
+        {
+          "skill_id": "effect_guard",
+          "summary": "Idempotent authorization and effect adjudication."
+        }
+      ]
+    },
+    {
+      "skill_id": "testing",
+      "content": "Testing context: choose the smallest complete protected regression surface.\n",
+      "content_sha256": "1c05065b51c9136c679b3b27449e25496b6368da02249e74f641aa0f43062212",
+      "children": [
+        {
+          "skill_id": "unit_tests",
+          "summary": "Deterministic unit tests for local contracts."
+        },
+        {
+          "skill_id": "integration_tests",
+          "summary": "Cross-component and persistence integration tests."
+        },
+        {
+          "skill_id": "replay",
+          "summary": "Exact deterministic replay and digest comparison."
+        }
+      ]
+    },
+    {
+      "skill_id": "unit_tests",
+      "content": "Unit-test context: isolate one contract and include negative boundary cases.\n",
+      "content_sha256": "f1f08a1823f9bf37b26f302dc414d4f2ca0e49ae8870d5705a3e0f51135910b0",
+      "children": []
+    },
+    {
+      "skill_id": "integration_tests",
+      "content": "Integration-test context: verify identity, persistence, and component boundaries together.\n",
+      "content_sha256": "b0e86078b562d18b6e4031fd84651a33f0b21a256e56a1ccd0e178233b925705",
+      "children": []
+    },
+    {
+      "skill_id": "deployment",
+      "content": "Deployment context: stage rollout, observe authoritative state, and preserve rollback.\n",
+      "content_sha256": "1a2ce84eb77ad67e30d550c21483b00217a6313677ee1e759e366b4878dc04d5",
+      "children": []
+    },
+    {
+      "skill_id": "governance",
+      "content": "Governance context: preserve safety, evidence provenance, and truthful claim boundaries.\n",
+      "content_sha256": "9dfa007f2de7b33f32c07359b67e92f22f073bccd91958e12b9fbee74c283ae8",
+      "children": [
+        {
+          "skill_id": "safety",
+          "summary": "Sandbox, authorization, and side-effect safety."
+        },
+        {
+          "skill_id": "evidence",
+          "summary": "Evidence ledger and independent verification."
+        },
+        {
+          "skill_id": "claims",
+          "summary": "Truthful capability and completion claims."
+        },
+        {
+          "skill_id": "policy",
+          "summary": "Administrative policy drafting and compliance prose."
+        }
+      ]
+    },
+    {
+      "skill_id": "safety",
+      "content": "Safety context: require sandboxing and fail-closed authorization before effects.\n",
+      "content_sha256": "134a820c3059295b70698c07af2f815de6e196cfdf5e6396afd617e168a815d1",
+      "children": [
+        {
+          "skill_id": "sandbox",
+          "summary": "Isolated execution with no production or main writes."
+        },
+        {
+          "skill_id": "effect_guard",
+          "summary": "Idempotent authorization and effect adjudication."
+        }
+      ]
+    },
+    {
+      "skill_id": "effect_guard",
+      "content": "Effect-guard context: journal intent, verify authoritative outcome, and prevent duplicate effects.\n",
+      "content_sha256": "c8616c9d86daaffd344d29aa938f61d8c010bad62f996ded0793de38d8e072fa",
+      "children": []
+    },
+    {
+      "skill_id": "sandbox",
+      "content": "Sandbox context: prohibit production effects and confine all fixture materialization.\n",
+      "content_sha256": "50adcbdbca298e0373d66ca10eb1684dd2f0394e8328c3d3a6a66eb184812f1d",
+      "children": []
+    },
+    {
+      "skill_id": "evidence",
+      "content": "Evidence context: preserve supporting, contradictory, and unknown observations with provenance.\n",
+      "content_sha256": "c720af15e27bc839149c1fc500fcfa4bbff41928d8f0d3df4be27821be9d36e5",
+      "children": [
+        {
+          "skill_id": "ledger",
+          "summary": "Append-only evidence ledger with exact source binding."
+        },
+        {
+          "skill_id": "verification",
+          "summary": "Independent verification and falsification boundary."
+        }
+      ]
+    },
+    {
+      "skill_id": "ledger",
+      "content": "Ledger context: record immutable evidence references, digests, and negative findings.\n",
+      "content_sha256": "54d14572ec156d438266900412573979edbaadd4f81559513ba76d60574f9270",
+      "children": []
+    },
+    {
+      "skill_id": "verification",
+      "content": "Verification context: distinguish internal checks from independent external evidence.\n",
+      "content_sha256": "143abc5185d0f4b87fc02c324102e48cdd313c165b5adb96846a109369cd3d20",
+      "children": []
+    },
+    {
+      "skill_id": "claims",
+      "content": "Claims context: keep user-level completion and AGI support false unless evidence warrants them.\n",
+      "content_sha256": "a21c64adfea7963ec2300c62e87b6b8da7670b9c67efb008e3056faa44f9848c",
+      "children": []
+    },
+    {
+      "skill_id": "operations",
+      "content": "Operations context: diagnose incidents, monitor state, and retain recoverable continuations.\n",
+      "content_sha256": "8fd9e6e0f275e2446945bc8d89fd2564d1a6eacd94a7dfc28e4effab5cae9180",
+      "children": [
+        {
+          "skill_id": "incident",
+          "summary": "Incident triage and causal isolation."
+        },
+        {
+          "skill_id": "monitoring",
+          "summary": "Heartbeat, health, and exact-state monitoring."
+        },
+        {
+          "skill_id": "support",
+          "summary": "User support and communication handling."
+        }
+      ]
+    },
+    {
+      "skill_id": "incident",
+      "content": "Incident context: reproduce safely, isolate the failing boundary, and select rollback.\n",
+      "content_sha256": "deb6d7400b5429d3d5cb1976f6007af4c0d2e704562001c4a827a37143940756",
+      "children": [
+        {
+          "skill_id": "rollback",
+          "summary": "Recoverable rollback and exact continuation."
+        }
+      ]
+    },
+    {
+      "skill_id": "monitoring",
+      "content": "Monitoring context: compare durable state, recent activity, and explicit freshness windows.\n",
+      "content_sha256": "beeb6b11502d7db56ff8d995d6ce0ae6d3b5cd427765b123f3da30d45adb4584",
+      "children": []
+    },
+    {
+      "skill_id": "rollback",
+      "content": "Rollback context: restore a known-safe boundary without erasing retained evidence.\n",
+      "content_sha256": "b434cc97f94ebbb04084a7ad8998ebd1d8028e8be344f114ba41ae53b06b12be",
+      "children": []
+    },
+    {
+      "skill_id": "support",
+      "content": "Support context: respond to user-facing product questions and service requests.\n",
+      "content_sha256": "e6166f9f0f0203e078de2ef64fd8c95910333c40fb373744f107c6b8c56215ff",
+      "children": []
+    },
+    {
+      "skill_id": "marketing",
+      "content": "Marketing context: optimize promotion, campaigns, and audience messaging.\n",
+      "content_sha256": "8b6445d5715ca7ec027480c2f0377fb656bfa2fa79666f337e218deaa55ac1ef",
+      "children": []
+    },
+    {
+      "skill_id": "social",
+      "content": "Social context: prepare community posts, engagement prompts, and content calendars.\n",
+      "content_sha256": "22138b1a8bc1fde22fc21af083a824532a73cb6f5ed9ff4735dd36e2e27f1a92",
+      "children": []
+    },
+    {
+      "skill_id": "biology",
+      "content": "Biology context: design wet-lab assays and organism-specific procedures.\n",
+      "content_sha256": "92dfdd384b7b095d2f19c778e4cfa17fc2d6fe5cfcf56590b28d378e98de7dc8",
+      "children": []
+    },
+    {
+      "skill_id": "ui",
+      "content": "UI context: choose presentation structure, typography, and visual interaction details.\n",
+      "content_sha256": "e95eb735274e4178898d4cf35f805526074642b7578adcca39156aa50951592a",
+      "children": []
+    },
+    {
+      "skill_id": "policy",
+      "content": "Policy context: draft administrative rules and compliance documentation.\n",
+      "content_sha256": "2942259d104edb08554f6b71c1b509231bb0c044176c24556a53309aaaae2971",
+      "children": []
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "precommit-routing-evaluation",
+      "situation": {
+        "task": "Precommit a deterministic held-out routing evaluation with matched controls, exact replay, and mechanical context-reduction metrics.",
+        "constraints": [
+          "no production effects",
+          "no post-output relabeling"
+        ]
+      },
+      "root_skill_id": "root",
+      "required_paths": [
+        [
+          "root",
+          "research",
+          "experiment",
+          "metrics"
+        ],
+        [
+          "root",
+          "research",
+          "experiment",
+          "controls"
+        ],
+        [
+          "root",
+          "research",
+          "experiment",
+          "replay"
+        ]
+      ],
+      "forbidden_skill_ids": [
+        "biology",
+        "claims",
+        "deployment",
+        "effect_guard",
+        "engineering",
+        "evidence",
+        "governance",
+        "implementation",
+        "incident",
+        "integration_tests",
+        "ledger",
+        "literature",
+        "marketing",
+        "monitoring",
+        "operations",
+        "policy",
+        "rollback",
+        "safety",
+        "sandbox",
+        "social",
+        "support",
+        "testing",
+        "ui",
+        "unit_tests",
+        "verification"
+      ],
+      "eager_context_chars": 2633
+    },
+    {
+      "case_id": "safe-effect-dispatch",
+      "situation": {
+        "task": "Implement fail-closed effect dispatch with sandbox isolation, idempotent adjudication, and no duplicate external action.",
+        "constraints": [
+          "typed boundary",
+          "authoritative readback"
+        ]
+      },
+      "root_skill_id": "root",
+      "required_paths": [
+        [
+          "root",
+          "engineering",
+          "implementation",
+          "effect_guard"
+        ],
+        [
+          "root",
+          "governance",
+          "safety",
+          "sandbox"
+        ],
+        [
+          "root",
+          "governance",
+          "safety",
+          "effect_guard"
+        ]
+      ],
+      "forbidden_skill_ids": [
+        "biology",
+        "claims",
+        "controls",
+        "deployment",
+        "evidence",
+        "experiment",
+        "incident",
+        "integration_tests",
+        "ledger",
+        "literature",
+        "marketing",
+        "metrics",
+        "monitoring",
+        "operations",
+        "policy",
+        "replay",
+        "research",
+        "rollback",
+        "social",
+        "support",
+        "testing",
+        "ui",
+        "unit_tests",
+        "verification"
+      ],
+      "eager_context_chars": 2633
+    },
+    {
+      "case_id": "incident-recovery",
+      "situation": {
+        "task": "Diagnose a stale execution incident, monitor durable state, preserve evidence, and prepare a recoverable rollback without mutating production.",
+        "constraints": [
+          "exact continuation",
+          "negative evidence retained"
+        ]
+      },
+      "root_skill_id": "root",
+      "required_paths": [
+        [
+          "root",
+          "operations",
+          "incident",
+          "rollback"
+        ],
+        [
+          "root",
+          "operations",
+          "monitoring"
+        ],
+        [
+          "root",
+          "governance",
+          "evidence",
+          "ledger"
+        ]
+      ],
+      "forbidden_skill_ids": [
+        "biology",
+        "claims",
+        "controls",
+        "deployment",
+        "effect_guard",
+        "engineering",
+        "experiment",
+        "implementation",
+        "integration_tests",
+        "literature",
+        "marketing",
+        "metrics",
+        "policy",
+        "replay",
+        "research",
+        "safety",
+        "sandbox",
+        "social",
+        "support",
+        "testing",
+        "ui",
+        "unit_tests",
+        "verification"
+      ],
+      "eager_context_chars": 2633
+    },
+    {
+      "case_id": "router-regression-suite",
+      "situation": {
+        "task": "Build protected unit and integration tests for a recursive router and prove exact deterministic replay.",
+        "constraints": [
+          "path and budget failures covered",
+          "same inputs replay exactly"
+        ]
+      },
+      "root_skill_id": "root",
+      "required_paths": [
+        [
+          "root",
+          "engineering",
+          "testing",
+          "unit_tests"
+        ],
+        [
+          "root",
+          "engineering",
+          "testing",
+          "integration_tests"
+        ],
+        [
+          "root",
+          "engineering",
+          "testing",
+          "replay"
+        ]
+      ],
+      "forbidden_skill_ids": [
+        "biology",
+        "claims",
+        "controls",
+        "deployment",
+        "effect_guard",
+        "evidence",
+        "experiment",
+        "governance",
+        "implementation",
+        "incident",
+        "ledger",
+        "literature",
+        "marketing",
+        "metrics",
+        "monitoring",
+        "operations",
+        "policy",
+        "research",
+        "rollback",
+        "safety",
+        "sandbox",
+        "social",
+        "support",
+        "ui",
+        "verification"
+      ],
+      "eager_context_chars": 2633
+    },
+    {
+      "case_id": "truthful-evidence-claim",
+      "situation": {
+        "task": "Evaluate an internal capability result, preserve its evidence ledger, seek independent verification, and report a truthful bounded claim.",
+        "constraints": [
+          "internal evidence is not AGI proof",
+          "user-level verdict remains false"
+        ]
+      },
+      "root_skill_id": "root",
+      "required_paths": [
+        [
+          "root",
+          "governance",
+          "evidence",
+          "ledger"
+        ],
+        [
+          "root",
+          "governance",
+          "evidence",
+          "verification"
+        ],
+        [
+          "root",
+          "governance",
+          "claims"
+        ]
+      ],
+      "forbidden_skill_ids": [
+        "biology",
+        "controls",
+        "deployment",
+        "effect_guard",
+        "engineering",
+        "experiment",
+        "implementation",
+        "incident",
+        "integration_tests",
+        "literature",
+        "marketing",
+        "metrics",
+        "monitoring",
+        "operations",
+        "policy",
+        "replay",
+        "research",
+        "rollback",
+        "safety",
+        "sandbox",
+        "social",
+        "support",
+        "testing",
+        "ui",
+        "unit_tests"
+      ],
+      "eager_context_chars": 2633
+    },
+    {
+      "case_id": "shared-evidence-synthesis",
+      "situation": {
+        "task": "Synthesize prior art and governance evidence for a falsifiable proposal while materializing their shared evidence branch only once.",
+        "constraints": [
+          "shared descendant",
+          "no promotional branches"
+        ]
+      },
+      "root_skill_id": "root",
+      "required_paths": [
+        [
+          "root",
+          "research",
+          "literature"
+        ],
+        [
+          "root",
+          "research",
+          "evidence",
+          "verification"
+        ],
+        [
+          "root",
+          "governance",
+          "evidence",
+          "ledger"
+        ],
+        [
+          "root",
+          "governance",
+          "claims"
+        ]
+      ],
+      "forbidden_skill_ids": [
+        "biology",
+        "controls",
+        "deployment",
+        "effect_guard",
+        "engineering",
+        "experiment",
+        "implementation",
+        "incident",
+        "integration_tests",
+        "marketing",
+        "metrics",
+        "monitoring",
+        "operations",
+        "policy",
+        "replay",
+        "rollback",
+        "safety",
+        "sandbox",
+        "social",
+        "support",
+        "testing",
+        "ui",
+        "unit_tests"
+      ],
+      "eager_context_chars": 2633
+    }
+  ],
+  "budgets": {
+    "max_depth": 8,
+    "max_nodes": 20,
+    "max_selected_children": 4,
+    "max_context_chars": 8000
+  },
+  "thresholds": {
+    "required_branch_recall": 1.0,
+    "forbidden_full_content_reads": 0,
+    "deterministic_replays": 2,
+    "minimum_successful_depth": 3,
+    "minimum_multichild_cases": 1,
+    "maximum_routed_to_eager_ratio": 0.5
+  },
+  "safety": {
+    "only_child_summaries_before_selection": true,
+    "post_output_relabeling_allowed": false,
+    "global_activation_allowed": false,
+    "main_writes_allowed": false,
+    "external_effects_allowed": false,
+    "protected_router_regressions_required": true,
+    "manifest_and_content_binding_required": true
+  },
+  "observations": [],
+  "decision": {
+    "verdict": "INSUFFICIENT_EVIDENCE",
+    "reason": "The case graph, hidden labels, eager baselines, budgets, thresholds, and scorer are frozen; no routing selection plan or routed output has been observed.",
+    "scoped_use_authorized": false,
+    "global_activation_authorized": false
+  },
+  "user_level_verdict": "FAIL",
+  "claim_boundary": {
+    "agi_claim_supported": false,
+    "user_goal_completed": false,
+    "harness_is_external_evidence": false,
+    "scoped_routing_is_global_activation": false
+  }
+}

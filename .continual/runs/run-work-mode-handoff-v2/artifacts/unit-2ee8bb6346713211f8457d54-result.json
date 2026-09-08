@@ -1,0 +1,45 @@
+{
+  "component": "task_evaluate",
+  "evidence": {
+    "authority": {
+      "execution_id": "work-recovery-20260823T151235Z-7f8d3b125a9c4e62",
+      "fence_token_digest": "9a551d8b770d716ae6a0c3f7b947353dbe76e6608f544454944ce2e7203fd35e",
+      "heartbeat_at": "2026-08-23T21:54:04.061Z",
+      "lease_generation": 6,
+      "owner_kind": "work_recovery_automation",
+      "status": "running"
+    },
+    "ci_result": "four pytest shards and dependent aggregate succeeded",
+    "connector_observed_at": "2026-08-23T21:55:08.835Z",
+    "exact_head_sha": "8234151332ade162d679b30ef17b122ccf01ddb9",
+    "exact_head_tree_sha": "313a3923a75a90bfddbf7da26e188bf34f51f1e2",
+    "exact_readback": "41 of 41 proposed blobs matched at the merge commit",
+    "local_validation": "116 protected tests passed; 939 JSON documents validated; compileall and diff check passed; work-verify 113 requests / 112 responses / one expected pending invocation, valid=true.",
+    "merge_sha": "074dfcf8c24dd2a4250228327e69519c2b8eb197",
+    "observation_receipt_digest": "cc74caad373595ce6e8151001a46111e4b135048612a067a699d13b19ef39bfd",
+    "observation_request_digest": "852ba51d3ed3a4bb4cb8566f75e67d07ff25fdcdbe660a926f6fcc11ddf6055e",
+    "observation_request_id": "work-state-f7d8ebb44fbc4a48a473c518",
+    "observation_requested_at": "2026-08-23T21:54:50.461959Z",
+    "policy_activation_blob": "46cbd5dc1c25180722240899cad98a1ec902560a",
+    "policy_activation_commit": "f02aa9fc6c8ae04611cb42b6e3250a429f159448",
+    "pull_request": "https://github.com/bachikoljunior-blip/O/pull/283",
+    "workflow_run": "https://github.com/bachikoljunior-blip/O/actions/runs/32667061602"
+  },
+  "implementation": [
+    "Added immutable work-source-observation prepare/record/verifier primitives and CLI preparation/recording commands.",
+    "Bound verified observation provenance into pre-freeze DecisionContextManifest construction while preserving already-frozen immutable replay.",
+    "Rejects missing, stale, future-skewed, predating, tampered, wrong-commit, wrong-blob, wrong-executor, wrong-model, wrong-authority, advanced-state, and non-running evidence before new semantic request mutation."
+  ],
+  "negative_evidence": [
+    "The observation request was persisted before the connector read and receipt; receipt observed_at is later than requested_at.",
+    "The policy activation state was read from its immutable exact commit/blob and the receipt exposes only the bounded public authority projection.",
+    "A timestamped connector read does not prove linearizable absence of a concurrent later main update.",
+    "This is internal request-safety/provenance evidence, not behavioral capability, AGI, or user-objective completion."
+  ],
+  "next": "Task Evaluate the exact implementation, publication ordering, rejection coverage, live receipt, immutable replay, and claim boundary; then consolidate and learn before Root selects the next independent unit.",
+  "scope": "context-kernel/pre-freeze-authoritative-work-state-observation-v1",
+  "summary": "Implemented, validated, published, enabled, and exercised the fail-closed authoritative Work-source observation binding without changing lease authority.",
+  "task_completion_verdict": "FAIL",
+  "unit_completion_verdict": "PASS",
+  "unit_id": "unit-2ee8bb6346713211f8457d54"
+}

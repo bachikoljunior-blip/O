@@ -1,0 +1,76 @@
+{
+  "adaptation": {
+    "adapted_rule": "matrix_transpose_v1",
+    "permitted_learning_record": "A rule identifier and evidence digests only; no task-B answer cells.",
+    "task_b_reveal_forbidden_until_adapted_prediction_frozen": true
+  },
+  "baseline": {
+    "frozen_rule": "Return the supplied test input unchanged.",
+    "same_solver_for_A_and_B": true,
+    "solver": "identity_v1"
+  },
+  "claim_boundary": "Exactly two deterministically selected ARC training tasks and one bounded rule-library expansion; no broad continual-learning, autonomy, production, AGI, user-level, or upper-objective inference.",
+  "holder_sha256": "b1b8f5a9f39023c207521281621c1e9c8359f2b5f3960ea29e9ad99fadb9a034",
+  "idempotency_key": "o-work-gen29:arc-sequential-transfer:39903044:transpose:v1",
+  "negative_controls": [
+    "changed_source_commit",
+    "changed_task_identity",
+    "mismatched_holder_commitment",
+    "leaked_answer_cells",
+    "changed_selector_digest",
+    "duplicate_replay"
+  ],
+  "orchestrator_sha256": "c17d27fab736753bd2500f1bb2a385c40b5d0cb76438f2218d0825f47e7dd8ce",
+  "record_type": "external_arc_sequential_transfer_precommit",
+  "recorded_at": "2026-09-02T22:01:36.434Z",
+  "schema_version": 1,
+  "scoring": {
+    "exact_cell": "if shape differs, score 0/target_cell_count; otherwise count equal cells",
+    "exact_grid": "shape and every cell must match",
+    "improvement": "adapted task-B exact-cell accuracy must strictly exceed baseline task-B accuracy"
+  },
+  "selector": {
+    "algorithm": "lexicographically first two public training-or-evaluation tasks with exactly one test case, all demonstration outputs equal matrix transpose, a sanitized test input not invariant under transpose, and no exact task-id occurrence in O",
+    "candidate_count": 2,
+    "excluded_outcome_fields": [
+      "test[*].output"
+    ],
+    "family": "matrix_transpose",
+    "selected_task_ids": [
+      "74dd1130",
+      "9dfd6313"
+    ]
+  },
+  "source": {
+    "commit": "399030444e0ab0cc8b4e199870fb20b863846f34",
+    "license": "Apache-2.0",
+    "license_path": "LICENSE",
+    "license_sha256": "b3a161754ffc20840ccf92aec0fe464fbbcf42f14c22f78a3ec2e98fca3864ca",
+    "repository": "fchollet/ARC-AGI"
+  },
+  "tasks": [
+    {
+      "holder_output_commitment_sha256": "54876dc11e468fcd7dc56dcb6ae42afc15b3ba016b5c85df8025860da2f77e18",
+      "prior_use_scan_match": false,
+      "role": "A",
+      "sanitized_projection_sha256": "11747ddcc5ec0715f1e381616604414838788009e0ed407b4a8229cec24d5976",
+      "source_blob_sha": "817d8b297495a2e56171ce029a77cf064512916b",
+      "source_path": "data/training/74dd1130.json",
+      "source_split": "training",
+      "task_id": "74dd1130",
+      "test_count": 1
+    },
+    {
+      "holder_output_commitment_sha256": "a1f0291149746f3f409ff8ec9fa584cd2eb085f170034ca770020affe7572db0",
+      "prior_use_scan_match": false,
+      "role": "B",
+      "sanitized_projection_sha256": "d9c84ba717f56bcad86b917c109ff4785269c379d02a672e37a245c486f190d6",
+      "source_blob_sha": "ad54e26ed65486fb769482864982b964816429b3",
+      "source_path": "data/training/9dfd6313.json",
+      "source_split": "training",
+      "task_id": "9dfd6313",
+      "test_count": 1
+    }
+  ],
+  "unit_id": "unit-generation29-external-arc-sequential-transfer-v1"
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "role": "bridge",
+  "observed_at": "2026-08-29T19:52:26+09:00",
+  "bootstrap": {
+    "required_first_read": "note/automation_control/DESIRED_STATE.json",
+    "observed_main_head_before_role_local_write": "da95325d16856dbad850f84c9931ac871e79eb0c",
+    "result": "404_NOT_FOUND",
+    "current_role_config_resolved": false,
+    "enabled_desired_resolved": false
+  },
+  "execution_evidence": {
+    "semantic_bridge_work_started": false,
+    "clean_feed_items_forwarded": 0,
+    "individual_item_publications": 0,
+    "polling_only_work_created": 0,
+    "synthetic_acknowledgements": 0,
+    "o_primary_state_mutations": 0,
+    "desired_state_edited": false
+  },
+  "revision_evidence": {
+    "control_revision": "UNAVAILABLE",
+    "bridge_config_revision": "UNAVAILABLE",
+    "clean_feed_revision": "NOT_READ_DUE_TO_HARD_BOOTSTRAP_BLOCK",
+    "o_ack_revision": "NOT_READ_DUE_TO_HARD_BOOTSTRAP_BLOCK"
+  },
+  "termination": {
+    "status": "BLOCKED_CONTROL_MISSING",
+    "kind": "HARD_CONTROL_BLOCK",
+    "reason": "The authoritative bootstrap file is absent at the active main head, so neither enabled_desired nor the current bridge role config can be established safely."
+  },
+  "automation_action": {
+    "title": "O Research Feed Bridge",
+    "id": "6a8d2b926a248191bf8cf841c89305af",
+    "is_enabled_after_action": false,
+    "reason": "Scheduled execution is fully blocked because the mandatory authoritative bootstrap control is absent; continuing hourly runs cannot safely resolve enabled_desired or the current bridge configuration."
+  },
+  "exact_continuation": "Republish the current authoritative note/automation_control/DESIRED_STATE.json on active main, then explicitly re-enable this bridge automation if continued bridging is desired. On resumption, read DESIRED_STATE.json first and do not reconstruct bridge configuration from historical control, previous receipts, O state, downstream state, or legacy semantics."
+}

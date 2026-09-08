@@ -1,0 +1,155 @@
+{
+  "component": "task_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-23T06:31:24.613176Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-dbdfb259ca0b2bfea81cd27b",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "active_component_path": "prompts/task_evaluate.md",
+    "candidate": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "expected_scope": "continual/incremental-task-evaluation",
+      "prompt_mode": "overlay"
+    },
+    "execution_unit": {
+      "component": "task_evaluate",
+      "expected_outputs": [
+        "original-goal verdict",
+        "bounded-unit verdict",
+        "negative evidence",
+        "next matched-experiment unit"
+      ],
+      "goal": "Evaluate whether the scientist-agent baseline unit met its frozen evidence and fail-closed no-speculative-adoption conditions while preserving the user-level objective as unmet.",
+      "inputs": [
+        "agi/SCIENTIST_AGENT_BASELINE.json",
+        "14-test focused result",
+        "primary-source URLs",
+        "current native Run evidence"
+      ],
+      "scope": "agi/scientist-agent-external-baseline-comparison",
+      "unit_id": "unit-ca2035ad1d994eb163038968"
+    },
+    "preflight_selection": {
+      "baseline_need": "Preserve the active evaluator's upper-goal verdict and add the Candidate's separate unit_verdict only.",
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "conflicts": [],
+      "decision": "TRIAL_CANDIDATE",
+      "dependencies": [],
+      "evidence_to_collect": [
+        "frozen rubric completeness",
+        "primary-source traceability",
+        "focused validation result",
+        "implementation_authorized=false",
+        "upper-goal FAIL independent from bounded-unit verdict"
+      ],
+      "mode": "pre-application",
+      "reason": "This unit has an independently falsifiable bounded outcome distinct from the user-level goal: the comparison can pass while the predicted mechanism remains unmeasured and the upper objective remains unmet.",
+      "regression_checks": [
+        "A bounded PASS cannot change the original verdict.",
+        "EXPERIMENT_REQUIRED cannot be reported as ADOPT_MINIMAL_CHANGE.",
+        "Negative evidence and the unmeasured advantage remain explicit."
+      ],
+      "rollback": "Discard the overlay output if it conflates verdicts or omits negative evidence.",
+      "scope": "agi/scientist-agent-external-baseline-comparison"
+    },
+    "snapshot": {
+      "continuation_stack": [
+        {
+          "continuation": "After Task Evaluate, consolidate and learn. If the bounded unit passes, Root should select the smallest sandboxed matched experiment for checkpoint inheritance; main remains single-writer and implementation remains inactive until evidence supports it.",
+          "parent_unit_id": "unit-85bfcc10eb003a178e261658",
+          "result_ref": "artifacts/unit-85bfcc10eb003a178e261658-result.json"
+        }
+      ],
+      "created_at": "2026-08-22T11:41:47.630118Z",
+      "current_component": "task_evaluate",
+      "current_unit": "unit-ca2035ad1d994eb163038968",
+      "entry_ref": "artifacts/entry.json",
+      "environment": {
+        "active_components_digest": "3974833d170f43432c948095",
+        "model": "chatgpt-work-model-unverified",
+        "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+        "python": "3.12.13",
+        "repository_commit": "f914369d42a74548d420e775afc60333e7a173f3",
+        "runner": "python-engine-v2"
+      },
+      "episode_id": "episode-work-mode-handoff-v2",
+      "error_count": 0,
+      "last_evaluation": {
+        "candidate_trial": {
+          "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+          "outcome": "SUPPORTED_FOR_SCOPE",
+          "reason": "The overlay preserved original-goal FAIL, emitted bounded unit PASS independently, retained negative evidence, and did not weaken the claim boundary."
+        },
+        "claim_boundary": "The bounded unit passed; the user's upper objective remains unmet and no AGI claim is supported.",
+        "evaluated_goal": "Minimize defensible elapsed time toward the user's real-world AGI objective while reporting truthfully and preserving evidence integrity.",
+        "evidence": [
+          {
+            "finding": "The four-file implementation defines the one-command fixed-member cross-binding validator and its regression matrix.",
+            "source": "GitHub PR 258 at exact head bacc1a241c64df1744a4247f8ba40a36ef1a241e"
+          },
+          {
+            "finding": "The unchanged exact head completed the repository workflow successfully.",
+            "source": "GitHub Actions run 32602836716"
+          },
+          {
+            "finding": "PR 258 is integrated on main.",
+            "source": "GitHub merge commit 006002e2c165bdc32ef8bf41906ef46b2bd7a427"
+          },
+          {
+            "finding": "tests/test_external_handoff_bundle.py passed 32 tests in 15.46 seconds on current main.",
+            "source": "fresh recovery-worktree focused pytest"
+          },
+          {
+            "finding": "The recovered Execute response and scoped Candidate trial are identity-bound and digest-verified.",
+            "source": "run-work-mode-handoff-v2 work-verify and immutable response records"
+          }
+        ],
+        "negative_evidence": [
+          "Repository CI, local tests, cryptographic packaging, and native O integration are internal engineering evidence only.",
+          "A valid handoff bundle validator does not establish that any independent evaluator used it or that the system has AGI capabilities.",
+          "No repository-controlled artifact may substitute for independent production evidence."
+        ],
+        "repair": {
+          "do_not_repair": "Do not weaken evidence criteria, fabricate evaluator independence, or repeat another same-family internal probe without comparative justification.",
+          "next_falsifiable_unit": "At the next Root boundary, ingest inbox revision 12 and run a bounded external-baseline comparison: identify one independently demonstrated scientist-agent mechanism for closed-loop hypothesis, experiment, evaluation, and result inheritance; compare it mechanically with O's current loop; select and test one minimal reversible change only if it has a falsifiable expected-time advantage."
+        },
+        "unit_subfinding": {
+          "reason": "The bounded external-handoff cross-binding unit met its frozen implementation, mismatch-rejection, atomicity, no-ledger-mutation, exact-head CI, merge-readback, and fresh focused-regression conditions.",
+          "unit_id": "unit-00d92b6d57ce8250c123b90e",
+          "verdict": "PASS"
+        },
+        "unit_verdict": "PASS",
+        "unmet_conditions": [
+          "No independently controlled production challenge or evaluator group is present.",
+          "No qualifying external production attestation exists for the required capability criteria.",
+          "The independent evaluator quorum remains unmet.",
+          "The serving model and runtime identity remain externally unverified.",
+          "Inbox revision 12 requires comparing demonstrated scientist-agent mechanisms against O rather than continuing only the current internal method family."
+        ],
+        "verdict": "FAIL"
+      },
+      "last_result_ref": "artifacts/unit-00d92b6d57ce8250c123b90e-result.json",
+      "phase": "unit_pending",
+      "produced_candidates": [],
+      "revision": 31,
+      "run_id": "run-work-mode-handoff-v2",
+      "status": "continue",
+      "task_completion_verdict": "FAIL",
+      "unit_completion_verdict": "PASS",
+      "updated_at": "2026-08-23T06:31:04.709284Z"
+    }
+  },
+  "payload_digest": "9a4829025a4b9a3fd7cf0d00f41f05926e13e9238d082b226c6c9a1ccba3541b",
+  "prompt_content": "# TASK EVALUATE\n\nEvaluate whether the original user task—not merely the most recent unit—satisfies its explicit success conditions. Prefer tests, builds, lint, real files, git state, API results, benchmark reports, independently checkable artifacts, and user-defined acceptance criteria. Self-report and architectural sophistication are not sufficient evidence.\n\nReturn `PASS`, `FAIL`, or `UNCERTAIN`, with evidence provenance and precise repair information. For AGI claims, use the evidence gate in `src/agi/evaluation.py`; a development benchmark pass alone cannot produce PASS for the full AGI goal.\n\nAt the end perform Local Learn on this evaluator execution.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.\n\n# Scoped Candidate overlay\n\nCandidate ID: candidate-task-evaluate-unit-verdict-v1\n\nEvaluate the original task goal without weakening it and return its verdict in `verdict`. When the current bounded execution unit has a separately falsifiable completion condition, also return `unit_verdict` as PASS, FAIL, or UNCERTAIN with evidence and reason. A passing unit never implies the original task passed. Preserve negative evidence and the strict external claim boundary.\n",
+  "prompt_digest": "2d9d11b17f47a342bdd5834e01ea25746687232e6aa5ed14828c80a443d61230",
+  "prompt_path": ".continual/runs/run-work-mode-handoff-v2/effective-prompts/task_evaluate-candidate-task-evaluate-unit-verdict-v1-9f238610290182cd90e407d4.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "4d96281c63748f072ea64b82c7628a81d46eb3f1d809400421f8059cf0230027",
+  "run_id": "run-work-mode-handoff-v2",
+  "schema_version": 1
+}

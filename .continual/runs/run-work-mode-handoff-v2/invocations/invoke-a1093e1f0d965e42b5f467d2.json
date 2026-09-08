@@ -1,0 +1,51 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-08-24T02:45:14.099437Z",
+  "component": "candidate_evaluate",
+  "fragment_ref": ".continual/runs/run-work-mode-handoff-v2/fragments/invoke-a1093e1f0d965e42b5f467d2-candidate_evaluate.json",
+  "invocation_id": "invoke-a1093e1f0d965e42b5f467d2",
+  "output": {
+    "fragment": {
+      "claim_boundary": "This is a scoped activation proposal only; the Candidate remains inactive and the user's upper objective remains unmet.",
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/runs/run-work-mode-handoff-v2/artifacts/unit-1f9f811d15fe79a8cc26e75d-result.json",
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md"
+      ],
+      "observations": [
+        "The actual result cleanly separates bounded PASS from user-level FAIL.",
+        "All negative evidence needed to prevent capability or completion inflation remains explicit.",
+        "A separate protected-baseline regression gate is still required."
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Repeated successful scoped trials support proposing the dual-verdict overlay for deterministic regression, but do not authorize activation or promotion."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [
+        "The Candidate is not VERIFIED_FOR_SCOPE by a separate deterministic protected-baseline regression gate.",
+        "A future evaluator could still overproduce a bounded PASS if it fails to require explicit success conditions and exact evidence."
+      ],
+      "decision": "PROPOSE_ACTIVATION",
+      "global_activation_authorized": false,
+      "promotion_performed": false,
+      "reason": "The actual Task Evaluate result kept the bounded provenance-renewal PASS independent from the user's upper-objective FAIL, cited exact implementation, regression, live receipt, and CI evidence, and retained non-linearizability, unpublished status, and internal-only limitations.",
+      "regression_gate_required": true,
+      "rollback": "Keep the Candidate inactive unless a separate deterministic protected-baseline gate recomputes the behavior and verifies original-goal verdict independence across passing and failing bounded units.",
+      "scope": "continual/incremental-task-evaluation",
+      "supporting_evidence": [
+        "unit_verdict PASS is limited to immutable same-source Work observation renewal and is supported by source, tests, and a live cross-bound receipt",
+        "verdict and user_level_verdict remain FAIL for the unmet real-world objective",
+        "global activation and AGI claim support remain false",
+        "negative evidence explicitly preserves timestamped-not-linearizable, unpublished, and internal provenance boundaries",
+        "the earlier behavioral-outcome trial showed the same non-conflation behavior"
+      ]
+    }
+  },
+  "payload_digest": "9aa3cf8896b248167c938d95",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "status": "complete"
+}

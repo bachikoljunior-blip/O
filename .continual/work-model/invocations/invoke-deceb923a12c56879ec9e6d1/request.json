@@ -1,0 +1,250 @@
+{
+  "component": "candidate_evaluate",
+  "contract": {
+    "private_reasoning_forbidden": true,
+    "response_shape": "component output with result, fragment, and local_learn except Learn",
+    "secrets_forbidden": true
+  },
+  "created_at": "2026-08-24T22:01:28.286196Z",
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-deceb923a12c56879ec9e6d1",
+  "model_identity": "chatgpt-work-model-unverified",
+  "payload": {
+    "candidate_index": {
+      "candidates": [
+        {
+          "candidate_id": "candidate-agi-benchmark-suite-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-agi-benchmark-suite-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "NEED_MORE_EVIDENCE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-c6c462472386c57b124d",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/campaign-authoring",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-c6c462472386c57b124d/prompt.md",
+          "scope_states": {},
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-copilot-sdk-live-campaign-v1",
+          "conflicts_with": [
+            "candidate-github-models-live-campaign-v1"
+          ],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-copilot-sdk-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-github-models-live-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/live-genuine-model-campaign-migration",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-github-models-live-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/live-genuine-model-campaign-migration": "REJECTED_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-campaign-stage-isolation-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1",
+            "candidate-live-request-status-rendezvous-v1"
+          ],
+          "expected_scope": "agi/live-campaign-evidence-coverage",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-campaign-stage-isolation-v1/prompt.md",
+          "scope_states": {
+            "agi/live-campaign-evidence-coverage": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-live-request-status-rendezvous-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-copilot-sdk-live-campaign-v1"
+          ],
+          "expected_scope": "agi/live-request-observability",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-live-request-status-rendezvous-v1/prompt.md",
+          "scope_states": {
+            "agi/live-request-observability": "ACTIVE_FOR_SCOPE",
+            "global": "untested"
+          },
+          "status": "active-for-scope",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-self-application-context-hygiene-v1",
+          "conflicts_with": [],
+          "depends_on": [],
+          "expected_scope": "agi/repository-development",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-self-application-context-hygiene-v1/prompt.md",
+          "scope_states": {
+            "agi/bounded-stage-checkpoint-inheritance/research-unit-a-matched-measurement-v1": "REMAIN_CANDIDATE",
+            "agi/bounded-stage-checkpoint-inheritance/research-unit-b-matched-measurement-v1": "REMAIN_CANDIDATE",
+            "agi/bounded-stage-checkpoint-inheritance/research-unit-c-matched-measurement-v1": "REMAIN_CANDIDATE",
+            "agi/repository-development": "REMAIN_CANDIDATE",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        },
+        {
+          "candidate_id": "candidate-workspace-campaign-v1",
+          "conflicts_with": [],
+          "depends_on": [
+            "candidate-agi-benchmark-suite-v1"
+          ],
+          "expected_scope": "agi/capability-evaluation",
+          "prompt_mode": "overlay",
+          "prompt_path": ".continual/candidates/candidate-workspace-campaign-v1/prompt.md",
+          "scope_states": {
+            "agi/capability-evaluation": "candidate",
+            "global": "untested"
+          },
+          "status": "candidate",
+          "target_component": "execute"
+        }
+      ],
+      "schema_version": 2
+    },
+    "environment": {
+      "active_components_digest": "3974833d170f43432c948095",
+      "model": "chatgpt-work-model-unverified",
+      "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "python": "3.12.13",
+      "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+      "runner": "python-engine-v2"
+    },
+    "execution_unit": {
+      "execution_unit": {
+        "component": "execute",
+        "evidence_needed": [
+          "an exact reviewed path and blob manifest with no authority-state, inbox, credential, or orphan-invocation mutation",
+          "one non-force branch and PR based on latest main",
+          "all four pytest shards and dependent aggregate succeed on the unchanged exact head",
+          "fresh authority, inbox, PR-head, and conflict checks immediately before expected-head merge",
+          "exact main readback for every reviewed blob",
+          "a post-merge state-only CAS binding continuation to the still-pending publication Work request"
+        ],
+        "expected_outputs": [
+          "merged checkpoint-integrity source, CLI, tests, and native prepublication records",
+          "exact-head CI and merge identifiers",
+          "zero reviewed-blob mismatches on main",
+          "a durable pending Execute continuation without answering or altering orphan invocations"
+        ],
+        "failure_conditions": [
+          "moved PR head, failed or missing required job, authority or inbox change, merge conflict, or blob mismatch",
+          "inclusion of WORK_EXECUTION_STATE, inbox, credentials, unrelated source, or orphan invocation paths in the result branch",
+          "force push, semantic reconstruction, or duplicate answer",
+          "any generalized scientist-agent or user-completion claim"
+        ],
+        "goal": "Publish the reviewed checkpoint-integrity implementation, tests, and current native O records from latest main; require unchanged exact-head CI; merge only with fresh generation-9 authority and inbox revision 20; then exact-read every reviewed blob and checkpoint the pending publication invocation.",
+        "inputs": [
+          "locally validated implementation and tests from unit-ed0ffc4ab0d4d5cbede05040",
+          "current repair-run native records and Work invocations",
+          "latest remote main 158977e567f7cb44b76167a111aea0768cb202f3",
+          "generation-9 authority and authoritative inbox revision 20",
+          "the Task Evaluate UNCERTAIN verdict naming missing publication evidence"
+        ],
+        "parent_continuation": "After successful publication and state checkpoint, answer this Execute with exact evidence, Task Evaluate the integrated unit, consolidate and learn, then return to Root for the next unmet upper-objective work.",
+        "rollback": "Leave the branch unmerged or close the PR; preserve the local implementation and immutable evidence; checkpoint the exact pending invocation; never force-push or rewrite orphan records.",
+        "scope": "work-checkpoint-integrity/exact-head-publication-v1",
+        "success_conditions": [
+          "the published diff contains only reviewed implementation, test, and current repair-run lifecycle paths",
+          "exact-head CI passes unchanged and expected-head merge succeeds",
+          "all reviewed blobs match remote main",
+          "generation-9 authority and inbox revision 20 remain unchanged",
+          "the two orphan invocations remain byte-untouched and unanswered"
+        ],
+        "unit_id": "unit-bd6b880d77d491a31322392b"
+      },
+      "snapshot": {
+        "continuation_stack": [],
+        "created_at": "2026-08-24T21:08:07.556157Z",
+        "current_component": "execute",
+        "current_unit": "unit-bd6b880d77d491a31322392b",
+        "entry_ref": "artifacts/entry.json",
+        "environment": {
+          "active_components_digest": "3974833d170f43432c948095",
+          "model": "chatgpt-work-model-unverified",
+          "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+          "python": "3.12.13",
+          "repository_commit": "84a48cecf24bd77524e283385e15bba63f97792e",
+          "runner": "python-engine-v2"
+        },
+        "error_count": 4,
+        "last_evaluation": {
+          "agi_claim_supported": false,
+          "claim_boundary": "Local checkpoint-integrity behavior is supported for the exact tested fixtures and generation-8 record discrepancy. Integration and remote durability remain unproven until unchanged exact-head CI, expected-head merge, and remote readback complete.",
+          "continuation": "Proceed through post-result Candidate evaluation, Consolidate Episode, and Learn, then Root must select exact-head publication and remote readback of this implementation as the next repair unit.",
+          "evidence_provenance": [
+            "Local pytest result: 116 passed across checkpoint integrity, Work session, Work source observation, CI source observation, monitor, and Context Kernel tests.",
+            "Local CLI valid control: current generation-9 state returned valid=true with run_snapshot and completed invocation verified.",
+            "Historical exact-state control: agi/WORK_EXECUTION_STATE.json from commit 1a2373dd243f85ec60e4fe74f92a6fef0b946e69 returned PENDING_WORK_REQUEST_INVALID for invoke-37609d6e1890c250c8ada58b and COMPLETED_WORK_INVOCATION_INVALID for invoke-3e7b66bfc42ae092653c4668.",
+            "Focused test byte snapshots show read-only verification does not mutate .continual records.",
+            "No exact-head workflow, merge commit, or remote blob readback exists yet for the implementation branch."
+          ],
+          "negative_evidence": [
+            "The negative result is limited to generation-8 state commit 1a2373dd243f85ec60e4fe74f92a6fef0b946e69, the checked repository record set, and this validator configuration.",
+            "It does not support a negative claim about other checkpoints, untested recovery mechanisms, or any scientist-agent family.",
+            "Project-operated local tests do not establish independent production evidence, AGI, or user-level completion."
+          ],
+          "repair_information": "Complete the bounded publication path: consolidate and learn this result without Candidate activation; return to Root; publish only the reviewed implementation, tests, and native lifecycle records from latest main; require all exact-head CI shards plus aggregate; recheck generation-9 authority and inbox revision 20; merge only the unchanged head; read back every reviewed blob. Do not answer or alter the two orphan invocations.",
+          "unit_verdict": "UNCERTAIN",
+          "unit_verdict_reason": "The local implementation satisfies the behavioral checks exercised by 116 focused/protected tests: a valid completed checkpoint and a valid pending checkpoint pass; missing request/response, malformed JSON, digest tampering, binding mismatch, malformed claim, missing snapshot, and malformed state fail closed; record bytes remain unchanged. The exact generation-8 state produces the two expected missing-record findings. However, the frozen unit also requires unchanged exact-head CI and remote integration evidence, which do not yet exist for these changes.",
+          "verdict": "FAIL",
+          "verdict_reason": "The original user-level objective remains unmet. This unit provides internal checkpoint-durability engineering evidence only and has not been integrated through exact-head CI, merge, or remote readback."
+        },
+        "last_result_ref": "artifacts/unit-81713499c87b48ba8cf78110-result.json",
+        "phase": "unit_pending",
+        "revision": 10,
+        "run_id": "run-work-recovery-gen9-durability-repair",
+        "status": "continue",
+        "task_completion_verdict": "FAIL",
+        "unit_completion_verdict": "UNCERTAIN",
+        "updated_at": "2026-08-24T22:01:28.271191Z"
+      }
+    },
+    "mode": "pre-application",
+    "rule": "Evaluate only candidates that can affect this exact upcoming unit.",
+    "run_id": "run-work-recovery-gen9-durability-repair",
+    "target_component": "execute"
+  },
+  "payload_digest": "ed9e0c22b1791220d301d105044dc8af743750114e5da1939c480a088b64d1b3",
+  "prompt_content": "# CANDIDATE EVALUATE\n\nYou are the Candidate Evaluator. Evaluate only Candidates that can affect the exact upcoming component supplied in the payload.\n\n## pre-application\n\nDecide applicability, exact scope, dependency/conflict status, active versus Candidate version, baseline need, evidence to collect, regression checks, rollback, and relevant quality/latency/token/tool/external-cost/failure-risk dimensions. Valid decisions include `NOT_APPLICABLE`, `USE_ACTIVE`, `TRIAL_CANDIDATE`, `USE_CANDIDATE`, `ACTIVE_FOR_SCOPE`, `BASELINE_FIRST`, `DEFER`, and `BLOCKED`.\n\n`ACTIVE_FOR_SCOPE` at pre-application means only that an already deterministically verified scoped Candidate may be used. It is not authority to promote an unverified Candidate.\n\n## post-result\n\nUse actual result evidence—not Candidate self-report—to decide `PROPOSE_ACTIVATION`, `REJECTED_FOR_SCOPE`, `REMAIN_CANDIDATE`, `NEED_MORE_EVIDENCE`, or `UNCERTAIN`. Preserve contradictory evidence and rejected reasons. You may recommend activation with `PROPOSE_ACTIVATION`, but you cannot promote a Candidate yourself. Scoped activation requires the separate deterministic protected-baseline regression gate to recompute measurements and persist `VERIFIED_FOR_SCOPE` evidence.\n\nA running evaluator never swaps itself during the current call. At the end perform Local Learn unless this execution is Learn itself.\n\nReturn one JSON object only with keys `result`, `local_learn`, and `fragment`.",
+  "prompt_digest": "337462829c049cb35baf6458d69eea3ab386298ade080b2cddc7d9f63697c851",
+  "prompt_path": "prompts/candidate_evaluate.md",
+  "provider": "chatgpt-work-external",
+  "request_digest": "4e2de0bac6eabf111501feed709d32930e0e7e492bb00296ca1066176117cb54",
+  "run_id": "run-work-recovery-gen9-durability-repair",
+  "schema_version": 1
+}

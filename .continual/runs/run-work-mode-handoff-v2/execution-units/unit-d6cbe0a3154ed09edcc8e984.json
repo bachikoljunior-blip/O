@@ -1,0 +1,44 @@
+{
+  "component": "execute",
+  "evidence_needed": [
+    "entries 1 through 17 remain byte-semantically unchanged and recovered entries map exactly to new authoritative sequences 18 and 19",
+    "preparation rejects malformed current JSON, schema violations, stale expected_revision, non-contiguous sequences, duplicate IDs, and secret-like fields before mutation",
+    "the remote operation performs one compare-and-swap against the fetched blob and never retries a mutation after an ambiguous result",
+    "bounded readback verifies the exact serialized content and resulting blob identity; mismatch or exhaustion fails closed",
+    "an idempotent caller retry returns the already-applied exact append without a second CAS, while any same-ID content mismatch fails closed",
+    "focused tests, protected Context Kernel tests, compileall, repository JSON parsing, exact-head CI, fresh-main conflict proof, expected-head merge, and exact main readback"
+  ],
+  "expected_outputs": [
+    "a documented dedicated append API with provider-adapted fetch and single-CAS callbacks",
+    "regression tests for success, idempotent retry, stale revision, malformed/schema-invalid input, secret rejection, mismatched readback, and bounded stale readback",
+    "an isolated branch and PR whose unchanged exact head passes all required CI",
+    "safe expected-head merge and exact remote readback of source, tests, documentation, revision-19 inbox, recovery receipt, and directive ledger",
+    "generation-7 state acknowledgement of inbox revision 19 at a semantic boundary that has a frozen revision-19 Decision Context manifest"
+  ],
+  "failure_conditions": [
+    "lease owner, execution id, generation, or fence changes before an effect boundary",
+    "the authoritative inbox no longer has the expected revision/blob or entries 18 and 19 differ from their verified recovery source",
+    "validation happens after mutation, a CAS is retried, or readback can accept non-exact content",
+    "tests or exact-head CI fail, the PR head changes, current main makes the change conflict, or remote readback differs",
+    "the unit claims capability improvement, positive-control evidence, AGI, or user-level completion from control-plane safety work"
+  ],
+  "goal": "Finish and publish the dedicated authoritative user-input inbox append path: prove revisions 18 and 19 were incorporated after revision 17 without altering entries 1 through 17, then publish a reusable expected_revision-bound JSON/schema-validated single-CAS append with bounded exact remote readback and no mutation retry.",
+  "inputs": [
+    "agi/USER_INPUT_INBOX.json revision 19 at blob 7909d7a2d9076ce7916e3c3403fb929db1b501a6",
+    "agi/USER_INPUT_INBOX_RECOVERY.json integration receipt at blob a5974d662a5c2487b78f602b3ba77f98286662fb",
+    "agi/EFFECTIVE_USER_DIRECTIVES.json revision 19 at blob 197d78d081fa400f2689165c5599baeece45970a",
+    "src/agi/user_input_inbox.py and tests/test_user_input_inbox.py isolated implementation",
+    "generation-7 sole-writer lease and exact expected-blob state CAS contract"
+  ],
+  "parent_continuation": "After Execute, Task Evaluate the exact append, acknowledgement, CI, merge, and readback evidence; Consolidate Episode and Learn; then return to Root. The next Context Kernel experiment must compare recursive Skill-in-Skill retrieval against current routing and must establish a fidelity-preserving scientist-agent positive control before drawing conclusions from O-specific adaptation.",
+  "rollback": "Do not merge a failed, changed, or conflicted head. Preserve revision 19 and its recovery receipt, leave the isolated implementation reviewable, and checkpoint the exact blocker without reverting or overwriting another writer's work.",
+  "scope": "control-plane/user-input-inbox-append-path-v1",
+  "success_conditions": [
+    "revisions 18 and 19 are authoritative, acknowledged, and traceably sourced from the recovery file",
+    "future append callers cannot overwrite a newer inbox revision or silently accept invalid JSON/schema content",
+    "only one external mutation is attempted per append operation and post-mutation uncertainty is resolved by readback rather than another write",
+    "all required checks pass at an unchanged conflict-free head and reviewed bytes read back exactly from main",
+    "revision 18 remains a comparison proposal rather than automatic adoption, and revision 19 preserves the unmodified-positive-control distinction for later experiments"
+  ],
+  "unit_id": "unit-d6cbe0a3154ed09edcc8e984"
+}

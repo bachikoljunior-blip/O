@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "artifact_type": "bounded_work_response_evidence_integrity_result",
+  "unit_id": "unit-01cbffba310bfa12fae753d0",
+  "scope": "generation29/work-response-evidence-blob-integrity-v1",
+  "request": {
+    "work_invocation_id": "invoke-b6470fd5be823a8114f3e84d",
+    "request_digest": "933a61ca8f0aab4d0905e1aaa9cf5344886ff82be66788f0bf358cae286a112c",
+    "executor_binding": "current_chatgpt_work_session"
+  },
+  "implementation": {
+    "boundary": "Work response submission and bound native consumption",
+    "policy": "Recursively inspect only explicit repository evidence declarations under fixed depth, node, and binding limits; validate normalized relative paths, reject every symlink component and non-regular file, require lowercase full 40-hex identities, recompute git blob identity from exact bytes with git hash-object --no-filters, reject conflicts before file access, and require exact equality before semantic consume.",
+    "limits": {
+      "maximum_depth": 32,
+      "maximum_nodes": 4096,
+      "maximum_bindings": 256
+    },
+    "arbitrary_prose_interpreted": false,
+    "network_lookup_used": false,
+    "mutable_branch_lookup_used": false,
+    "evidence_bindings": [
+      {
+        "path": "src/continual/work_session.py",
+        "git_blob_sha": "c6137dadc26a871cae1a04fcc124e23358d47838"
+      },
+      {
+        "path": "src/continual/engine.py",
+        "git_blob_sha": "a3c699f0aa87098851f73702c4aa9fdf7c2877e0"
+      }
+    ]
+  },
+  "controls": {
+    "accepted_cases": [
+      "corrected full repository blob identity recomputed from exact bytes",
+      "identical duplicate declarations produce identical side-effect-free verification results",
+      "arbitrary prose containing path-like or SHA-like text is ignored"
+    ],
+    "rejected_before_semantic_consume": [
+      "short or truncated identity",
+      "uppercase or malformed identity",
+      "non-string identity",
+      "wrong, guessed, or stale identity",
+      "missing path",
+      "outside-root path",
+      "non-normalized path",
+      "symlink traversal",
+      "non-regular file",
+      "conflicting duplicate identity",
+      "named identity without a same-object path",
+      "excess depth, node count, or binding count",
+      "post-submission byte drift"
+    ],
+    "post_submission_drift_preserves_native_journal": true,
+    "duplicate_validation_side_effect_free": true,
+    "response_shape_validation_preserved": true,
+    "frozen_invocation_validation_preserved": true,
+    "exact_once_submission_preserved": true
+  },
+  "historical_correction_control": {
+    "accepted_response": {
+      "path": ".continual/work-model/invocations/invoke-1fad3959c1466207fb6876ad/response.json",
+      "git_blob_sha": "9af39277a27877a79e8f104bc91c46b937d59c49",
+      "sha256": "bc5eee4d099fa0f801bc4d48659e48deb80385916a6ac46c03f4ab3652d23b26",
+      "mutated": false,
+      "resubmitted": false
+    },
+    "correction_record": {
+      "path": "artifacts/unit-generation29-external-arc-nonzero-bounding-box-transfer-v1-response-correction.json",
+      "git_blob_sha": "b4515a1871fc7e34169fb773b9d86c89adb671e3",
+      "recognized_as_negative_evidence": true
+    },
+    "corrected_result": {
+      "path": "artifacts/unit-generation29-external-arc-nonzero-bounding-box-transfer-v1-result.json",
+      "git_blob_sha": "4023b9fb126f3422ae91b5e37fea976ba59839e6",
+      "verification": "accepted after exact-byte recomputation"
+    },
+    "incorrect_value_in_immutable_response": "4023b9f862ab57306cb8de31d8b23e3606a5b452",
+    "incorrect_value_verification": "rejected as an identity mismatch",
+    "history_rewritten": false
+  },
+  "validation": {
+    "command": "uv run pytest -q tests/test_work_response_evidence_binding.py tests/test_work_session_bridge.py tests/test_engine_work_safety.py",
+    "focused_tests": "32 passed",
+    "evidence_bindings": [
+      {
+        "path": "tests/test_work_response_evidence_binding.py",
+        "git_blob_sha": "5ed4199a69f5d63519cac766ed344e6af8a14a4e"
+      },
+      {
+        "path": "tests/test_engine_work_safety.py",
+        "git_blob_sha": "d54d959c327fb54ca8b8696dcf8266afa9cc01d6"
+      }
+    ],
+    "protected_exact_head_ci": "pending publication of this implementation head",
+    "expected_head_merge": "pending publication of this implementation head",
+    "remote_blob_readback": "pending publication of this implementation head"
+  },
+  "repository_boundary": {
+    "authorized_publication_repository": "bachikoljunior-blip/O",
+    "upstream_source_writes": 0,
+    "writes_outside_authorized_O_publication_path": 0,
+    "note_control_receipt_writes": 1,
+    "note_control_receipt_scope": "required o_work_monitor_recovery scheduled-slot integrity receipt only"
+  },
+  "verdicts": {
+    "mechanism_unit": "PASS_LOCAL_PENDING_PROTECTED_PUBLICATION",
+    "prior_bounding_box_unit": "FAIL_CLOSED_INSUFFICIENT_CANDIDATES",
+    "candidate_activation": false,
+    "production_routing": false,
+    "upper_objective": "FAIL_OPEN",
+    "user_level_objective": "FAIL_OPEN",
+    "agi_achieved": false
+  },
+  "claim_boundary": "The local result supports only the bounded deterministic repository-evidence verification mechanism. It does not establish generalized reliability, broad continual learning, autonomous self-improvement, Candidate activation, production readiness, user completion, upper-objective completion, or AGI. Final mechanism PASS remains conditional on protected exact-head CI, expected-head merge, and exact remote readback.",
+  "next_action": "Publish the implementation, tests, and this result on one isolated head; require directive preflight and protected tests at that exact head; merge only with expected-head enforcement; read every changed blob back; then submit this frozen Execute response exactly once and bind it before native consumption."
+}

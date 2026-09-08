@@ -1,0 +1,1 @@
+Recover the stale O AGI execution from latest main, retain the failed live Copilot campaign as negative evidence, fix only the falsified provider-output boundaries without weakening strict scoring or the external AGI gate, validate the exact head, and immediately falsify the correction in a fresh bounded genuine-model capability and retention campaign.

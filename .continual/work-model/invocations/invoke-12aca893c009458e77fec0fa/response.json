@@ -1,0 +1,56 @@
+{
+  "executor_binding": "current_chatgpt_work_session",
+  "invocation_id": "invoke-12aca893c009458e77fec0fa",
+  "model_identity": "chatgpt-work-model-unverified",
+  "model_verified": false,
+  "output": {
+    "fragment": {
+      "component": "candidate_evaluate",
+      "evidence_refs": [
+        ".continual/work-model/invocations/invoke-ab01bb55b917bc433e09d36f/response.json",
+        ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md"
+      ],
+      "observations": [
+        "The result contains three explicit non-conflated verdict layers.",
+        "Every publication PASS claim is backed by concrete GitHub and main-readback evidence.",
+        "Missing routing and user-level evidence remains negative rather than being inferred from CI."
+      ],
+      "purpose": "Judge the scoped verdict-separation Candidate from the actual Task Evaluate result.",
+      "unresolved": [
+        "deterministic protected-baseline regression is still required before scoped activation",
+        "the original user-level objective remains unmet"
+      ]
+    },
+    "local_learn": {
+      "candidates": [],
+      "decision": "NO_CHANGE",
+      "observation": "Activation recommendation and activation itself must remain separate; a good live trial is evidence for the regression gate, not permission to mutate active prompts."
+    },
+    "result": {
+      "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+      "contradictory_evidence": [
+        "No deterministic protected-baseline regression record has yet promoted this Candidate to VERIFIED_FOR_SCOPE.",
+        "The Candidate can overproduce unit PASS if a future evaluator omits explicit bounded success conditions."
+      ],
+      "decision": "PROPOSE_ACTIVATION",
+      "global_activation_authorized": false,
+      "promotion_performed": false,
+      "reason": "The actual result used the overlay as intended: bounded publication PASS, routing INSUFFICIENT_EVIDENCE, and original-goal FAIL were each explicit, independently supported, and non-conflated. Negative evidence and claim boundaries were preserved.",
+      "regression_gate_required": true,
+      "rollback": "Keep the Candidate inactive unless the separate deterministic gate recomputes protected baseline behavior and verifies original-goal verdict independence.",
+      "scope": "continual/incremental-task-evaluation",
+      "supporting_evidence": [
+        "unit_verdict PASS cites exact workflow, merge-tree, expected-head merge, and readback facts",
+        "verdict FAIL retains the unmet real-world objective",
+        "routing_verdict remains INSUFFICIENT_EVIDENCE with zero observations",
+        "agi_claim_supported and global activation remain false",
+        "the prior scoped trial showed the same non-conflation behavior"
+      ]
+    }
+  },
+  "output_digest": "b8f2e9b8a60f7229d8178a7b81e0e9daa41acab8efe286fbcf0e639568f4723c",
+  "received_at": "2026-08-23T12:25:12.245852Z",
+  "request_digest": "4dbf953dbe117337027a68c8d713668f38ed1635aae7ade9c8f8065cdd6ae56a",
+  "response_digest": "23cdec7a0f62afe1d093b4741e2527647a2fa5ed0173a494174c20533f755217",
+  "schema_version": 1
+}
