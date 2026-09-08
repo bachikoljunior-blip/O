@@ -173,7 +173,7 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-08T00:51:30.000Z",
+    "checkpointed_at": "2026-09-08T01:15:17.000Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -188,7 +188,7 @@
     "snapshot_blob_sha": "3f104f917820e053dd97f46a431aa4f7cb6086f4",
     "snapshot_revision": 259,
     "snapshot_phase": "consolidate_pending",
-    "completed_effect_receipt_ref": "generation34_pr606_merge_v1",
+    "completed_effect_receipt_ref": "generation34_consolidate259_consume_native261_v1",
     "completed_effect_receipt": {
       "schema_version": 1,
       "classification": "stop_cause_repair_exact_head_ci_pending",
@@ -378,12 +378,12 @@
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
-    "idempotency_key": "o-work-g34:81acbf6d:bound-target-resume-repair:merged:v1",
-    "exact_frontier": "PR606 repair is merged and exact-readback verified on main; Consolidate259 remains the sole authoritative accepted response and is unconsumed.",
-    "next_tool": "work-checkpoint-verify",
-    "next_action": "Reconstruct fresh main, verify checkpoint and Work journals, then consume the existing Consolidate259 response exactly once with the repaired engine.",
-    "next_tool_action": "Reconstruct fresh main, verify checkpoint and Work journals, then consume the existing Consolidate259 response exactly once with the repaired engine.",
+    "pending_pull_requests": [607],
+    "idempotency_key": "o-work-g34:81acbf6d:consolidate259-consume-native261:v1",
+    "exact_frontier": "The frozen Consolidate259 response was consumed exactly once on PR607 head 36dee89ee2e3fde247313034df2b03d257456324; snapshot261 is post_task_learn_pending and awaits exact-head CI, merge, and main readback.",
+    "next_tool": "github_fetch_commit_workflow_runs",
+    "next_action": "Wait for PR607 exact-head directive and all five test jobs without rerun; merge/readback only on success, then bind snapshot261 and freeze the exact Post-task Learn request.",
+    "next_tool_action": "Wait for PR607 exact-head directive and all five test jobs without rerun; merge/readback only on success, then bind snapshot261 and freeze the exact Post-task Learn request.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -30276,7 +30276,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-08T00:51:30.000Z",
+  "heartbeat_at": "2026-09-08T01:15:17.000Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -31196,9 +31196,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Merged and exact-readback verified PR606 after all exact-head CI passed; the existing Consolidate259 response remains the sole unconsumed continuation.",
-  "last_activity_at": "2026-09-08T00:51:30.000Z",
-  "last_checked_at": "2026-09-08T00:51:30.000Z",
+  "last_action": "Consumed the existing Consolidate259 response exactly once and published the canonical native261 transition on PR607 for exact-head validation.",
+  "last_activity_at": "2026-09-08T01:15:17.000Z",
+  "last_checked_at": "2026-09-08T01:15:17.000Z",
   "last_error": null,
   "last_native_publication": {
     "all_content_blobs_exact_readback": true,
@@ -31211,7 +31211,7 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-08T00:51:30.000Z",
+  "last_progress_at": "2026-09-08T01:15:17.000Z",
   "last_verified_effect": {
     "schema_version": 1,
     "classification": "stop_cause_repair_exact_head_ci_pending",
@@ -37693,7 +37693,7 @@
     "verified_remote_readback": true,
     "resume_required": true
   },
-  "pending_pull_requests": [],
+  "pending_pull_requests": [607],
   "pending_ci_run_ids": [],
   "pending_job_ids": [],
   "generation34_consolidate259_continuation_source_repair_v1": {
@@ -37854,5 +37854,42 @@
     "resume_required": true,
     "upper_objective_achieved": false,
     "observed_at": "2026-09-08T00:51:30.000Z"
+  },
+  "generation34_consolidate259_consume_native261_v1": {
+    "schema_version": 1,
+    "classification": "consolidate_response_consumed_once_branch_readback_verified_ci_pending",
+    "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+    "lease_generation": 34,
+    "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+    "idempotency_key": "o-work-g34:81acbf6d:consolidate259-consume-native261:v1",
+    "source_main_sha": "20f68ac2d8ee6e6c3d5ea88894a8ed18b72f9188",
+    "branch": "work-g34-consolidate259-consume-native261",
+    "head_sha": "36dee89ee2e3fde247313034df2b03d257456324",
+    "pull_request": 607,
+    "work_invocation_id": "invoke-49d02026ef7076044a6ef760",
+    "native_invocation_id": "invoke-4a50e45bf562040dada6698f",
+    "request_digest": "be406ea51d301fc090532df9bed67a083663d4a62813c4f1fd94a5bafbbe1e52",
+    "payload_digest": "eb4f2fb71d46c495d0410b329ca9d506ed454f5f9a79b789adfe56c5650afee9",
+    "response_digest": "9fa3a609f3ca63e89e3904e979201c99d2432c315dd4668d2ef938d4f174d0e3",
+    "output_digest": "c9611235ba661a64dffa28623fce521a039ba022520cc95227ec78330a0d6d8a",
+    "snapshot_revision": 261,
+    "snapshot_phase": "post_task_learn_pending",
+    "response_consumed_once": true,
+    "response_repeated": false,
+    "request_recreated": false,
+    "matching_native_completed_events": 1,
+    "work_verify": {"valid": true, "requests": 250, "responses": 250, "pending": 0, "native_completed": 242, "native_fragments": 242, "native_local_learn": 221},
+    "branch_readback": [
+      {"path": ".continual/episodes/episode-work-recovery-gen9-durability-repair/episode.json", "sha": "9fe14ab6bfb29220eb1bffc1813b031e99edd2c0"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/events.jsonl", "sha": "0a3d079613a0c5ee32c53a5d714c49dcb217f6e7"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/invocations/invoke-4a50e45bf562040dada6698f.json", "sha": "cd6885db1e2de1d85f3aaf319363613680f919f1"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json", "sha": "a62b0045a258a8b14d6b2f4780f697e25c984688"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/fragments/invoke-4a50e45bf562040dada6698f-consolidate_episode.json", "sha": "fcd13fc999bd7e9609a19030bee8742256fa5416"},
+      {"path": ".continual/runs/run-work-recovery-gen9-durability-repair/local-learn/invoke-4a50e45bf562040dada6698f-consolidate_episode.json", "sha": "ff25b8586acf3c04d82f0ad8ac1d52af4d641118"},
+      {"path": "artifacts/g34-consolidate259-consume-native261-v1.json", "sha": "5950f99488a534b6ff2982b86cd46fbee866a33f"}
+    ],
+    "upper_objective_achieved": false,
+    "resume_required": true,
+    "observed_at": "2026-09-08T01:15:17.000Z"
   }
 }
