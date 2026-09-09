@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "classification": "root_response_consumed_exactly_once_execute_unit_selected_native286_publication_pending",
+  "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+  "lease_generation": 34,
+  "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+  "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
+  "idempotency_key": "g34:task283:root:consume:invoke-60a94db37eef5319c5522400:d5a457b39430033d99d33027c934660c5033dc979abab1b8b8f6890fe4b2e306:native286:v1",
+  "source_main_sha": "73d2a202b06a04e3fa9507d9cef5509bc01eae7a",
+  "source_state_blob_sha": "ecddf503ef4743168dcfd96f9856cbe96ae68f97",
+  "consumed_root": {
+    "work_invocation_id": "invoke-5f421673738764198d24bbe2",
+    "native_invocation_id": "invoke-60a94db37eef5319c5522400",
+    "request_digest": "3129647bd0623b814fd6eeafd8076b8ba41f03fa17d3328acd32e1f4f819d3e7",
+    "response_digest": "d5a457b39430033d99d33027c934660c5033dc979abab1b8b8f6890fe4b2e306",
+    "output_digest": "88df28ae37c0d6110b9f25dc6cf647a57438b82e412616c3db581566fd25b0a0",
+    "completion_count": 1,
+    "response_consumed": true,
+    "response_replayed": false,
+    "request_recreated": false
+  },
+  "selected_execute": {
+    "unit_id": "unit-generation34-cross-project-live-regression-transfer-v1",
+    "component": "execute",
+    "decision_manifest_digest": "eab8cc15ee167c0af588eff5c322f49efcc9d36ba15bf2805ba9b13036dba9a0",
+    "target_substitution": false,
+    "patch_attempt_limit": 1,
+    "upstream_writes": 0
+  },
+  "native_effect": {
+    "snapshot_revision": 286,
+    "snapshot_phase": "unit_pending",
+    "snapshot_blob_sha": "e747db2cb5f26cf5f3bbe3d10e64b5e654206767",
+    "native_invocation_blob_sha": "8b15b69f68ecc89d232d9ba7e9e07d9e06c9975e",
+    "events_blob_sha": "7fc48fd03edc3cef4fa6731bc1b5cda74c1a3bf5"
+  },
+  "preflight_repair": {
+    "failure": "continuation durability main commit mismatch",
+    "effect": "failed closed before native mutation",
+    "cause": "continuation_durability.source_main_sha was advanced from the immutable snapshot source commit to the response publication commit",
+    "repair": "restored source_main_sha to the frozen snapshot head f65b2dbdc0ed025c5c67c8fd95b2bed393ff737e",
+    "recurrence_validation": "the complete continuity preflight then succeeded and the exact response was consumed once"
+  },
+  "work_source_observation_id": "work-state-18f9b5479354dbc75d62e6ca",
+  "work_source_observation_request_digest": "39897decfc9081683f74ed210387c81d093202f04bff9bd848184731231f8d8c",
+  "work_source_observation_receipt_digest": "fe38e952130ae7c3a418e2eea659cace8db50da05c9328d3679474de6faaf9bb",
+  "ci_source_observation_id": "ci-run-f0ba6e8f8d12dba02da8d519",
+  "ci_source_observation_request_digest": "eb36e7f5c6d0dce798018faca077c4989ad6ed88743e98ec91d7d59e808a262c",
+  "ci_source_observation_receipt_digest": "04b180cb8a2d5ce85faa6a2fb72bbd1cf225b288f4cd927195d47bfa3a0a0366",
+  "next_action": "Publish and exact-readback this native consume, bind revision 286, then continue once to freeze the selected Execute Work request.",
+  "resume_required": true,
+  "upper_objective_achieved": false,
+  "agi_claim_supported": false,
+  "observed_at": "2026-09-09T17:39:15.162243Z"
+}
