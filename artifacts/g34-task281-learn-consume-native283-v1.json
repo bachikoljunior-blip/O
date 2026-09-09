@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "checkpoint_id": "g34-task281-learn-consume-native283-v1",
+  "recorded_at": "2026-09-09T15:11:37.381120Z",
+  "run_id": "run-work-recovery-gen9-durability-repair",
+  "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+  "lease_generation": 34,
+  "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+  "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
+  "source_main_sha": "515eaf748d3eacfca82e26ba51ac69b329a6575b",
+  "source_state_blob_sha": "97086ddf56a72804ec74388ddbb58f013418dd6d",
+  "work_invocation_id": "invoke-a3a3819acfa6be2a1294ddc2",
+  "native_invocation_id": "invoke-10cf14c38b172164ae2c0b53",
+  "component": "learn",
+  "request_digest": "015a54ed963167feb8090cc847cc49903af12bdb68ebe84cbff2a18d8cf32127",
+  "payload_digest": "0a332949eb43d582b8c82b273b2dac2348718fea91809ecdaa331346dc44fd3d",
+  "response_digest": "aa5f1ae845e16ac21d9944c6695d10f80e1e0c327e2a3c371c0bc7f2d98275cc",
+  "output_digest": "53dfc42c260a99db6dc231075d7e243855fe7196e2188996287d86b2aa2c4dcc",
+  "response_blob_sha": "341bc4e6c85a1672099f038e27722dd9b9135120",
+  "completion": {
+    "status": "complete",
+    "completed_at": "2026-09-09T15:11:37.379154Z",
+    "response_submitted_exactly_once": true,
+    "response_consumed_exactly_once": true,
+    "request_recreated": false,
+    "response_replayed": false,
+    "native_snapshot_revision": 283,
+    "native_phase": "root_pending",
+    "upper_objective_achieved": false,
+    "agi_claim_supported": false
+  },
+  "preflight_failures_and_repairs": [
+    {
+      "failure": "state pending Work request reference mismatch with native journal",
+      "mutation_occurred": false,
+      "repair": "restored exact_continuation.pending_request_ref to the frozen Work request reference and exact-readback bound the repaired state",
+      "repair_commit": "767279de6f8c2c3f302ed70ce062d46f359e4816",
+      "repair_state_blob_sha": "c767489bb4a21105f548ff12ddac357d640970eb"
+    },
+    {
+      "failure": "continuation is not remote-main durable",
+      "mutation_occurred": false,
+      "repair": "restored continuation_durability.status to the required remote_main_readback_verified enum, retained phase-specific evidence separately, and validated the full resume continuity preflight",
+      "repair_commit": "515eaf748d3eacfca82e26ba51ac69b329a6575b",
+      "repair_state_blob_sha": "97086ddf56a72804ec74388ddbb58f013418dd6d"
+    }
+  ],
+  "local_content_digests": {
+    "events_sha256": "3ccf5cc1974c3f830644a93f620112b769cde77f101711312a450ff5fefed2e6",
+    "snapshot_sha256": "f933b847e1bf019379701ffd5a08c41686bcdc48e03bb7d0b4fe24e10baed5ce",
+    "native_invocation_sha256": "65b199395df8ff3eddddf2ee7182ced91e2022f61ef3905a4394f6ecd53654c3",
+    "fragment_sha256": "b7f7f663d6f809a8b8ebc62bb2ffbcadfea2d649c99e19e5dcbb12fe139d4534"
+  },
+  "next_exact_action": "Publish the Learn native-consume lifecycle through protected exact-head CI, expected-head merge, and exact main readback; then bind revision 283 root_pending into the fenced execution state before freezing the next Root request."
+}
