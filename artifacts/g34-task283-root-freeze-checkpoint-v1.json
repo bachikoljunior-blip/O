@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "checkpoint_id": "g34-task283-root-freeze-checkpoint-v1",
+  "recorded_at": "2026-09-09T16:03:04.409489Z",
+  "run_id": "run-work-recovery-gen9-durability-repair",
+  "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
+  "lease_generation": 34,
+  "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
+  "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
+  "source_main_sha": "f0687cfeef572d98158eef3a943106885fe91ce4",
+  "source_state_blob_sha": "96575e6f6d3c301c4d80c7833c80645c864efe85",
+  "source_snapshot_revision": 284,
+  "source_snapshot_phase": "root_pending",
+  "component": "root",
+  "work_invocation_id": "invoke-5f421673738764198d24bbe2",
+  "native_invocation_id": "invoke-60a94db37eef5319c5522400",
+  "request_digest": "3129647bd0623b814fd6eeafd8076b8ba41f03fa17d3328acd32e1f4f819d3e7",
+  "request_payload_digest": "12e255c17c5f06a628176d4e9525e781d5c808029f6a96b8e1b498bac626576b",
+  "native_payload_digest": "d72cc75f3f0c04f0a2ba6510",
+  "request_created_at": "2026-09-09T16:03:04.406191Z",
+  "request_recreated": false,
+  "response_submitted": false,
+  "response_consumed": false,
+  "response_replayed": false,
+  "work_source_observation": {
+    "observation_id": "work-state-c9a0a83dd19879dab0b566ca",
+    "request_digest": "02c040355446aecfc3941e4e367e8dbf5e7836d90ad98eb03ef191bc8fe3565b",
+    "receipt_digest": "24b5f483cc23d85a0b9bea9a5b475e7c45f865f43fa5ce8782c06ccf2538c189",
+    "source_main_sha": "f0687cfeef572d98158eef3a943106885fe91ce4",
+    "source_state_blob_sha": "96575e6f6d3c301c4d80c7833c80645c864efe85"
+  },
+  "ci_source_observation": {
+    "observation_id": "ci-run-dade300fe63573ffefe47ad5",
+    "request_digest": "d6e1a321ada04b71b20b2bd3dffb74fa9a0e73738b147b7406a77f1596b5eda6",
+    "receipt_digest": "7790a5b1f286ae432f4756eaf82adbf0735b47df42a018514f6e8eabbe1341f2",
+    "workflow_run_id": 34364415398,
+    "exact_head_sha": "eff7711d3db5dec24b474ed37ecd773b6f6cc1a3",
+    "all_required_jobs_success": true
+  },
+  "stop_cause_repair": {
+    "initial_failure": "mandatory Work source lacks a matching fresh authoritative observation",
+    "initial_request_froze": false,
+    "cause": "The first large state upload decoded raw UTF-8 bytes as Latin-1 characters before the connector re-encoded the string, changing non-ASCII bytes while retaining valid JSON.",
+    "repair": "Reassembled the local state by complete UTF-8 line boundaries, replaced the malformed remote object with expected-blob CAS, and required exact equality between local git hash-object and remote-main blob before preparing a new source observation.",
+    "malformed_commit_sha": "cd0d4976a910adc9e8f4cc14e7493173bb2af5a1",
+    "malformed_blob_sha": "f3ae51ae7c057e6fb113cdb698882f27b8da86a2",
+    "repair_commit_sha": "f0687cfeef572d98158eef3a943106885fe91ce4",
+    "repaired_blob_sha": "96575e6f6d3c301c4d80c7833c80645c864efe85",
+    "exact_utf8_readback_verified": true,
+    "recurrence_guard": "For UTF-8 state uploads, transfer complete text line ranges or use a true UTF-8 decoder; never map raw bytes directly to JavaScript characters. Require returned content_sha == local git hash-object before source observation."
+  },
+  "next_exact_action": "Publish and exact-read back this unique Root freeze, bind it into the fenced execution state, then submit one Root response for this request and continue into the selected safe unit."
+}
