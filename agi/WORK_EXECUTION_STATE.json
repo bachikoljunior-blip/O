@@ -173,7 +173,7 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-09T17:21:00Z",
+    "checkpointed_at": "2026-09-09T17:39:00Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -242,17 +242,22 @@
       "resume_required": true,
       "upper_objective_achieved": false,
       "agi_claim_supported": false,
-      "verified_at": "2026-09-09T17:21:00Z"
+      "verified_at": "2026-09-09T17:21:00Z",
+      "resume_preflight_failure": "continuation durability main commit mismatch",
+      "resume_preflight_failure_effect": "The consume failed closed before native mutation; the Root response remains unconsumed and no request or response was recreated or replayed.",
+      "resume_preflight_repair": "Restore continuation_durability.source_main_sha to the immutable snapshot source commit f65b2dbdc0ed025c5c67c8fd95b2bed393ff737e; response publication provenance remains separately recorded in exact_continuation and the task283 response receipt.",
+      "resume_preflight_recurrence_validation": "Run the complete continuity preflight again; it must verify the pending request, native journal, and snapshot blobs at the frozen snapshot head before any consume.",
+      "stop_cause_eliminated": true
     },
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_pull_requests": [],
     "idempotency_key": "g34:task283:root:response:invoke-5f421673738764198d24bbe2:d5a457b39430033d99d33027c934660c5033dc979abab1b8b8f6890fe4b2e306",
-    "exact_frontier": "The unique Root response is merge-durable and exact-readback verified but not yet consumed; the next operation is one fenced native consume that must freeze Execute.",
+    "exact_frontier": "Root response remains unconsumed after a fail-closed preflight; restore immutable snapshot-source binding, exact-readback it, refresh observations, and retry the one consume.",
     "next_tool": "fresh Work and CI source observations, continuity preflight, work-resume --max-steps 1",
-    "next_action": "Consume the exact published Root response d5a457b39430033d99d33027c934660c5033dc979abab1b8b8f6890fe4b2e306 once from merged main 02376de8a98e953531f0608f5d4721f5b6e1dc01, freeze the selected Execute request, and continue the locked trial without replay or substitution.",
-    "next_tool_action": "Consume the exact published Root response d5a457b39430033d99d33027c934660c5033dc979abab1b8b8f6890fe4b2e306 once from merged main 02376de8a98e953531f0608f5d4721f5b6e1dc01, freeze the selected Execute request, and continue the locked trial without replay or substitution.",
+    "next_action": "Exact-readback the repaired state, refresh source observations for that state, rerun the full continuity preflight, then consume the published Root response exactly once.",
+    "next_tool_action": "Exact-readback the repaired state, refresh source observations for that state, rerun the full continuity preflight, then consume the published Root response exactly once.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -1235,7 +1240,7 @@
     "snapshot_blob_sha": "7d42c5d71f742ff93c485c39d7988a2a3d04c2f9",
     "snapshot_revision": 284,
     "snapshot_phase": "root_pending",
-    "source_main_sha": "02376de8a98e953531f0608f5d4721f5b6e1dc01",
+    "source_main_sha": "f65b2dbdc0ed025c5c67c8fd95b2bed393ff737e",
     "source_state_blob_sha": "335533e8bdaa109a341883f881c0c6797622f089",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@f0687cfeef572d98158eef3a943106885fe91ce4/agi/WORK_EXECUTION_STATE.json",
     "verified_at": "2026-09-09T17:21:00Z",
@@ -31073,7 +31078,7 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Merged PR649 at its expected head after directive and all five test jobs succeeded, read back all six response artifacts exactly, and bound the unique Root response for one native consume.",
+  "last_action": "The first native consume failed closed because continuation_durability.source_main_sha was incorrectly advanced from the immutable snapshot head to response publication head; restored the frozen snapshot source binding without consuming or replaying anything.",
   "last_activity_at": "2026-09-09T17:21:00Z",
   "last_checked_at": "2026-09-09T17:21:00Z",
   "last_error": null,
@@ -31538,7 +31543,7 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Consume the exact published Root response d5a457b39430033d99d33027c934660c5033dc979abab1b8b8f6890fe4b2e306 once from merged main 02376de8a98e953531f0608f5d4721f5b6e1dc01, freeze the selected Execute request, and continue the locked trial without replay or substitution.",
+  "next_action": "Exact-readback the repaired state, refresh source observations for that state, rerun the full continuity preflight, then consume the published Root response exactly once.",
   "next_tool": "fresh Work and CI source observations, continuity preflight, work-resume --max-steps 1",
   "next_tool_action": "Consume the exact published Root response d5a457b39430033d99d33027c934660c5033dc979abab1b8b8f6890fe4b2e306 once from merged main 02376de8a98e953531f0608f5d4721f5b6e1dc01, freeze the selected Execute request, and continue the locked trial without replay or substitution.",
   "no_response_on_authoritative_remote": false,
@@ -42055,6 +42060,11 @@
     "resume_required": true,
     "upper_objective_achieved": false,
     "agi_claim_supported": false,
-    "verified_at": "2026-09-09T17:21:00Z"
+    "verified_at": "2026-09-09T17:21:00Z",
+    "resume_preflight_failure": "continuation durability main commit mismatch",
+    "resume_preflight_failure_effect": "The consume failed closed before native mutation; the Root response remains unconsumed and no request or response was recreated or replayed.",
+    "resume_preflight_repair": "Restore continuation_durability.source_main_sha to the immutable snapshot source commit f65b2dbdc0ed025c5c67c8fd95b2bed393ff737e; response publication provenance remains separately recorded in exact_continuation and the task283 response receipt.",
+    "resume_preflight_recurrence_validation": "Run the complete continuity preflight again; it must verify the pending request, native journal, and snapshot blobs at the frozen snapshot head before any consume.",
+    "stop_cause_eliminated": true
   }
 }
