@@ -173,14 +173,14 @@
   },
   "checkpoint": {
     "schema_version": 1,
-    "checkpointed_at": "2026-09-09T04:18:38Z",
+    "checkpointed_at": "2026-09-09T04:49:00Z",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "goal_revision": 118,
-    "current_head_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-    "current_main_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-    "current_state_blob_sha": "56a87ee33d3321838f749855086a1e2bc15ab09c",
+    "current_head_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "current_main_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "current_state_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
     "frozen_invocation_id": "invoke-8b3122ab79e4b7cf17b434c6",
     "frozen_request_digest": "33e51beffaf1226f7a21d7c00d434b98be3594ec640a50672fea4a3797336a17",
     "frozen_payload_digest": "f9757682db8ebaa8a3f7734e4ef3765e98089edd71c71615477c67a0eeb4ed64",
@@ -191,13 +191,13 @@
     "completed_effect_receipt_ref": "generation34_task275_postresult_candidate_response_v1",
     "completed_effect_receipt": {
       "schema_version": 1,
-      "classification": "postresult_candidate_evaluate_response_submitted_exactly_once_publication_pending",
+      "classification": "postresult_candidate_evaluate_response_submitted_exactly_once_main_readback_verified",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
       "idempotency_key": "o-work-g34:81acbf6d:task275-postresult-candidate-response:33e51bef:6affe853:v1",
-      "source_main_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-      "source_state_blob_sha": "56a87ee33d3321838f749855086a1e2bc15ab09c",
+      "source_main_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+      "source_state_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
       "run_id": "run-work-recovery-gen9-durability-repair",
       "current_unit_id": "unit-generation34-production-history-resolution-task-evaluate-v1",
       "work_invocation_id": "invoke-8b3122ab79e4b7cf17b434c6",
@@ -217,8 +217,8 @@
       "snapshot_phase": "unit_pending",
       "snapshot_blob_sha": "2c3a15168c6ee91e255cb9d3d58ae3104ffde157",
       "branch": "work-g34-task275-postresult-candidate-response",
-      "head_sha": null,
-      "pull_request": null,
+      "head_sha": "10911ef8487aa118a42cd7e8783937acb6914136",
+      "pull_request": 632,
       "files": [
         {
           "path": ".continual/work-model/invocations/invoke-8b3122ab79e4b7cf17b434c6/response.json",
@@ -234,22 +234,78 @@
       "response_consumed": false,
       "response_replayed": false,
       "request_recreated": false,
-      "publication_pending": true,
-      "main_readback_verified": false,
+      "publication_pending": false,
+      "main_readback_verified": true,
       "resume_required": true,
       "upper_objective_achieved": false,
       "agi_claim_supported": false,
-      "observed_at": "2026-09-09T04:18:38Z"
+      "observed_at": "2026-09-09T04:18:38Z",
+      "merge_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+      "workflow_runs": {
+        "directive_source_preflight": {
+          "run_id": 34310704430,
+          "conclusion": "success",
+          "job_id": 102336604480
+        },
+        "test": {
+          "run_id": 34310704479,
+          "conclusion": "success"
+        }
+      },
+      "required_jobs": [
+        {
+          "job_id": 102336604809,
+          "name": "pytest shard 0 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 102336604881,
+          "name": "pytest shard 1 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 102336604673,
+          "name": "pytest shard 2 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 102336604901,
+          "name": "pytest shard 3 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 102341663040,
+          "name": "test",
+          "conclusion": "success"
+        }
+      ],
+      "required_jobs_conclusion": "success",
+      "main_readback": [
+        {
+          "path": ".continual/work-model/invocations/invoke-8b3122ab79e4b7cf17b434c6/response.json",
+          "sha": "ab3e61134b8f19ba0a483b709363cc86093b9949"
+        },
+        {
+          "path": "artifacts/g34-task275-postresult-candidate-response-checkpoint-v1.json",
+          "sha": "95788c4a8635737120061dea9de41a89d39e2aeb"
+        },
+        {
+          "path": "agi/WORK_EXECUTION_STATE.json",
+          "sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590"
+        }
+      ],
+      "state_bind_expected_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
+      "verified_at": "2026-09-09T04:49:00Z"
     },
     "last_verified_effect": {
       "schema_version": 1,
-      "classification": "postresult_candidate_evaluate_response_submitted_exactly_once_publication_pending",
+      "classification": "postresult_candidate_evaluate_response_submitted_exactly_once_main_readback_verified",
       "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
       "lease_generation": 34,
       "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
       "idempotency_key": "o-work-g34:81acbf6d:task275-postresult-candidate-response:33e51bef:6affe853:v1",
-      "source_main_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-      "source_state_blob_sha": "56a87ee33d3321838f749855086a1e2bc15ab09c",
+      "source_main_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+      "source_state_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
       "run_id": "run-work-recovery-gen9-durability-repair",
       "current_unit_id": "unit-generation34-production-history-resolution-task-evaluate-v1",
       "work_invocation_id": "invoke-8b3122ab79e4b7cf17b434c6",
@@ -269,8 +325,8 @@
       "snapshot_phase": "unit_pending",
       "snapshot_blob_sha": "2c3a15168c6ee91e255cb9d3d58ae3104ffde157",
       "branch": "work-g34-task275-postresult-candidate-response",
-      "head_sha": null,
-      "pull_request": null,
+      "head_sha": "10911ef8487aa118a42cd7e8783937acb6914136",
+      "pull_request": 632,
       "files": [
         {
           "path": ".continual/work-model/invocations/invoke-8b3122ab79e4b7cf17b434c6/response.json",
@@ -286,22 +342,78 @@
       "response_consumed": false,
       "response_replayed": false,
       "request_recreated": false,
-      "publication_pending": true,
-      "main_readback_verified": false,
+      "publication_pending": false,
+      "main_readback_verified": true,
       "resume_required": true,
       "upper_objective_achieved": false,
       "agi_claim_supported": false,
-      "observed_at": "2026-09-09T04:18:38Z"
+      "observed_at": "2026-09-09T04:18:38Z",
+      "merge_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+      "workflow_runs": {
+        "directive_source_preflight": {
+          "run_id": 34310704430,
+          "conclusion": "success",
+          "job_id": 102336604480
+        },
+        "test": {
+          "run_id": 34310704479,
+          "conclusion": "success"
+        }
+      },
+      "required_jobs": [
+        {
+          "job_id": 102336604809,
+          "name": "pytest shard 0 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 102336604881,
+          "name": "pytest shard 1 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 102336604673,
+          "name": "pytest shard 2 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 102336604901,
+          "name": "pytest shard 3 of 4",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 102341663040,
+          "name": "test",
+          "conclusion": "success"
+        }
+      ],
+      "required_jobs_conclusion": "success",
+      "main_readback": [
+        {
+          "path": ".continual/work-model/invocations/invoke-8b3122ab79e4b7cf17b434c6/response.json",
+          "sha": "ab3e61134b8f19ba0a483b709363cc86093b9949"
+        },
+        {
+          "path": "artifacts/g34-task275-postresult-candidate-response-checkpoint-v1.json",
+          "sha": "95788c4a8635737120061dea9de41a89d39e2aeb"
+        },
+        {
+          "path": "agi/WORK_EXECUTION_STATE.json",
+          "sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590"
+        }
+      ],
+      "state_bind_expected_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
+      "verified_at": "2026-09-09T04:49:00Z"
     },
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
     "pending_pull_requests": [],
     "idempotency_key": "o-work-g34:81acbf6d:task275-postresult-candidate-response:33e51bef:6affe853:v1",
-    "exact_frontier": "The frozen post-result Candidate Evaluate response for invoke-8b3122ab79e4b7cf17b434c6 was submitted exactly once and is awaiting protected publication before exact-once consume.",
-    "next_tool": "GitHub explicit-base-tree publication and exact-head CI",
-    "next_action": "Publish and exact-read back the Candidate response, bind continuation durability, then consume it once into Consolidate Episode.",
-    "next_tool_action": "Publish and exact-read back the Candidate response, bind continuation durability, then consume it once into Consolidate Episode.",
+    "exact_frontier": "The post-result Candidate Evaluate response is exact-head CI and remote-main readback verified, remains unconsumed, and is ready for one exact consume into Consolidate Episode.",
+    "next_tool": "work-resume exact-once Candidate consume into Consolidate Episode",
+    "next_action": "Consume response 6affe853 exactly once, freeze Consolidate Episode, and publish/read back the transition.",
+    "next_tool_action": "Consume response 6affe853 exactly once, freeze Consolidate Episode, and publish/read back the transition.",
     "blocker": null,
     "termination": null,
     "resume_required": true,
@@ -731,52 +843,52 @@
     "validation": "44 focused tests passed; work-verify valid with all known requests and responses plus five recognized pending requests; compileall and git diff check passed."
   },
   "ci_source_observation": {
-    "exact_head_sha": "a330a82aac600483a307b4a97ee03de989edbcee",
-    "merge_sha": "bfaf95f1ba67e213d594c13f975fd31e956b9941",
-    "pull_request": 631,
+    "exact_head_sha": "10911ef8487aa118a42cd7e8783937acb6914136",
+    "merge_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "pull_request": 632,
     "status": "exact_head_required_jobs_success_and_merge_readback_verified",
     "conclusion": "success",
-    "test_workflow_run_id": 34308005570,
-    "directive_workflow_run_id": 34308005567,
+    "test_workflow_run_id": 34310704479,
+    "directive_workflow_run_id": 34310704430,
     "required_job_ids": [
-      102328623247,
-      102328623115,
-      102328623317,
-      102328623319,
-      102333666086
+      102336604809,
+      102336604881,
+      102336604673,
+      102336604901,
+      102341663040
     ],
-    "observed_at": "2026-09-09T04:02:20Z"
+    "observed_at": "2026-09-09T04:49:00Z"
   },
   "ci_source_observation_policy": {
-    "exact_head_sha": "a330a82aac600483a307b4a97ee03de989edbcee",
+    "exact_head_sha": "10911ef8487aa118a42cd7e8783937acb6914136",
     "executor_binding": "current_chatgpt_work_session",
     "max_age_seconds": 7200,
     "repository_full_name": "bachikoljunior-blip/O",
     "required": true,
     "required_jobs": [
       {
-        "id": 102328623247,
+        "id": 102336604809,
         "name": "pytest shard 0 of 4"
       },
       {
-        "id": 102328623115,
+        "id": 102336604881,
         "name": "pytest shard 1 of 4"
       },
       {
-        "id": 102328623317,
+        "id": 102336604673,
         "name": "pytest shard 2 of 4"
       },
       {
-        "id": 102328623319,
+        "id": 102336604901,
         "name": "pytest shard 3 of 4"
       },
       {
-        "id": 102333666086,
+        "id": 102341663040,
         "name": "test"
       }
     ],
     "workflow_id": 335420036,
-    "workflow_run_id": 34308005570
+    "workflow_run_id": 34310704479
   },
   "clean_g1_research_feed_cursor": {
     "blob_sha": "b3780c12f1aeb02a1e36a5da976ee99dc2ba72b9",
@@ -1246,7 +1358,7 @@
   "continuation": "Prepare fresh Work and PR539 CI observations, freeze post-task Learn from native213, answer once using canonical Episode then return to Root for materially different safe work.",
   "continuation_durability": {
     "schema_version": 1,
-    "status": "postresult_candidate_evaluate_response_submitted_precommit_publication_pending",
+    "status": "remote_main_readback_verified",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -1280,15 +1392,15 @@
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
+    "snapshot_head_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
     "snapshot_blob_sha": "2c3a15168c6ee91e255cb9d3d58ae3104ffde157",
     "snapshot_revision": 275,
     "snapshot_phase": "unit_pending",
-    "source_main_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-    "source_state_blob_sha": "56a87ee33d3321838f749855086a1e2bc15ab09c",
+    "source_main_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "source_state_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@a163200aeb247cc88c81d3fe866a3138b599328c/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": null,
-    "verified_remote_readback": false
+    "verified_at": "2026-09-09T04:49:00Z",
+    "verified_remote_readback": true
   },
   "continuation_source": {
     "0": "r",
@@ -1483,7 +1595,7 @@
   "durability_status": "remote_main_readback_verified",
   "exact_continuation": {
     "schema_version": 1,
-    "status": "postresult_candidate_evaluate_response_submitted_precommit_publication_pending",
+    "status": "remote_main_readback_verified",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
@@ -1517,57 +1629,57 @@
     "resume_required": true,
     "run_snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
+    "snapshot_head_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
     "snapshot_blob_sha": "2c3a15168c6ee91e255cb9d3d58ae3104ffde157",
     "snapshot_revision": 275,
     "snapshot_phase": "unit_pending",
-    "source_main_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-    "source_state_blob_sha": "56a87ee33d3321838f749855086a1e2bc15ab09c",
+    "source_main_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "source_state_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
     "predecessor_state_history_ref": "github://bachikoljunior-blip/O@a163200aeb247cc88c81d3fe866a3138b599328c/agi/WORK_EXECUTION_STATE.json",
-    "verified_at": null,
-    "verified_remote_readback": false
+    "verified_at": "2026-09-09T04:49:00Z",
+    "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
     "ci_restarted": false,
-    "head_sha": "a330a82aac600483a307b4a97ee03de989edbcee",
-    "workflow_run_id": 34308005570,
-    "directive_workflow_run_id": 34308005567,
+    "head_sha": "10911ef8487aa118a42cd7e8783937acb6914136",
+    "workflow_run_id": 34310704479,
+    "directive_workflow_run_id": 34310704430,
     "status": "completed",
     "conclusion": "success",
     "jobs": [
       {
-        "id": 102328623247,
+        "id": 102336604809,
         "name": "pytest shard 0 of 4",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 102328623115,
+        "id": 102336604881,
         "name": "pytest shard 1 of 4",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 102328623317,
+        "id": 102336604673,
         "name": "pytest shard 2 of 4",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 102328623319,
+        "id": 102336604901,
         "name": "pytest shard 3 of 4",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 102333666086,
+        "id": 102341663040,
         "name": "test",
         "status": "completed",
         "conclusion": "success"
       }
     ],
-    "observed_at": "2026-09-09T04:02:20Z",
-    "merge_sha": "bfaf95f1ba67e213d594c13f975fd31e956b9941",
+    "observed_at": "2026-09-09T04:49:00Z",
+    "merge_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
     "main_readback_verified": true
   },
   "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
@@ -30202,7 +30314,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-09T04:18:38Z",
+  "heartbeat_at": "2026-09-09T04:49:00Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -31122,9 +31234,9 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "Submitted the exact frozen post-result Candidate Evaluate response once; it proposes scoped activation to the separate deterministic gate but performs no promotion or production routing.",
-  "last_activity_at": "2026-09-09T04:18:38Z",
-  "last_checked_at": "2026-09-09T04:18:38Z",
+  "last_action": "Merged PR #632 at the exact expected head after directive and all five test jobs succeeded; exact main readback verified the one submitted post-result Candidate Evaluate response with no activation.",
+  "last_activity_at": "2026-09-09T04:49:00Z",
+  "last_checked_at": "2026-09-09T04:49:00Z",
   "last_error": "Context Kernel failed closed: decision context Work heartbeat is stale",
   "last_native_publication": {
     "all_content_blobs_exact_readback": true,
@@ -31137,16 +31249,16 @@
     "readback_at": "2026-09-05T12:42:07.124Z",
     "source_main_sha": "4d3a961feeade1a3638784be32d71df4496f0640"
   },
-  "last_progress_at": "2026-09-09T04:18:38Z",
+  "last_progress_at": "2026-09-09T04:49:00Z",
   "last_verified_effect": {
     "schema_version": 1,
-    "classification": "postresult_candidate_evaluate_response_submitted_exactly_once_publication_pending",
+    "classification": "postresult_candidate_evaluate_response_submitted_exactly_once_main_readback_verified",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "idempotency_key": "o-work-g34:81acbf6d:task275-postresult-candidate-response:33e51bef:6affe853:v1",
-    "source_main_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-    "source_state_blob_sha": "56a87ee33d3321838f749855086a1e2bc15ab09c",
+    "source_main_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "source_state_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
     "run_id": "run-work-recovery-gen9-durability-repair",
     "current_unit_id": "unit-generation34-production-history-resolution-task-evaluate-v1",
     "work_invocation_id": "invoke-8b3122ab79e4b7cf17b434c6",
@@ -31166,8 +31278,8 @@
     "snapshot_phase": "unit_pending",
     "snapshot_blob_sha": "2c3a15168c6ee91e255cb9d3d58ae3104ffde157",
     "branch": "work-g34-task275-postresult-candidate-response",
-    "head_sha": null,
-    "pull_request": null,
+    "head_sha": "10911ef8487aa118a42cd7e8783937acb6914136",
+    "pull_request": 632,
     "files": [
       {
         "path": ".continual/work-model/invocations/invoke-8b3122ab79e4b7cf17b434c6/response.json",
@@ -31183,12 +31295,68 @@
     "response_consumed": false,
     "response_replayed": false,
     "request_recreated": false,
-    "publication_pending": true,
-    "main_readback_verified": false,
+    "publication_pending": false,
+    "main_readback_verified": true,
     "resume_required": true,
     "upper_objective_achieved": false,
     "agi_claim_supported": false,
-    "observed_at": "2026-09-09T04:18:38Z"
+    "observed_at": "2026-09-09T04:18:38Z",
+    "merge_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "workflow_runs": {
+      "directive_source_preflight": {
+        "run_id": 34310704430,
+        "conclusion": "success",
+        "job_id": 102336604480
+      },
+      "test": {
+        "run_id": 34310704479,
+        "conclusion": "success"
+      }
+    },
+    "required_jobs": [
+      {
+        "job_id": 102336604809,
+        "name": "pytest shard 0 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 102336604881,
+        "name": "pytest shard 1 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 102336604673,
+        "name": "pytest shard 2 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 102336604901,
+        "name": "pytest shard 3 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 102341663040,
+        "name": "test",
+        "conclusion": "success"
+      }
+    ],
+    "required_jobs_conclusion": "success",
+    "main_readback": [
+      {
+        "path": ".continual/work-model/invocations/invoke-8b3122ab79e4b7cf17b434c6/response.json",
+        "sha": "ab3e61134b8f19ba0a483b709363cc86093b9949"
+      },
+      {
+        "path": "artifacts/g34-task275-postresult-candidate-response-checkpoint-v1.json",
+        "sha": "95788c4a8635737120061dea9de41a89d39e2aeb"
+      },
+      {
+        "path": "agi/WORK_EXECUTION_STATE.json",
+        "sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590"
+      }
+    ],
+    "state_bind_expected_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
+    "verified_at": "2026-09-09T04:49:00Z"
   },
   "latest_integrated_source": {
     "additional_pull_requests": [
@@ -31506,9 +31674,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Publish and exact-read back the post-result Candidate Evaluate response before consuming it.",
-  "next_tool": "GitHub explicit-base-tree publication and exact-head CI",
-  "next_tool_action": "Publish and exact-read back the post-result Candidate Evaluate response before consuming it.",
+  "next_action": "Consume response 6affe853 exactly once, freeze Consolidate Episode, and publish/read back the transition.",
+  "next_tool": "work-resume exact-once Candidate consume into Consolidate Episode",
+  "next_tool_action": "Consume response 6affe853 exactly once, freeze Consolidate Episode, and publish/read back the transition.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -35749,8 +35917,8 @@
   "snapshot_phase": "unit_pending",
   "snapshot_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/snapshot.json",
   "snapshot_revision": 275,
-  "source_main_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-  "source_state_blob_sha": "56a87ee33d3321838f749855086a1e2bc15ab09c",
+  "source_main_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+  "source_state_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "authorized_at": "2026-09-06T20:25:57.811Z",
@@ -40551,13 +40719,13 @@
   },
   "generation34_task275_postresult_candidate_response_v1": {
     "schema_version": 1,
-    "classification": "postresult_candidate_evaluate_response_submitted_exactly_once_publication_pending",
+    "classification": "postresult_candidate_evaluate_response_submitted_exactly_once_main_readback_verified",
     "execution_id": "work-recovery-20260906T201351Z-c295a2422756fca52c053dc6",
     "lease_generation": 34,
     "fence_token_digest": "81acbf6dac282ee233b22c381f17dcb7f07377bdc8493da34d5eff3df49d46ce",
     "idempotency_key": "o-work-g34:81acbf6d:task275-postresult-candidate-response:33e51bef:6affe853:v1",
-    "source_main_sha": "26968a5ceb0407e1a756503c8b1d1a72f68636cb",
-    "source_state_blob_sha": "56a87ee33d3321838f749855086a1e2bc15ab09c",
+    "source_main_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "source_state_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
     "run_id": "run-work-recovery-gen9-durability-repair",
     "current_unit_id": "unit-generation34-production-history-resolution-task-evaluate-v1",
     "work_invocation_id": "invoke-8b3122ab79e4b7cf17b434c6",
@@ -40577,8 +40745,8 @@
     "snapshot_phase": "unit_pending",
     "snapshot_blob_sha": "2c3a15168c6ee91e255cb9d3d58ae3104ffde157",
     "branch": "work-g34-task275-postresult-candidate-response",
-    "head_sha": null,
-    "pull_request": null,
+    "head_sha": "10911ef8487aa118a42cd7e8783937acb6914136",
+    "pull_request": 632,
     "files": [
       {
         "path": ".continual/work-model/invocations/invoke-8b3122ab79e4b7cf17b434c6/response.json",
@@ -40594,11 +40762,67 @@
     "response_consumed": false,
     "response_replayed": false,
     "request_recreated": false,
-    "publication_pending": true,
-    "main_readback_verified": false,
+    "publication_pending": false,
+    "main_readback_verified": true,
     "resume_required": true,
     "upper_objective_achieved": false,
     "agi_claim_supported": false,
-    "observed_at": "2026-09-09T04:18:38Z"
+    "observed_at": "2026-09-09T04:18:38Z",
+    "merge_sha": "778e861b9ba2f2072aba3d72ec0b21d4a63e99fb",
+    "workflow_runs": {
+      "directive_source_preflight": {
+        "run_id": 34310704430,
+        "conclusion": "success",
+        "job_id": 102336604480
+      },
+      "test": {
+        "run_id": 34310704479,
+        "conclusion": "success"
+      }
+    },
+    "required_jobs": [
+      {
+        "job_id": 102336604809,
+        "name": "pytest shard 0 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 102336604881,
+        "name": "pytest shard 1 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 102336604673,
+        "name": "pytest shard 2 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 102336604901,
+        "name": "pytest shard 3 of 4",
+        "conclusion": "success"
+      },
+      {
+        "job_id": 102341663040,
+        "name": "test",
+        "conclusion": "success"
+      }
+    ],
+    "required_jobs_conclusion": "success",
+    "main_readback": [
+      {
+        "path": ".continual/work-model/invocations/invoke-8b3122ab79e4b7cf17b434c6/response.json",
+        "sha": "ab3e61134b8f19ba0a483b709363cc86093b9949"
+      },
+      {
+        "path": "artifacts/g34-task275-postresult-candidate-response-checkpoint-v1.json",
+        "sha": "95788c4a8635737120061dea9de41a89d39e2aeb"
+      },
+      {
+        "path": "agi/WORK_EXECUTION_STATE.json",
+        "sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590"
+      }
+    ],
+    "state_bind_expected_blob_sha": "b049c6bf4ad1f826bbf1043871e1d1dda5645590",
+    "verified_at": "2026-09-09T04:49:00Z"
   }
 }
