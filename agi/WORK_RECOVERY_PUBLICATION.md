@@ -24,3 +24,12 @@ merge the reviewed frontier into the newest fenced state; preserve its current
 ownership and heartbeat. Publish new journals, fragments, Local Learn records,
 snapshot and matching continuation in the same reviewed tree. A frontier awaiting
 publication must remain explicitly unverified until exact main readback succeeds.
+
+While that native PR is open, keep its head, PR number and CI status in the
+dedicated publication object on main. Defer nearby generic `pending_*` aliases
+until after the atomic merge: changing them next to the incoming native frontier
+can create a textual conflict even with consistent key ordering. If such a
+conflict occurs, restore only those state-only tracking aliases to their prior
+values, retaining current authority, the predecessor-consumption hold and the
+dedicated PR record. Recheck the actual merge tree. This can preserve an unchanged
+passing publication head without rewriting native records or waiving CI.
