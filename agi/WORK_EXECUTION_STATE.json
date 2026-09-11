@@ -34976,6 +34976,15 @@
     "execution_id": "work-recovery-20260911T095909Z-8030df329c184b9298fd753d",
     "head_sha": "e8faadea1cd7b80a903a89be52e098115e776a30",
     "idempotency_key": "O:g35:revision289:invoke-aa3cbffae6be682abecdb339:publish-once",
+    "integration_repair": {
+      "cause": "Updating generic pending_head_sha/pending_pull_request fields on main overlapped adjacent native-frontier lines in the reviewed branch, creating a textual merge conflict.",
+      "ci_gate_waived": false,
+      "future_rule": "During native publication, update authority and the dedicated publication object on main. Defer nearby generic native/publication aliases until after merge and readback.",
+      "native_records_changed": false,
+      "observed_at": "2026-09-11T13:08:16.624Z",
+      "remediation": "Retain in-flight PR/head/CI tracking in generation35_root289_publication; restore only the three generic tracking fields to their prepublication values until the atomic merge. Keep heartbeat, fence, predecessor hold, native records, exact reviewed head and all CI gates unchanged.",
+      "reviewed_head_changed": false
+    },
     "latest_ci_jobs": [
       {
         "conclusion": "success",
@@ -35875,7 +35884,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-11T13:06:31.089Z",
+  "heartbeat_at": "2026-09-11T13:08:16.624Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -36796,8 +36805,8 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "PR657 unchanged e8faadea1cd7b80a903a89be52e098115e776a30 passed all four shards and aggregate34598675493, plus directive34598675481. Fresh main/PR/CI readback confirms the same owner and exact head; merge and main verification are next.",
-  "last_activity_at": "2026-09-11T13:06:31.089Z",
-  "last_checked_at": "2026-09-11T13:06:31.089Z",
+  "last_activity_at": "2026-09-11T13:08:16.624Z",
+  "last_checked_at": "2026-09-11T13:08:16.624Z",
   "last_error": null,
   "last_native_publication": {
     "ci_run_id": 34594248143,
@@ -36960,8 +36969,8 @@
   "lease_renewal": {
     "execution_id": "work-recovery-20260911T095909Z-8030df329c184b9298fd753d",
     "lease_generation": 35,
-    "reason": "Same fenced primary; complete unchanged-head CI passed, proceed to expected-head merge and exact native readback.",
-    "renewed_at": "2026-09-11T13:06:31.089Z",
+    "reason": "Same primary; resolve overlap in state-only PR tracking while preserving the unchanged passing publication head.",
+    "renewed_at": "2026-09-11T13:08:16.624Z",
     "schema_version": 1
   },
   "local_combined_regression": {
@@ -37466,7 +37475,7 @@
   "pending_consolidate_request_blob_sha": null,
   "pending_consolidate_request_digest": null,
   "pending_consolidate_work_invocation_id": null,
-  "pending_head_sha": "e8faadea1cd7b80a903a89be52e098115e776a30",
+  "pending_head_sha": null,
   "pending_job_ids": [],
   "pending_learn_native_invocation_id": null,
   "pending_learn_request_blob_sha": null,
@@ -37479,10 +37488,8 @@
   "pending_payload_digest": "ed65c438131b48915a8c3470b0166dfd8d4e84919c381f5247b8b4e9d1c42f57",
   "pending_preflight_blob_sha": "2e71b2658901b5021e133e52e6e51397da022b8e",
   "pending_preflight_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/preflight/preflight-root-ada924d3d60acc916c17fc69.json",
-  "pending_pull_request": 657,
-  "pending_pull_requests": [
-    657
-  ],
+  "pending_pull_request": null,
+  "pending_pull_requests": [],
   "pending_request_blob_sha": "02144692a92adb7be35f9d31d2fdf0c0e3673328",
   "pending_request_digest": "490709fcd3a716fd4d315a9959f05b7d408461ea5cc8ad785f66618fa1cb2aa7",
   "pending_request_ref": ".continual/work-model/invocations/invoke-eb5aefd0ff13d73a42d97890/request.json",
@@ -42792,7 +42799,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-11T13:06:31.089Z",
+  "updated_at": "2026-09-11T13:08:16.624Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-11T11:13:40.638Z",
