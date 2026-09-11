@@ -1,0 +1,90 @@
+{
+  "agi_claim_supported": false,
+  "audit_ref": "artifacts/g35-checkpoint-entry-evidence/audit-result.json",
+  "condition_matrix": [
+    {
+      "condition": "The validator cross-checks WORK_EXECUTION_STATE exact continuation and claimed answered invocation IDs against checked-in native request/response records.",
+      "condition_number": 1,
+      "evidence": "Focused tests with valid fixtures and one isolated failure per missing or invalid record.",
+      "existing_tests": [
+        "test_valid_completed_checkpoint_is_verified_and_read_only",
+        "test_pending_request_is_verified_without_requiring_a_response",
+        "test_missing_pending_request_and_claimed_response_fail_closed",
+        "test_published_primary_native_records_are_complete"
+      ],
+      "implementation": [
+        "verify_work_checkpoint_integrity: exact_continuation pending request/native references and answered_invocations checks",
+        "_verify_completed and _check_request_binding",
+        "verified_work_request, verified_work_invocation: frozen request/response digests and component contract"
+      ],
+      "limit": "This verifies the named validator contract and supplied reference set. It does not replace current-fence continuity or exact blob publication checks.",
+      "observations": "The nine isolated controls include one valid fixture, separately missing pending request and claimed response, independently invalid request/response digests, malformed request/response/state, and a run-binding inconsistency. Every case meets its expected result. Exact published main fbf60316efd783587e12e8d179b8dbfab24a8932 references are valid.",
+      "provisional_verdict": "PASS"
+    },
+    {
+      "condition": "Validation is fail-closed and produces structured reasons without reconstructing missing semantic content.",
+      "condition_number": 2,
+      "evidence": "Tests prove missing, malformed, digest-mismatched, and inconsistent records are rejected and no files are changed.",
+      "existing_tests": [
+        "test_malformed_and_digest_invalid_responses_are_rejected",
+        "test_binding_mismatch_and_malformed_claim_are_structured",
+        "test_missing_snapshot_and_malformed_state_are_rejected"
+      ],
+      "implementation": [
+        "_load_state",
+        "_issue",
+        "_safe_reference",
+        "verify_work_checkpoint_integrity read-only aggregation",
+        "work_session verified request/response boundary"
+      ],
+      "limit": "Fixture setup intentionally alters only isolated copies before measurement. No result establishes every conceivable malformed input or filesystem behavior.",
+      "observations": "Each isolated invalid fixture returns valid=false and nonempty string code/path/message diagnostics. Byte-hash manifests before and after each validation match. All 5092 real native files also match before/after the complete audit; no orphan was created or answered.",
+      "provisional_verdict": "PASS"
+    },
+    {
+      "condition": "The current generation-8 durability discrepancy is detected without re-answering either orphan invocation.",
+      "condition_number": 3,
+      "evidence": "A read-only validation against latest-main records identifies the absent referenced request and/or response inconsistency.",
+      "existing_tests": [],
+      "implementation": [
+        "Exact git ls-tree and cat-file object materialization in artifacts/g35-checkpoint-entry-evidence/audit.py",
+        "verify_work_checkpoint_integrity against the preserved generation8 state and its exact historical record set"
+      ],
+      "limit": "This exact historical record-set probe has 24 invocation issues and 46 absent file references. The earlier saved probe reported the two issue classes against its then-checked later record set. These are distinct checked snapshots; neither is rewritten or generalized. Physical termination cause remains unknown.",
+      "observations": "Historical commit 1a2373dd243f85ec60e4fe74f92a6fef0b946e69 has state blob 0e8efbc9697cca21a1ed23d6a2d585c3c2d4fb47. Its referenced invoke-37609d6e1890c250c8ada58b request and invoke-3e7b66bfc42ae092653c4668 response are absent from that exact Git tree. The read-only probe returns the corresponding two issue classes, with all other historical missing claims retained as well.",
+      "provisional_verdict": "PASS"
+    },
+    {
+      "condition": "Existing protected behavior remains green and the result is published only through exact-head CI before any merge claim.",
+      "condition_number": 4,
+      "evidence": "Focused and protected tests, unchanged exact-head CI, and remote readback if publication occurs.",
+      "existing_tests": [
+        "test_published_primary_native_records_are_complete",
+        "test_published_primary_checkpoint_references_exist"
+      ],
+      "implementation": [
+        "agi/WORK_RECOVERY_PUBLICATION.md",
+        "tests/test_primary_work_publication.py",
+        "unchanged-head full CI and remote-main readback publication contract"
+      ],
+      "limit": "New evidence and Execute response publication are still pending when this matrix is frozen. Recheck the atomic publication tree and require its own unchanged-head full CI/main proof before Task Evaluate may certify condition4. The initial mixed-frontier failure is neither discarded nor treated as a new validator defect.",
+      "observations": "PR660 head bc6d5e6c1e83ada34f4c21eb178147fd8f8b429a passed full CI34615624901 and directive34615624802, merged at211f6a653c3020c01915f994297284b01a66d041; 19 content blobs and current authority/frontier were verified. The initial local test run for this new unit is retained: eight passed, while the publication checkpoint test detected PENDING_NATIVE_STATUS_MISMATCH after Candidate consumption advanced local records ahead of the deliberately held main frontier.",
+      "provisional_verdict": "UNCERTAIN"
+    }
+  ],
+  "entry_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/entry.json",
+  "implementation_decision": "NO_CHANGE",
+  "independent_evaluation": false,
+  "initial_validation_ref": "artifacts/g35-checkpoint-entry-evidence/focused-initial-receipt.json",
+  "original_click_evaluation_verdict": "UNCERTAIN",
+  "original_trial_verdict": "NOT_EVALUABLE",
+  "physical_process_termination_cause": "UNKNOWN",
+  "prepared_at": "2026-09-11T16:15:48.223050Z",
+  "prior_native_results_preserved": [
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-ed0ffc4ab0d4d5cbede05040-result.json",
+    ".continual/runs/run-work-recovery-gen9-durability-repair/artifacts/unit-81713499c87b48ba8cf78110-result.json"
+  ],
+  "reason": "No mechanical validator defect reproduced. Existing regression coverage plus retained independent fault controls establish the bounded behavior; do not add duplicate source or test changes.",
+  "schema_version": 1,
+  "user_level_objective_met": false
+}
