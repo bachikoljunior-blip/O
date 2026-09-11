@@ -135,14 +135,16 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
         "r39-matched-evidence-self-sealing-risk": "r40-rev39-nonprescriptive-evidence-gap-context",
         "r39-minimum-reversible-matched-evidence-sequence": "r40-rev39-candidate-procedure-withdrawal",
         "r45-handover-target-disambiguation": "r48-primary-current-task-chat",
+        "r48-primary-current-task-chat": "r49-primary-resume-current-work-session",
     }
     handover_targets = [
         atom for atom in first["effective_atoms"]
         if atom["slot"] == "execution.ownership_handover_target"
     ]
     assert [atom["atom_id"] for atom in handover_targets] == [
-        "r48-primary-current-task-chat"
+        "r49-primary-resume-current-work-session"
     ]
+    assert "r49-causal-repair-before-resumption" in effective
     assert "r48-primary-automation-health-and-continuation" in effective
     assert "r48-possible-active-other-primary" in effective
     rendered = json.dumps(first, ensure_ascii=False)
