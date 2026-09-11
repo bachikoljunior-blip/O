@@ -148,29 +148,53 @@ class Engine:
         *,
         max_steps: int = 64,
         run_id: str | None = None,
+        bootstrap_snapshot: dict[str, Any] | None = None,
     ) -> str:
         if not isinstance(request, str) or not request.strip():
             raise ValueError("request must be a non-empty string")
         run_id = run_id or self.store.new_id("run")
         if not re.fullmatch(r"run-[A-Za-z0-9._-]{6,128}", run_id):
             raise ValueError("invalid run_id")
+        initial = deepcopy(bootstrap_snapshot) if bootstrap_snapshot is not None else {
+            "run_id": run_id,
+            "status": "continue",
+            "phase": "entry_pending",
+            "revision": 0,
+            "created_at": self.store.utc_now(),
+            "environment": self.environment(),
+            "continuation_stack": [],
+            "error_count": 0,
+        }
+        if (
+            initial.get("run_id") != run_id
+            or initial.get("status") != "continue"
+            or initial.get("phase") != "entry_pending"
+            or initial.get("revision") != 0
+            or initial.get("error_count") != 0
+            or not isinstance(initial.get("environment"), dict)
+            or not isinstance(initial.get("continuation_stack"), list)
+        ):
+            raise ValueError("invalid initial run snapshot")
         rd = self.store.run_dir(run_id)
         rd.mkdir(parents=True, exist_ok=False)
         self.store.atomic_text(rd / "request.md", request)
         self.store.atomic_json(
             rd / "snapshot.json",
-            {
-                "run_id": run_id,
-                "status": "continue",
-                "phase": "entry_pending",
-                "revision": 0,
-                "created_at": self.store.utc_now(),
-                "environment": self.environment(),
-                "continuation_stack": [],
-                "error_count": 0,
-            },
+            initial,
         )
-        self.store.append_event(run_id, {"type": "run_started"})
+        event: dict[str, Any] = {"type": "run_started"}
+        if bootstrap_snapshot is not None:
+            event["at"] = initial["created_at"]
+        self.store.append_event(run_id, event)
+        return self.resume_start(run_id, max_steps=max_steps)
+
+    def resume_start(self, run_id: str, *, max_steps: int = 64) -> str:
+        """Complete normal startup after a verified mechanical initialization."""
+        rd = self.store.run_dir(run_id)
+        snapshot = self.store.snapshot(run_id)
+        if snapshot.get("phase") != "entry_pending" or snapshot.get("revision") != 0:
+            raise ValueError("startup requires an unadvanced initial snapshot")
+        request = (rd / "request.md").read_text(encoding="utf-8")
         runner_eval = self._preflight(
             run_id,
             "runner",
@@ -1018,7 +1042,13 @@ class Engine:
             try:
                 if phase == "entry_pending":
                     request = (rd / "request.md").read_text(encoding="utf-8")
-                    output = self._invoke(run_id, "entry", {"request": request})
+                    entry_payload: dict[str, Any] = {"request": request}
+                    if snapshot.get("continuation_source") is not None:
+                        entry_payload["inherited_continuation"] = {
+                            "source": deepcopy(snapshot["continuation_source"]),
+                            "parents": deepcopy(snapshot.get("continuation_stack", [])),
+                        }
+                    output = self._invoke(run_id, "entry", entry_payload)
                     self.store.atomic_json(rd / "artifacts" / "entry.json", output.get("result", {}))
                     self._advance(
                         run_id,
