@@ -17,3 +17,10 @@ historical metadata explicitly. Never rerun the semantic invocation to recreate
 an already completed output.
 
 This operational note records retained recovery practice. Frozen benchmark inputs remain byte-for-byte unchanged. The authoritative execution state links this note for current and successor recovery owners.
+
+Serialize authoritative state with a consistent recursive key order. When a
+native publication updates its frontier while the live owner renews a heartbeat,
+merge the reviewed frontier into the newest fenced state; preserve its current
+ownership and heartbeat. Publish new journals, fragments, Local Learn records,
+snapshot and matching continuation in the same reviewed tree. A frontier awaiting
+publication must remain explicitly unverified until exact main readback succeeds.
