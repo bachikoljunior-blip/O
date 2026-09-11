@@ -838,6 +838,18 @@ class WorkSession:
             "pending": pending_work_invocations(self.root, run_id=run_id),
         }
 
+    def start_continuation(self, predecessor_run_id: str) -> dict[str, Any]:
+        """Freeze a successor only through a verified terminal handoff plan.
+
+        Ordinary ``start`` retains its active-authority rejection. This explicit
+        path never consumes a model response or changes the authoritative lease.
+        The successor and its frontier still require protected publication before
+        ordinary ``resume`` may advance them.
+        """
+        from .work_run_handoff import start_terminal_continuation
+
+        return start_terminal_continuation(self, predecessor_run_id)
+
 
 def pending_work_invocations(root: Path, *, run_id: str | None = None) -> list[dict[str, Any]]:
     root = root.resolve()
