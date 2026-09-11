@@ -16,22 +16,6 @@ The model is connected to O through the checked-in `continual work-start`, `work
 6. Publish validated execution results from an isolated branch through exact-head CI and merge only an unchanged passing head; state-only heartbeat and inbox acknowledgements use expected-blob CAS on `main`.
 7. Refresh the primary heartbeat and exact continuation while work is active.
 
-Authority-only `WORK_EXECUTION_STATE.json` heartbeat, acquisition, and checkpoint
-commits must retain the already validated `[skip ci]` commit marker. Such commits
-must not include source, directive, native-result, or test changes. Run full
-exact-head CI for every substantive publication. The marker prevents the known
-state-only CI queue amplification; it never exempts executable work from CI.
-
-Before publishing native progress, verify the complete reviewed tree with
-`work-verify --run-id <active_run_id>` and `work-checkpoint-verify`. Include the
-referenced execution unit, fragment, and Local Learn files, even when Git ignores
-new `.continual/` files. Ordinary CI checks the actually checked-in primary Run
-through `tests/test_primary_work_publication.py`; synthetic fixture tests alone
-do not establish that a published continuation is complete. If a derived record
-was lost, restore it only from an existing frozen output and record any unknown
-historical metadata explicitly. Never rerun the semantic invocation to recreate
-an already completed output.
-
 The primary run may stop normally only when the user's actual upper-level objective is truthfully satisfied or the user explicitly stops it. The repository-authored strict independent external production evidence gate remains available as conservative verification machinery, but it is not the user's completion criterion or the monitor-stop condition. If the platform or process forces an end first, persist the exact continuation and mark the lease `interrupted` or `checkpointed`; that is recovery state, not completion.
 
 ## Standing continuous execution authorization
