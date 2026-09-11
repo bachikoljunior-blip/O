@@ -1,0 +1,14 @@
+........F                                                                [100%]
+=================================== FAILURES ===================================
+______________ test_published_primary_checkpoint_references_exist ______________
+
+    def test_published_primary_checkpoint_references_exist():
+        result = verify_work_checkpoint_integrity(ROOT, state=_primary_state())
+>       assert result["valid"], result["issues"]
+E       AssertionError: [{'code': 'PENDING_NATIVE_STATUS_MISMATCH', 'path': 'exact_continuation.pending_native_invocation_id', 'message': 'pending native invocation is not awaiting_work_model', 'invocation_id': 'invoke-7f52e436d487273cae910dc6'}]
+E       assert False
+
+tests/test_primary_work_publication.py:25: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_primary_work_publication.py::test_published_primary_checkpoint_references_exist
+1 failed, 8 passed in 1.67s
