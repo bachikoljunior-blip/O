@@ -33,3 +33,21 @@ conflict occurs, restore only those state-only tracking aliases to their prior
 values, retaining current authority, the predecessor-consumption hold and the
 dedicated PR record. Recheck the actual merge tree. This can preserve an unchanged
 passing publication head without rewriting native records or waiving CI.
+
+Keep live CI tracking outside any publication object changed by the incoming
+branch. PR661 showed that adding adjacent status and validation fields to that
+same object can conflict even when the frontier fields themselves are separate.
+When preparing the branch, leave its existing publication-tracking object at the
+base value and put live PR/CI observations in a different main-only object. Keep
+main's nearby `work_status` and `working_branch` tracking fields unchanged during
+that merge window. A heartbeat may still renew the same owner. If a conflict is
+already present, preserve its evidence, align only the affected tracking fields,
+retain the predecessor-consumption hold, and verify the actual merge tree before
+merging the unchanged CI head.
+
+Use the same canonical JSON serializer for state preparation and publication.
+A Python-serialized local simulation can have different numeric bytes from the
+JavaScript-serialized state CAS; its blob is not the identity of the remote
+write. Compare the intended raw bytes after the write and inspect the actual
+remote commit's merge tree. The PR661 reconciliation retains that distinction
+in `artifacts/g35-pr661-tracking-reconciliation.json`.
