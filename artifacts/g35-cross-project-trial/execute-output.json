@@ -1,0 +1,93 @@
+{
+  "fragment": {
+    "agi_claim_supported": false,
+    "artifact_ref": "artifacts/g35-cross-project-trial/result.json",
+    "component": "execute",
+    "failures": [
+      "The frozen environment lacked Click distribution metadata; changing it after outcome would violate the precommitted trial."
+    ],
+    "observations": [
+      "Pristine baseline 7/12; sole patch 12/12; official shell-completion tests 58 passed; full official suite collection exited 2."
+    ],
+    "summary": "Completed the one-attempt Click #2847 trial; five fixed failures were removed, but missing installed package metadata blocked the required full official suite.",
+    "upper_objective_achieved": false
+  },
+  "local_learn": {
+    "candidates": [],
+    "decision": "NO_CHANGE",
+    "next_action": "Keep this trial NOT_EVALUABLE; require exact-project package metadata and official collection readiness before a future independently precommitted trial. Continue Task Evaluate, Candidate evaluation when applicable, Consolidate, Learn, and Root.",
+    "observations": [
+      "A source-only PYTHONPATH setup is insufficient when official tests require installed distribution metadata.",
+      "A fixed reproduction passing and 58 focused official tests passing cannot substitute for the required full suite.",
+      "The missing four native records were recovered from frozen outputs, and actual-tree CI checks now detect the publication omission."
+    ]
+  },
+  "result": {
+    "agi_claim_supported": false,
+    "artifacts_ref": "artifacts/g35-cross-project-trial",
+    "baseline": {
+      "exit_code": 1,
+      "failing_cases": 5,
+      "passed": 7,
+      "source_pristine": true,
+      "total": 12
+    },
+    "candidate_activation": false,
+    "completed_at": "2026-09-11T10:21:34.101364Z",
+    "existing_solution_access": false,
+    "independent_evaluation": false,
+    "integrity_checks_passed": true,
+    "interactive_terminal_validation": false,
+    "measurement_replays": 0,
+    "negative_learning": "For a future separately precommitted trial, install the exact selected project and verify importlib distribution metadata and official test collection before freezing the measurement environment. Preserve this attempt as NOT_EVALUABLE.",
+    "next_action": "Submit this Execute result exactly once, publish and consume it through O, then evaluate the frozen evidence and continue the native lifecycle without replaying or rescoring this attempt.",
+    "official_tests": {
+      "full_suite": {
+        "collection_completed": false,
+        "collection_error": "importlib.metadata.PackageNotFoundError: No package metadata was found for click",
+        "exit_code": 2,
+        "semantic_test_failure_claimed": false
+      },
+      "shell_completion": {
+        "exit_code": 0,
+        "passed": 58
+      }
+    },
+    "patch": {
+      "attempts": 1,
+      "changed_upstream_paths": [
+        "src/click/shell_completion.py"
+      ],
+      "revised_after_outcome": false,
+      "sha256": "e8e82ff0dcf5aa9e63c1396a7705a625090db3cb8d605f9b6d8b7b0cad3a73dd"
+    },
+    "patched_reproduction": {
+      "exit_code": 0,
+      "passed": 12,
+      "total": 12
+    },
+    "protocol_commit": "2be5622ea76a64f1e8b1746763d25f1d65e7f7dc",
+    "protocol_digest": "42128e8436c4074bf47266975a1477fea33ecd834936ede50de809372373c4dc",
+    "schema_version": 1,
+    "scope_limitations": [
+      "One public issue, source commit, same operator and twelve fixed completion-protocol cases.",
+      "No interactive terminal widget test and no independent evaluator.",
+      "Full official test collection was blocked by a frozen environment defect.",
+      "No package install, environment alteration, command substitution, second patch, or rescoring after the outcome."
+    ],
+    "selector_commit": "0a43ea5f07b371db4a9f38025badf35bff029a80",
+    "source": {
+      "issue_number": 2847,
+      "license": "BSD-3-Clause",
+      "repository": "pallets/click",
+      "source_commit": "6aabf099bfdd4c1e75fe8d0e0d4241372b988ab1"
+    },
+    "status": "NOT_EVALUABLE",
+    "target_substitution": false,
+    "unit_id": "unit-generation34-cross-project-live-regression-transfer-v1",
+    "unit_verdict": "NOT_EVALUABLE",
+    "upper_objective_achieved": false,
+    "upstream_writes": 0,
+    "verdict_reason": "The fixed completion cases improved from 7/12 to 12/12 and the 58 official shell-completion tests passed, but the required full official suite stopped during collection with PackageNotFoundError for Click distribution metadata. The frozen environment used source PYTHONPATH without an installed distribution. All required official tests therefore did not pass; no full repair PASS is admissible."
+  }
+}

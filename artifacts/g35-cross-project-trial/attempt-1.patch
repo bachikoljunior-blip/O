@@ -1,0 +1,40 @@
+diff --git a/src/click/shell_completion.py b/src/click/shell_completion.py
+index 8a2668b..08c77b5 100644
+--- a/src/click/shell_completion.py
++++ b/src/click/shell_completion.py
+@@ -434,6 +434,11 @@ class BashComplete(ShellComplete):
+         cword = int(os.environ["COMP_CWORD"])
+         args = cwords[1:cword]
+ 
++        # Bash splits a long option's equals separator into its own word.
++        # The separator is not the already completed option value.
++        if len(args) > 1 and args[-1] == "=" and args[-2].startswith("--"):
++            args.pop()
++
+         try:
+             incomplete = cwords[cword]
+         except IndexError:
+@@ -451,6 +456,23 @@ class ZshComplete(ShellComplete):
+     name: t.ClassVar[str] = "zsh"
+     source_template: t.ClassVar[str] = _SOURCE_ZSH
+ 
++    def get_completions(
++        self, args: list[str], incomplete: str
++    ) -> list[CompletionItem[str]]:
++        completions = super().get_completions(args, incomplete)
++
++        # Zsh replaces the whole joined word, including the option name.
++        if incomplete.startswith("--") and "=" in incomplete:
++            prefix = incomplete.partition("=")[0] + "="
++            completions = [
++                CompletionItem(
++                    prefix + item.value, type=item.type, help=item.help, **item._info
++                ) if item.type == "plain" else item
++                for item in completions
++            ]
++
++        return completions
++
+     def get_completion_args(self) -> tuple[list[str], str]:
+         cwords = split_arg_string(os.environ["COMP_WORDS"])
+         cword = int(os.environ["COMP_CWORD"])
