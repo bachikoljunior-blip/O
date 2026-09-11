@@ -37532,7 +37532,30 @@
     "total_parent_continuation_count": 13
   },
   "generation35_terminal295_publication": {
-    "actual_handoff_attempted": false,
+    "actual_handoff_attempted": true,
+    "actual_restriction": {
+      "actual_parent_count": 13,
+      "actual_predecessor_revision": 295,
+      "actual_predecessor_status": "finished",
+      "attempted_request": "Continue the unfinished O primary under the latest effective user directives after the bounded checkpoint-durability Run has genuinely finished. Preserve all13 parent continuations and their original Run source references, retained failures, and the distinction between the original Entry PASS and the wider unfinished objective. Establish a legitimate fenced continuation without replaying any completed invocation.",
+      "attempted_successor_run_id": "run-work-g35-primary-continuation-v1",
+      "authority_file_unchanged": true,
+      "claim_boundary": "One actual finished-Run attempt reproduced the handoff restriction without native or authority effects. This is not evidence of the earlier physical stop cause or of a successful repair.",
+      "error": {
+        "message": "cannot start a new Work run while authoritative run run-work-recovery-gen9-durability-repair is running; repair or resume its exact continuation, or durably supersede it first",
+        "type": "WorkSessionError"
+      },
+      "finding": "The existing active-authority guard protects the current execution as designed, but the Work API provides no explicit verified terminal handoff operation. A separate guarded continuation path is needed; removing or bypassing the unfinished-run guard is not the repair.",
+      "native_files_checked": 5149,
+      "native_files_unchanged": true,
+      "next_action": "Implement and test an explicit fenced terminal handoff with exact published predecessor proof, a durable fixed successor request, preserved source-qualified parents, and idempotent partial-bootstrap recovery; publish the completed predecessor and validated repair before use.",
+      "observed_at": "2026-09-11T21:42:14.478037Z",
+      "response_consumptions": 0,
+      "schema_version": 1,
+      "semantic_requests_created": 0,
+      "source_run_id": "run-work-recovery-gen9-durability-repair",
+      "successor_created": false
+    },
     "all_parent_continuations_unchanged": true,
     "awaiting_native_journals": [],
     "broader_primary_complete": false,
@@ -37557,6 +37580,7 @@
     "predecessor_consume_mechanically_blocked": true,
     "prior_episode_archive_preserved": true,
     "recursive_local_learn_created": false,
+    "repair_scope": "Add an explicit Work-session terminal continuation API: retain ordinary unfinished-run start rejection; require exact published finished predecessor, fresh current fenced authority/CI and a durable fixed handoff plan; preserve all source-qualified parents; reuse verified bootstrap records without consuming a semantic response.",
     "requires_atomic_frontier_update": true,
     "requires_full_exact_head_ci": true,
     "run_finished_event": {
@@ -37569,7 +37593,8 @@
     "schema_version": 1,
     "snapshot_phase": "finished",
     "snapshot_status": "finished",
-    "status": "genuine_terminal_boundary_verified_prepare_legitimate_handoff",
+    "status": "actual_terminal_start_restriction_reproduced_implement_guarded_handoff",
+    "successor_created": false,
     "total_parent_continuation_count": 13,
     "work": {
       "native_completed": 268,
@@ -38379,7 +38404,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-11T21:41:06.158Z",
+  "heartbeat_at": "2026-09-11T21:47:29.110Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -45342,7 +45367,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-11T21:41:06.158Z",
+  "updated_at": "2026-09-11T21:47:29.110Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-11T11:13:40.638Z",
