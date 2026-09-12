@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-12T03:45:00.168Z",
+  "pull_request": 671,
+  "head_sha": "a109bf3b7894f77c7d1e1c7c99c9c96186a6fd96",
+  "ci_run_id": 34670629602,
+  "observation": {
+    "all_five_required_jobs_succeeded": false,
+    "authority_blob": "0e4027c197fcf7e8a4002dc45333f762c076ae02",
+    "authority_commit": "571ddd946cebb4c1a9fabefe7e31561000a382a3",
+    "directive_run": {
+      "conclusion": "success",
+      "head_sha": "a109bf3b7894f77c7d1e1c7c99c9c96186a6fd96",
+      "id": 34670629600,
+      "name": "directive-source-preflight",
+      "status": "completed",
+      "workflow_id": 342801498
+    },
+    "exact_main_byte_readback": true,
+    "full_ci_passed": false,
+    "head_sha": "a109bf3b7894f77c7d1e1c7c99c9c96186a6fd96",
+    "jobs": [
+      {
+        "completed_at": null,
+        "conclusion": null,
+        "id": 103491187362,
+        "name": "pytest shard 0 of 4",
+        "started_at": null,
+        "status": "in_progress"
+      },
+      {
+        "completed_at": null,
+        "conclusion": null,
+        "id": 103491187470,
+        "name": "pytest shard 1 of 4",
+        "started_at": null,
+        "status": "in_progress"
+      },
+      {
+        "completed_at": null,
+        "conclusion": "failure",
+        "id": 103491187476,
+        "name": "pytest shard 2 of 4",
+        "started_at": null,
+        "status": "completed"
+      },
+      {
+        "completed_at": null,
+        "conclusion": "failure",
+        "id": 103491187486,
+        "name": "pytest shard 3 of 4",
+        "started_at": null,
+        "status": "completed"
+      }
+    ],
+    "observed_at": "2026-09-12T03:39:58.179Z",
+    "pull_request": 671,
+    "response_consumed": false,
+    "schema_version": 1,
+    "workflow_run": {
+      "conclusion": null,
+      "head_sha": "a109bf3b7894f77c7d1e1c7c99c9c96186a6fd96",
+      "id": 34670629602,
+      "name": "test",
+      "status": "in_progress",
+      "workflow_id": 335420036
+    }
+  },
+  "job_log_summaries": [
+    {
+      "job_id": 103491187476,
+      "lines": [
+        "2026-09-12T03:39:21.9022620Z E                   agi.recursive_context_retrieval_ablation.RecursiveContextAblationError: repository content digest mismatch: agi/CONTEXT_OBSERVATION_LEDGER.json",
+        "2026-09-12T03:39:21.9025119Z FAILED tests/test_recursive_context_retrieval_ablation.py::test_checked_in_three_fixture_ablation_passes_with_narrow_claim - agi.recursive_context_retrieval_ablation.RecursiveContextAblationError: repository content digest mismatch: agi/CONTEXT_OBSERVATION_LEDGER.json",
+        "2026-09-12T03:39:21.9026250Z 1 failed, 232 passed, 699 deselected in 412.28s (0:06:52)"
+      ]
+    },
+    {
+      "job_id": 103491187486,
+      "lines": [
+        "2026-09-12T03:39:15.7964484Z E                   agi.recursive_context_retrieval_ablation.RecursiveContextAblationError: repository content digest mismatch: agi/CONTEXT_OBSERVATION_LEDGER.json",
+        "2026-09-12T03:39:15.9258204Z E                   agi.recursive_context_retrieval_ablation.RecursiveContextAblationError: repository content digest mismatch: agi/CONTEXT_OBSERVATION_LEDGER.json",
+        "2026-09-12T03:39:15.9261840Z FAILED tests/test_recursive_context_retrieval_ablation.py::test_stale_and_authority_competitors_have_exact_fail_closed_reasons - agi.recursive_context_retrieval_ablation.RecursiveContextAblationError: repository content digest mismatch: agi/CONTEXT_OBSERVATION_LEDGER.json",
+        "2026-09-12T03:39:15.9264664Z FAILED tests/test_recursive_context_retrieval_ablation.py::test_freshness_regression_rejects_required_source_without_unsafe_admission - agi.recursive_context_retrieval_ablation.RecursiveContextAblationError: repository content digest mismatch: agi/CONTEXT_OBSERVATION_LEDGER.json",
+        "2026-09-12T03:39:15.9266349Z 2 failed, 231 passed, 699 deselected in 402.21s (0:06:42)"
+      ]
+    }
+  ],
+  "cause": "The frozen historical retrieval fixture validates its old context-ledger digest against the actively growing repository ledger. The new bound observations changed that current file while the historical fixture and expected digest stayed fixed.",
+  "repair_scope": "Materialize the declared historical source bytes into an isolated test root. Preserve the original fixture manifest, report, validator digest guards, current observation ledger, saved Execute response and numerical analysis.",
+  "response_replayed": false,
+  "analysis_rescored": false
+}
