@@ -38142,6 +38142,25 @@
       }
     },
     "merge_sha": "aac91525751cdaa65c90e1023342de946cf4e3a6",
+    "native_consume_observation": {
+      "completed_events": [
+        {
+          "at": "2026-09-12T00:09:03.111251Z",
+          "component": "entry",
+          "invocation_id": "invoke-d95277110c84494cf759fd40",
+          "run_id": "run-work-g35-primary-continuation-v1",
+          "type": "invocation_completed"
+        }
+      ],
+      "observed_at": "2026-09-12T00:10:14.997Z",
+      "parents_preserved": 13,
+      "response_replayed": false,
+      "successor_component": "root",
+      "successor_native_invocation_id": "invoke-770f206af7091f71190f63e6",
+      "successor_request_digest": "8d8d1f63dc79a511e5da97939c4851588b8b54aa6b8a3c841cd17018ded9afd9",
+      "successor_revision": 1,
+      "successor_work_invocation_id": "invoke-16f6822f61c4ee48cc679286"
+    },
     "native_invocation_id": "invoke-d95277110c84494cf759fd40",
     "output_digest": "061718d31d333d7bf3aa41ca04eecaffbf11ca47435e306b14430718c3424567",
     "parent_count": 13,
@@ -38149,7 +38168,7 @@
     "prepared_at": "2026-09-11T23:25:22.657Z",
     "reference_correction_ref": "artifacts/g35-successor-entry0-reference-correction.json",
     "request_digest": "fea2d9d0d857551d9157c3ff56737c7a8678bddb51176b96845bb8eef45e1eff",
-    "response_consumed": false,
+    "response_consumed": true,
     "response_digest": "6ec03c2c699c440d71010677507aae66b32e3733c2ce2cd3549268a767e55f40",
     "response_submitted": true,
     "response_submitted_at": "2026-09-11T23:22:26.870861Z",
@@ -38188,8 +38207,29 @@
     },
     "source_bindings": 22,
     "source_unchanged": true,
-    "status": "merged_verified_response_not_consumed",
+    "status": "merged_verified_consumed_once",
     "work_invocation_id": "invoke-03af235027930455d9cb2fc6"
+  },
+  "generation35_successor_root1_ci_tracking": {
+    "rule": "Pre-existing main-only tracker; keep unchanged in incoming branch to avoid adjacent-key CI publication conflicts.",
+    "run_id": "run-work-g35-primary-continuation-v1",
+    "schema_version": 1,
+    "snapshot_revision": 1,
+    "status": "not_yet_published"
+  },
+  "generation35_successor_root1_publication": {
+    "created_at": "2026-09-12T00:10:14.997Z",
+    "native_invocation_id": "invoke-770f206af7091f71190f63e6",
+    "parents_preserved": 13,
+    "payload_digest": "a3f31af9fde93d9fd7f3aac3ef2bda5824dbf7232b84c8660526c83fb33eda3f",
+    "predecessor_work_invocation_id": "invoke-03af235027930455d9cb2fc6",
+    "request_digest": "8d8d1f63dc79a511e5da97939c4851588b8b54aa6b8a3c841cd17018ded9afd9",
+    "response_consumed": false,
+    "response_submitted": false,
+    "run_id": "run-work-g35-primary-continuation-v1",
+    "schema_version": 1,
+    "status": "actual_root_frozen_response_pending",
+    "work_invocation_id": "invoke-16f6822f61c4ee48cc679286"
   },
   "generation35_task289_publication": {
     "branch": "work/g35-task-evaluation289",
@@ -40298,7 +40338,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-12T00:08:11.769Z",
+  "heartbeat_at": "2026-09-12T00:10:14.997Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -41218,8 +41258,8 @@
     "supersedes_entry_id": "user-direction-external-research-feed-poll-20260825-v21",
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
-  "last_action": "PR668 merged and all native successor Entry sources verified on main",
-  "last_activity_at": "2026-09-12T00:08:11.769Z",
+  "last_action": "Consumed the saved Entry exactly once and froze the actual Root at revision1.",
+  "last_activity_at": "2026-09-12T00:10:14.997Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_error": null,
   "last_native_publication": {
@@ -41641,9 +41681,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Obtain fresh source observations, consume the saved successor Entry once and freeze its actual Root boundary.",
+  "next_action": "Respond once to the frozen Root from its persistent packet, then publish Entry completion and Root response.",
   "next_tool": "Publish and verify Task Evaluate continuation",
-  "next_tool_action": "Obtain fresh source observations, consume the saved successor Entry once and freeze its actual Root boundary.",
+  "next_tool_action": "Respond once to the frozen Root from its persistent packet, then publish Entry completion and Root response.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -45911,6 +45951,17 @@
     "idempotency_key": "O:g35:PR668:successor-entry0:one-consume:v1",
     "lease_generation": 35,
     "model_identity": "chatgpt-work-model-unverified",
+    "pending_publication_hold": {
+      "completed_work_invocation_id": "invoke-03af235027930455d9cb2fc6",
+      "next_action": "Read and answer this actual frozen Root once; publish the complete Entry completion and Root frontier through full unchanged-head CI/main readback before the next ordinary resume.",
+      "pending_native_invocation_id": "invoke-770f206af7091f71190f63e6",
+      "pending_request_digest": "8d8d1f63dc79a511e5da97939c4851588b8b54aa6b8a3c841cd17018ded9afd9",
+      "pending_work_invocation_id": "invoke-16f6822f61c4ee48cc679286",
+      "response_consumed": false,
+      "run_id": "run-work-g35-primary-continuation-v1",
+      "snapshot_revision": 1,
+      "status": "actual_root1_frontier_publication_pending"
+    },
     "policy_bindings": {
       "agi/USER_DIRECTIVE_EVENTS.json": "f901f513d30a858acdf01e51038146131cf8a158f1d968c6eb22afe7a4081e35",
       "agi/USER_INPUT_INBOX.json": "ee4435550440ad85b6eac831e651b21622f0c88b983926ff248ff442aa25a712",
@@ -45919,7 +45970,7 @@
     "policy_revision": 49,
     "policy_revision_acknowledged": 49,
     "reason": "The guarded terminal handoff was actually exercised and its successor Entry, all13 parents, old terminal history,23 content blobs and22 evidence bindings are published and verified on main after all5 unchanged-head CI jobs and directive success. Consume only the saved original Entry once through ordinary WorkSession.resume after fresh Work and CI observations. Physical scheduler and earlier disconnection causes remain UNKNOWN.",
-    "resume_authorized": true,
+    "resume_authorized": false,
     "run_id": "run-work-g35-primary-continuation-v1",
     "schema_version": 1,
     "successor_revalidation_required": false,
@@ -47277,7 +47328,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-12T00:08:11.769Z",
+  "updated_at": "2026-09-12T00:10:14.997Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-11T11:13:40.638Z",
