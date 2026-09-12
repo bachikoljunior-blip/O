@@ -1,0 +1,137 @@
+{
+  "available_prompts": 1,
+  "candidate_mutated": false,
+  "candidates_in_frozen_index": 1,
+  "catalog_mutated": false,
+  "claim_boundary": "Exact source and pre-application scope assessment only; no Task Evaluate outcome, overlay gain, independent evaluation or AGI.",
+  "current_candidate_scope_states": {
+    "agi/backlog-integration": "NEED_MORE_EVIDENCE",
+    "agi/behavioral-evidence/generation33-external-sokoban-planning-comparison-v1": "REMAIN_CANDIDATE",
+    "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1": "PROPOSE_ACTIVATION",
+    "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+    "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+    "agi/evidence-scope/negative-evidence-ledger-audit-v1": "REMAIN_CANDIDATE",
+    "continual/incremental-task-evaluation": "PROPOSE_ACTIVATION",
+    "continual/incremental-task-evaluation/matched-evidence-acquisition-loop-v1": "PROPOSE_ACTIVATION",
+    "continual/production-remote-historical-object-resolution-evaluation-v1": "PROPOSE_ACTIVATION"
+  },
+  "current_candidate_status": "candidate",
+  "current_scope_verified": false,
+  "frozen_catalog_entry": {
+    "candidate_id": "candidate-task-evaluate-unit-verdict-v1",
+    "conflicts_with": [],
+    "depends_on": [],
+    "expected_scope": "continual/incremental-task-evaluation",
+    "prompt_mode": "overlay",
+    "prompt_path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+    "scope_states": {
+      "agi/backlog-integration": "NEED_MORE_EVIDENCE",
+      "agi/behavioral-evidence/generation33-external-sokoban-planning-comparison-v1": "REMAIN_CANDIDATE",
+      "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1": "PROPOSE_ACTIVATION",
+      "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+      "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1": "PROPOSE_ACTIVATION",
+      "agi/evidence-scope/negative-evidence-ledger-audit-v1": "REMAIN_CANDIDATE",
+      "continual/incremental-task-evaluation": "PROPOSE_ACTIVATION",
+      "continual/incremental-task-evaluation/matched-evidence-acquisition-loop-v1": "PROPOSE_ACTIVATION"
+    },
+    "status": "candidate",
+    "target_component": "task_evaluate"
+  },
+  "frozen_work_invocation_id": "invoke-15a27ba188427a0a26f44077",
+  "index_file_scope_difference": {
+    "affects_current_activation_eligibility": false,
+    "candidate_file_only_scopes": [
+      "continual/production-remote-historical-object-resolution-evaluation-v1"
+    ],
+    "preexisting_in_same_main_commit": true,
+    "resolution": "Retain both actual views. Neither has verified activation for this exact scope; do not rewrite the frozen catalog or Candidate history."
+  },
+  "missing_prompt_references": [],
+  "observed_at": "2026-09-12T05:38:27.046316Z",
+  "recorded_contradictory_evidence": [],
+  "recorded_risk": "An overlay could overproduce unit PASS; regression must require explicit bounded success conditions and preserve original verdict independence.",
+  "recorded_supporting_evidence": [
+    "run-work-mode-handoff-v2 unit-f67e779cf0b2194e4e3e6542",
+    "PR 256 exact-head CI 32591220738",
+    "main 976efad5fe0f2d1348ba97e5ba67d6253d331958",
+    {
+      "at": "2026-08-23T05:11:03.809201Z",
+      "evidence": [
+        "Trial output: dual verdicts present and non-conflated (verdict FAIL / unit_verdict PASS), each with independent evidence provenance",
+        "Deviation adjudication placed inside unit_verdict_reason as the overlay intends, not absorbed into the task verdict",
+        "Claim boundary text preserved: PASS unit_verdict explicitly marked as not AGI evidence"
+      ],
+      "scope": "agi/backlog-integration"
+    },
+    {
+      "at": "2026-08-24T02:32:14.903716Z",
+      "evidence": [
+        "actual result contains verdict FAIL, user_level_verdict FAIL, unit_verdict PASS, and agi_claim_supported false",
+        "actual result preserves six explicit negative-evidence items and four unmet conditions",
+        "claim boundary states internal, non-heldout, non-independent, non-breadth, non-AGI, and non-completion",
+        "global_activation_authorized remains false"
+      ],
+      "scope": "continual/incremental-task-evaluation"
+    },
+    {
+      "at": "2026-08-24T17:32:20.212520Z",
+      "evidence": [
+        "unit_verdict PASS is supported by four exact score-1.0 replay-stable receipts",
+        "mechanism_verdict remains INSUFFICIENT_EVIDENCE because research-unit-b/c are absent",
+        "user_level_verdict and task completion remain FAIL",
+        "negative evidence remains limited to research-unit-a exact tested conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/research-unit-a-partial-evaluation-v1"
+    },
+    {
+      "at": "2026-08-24T17:51:27.425678Z",
+      "evidence": [
+        "unit_verdict PASS is supported by four exact score-1.0 replay/cross-binding verified receipts",
+        "mechanism_verdict remains INSUFFICIENT_EVIDENCE because research-unit-c is absent",
+        "user_level_verdict and task completion remain FAIL",
+        "negative evidence remains limited to research-unit-b exact tested conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/research-unit-b-partial-evaluation-v1"
+    },
+    {
+      "at": "2026-08-24T18:11:07.788154Z",
+      "evidence": [
+        "unit PASS is supported by twelve score-1.0 replay-verified attempts",
+        "mechanism REJECT_MECHANISM follows the frozen median rule because invocation cost worsened",
+        "user-level and task completion remain FAIL",
+        "negative evidence remains limited to the exact tested candidate/configuration/conditions"
+      ],
+      "scope": "agi/bounded-stage-checkpoint-inheritance/final-evaluation-v1"
+    }
+  ],
+  "schema_version": 1,
+  "source_bindings": [
+    {
+      "git_blob_sha": "e095b4ffb33f608930888427f8356b5c518428cd",
+      "path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/candidate.json",
+      "sha256_raw": "0a141087784710fa1f926f8f64e0d1339313036a380442d8aa6107972dfe0b8b"
+    },
+    {
+      "git_blob_sha": "e3139f2f13e30d89521c77f1acec46b86584e389",
+      "path": ".continual/candidates/candidate-task-evaluate-unit-verdict-v1/prompt.md",
+      "sha256_raw": "6276736ad4731aba95f9cc808729cc08f8525bbbc9ee8c8a4594faf42f665f2f"
+    },
+    {
+      "git_blob_sha": "8d758220051b503658c493da87da1f0cc01ad1c5",
+      "path": ".continual/candidates/index.json",
+      "sha256_raw": "6c9a1f2cf299acd93f5a02b051c945440ec553f7886943838304b7bda290eef6"
+    },
+    {
+      "git_blob_sha": "e32144c6d06226e7903bbc212c49cd45a0c665e9",
+      "path": ".continual/system/active-components.json",
+      "sha256_raw": "e6a2557510951e0cb447915cdcb86cb94add5298013e6151eedeec6efb19f4ba"
+    },
+    {
+      "git_blob_sha": "86036487673a8f244943cf73da49670059185567",
+      "path": "prompts/task_evaluate.md",
+      "sha256_raw": "f7edf6f7888b62ac594f27956e09a47c7ba925852a74ef98393b567ed13de89c"
+    }
+  ],
+  "source_main_sha": "5e46b5437bb9d197cf9bd19008e6e2df194c8a00",
+  "supporting_evidence_class": "Historical entries retained as recorded; no fresh matched active-versus-overlay comparison is performed here."
+}
