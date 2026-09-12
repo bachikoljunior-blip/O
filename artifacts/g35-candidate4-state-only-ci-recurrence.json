@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-09-12T06:05:01.274Z",
+  "status": "operating_rule_restored_and_observed_on_live_watcher",
+  "cause": "Three authority-only preparation commits omitted the previously retained [skip ci] marker and started main-push test and directive workflows.",
+  "prior_rule_ref": "agi/WORK_EXECUTION_STATE.json#generation35_state_only_ci_recurrence",
+  "unnecessary_workflows": [
+    {
+      "id": 34676468242,
+      "event": "push",
+      "head_sha": "e7219d661f7169c1870d9c1032276367e1201219",
+      "name": "directive-source-preflight",
+      "status_at_observation": "completed",
+      "conclusion_at_observation": "success",
+      "created_at": "2026-09-12T05:47:13Z"
+    },
+    {
+      "id": 34676468262,
+      "event": "push",
+      "head_sha": "e7219d661f7169c1870d9c1032276367e1201219",
+      "name": "test",
+      "status_at_observation": "in_progress",
+      "conclusion_at_observation": null,
+      "created_at": "2026-09-12T05:47:13Z"
+    },
+    {
+      "id": 34676594594,
+      "event": "push",
+      "head_sha": "d5499d9ca18f9ffe8a8ebe4758c7ce18720994b3",
+      "name": "test",
+      "status_at_observation": "in_progress",
+      "conclusion_at_observation": null,
+      "created_at": "2026-09-12T05:50:11Z"
+    },
+    {
+      "id": 34676594585,
+      "event": "push",
+      "head_sha": "d5499d9ca18f9ffe8a8ebe4758c7ce18720994b3",
+      "name": "directive-source-preflight",
+      "status_at_observation": "completed",
+      "conclusion_at_observation": "success",
+      "created_at": "2026-09-12T05:50:11Z"
+    },
+    {
+      "id": 34676731592,
+      "event": "push",
+      "head_sha": "811b8e92b5355157954742b1b655b17a677c0135",
+      "name": "test",
+      "status_at_observation": "in_progress",
+      "conclusion_at_observation": null,
+      "created_at": "2026-09-12T05:53:30Z"
+    },
+    {
+      "id": 34676731596,
+      "event": "push",
+      "head_sha": "811b8e92b5355157954742b1b655b17a677c0135",
+      "name": "directive-source-preflight",
+      "status_at_observation": "completed",
+      "conclusion_at_observation": "success",
+      "created_at": "2026-09-12T05:53:30Z"
+    }
+  ],
+  "repair": "Keep [skip ci] on every authority-only state commit. The current CI watcher already uses the marker; also apply it to upcoming activation, prepublication, and heartbeat-only commits. Keep full unchanged-head CI for every actual native/content publication.",
+  "observed_marked_commit_workflows": [
+    {
+      "head_sha": "d091b2ee2a4e20cc1c56ccb971e788eaf63ca6e8",
+      "total_count": 0,
+      "workflow_runs": []
+    },
+    {
+      "head_sha": "72658c39e66add503115919a92720996fcfb5999",
+      "total_count": 0,
+      "workflow_runs": []
+    }
+  ],
+  "protected_workflows_changed": false,
+  "ci_requirements_weakened": false,
+  "publication_head_changed": false,
+  "native_response_replayed": false,
+  "runs_cancelled": false,
+  "cancel_tool_available": false,
+  "individual_test_timing_cause": "UNKNOWN",
+  "claim_boundary": "Exact omitted-marker/main-push recurrence and zero observed workflows at these two marked commits. No measured runner contention, latency reduction or physical scheduler diagnosis.",
+  "current_required_ci": {
+    "pull_request": 673,
+    "head_sha": "3c6d40809787379265e233e9b5f1224fe19a58e3",
+    "test_workflow": 34676751765,
+    "directive_workflow": 34676751791
+  },
+  "guarded_helper_exercised": {
+    "commit_sha": "f7f671adcc36720769687e4f70c784005ddd773f",
+    "state_blob_sha": "6930f593eb115a3cd2f0856e75bc567ae531cb2c",
+    "message_marker_verified": true,
+    "same_lease_identity_checked": true,
+    "single_state_path_only": true,
+    "exact_byte_readback": true,
+    "semantic_resume_performed": false
+  }
+}
