@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "protocol_id": "g36-recovery-control-source-baseline-gate-v1",
+  "created_at": "2026-09-13T08:45:00Z",
+  "status": "FROZEN_PRE_OUTCOME",
+  "unit_id": "unit-generation36-recovery-control-source-baseline-gate-v1",
+  "selection_basis": "deterministic lexical repository URL order",
+  "candidate_limit": 2,
+  "selected_source_limit": 1,
+  "candidate_sources": [
+    {
+      "order": 1,
+      "repository": "https://github.com/joblib/joblib",
+      "distribution": "joblib",
+      "installed_version": "1.5.3",
+      "tag": "1.5.3",
+      "tag_object_sha": "d8cde23485d306447f85b9841f2265a71a985d70",
+      "commit_sha": "40cd002ae1765195dfc4738a6bc7f5534b420a21",
+      "project_metadata_url": "https://raw.githubusercontent.com/joblib/joblib/1.5.3/pyproject.toml",
+      "installed_metadata_sha256": "cee9c60896ae4e7a965a840fbde50d111d2f8018f61201d1ed2e9fc3dd4883e6",
+      "installed_wheel_sha256": "ff309ddcdd65ebd02bc724dbf2bcc4a0ff53a5b61792a44548d383e4ebb19d3b",
+      "installed_files_count": 145,
+      "official_test_basis": "tagged pyproject.toml declares pytest testpaths=joblib and packages joblib.test",
+      "frozen_installed_distribution_command": "python -m pytest --pyargs joblib",
+      "pre_outcome_static_eligibility": "SELECTED_FIRST"
+    },
+    {
+      "order": 2,
+      "repository": "https://github.com/numpy/numpy",
+      "distribution": "numpy",
+      "installed_version": "2.3.5",
+      "tag": "v2.3.5",
+      "tag_object_sha": "ad4c444bd5acdd2856ff39209c65b50db3d20790",
+      "commit_sha": "c3d60fc8393f3ca3306b8ce8b6453d43737e3d90",
+      "project_metadata_url": "https://raw.githubusercontent.com/numpy/numpy/v2.3.5/pyproject.toml",
+      "installed_metadata_sha256": "6002f29765e5bc1a3be4a1b92ed56b64968a0fecba73e7f81cd536d0c40f4fa3",
+      "installed_wheel_sha256": "ac90a994678616346852fc495a154e351832198199a0e921c9e8f4b372b28e82",
+      "installed_files_count": 1313,
+      "official_test_basis": "tagged pyproject.toml declares installed-wheel test command python -m pytest --pyargs numpy",
+      "frozen_installed_distribution_command": "python -m pytest --pyargs numpy -m 'not slow'",
+      "pre_outcome_static_eligibility": "UNSELECTED_BY_ORDER"
+    }
+  ],
+  "selected_source": "https://github.com/joblib/joblib",
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "installed_distribution_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+    "pytest_available_before_command": false
+  },
+  "eligibility_predicates": [
+    "repository URL and exact source commit are immutable and public",
+    "installed distribution name/version match the tagged project metadata",
+    "distribution contains stable test module paths usable as immutable regression identifiers",
+    "official unmodified test command can execute in the frozen environment without installing or patching anything",
+    "selection is bound before any task outcome is observed"
+  ],
+  "pass_rule": "PASS only if the selected installed distribution metadata matches and the frozen official command completes successfully with a durable exact-output receipt.",
+  "not_evaluable_rule": "If the selected official command cannot execute reproducibly, emit NOT_EVALUABLE and do not substitute the second candidate after the observation.",
+  "stopping_rules": {
+    "maximum_baseline_commands": 1,
+    "maximum_provider_calls": 0,
+    "maximum_paid_provider_calls": 0,
+    "maximum_upstream_writes": 0,
+    "behavioral_arms_started": 0,
+    "no_fault_controls_constructed": 0,
+    "patches_allowed": 0,
+    "candidate_substitution_after_outcome": false
+  },
+  "contamination_guard": {
+    "task_outcomes_observed_before_freeze": 0,
+    "prior_closed_trial_reused": false,
+    "prior_patch_or_answer_reused": false,
+    "selected_test_output_seen": false
+  },
+  "claim_boundary": "This protocol is a same-operator installed-distribution entry gate only. It does not start behavioral arms, establish recovery benefit, independent evaluation, broad capability, or AGI."
+}
