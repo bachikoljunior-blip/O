@@ -172,12 +172,12 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T04:21:03.433253Z",
+    "checkpointed_at": "2026-09-13T04:33:01.503321Z",
     "completed_effect_receipt_durability": "remote replay hold exact-read back; PR679 exact 14-file head readback verified; CI pending",
     "completed_effect_receipt_ref": "artifacts/g36-native-root-consume-receipt.json",
     "current_head_sha": "0251bf3a222da02da95ef99bc16efef5c821fa85",
-    "current_main_sha": "6600f5396bede8cad04459812c59fb0e0afe85b0",
-    "current_state_blob_sha": "121d5f5d7190013928b5d40b34d7bd1721b50ea7",
+    "current_main_sha": "75245b8b57d5f75d274354da28bc22f3bdea497b",
+    "current_state_blob_sha": "d48113bfd7cdf810fe30d1dad7ae1adf63df128b",
     "exact_frontier": "Root completed exactly once; its selected Execute unit is unit_pending and no successor Work request has been frozen yet.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
@@ -189,12 +189,15 @@
     "idempotency_key": "O:g36:root-consumed:unit-pending-replay-hold:v1",
     "lease_generation": 36,
     "next_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on the unchanged PR679 head; then merge with expected-head CAS and exact-read back main.",
-    "next_tool": "wait for exact-head PR679 required CI",
+    "next_tool": "continue bounded observation of PR679 exact-head CI",
     "pending_ci_run_ids": [
       34737660058,
       34737660057
     ],
-    "pending_job_ids": [],
+    "pending_job_ids": [
+      103671803162,
+      103671803175
+    ],
     "pending_launch_ids": [],
     "pending_pull_requests": [
       679
@@ -41384,7 +41387,7 @@
     "native_resume_authorized": false,
     "native_resume_executed": true,
     "next_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on the unchanged PR679 head; then merge with expected-head CAS and exact-read back main.",
-    "observed_at": "2026-09-13T04:21:03.433253Z",
+    "observed_at": "2026-09-13T04:33:01.503321Z",
     "predecessor_checkpoint": {
       "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
       "blocker": null,
@@ -41762,17 +41765,26 @@
   "generation36_root_publication": {
     "branch": "o-work-g36-root-consume",
     "completed_effect_receipt": "artifacts/g36-native-root-consume-receipt.json",
+    "completed_required_job_ids": [
+      103671803059,
+      103671803170,
+      103671803177
+    ],
     "directive_workflow_run_id": 34737660057,
     "exact_file_readback_verified": true,
-    "observed_at": "2026-09-13T04:21:03.433253Z",
+    "observed_at": "2026-09-13T04:33:01.503321Z",
     "publication_commit": "0251bf3a222da02da95ef99bc16efef5c821fa85",
     "publication_tree": "23717349528e46d4a5994bb4825e322a45e036cb",
     "pull_request": 679,
     "resume_required": true,
+    "running_required_job_ids": [
+      103671803162,
+      103671803175
+    ],
     "saved_content_commit": "a050e61a4ae05e89644864ba1ae72aaca98e8a76",
     "saved_content_tree": "d298e5d38c174770fc18ece1d6c62633458783b0",
     "schema_version": 1,
-    "status": "ci_pending",
+    "status": "ci_partially_complete",
     "test_workflow_run_id": 34737660058
   },
   "goal_revision": 118,
@@ -42546,7 +42558,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T04:21:03.433253Z",
+  "heartbeat_at": "2026-09-13T04:33:01.503321Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43467,7 +43479,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T04:21:03.433253Z",
+  "last_activity_at": "2026-09-13T04:33:01.503321Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_error": null,
   "last_native_publication": {
@@ -43901,7 +43913,7 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Publish Task4 through full unchanged-head CI and exact main readback, then consume it once with fresh source receipts and follow the actual immediate Candidate/Consolidate/Learn frontier.",
-  "next_tool": "wait for exact-head PR679 required CI",
+  "next_tool": "continue bounded observation of PR679 exact-head CI",
   "next_tool_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on the unchanged PR679 head; then merge with expected-head CAS and exact-read back main.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
@@ -48222,6 +48234,11 @@
         },
         "task4_replayed": false
       },
+      "completed_required_job_ids": [
+        103671803059,
+        103671803170,
+        103671803177
+      ],
       "directive_workflow_run_id": 34737660057,
       "do_not_reconsume_work_invocation_id": "invoke-eb6d8c8a9a1a32bb79156a13",
       "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
@@ -48242,7 +48259,7 @@
       "lease_generation": 36,
       "native_resume_authorized": false,
       "next_action": "Persist a remote replay hold for the completed Root, publish and exact-read back the Root effect and selected unit, then authorize native resume and freeze the next ordinary semantic request without replaying Root.",
-      "observed_at": "2026-09-13T04:21:03.433253Z",
+      "observed_at": "2026-09-13T04:33:01.503321Z",
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "240d07220c959e9bdb8efa141784850ebd0b5010:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
@@ -48251,6 +48268,10 @@
       "publication_pull_request": 679,
       "publication_status": "ci_pending",
       "publication_verified": false,
+      "running_required_job_ids": [
+        103671803162,
+        103671803175
+      ],
       "schema_version": 1,
       "test_workflow_run_id": 34737660058
     },
@@ -49666,7 +49687,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T04:21:03.433253Z",
+  "updated_at": "2026-09-13T04:33:01.503321Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T01:26:08.262203Z",
