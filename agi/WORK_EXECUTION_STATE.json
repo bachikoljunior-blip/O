@@ -172,13 +172,13 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T11:52:26Z",
-    "completed_effect_receipt_durability": "The immutable Root response was submitted exactly once after request publication authorization; it is not yet published or consumable",
+    "checkpointed_at": "2026-09-13T12:29:07Z",
+    "completed_effect_receipt_durability": "The immutable Root response was submitted exactly once, published by PR688 after full CI, merged at 4686340375697d31dcc5d05a986f30aa7f3c2587 and exact-read back; consumption remains held for revision55 ingress and safe-boundary projection.",
     "completed_effect_receipt_ref": ".continual/work-model/invocations/invoke-1697f574da7b163af072a5b3/response.json",
     "current_head_sha": "6c0428836de92d8cb00ea71f3bf40a70fec71d3a",
-    "current_main_sha": "da2393a51938333c6ecbd03bf348a68890308ca4",
-    "current_state_blob_sha": "44f37839bce6934352b866e84a0384d3ef2f2327",
-    "exact_frontier": "Root Work invoke-1697f574da7b163af072a5b3 has exactly one submitted response digest 223d44d548d26c1189db50d94219b76ac39f9f661b56090c26d53bf4d83d8f66 selecting Task Evaluate; response publication is pending and native consumption remains unauthorized.",
+    "current_main_sha": "4686340375697d31dcc5d05a986f30aa7f3c2587",
+    "current_state_blob_sha": "394743f6c398302efb90be27cea67b91eb12274f",
+    "exact_frontier": "Root Work invoke-1697f574da7b163af072a5b3 has exactly one published and exact-read-back response digest 223d44d548d26c1189db50d94219b76ac39f9f661b56090c26d53bf4d83d8f66 selecting Task Evaluate. Revision55 deadline-followthrough ingress is pending CI/readback; native consumption remains unauthorized until that safe boundary.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
     "frozen_invocation_id": "invoke-1697f574da7b163af072a5b3",
@@ -189,12 +189,17 @@
     "goal_revision": 118,
     "idempotency_key": "O:g36:root14:invoke-1697f574da7b163af072a5b3:response-publication-hold:v1",
     "lease_generation": 36,
-    "next_action": "Publish the exact Root response through full unchanged-head CI, expected-head merge and exact main readback; only then authorize one native consume.",
-    "next_tool": "isolated response publication PR and exact-head CI",
-    "pending_ci_run_ids": [],
+    "next_action": "Complete PR689 full unchanged-head CI and exact main readback for inbox revision55, project the fixed-deadline compliance audit at the next safe semantic boundary, then authorize exactly one native consume.",
+    "next_tool": "PR689 exact-head CI observation, expected-head merge and exact readback",
+    "pending_ci_run_ids": [
+      34757186279,
+      34757186298
+    ],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      689
+    ],
     "resume_required": true,
     "schema_version": 1,
     "snapshot_blob_sha": "4fcd81edc6aa1c72abdaa97ebd54decedaa52c1a",
@@ -1181,12 +1186,12 @@
     "snapshot_head_sha": "de8518942208efb27783c748de1b0404e82f8346",
     "snapshot_phase": "root_pending",
     "snapshot_revision": 14,
-    "source_main_sha": "da2393a51938333c6ecbd03bf348a68890308ca4",
-    "source_state_blob_sha": "44f37839bce6934352b866e84a0384d3ef2f2327",
-    "status": "pending_response_publication_hold",
+    "source_main_sha": "4686340375697d31dcc5d05a986f30aa7f3c2587",
+    "source_state_blob_sha": "394743f6c398302efb90be27cea67b91eb12274f",
+    "status": "pending_user_input_ingress_hold",
     "target_component": "root",
-    "verified_at": "2026-09-13T11:52:26Z",
-    "verified_remote_readback": false
+    "verified_at": "2026-09-13T12:29:07Z",
+    "verified_remote_readback": true
   },
   "continuation_source": "repository_latest_main_only",
   "continuity_correction": {
@@ -1407,12 +1412,12 @@
     "snapshot_head_sha": "de8518942208efb27783c748de1b0404e82f8346",
     "snapshot_phase": "root_pending",
     "snapshot_revision": 14,
-    "source_main_sha": "da2393a51938333c6ecbd03bf348a68890308ca4",
-    "source_state_blob_sha": "44f37839bce6934352b866e84a0384d3ef2f2327",
-    "status": "pending_response_publication_hold",
+    "source_main_sha": "4686340375697d31dcc5d05a986f30aa7f3c2587",
+    "source_state_blob_sha": "394743f6c398302efb90be27cea67b91eb12274f",
+    "status": "pending_user_input_ingress_hold",
     "target_component": "root",
-    "verified_at": "2026-09-13T11:52:26Z",
-    "verified_remote_readback": false
+    "verified_at": "2026-09-13T12:29:07Z",
+    "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
     "conclusion": "success",
@@ -42834,7 +42839,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T11:52:26Z",
+  "heartbeat_at": "2026-09-13T12:26:24Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43809,7 +43814,7 @@
     "source_main_sha": "ec1a4500b6765f3cb0212dbbb18781149a0e2430",
     "state_frontier_and_authority_verified": true
   },
-  "last_progress_at": "2026-09-13T11:52:26.962170Z",
+  "last_progress_at": "2026-09-13T12:26:24Z",
   "last_substantive_activity": {
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
@@ -48632,7 +48637,7 @@
       "response_submission_authorized": false,
       "response_submission_completed": true,
       "response_submission_limit": 1,
-      "next_action": "Publish the exact immutable Root response through full unchanged-head CI, expected-head merge and exact main readback; then authorize exactly one native consume.",
+      "next_action": "Complete revision55 deadline-followthrough ingress through PR689 full CI and exact readback, project it at the next safe boundary, then authorize exactly one native consume.",
       "observed_at": "2026-09-13T11:52:26Z",
       "original_preflight_cache": {
         "blob_sha": "ce2a00426f24eb44b4ad3749673f1a6f5718d877",
@@ -48655,18 +48660,28 @@
       "publication_merge_sha": "de8518942208efb27783c748de1b0404e82f8346",
       "publication_exact_main_readback_verified": true,
       "publication_exact_main_readback_count": 13,
-      "response_publication_status": "root_response_publication_pending",
-      "response_publication_verified": false,
-      "response_publication_merge_sha": null,
-      "response_publication_exact_main_readback_verified": false,
+      "response_publication_status": "root_response_merged_full_ci_and_exact_main_readback_verified",
+      "response_publication_verified": true,
+      "response_publication_merge_sha": "4686340375697d31dcc5d05a986f30aa7f3c2587",
+      "response_publication_exact_main_readback_verified": true,
       "response_publication_branch": "o-work-g36-root14-response",
-      "response_publication_head_sha": null,
-      "response_publication_pull_request": null,
-      "response_publication_test_workflow_run_id": null,
-      "response_publication_directive_workflow_run_id": null,
+      "response_publication_head_sha": "4e017d81bb555036dc212b69e1e800988beeff2c",
+      "response_publication_pull_request": 688,
+      "response_publication_test_workflow_run_id": 34755707753,
+      "response_publication_directive_workflow_run_id": 34755707733,
       "response_publication_pending_job_ids": [],
-      "response_publication_completed_job_ids": [],
-      "response_publication_directive_job": null,
+      "response_publication_completed_job_ids": [
+        103719596283,
+        103719596362,
+        103719596396,
+        103719596405,
+        103722913897,
+        103719596178
+      ],
+      "response_publication_directive_job": {
+        "conclusion": "success",
+        "job_id": 103719596178
+      },
       "recurrence_validation": {
         "directive_job_id": 103699749913,
         "directive_workflow_run_id": 34748146678,
@@ -50176,11 +50191,45 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T11:52:26Z",
+  "updated_at": "2026-09-13T12:29:07Z",
   "upper_objective_achieved": false,
+  "primary_agi_deadline_audit": {
+    "audit_request_id": "user-primary-agi-deadline-compliance-20260913T111338Z-v1",
+    "audit_receipt_blob_sha": "757b6b6b5c0163327da40d1c6c2fd86d4f20deb9",
+    "audit_receipt_path": "automation_control/receipts/o_work_monitor_recovery/20260913T111338Z-primary-agi-deadline-user-audit.json",
+    "audit_receipt_repository": "bachikoljunior-blip/note",
+    "deadline_at": "2026-10-13T07:43:29Z",
+    "deadline_local": "2026-10-13T16:43:29+09:00",
+    "deadline_source_atom_id": "r54-one-month-achievement-deadline",
+    "deadline_source_entry_id": "user-achieve-upper-objective-within-one-month-20260913-f26be1c092f7-v1",
+    "deadline_was_rolled_forward": false,
+    "evaluated_at": "2026-09-13T12:29:07Z",
+    "evidence": {
+      "actual_root_response_blob_sha": "0a4813903e7ef2e2dd7738cdc31df46c64be8483",
+      "actual_root_response_deadline_aware": true,
+      "actual_root_response_digest": "223d44d548d26c1189db50d94219b76ac39f9f661b56090c26d53bf4d83d8f66",
+      "actual_root_response_invocation_id": "invoke-1697f574da7b163af072a5b3",
+      "prior_actual_work_request_acknowledged_revision": 54,
+      "prior_actual_work_request_deadline_explicit": true,
+      "new_followthrough_entry_revision": 55,
+      "new_followthrough_exact_primary_acknowledgement": false
+    },
+    "status": {
+      "agi_achieved": false,
+      "deadline_aware_backwards_plan_verified": false,
+      "deadline_recorded": true,
+      "future_deadline_compliance_guaranteed": false,
+      "primary_acknowledgement_of_fixed_deadline_verified": true,
+      "revision55_followthrough_acknowledgement": "pending_safe_boundary_projection",
+      "subsequent_actions_demonstrably_follow_plan": "not_yet_verified",
+      "forecast_on_time": "UNKNOWN"
+    },
+    "next_safe_correction": "Publish inbox revision55 and its exact reviewed directive atom with required CI/readback, then project it into the next native Task Evaluate boundary. Require a deadline-aware backward plan with dated milestones and audit subsequent actions and risk without weakening evidence or safety.",
+    "separate_parallel_deadline_changed": false
+  },
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T08:25:00Z",
-    "application_note": "Input54 sets a one-month deadline for the unchanged upper objective, interpreted as 2026-10-13T07:43:29Z. It increases elapsed-time priority without weakening the strict external goal gate, evidence integrity, single-writer safety, or platform/account safeguards.",
+    "application_note": "Input54 fixes the unchanged upper-objective deadline at 2026-10-13T07:43:29Z. Input55 requests source-evidenced primary compliance auditing without rolling that deadline forward; it is pending publication and safe-boundary projection, while the existing Root response already treats the fixed deadline as priority without weakening evidence or safety.",
     "highest_acknowledged_revision": 54,
     "last_acknowledged_input": {
       "acknowledged_at": "2026-09-13T08:25:00Z",
@@ -50194,20 +50243,20 @@
       "revision": 54
     },
     "latest_observed_input": {
-      "id": "user-achieve-upper-objective-within-one-month-20260913-f26be1c092f7-v1",
+      "id": "user-primary-agi-deadline-compliance-audit-20260913-f26be1c092f7-v1",
       "interpretation_publication_pr": null,
-      "observed_at": "2026-09-13T08:25:00Z",
-      "revision": 54
+      "observed_at": "2026-09-13T12:23:26Z",
+      "revision": 55
     },
     "path": "agi/USER_INPUT_INBOX.json",
-    "pending_inbox_blob_sha": null,
+    "pending_inbox_blob_sha": "79523ec00db2e0fc06ab5f133d7afd3156db9fc8",
     "pending_inbox_commit_sha": null,
-    "pending_revision": null
+    "pending_revision": 55
   },
   "user_level_objective_met": false,
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_at": null,
-  "verified_remote_readback": true,
+  "verified_remote_readback": false,
   "work_status": "running",
   "working_branch": "main"
 }
