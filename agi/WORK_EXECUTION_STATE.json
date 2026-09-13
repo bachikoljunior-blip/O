@@ -172,12 +172,12 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T05:09:45.284006Z",
-    "completed_effect_receipt_durability": "Root main readback verified; Candidate preflight saved in immutable local commit; remote replay hold CAS pending",
+    "checkpointed_at": "2026-09-13T05:11:27.897470Z",
+    "completed_effect_receipt_durability": "Candidate request replay hold exact-read back; PR680 exact three-file head verified; CI pending",
     "completed_effect_receipt_ref": "artifacts/g36-native-root-consume-receipt.json",
-    "current_head_sha": "5614d842bdb184abfac779bb4004d0d973d8399f",
-    "current_main_sha": "e3974bf88ee90cd62c7d5dd7756b414f4924f728",
-    "current_state_blob_sha": "5011436b5a8a750a7be19948dd56ae932c6c4ed0",
+    "current_head_sha": "c88c1e644aaa51655ed78eec6ca6d0afd3a80bc3",
+    "current_main_sha": "7f8ae0b6a33a4f2dfce953c30347e5c6be6f709e",
+    "current_state_blob_sha": "6ac556c63a581501388c7f27c51ff358b7f67528",
     "exact_frontier": "Root completed once; one Candidate Evaluate preflight is frozen and unanswered before the selected Execute unit.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
@@ -188,12 +188,17 @@
     "goal_revision": 118,
     "idempotency_key": "O:g36:unit-pending:candidate-preflight-freeze:v1",
     "lease_generation": 36,
-    "next_action": "Publish and exact-read back the unique Candidate preflight, then answer and consume it once before executing the selected source/baseline gate.",
-    "next_tool": "publish exact frozen Candidate preflight",
-    "pending_ci_run_ids": [],
+    "next_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR680 head; merge with expected-head CAS and exact-read back main before answering Candidate Evaluate.",
+    "next_tool": "wait for exact-head PR680 required CI",
+    "pending_ci_run_ids": [
+      34739669433,
+      34739669440
+    ],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      680
+    ],
     "resume_required": true,
     "schema_version": 1,
     "snapshot_blob_sha": "86b767e0e219e42297511240f4361b70800746d0",
@@ -41109,13 +41114,20 @@
   },
   "generation36_candidate_preflight_publication": {
     "branch": "o-work-g36-candidate-preflight-freeze",
+    "directive_workflow_run_id": 34739669440,
+    "exact_file_readback_verified": true,
     "native_invocation_id": "invoke-cedfb9ba69caee1135e15359",
+    "observed_at": "2026-09-13T05:11:27.897470Z",
+    "publication_commit": "c88c1e644aaa51655ed78eec6ca6d0afd3a80bc3",
+    "publication_tree": "f37b64004ae9c9ffbea6b56a5f04d2c4d21f4f7b",
+    "pull_request": 680,
     "request_digest": "e47d99838ee726cd3077b77d493311b4ff85efd083328f970224fa0f9a265f85",
     "resume_required": true,
     "saved_content_commit": "5614d842bdb184abfac779bb4004d0d973d8399f",
     "saved_content_tree": "ac9036e9bee59d078b6524bde38a0e3d8cfb2ba6",
     "schema_version": 1,
-    "status": "replay_hold_required_before_publication",
+    "status": "ci_pending",
+    "test_workflow_run_id": 34739669433,
     "work_invocation_id": "invoke-1e33ccbeead76b5c335fc431"
   },
   "generation36_consolidate_publication": {
@@ -41389,8 +41401,8 @@
     },
     "native_resume_authorized": false,
     "native_resume_executed": true,
-    "next_action": "Publish and exact-read back the unique Candidate preflight, then answer and consume it once before executing the selected source/baseline gate.",
-    "observed_at": "2026-09-13T05:09:45.284006Z",
+    "next_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR680 head; merge with expected-head CAS and exact-read back main before answering Candidate Evaluate.",
+    "observed_at": "2026-09-13T05:11:27.897470Z",
     "predecessor_checkpoint": {
       "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
       "blocker": null,
@@ -42578,7 +42590,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T05:09:45.284006Z",
+  "heartbeat_at": "2026-09-13T05:11:27.897470Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43499,7 +43511,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T05:09:45.284006Z",
+  "last_activity_at": "2026-09-13T05:11:27.897470Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_eliminated_stop_cause": {
     "classification": "discretionary_stop_cause_eliminated_and_validated",
@@ -43972,8 +43984,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Publish Task4 through full unchanged-head CI and exact main readback, then consume it once with fresh source receipts and follow the actual immediate Candidate/Consolidate/Learn frontier.",
-  "next_tool": "publish exact frozen Candidate preflight",
-  "next_tool_action": "Publish and exact-read back the unique Candidate preflight, then answer and consume it once before executing the selected source/baseline gate.",
+  "next_tool": "wait for exact-head PR680 required CI",
+  "next_tool_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR680 head; merge with expected-head CAS and exact-read back main before answering Candidate Evaluate.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -48293,6 +48305,7 @@
         },
         "task4_replayed": false
       },
+      "directive_workflow_run_id": 34739669440,
       "do_not_reconsume_work_invocation_id": "invoke-eb6d8c8a9a1a32bb79156a13",
       "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
       "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
@@ -48311,13 +48324,17 @@
       "lease_generation": 36,
       "native_resume_authorized": false,
       "next_action": "Publish and exact-read back the unique Candidate preflight, then answer and consume it once before executing the selected source/baseline gate.",
-      "observed_at": "2026-09-13T05:09:45.284006Z",
+      "observed_at": "2026-09-13T05:11:27.897470Z",
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "e3974bf88ee90cd62c7d5dd7756b414f4924f728:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
       "publication_blocker": null,
+      "publication_head_sha": "c88c1e644aaa51655ed78eec6ca6d0afd3a80bc3",
+      "publication_pull_request": 680,
+      "publication_status": "ci_pending",
       "publication_verified": false,
-      "schema_version": 1
+      "schema_version": 1,
+      "test_workflow_run_id": 34739669433
     },
     "policy_bindings": {
       "agi/USER_DIRECTIVE_EVENTS.json": "1c7817b90db9825826441a1e63f78ce45aca68023881de5fb571c5372f263f2b",
@@ -49731,7 +49748,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T05:09:45.284006Z",
+  "updated_at": "2026-09-13T05:11:27.897470Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T01:26:08.262203Z",
