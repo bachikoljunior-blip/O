@@ -172,13 +172,13 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T09:18:54Z",
+    "checkpointed_at": "2026-09-13T09:44:38Z",
     "completed_effect_receipt_durability": "PR684 full CI, expected-head merge, and exact 11-blob main readback verified",
     "completed_effect_receipt_ref": "https://github.com/bachikoljunior-blip/O/pull/684",
-    "current_head_sha": "aa0c93f552ce6670685ae3e1727d83fd37f4aaa3",
-    "current_main_sha": "779e4b3ebeddaf8ac43add9efd59cd5e5ce0d0cb",
-    "current_state_blob_sha": "5a9162a0ff39566f48b4a99a7d8d84005ebf00be",
-    "exact_frontier": "The unique Execute response was submitted exactly once and frozen on PR685; directive CI succeeded and four test shards are running. Native consume remains prohibited.",
+    "current_head_sha": "98d0668460b73c32b1a22542123fd1da14a185a7",
+    "current_main_sha": "98d0668460b73c32b1a22542123fd1da14a185a7",
+    "current_state_blob_sha": "458c4a34d5aa7618f8b2f2a941405ed7c270d1cd",
+    "exact_frontier": "The unique Execute response and four gate evidence files are merged after full CI and exact main readback; one native consume is authorized after fresh Work and CI source observations.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
     "frozen_invocation_id": "invoke-016ae9e5920e1f016abec4ed",
@@ -187,23 +187,14 @@
     "frozen_request_digest": "24eabcdda0f79d7db295ba02bec04cae8d5b7ef678814218f0640eed8312a723",
     "frozen_response_digest": "99fbec69e29028f3cb3a4963898f6c0ebb724fa607a579058b792ca668b19330",
     "goal_revision": 118,
-    "idempotency_key": "O:g36:execute-response:publication-before-consume:v1",
+    "idempotency_key": "O:g36:PR685:execute-native-consume-once:v1",
     "lease_generation": 36,
-    "next_action": "Publish the exact submitted Execute response and gate evidence through full CI and exact main readback before native consume.",
-    "next_tool": "GitHub isolated response publication",
-    "pending_ci_run_ids": [
-      34749138422
-    ],
-    "pending_job_ids": [
-      103702321891,
-      103702322129,
-      103702322170,
-      103702322682
-    ],
+    "next_action": "Record fresh Work and CI source observations, then consume the exact Execute response once and freeze Task Evaluate.",
+    "next_tool": "work-source-observation and ci-source-observation, then work-resume --max-steps 1",
+    "pending_ci_run_ids": [],
+    "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [
-      685
-    ],
+    "pending_pull_requests": [],
     "resume_required": true,
     "schema_version": 1,
     "snapshot_blob_sha": "c251d33070d50a50f3960de393341932f1e94aac",
@@ -42784,7 +42775,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T09:18:54Z",
+  "heartbeat_at": "2026-09-13T09:44:38Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43705,7 +43696,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T09:18:54Z",
+  "last_activity_at": "2026-09-13T09:44:38Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_eliminated_stop_cause": {
     "classification": "discretionary_stop_cause_eliminated_and_validated",
@@ -44177,9 +44168,9 @@
     "untested_mechanism_negative_count": 0,
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
-  "next_action": "Publish the exact Execute response and four entry-gate evidence files, then require full CI, merge, and exact main readback before native consume.",
-  "next_tool": "GitHub isolated response publication",
-  "next_tool_action": "Response resubmission is forbidden; native consume remains unauthorized until response publication passes full CI and exact main readback.",
+  "next_action": "Record fresh Work and CI source observations, then consume the exact Execute response once and freeze its Task Evaluate successor.",
+  "next_tool": "work-source-observation and ci-source-observation, then work-resume --max-steps 1",
+  "next_tool_action": "Response resubmission is forbidden; consume invoke-016ae9e5920e1f016abec4ed at most once after fresh source bindings.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -48429,7 +48420,7 @@
     "lease_generation": 36,
     "model_identity": "chatgpt-work-model-unverified",
     "pending_publication_hold": {
-      "active": true,
+      "active": false,
       "all_predecessor_replays_forbidden": [
         "invoke-aca17c412d7447e3c528b291",
         "invoke-031bd4d05375a4758155c8a8",
@@ -48570,12 +48561,14 @@
         "request_sha256": "62c32259f00fff44f01c97b18251e50f5116a0ae67883059aed28fdb9ba7a8ff",
         "work_invocation_id": "invoke-e532582b5c6b974b74089ab4"
       },
-      "native_resume_authorized": false,
+      "native_resume_authorized": true,
+      "response_consumption_authorized": true,
+      "response_consumption_limit": 1,
       "response_submission_authorized": false,
       "response_submission_completed": true,
       "response_submission_limit": 1,
-      "next_action": "Publish the exact submitted Execute response and four entry-gate evidence files on an isolated branch; require full CI, merge, and exact main readback before one native consume.",
-      "observed_at": "2026-09-13T09:10:12Z",
+      "next_action": "Record fresh authoritative Work and CI observations against main 98d0668460b73c32b1a22542123fd1da14a185a7 and this state, then consume the exact Execute response once and freeze its Task Evaluate successor.",
+      "observed_at": "2026-09-13T09:44:38Z",
       "original_preflight_cache": {
         "blob_sha": "ce2a00426f24eb44b4ad3749673f1a6f5718d877",
         "local_saved_commit": "751c4fe4642e9c7c693b6b00dc62fe41b43af0e3",
@@ -48589,7 +48582,7 @@
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "fbccaac36120c41cbb961f7a61fd3cf8a19f552e:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
-      "publication_blocker": "exact Execute response and entry-gate evidence require isolated publication, full CI, merge, and exact main readback before native consume",
+      "publication_blocker": null,
       "publication_head_sha": "f31dcf2013632c934aba062aa7b395e6bd0c2736",
       "publication_pull_request": 684,
       "publication_status": "merged_full_ci_and_exact_main_readback_verified",
@@ -48597,18 +48590,23 @@
       "publication_merge_sha": "924369c2a34fe710c9f62f87133ca2275b2955cc",
       "publication_exact_main_readback_verified": true,
       "publication_exact_main_readback_count": 11,
-      "response_publication_status": "prepared_pending_remote_publication",
-      "response_publication_verified": false,
+      "response_publication_status": "merged_full_ci_and_exact_main_readback_verified",
+      "response_publication_verified": true,
+      "response_publication_merge_sha": "98d0668460b73c32b1a22542123fd1da14a185a7",
+      "response_publication_exact_main_readback_verified": true,
       "response_publication_branch": "o-work-g36-execute-entry-gate-response",
       "response_publication_head_sha": "aa0c93f552ce6670685ae3e1727d83fd37f4aaa3",
       "response_publication_pull_request": 685,
       "response_publication_test_workflow_run_id": 34749138422,
       "response_publication_directive_workflow_run_id": 34749138312,
-      "response_publication_pending_job_ids": [
+      "response_publication_pending_job_ids": [],
+      "response_publication_completed_job_ids": [
         103702321891,
         103702322129,
         103702322170,
-        103702322682
+        103702322682,
+        103704814405,
+        103702321962
       ],
       "response_publication_directive_job": {
         "conclusion": "success",
@@ -50125,7 +50123,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T09:18:54Z",
+  "updated_at": "2026-09-13T09:44:38Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T08:25:00Z",
