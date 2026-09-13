@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "unit_id": "unit-generation36-recovery-control-source-baseline-gate-v1",
+  "completed_at": "2026-09-13T08:46:00Z",
+  "status": "NOT_EVALUABLE",
+  "unit_verdict": "NOT_EVALUABLE",
+  "selected_source": {
+    "repository": "https://github.com/joblib/joblib",
+    "source_commit": "40cd002ae1765195dfc4738a6bc7f5534b420a21",
+    "distribution": "joblib",
+    "version": "1.5.3"
+  },
+  "artifacts": {
+    "protocol": "artifacts/g36-recovery-control-entry-gate/selection-protocol.json",
+    "baseline_receipt": "artifacts/g36-recovery-control-entry-gate/baseline-receipt.json",
+    "contamination_audit": "artifacts/g36-recovery-control-entry-gate/contamination-audit.json"
+  },
+  "predicates": [
+    {
+      "id": "immutable-public-source",
+      "assessment": "PASS",
+      "evidence": "joblib tag 1.5.3 resolves through annotated tag d8cde23485d306447f85b9841f2265a71a985d70 to commit 40cd002ae1765195dfc4738a6bc7f5534b420a21"
+    },
+    {
+      "id": "installed-distribution-identity",
+      "assessment": "PASS",
+      "evidence": "Installed joblib 1.5.3 metadata names https://github.com/joblib/joblib as Source and matches the frozen tagged project version."
+    },
+    {
+      "id": "stable-test-identifiers",
+      "assessment": "PASS",
+      "evidence": "The installed wheel records 93 paths under joblib/test; tagged pyproject.toml packages joblib.test and declares pytest testpaths=joblib."
+    },
+    {
+      "id": "official-baseline-command-reproducible",
+      "assessment": "FAIL_NO_OUTCOME",
+      "evidence": "The frozen command exited 1 before collection because the immutable runtime lacks pytest."
+    },
+    {
+      "id": "pre-outcome-selection",
+      "assessment": "PASS",
+      "evidence": "The lexical candidate manifest and selected source were persisted before command execution; zero task outcomes were observed."
+    }
+  ],
+  "accounting": {
+    "candidate_sources_declared": 2,
+    "sources_selected": 1,
+    "baseline_commands_started": 1,
+    "baseline_commands_completed_successfully": 0,
+    "task_outcomes_observed": 0,
+    "candidate_substitutions": 0,
+    "behavioral_arms_started": 0,
+    "provider_calls_started": 0,
+    "upstream_writes_started": 0
+  },
+  "verdict_reason": "One mandatory predicate failed before test collection: the declared pytest runner is absent. Under the frozen stopping rule, the second candidate cannot be substituted after this observation, so no PASS or regression outcome is admissible.",
+  "bounded_recommendation": "At a later separately preregistered Root unit, use an immutable environment that already contains the selected distribution and its declared test runner, then repeat an entry gate before constructing any of the 16 behavioral cases. Do not install or patch the environment inside this closed gate.",
+  "claim_boundary": "Same-operator entry-gate NOT_EVALUABLE only. It is not a joblib failure, recovery-effect result, independent evaluation, broad capability result, or AGI evidence.",
+  "upper_objective_achieved": false,
+  "user_level_objective_met": false
+}
