@@ -172,13 +172,13 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T07:35:54.448785Z",
+    "checkpointed_at": "2026-09-13T07:39:15.500524Z",
     "completed_effect_receipt_durability": "PR682 full CI, expected-head merge and exact six-blob main readback verified",
     "completed_effect_receipt_ref": "artifacts/g36-native-candidate-consume-receipt.json",
-    "current_head_sha": "831939eae0160f27b160f7b40f16541b30ab8af8",
-    "current_main_sha": "831939eae0160f27b160f7b40f16541b30ab8af8",
-    "current_state_blob_sha": "5e1af85e838aa77bdbdb10f27647d56efd50804b",
-    "exact_frontier": "Candidate completed exactly once; Execute request is not frozen. Fresh matching Work and CI observations are required after publication.",
+    "current_head_sha": "ecc7fea39d276dd76aa552c218c9f1450441a7ec",
+    "current_main_sha": "ecc7fea39d276dd76aa552c218c9f1450441a7ec",
+    "current_state_blob_sha": "da0cbfd2455b35aca59c3615b3543eb6ff793472",
+    "exact_frontier": "Candidate completed once and published; Execute request remains unfrozen. Native classification schema repaired; fresh source receipts must be reacquired.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
     "frozen_invocation_id": null,
@@ -186,10 +186,10 @@
     "frozen_request_digest": "e47d99838ee726cd3077b77d493311b4ff85efd083328f970224fa0f9a265f85",
     "frozen_response_digest": "834367004ad5ebaebcfbad87c27370edb05fd2843df523cb5e20d74af02fd6f5",
     "goal_revision": 118,
-    "idempotency_key": "O:g36:PR682:execute-source-observation-repair:v1",
+    "idempotency_key": "O:g36:PR682:execute-preflight-classification:v1",
     "lease_generation": 36,
-    "next_action": "Precommit source reads, exact-read current main state and PR682 CI through the authorized connector, publish those immutable receipts, then resume once to freeze Execute without reconsuming Candidate.",
-    "next_tool": "prepare and record fresh Work and CI source observations",
+    "next_action": "Exact-read this state, precommit new observation identities, read current state and unchanged successful PR682 CI, then resume once to freeze Execute.",
+    "next_tool": "reacquire fresh Work and CI observations after classification repair",
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
@@ -41122,6 +41122,9 @@
       "status": "completed"
     },
     "exact_main_readback_verified": true,
+    "execute_request_frozen": false,
+    "execute_resume_classification_repair": "implemented_fresh_source_reacquisition_required",
+    "execute_resume_first_attempt": "rejected_before_mutation_classification_mismatch",
     "first_head": "59ab9cf4fe5a18642a3519df41ce54fd5b0f94b0",
     "first_test_result": "failed_missing_fragment",
     "first_test_run": 34743879360,
@@ -41559,8 +41562,8 @@
     },
     "native_resume_authorized": true,
     "native_resume_executed": false,
-    "next_action": "Precommit source reads, exact-read current main state and PR682 CI through the authorized connector, publish those immutable receipts, then resume once to freeze Execute without reconsuming Candidate.",
-    "observed_at": "2026-09-13T07:35:54.448785Z",
+    "next_action": "Exact-read this state, precommit new observation identities, read current state and unchanged successful PR682 CI, then resume once to freeze Execute.",
+    "observed_at": "2026-09-13T07:39:15.500524Z",
     "predecessor_checkpoint": {
       "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
       "blocker": null,
@@ -42748,7 +42751,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T07:35:54.448785Z",
+  "heartbeat_at": "2026-09-13T07:39:15.500524Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43669,7 +43672,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T07:35:54.448785Z",
+  "last_activity_at": "2026-09-13T07:39:15.500524Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_eliminated_stop_cause": {
     "classification": "discretionary_stop_cause_eliminated_and_validated",
@@ -44142,8 +44145,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Publish Task4 through full unchanged-head CI and exact main readback, then consume it once with fresh source receipts and follow the actual immediate Candidate/Consolidate/Learn frontier.",
-  "next_tool": "prepare and record fresh Work and CI source observations",
-  "next_tool_action": "Precommit source reads, exact-read current main state and PR682 CI through the authorized connector, publish those immutable receipts, then resume once to freeze Execute without reconsuming Candidate.",
+  "next_tool": "reacquire fresh Work and CI observations after classification repair",
+  "next_tool_action": "Exact-read this state, precommit new observation identities, read current state and unchanged successful PR682 CI, then resume once to freeze Execute.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -48377,8 +48380,8 @@
   "source_state_blob_sha": "e22e8c595b9c3d2626fc0c33e67a90d2c4884130",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
-    "classification": "candidate_effect_published_source_observation_repair_authorized",
-    "evaluated_at": "2026-09-13T07:35:54.448785Z",
+    "classification": "no_discretionary_stop_detected",
+    "evaluated_at": "2026-09-13T07:39:15.500524Z",
     "evidence_refs": [
       "https://github.com/bachikoljunior-blip/O/pull/682",
       "https://github.com/bachikoljunior-blip/O/commit/831939eae0160f27b160f7b40f16541b30ab8af8",
@@ -48389,7 +48392,7 @@
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "executor_binding": "current_chatgpt_work_session",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
-    "idempotency_key": "O:g36:PR682:execute-source-observation-repair:v1",
+    "idempotency_key": "O:g36:PR682:execute-preflight-classification:v1",
     "lease_generation": 36,
     "model_identity": "chatgpt-work-model-unverified",
     "pending_publication_hold": {
@@ -48554,7 +48557,7 @@
       "reason": "PR674 unchanged head passed full CI and directive preflight, then merged after the actual post-CI physical exit was detected. Remote main readback verifies all23 Task4 content blobs, the unchanged revision4 snapshot, saved request, saved response and native journal. The saved Task4 response is authorized for one native consume; original scientific limits, all13 parents and prior failures remain unchanged.",
       "resume_authorized": true
     },
-    "reason": "Corrected PR682 head passed both workflows and all five test jobs, merged by expected head, and all six Candidate-effect blobs match main. Candidate replay remains forbidden. Acquire fresh Work and CI receipts bound to this exact authorization before one Execute freeze.",
+    "reason": "PR682 publication and its missing-artifact repair are verified. The immediate failed Execute-resume attempt made no mutation and exposed only a native schema mismatch: when the authoritative prior-stop classifier reports no discretionary stop, this field must use the exact no_discretionary_stop_detected value. Fresh source observations will be reacquired after this state change.",
     "recurrence_guard": {
       "entrypoint": "publish-before-successor plus matching fresh Work/CI source observations before Context Kernel",
       "status": "enforced"
@@ -48584,6 +48587,14 @@
         "cause_id": "candidate-consume-publication-omitted-ignored-engine-artifacts",
         "status": "implemented_and_validated",
         "validation": "Corrected unchanged head passed all required CI; merge and exact six-blob main readback succeeded."
+      },
+      {
+        "artifact_refs": [
+          "src/continual/continuity_preflight.py",
+          "agi/WORK_EXECUTION_STATE.json#start_of_run_continuity_preflight.classification"
+        ],
+        "cause_id": "execute-resume-descriptive-classification-schema-mismatch",
+        "status": "implemented"
       }
     ],
     "resume_authorized": true,
@@ -48612,6 +48623,14 @@
           ".continual/runs/run-work-g35-primary-continuation-v1/local-learn/invoke-cedfb9ba69caee1135e15359-candidate_evaluate.json"
         ],
         "mechanism": "The first PR682 head omitted the Engine-created Candidate fragment and Local Learn because both valid files were under an ignored run path and were not explicitly force-added. Full CI failed closed on the missing published fragment."
+      },
+      {
+        "cause_id": "execute-resume-descriptive-classification-schema-mismatch",
+        "evidence_refs": [
+          "src/continual/continuity_preflight.py",
+          "agi/WORK_EXECUTION_STATE.json#start_of_run_continuity_preflight"
+        ],
+        "mechanism": "The authorization used a descriptive classification not accepted by assert_work_resume_continuity_preflight when its authoritative prior-stop result is no_discretionary_stop_detected."
       }
     ],
     "run_id": "run-work-g35-primary-continuation-v1",
@@ -49987,7 +50006,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T07:35:54.448785Z",
+  "updated_at": "2026-09-13T07:39:15.500524Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T01:26:08.262203Z",
