@@ -172,13 +172,13 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T02:31:09.693103Z",
-    "completed_effect_receipt_durability": "exact immutable local commit and bundle; native publication pending",
+    "checkpointed_at": "2026-09-13T03:08:03.006678Z",
+    "completed_effect_receipt_durability": "main exact readback verified",
     "completed_effect_receipt_ref": "artifacts/g36-native-consolidate-consume-receipt.json",
-    "current_head_sha": "b48ca2a0f13cc9b3c8801eb696e4fd210d901a02",
-    "current_main_sha": "9f99a9e4b21d76a7ff9201d897267d416a8da1a4",
-    "current_state_blob_sha": "96b1c17337c9b0e2099aba3c4ada241d9e1778e7",
-    "exact_frontier": "Consolidate completed once; new Learn request frozen and unanswered in saved commit. Remote predecessor snapshot must not be replayed.",
+    "current_head_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
+    "current_main_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
+    "current_state_blob_sha": "a408249361d621cb17b192dc6f3ee8b0b6dd532d",
+    "exact_frontier": "Learn frozen and unanswered on main; Consolidate, Candidate5 and Task4 each completed once.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
     "frozen_invocation_id": "invoke-21217ff15f54deae59ad1318",
@@ -188,8 +188,8 @@
     "goal_revision": 118,
     "idempotency_key": "O:g36:consolidate-consumed:learn-replay-hold:v1",
     "lease_generation": 36,
-    "next_action": "Publish exact completed Consolidate/Episode and the frozen Learn request with matching state, full CI and main readback before next resume; never replay completed Consolidate, Candidate5 or Task4.",
-    "next_tool": "publish saved Consolidate and frozen Learn",
+    "next_action": "Answer and consume the exact saved Learn request once; preserve its actual result and continue the ordinary Root lifecycle.",
+    "next_tool": "work-submit invoke-21217ff15f54deae59ad1318",
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
@@ -643,35 +643,35 @@
     "test_workflow_run_id": 34676751765
   },
   "ci_source_observation_policy": {
-    "exact_head_sha": "641a41b667e71369075632b21e9a4c49a395bfc3",
+    "exact_head_sha": "3c454213e4f20ea171eea9327b60f7650971ea3d",
     "executor_binding": "current_chatgpt_work_session",
     "max_age_seconds": 7200,
     "repository_full_name": "bachikoljunior-blip/O",
     "required": true,
     "required_jobs": [
       {
-        "id": 103653780123,
-        "name": "pytest shard 0 of 4"
-      },
-      {
-        "id": 103653780135,
-        "name": "pytest shard 1 of 4"
-      },
-      {
-        "id": 103653780163,
+        "id": 103660400955,
         "name": "pytest shard 2 of 4"
       },
       {
-        "id": 103653780231,
+        "id": 103660401044,
         "name": "pytest shard 3 of 4"
       },
       {
-        "id": 103658444004,
+        "id": 103660401047,
+        "name": "pytest shard 0 of 4"
+      },
+      {
+        "id": 103660401051,
+        "name": "pytest shard 1 of 4"
+      },
+      {
+        "id": 103663709247,
         "name": "test"
       }
     ],
     "workflow_id": 335420036,
-    "workflow_run_id": 34731051147
+    "workflow_run_id": 34733431647
   },
   "clean_g1_research_feed_cursor": {
     "blob_sha": "b3780c12f1aeb02a1e36a5da976ee99dc2ba72b9",
@@ -1177,15 +1177,15 @@
     "schema_version": 1,
     "snapshot_blob_sha": "d5225aa78300a784f789651e5f0164814354ed6d",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "b48ca2a0f13cc9b3c8801eb696e4fd210d901a02",
+    "snapshot_head_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
     "snapshot_phase": "post_task_learn_pending",
     "snapshot_revision": 6,
-    "source_main_sha": "9f99a9e4b21d76a7ff9201d897267d416a8da1a4",
-    "source_state_blob_sha": "96b1c17337c9b0e2099aba3c4ada241d9e1778e7",
-    "status": "pending_publication",
+    "source_main_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
+    "source_state_blob_sha": "a408249361d621cb17b192dc6f3ee8b0b6dd532d",
+    "status": "remote_main_readback_verified",
     "target_component": "learn",
-    "verified_at": null,
-    "verified_remote_readback": false
+    "verified_at": "2026-09-13T03:08:03.006678Z",
+    "verified_remote_readback": true
   },
   "continuation_source": "repository_latest_main_only",
   "continuity_correction": {
@@ -1364,7 +1364,7 @@
     "text": "Oという名前のリポジトリの主実行止まってたらここで再開して。停止原因改善もするようになってなかったらするようにして再開して。続けて",
     "workspace_identifier": "e9b6a8a25162"
   },
-  "durability_status": "pending_publication",
+  "durability_status": "remote_main_readback_verified",
   "exact_continuation": {
     "completed_work_invocation_id": "invoke-691a600e0e916f36a8236977",
     "current_unit_id": "unit-generation35-recovery-intervention-outcome-evaluation-v1",
@@ -1403,15 +1403,15 @@
     "schema_version": 1,
     "snapshot_blob_sha": "d5225aa78300a784f789651e5f0164814354ed6d",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "b48ca2a0f13cc9b3c8801eb696e4fd210d901a02",
+    "snapshot_head_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
     "snapshot_phase": "post_task_learn_pending",
     "snapshot_revision": 6,
-    "source_main_sha": "9f99a9e4b21d76a7ff9201d897267d416a8da1a4",
-    "source_state_blob_sha": "96b1c17337c9b0e2099aba3c4ada241d9e1778e7",
-    "status": "pending_publication",
+    "source_main_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
+    "source_state_blob_sha": "a408249361d621cb17b192dc6f3ee8b0b6dd532d",
+    "status": "remote_main_readback_verified",
     "target_component": "learn",
-    "verified_at": null,
-    "verified_remote_readback": false
+    "verified_at": "2026-09-13T03:08:03.006678Z",
+    "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
     "conclusion": "success",
@@ -41110,11 +41110,13 @@
   "generation36_consolidate_publication": {
     "branch": "o-work-g36-consolidate-consume",
     "completed_effect_receipt": "artifacts/g36-native-consolidate-consume-receipt.json",
+    "merge_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
     "resume_required": true,
     "saved_content_commit": "b48ca2a0f13cc9b3c8801eb696e4fd210d901a02",
     "saved_content_tree": "a306465730377fa57d6b7fb3ed45cd80ed745b18",
     "schema_version": 1,
-    "status": "full_ci_and_main_readback_required"
+    "status": "merged_full_ci_and_exact_main_readback_verified",
+    "verified_at": "2026-09-13T03:08:03.006678Z"
   },
   "generation36_publication_ci_tracker": {
     "completed_effect": "11-file successor published on branch; exact tree identity verified; full required CI accepted",
@@ -41179,9 +41181,10 @@
       "head_sha": "3c454213e4f20ea171eea9327b60f7650971ea3d",
       "idempotency_key": "O:g36:PR677:Learn:one-consume:v1",
       "lease_generation": 36,
-      "native_resume_authorized": false,
-      "next_action": "Query accepted PR677 CI; after unchanged-head full success, expected-head merge and exact main readback, authorize the one frozen Learn request by same-owner CAS/readback.",
-      "observed_at": "2026-09-13T02:38:29.340851Z",
+      "merge_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
+      "native_resume_authorized": true,
+      "next_action": "Answer and consume the exact saved Learn request once; preserve its actual result and continue the ordinary Root lifecycle.",
+      "observed_at": "2026-09-13T03:08:03.006678Z",
       "pending_job_ids": [
         103660400955,
         103660401044,
@@ -41190,7 +41193,7 @@
       ],
       "pull_request": 677,
       "schema_version": 1,
-      "status": "accepted_full_ci_pending",
+      "status": "merged_full_ci_and_exact_main_readback_verified",
       "test_workflow_run_id": 34733431647,
       "tree_sha": "9b946882892b38ff77284ef83ab5d0f2cb6b8538"
     },
@@ -41251,9 +41254,9 @@
       "snapshot_revision": 6,
       "task4_replayed": false
     },
-    "native_resume_authorized": false,
+    "native_resume_authorized": true,
     "native_resume_executed": true,
-    "next_action": "Publish exact completed Consolidate/Episode and the frozen Learn request with matching state, full CI and main readback before next resume; never replay completed Consolidate, Candidate5 or Task4.",
+    "next_action": "Answer and consume the exact saved Learn request once; preserve its actual result and continue the ordinary Root lifecycle.",
     "observed_at": "2026-09-13T00:44:23.095584Z",
     "predecessor_checkpoint": {
       "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
@@ -42400,7 +42403,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T03:01:32.082Z",
+  "heartbeat_at": "2026-09-13T03:08:03.006678Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43344,7 +43347,8 @@
     "lease_generation": 36,
     "occurred_at": "2026-09-13T02:27:50.897814Z",
     "receipt_ref": "artifacts/g36-native-consolidate-consume-receipt.json",
-    "remote_payload_verified": false,
+    "remote_main_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
+    "remote_payload_verified": true,
     "saved_commit": "b48ca2a0f13cc9b3c8801eb696e4fd210d901a02"
   },
   "last_verified_effect": {
@@ -43754,8 +43758,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Publish Task4 through full unchanged-head CI and exact main readback, then consume it once with fresh source receipts and follow the actual immediate Candidate/Consolidate/Learn frontier.",
-  "next_tool": "publish exact frozen Learn frontier",
-  "next_tool_action": "Publish exact completed Consolidate/Episode and the frozen Learn request with matching state, full CI and main readback before next resume; never replay completed Consolidate, Candidate5 or Task4.",
+  "next_tool": "work-submit invoke-21217ff15f54deae59ad1318",
+  "next_tool_action": "Answer and consume the exact saved Learn request once; preserve its actual result and continue the ordinary Root lifecycle.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -47990,22 +47994,22 @@
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-09-13T02:31:09.693103Z",
+    "evaluated_at": "2026-09-13T03:08:03.006678Z",
     "evidence_refs": [
-      "https://github.com/bachikoljunior-blip/O/pull/676",
-      "https://github.com/bachikoljunior-blip/O/commit/707a67c23b387704f6781508f4d9d34983b73b22",
-      "https://github.com/bachikoljunior-blip/O/actions/runs/34731051147",
-      "artifacts/g36-native-candidate5-consume-receipt.json",
+      "https://github.com/bachikoljunior-blip/O/pull/677",
+      "https://github.com/bachikoljunior-blip/O/commit/796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
+      "https://github.com/bachikoljunior-blip/O/actions/runs/34733431647",
+      "artifacts/g36-native-consolidate-consume-receipt.json",
       "agi/USER_INPUT_INBOX.json"
     ],
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "executor_binding": "current_chatgpt_work_session",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
-    "idempotency_key": "O:g36:PR676:Consolidate:one-consume:v1",
+    "idempotency_key": "O:g36:PR677:Learn:one-consume:v1",
     "lease_generation": 36,
     "model_identity": "chatgpt-work-model-unverified",
     "pending_publication_hold": {
-      "active": true,
+      "active": false,
       "all_predecessor_replays_forbidden": [
         "invoke-aca17c412d7447e3c528b291",
         "invoke-031bd4d05375a4758155c8a8",
@@ -48062,14 +48066,16 @@
       },
       "idempotency_key": "O:g36:consolidate-consumed:learn-replay-hold:v1",
       "lease_generation": 36,
-      "native_resume_authorized": false,
+      "native_resume_authorized": true,
       "next_action": "Publish exact completed Consolidate/Episode and the frozen Learn request with matching state, full CI and main readback before next resume; never replay completed Consolidate, Candidate5 or Task4.",
       "observed_at": "2026-09-13T02:31:09.693103Z",
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "c9ea3253afe6058d14859ac1525133f86adceb55:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
       "publication_blocker": null,
-      "publication_verified": false,
+      "publication_verified": true,
+      "resolution_merge_sha": "796f3d8a4d70c95b8f8a1bbbdf6292985a9fabf1",
+      "resolved_at": "2026-09-13T03:08:03.006678Z",
       "schema_version": 1
     },
     "policy_bindings": {
@@ -48086,8 +48092,8 @@
       "reason": "PR674 unchanged head passed full CI and directive preflight, then merged after the actual post-CI physical exit was detected. Remote main readback verifies all23 Task4 content blobs, the unchanged revision4 snapshot, saved request, saved response and native journal. The saved Task4 response is authorized for one native consume; original scientific limits, all13 parents and prior failures remain unchanged.",
       "resume_authorized": true
     },
-    "reason": "Candidate5 completed once under generation36. The exact saved Consolidate frontier passed full PR676 CI, merged, and read back from main. Continue the unique unanswered Consolidate request without replaying Candidate5 or Task4.",
-    "resume_authorized": false,
+    "reason": "Consolidate completed once under generation36. The exact saved Learn frontier passed full PR677 CI, merged, and read back from main. Continue the unique unanswered Learn request without replaying Consolidate, Candidate5 or Task4.",
+    "resume_authorized": true,
     "run_id": "run-work-g35-primary-continuation-v1",
     "schema_version": 1,
     "successor_revalidation_required": false,
