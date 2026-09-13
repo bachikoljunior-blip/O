@@ -48380,8 +48380,8 @@
   "source_state_blob_sha": "e22e8c595b9c3d2626fc0c33e67a90d2c4884130",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
-    "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-09-13T07:39:15.500524Z",
+    "classification": "recoverable_candidate_preflight_cache_publication_required",
+    "evaluated_at": "2026-09-13T07:46:15.021769Z",
     "evidence_refs": [
       "https://github.com/bachikoljunior-blip/O/pull/682",
       "https://github.com/bachikoljunior-blip/O/commit/831939eae0160f27b160f7b40f16541b30ab8af8",
@@ -48396,7 +48396,7 @@
     "lease_generation": 36,
     "model_identity": "chatgpt-work-model-unverified",
     "pending_publication_hold": {
-      "active": false,
+      "active": true,
       "all_predecessor_replays_forbidden": [
         "invoke-aca17c412d7447e3c528b291",
         "invoke-031bd4d05375a4758155c8a8",
@@ -48405,8 +48405,8 @@
         "invoke-eb6d8c8a9a1a32bb79156a13",
         "invoke-1e33ccbeead76b5c335fc431"
       ],
-      "all_required_jobs_success": true,
-      "classification": "candidate_consumed_execute_source_observation_repair_publication_required",
+      "all_required_jobs_success": false,
+      "classification": "candidate_preflight_cache_omitted_from_ignored_publication_manifest",
       "completed_effect": {
         "authorization_main_sha": "fbccaac36120c41cbb961f7a61fd3cf8a19f552e",
         "behavioral_arms_started": 0,
@@ -48496,7 +48496,7 @@
       "corrected_saved_tree": "7307abb533d348fc495d308b7a0276218f6118fb",
       "directive_workflow_run_id": 34744265536,
       "do_not_reconsume_work_invocation_id": "invoke-1e33ccbeead76b5c335fc431",
-      "exact_main_readback_verified": true,
+      "exact_main_readback_verified": false,
       "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
       "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
       "first_failed_head_sha": "59ab9cf4fe5a18642a3519df41ce54fd5b0f94b0",
@@ -48518,17 +48518,40 @@
       },
       "idempotency_key": "O:g36:candidate-consumed:execute-source-repair:v1",
       "lease_generation": 36,
-      "native_resume_authorized": true,
-      "next_action": "Publish and exact-read back this completed Candidate effect and revision-10 frontier, then acquire matching fresh authoritative Work and CI observations before freezing Execute. Never consume Candidate again.",
-      "observed_at": "2026-09-13T07:35:54.448785Z",
+      "isolated_duplicate_candidate": {
+        "authoritative": false,
+        "created_at": "2026-09-13T07:40:56.696523Z",
+        "local_saved_commit": "d83239957f9022f06f149c2feb027a7a6087cf0b",
+        "local_saved_tree": "61dbe48b1086809b53efe1415da4ea474391632d",
+        "native_invocation_blob_sha": "004bdff00c8c81b212cd80980e2401c7c9829471",
+        "native_invocation_id": "invoke-5f6304913b28cf91a8efa75e",
+        "no_response_submitted": true,
+        "no_response_to_consume": true,
+        "payload_digest": "af9ed4fc03c81e43305feecef7524879614233cdcf235900aa0a231b6c6b456b",
+        "publication_status": "isolated_local_only_do_not_publish_as_pending_work",
+        "request_blob_sha": "469ef9d7c105051836471398a8a0248d88b39e4a",
+        "request_digest": "e77446f27d79384bc2ffb7b6c6ef95fa793b6f7c5b20e3ac625a2227ad35e25e",
+        "request_sha256": "62c32259f00fff44f01c97b18251e50f5116a0ae67883059aed28fdb9ba7a8ff",
+        "work_invocation_id": "invoke-e532582b5c6b974b74089ab4"
+      },
+      "native_resume_authorized": false,
+      "next_action": "Publish the exact original Candidate preflight cache with a recurrence guard, pass full exact-head CI, merge and exact-read back main. Then acquire new matching Work and CI observations and resume from revision 10. Never answer, publish as pending, consume, or recreate the isolated duplicate Candidate.",
+      "observed_at": "2026-09-13T07:46:15.021769Z",
+      "original_preflight_cache": {
+        "blob_sha": "ce2a00426f24eb44b4ad3749673f1a6f5718d877",
+        "local_saved_commit": "751c4fe4642e9c7c693b6b00dc62fe41b43af0e3",
+        "local_saved_tree": "c3344e0711dde63b8d14d417c3291e8f22670989",
+        "ref": ".continual/runs/run-work-g35-primary-continuation-v1/preflight/preflight-execute-831454c00600ebbdd2a8ee71.json",
+        "status": "exact_bytes_local_publication_pending"
+      },
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "fbccaac36120c41cbb961f7a61fd3cf8a19f552e:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
       "publication_blocker": null,
       "publication_head_sha": "7782808ed66ea0bf6343f948d3b2b282f4eef790",
       "publication_pull_request": 682,
-      "publication_status": "merged_exact_main_readback_verified",
-      "publication_verified": true,
+      "publication_status": "preflight_cache_repair_pending",
+      "publication_verified": false,
       "required_job_ids": [
         103689125254,
         103689125356,
@@ -48557,7 +48580,7 @@
       "reason": "PR674 unchanged head passed full CI and directive preflight, then merged after the actual post-CI physical exit was detected. Remote main readback verifies all23 Task4 content blobs, the unchanged revision4 snapshot, saved request, saved response and native journal. The saved Task4 response is authorized for one native consume; original scientific limits, all13 parents and prior failures remain unchanged.",
       "resume_authorized": true
     },
-    "reason": "PR682 publication and its missing-artifact repair are verified. The immediate failed Execute-resume attempt made no mutation and exposed only a native schema mismatch: when the authoritative prior-stop classifier reports no discretionary stop, this field must use the exact no_discretionary_stop_detected value. Fresh source observations will be reacquired after this state change.",
+    "reason": "The clean-main resume minted a second Candidate preflight because PR682 omitted the original successful Candidate preflight cache under an ignored native-run path. The duplicate is non-authoritative, locally isolated, has no response, and must never be answered or consumed. Native resume is revoked until the exact original cache and a recurrence guard pass full CI, merge, and exact main readback.",
     "recurrence_guard": {
       "entrypoint": "publish-before-successor plus matching fresh Work/CI source observations before Context Kernel",
       "status": "enforced"
@@ -48595,9 +48618,18 @@
         ],
         "cause_id": "execute-resume-descriptive-classification-schema-mismatch",
         "status": "implemented"
+      },
+      {
+        "artifact_refs": [
+          ".continual/runs/run-work-g35-primary-continuation-v1/preflight/preflight-execute-831454c00600ebbdd2a8ee71.json",
+          "artifacts/g36-isolated-duplicate-candidate-preflight-receipt.json",
+          "tests/test_primary_work_publication.py"
+        ],
+        "cause_id": "candidate-preflight-cache-omitted-from-ignored-publication-manifest",
+        "status": "exact_cache_and_recurrence_guard_publication_pending"
       }
     ],
-    "resume_authorized": true,
+    "resume_authorized": false,
     "root_causes": [
       {
         "cause_id": "candidate-consume-durability-status-schema-mismatch",
@@ -48631,11 +48663,20 @@
           "agi/WORK_EXECUTION_STATE.json#start_of_run_continuity_preflight"
         ],
         "mechanism": "The authorization used a descriptive classification not accepted by assert_work_resume_continuity_preflight when its authoritative prior-stop result is no_discretionary_stop_detected."
+      },
+      {
+        "cause_id": "candidate-preflight-cache-omitted-from-ignored-publication-manifest",
+        "evidence_refs": [
+          ".continual/runs/run-work-g35-primary-continuation-v1/preflight/preflight-execute-831454c00600ebbdd2a8ee71.json",
+          "artifacts/g36-isolated-duplicate-candidate-preflight-receipt.json",
+          "src/continual/engine.py"
+        ],
+        "mechanism": "The original Candidate response was consumed exactly once and its preflight result was cached under an ignored native-run path. PR682 published the completed effect but omitted that cache, so the next clean-main resume could not recognize the completed preflight and minted a second Candidate request for the unchanged Execute unit."
       }
     ],
     "run_id": "run-work-g35-primary-continuation-v1",
     "schema_version": 1,
-    "successor_revalidation_required": false,
+    "successor_revalidation_required": true,
     "validated_repairs": [
       "PR655 unchanged head d31ba52bae4331d657c40f76d357675d2054af90: four shards and aggregate succeeded.",
       "Main1719b867f1568889a5adfae7a6119de1f9c6d381:47 reviewed blobs exact; old frozen request/journal/snapshot unchanged.",
