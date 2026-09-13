@@ -172,12 +172,12 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T05:58:01.358512Z",
-    "completed_effect_receipt_durability": "immutable local Git commit; remote replay hold CAS pending",
+    "checkpointed_at": "2026-09-13T05:59:35.699657Z",
+    "completed_effect_receipt_durability": "Candidate response replay hold exact-read back; PR681 exact response blob verified; CI pending",
     "completed_effect_receipt_ref": ".continual/work-model/invocations/invoke-1e33ccbeead76b5c335fc431/response.json",
-    "current_head_sha": "35be80df94ea303ef9c8ed72fa5de80ab6dbe779",
-    "current_main_sha": "86d8b6a272e64739ffe894ff85459a178bc1f525",
-    "current_state_blob_sha": "a1f936785b5964590b3e6ee69a34235a3635bc56",
+    "current_head_sha": "1e9348195ccd396f810ec4cf266bdd08eced0ce8",
+    "current_main_sha": "76f4a0aa2c5942d17891f8cf73487dc8a35685af",
+    "current_state_blob_sha": "280d070aa0494e86beb253e72ec5e7ba7f0dd7cb",
     "exact_frontier": "Candidate response saved exactly once and unconsumed; remote publication and protected CI are required before native consume.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
@@ -188,12 +188,17 @@
     "goal_revision": 118,
     "idempotency_key": "O:g36:candidate-response:publish-before-consume:v1",
     "lease_generation": 36,
-    "next_action": "Publish the exact saved Candidate response, require unchanged-head CI and exact main readback, then consume it exactly once and freeze Execute.",
-    "next_tool": "publish exact Candidate response from immutable saved commit",
-    "pending_ci_run_ids": [],
+    "next_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR681 head; merge with expected-head CAS and exact-read back the Candidate response before consuming it once.",
+    "next_tool": "wait for exact-head PR681 required CI",
+    "pending_ci_run_ids": [
+      34741614831,
+      34741614827
+    ],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      681
+    ],
     "resume_required": true,
     "schema_version": 1,
     "snapshot_blob_sha": "86b767e0e219e42297511240f4361b70800746d0",
@@ -41154,6 +41159,26 @@
     "test_workflow_run_id": 34739669433,
     "work_invocation_id": "invoke-1e33ccbeead76b5c335fc431"
   },
+  "generation36_candidate_response_publication": {
+    "branch": "o-work-g36-candidate-source-gate-response",
+    "directive_workflow_run_id": 34741614827,
+    "exact_file_readback_verified": true,
+    "native_invocation_id": "invoke-cedfb9ba69caee1135e15359",
+    "observed_at": "2026-09-13T05:59:35.699657Z",
+    "output_digest": "b05f7072603da843fe935fdabfdf2404a81a22c6e81675475f716986a04fbe4a",
+    "publication_commit": "1e9348195ccd396f810ec4cf266bdd08eced0ce8",
+    "pull_request": 681,
+    "response_blob_sha": "bb497ea4df7aeb0270e74b5c86573acb5434a44f",
+    "response_consumed": false,
+    "response_digest": "834367004ad5ebaebcfbad87c27370edb05fd2843df523cb5e20d74af02fd6f5",
+    "resume_required": true,
+    "saved_content_commit": "35be80df94ea303ef9c8ed72fa5de80ab6dbe779",
+    "saved_content_tree": "95bb0c407ea5c76adeb7e04512caeabec60c48a6",
+    "schema_version": 1,
+    "status": "ci_pending",
+    "test_workflow_run_id": 34741614831,
+    "work_invocation_id": "invoke-1e33ccbeead76b5c335fc431"
+  },
   "generation36_consolidate_publication": {
     "branch": "o-work-g36-consolidate-consume",
     "completed_effect_receipt": "artifacts/g36-native-consolidate-consume-receipt.json",
@@ -41428,8 +41453,8 @@
     },
     "native_resume_authorized": false,
     "native_resume_executed": true,
-    "next_action": "Publish the exact saved Candidate response, require unchanged-head CI and exact main readback, then consume it exactly once and freeze Execute.",
-    "observed_at": "2026-09-13T05:58:01.358512Z",
+    "next_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR681 head; merge with expected-head CAS and exact-read back the Candidate response before consuming it once.",
+    "observed_at": "2026-09-13T05:59:35.699657Z",
     "predecessor_checkpoint": {
       "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
       "blocker": null,
@@ -42617,7 +42642,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T05:58:01.358512Z",
+  "heartbeat_at": "2026-09-13T05:59:35.699657Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43538,7 +43563,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T05:58:01.358512Z",
+  "last_activity_at": "2026-09-13T05:59:35.699657Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_eliminated_stop_cause": {
     "classification": "discretionary_stop_cause_eliminated_and_validated",
@@ -44011,8 +44036,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Publish Task4 through full unchanged-head CI and exact main readback, then consume it once with fresh source receipts and follow the actual immediate Candidate/Consolidate/Learn frontier.",
-  "next_tool": "publish exact Candidate response from immutable saved commit",
-  "next_tool_action": "Publish the exact saved Candidate response, require unchanged-head CI and exact main readback, then consume it exactly once and freeze Execute.",
+  "next_tool": "wait for exact-head PR681 required CI",
+  "next_tool_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR681 head; merge with expected-head CAS and exact-read back the Candidate response before consuming it once.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -48268,6 +48293,7 @@
         "invoke-eb6d8c8a9a1a32bb79156a13"
       ],
       "classification": "candidate_response_saved_publication_required",
+      "directive_workflow_run_id": 34741614827,
       "do_not_reconsume_work_invocation_id": "invoke-eb6d8c8a9a1a32bb79156a13",
       "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
       "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
@@ -48289,13 +48315,17 @@
       "lease_generation": 36,
       "native_resume_authorized": false,
       "next_action": "Publish the exact saved Candidate response, require unchanged-head CI and exact main readback, then consume it exactly once and freeze Execute.",
-      "observed_at": "2026-09-13T05:58:01.358512Z",
+      "observed_at": "2026-09-13T05:59:35.699657Z",
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "86d8b6a272e64739ffe894ff85459a178bc1f525:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
       "publication_blocker": null,
+      "publication_head_sha": "1e9348195ccd396f810ec4cf266bdd08eced0ce8",
+      "publication_pull_request": 681,
+      "publication_status": "ci_pending",
       "publication_verified": false,
-      "schema_version": 1
+      "schema_version": 1,
+      "test_workflow_run_id": 34741614831
     },
     "policy_bindings": {
       "agi/USER_DIRECTIVE_EVENTS.json": "1c7817b90db9825826441a1e63f78ce45aca68023881de5fb571c5372f263f2b",
@@ -49709,7 +49739,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T05:58:01.358512Z",
+  "updated_at": "2026-09-13T05:59:35.699657Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T01:26:08.262203Z",
