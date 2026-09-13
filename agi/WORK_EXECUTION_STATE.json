@@ -1181,7 +1181,7 @@
     "snapshot_head_sha": "de8518942208efb27783c748de1b0404e82f8346",
     "snapshot_phase": "root_pending",
     "snapshot_revision": 14,
-    "source_main_sha": "6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
+    "source_main_sha": "de8518942208efb27783c748de1b0404e82f8346",
     "source_state_blob_sha": "f972983f0911e50e183f1cac828ad82ab1991ea0",
     "status": "remote_main_readback_verified",
     "target_component": "root",
@@ -1407,7 +1407,7 @@
     "snapshot_head_sha": "de8518942208efb27783c748de1b0404e82f8346",
     "snapshot_phase": "root_pending",
     "snapshot_revision": 14,
-    "source_main_sha": "6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
+    "source_main_sha": "de8518942208efb27783c748de1b0404e82f8346",
     "source_state_blob_sha": "f972983f0911e50e183f1cac828ad82ab1991ea0",
     "status": "remote_main_readback_verified",
     "target_component": "root",
@@ -48464,18 +48464,21 @@
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-09-13T08:25:00Z",
+    "evaluated_at": "2026-09-13T13:15:31Z",
     "evidence_refs": [
       "https://github.com/bachikoljunior-blip/O/pull/682",
       "https://github.com/bachikoljunior-blip/O/commit/831939eae0160f27b160f7b40f16541b30ab8af8",
       "https://github.com/bachikoljunior-blip/O/actions/runs/34744265576",
       "https://github.com/bachikoljunior-blip/O/actions/runs/34744265536",
-      "artifacts/g36-native-candidate-consume-receipt.json"
+      "artifacts/g36-native-candidate-consume-receipt.json",
+      "https://github.com/bachikoljunior-blip/O/pull/689",
+      "https://github.com/bachikoljunior-blip/O/commit/6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
+      "https://github.com/bachikoljunior-blip/O/commit/b29188c6682503fd878cfe93de69d040ba14e8ac"
     ],
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "executor_binding": "current_chatgpt_work_session",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
-    "idempotency_key": "O:g36:PR682:execute-preflight-classification:v1",
+    "idempotency_key": "O:g36:root14:revision55-continuity-preflight-repair:v1",
     "lease_generation": 36,
     "model_identity": "chatgpt-work-model-unverified",
     "pending_publication_hold": {
@@ -48705,12 +48708,12 @@
       "test_workflow_run_id": 34753928797
     },
     "policy_bindings": {
-      "agi/USER_DIRECTIVE_EVENTS.json": "63d4160cdc02ef464c1ed5de215e43236d51f31cb6d0b4793e88c89b87958ece",
-      "agi/USER_INPUT_INBOX.json": "9da64910420583c9cae73156e30f67c704d0b3f8e239afbe2bd947713d1da531",
+      "agi/USER_DIRECTIVE_EVENTS.json": "fca3794beae741e27d46d82a72116b3337f8b4e8f9c31965d9a95abca8d90919",
+      "agi/USER_INPUT_INBOX.json": "202bf4950f72913b9022c3ccc6a5f6a7be5904b1afdadaba27ec6e09d62cb281",
       "agi/WORK_STRATEGY.json": "4ef77242671fab300972c368520f414223ee9d22806d9fa4724dbe0f56535f1b"
     },
-    "policy_revision": 54,
-    "policy_revision_acknowledged": 54,
+    "policy_revision": 55,
+    "policy_revision_acknowledged": 55,
     "previous_resume_authorization": {
       "classification": "no_discretionary_stop_detected",
       "evaluated_at": "2026-09-12T08:17:11.305Z",
@@ -48718,7 +48721,7 @@
       "reason": "PR674 unchanged head passed full CI and directive preflight, then merged after the actual post-CI physical exit was detected. Remote main readback verifies all23 Task4 content blobs, the unchanged revision4 snapshot, saved request, saved response and native journal. The saved Task4 response is authorized for one native consume; original scientific limits, all13 parents and prior failures remain unchanged.",
       "resume_authorized": true
     },
-    "reason": "PR683 eliminated the clean-main duplicate-Candidate cause: the exact original Candidate preflight cache is on main, all required exact-head CI and directive checks passed, and the ignore-pattern recurrence guard is active. The isolated duplicate remains non-authoritative with no response. Fresh Work and CI observations are required before the next revision-10 resume, which must freeze Execute rather than another Candidate.",
+    "reason": "The first Root-response consume attempt failed closed before mutation because the continuity preflight remained bound to inbox revision54 after the separately CI-validated revision55 deadline-compliance ingress. PR689 and exact main readback verify inbox55 and its reviewed directive ledger without changing the frozen Root request or response. This repair binds the preflight to those exact revision55 bytes; the existing one-consume guard and predecessor replay prohibitions remain unchanged.",
     "recurrence_guard": {
       "entrypoint": "publish-before-successor plus matching fresh Work/CI source observations before Context Kernel",
       "status": "implemented_and_validated"
@@ -48851,6 +48854,28 @@
         "status": "passed"
       }
     ]
+  },
+  "continuity_preflight_revision55_repair": {
+    "cause": "The Root native-consume preflight still named policy revision54 after inbox revision55 and its reviewed directive ledger had passed required CI and exact main readback.",
+    "detected_at": "2026-09-13T13:13:00Z",
+    "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
+    "failed_command_mutated_native_state": false,
+    "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
+    "fixed_deadline_utc": "2026-10-13T07:43:29Z",
+    "idempotency_key": "O:g36:root14:revision55-continuity-preflight-repair:v1",
+    "lease_generation": 36,
+    "repair": "Rebind the start-of-run preflight to inbox revision55 and the exact SHA-256 digests of the current inbox, reviewed directive ledger, and unchanged Work strategy. Restore the continuation source-main field to the immutable snapshot publication commit already named by snapshot_head_sha. Preserve the Root request, response, one-consume limit, and all predecessor replay prohibitions.",
+    "repair_status": "locally_validated_pending_remote_cas_readback",
+    "validation": {
+      "classification": "no_discretionary_stop_detected",
+      "continuation_source_main_sha": "de8518942208efb27783c748de1b0404e82f8346",
+      "native_response_consumed": false,
+      "policy_revision": 55,
+      "preflight_result": "passed",
+      "request_blob_sha": "7305855e8f818b24d975e3f28de53a0194890c00",
+      "response_blob_sha": "0a4813903e7ef2e2dd7738cdc31df46c64be8483",
+      "snapshot_blob_sha": "4fcd81edc6aa1c72abdaa97ebd54decedaa52c1a"
+    }
   },
   "started_at": "2026-09-11T10:00:21.530Z",
   "state_only_ci_queue_recurrence_v48": {
