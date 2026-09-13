@@ -172,13 +172,13 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T05:47:18.423498Z",
-    "completed_effect_receipt_durability": "Candidate request replay hold exact-read back; PR680 exact three-file head verified; CI pending",
+    "checkpointed_at": "2026-09-13T05:53:59.913752Z",
+    "completed_effect_receipt_durability": "PR680 exact-head CI, expected-head merge, and exact three-file main readback verified",
     "completed_effect_receipt_ref": "artifacts/g36-native-root-consume-receipt.json",
-    "current_head_sha": "c88c1e644aaa51655ed78eec6ca6d0afd3a80bc3",
-    "current_main_sha": "9a2a48daef89e9f1dabb8ea9f61370347c28bdbc",
-    "current_state_blob_sha": "104658a2abe1b65bdb5ce4f40a126c0699a26b56",
-    "exact_frontier": "Root completed once; one Candidate Evaluate preflight is frozen and unanswered before the selected Execute unit.",
+    "current_head_sha": "16035197b250d312419c3550ef8d215a53fb83b6",
+    "current_main_sha": "16035197b250d312419c3550ef8d215a53fb83b6",
+    "current_state_blob_sha": "e2542630d2d3bbc16a2b3a8908c00a66d36bdc04",
+    "exact_frontier": "One unique Candidate Evaluate request is durably published on main, unanswered and authorized for one response submission.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
     "frozen_invocation_id": "invoke-1e33ccbeead76b5c335fc431",
@@ -186,21 +186,14 @@
     "frozen_request_digest": "e47d99838ee726cd3077b77d493311b4ff85efd083328f970224fa0f9a265f85",
     "frozen_response_digest": null,
     "goal_revision": 118,
-    "idempotency_key": "O:g36:unit-pending:candidate-preflight-freeze:v1",
+    "idempotency_key": "O:g36:PR680:candidate-answer:once:v1",
     "lease_generation": 36,
-    "next_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR680 head; merge with expected-head CAS and exact-read back main before answering Candidate Evaluate.",
-    "next_tool": "continue bounded observation of PR680 exact-head CI",
-    "pending_ci_run_ids": [
-      34739669433,
-      34739669440
-    ],
-    "pending_job_ids": [
-      103677112982
-    ],
+    "next_action": "Evaluate the exact upcoming source/baseline Execute unit with the active prompt, submit the unique Candidate response once, validate native completion, then freeze the Execute request without replaying any predecessor.",
+    "next_tool": "continual work-submit invoke-1e33ccbeead76b5c335fc431",
+    "pending_ci_run_ids": [],
+    "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [
-      680
-    ],
+    "pending_pull_requests": [],
     "resume_required": true,
     "schema_version": 1,
     "snapshot_blob_sha": "86b767e0e219e42297511240f4361b70800746d0",
@@ -1184,15 +1177,15 @@
     "schema_version": 1,
     "snapshot_blob_sha": "86b767e0e219e42297511240f4361b70800746d0",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "5614d842bdb184abfac779bb4004d0d973d8399f",
+    "snapshot_head_sha": "16035197b250d312419c3550ef8d215a53fb83b6",
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 9,
-    "source_main_sha": "e3974bf88ee90cd62c7d5dd7756b414f4924f728",
-    "source_state_blob_sha": "5011436b5a8a750a7be19948dd56ae932c6c4ed0",
-    "status": "pending_publication",
+    "source_main_sha": "16035197b250d312419c3550ef8d215a53fb83b6",
+    "source_state_blob_sha": "e2542630d2d3bbc16a2b3a8908c00a66d36bdc04",
+    "status": "remote_main_readback_verified_unanswered",
     "target_component": "execute",
-    "verified_at": null,
-    "verified_remote_readback": false
+    "verified_at": "2026-09-13T05:53:59.913752Z",
+    "verified_remote_readback": true
   },
   "continuation_source": "repository_latest_main_only",
   "continuity_correction": {
@@ -1371,7 +1364,7 @@
     "text": "Oという名前のリポジトリの主実行止まってたらここで再開して。停止原因改善もするようになってなかったらするようにして再開して。続けて",
     "workspace_identifier": "e9b6a8a25162"
   },
-  "durability_status": "pending_publication",
+  "durability_status": "remote_main_readback_verified",
   "exact_continuation": {
     "completed_work_invocation_id": "invoke-eb6d8c8a9a1a32bb79156a13",
     "current_unit_id": "unit-generation36-recovery-control-source-baseline-gate-v1",
@@ -1410,15 +1403,15 @@
     "schema_version": 1,
     "snapshot_blob_sha": "86b767e0e219e42297511240f4361b70800746d0",
     "snapshot_branch": "main",
-    "snapshot_head_sha": "5614d842bdb184abfac779bb4004d0d973d8399f",
+    "snapshot_head_sha": "16035197b250d312419c3550ef8d215a53fb83b6",
     "snapshot_phase": "unit_pending",
     "snapshot_revision": 9,
-    "source_main_sha": "e3974bf88ee90cd62c7d5dd7756b414f4924f728",
-    "source_state_blob_sha": "5011436b5a8a750a7be19948dd56ae932c6c4ed0",
-    "status": "pending_publication",
+    "source_main_sha": "16035197b250d312419c3550ef8d215a53fb83b6",
+    "source_state_blob_sha": "e2542630d2d3bbc16a2b3a8908c00a66d36bdc04",
+    "status": "remote_main_readback_verified_unanswered",
     "target_component": "execute",
-    "verified_at": null,
-    "verified_remote_readback": false
+    "verified_at": "2026-09-13T05:53:59.913752Z",
+    "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
     "conclusion": "success",
@@ -41115,29 +41108,43 @@
     "verified_at": "2026-09-13T02:21:24.946711Z"
   },
   "generation36_candidate_preflight_publication": {
+    "all_required_jobs_success": true,
     "branch": "o-work-g36-candidate-preflight-freeze",
     "completed_required_job_ids": [
+      103677112982,
       103677113051,
       103677113072,
       103677113105,
+      103681379424,
       103677113002
     ],
     "directive_workflow_run_id": 34739669440,
     "exact_file_readback_verified": true,
+    "exact_main_readback_verified": true,
+    "merge_sha": "16035197b250d312419c3550ef8d215a53fb83b6",
     "native_invocation_id": "invoke-cedfb9ba69caee1135e15359",
-    "observed_at": "2026-09-13T05:47:18.423498Z",
+    "observed_at": "2026-09-13T05:53:59.913752Z",
     "publication_commit": "c88c1e644aaa51655ed78eec6ca6d0afd3a80bc3",
     "publication_tree": "f37b64004ae9c9ffbea6b56a5f04d2c4d21f4f7b",
     "pull_request": 680,
     "request_digest": "e47d99838ee726cd3077b77d493311b4ff85efd083328f970224fa0f9a265f85",
-    "resume_required": true,
-    "running_required_job_ids": [
-      103677112982
+    "required_job_ids": [
+      103677112982,
+      103677113051,
+      103677113072,
+      103677113105,
+      103681379424,
+      103677113002
     ],
+    "response_authorized": true,
+    "response_consumed": false,
+    "response_submitted": false,
+    "resume_required": true,
+    "running_required_job_ids": [],
     "saved_content_commit": "5614d842bdb184abfac779bb4004d0d973d8399f",
     "saved_content_tree": "ac9036e9bee59d078b6524bde38a0e3d8cfb2ba6",
     "schema_version": 1,
-    "status": "ci_partially_complete",
+    "status": "merged_exact_main_readback_verified",
     "test_workflow_run_id": 34739669433,
     "work_invocation_id": "invoke-1e33ccbeead76b5c335fc431"
   },
@@ -41337,6 +41344,9 @@
     "approved_manifest_sha256": "f7e199f291174213b4c5cdb5ff41789f1cafd47fbd43f04d64042e1713f0e627",
     "approved_tree": "7df492caf7aa08458dc92fb7dda377187184c9ac",
     "authorization_verified": true,
+    "candidate_response_authorized": true,
+    "candidate_response_consumed": false,
+    "candidate_response_submitted": false,
     "concrete_stop_cause": "Saved Task4 consumed once; Candidate5 successor publication blocked by explicit public-payload approval requirement. User now approved the exact reviewed 11-file replacement.",
     "executor_surface": "current_chatgpt_work_session native continual CLI",
     "frozen_nine_blobs_preserved": true,
@@ -41412,8 +41422,8 @@
     },
     "native_resume_authorized": false,
     "native_resume_executed": true,
-    "next_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR680 head; merge with expected-head CAS and exact-read back main before answering Candidate Evaluate.",
-    "observed_at": "2026-09-13T05:47:18.423498Z",
+    "next_action": "Evaluate the exact upcoming source/baseline Execute unit with the active prompt, submit the unique Candidate response once, validate native completion, then freeze the Execute request without replaying any predecessor.",
+    "observed_at": "2026-09-13T05:53:59.913752Z",
     "predecessor_checkpoint": {
       "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
       "blocker": null,
@@ -42601,7 +42611,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T05:47:18.423498Z",
+  "heartbeat_at": "2026-09-13T05:53:59.913752Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43522,7 +43532,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T05:47:18.423498Z",
+  "last_activity_at": "2026-09-13T05:53:59.913752Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_eliminated_stop_cause": {
     "classification": "discretionary_stop_cause_eliminated_and_validated",
@@ -43995,8 +44005,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Publish Task4 through full unchanged-head CI and exact main readback, then consume it once with fresh source receipts and follow the actual immediate Candidate/Consolidate/Learn frontier.",
-  "next_tool": "continue bounded observation of PR680 exact-head CI",
-  "next_tool_action": "Require all four pytest shards, aggregate, and directive-source-preflight to succeed on unchanged PR680 head; merge with expected-head CAS and exact-read back main before answering Candidate Evaluate.",
+  "next_tool": "continual work-submit invoke-1e33ccbeead76b5c335fc431",
+  "next_tool_action": "Evaluate the exact upcoming source/baseline Execute unit with the active prompt, submit the unique Candidate response once, validate native completion, then freeze the Execute request without replaying any predecessor.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -48231,21 +48241,22 @@
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
     "classification": "no_discretionary_stop_detected",
-    "evaluated_at": "2026-09-13T05:09:45.284006Z",
+    "evaluated_at": "2026-09-13T05:53:59.913752Z",
     "evidence_refs": [
-      ".continual/work-model/invocations/invoke-1e33ccbeead76b5c335fc431/request.json",
-      ".continual/runs/run-work-g35-primary-continuation-v1/invocations/invoke-cedfb9ba69caee1135e15359.json",
-      "https://github.com/bachikoljunior-blip/O/pull/679",
-      "https://github.com/bachikoljunior-blip/O/commit/e3974bf88ee90cd62c7d5dd7756b414f4924f728"
+      "https://github.com/bachikoljunior-blip/O/pull/680",
+      "https://github.com/bachikoljunior-blip/O/commit/16035197b250d312419c3550ef8d215a53fb83b6",
+      "https://github.com/bachikoljunior-blip/O/actions/runs/34739669433",
+      "https://github.com/bachikoljunior-blip/O/actions/runs/34739669440",
+      ".continual/work-model/invocations/invoke-1e33ccbeead76b5c335fc431/request.json"
     ],
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "executor_binding": "current_chatgpt_work_session",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
-    "idempotency_key": "O:g36:unit-pending:candidate-preflight-freeze:v1",
+    "idempotency_key": "O:g36:PR680:candidate-answer:once:v1",
     "lease_generation": 36,
     "model_identity": "chatgpt-work-model-unverified",
     "pending_publication_hold": {
-      "active": true,
+      "active": false,
       "all_predecessor_replays_forbidden": [
         "invoke-aca17c412d7447e3c528b291",
         "invoke-031bd4d05375a4758155c8a8",
@@ -48253,6 +48264,7 @@
         "invoke-21217ff15f54deae59ad1318",
         "invoke-eb6d8c8a9a1a32bb79156a13"
       ],
+      "all_required_jobs_success": true,
       "classification": "candidate_preflight_frozen_publication_required",
       "completed_effect": {
         "authorization_main_sha": "240d07220c959e9bdb8efa141784850ebd0b5010",
@@ -48317,13 +48329,16 @@
         "task4_replayed": false
       },
       "completed_required_job_ids": [
+        103677112982,
         103677113051,
         103677113072,
         103677113105,
+        103681379424,
         103677113002
       ],
       "directive_workflow_run_id": 34739669440,
       "do_not_reconsume_work_invocation_id": "invoke-eb6d8c8a9a1a32bb79156a13",
+      "exact_main_readback_verified": true,
       "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
       "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
       "frozen_frontier": {
@@ -48339,20 +48354,28 @@
       },
       "idempotency_key": "O:g36:unit-pending:candidate-preflight-freeze:v1",
       "lease_generation": 36,
-      "native_resume_authorized": false,
+      "native_resume_authorized": true,
       "next_action": "Publish and exact-read back the unique Candidate preflight, then answer and consume it once before executing the selected source/baseline gate.",
-      "observed_at": "2026-09-13T05:47:18.423498Z",
+      "observed_at": "2026-09-13T05:53:59.913752Z",
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "e3974bf88ee90cd62c7d5dd7756b414f4924f728:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
       "publication_blocker": null,
       "publication_head_sha": "c88c1e644aaa51655ed78eec6ca6d0afd3a80bc3",
       "publication_pull_request": 680,
-      "publication_status": "ci_partially_complete",
-      "publication_verified": false,
-      "running_required_job_ids": [
-        103677112982
+      "publication_status": "merged_exact_main_readback_verified",
+      "publication_verified": true,
+      "required_job_ids": [
+        103677112982,
+        103677113051,
+        103677113072,
+        103677113105,
+        103681379424,
+        103677113002
       ],
+      "resolution_merge_sha": "16035197b250d312419c3550ef8d215a53fb83b6",
+      "resolved_at": "2026-09-13T05:53:59.913752Z",
+      "running_required_job_ids": [],
       "schema_version": 1,
       "test_workflow_run_id": 34739669433
     },
@@ -48370,7 +48393,7 @@
       "reason": "PR674 unchanged head passed full CI and directive preflight, then merged after the actual post-CI physical exit was detected. Remote main readback verifies all23 Task4 content blobs, the unchanged revision4 snapshot, saved request, saved response and native journal. The saved Task4 response is authorized for one native consume; original scientific limits, all13 parents and prior failures remain unchanged.",
       "resume_authorized": true
     },
-    "reason": "The Root-selected Execute unit entered its ordinary Candidate preflight and froze exactly one Work request. Publish it before any response or further native mutation.",
+    "reason": "The unique Candidate request passed full unchanged-head PR680 CI, merged with the expected head, and all three files read back exactly from main. Authorize one answer submission only; all predecessors remain replay-forbidden.",
     "recurrence_guard": {
       "entrypoint": "continual work-resume continuity preflight plus explicit origin/main refresh",
       "status": "enforced"
@@ -48384,7 +48407,7 @@
         "status": "implemented"
       }
     ],
-    "resume_authorized": false,
+    "resume_authorized": true,
     "root_causes": [
       {
         "cause_id": "stale-local-origin-main-before-root-consume",
@@ -49768,7 +49791,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T05:47:18.423498Z",
+  "updated_at": "2026-09-13T05:53:59.913752Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T01:26:08.262203Z",
