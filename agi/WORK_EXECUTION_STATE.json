@@ -172,13 +172,13 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T12:29:07Z",
+    "checkpointed_at": "2026-09-13T13:05:20Z",
     "completed_effect_receipt_durability": "The immutable Root response was submitted exactly once, published by PR688 after full CI, merged at 4686340375697d31dcc5d05a986f30aa7f3c2587 and exact-read back; consumption remains held for revision55 ingress and safe-boundary projection.",
     "completed_effect_receipt_ref": ".continual/work-model/invocations/invoke-1697f574da7b163af072a5b3/response.json",
     "current_head_sha": "6c0428836de92d8cb00ea71f3bf40a70fec71d3a",
-    "current_main_sha": "4686340375697d31dcc5d05a986f30aa7f3c2587",
-    "current_state_blob_sha": "394743f6c398302efb90be27cea67b91eb12274f",
-    "exact_frontier": "Root Work invoke-1697f574da7b163af072a5b3 has exactly one published and exact-read-back response digest 223d44d548d26c1189db50d94219b76ac39f9f661b56090c26d53bf4d83d8f66 selecting Task Evaluate. Revision55 deadline-followthrough ingress is pending CI/readback; native consumption remains unauthorized until that safe boundary.",
+    "current_main_sha": "6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
+    "current_state_blob_sha": "f972983f0911e50e183f1cac828ad82ab1991ea0",
+    "exact_frontier": "Root Work invoke-1697f574da7b163af072a5b3 has exactly one published and exact-read-back response selecting Task Evaluate. Revision55 and its reviewed fixed-deadline compliance atom passed full CI in PR689, merged at 6bc5faeb053ef5a1780278e3f83cd7600a6482cc and read back exactly. Exactly one native consume is now authorized so the new direction is projected into the Task Evaluate boundary.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
     "frozen_invocation_id": "invoke-1697f574da7b163af072a5b3",
@@ -187,19 +187,14 @@
     "frozen_request_digest": "2bf415ad829987c98caeccbedc4aab6cfa08c456b1475beed952be1eb548dfac",
     "frozen_response_digest": "223d44d548d26c1189db50d94219b76ac39f9f661b56090c26d53bf4d83d8f66",
     "goal_revision": 118,
-    "idempotency_key": "O:g36:root14:invoke-1697f574da7b163af072a5b3:response-publication-hold:v1",
+    "idempotency_key": "O:g36:root14:invoke-1697f574da7b163af072a5b3:native-consume-after-r55:v1",
     "lease_generation": 36,
-    "next_action": "Complete PR689 full unchanged-head CI and exact main readback for inbox revision55, project the fixed-deadline compliance audit at the next safe semantic boundary, then authorize exactly one native consume.",
-    "next_tool": "PR689 exact-head CI observation, expected-head merge and exact readback",
-    "pending_ci_run_ids": [
-      34757186279,
-      34757186298
-    ],
+    "next_action": "Consume the published Root response exactly once through the native run, verify the Task Evaluate request projects inbox revision55 and the fixed deadline, then publish the new frontier before any Work response.",
+    "next_tool": "continual work-resume with max-steps 1",
+    "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [
-      689
-    ],
+    "pending_pull_requests": [],
     "resume_required": true,
     "schema_version": 1,
     "snapshot_blob_sha": "4fcd81edc6aa1c72abdaa97ebd54decedaa52c1a",
@@ -1186,11 +1181,11 @@
     "snapshot_head_sha": "de8518942208efb27783c748de1b0404e82f8346",
     "snapshot_phase": "root_pending",
     "snapshot_revision": 14,
-    "source_main_sha": "4686340375697d31dcc5d05a986f30aa7f3c2587",
-    "source_state_blob_sha": "394743f6c398302efb90be27cea67b91eb12274f",
-    "status": "pending_user_input_ingress_hold",
+    "source_main_sha": "6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
+    "source_state_blob_sha": "f972983f0911e50e183f1cac828ad82ab1991ea0",
+    "status": "remote_main_readback_verified",
     "target_component": "root",
-    "verified_at": "2026-09-13T12:29:07Z",
+    "verified_at": "2026-09-13T13:05:20Z",
     "verified_remote_readback": true
   },
   "continuation_source": "repository_latest_main_only",
@@ -1412,11 +1407,11 @@
     "snapshot_head_sha": "de8518942208efb27783c748de1b0404e82f8346",
     "snapshot_phase": "root_pending",
     "snapshot_revision": 14,
-    "source_main_sha": "4686340375697d31dcc5d05a986f30aa7f3c2587",
-    "source_state_blob_sha": "394743f6c398302efb90be27cea67b91eb12274f",
-    "status": "pending_user_input_ingress_hold",
+    "source_main_sha": "6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
+    "source_state_blob_sha": "f972983f0911e50e183f1cac828ad82ab1991ea0",
+    "status": "remote_main_readback_verified",
     "target_component": "root",
-    "verified_at": "2026-09-13T12:29:07Z",
+    "verified_at": "2026-09-13T13:05:20Z",
     "verified_remote_readback": true
   },
   "exact_head_ci_observation": {
@@ -48484,7 +48479,7 @@
     "lease_generation": 36,
     "model_identity": "chatgpt-work-model-unverified",
     "pending_publication_hold": {
-      "active": true,
+      "active": false,
       "all_predecessor_replays_forbidden": [
         "invoke-aca17c412d7447e3c528b291",
         "invoke-031bd4d05375a4758155c8a8",
@@ -48494,7 +48489,7 @@
         "invoke-1e33ccbeead76b5c335fc431"
       ],
       "all_required_jobs_success": true,
-      "classification": "root_response_submitted_once_publication_pending",
+      "classification": "root_response_and_revision55_ingress_merged_exact_readback_native_consume_authorized_once",
       "completed_effect": {
         "authorization_main_sha": "fbccaac36120c41cbb961f7a61fd3cf8a19f552e",
         "behavioral_arms_started": 0,
@@ -48613,7 +48608,7 @@
         "snapshot_blob_sha": "4fcd81edc6aa1c72abdaa97ebd54decedaa52c1a",
         "snapshot_revision": 14
       },
-      "idempotency_key": "O:g36:root14:invoke-1697f574da7b163af072a5b3:response-publication-hold:v1",
+      "idempotency_key": "O:g36:root14:invoke-1697f574da7b163af072a5b3:native-consume-after-r55:v1",
       "lease_generation": 36,
       "isolated_duplicate_candidate": {
         "authoritative": false,
@@ -48631,14 +48626,14 @@
         "request_sha256": "62c32259f00fff44f01c97b18251e50f5116a0ae67883059aed28fdb9ba7a8ff",
         "work_invocation_id": "invoke-e532582b5c6b974b74089ab4"
       },
-      "native_resume_authorized": false,
-      "response_consumption_authorized": false,
+      "native_resume_authorized": true,
+      "response_consumption_authorized": true,
       "response_consumption_limit": 1,
       "response_submission_authorized": false,
       "response_submission_completed": true,
       "response_submission_limit": 1,
-      "next_action": "Complete revision55 deadline-followthrough ingress through PR689 full CI and exact readback, project it at the next safe boundary, then authorize exactly one native consume.",
-      "observed_at": "2026-09-13T11:52:26Z",
+      "next_action": "Consume Root response invoke-1697f574da7b163af072a5b3 exactly once, verify the successor Task Evaluate projection includes inbox revision55 and the fixed deadline, and publish the new frontier before any response.",
+      "observed_at": "2026-09-13T13:05:20Z",
       "original_preflight_cache": {
         "blob_sha": "ce2a00426f24eb44b4ad3749673f1a6f5718d877",
         "local_saved_commit": "751c4fe4642e9c7c693b6b00dc62fe41b43af0e3",
@@ -50191,7 +50186,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T12:29:07Z",
+  "updated_at": "2026-09-13T13:05:20Z",
   "upper_objective_achieved": false,
   "primary_agi_deadline_audit": {
     "audit_request_id": "user-primary-agi-deadline-compliance-20260913T111338Z-v1",
@@ -50203,7 +50198,7 @@
     "deadline_source_atom_id": "r54-one-month-achievement-deadline",
     "deadline_source_entry_id": "user-achieve-upper-objective-within-one-month-20260913-f26be1c092f7-v1",
     "deadline_was_rolled_forward": false,
-    "evaluated_at": "2026-09-13T12:29:07Z",
+    "evaluated_at": "2026-09-13T13:05:20Z",
     "evidence": {
       "actual_root_response_blob_sha": "0a4813903e7ef2e2dd7738cdc31df46c64be8483",
       "actual_root_response_deadline_aware": true,
@@ -50220,43 +50215,63 @@
       "deadline_recorded": true,
       "future_deadline_compliance_guaranteed": false,
       "primary_acknowledgement_of_fixed_deadline_verified": true,
-      "revision55_followthrough_acknowledgement": "pending_safe_boundary_projection",
+      "revision55_followthrough_acknowledgement": "reviewed_ledger_verified_pending_actual_task_evaluate_projection",
       "subsequent_actions_demonstrably_follow_plan": "not_yet_verified",
       "forecast_on_time": "UNKNOWN"
     },
-    "next_safe_correction": "Publish inbox revision55 and its exact reviewed directive atom with required CI/readback, then project it into the next native Task Evaluate boundary. Require a deadline-aware backward plan with dated milestones and audit subsequent actions and risk without weakening evidence or safety.",
+    "next_safe_correction": "Consume the already-published Root response exactly once so revision55 is projected into the next native Task Evaluate boundary. Require a deadline-aware backward plan with dated milestones and audit subsequent actions and risk without weakening evidence or safety.",
+    "ingress_publication": {
+      "branch": "o-work-g36-inbox55-deadline-audit",
+      "head_sha": "5e3f99f69f0270193d454c14e6485759ac61cc0a",
+      "merge_sha": "6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
+      "pull_request": 689,
+      "test_workflow_run_id": 34757350947,
+      "directive_workflow_run_id": 34757350944,
+      "required_job_ids": [
+        103723912933,
+        103723913047,
+        103723913054,
+        103723913119,
+        103727258680,
+        103723912895
+      ],
+      "all_required_jobs_success": true,
+      "exact_main_readback_verified": true,
+      "inbox_blob_sha": "79523ec00db2e0fc06ab5f133d7afd3156db9fc8",
+      "directive_ledger_blob_sha": "efde9f51dc3a8cd4d89378eb1df6093a7429d9e6"
+    },
     "separate_parallel_deadline_changed": false
   },
   "user_input_inbox": {
-    "acknowledged_at": "2026-09-13T08:25:00Z",
-    "application_note": "Input54 fixes the unchanged upper-objective deadline at 2026-10-13T07:43:29Z. Input55 requests source-evidenced primary compliance auditing without rolling that deadline forward; it is pending publication and safe-boundary projection, while the existing Root response already treats the fixed deadline as priority without weakening evidence or safety.",
-    "highest_acknowledged_revision": 54,
+    "acknowledged_at": "2026-09-13T13:05:20Z",
+    "application_note": "Input54 fixes the unchanged upper-objective deadline at 2026-10-13T07:43:29Z. Input55 requires source-evidenced primary compliance auditing without rolling that deadline forward. Revision55 and its reviewed atom passed PR689 CI and exact main readback; the next native Task Evaluate boundary must project it and produce actual followthrough evidence or explicit UNKNOWN.",
+    "highest_acknowledged_revision": 55,
     "last_acknowledged_input": {
-      "acknowledged_at": "2026-09-13T08:25:00Z",
-      "directive_ledger_blob_sha": "43f98ce79a19249bba2ac28a46fb7a838019759e",
-      "directive_ledger_commit_sha": "0b3dbe482e84c8d18be9c7ed948f7fd71df2fee7",
+      "acknowledged_at": "2026-09-13T13:05:20Z",
+      "directive_ledger_blob_sha": "efde9f51dc3a8cd4d89378eb1df6093a7429d9e6",
+      "directive_ledger_commit_sha": "6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
       "effective": true,
-      "id": "user-achieve-upper-objective-within-one-month-20260913-f26be1c092f7-v1",
-      "inbox_blob_sha": "a1adddb3beb80b3a59eb5fe9402f70e4da699fb1",
-      "inbox_commit_sha": "d2df53f1c6ce3e0ae79c80c2bc54dbfede3cd13b",
-      "interpretation_publication_pr": null,
-      "revision": 54
+      "id": "user-primary-agi-deadline-compliance-audit-20260913-f26be1c092f7-v1",
+      "inbox_blob_sha": "79523ec00db2e0fc06ab5f133d7afd3156db9fc8",
+      "inbox_commit_sha": "6bc5faeb053ef5a1780278e3f83cd7600a6482cc",
+      "interpretation_publication_pr": 689,
+      "revision": 55
     },
     "latest_observed_input": {
       "id": "user-primary-agi-deadline-compliance-audit-20260913-f26be1c092f7-v1",
-      "interpretation_publication_pr": null,
+      "interpretation_publication_pr": 689,
       "observed_at": "2026-09-13T12:23:26Z",
       "revision": 55
     },
     "path": "agi/USER_INPUT_INBOX.json",
-    "pending_inbox_blob_sha": "79523ec00db2e0fc06ab5f133d7afd3156db9fc8",
+    "pending_inbox_blob_sha": null,
     "pending_inbox_commit_sha": null,
-    "pending_revision": 55
+    "pending_revision": null
   },
   "user_level_objective_met": false,
   "user_request_queue_path": "agi/USER_REQUEST_QUEUE.json",
   "verified_at": null,
-  "verified_remote_readback": false,
+  "verified_remote_readback": true,
   "work_status": "running",
   "working_branch": "main"
 }
