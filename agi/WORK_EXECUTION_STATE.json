@@ -172,12 +172,12 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T06:52:02.916434Z",
-    "completed_effect_receipt_durability": "saved immutable local Git commit; remote replay hold CAS pending",
+    "checkpointed_at": "2026-09-13T07:03:47.720251Z",
+    "completed_effect_receipt_durability": "remote replay hold exact-readback verified; corrected six-file publication head awaits full CI",
     "completed_effect_receipt_ref": "artifacts/g36-native-candidate-consume-receipt.json",
-    "current_head_sha": "7b33b8d9ed4b36099deb7bee3881511b84291bfd",
-    "current_main_sha": "fbccaac36120c41cbb961f7a61fd3cf8a19f552e",
-    "current_state_blob_sha": "94d32bd3e43762f2f19e051da467ea7c7758de8d",
+    "current_head_sha": "7782808ed66ea0bf6343f948d3b2b282f4eef790",
+    "current_main_sha": "5b4f7a93fe3bb9d25d81acc51aafed740b5da5d0",
+    "current_state_blob_sha": "a3c81cffb76ac5bd43a2c0d1df3b7c9f6f5cb4e0",
     "exact_frontier": "Candidate completed exactly once; Execute request is not frozen. Fresh matching Work and CI observations are required after publication.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
@@ -186,14 +186,19 @@
     "frozen_request_digest": "e47d99838ee726cd3077b77d493311b4ff85efd083328f970224fa0f9a265f85",
     "frozen_response_digest": "834367004ad5ebaebcfbad87c27370edb05fd2843df523cb5e20d74af02fd6f5",
     "goal_revision": 118,
-    "idempotency_key": "O:g36:candidate-consumed:execute-source-repair:v1",
+    "idempotency_key": "O:g36:PR682:candidate-consume:corrected-head:v1",
     "lease_generation": 36,
-    "next_action": "Publish and exact-read back this completed Candidate effect and revision-10 frontier, then acquire matching fresh authoritative Work and CI observations before freezing Execute. Never consume Candidate again.",
-    "next_tool": "publish Candidate consume effect, then acquire fresh Work and CI sources",
-    "pending_ci_run_ids": [],
+    "next_action": "Require both workflows and all test jobs to succeed on exact head 7782808ed66ea0bf6343f948d3b2b282f4eef790, then merge expected head and exact-read back all six effect files.",
+    "next_tool": "observe corrected PR682 unchanged-head full CI",
+    "pending_ci_run_ids": [
+      34744265576,
+      34744265536
+    ],
     "pending_job_ids": [],
     "pending_launch_ids": [],
-    "pending_pull_requests": [],
+    "pending_pull_requests": [
+      682
+    ],
     "resume_required": true,
     "schema_version": 1,
     "snapshot_blob_sha": "2f76f6d9bf6b2f9431366c2b6d1329502d95a512",
@@ -1364,7 +1369,7 @@
     "text": "Oという名前のリポジトリの主実行止まってたらここで再開して。停止原因改善もするようになってなかったらするようにして再開して。続けて",
     "workspace_identifier": "e9b6a8a25162"
   },
-  "durability_status": "pending_publication",
+  "durability_status": "corrected_head_full_ci_pending",
   "exact_continuation": {
     "completed_work_invocation_id": "invoke-1e33ccbeead76b5c335fc431",
     "current_unit_id": "unit-generation36-recovery-control-source-baseline-gate-v1",
@@ -41110,13 +41115,20 @@
   "generation36_candidate_consume_publication": {
     "branch": "o-work-g36-candidate-consume-source-repair",
     "completed_effect_receipt": "artifacts/g36-native-candidate-consume-receipt.json",
+    "corrected_directive_run": 34744265536,
+    "corrected_head": "7782808ed66ea0bf6343f948d3b2b282f4eef790",
+    "corrected_test_run": 34744265576,
+    "first_head": "59ab9cf4fe5a18642a3519df41ce54fd5b0f94b0",
+    "first_test_result": "failed_missing_fragment",
+    "first_test_run": 34743879360,
     "fresh_ci_source_observation_required": true,
     "fresh_work_source_observation_required": true,
+    "pull_request": 682,
     "resume_required": true,
-    "saved_content_commit": "7b33b8d9ed4b36099deb7bee3881511b84291bfd",
-    "saved_content_tree": "1fbc67ad33b43dc259406cacf99c0d2891c30c96",
+    "saved_content_commit": "d0dc034d9288360845d3f1223d3296c2d53e15a7",
+    "saved_content_tree": "7307abb533d348fc495d308b7a0276218f6118fb",
     "schema_version": 1,
-    "status": "replay_hold_required_before_publication"
+    "status": "corrected_head_full_ci_pending"
   },
   "generation36_candidate_preflight_publication": {
     "all_required_jobs_success": true,
@@ -42698,7 +42710,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T06:52:02.916434Z",
+  "heartbeat_at": "2026-09-13T07:03:47.720251Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43619,7 +43631,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T06:52:02.916434Z",
+  "last_activity_at": "2026-09-13T07:03:47.720251Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_eliminated_stop_cause": {
     "classification": "discretionary_stop_cause_eliminated_and_validated",
@@ -44092,8 +44104,8 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Publish Task4 through full unchanged-head CI and exact main readback, then consume it once with fresh source receipts and follow the actual immediate Candidate/Consolidate/Learn frontier.",
-  "next_tool": "publish Candidate consume effect, then acquire fresh Work and CI sources",
-  "next_tool_action": "Publish and exact-read back this completed Candidate effect and revision-10 frontier, then acquire matching fresh authoritative Work and CI observations before freezing Execute. Never consume Candidate again.",
+  "next_tool": "observe corrected PR682 unchanged-head full CI",
+  "next_tool_action": "Require both workflows and all test jobs to succeed on exact head 7782808ed66ea0bf6343f948d3b2b282f4eef790, then merge expected head and exact-read back all six effect files.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
   "paired_route_isolation_harness_publication": {
@@ -48327,8 +48339,8 @@
   "source_state_blob_sha": "e22e8c595b9c3d2626fc0c33e67a90d2c4884130",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
-    "classification": "recoverable_successor_source_observation_missing_after_single_candidate_consume",
-    "evaluated_at": "2026-09-13T06:52:02.916434Z",
+    "classification": "candidate_effect_publication_corrected_head_ci_pending",
+    "evaluated_at": "2026-09-13T07:03:47.720251Z",
     "evidence_refs": [
       "artifacts/g36-native-candidate-consume-receipt.json",
       ".continual/runs/run-work-g35-primary-continuation-v1/invocations/invoke-cedfb9ba69caee1135e15359.json",
@@ -48428,9 +48440,17 @@
           "status": "passed"
         }
       },
+      "corrected_publication_head_sha": "7782808ed66ea0bf6343f948d3b2b282f4eef790",
+      "corrected_saved_commit": "d0dc034d9288360845d3f1223d3296c2d53e15a7",
+      "corrected_saved_tree": "7307abb533d348fc495d308b7a0276218f6118fb",
+      "directive_workflow_run_id": 34744265536,
       "do_not_reconsume_work_invocation_id": "invoke-1e33ccbeead76b5c335fc431",
       "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
       "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
+      "first_failed_head_sha": "59ab9cf4fe5a18642a3519df41ce54fd5b0f94b0",
+      "first_failed_job_id": 103688085440,
+      "first_failed_test_run_id": 34743879360,
+      "first_failure": "completed native fragment is missing or malformed: invoke-cedfb9ba69caee1135e15359",
       "fresh_ci_source_observation_required": true,
       "fresh_work_source_observation_required": true,
       "frozen_frontier": {
@@ -48440,21 +48460,24 @@
         "phase": "unit_pending",
         "response_consumed": false,
         "response_submitted": false,
-        "saved_commit": "7b33b8d9ed4b36099deb7bee3881511b84291bfd",
-        "saved_tree": "1fbc67ad33b43dc259406cacf99c0d2891c30c96",
+        "saved_commit": "d0dc034d9288360845d3f1223d3296c2d53e15a7",
+        "saved_tree": "7307abb533d348fc495d308b7a0276218f6118fb",
         "selected_unit_id": "unit-generation36-recovery-control-source-baseline-gate-v1"
       },
       "idempotency_key": "O:g36:candidate-consumed:execute-source-repair:v1",
       "lease_generation": 36,
       "native_resume_authorized": false,
       "next_action": "Publish and exact-read back this completed Candidate effect and revision-10 frontier, then acquire matching fresh authoritative Work and CI observations before freezing Execute. Never consume Candidate again.",
-      "observed_at": "2026-09-13T06:52:02.916434Z",
+      "observed_at": "2026-09-13T07:03:47.720251Z",
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "fbccaac36120c41cbb961f7a61fd3cf8a19f552e:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
       "publication_blocker": null,
+      "publication_pull_request": 682,
+      "publication_status": "corrected_head_full_ci_pending",
       "publication_verified": false,
-      "schema_version": 1
+      "schema_version": 1,
+      "test_workflow_run_id": 34744265576
     },
     "policy_bindings": {
       "agi/USER_DIRECTIVE_EVENTS.json": "1c7817b90db9825826441a1e63f78ce45aca68023881de5fb571c5372f263f2b",
@@ -48470,7 +48493,7 @@
       "reason": "PR674 unchanged head passed full CI and directive preflight, then merged after the actual post-CI physical exit was detected. Remote main readback verifies all23 Task4 content blobs, the unchanged revision4 snapshot, saved request, saved response and native journal. The saved Task4 response is authorized for one native consume; original scientific limits, all13 parents and prior failures remain unchanged.",
       "resume_authorized": true
     },
-    "reason": "Candidate completed exactly once. Execute request creation then failed closed before freezing because the required fresh Work source observation was absent. Publish this revision-10 frontier first, then record matching fresh sources and resume without reconsuming Candidate.",
+    "reason": "Candidate remains consumed exactly once. The omitted ignored Engine artifacts were added from their original bytes; corrected PR682 head is awaiting full CI. Execute remains unfrozen and Candidate replay remains forbidden.",
     "recurrence_guard": {
       "entrypoint": "publish-before-successor plus matching fresh Work/CI source observations before Context Kernel",
       "status": "enforced"
@@ -48491,6 +48514,15 @@
         ],
         "cause_id": "execute-freeze-missing-fresh-authoritative-work-source-observation",
         "status": "in_progress"
+      },
+      {
+        "artifact_refs": [
+          ".continual/runs/run-work-g35-primary-continuation-v1/fragments/invoke-cedfb9ba69caee1135e15359-candidate_evaluate.json",
+          ".continual/runs/run-work-g35-primary-continuation-v1/local-learn/invoke-cedfb9ba69caee1135e15359-candidate_evaluate.json"
+        ],
+        "cause_id": "candidate-consume-publication-omitted-ignored-engine-artifacts",
+        "status": "implemented_corrected_head_ci_pending",
+        "validation": "Corrected head 7782808ed66ea0bf6343f948d3b2b282f4eef790 must pass all required CI before merge."
       }
     ],
     "resume_authorized": false,
@@ -48510,6 +48542,15 @@
           "src/continual/context_kernel.py"
         ],
         "mechanism": "After Candidate completed, the engine immediately attempted the Execute freeze and failed closed because the mandatory Work source had no matching fresh authoritative observation."
+      },
+      {
+        "cause_id": "candidate-consume-publication-omitted-ignored-engine-artifacts",
+        "evidence_refs": [
+          "https://github.com/bachikoljunior-blip/O/actions/runs/34743879360",
+          ".continual/runs/run-work-g35-primary-continuation-v1/fragments/invoke-cedfb9ba69caee1135e15359-candidate_evaluate.json",
+          ".continual/runs/run-work-g35-primary-continuation-v1/local-learn/invoke-cedfb9ba69caee1135e15359-candidate_evaluate.json"
+        ],
+        "mechanism": "The first PR682 head omitted the Engine-created Candidate fragment and Local Learn because both valid files were under an ignored run path and were not explicitly force-added. Full CI failed closed on the missing published fragment."
       }
     ],
     "run_id": "run-work-g35-primary-continuation-v1",
@@ -49885,7 +49926,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T06:52:02.916434Z",
+  "updated_at": "2026-09-13T07:03:47.720251Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T01:26:08.262203Z",
