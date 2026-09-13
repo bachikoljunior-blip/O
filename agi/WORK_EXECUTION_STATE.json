@@ -12246,7 +12246,30 @@
     "branch_result_receipt_ref": ".continual/runs/run-work-recovery-gen9-durability-repair/recovery-receipts/gen29-learn-consume-root-freeze-v1.json",
     "candidate": {
       "activation_authorized": false,
-      "active": false,
+      "active": true,
+      "execute_freeze": {
+        "component": "execute",
+        "created_at": "2026-09-13T08:34:59.784708Z",
+        "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
+        "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
+        "lease_generation": 36,
+        "local_saved_commit": "dbe2cc9c02d0318cdb80f2edd1425fd78ac8558f",
+        "local_saved_tree": "b1f7bac0f14891c85eed4e5501ebd53af8b15174",
+        "native_invocation_blob_sha": "2f24a232c5a9e7f2e907d7d4797c656a63162e03",
+        "native_invocation_id": "invoke-adc5bd48513918451f35b309",
+        "payload_digest": "0986004edd2c3c6971b8b8cdd61eb72d772fa199033eda1486704bd59223a4ea",
+        "publication_head_sha": "f31dcf2013632c934aba062aa7b395e6bd0c2736",
+        "publication_pull_request": 684,
+        "request_blob_sha": "5c80eee9a27f4ac177d754cc86d57777b1526b59",
+        "request_digest": "24eabcdda0f79d7db295ba02bec04cae8d5b7ef678814218f0640eed8312a723",
+        "request_ref": ".continual/work-model/invocations/invoke-016ae9e5920e1f016abec4ed/request.json",
+        "response_consumed": false,
+        "response_submitted": false,
+        "snapshot_blob_sha": "c251d33070d50a50f3960de393341932f1e94aac",
+        "snapshot_revision": 11,
+        "status": "exact_head_ci_running",
+        "work_invocation_id": "invoke-016ae9e5920e1f016abec4ed"
+      },
       "candidate_blob_sha": "41b14b15348e8d2c7759523de7d2338a274c5e2b",
       "candidate_id": "candidate-bounded-recursive-context-retrieval-v1",
       "expected_scope": "agi/context-kernel/recursive-context-retrieval",
@@ -42751,7 +42774,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T08:32:30Z",
+  "heartbeat_at": "2026-09-13T08:40:00Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43672,7 +43695,7 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T08:32:30Z",
+  "last_activity_at": "2026-09-13T08:40:00Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
   "last_eliminated_stop_cause": {
     "classification": "discretionary_stop_cause_eliminated_and_validated",
@@ -48405,8 +48428,8 @@
         "invoke-eb6d8c8a9a1a32bb79156a13",
         "invoke-1e33ccbeead76b5c335fc431"
       ],
-      "all_required_jobs_success": true,
-      "classification": "candidate_preflight_cache_omitted_from_ignored_publication_manifest",
+      "all_required_jobs_success": false,
+      "classification": "execute_request_frozen_pending_publication",
       "completed_effect": {
         "authorization_main_sha": "fbccaac36120c41cbb961f7a61fd3cf8a19f552e",
         "behavioral_arms_started": 0,
@@ -48507,13 +48530,13 @@
       "fresh_work_source_observation_required": true,
       "frozen_frontier": {
         "component": "execute",
-        "execute_request_frozen": false,
-        "pending_work_invocation_id": null,
+        "execute_request_frozen": true,
+        "pending_work_invocation_id": "invoke-016ae9e5920e1f016abec4ed",
         "phase": "unit_pending",
         "response_consumed": false,
         "response_submitted": false,
-        "saved_commit": "d0dc034d9288360845d3f1223d3296c2d53e15a7",
-        "saved_tree": "7307abb533d348fc495d308b7a0276218f6118fb",
+        "saved_commit": "dbe2cc9c02d0318cdb80f2edd1425fd78ac8558f",
+        "saved_tree": "b1f7bac0f14891c85eed4e5501ebd53af8b15174",
         "selected_unit_id": "unit-generation36-recovery-control-source-baseline-gate-v1"
       },
       "idempotency_key": "O:g36:candidate-consumed:execute-source-repair:v1",
@@ -48534,8 +48557,8 @@
         "request_sha256": "62c32259f00fff44f01c97b18251e50f5116a0ae67883059aed28fdb9ba7a8ff",
         "work_invocation_id": "invoke-e532582b5c6b974b74089ab4"
       },
-      "native_resume_authorized": true,
-      "next_action": "Acquire new matching authoritative Work and CI observations against main 3ba4e88001b58629da334ad6921b8fab10355841, then resume revision 10. Verify that the exact published preflight cache is reused and the next Work request is Execute. Never answer, publish as pending, consume, or recreate the isolated duplicate Candidate.",
+      "native_resume_authorized": false,
+      "next_action": "Wait for PR684 exact unchanged-head CI, merge and exact-read back the unique Execute request/native binding/snapshot and source receipts, then authorize one response submission. Never consume or recreate Candidate or Task4.",
       "observed_at": "2026-09-13T08:25:00Z",
       "original_preflight_cache": {
         "blob_sha": "ce2a00426f24eb44b4ad3749673f1a6f5718d877",
@@ -48550,22 +48573,21 @@
       "predecessor_replay_forbidden": true,
       "previous_resolved_hold_source": "fbccaac36120c41cbb961f7a61fd3cf8a19f552e:agi/WORK_EXECUTION_STATE.json",
       "publication_authorized": true,
-      "publication_blocker": null,
-      "publication_head_sha": "3798ff1e4743be7e503a7a336d93278cf979679e",
-      "publication_pull_request": 683,
-      "publication_status": "merged_exact_main_readback_verified",
-      "publication_verified": true,
+      "publication_blocker": "required exact-head PR684 CI and exact main readback are pending",
+      "publication_head_sha": "f31dcf2013632c934aba062aa7b395e6bd0c2736",
+      "publication_pull_request": 684,
+      "publication_status": "exact_head_ci_running",
+      "publication_verified": false,
       "recurrence_validation": {
-        "directive_job_id": 103695097235,
-        "directive_workflow_run_id": 34746431411,
+        "directive_job_id": null,
+        "directive_workflow_run_id": 34748146678,
         "required_job_ids": [
-          103695097325,
-          103695097383,
-          103695097397,
-          103695097419,
-          103698236749
+          103699749884,
+          103699749969,
+          103699749973,
+          103699750006
         ],
-        "test_workflow_run_id": 34746431412
+        "test_workflow_run_id": 34748146684
       },
       "required_job_ids": [
         103695097325,
@@ -50063,7 +50085,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T08:32:30Z",
+  "updated_at": "2026-09-13T08:40:00Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T08:25:00Z",
