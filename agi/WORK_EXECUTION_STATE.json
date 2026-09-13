@@ -172,12 +172,12 @@
     "test_run_id": 33965128300
   },
   "checkpoint": {
-    "checkpointed_at": "2026-09-13T05:04:39.171524Z",
+    "checkpointed_at": "2026-09-13T05:07:17.909410Z",
     "completed_effect_receipt_durability": "main exact readback verified",
     "completed_effect_receipt_ref": "artifacts/g36-native-root-consume-receipt.json",
-    "current_head_sha": "1aff0d704a7d7121943d385007cde5d2c497a5f4",
-    "current_main_sha": "1aff0d704a7d7121943d385007cde5d2c497a5f4",
-    "current_state_blob_sha": "8fc7fe797056c57c142a578b3c8f875d2f2154c1",
+    "current_head_sha": "b689bb239fee1076ee4f461ebd9ce0d0b02f0639",
+    "current_main_sha": "b689bb239fee1076ee4f461ebd9ce0d0b02f0639",
+    "current_state_blob_sha": "4ca1c1d87a600749828dc04393a5dc1dca764eea",
     "exact_frontier": "Root completed exactly once and selected Execute unit is durably unit_pending on main; no successor request exists yet.",
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
@@ -186,10 +186,10 @@
     "frozen_request_digest": "118910968eae47b2ec9f267ffe9bc371d208eb5aa1b794cb47f852fd2ea9b8eb",
     "frozen_response_digest": "39b576390a570579506d357bbbb25130df4192049001b75d1daa8c200be00c6b",
     "goal_revision": 118,
-    "idempotency_key": "O:g36:PR679:unit-pending:freeze-next:v1",
+    "idempotency_key": "O:g36:PR679:unit-pending:freeze-next:preflight-alignment:v1",
     "lease_generation": 36,
     "next_action": "Resume the exact unit_pending frontier once to freeze the next semantic Work request; do not replay Root or any predecessor.",
-    "next_tool": "continual work-resume --max-steps 1",
+    "next_tool": "continual work-resume --max-steps 1 after exact state readback",
     "pending_ci_run_ids": [],
     "pending_job_ids": [],
     "pending_launch_ids": [],
@@ -41379,7 +41379,7 @@
     "native_resume_authorized": true,
     "native_resume_executed": false,
     "next_action": "Resume the exact unit_pending frontier once to freeze the next semantic Work request; do not replay Root or any predecessor.",
-    "observed_at": "2026-09-13T05:04:39.171524Z",
+    "observed_at": "2026-09-13T05:07:17.909410Z",
     "predecessor_checkpoint": {
       "authority_digest": "29aa17cd00f92ae0610a09492e4fc9817f330d79618ce6c7a65d2fbdb4f668f2",
       "blocker": null,
@@ -41503,6 +41503,12 @@
       "snapshot_revision": 287,
       "termination": null,
       "upper_objective_achieved": false
+    },
+    "preflight_alignment_repair": {
+      "cause": "post-merge state retained the historical eliminated-stop classification while the live classifier correctly returned no active stop",
+      "error": "continuity preflight classification mismatch",
+      "failed_before_native_mutation": true,
+      "repair": "preserve causal evidence as history and align the active preflight classification to no_discretionary_stop_detected"
     },
     "previous_publication_hold": {
       "classification": "unresolved_saved_frontier_publication_safety_hold",
@@ -42561,7 +42567,7 @@
     "request_recreated": false,
     "response_resubmitted": false
   },
-  "heartbeat_at": "2026-09-13T05:04:39.171524Z",
+  "heartbeat_at": "2026-09-13T05:07:17.909410Z",
   "hidden_rubric_lifecycle_publication_precommit": {
     "all_reviewed_blobs_match": true,
     "base_main_commit": "c461237a627cdd00e225d9f70f145b6ab6b874ce",
@@ -43482,8 +43488,47 @@
     "validation": "All modified JSON parsed, git diff --check passed, and 77 focused inbox/effective-directive/context-kernel tests passed."
   },
   "last_action": "Disabled stale Task4 resume authorization after verifying the remote blocker and the exact saved Candidate5 frontier; publication safety refusal remains unresolved.",
-  "last_activity_at": "2026-09-13T05:04:39.171524Z",
+  "last_activity_at": "2026-09-13T05:07:17.909410Z",
   "last_checked_at": "2026-09-11T17:52:05.954Z",
+  "last_eliminated_stop_cause": {
+    "classification": "discretionary_stop_cause_eliminated_and_validated",
+    "effect_receipt": "artifacts/g36-native-root-consume-receipt.json",
+    "recorded_at": "2026-09-13T05:07:17.909410Z",
+    "recurrence_guard": {
+      "entrypoint": "continual work-resume continuity preflight plus explicit origin/main refresh",
+      "status": "enforced"
+    },
+    "remediations": [
+      {
+        "artifact_refs": [
+          "artifacts/g36-native-root-consume-receipt.json",
+          "src/continual/continuity_preflight.py"
+        ],
+        "status": "implemented"
+      }
+    ],
+    "root_causes": [
+      {
+        "cause_id": "stale-local-origin-main-before-root-consume",
+        "evidence_refs": [
+          "artifacts/g36-native-root-consume-receipt.json",
+          "240d07220c959e9bdb8efa141784850ebd0b5010:agi/WORK_EXECUTION_STATE.json"
+        ],
+        "mechanism": "origin/main remained at an older commit after the Root response was saved, so the mandatory continuity preflight rejected the first native consume attempt before mutation"
+      }
+    ],
+    "schema_version": 1,
+    "validations": [
+      {
+        "evidence_refs": [
+          "artifacts/g36-native-root-consume-receipt.json",
+          ".continual/runs/run-work-g35-primary-continuation-v1/invocations/invoke-bcaf1207a00be1ff78f9872b.json",
+          ".continual/runs/run-work-g35-primary-continuation-v1/snapshot.json"
+        ],
+        "status": "passed"
+      }
+    ]
+  },
   "last_error": null,
   "last_native_publication": {
     "ci_run_id": 34664941148,
@@ -43916,7 +43961,7 @@
     "validation": "47 focused tests passed after the bounded wording and matching validator/digest repair; compileall, JSON/JSONL parse, git diff check, and explicit 86-path exclusion review passed."
   },
   "next_action": "Publish Task4 through full unchanged-head CI and exact main readback, then consume it once with fresh source receipts and follow the actual immediate Candidate/Consolidate/Learn frontier.",
-  "next_tool": "continual work-resume --max-steps 1",
+  "next_tool": "continual work-resume --max-steps 1 after exact state readback",
   "next_tool_action": "Resume the exact unit_pending frontier once to freeze the next semantic Work request; do not replay Root or any predecessor.",
   "no_response_on_authoritative_remote": false,
   "owner_kind": "work_recovery_automation",
@@ -48151,8 +48196,8 @@
   "source_state_blob_sha": "e22e8c595b9c3d2626fc0c33e67a90d2c4884130",
   "stale_after_seconds": 900,
   "start_of_run_continuity_preflight": {
-    "classification": "discretionary_stop_cause_eliminated_and_validated",
-    "evaluated_at": "2026-09-13T05:04:39.171524Z",
+    "classification": "no_discretionary_stop_detected",
+    "evaluated_at": "2026-09-13T05:07:17.909410Z",
     "evidence_refs": [
       "https://github.com/bachikoljunior-blip/O/pull/679",
       "https://github.com/bachikoljunior-blip/O/commit/1aff0d704a7d7121943d385007cde5d2c497a5f4",
@@ -48162,7 +48207,7 @@
     "execution_id": "work-recovery-20260913T004423Z-3413ae4b328e4b57a468979b",
     "executor_binding": "current_chatgpt_work_session",
     "fence_token_digest": "68ab146c033a86ff068ec5d12d4cdd2378aa75d1cfed372327ac2004387d6e78",
-    "idempotency_key": "O:g36:PR679:unit-pending:freeze-next:v1",
+    "idempotency_key": "O:g36:PR679:unit-pending:freeze-next:preflight-alignment:v1",
     "lease_generation": 36,
     "model_identity": "chatgpt-work-model-unverified",
     "pending_publication_hold": {
@@ -48303,7 +48348,7 @@
       "reason": "PR674 unchanged head passed full CI and directive preflight, then merged after the actual post-CI physical exit was detected. Remote main readback verifies all23 Task4 content blobs, the unchanged revision4 snapshot, saved request, saved response and native journal. The saved Task4 response is authorized for one native consume; original scientific limits, all13 parents and prior failures remain unchanged.",
       "resume_authorized": true
     },
-    "reason": "Root completed once and its selected unit passed full unchanged-head PR679 CI, merged, and read back exactly from main. Resume only the unit_pending frontier to freeze its next ordinary semantic request.",
+    "reason": "The earlier stale origin/main stop is already eliminated and recorded. At this post-merge unit_pending boundary the live classifier detects no active discretionary stop, so resume may freeze exactly one next request.",
     "recurrence_guard": {
       "entrypoint": "continual work-resume continuity preflight plus explicit origin/main refresh",
       "status": "enforced"
@@ -49701,7 +49746,7 @@
       "valid": true
     }
   },
-  "updated_at": "2026-09-13T05:04:39.171524Z",
+  "updated_at": "2026-09-13T05:07:17.909410Z",
   "upper_objective_achieved": false,
   "user_input_inbox": {
     "acknowledged_at": "2026-09-13T01:26:08.262203Z",
