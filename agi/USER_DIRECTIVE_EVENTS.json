@@ -2393,20 +2393,20 @@
         "deadline_at": "2026-10-13T07:43:29Z",
         "deadline_source_atom_id": "r54-one-month-achievement-deadline",
         "directive": "verify_primary_execution_actual_deadline_adoption_and_followthrough",
-        "required_source_evidence": [
-          "primary_acknowledgement",
-          "deadline_aware_plan_and_dated_milestones",
-          "subsequent_actions_against_plan",
-          "deadline_risk"
-        ],
-        "prompt_or_inbox_presence_alone_is_not_compliance": true,
-        "do_not_roll_deadline_forward": true,
         "do_not_invent_on_time_guarantee": true,
+        "do_not_roll_deadline_forward": true,
         "does_not_weaken": [
           "unchanged_real_world_agi_standard",
           "evidence_integrity",
           "single_writer_safety",
           "platform_and_account_safety"
+        ],
+        "prompt_or_inbox_presence_alone_is_not_compliance": true,
+        "required_source_evidence": [
+          "primary_acknowledgement",
+          "deadline_aware_plan_and_dated_milestones",
+          "subsequent_actions_against_plan",
+          "deadline_risk"
         ]
       }
     },
@@ -2477,24 +2477,47 @@
         "r58-post-continuity-deadline-method-reassessment"
       ],
       "value": {
-        "when": "after_each_continuity_check",
         "assess": "feasibility_of_unchanged_objective_by_fixed_deadline",
+        "fixed_deadline_utc": "2026-10-13T07:43:29Z",
         "method_review_triggers": [
           "infeasible",
           "unknown"
         ],
         "required_response": "Question whether the current method or assumptions are wrong. Identify the bottleneck or missing evidence, compare a safe alternative, and select a bounded validation step and decision point.",
-        "unknown_is_proof_of_impossibility": false,
         "rule_presence_alone_is_followthrough": false,
-        "fixed_deadline_utc": "2026-10-13T07:43:29Z"
+        "unknown_is_proof_of_impossibility": false,
+        "when": "after_each_continuity_check"
+      }
+    },
+    {
+      "atom_id": "r60-any-non-feasible-method-reassessment",
+      "cardinality": "many",
+      "precedence": 60,
+      "slot": "objective.deadline_compliance_audit",
+      "source_directive_indices": [
+        0
+      ],
+      "source_entry_digest": "1a0c78c9504d1922173ceb217a08e1fd82d1750924126705599c88e740efa84c",
+      "source_entry_id": "user-input-event-sha256-18c717955aebb07d4275f79b19dcc2ddb98aac61ffd9c58d3a7e4c7f65638c10",
+      "supersedes": [
+        "r59-infeasible-or-unknown-method-reassessment"
+      ],
+      "value": {
+        "assess": "feasibility_of_unchanged_objective_by_fixed_deadline",
+        "fixed_deadline_utc": "2026-10-13T07:43:29Z",
+        "method_review_trigger": "any_result_other_than_evidence_supported_feasible",
+        "required_response": "Question whether the current method or assumptions are wrong. Identify the bottleneck or missing evidence, compare a safe alternative, and select a bounded validation step and decision point.",
+        "rule_presence_alone_is_followthrough": false,
+        "unknown_is_proof_of_impossibility": false,
+        "when": "after_each_continuity_check"
       }
     }
   ],
   "schema_version": 1,
   "source": {
-    "content_digest": "d438521370595514da4e6cf160d06296400efa34413257ec88891489da1b96a5",
-    "interpreted_at": "2026-09-14T07:18:04Z",
+    "content_digest": "3c90ce1fe3a241b243a8edd5bbad5830066173b56b21583b56c34ab768cccb09",
+    "interpreted_at": "2026-09-14T11:18:09.538779Z",
     "path": "agi/USER_INPUT_INBOX.json",
-    "revision": 59
+    "revision": 60
   }
 }

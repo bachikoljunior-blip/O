@@ -138,6 +138,7 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
         "r48-primary-current-task-chat": "r49-primary-resume-current-work-session",
         "r56-deadline-feasibility-method-reassessment": "r59-infeasible-or-unknown-method-reassessment",
         "r58-post-continuity-deadline-method-reassessment": "r59-infeasible-or-unknown-method-reassessment",
+        "r59-infeasible-or-unknown-method-reassessment": "r60-any-non-feasible-method-reassessment",
     }
     handover_targets = [
         atom for atom in first["effective_atoms"]
@@ -158,18 +159,19 @@ def test_current_policy_is_deterministic_and_preserves_partial_supersedes() -> N
     )
 
 
-def test_current_deadline_review_includes_unknown_without_claiming_impossibility() -> None:
+def test_current_deadline_review_covers_every_non_feasible_judgment() -> None:
     inbox, ledger, state, strategy = _inputs()
     compiled = _compile(inbox, ledger, state, strategy)
     effective = {atom["atom_id"]: atom for atom in compiled["effective_atoms"]}
-    review = effective["r59-infeasible-or-unknown-method-reassessment"]["value"]
+    review = effective["r60-any-non-feasible-method-reassessment"]["value"]
     assert review["when"] == "after_each_continuity_check"
-    assert review["method_review_triggers"] == ["infeasible", "unknown"]
+    assert review["method_review_trigger"] == "any_result_other_than_evidence_supported_feasible"
     assert review["unknown_is_proof_of_impossibility"] is False
     assert review["rule_presence_alone_is_followthrough"] is False
     assert review["fixed_deadline_utc"] == "2026-10-13T07:43:29Z"
     assert "r56-deadline-feasibility-method-reassessment" not in effective
     assert "r58-post-continuity-deadline-method-reassessment" not in effective
+    assert "r59-infeasible-or-unknown-method-reassessment" not in effective
     assert effective["r54-one-month-achievement-deadline"]["value"]["deadline_at"] == review["fixed_deadline_utc"]
     assert effective["r14-main-writer"]["value"] == "single_fenced_primary"
 
