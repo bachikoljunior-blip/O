@@ -7,6 +7,10 @@ from pathlib import Path
 
 from .campaign import run_campaign
 from .copilot_sdk_client import CopilotResponsesClient
+from .cross_run_workspace_retention import (
+    run_cross_run_workspace_retention,
+    write_cross_run_workspace_retention,
+)
 from .openai_agent import (
     OpenAIBenchmarkAgent,
     OpenAILongHorizonAgent,
@@ -138,6 +142,16 @@ def build_parser() -> argparse.ArgumentParser:
     campaign.add_argument("--campaign-id", default="copilot-development")
     campaign.add_argument("--output-dir", type=Path, required=True)
 
+    retention = sub.add_parser(
+        "run-retention",
+        help=(
+            "Acquire workspace memory/procedure state, reconstruct it into a fresh Copilot agent "
+            "instance, and run the no-relearning protected cross-run retention gate."
+        ),
+    )
+    retention.add_argument("--model")
+    retention.add_argument("--output-dir", type=Path, required=True)
+
     longhorizon = sub.add_parser(
         "run-longhorizon",
         help="Run the durable varied long-horizon protocol through GitHub Copilot SDK.",
@@ -181,6 +195,27 @@ def main() -> None:
             }
         )
         if not report.all_development_tasks_passed:
+            raise SystemExit(1)
+        return
+
+    if args.cmd == "run-retention":
+        report = run_cross_run_workspace_retention(
+            acquisition_agent_factory=lambda: CopilotWorkspaceAgent(model)
+        )
+        report_path = write_cross_run_workspace_retention(report, args.output_dir)
+        _dump(
+            {
+                "provider": "github-copilot-sdk",
+                "model": model,
+                "passed": report["passed"],
+                "report": report_path.as_posix(),
+                "warning": (
+                    "Copilot cross-run retention output is internal development evidence only. "
+                    "It cannot satisfy the independent production AGI gate."
+                ),
+            }
+        )
+        if not report["passed"]:
             raise SystemExit(1)
         return
 
