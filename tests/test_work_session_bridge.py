@@ -126,6 +126,41 @@ def test_work_start_cannot_bypass_an_active_authoritative_run(tmp_path: Path) ->
     } == before
 
 
+def test_authoritative_resume_rejects_multiple_semantic_steps_before_mutation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = _root(tmp_path)
+    run_id = "run-work-one-durable-boundary"
+    session = WorkSession(root, model_identity="bound-resume-model")
+    started = session.start("publish every consumed boundary", run_id=run_id)
+    request = started["pending"][0]
+    submit_work_response(
+        root,
+        request["invocation_id"],
+        _output("entry", request),
+        executor_binding="current_chatgpt_work_session",
+        model_identity="bound-resume-model",
+    )
+    snapshot_path = root / ".continual" / "runs" / run_id / "snapshot.json"
+    before = snapshot_path.read_bytes()
+
+    monkeypatch.setattr(
+        "continual.work_session.assert_work_resume_continuity_preflight",
+        lambda *args, **kwargs: {"required": True},
+    )
+    with pytest.raises(WorkSessionError, match="requires max_steps=1"):
+        session.resume(run_id, max_steps=2)
+    assert snapshot_path.read_bytes() == before
+    assert verify_work_invocations(root, run_id=run_id)["requests"] == 1
+
+    resumed = session.resume(run_id, max_steps=1)
+    assert resumed["snapshot"]["phase"] == "root_pending"
+    assert resumed["pending"] == []
+    verification = verify_work_invocations(root, run_id=run_id)
+    assert verification["requests"] == 1
+    assert verification["responses"] == 1
+
+
 def test_engine_resume_consumes_the_native_bound_request(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

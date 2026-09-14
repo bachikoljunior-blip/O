@@ -71,7 +71,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     work_resume = sub.add_parser("work-resume", help="Resume one Work-backed native O Run.")
     work_resume.add_argument("run_id")
-    work_resume.add_argument("--max-steps", type=int, default=64)
+    work_resume.add_argument("--max-steps", type=int, default=1)
     work_resume.add_argument("--executor-binding", default="current_chatgpt_work_session")
     work_resume.add_argument("--model-identity", default="chatgpt-work-model-unverified")
 

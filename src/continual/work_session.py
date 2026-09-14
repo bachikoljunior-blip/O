@@ -823,12 +823,18 @@ class WorkSession:
         }
 
     def resume(self, run_id: str, *, max_steps: int = 64) -> dict[str, Any]:
-        assert_work_resume_continuity_preflight(
+        continuity = assert_work_resume_continuity_preflight(
             self.root,
             run_id=run_id,
             executor_binding=self.executor_binding,
             model_identity=self.model_identity,
         )
+        if continuity.get("required") is True and max_steps != 1:
+            raise WorkSessionError(
+                "authoritative Work resume requires max_steps=1 so each "
+                "response-consumption boundary is published and read back "
+                "before the next semantic invocation"
+            )
         self._assert_resume_identity(run_id)
         engine = self._engine(run_id)
         snapshot = engine.resume(run_id, max_steps=max_steps)
