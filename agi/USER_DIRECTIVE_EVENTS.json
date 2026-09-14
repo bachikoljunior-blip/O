@@ -2461,13 +2461,40 @@
       "source_entry_id": "user-input-event-sha256-b009c1c32a70422851abe6d443c69f8f41437228c1bc28dc619018db390ac6f3",
       "supersedes": [],
       "value": "Treat the user's approval as granted for currently in-scope actions, including the previously identified public recovery-payload publication, without asking the user to understand or reconfirm it. This does not create missing payload bytes, authorize secrets or new spend, weaken safeguards, or bypass platform and safety boundaries."
+    },
+    {
+      "atom_id": "r59-infeasible-or-unknown-method-reassessment",
+      "cardinality": "many",
+      "precedence": 59,
+      "slot": "objective.deadline_compliance_audit",
+      "source_directive_indices": [
+        0
+      ],
+      "source_entry_digest": "d49d8225a4872a3770e3e4133538a8f4c409bd8e6ad550065e1850a830449684",
+      "source_entry_id": "user-input-event-sha256-cc9b6eae00779a93c6d5e6eccebb6a2a568dce4b1574a9fbbe06d9149b2f6b43",
+      "supersedes": [
+        "r56-deadline-feasibility-method-reassessment",
+        "r58-post-continuity-deadline-method-reassessment"
+      ],
+      "value": {
+        "when": "after_each_continuity_check",
+        "assess": "feasibility_of_unchanged_objective_by_fixed_deadline",
+        "method_review_triggers": [
+          "infeasible",
+          "unknown"
+        ],
+        "required_response": "Question whether the current method or assumptions are wrong. Identify the bottleneck or missing evidence, compare a safe alternative, and select a bounded validation step and decision point.",
+        "unknown_is_proof_of_impossibility": false,
+        "rule_presence_alone_is_followthrough": false,
+        "fixed_deadline_utc": "2026-10-13T07:43:29Z"
+      }
     }
   ],
   "schema_version": 1,
   "source": {
-    "content_digest": "285c3602349c7914f333703f6afab9a200906236a2f1b4afe3cb1bd99b0c8d4d",
-    "interpreted_at": "2026-09-14T05:13:13Z",
+    "content_digest": "d438521370595514da4e6cf160d06296400efa34413257ec88891489da1b96a5",
+    "interpreted_at": "2026-09-14T07:18:04Z",
     "path": "agi/USER_INPUT_INBOX.json",
-    "revision": 58
+    "revision": 59
   }
 }
